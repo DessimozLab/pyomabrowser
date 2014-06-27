@@ -1,0 +1,8 @@
+<h1>Orthologs of {{ query }}</h1>
+<p>The protein {{ query }} is orthologous to the following other ones:</p>
+<ul>
+{% for vp in vps %}
+  <li><a href="/cgi-bin/gateway.pl?f=DisplayEntry&p1={{ vp }}">{{ vp }}</a></li>
+{% endfor %}
+</ul>
+
