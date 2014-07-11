@@ -57,37 +57,42 @@ class Database(object):
                 usemask=False)
         return res
 
-    def get_neighbor_gene_nr(self, entry_nr, windows=1):
-        """a method which returns a list of tuples with the entry 
-        numbers and their orientation (strain) of the genes within
-        "window" steps next to the query gene, if they exist. 
-        Neighbors might not exist if the gene is at the end/beginning
-        of a chromosome/scaffold."""
+    def neighbour_genes(self, entry_nr, windows=1):
+        """Returns neighbor genes around a query gene.
+
+        This method returns a tuple containing a numpy recarray with 
+        gene entries located around the query gene, and an index 
+        pointing to the query gene. The genes are sorted according to 
+        their position on the chromosome. 
+        
+        The *windows* parameter specifies the number of genes up- and
+        downstream of the query gene that should be reported. Note
+        that the actual number can be smaller if the query gene is close
+        to a chromosome start or end."""
+        if windows<=0 or not isinstance(windows, int):
+            raise ValueError('windows parameters must be a positive integer value')
+
         entryTab = self.db.get_node('/Protein/Entries')
         dat = entryTab.read_where('EntryNr == %d'%(entry_nr))[0]
         target_chr = dat['Chromosome']
-        upstream = []
-        downstream = []
         genome_range = self._genome_range(entry_nr)
-        for e in entryTab.where('EntryNr < %d'%(entry_nr), steps=-1):
-            if (len(upstream)>windows or e['Chromosome'] != target_chr or
-                    e['EntryNr']<genome_range[0]):
-                break
-            if e['AltSpliceVariant']>0 and e['AltSpliceVariant']!=e['EntryNr']:
-                continue
-            upstream.append(e)
-        for e in entryTab.where('EntryNr > %d'%(entry_nr)):
-            if (len(downstream)>windows or e['Chromosome'] != target_chr or
-                    e['EntryNr']>genome_range[1]):
-                break
-            if e['AltSpliceVariant']>0 and e['AltSpliceVariant']!=e['EntryNr']:
-                continue
-            downstream.append(e)
-
-        return (upstream, dat, downstream)
+        f = 5
+        data = entryTab.read_where(
+                '(EntryNr >= %d) & (EntryNr <= %d) & '
+                '(Chromosome == "%s") & '
+                '((AltSpliceVariant == 0) |'
+                ' (AltSpliceVariant == EntryNr))'%( 
+                   max(genome_range[0], entry_nr-f*windows),
+                   min(genome_range[1], entry_nr+f*windows),
+                   target_chr))
+        data.sort(order=['EntryNr'])
+        idx = data['EntryNr'].searchsorted(entry_nr)
+        res = data[max(0,idx-windows):min(len(data),idx+windows+1)]
+        idx = res['EntryNr'].searchsorted(entry_nr)
+        return (res, idx)
 
     def _genome_range(self, g):
-        return self.id_mapper['OMA'].genome_range(g)
+        return id_mapper['OMA'].genome_range(g)
 
         
 
