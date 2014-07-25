@@ -1,0 +1,8 @@
+<h1>Hierarchical group of {{ query }} at {{ level }}</h1>
+<p>The protein {{ query }} forms a hog at the level of {{ level }} with to the following other genes:</p>
+<ul>
+{% for memb in hog_members %}
+  <li><a href="/cgi-bin/gateway.pl?f=DisplayEntry&p1={{ memb }}">{{ memb }}</a></li>
+{% endfor %}
+</ul>
+

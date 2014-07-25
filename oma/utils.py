@@ -1,3 +1,5 @@
+from future.builtins import super
+
 import tables
 import numpy
 import numpy.lib.recfunctions
@@ -44,6 +46,25 @@ class Database(object):
             raise ValueError(str(db)+' is not a valid database type')
         
         self.id_resolver = IDResolver(self.db)
+        self.re_fam = re.compile(r'HOG:(?P<fam>\d{7,})')
+
+    def ensure_entry(self, entry):
+        """This method allows to use an entry or an entry_nr.
+        If necessary it will load the entry from the entry_nr,
+        otherwise returning the same object again."""
+        if isinstance(entry, int):
+            return self.entry_by_entry_nr(entry)
+        return entry
+
+    def entry_by_entry_nr(self, entry_nr):
+        """Returns the entry from the /Protein/Entries table
+        corresponding to entry_nr."""
+        entry = self.db.root.Protein.Entries.read_where(
+                   'EntryNr == %d'%(entry_nr))
+        if len(entry) != 1:
+            raise ValueError('there are %d entries with entry_nr %d'%(len(entry),entry_nr))
+        return entry[0]
+
 
     def get_vpairs(self, entry_nr):
         genome = id_mapper['OMA'].genome_of_entry_nr(entry_nr)['UniProtSpeciesCode']
@@ -72,14 +93,13 @@ class Database(object):
         if windows<=0 or not isinstance(windows, int):
             raise ValueError('windows parameters must be a positive integer value')
 
-        entryTab = self.db.get_node('/Protein/Entries')
-        dat = entryTab.read_where('EntryNr == %d'%(entry_nr))[0]
+        dat = self.entry_by_entry_nr(entry_nr)
         target_chr = dat['Chromosome']
         genome_range = self._genome_range(entry_nr)
         f = 5
-        data = entryTab.read_where(
+        data = self.db.root.Protein.Entries.read_where(
                 '(EntryNr >= %d) & (EntryNr <= %d) & '
-                '(Chromosome == "%s") & '
+                '(Chromosome == b"%s") & '
                 '((AltSpliceVariant == 0) |'
                 ' (AltSpliceVariant == EntryNr))'%( 
                    max(genome_range[0], entry_nr-f*windows),
@@ -91,6 +111,42 @@ class Database(object):
         idx = res['EntryNr'].searchsorted(entry_nr)
         return (res, idx)
 
+
+    def hog_family(self, entry):
+        entry = self.ensure_entry(entry)
+        m = self.re_fam.match(entry['OmaHOG'])
+        if m is None:
+            raise Singleton(entry)
+        return int(m.group('fam'))
+    
+    def hog_members(self, entry_nr, level):
+        """Returns member entries for a given taxonomic level."""
+        query = self.entry_by_entry_nr(entry_nr)
+        queryFam = self.hog_family(query)
+        hoglev = None
+        for hog_candidate in self.db.root.HogLevel.where(
+                '(Fam == %d) & (Level == b"%s")'%(queryFam, level)):
+            if query['OmaHOG'].startswith(hog_candidate['ID']):
+                hoglev = hog_candidate
+                break
+        if hoglev is None:
+            raise ValueError('Level "%s" undefined for query gene'%(level))
+        hog_range = self._hog_lex_range(hoglev['ID'])
+        memb = self.db.root.Protein.Entries.read_where(
+                '(b"%s" <= OmaHOG) & (OmaHOG < b"%s")'%hog_range)
+        return memb
+        
+    def _hog_lex_range(self, hog):
+        """return the lexographic range of a hog. 
+        
+        This can be used to search of sub-hogs which are nested in
+        the query hog. The semantics is such that 
+        _hog_lex_range[0] <= hog < _hog_lex_range[1].
+        This is equivalent to say that a sub-hog starts with the
+        query hog."""
+        return hog, hog[0:-1]+chr(1+ord(hog[-1]))
+
+            
     def _genome_range(self, g):
         return id_mapper['OMA'].genome_range(g)
 
@@ -128,7 +184,7 @@ class OmaIdMapper(object):
         """returns the internal numeric entrynr from a 
         UniProtSpeciesCode+nr id. this is the inverse 
         function of 'map_entry_nr'."""
-        match = self.omaid_re(omaid)
+        match = self.omaid_re.match(omaid)
         if match is None:
             raise InvalidOmaId(omaid)
         code, nr = match.group('genome'), int(match.group('nr'))
@@ -157,13 +213,16 @@ class IDResolver(object):
     def __init__(self, db_handle):
         self.db = db_handle
         entry_nr_Col = db_handle.root.Protein.Entries.cols.EntryNr
-        self.max_entry_nr = entry_nr_Col[entry_nr_Col.index[-1]] 
+        self.max_entry_nr = entry_nr_Col[entry_nr_Col.index[-1]]
 
-    def _as_numeric(self, e_id):
+    def _from_numeric(self, e_id):
         nr = int(e_id)
         if not 0 < nr <= self.max_entry_nr:
             raise InvalidId('%d out of protein range: %s'%(nr, e_id))
         return nr
+
+    def _from_omaid(self, e_id):
+        return id_mapper['OMA'].omaid_to_entry_nr(e_id)
 
     def search_xrefs(self, e_id):
         raise NotImplemented('xref search not yet implemented')
@@ -171,10 +230,23 @@ class IDResolver(object):
     def resolve(self, e_id):
         """maps an id to the entry_nr of the current OMA release."""
         try:
-            nr = self._as_numeric(e_id)
+            nr = self._from_numeric(e_id)
         except ValueError:
-            nr = self.search_xrefs(e_id)
+            try: 
+                nr = self._from_omaid(e_id)
+            except InvalidOmaId:
+                nr = self.search_xrefs(e_id)
         return nr
+
+class Taxonomy(object):
+    """Taxonomy provides an interface to navigate the taxonomy data. 
+    
+    For performance reasons, it will load at instantiation the data
+    into memory. Hence, it should only be instantiated once."""
+    def __init__(self, db_handle):
+        self.tax_table = db_handle.root.Taxonomy.read()
+        self.taxid_key = db_handle.root.Taxonomy.cols.NCBITaxonId.
+
 
 class InvalidId(Exception):
     pass
@@ -187,6 +259,12 @@ class UnknownIdType(Exception):
 
 class UnknownSpecies(Exception):
     pass
+
+class Singleton(Exception):
+    def __init__(self, entry, msg=None):
+        super().__init__(msg)
+        self.entry = entry
+
 
 class IdMapperFactory(object):
     def __init__(self, db_obj):
