@@ -311,4 +311,4 @@ class IdMapperFactory(object):
 db = Database()
 id_resolver = IDResolver(db.db)
 id_mapper = IdMapperFactory(db)
-
+tax = Taxonomy(db.db)
