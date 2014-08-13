@@ -238,6 +238,7 @@ class IDResolver(object):
                 nr = self.search_xrefs(e_id)
         return nr
 
+
 class Taxonomy(object):
     """Taxonomy provides an interface to navigate the taxonomy data. 
     
@@ -245,7 +246,31 @@ class Taxonomy(object):
     into memory. Hence, it should only be instantiated once."""
     def __init__(self, db_handle):
         self.tax_table = db_handle.root.Taxonomy.read()
-        self.taxid_key = db_handle.root.Taxonomy.cols.NCBITaxonId.
+        self.taxid_key = self.tax_table.argsort(order=('NCBITaxonId'))
+
+    def _table_idx_from_numeric(self, tid):
+        i = self.tax_table['NCBITaxonId'].searchsorted(tid, 
+                sorter=self.taxid_key) 
+        idx = self.taxid_key[i]
+        if self.tax_table[idx]['NCBITaxonId'] != tid:
+            raise InvalidId("%d is an invalid/unknown taxonomy id"%(tid))
+        return idx
+
+    def _taxon_from_numeric(self,tid):
+        idx = self._table_idx_from_numeric(tid)
+        return self.tax_table[idx]
+
+    def get_parent_taxa(self, query):
+        """Get array of taxonomy entries leading towards the 
+        root of the taxonomy."""
+        idx = []
+        parent = query
+        while parent != 0:
+            i = self._table_idx_from_numeric(parent)
+            idx.append(i)
+            parent = self.tax_table[i]['ParentTaxonId']
+        return self.tax_table.take(idx)
+
 
 
 class InvalidId(Exception):
