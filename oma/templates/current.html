@@ -1,0 +1,386 @@
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+
+{% block title %}OMA: current{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+
+
+			<div class="jumbotron">
+				<div class="container">
+
+					<h1 class="text-center">Current release<br></h1>
+					<div class="well well-sm entete"></div>
+					<br>
+					<p>The entire OMA database is available for download in several formats. It is also possible to download each group separately. This option is available in the group view. Please read our terms and conditions before integrating OMA data into your own research or database.</p>
+
+					<br><br>
+					<div class="panel panel-default ">
+						<div class="panel-heading"><h4>Orthology Relationships
+						</h4>
+					</div>
+					<div class="panel-body">
+						<p>
+							The orthology relationships are available in two types: groups or pairs of orthologs. The information is given in terms of OMA identifiers (of the form HUMAN04376).               </p>
+
+							<table class="table table-hover ">
+								<tbody>
+									<tr>
+										<td class="col-md-6" >OMA groups:
+										</td>
+										<td class="col-md-6">
+
+
+											<a>
+												<span class="glyphicon glyphicon-download">
+												</span>
+												Text format
+
+											</a> 
+											<br>
+
+											<a>
+												<span class="glyphicon glyphicon-download">
+												</span>
+												OrthoXML format
+
+											</a>
+
+										</tr>
+										<tr>	
+										</td>
+										<td class="col-md-6">Pairwise orthologs:
+										</td>
+										<td class="col-md-6">
+
+
+											<a>
+												<span class="glyphicon glyphicon-download">
+												</span>  
+												Text format
+
+											</a> <br>
+
+											<a>
+												<span class="glyphicon glyphicon-download">
+												</span>
+												OrthoXML format
+
+											</a>
+
+
+										</td>
+
+									</tr>
+
+									<tr>	
+									</td>
+									<td class="col-md-6">Pairs between two species:
+									</td>
+									<td class="col-md-6">
+
+
+										<a>Genome Pair View <img alt="ext logo" src="image/ext.png" ></img></a>
+
+
+									</td>
+
+								</tr>
+							</tbody>
+						</table>
+
+
+					</div>
+				</div>   
+
+
+				<div class="panel panel-default ">
+					<div class="panel-heading"><h4>Sequences
+					</h4>
+				</div>
+				<div class="panel-body">
+					<p>
+						All sequences with the corresponding OMA identifiers can be downloaded in fasta files. The proteins are all in one file, while the coding DNA is split into two files, one for the Eukaryotes and one for the Prokaryotes.</p>
+
+
+						<table class="table table-hover ">
+							<tbody>
+								<tr>
+									<td class="col-md-6">Protein sequences:
+									</td>
+									<td class="col-md-6">
+
+
+										<a>
+											<span class="glyphicon glyphicon-download">
+											</span>  
+											Text format
+
+										</a> 
+										<br>
+
+										<a>
+											<span class="glyphicon glyphicon-download">
+											</span>
+											SeqXML format
+
+										</a>
+									</td>
+								</tr>
+
+
+								<tr>	
+
+									<td class="col-md-6">cDNA Eukaryotes:
+									</td>
+									<td class="col-md-6">
+										<a><span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
+									</td>
+
+								</tr>
+
+								<tr>	
+
+									<td class="col-md-6">cDNA Prokaryotes:
+									</td>
+									<td class="col-md-6">
+										<a><span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
+									</td>
+
+								</tr>
+								<tr>	
+
+									<td class="col-md-6">Protein Annotations:
+									</td>
+									<td class="col-md-6">
+										<a><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
+									</td>
+
+								</tr>
+							</tbody>
+						</table>
+
+					</div>
+				</div>   
+
+				<div class="panel panel-default ">
+					<div class="panel-heading"><h4>Identifier Mapping
+					</h4>
+				</div>
+				<div class="panel-body">
+					<p>
+						Mappings of the OMA identifier to various other databases are available:
+					</p>
+
+
+					<table class="table table-hover ">
+						<tbody>
+
+
+
+							<tr>	
+
+								<td class="col-md-6">Mapping to UniProt:
+								</td>
+								<td class="col-md-6">
+									<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+								</td>
+
+							</tr>
+
+							<tr>	
+
+								<td class="col-md-6">Mapping to Ensembl:
+								</td>
+								<td class="col-md-6">
+									<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+								</td>
+
+							</tr>
+							<tr>	
+
+								<td class="col-md-6" >Mapping to NCBI:
+								</td>
+								<td class="col-md-6">
+									<a><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
+								</td>
+
+							</tr>
+							<tr>	
+
+								<td class="col-md-6">Mapping to Wormbase:
+								</td>
+								<td class="col-md-6">
+									<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+								</td>
+
+							</tr>
+							<tr>	
+
+								<td class="col-md-6">Mapping to JGI:
+								</td>
+								<td class="col-md-6">
+									<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+								</td>
+
+							</tr>
+							<tr>	
+
+								<td class="col-md-6">Plant mapping: (ARATH and ORYSA) 
+								</td>
+								<td class="col-md-6">
+									<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+								</td>
+
+							</tr>
+							<tr>	
+
+								<td class="col-md-6">cDNA Eukaryotes:
+								</td>
+								<td class="col-md-6">
+									<a><span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
+								</td>
+
+							</tr>
+						</tbody>
+					</table>
+
+				</div>
+			</div>   
+
+
+			<div class="panel panel-default ">
+				<div class="panel-heading"><h4>Other files
+				</h4>
+			</div>
+			<div class="panel-body">
+
+
+				<table class="table table-hover ">
+					<tbody>
+
+
+
+						<tr>	
+
+							<td class="col-md-6">OMA Groups/Sequences in COGs format:
+							</td>
+							<td class="col-md-6">
+								<a><span class="glyphicon glyphicon-download"></span> Cog format</a><br>
+							</td>
+
+						</tr>
+
+						<tr>	
+
+							<td class="col-md-6">Species information: (Taxon IDs, scientific names, genome sources)
+							</td>
+							<td class="col-md-6">
+								<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+							</td>
+
+						</tr>
+						<tr>	
+
+							<td class="col-md-6">Group descriptions:
+							</td>
+							<td class="col-md-6">
+								<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+							</td>
+
+						</tr>
+						<tr>	
+
+							<td class="col-md-6">Close OMA Groups:
+							</td>
+							<td class="col-md-6">
+								<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+							</td>
+
+						</tr>
+
+					</tbody>
+				</table>
+
+
+			</div>
+		</div>  
+
+
+		<div class="panel panel-default ">
+			<div class="panel-heading"><h4>OMA ID History
+			</h4>
+		</div>
+
+		<div class="panel-body">
+			<p>
+				Mappings of the OMA identifier of updated genomes from one release to another. We track only proteins with same amino acid sequences.
+			</p>  
+
+
+
+			<table class="table table-hover ">
+				<tbody>
+
+
+
+					<tr>	
+
+						<td class="col-md-6">From Jul 2013 release
+						</td>
+						<td class="col-md-6">
+							<a><span class="glyphicon glyphicon-download"></span> Cog format</a><br>
+						</td>
+
+					</tr>
+
+					<tr>	
+
+						<td class="col-md-6">From Dec 2012 release
+						</td>
+						<td class="col-md-6">
+							<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+						</td>
+
+					</tr>
+					<tr>	
+
+						<td class="col-md-6">From Mar 2012 release
+						</td>
+						<td class="col-md-6">
+							<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+						</td>
+
+					</tr>
+					<tr>	
+
+						<td class="col-md-6">From May 2011 release
+						</td>
+						<td class="col-md-6">
+							<a><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
+						</td>
+
+					</tr>
+
+				</tbody>
+			</table>            
+
+		</div>
+	</div> 
+
+
+
+
+</div>
+</div>
+</div>	
+</div>
+</div>
+
+{% endblock content %}

@@ -1,132 +1,202 @@
 {% extends  "core.html" %}
-
+{% load staticfiles %}
+{% load bootstrap3 %}
 
 {% block title %}OMA: About{% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-default " role="navigation">
-	<div class="container-fluid">
-		<!-- Brand and toggle get grouped for better mobile display -->
-		<div class="navbar-nav visible-lg">
-			<a href="http://www.isb-sib.ch">
-				<img alt="SIB logo" src="image/SIBlogo.png"  class="siblogo">
 
-			</a>
-		</div>
-		<div class="navbar-nav hidden-sm hidden-xs verticalbar"></div>
-		<div class="navbar-header navbar-nav">
-			<button type="button" class="navbar-toggle " data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-			<a href="home.html">
-				<img alt="OMA logo" src="image/omalogo.png" class="omalogo">
-				<div class="glyphicon glyphicon-home icon-md"></div>
-			</a>
-		</div>
-
-		<!-- Collect the nav links, forms, and other content for toggling -->
-		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<ul class="nav navbar-nav ">
-				<li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Explore<span class="caret"></span></a>
-					<ul class="dropdown-menu" role="menu">
-						<li><a class="" href="dataset.html">Release information</a></li>
-						<li class="divider"></li>
-
-						<li><a class="" href="landOMA.html">OMA groups</a></li>
-						<li><a class="" href="landHOG.html">Hierarchical orthologous groups (HOGs)</a></li>
-						<li><a class="" href="landAnnotation.html">Functional annotations</a></li>
-						<li><a class="" href="landsynteny.html">Synteny</a></li>
-						<li class="divider"></li>
-						<li><a class="" href="genomePW.html">Orthology between two genomes</a></li>
-					</ul>
-				</li>
-			</ul>
-
-			<!-- 		   -->
-			<!-- search    -->
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
 
 
-			<form class="navbar-form navbar-left" role="search">
-				<div class="form-group">
-					<select id="selectNav" class="form-control btn-mini">
-						<option>Keyword</option>
-						<option class="">Protein Sequence</option>
-						<option class="">OMA Group</option>
-						<option class="">Entry</option>
-					</select>
+					<h1 class="text-center">OMA </h1>
+					<h2 class="text-center grey"> Web based database interface for orthology prediction</h2>
+					<div class="well well-sm entete"></div><br>
+
+
+
+					<div class="panel panel-default ">
+						<div id='nut' class="panel-heading">
+							<h3 >OMA in a nutshell</h3>
+						</div>
+						<div class="panel-body">
+							<p>The OMA (“Orthologous MAtrix”) project is a method and database for the inference of orthologs among complete genomes. The distinctive features of OMA are its broad scope and size, <a id='linkToBench' href='#bench'>high quality of inferences</a>, feature-rich web interface, <a href="{% url 'current'  %}">availability of data in a wide range of formats and interfaces</a>, and frequent update schedule of two releases per year.</p>
+
+							<p>OMA’s inference algorithm consists of three main phases. First, to infer homologous sequences (sequences of common ancestry), all-against-all Smith-Waterman alignments are computed and significant matches are retained. Second, to infer orthologous pairs (the subset of homologs related by speciation events), mutually closest homologs are identified based on evolutionary distances, taking into account distance inference uncertainty and the possibility for differential gene losses (for more details, see <a href="http://www.biomedcentral.com/1471-2105/10/220">Roth et al 2008</a>). Third, these orthologs are clustered in two different ways, which are useful for different purposes: (a) we identify cliques of orthologous pairs (“OMA groups”), which are useful as marker genes for phylogenetic reconstruction and tend to be very specific; (b) we identify hierarchical orthologous groups (“HOGs”), groups of genes defined for particular taxonomic ranges and identify all genes that have descended from a common ancestral gene in that taxonomic range. Fore more details on the algorithm to infer HOGs from orthologous pairs, see <a href="http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0053786">Altenhoff et al. 2013</a>.</p>
+
+							<p>The OMA pipeline can also run on custom genomic/transcriptomic data using the <a href="http://omabrowser.org/standalone/">OMA stand-alone software</a>, and it is even possible to combine precomputed data with custom data by <a href="http://omabrowser.org/cgi-bin/gateway.pl?f=AllAllExport">exporting parts of the OMA database</a>.
+							</p>
+
+							<p>
+								For more info on the feature of the OMA Browser, please consult the help pages accessible from the navigation bar in the top-right corner.</p>
+								<br>
+							</div>
+						</div>	
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h3>History</h3>
+							</div>
+							<div class="panel-body">
+								<p>The OMA project was initiated in 2004 at ETH Zurich by Prof. Gaston Gonnet, with the goal of identifying orthologs among all publicly available genomes. At the time, most sequenced genomes were bacteria and only only few were eukaryotes. Several PhD students in his group became increasingly involved, in particular Adrian Schneider, Christophe Dessimoz, and Alexander Roth. Over the subsequent 10 years, OMA underwent 16 major releases, steadily increasing the number of genomes under consideration.</p> 
+								<br>
+
+								<img src="{% static "image/history.png" %}" class="img-responsive margin-auto">
+
+
+								<p>The OMA Browser was introduced in 2006. Early releases were developed by Adrian Schneider and Christophe Dessimoz. Adrian Altenhoff joined the team in 2008. 
+								</p>
+
+
+								<p>In 2008, the responsibility of “baby-sitting” the all-against-all (i.e. importing and converting genomes, running and verifying computations across hundreds of CPUs) was handed over from Gaston to the two Adrians.</p>
+
+
+								<p>Since 2010, Adrian Altenhoff has been the main baby-sitter of the all-against-all and manager of OMA’s operations. In 2011, Christophe joined Gaston as co-PI of OMA. In 2012, OMA became a SIB-funded bioinformatics resource.</p>
+								<br>
+
+							</div>
+						</div>	
+
+
+
+
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h2>Publication</h2>
+
+
+							</div>
+							<div class="panel-body">
+								<h3>OMA overview</h3>
+								<br>
+								<br>
+								<p>Adrian M. Altenhoff, Adrian Schneider, Gaston H. Gonnet, Christophe Dessimoz  <br>
+									<em>
+										OMA 2011: Orthology Inference Among 1,000 Complete Genomes 
+									</em><br>
+									Nucleic Acids Research, 2011, 39 (suppl 1): D289-D294 <a href='http://nar.oxfordjournals.org/content/39/suppl_1/D289'> Full text</a> 
+								</p>
+
+								<br>
+
+								<p>Adrian Schneider, Christophe Dessimoz, Gaston H. Gonnet  <br>
+									<em>
+										OMA Browser - Exploring orthologous relations across 352 complete genomes 
+									</em><br>
+									Bioinformatics, 2007, 23:16 (pp. 2180-2182) <a href="http://omabrowser.org/cgi-bin/gateway.pl">Project page </a> 
+									<a href='http://bioinformatics.oxfordjournals.org/content/23/16/2180'> Full text
+									</a>
+								</p>
+								<br>
+
+								<h3>OMA algorithm</h3>
+								<br>
+								<br>
+
+								<p>Adrian M. Altenhoff, Manuel Gil, Gaston H. Gonnet, Christophe Dessimoz  <br>
+									<em>
+										Inferring Hierarchical Orthologous Groups From Orthologous Gene Pairs 
+									</em><br>
+									PLoS One, 2013, 8:1, e53786 <a href="http://omabrowser.org/standalone/">Software </a> 
+									<a href='http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0053786'> Full text
+									</a> 
+								</p>
+
+								<br>
+
+								<p>Alexander Roth, Gaston H. Gonnet, Christophe Dessimoz <br>
+									<em>
+										Algorithm of OMA for Large-Scale Orthology Inference 
+									</em><br>
+									BMC Bioinformatics, 2008, 9:518   
+
+									<a href='http://www.biomedcentral.com/1471-2105/9/518'> Full text</a>  <a href="http://www.biomedcentral.com/1471-2105/10/220">(Please note the associated erratum)
+								</a>
+							</p>
+
+							<br>
+							<p>Christophe Dessimoz, Brigitte Boeckmann, Alexander Roth, Gaston H. Gonnet  <br>
+								<em>
+									Detecting Non-Orthology in the COGs Database and Other Approaches Grouping Orthologs Using Genome-Specific Best Hits 
+								</em><br>
+								Nucleic Acids Res, 2006 34:11 (pp. 3309-3316) 
+								<a href='http://nar.oxfordjournals.org/content/34/11/3309'> Full text
+								</a>
+							</p>
+
+							<br>
+
+							<p>Christophe Dessimoz, Gina Cannarozzi, Manuel Gil, Daniel Margadant, Alexander Roth, Adrian Schneider, Gaston H. Gonnet <br>
+								<em>
+									OMA, a Comprehensive, Automated Project for the Identification of Orthologs from Complete Genome Data: Introduction and First Achievements 
+								</em><br>
+								RECOMB 2005 Workshop on Comparative Genomics, LNCS 3678 (pp. 61-72)   
+
+								<a href='http://download.springer.com/static/pdf/65/chp%253A10.1007%252F11554714_6.pdf?auth66=1408719784_5261138a05efa9237079a02f2783af34&ext=.pdf'> Full text
+								</a>
+								<a href='http://link.springer.com/chapter/10.1007%2F11554714_6'> Abstract
+								</a>
+							</p>
+
+							<br>
+
+
+
+							<h3 id='bench' >Benchmarking</h3>
+							<br>
+							<br>
+
+							<p >Daniel A. Dalquen, Adrian M. Altenhoff, Gaston H. Gonnet, Christophe Dessimoz <br>
+								<em>
+									The Impact of Gene Duplication, Insertion, Deletion, Lateral Gene Transfer and Sequencing Error on Orthology Inference: a Simulation Study 
+								</em><br>
+								PLoS One, 2013, 8:2, e56925  
+								<a href='http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0056925'> Full text 
+								</a> 
+							</p>
+
+							<br>
+							<p >Brigitte Boeckmann, Marc Robinson-Rechavi, Ioannis Xenarios, Christophe Dessimoz <br>
+								<em>
+									Conceptual Framework and Pilot Study to Benchmark Phylogenomic Databases Based on Reference Gene Trees
+								</em><br>
+								Briefings in Bioinformatics, 2011, 12:5 (pp. 474-484)
+								<a href='http://bib.oxfordjournals.org/content/12/5/423'> Full text 
+								</a> 
+							</p>
+
+							<br>
+							<p >Adrian M. Altenhoff and Christophe Dessimoz<br>
+								<em>Phylogenetic and Functional Assessment of Orthologs Inference Projects and Methods 
+								</em><br>
+								PLoS Computational Biology, 2009, 5:1, e1000262
+								<a href='http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1000262'> Full text 
+								</a>
+							</p>
+							<br>
+							<h3>Orthology inference in general</h3>
+							<br>
+							<br>
+
+							<p >Adrian M. Altenhoff and Christophe Dessimoz <br>
+								<em>Inferring Orthology and Paralogy
+									Evolutionary Genomics: Statistical and Computational methods 
+								</em><br>
+								(M Anisimova, Editor),
+								Methods in Molecular Biology, 2012, Springer Humana, Vol. 855.
+								<a href='http://download.springer.com/static/pdf/766/chp%253A10.1007%252F978-1-61779-582-4_9.pdf?auth66=1408720002_a8e393a0b4e8d3218ab9edeff9d151d8&ext=.pdf'> Full text 
+								</a>
+								<a href='http://link.springer.com/protocol/10.1007%2F978-1-61779-582-4_9'> Abstract
+								</a>
+							</p>
+							<br>
+						</div>
+					</div>	
 				</div>
-				<div class="input-group">
-					<input id="textNav" class="form-control" type="text">
-					<span class="input-group-btn">
-						<button class="btn btn-default" type="button" id="searchNav"><span class="glyphicon glyphicon-search grey"></span></button>
-					</span>
-
-				</div>
-			</form>
-
-			<script type="text/javascript">
-			function OpenInNewTab(url) {
-				var win = window.open(url, '_blank');
-				win.focus();
-			}
-
-			$('#searchNav').click( function() {
-				var select = document.getElementById("selectNav");
-				var text = document.getElementById("textNav").value;
-				var option = select.options[select.selectedIndex].value;
-				OpenInNewTab('option/ ' + option + '/query/'+text);
-			});
-			</script>
-
-			<!-- 		   -->
-			<!-- right-button    -->
-
-			<ul class="nav navbar-nav navbar-right">
-
-				<li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">About<span class="caret"></span></a>
-					<ul class="dropdown-menu" role="menu">
-						<li><a class="" href="about.html">OMA</a></li>
-						<li><a class="" href="team.html">Team</a></li>
-						<li><a class="" href="funding.html">Funding</a></li>
-						<li><a class="" href="license.html">License</a></li>
-						<li class="divider"></li>
-						<li><a class="" href="mailto:contact@omabrowser.org"><span class="glyphicon glyphicon-envelope"></span> Contact</a></li>
-					</ul>
-				</li>
-
-				<li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Download <span class="caret"></span></a>
-					<ul class="dropdown-menu" role="menu">
-						<li><a class="" href="current.html">Current release</a></li>
-						<li><a class="" href="archives.html">Archives</a></li>
-						<li><a class="" href="http://omabrowser.org/standalone/">OMA standalone</a></li>
-						<li><a class="" href="http://omabrowser.org/cgi-bin/gateway.pl?f=AllAllExport">Export All/All</a></li>
-					</ul>
-				</li>
-				<li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">API  <span class="caret"></span></a>
-					<ul class="dropdown-menu" role="menu">
-						<li><a class="" href="APISOAP.html">SOAP</a></li>
-						<li><a class="" href="APIDAS.html">DAS</a></li>
-					</ul>
-				</li>
-
-				<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Help  <span class="caret"></span></a>
-					<ul class="dropdown-menu" role="menu">
-						<li><a class="" href="about.html#nut">OMA in a nutshell</a></li>
-						<li><a class="" href="type.html">Types of orthologs</a></li>
-						<li><a class="" href="uses.html">Typical uses</a></li>
-						<li><a class="" href="FAQ.html">FAQ</a></li>
-					</ul>
-				</li>
-
-			</ul>
+			</div>
 		</div>
-		<!-- /.navbar-collapse -->
-	</div>
-	<!-- /.container-fluid -->
-</nav>
-<!-- 	end	   -->
-<!-- NAVBAR    -->
-{% endblock content %}
+
+		{% endblock content %}

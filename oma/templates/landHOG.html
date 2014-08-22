@@ -1,0 +1,99 @@
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}OMA: landHOG{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+	<div class="row">
+		<div class=" col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<div class="page-header ">
+						<h1 class="text-center">Hierarchical orthologous groups</h1>
+						<div class="well well-sm entete"></div>
+					</div>
+					<div class="panel panel-default">
+						<div class="panel-body">
+
+
+
+							<p>Hierarchical orthologous groups are sets of genes that are defined with respect to particular taxonomic ranges of interest. They group genes that have descended from a single common ancestral genes in that taxonomic range. 
+								<a href="{% url 'type'  %}" class="btn btn-default " role="button"> More info</a> 
+							</p>
+
+							<p>Currently, HOGs can be retrieved by first retrieving one of its member sequence, and then clicking on the “hierarchical orthologous groups” tab.</p>
+
+
+							<h3>Search a HOG</h3>
+
+							<br>
+
+							<form class="form-horizontal" role="form">
+								<div class="form-group">
+									<label for="textHOG" class="col-sm-4 control-label">Member gene/protein:
+									</label>
+									<div class="col-sm-6">
+										<input type="email" class="form-control" id='textHOG' placeholder="">
+									</div>
+									<div class="col-sm-2">
+										<span class="input-group btn btn-default" >
+											<a id='searchHOG' > 
+												<span  class="glyphicon glyphicon-search grey" >
+												</span>
+											</a>
+										</span>
+									</div>
+									<br>
+									<div class="col-xs-6 col-xs-offset-4">
+										
+										<h4>
+											<small> Example: 
+												<a id='exMemb'>	HUMAN02353</a>
+											</small>
+										</h4>
+										
+									</div>
+								</div>
+								<form><br>
+								</div>
+
+								<script type="text/javascript">
+								function OpenInNewTab(url) {
+									var win = window.open(url, '_blank');
+									win.focus();
+								}
+
+								$('#exMemb').click( function() {
+
+									$('#textHOG').val('HUMAN02353');
+								});
+								$('#searchHOG').click( function() {
+									var query= document.getElementById("textHOG").value;
+									var arrayQuery = query.split(" ");
+									var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
+									var x=1;
+									for (i in arrayQuery)
+									{
+										newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
+										x++;
+									}
+									newUrl=newUrl+'f=DisplayEntry';
+									window.location = newUrl;
+								});
+
+
+								
+
+
+								</script>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% endblock content %}

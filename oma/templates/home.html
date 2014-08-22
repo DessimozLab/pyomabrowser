@@ -5,7 +5,244 @@
 
 {% block title %}OMA: Home{% endblock %}
 
+
 {% block content %}
-kjgjhgjhf
-jgjhhj
+<!-- 		   -->
+<!-- alert    -->
+<div class="container-fluid">
+	<div class="row">
+		<!-- 		   -->
+		<!-- search    -->
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+
+			<div class="alert">
+				<div class="alert alert-success thd" role="alert">The OMA Browser has a new website layout! <a href="mailto:contact@omabrowser.org" class="btn btn-default btn-xs">Send feedback</a> 
+				</div>
+			</div>
+			<!-- 	end	   -->
+			<!-- alert    -->
+
+		</div>
+	</div>
+
+
+	<!-- 		   -->
+	<!-- content    -->
+
+
+
+	<div class="row">
+		<!-- 		   -->
+		<!-- search    -->
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<img src="{% static "image/oma2.png" %}" class="img-responsive margin-auto">
+
+					<p><br></p>
+					<div class="col-md-10 col-md-offset-1">
+						<div class="input-group">
+							<span class="input-group-btn">
+								<select id='selectBrowser' class="btn">
+									<option >Keyword</option>
+									<option >Protein Sequence</option>
+									<option >Group</option>
+									<option >Entry</option>
+								</select>
+							</span>
+							<input id='inputBrowser' type="text" class="form-control"   >
+							<span class="input-group-btn">
+								<button class="btn btn-default" id='loupeBrowser' type="button"><span class="glyphicon glyphicon-search "></span></button>
+							</span>
+						</div>	
+					</div>
+
+
+					<br>
+
+
+
+				</div>
+
+
+				<div class='row '>
+					<div class="col-md-8 col-md-offset-2"><div class=" text-center">
+						<h4><small> Example: <a id='exPhoto'>Search for "photoreceptor"</a>  -  <a id='exEntry' >Entry HUMAN16963 (with 96 orthologs) </a></small> </h4>
+					</div>
+				</div>
+
+
+			</div>
+
+		</div>
+	</div>
+</div>
+
+
+
+<br>
+
+
+<script type="text/javascript">
+
+
+$('#exPhoto').click( function() {
+
+	$('#selectBrowser').val('Keyword');
+
+	$('#inputBrowser').val('photoreceptor');
+
+});
+
+$('#exEntry').click( function() {
+
+	$('#selectBrowser').val('Entry');
+
+	$('#inputBrowser').val('HUMAN16963');
+
+});
+
+
+$('#loupeBrowser').click( function() {
+	var query= document.getElementById("inputBrowser").value;
+	var arrayQuery = query.split(" ");
+	var category= document.getElementById("selectBrowser").value;
+	var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
+	var x=1;
+	for (i in arrayQuery)
+	{
+		newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
+		x++;
+	}
+	newUrl=newUrl+'f=';
+	if (category=='Keyword'){
+		newUrl=newUrl+'SearchDb';
+	}
+	else if (category=='Protein Sequence'){
+		newUrl=newUrl+'SearchSeqDb';	
+	}
+	else if (category=='Group'){
+		newUrl=newUrl+'DisplayGroup';	
+	}
+	else if (category=='Entry'){
+		newUrl=newUrl+'DisplayEntry';	
+	}
+
+	window.location = newUrl;
+});
+
+
+
+
+</script>
+<div class="row">
+	<!-- 		   -->
+	<!-- 3 columns    -->
+	<div class=" col-sm-12 col-md-10 col-md-offset-1">
+		<div class="jumbotron">
+			<div class="container">
+
+				<div class="row">
+					<div class="col-sm-4 col-md-4 ">
+						<div class="thumbnail oma-3-panels">
+							<div class="caption">
+								<p class="text-center ">
+									<span class="glyphicon glyphicon-question-sign glyphicon-xl"></span>
+								</p>
+
+								<h3>First time here?</h3>
+								<ul>
+									<li>Read our 
+										<a href="{% url 'nutshell'  %}">brief introduction to OMA
+										</a>.
+									</li>
+									<li>Familiarise yourself with the 
+										<a href="{% url 'type'  %}">different types of orthologs provided</a>.
+									</li>
+									<li>Get ideas about 
+										<a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
+									</li>
+								</ul>
+							</div>
+						</div>                 
+					</div>
+					<div class="col-sm-4 col-md-4">
+						<div class="thumbnail oma-3-panels">
+							<div class="caption">
+
+								<p class="text-center ">
+									<a href="#" data-toggle="modal" data-target=".bs-example-modal-md">
+										<span class="glyphicon glyphicon-download glyphicon-xl"></span>
+									</a>
+								</p>
+								<h3>Download options</h3>
+								<ul>
+									<li>
+										<b><a href="{% url 'current'  %}">Current release</a>:</b>
+										All the database is available for downloading, you will find all the data we use on the OMA Browser
+									</li>
+
+									<li>
+										<b><a href="#">OMA Standalone</a>:</b>
+										If you want more privacy the standalone allow you to work your own set of genomes.
+									</li>
+
+									<li>
+										<b><a href="#">Export All-All</a>:</b>
+										You can export a set of genome for the OMA Standalone.
+									</li>
+
+									<li>
+										<b><a href="{% url 'archives'  %}">Archives</a>:</b>
+										All previous dataset are also available if you want to work on a old version of OMA.
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-4 col-md-4 ">
+						<div class="thumbnail oma-3-panels ">
+							<div class="caption comment-text" id="latest-news">
+								<p class="text-center ">
+									<span class="glyphicon glyphicon-info-sign glyphicon-xl">
+									</span>
+								</p>
+								<h3>Latest news</h3>
+								<ul >
+									<li>Sneak peak: export genomes and all-against-all computations from OMA and combine them with your own sequencing data: 
+										<a href="http://omabrowser.org/export">http://omabrowser.org/export</a>
+									</li>
+									<li>Did you know that the OMA pipeline can also run on your own computer? <a href="http://omabrowser.org/standalone">http://omabrowser.org/standalone</a>
+									</li>
+									<li>Big release coming up in a couple of weeks. Stay tuned…
+									</li>
+								</ul>
+								<p><a href="https://twitter.com/intent/user?screen_name=OMABrowser" class="btn btn-default btn-sm bottomright" role="button">Follow us on twitter</a></p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<!-- 		   -->
+	<!-- cite    -->
+	<div class="col-md-12 col-md-10 col-md-offset-1">
+		<div class="jumbotron">
+			<div class="container">
+				<h4>If you use OMA in your work, please consider citing:
+				</h4>
+				<h5>Adrian M. Altenhoff, Adrian Schneider, Gaston H. Gonnet, Christophe Dessimoz, <em>OMA 2011: Orthology Inference Among 1,000 Complete Genomes</em>,
+					Nucleic Acids Research, 2011, 39 (suppl 1): D289-D294
+				</h5>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+<!-- 	end	   -->
+<!-- content    -->
+
 {% endblock content %}

@@ -1,0 +1,100 @@
+{% extends  "core.html" %}
+
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% block title %}OMA: Landing Annotation{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<div class="page-header ">
+						<h1 class="text-center">Functional annotations<br></h1>
+						<div class="well well-sm entete"></div>
+					</div>
+					<div class="panel panel-default">
+						<div class="panel-body">
+
+
+
+							<p>In OMA, we provide Gene Ontology functional annotations retrieved from <a href="http://www.ebi.ac.uk/GOA">UniProtKB-GOA</a>  as well as functional predictions derived from evolutionary relationships inferred by OMA.
+							</p>
+
+							<p>To view Gene Ontology functional annotations, retrieve a protein sequence and click on the “Information” tab.</p>
+
+
+							<h3>Search a HOG</h3>
+
+							<br>
+
+							<form class="form-horizontal" role="form">
+								<div class="form-group">
+									<label for="textAnn" class="col-sm-4 control-label">Member gene/protein:
+									</label>
+									<div class="col-sm-6">
+										<input type="email" class="form-control" id='textAnn' placeholder="">
+									</div>
+									<div class="col-sm-2">
+										<span class="input-group btn btn-default" >
+											<a id='searchAnn' > 
+												<span  class="glyphicon glyphicon-search grey" >
+												</span>
+											</a>
+										</span>
+									</div>
+									<br>
+									<div class="col-xs-6 col-xs-offset-4">
+										
+										<h4>
+											<small> Example: 
+												<a id='exMemb'>	HUMAN02353</a>
+											</small>
+										</h4>
+										
+									</div>
+								</div>
+								<form><br>
+								</div>
+								<script type="text/javascript">
+								function OpenInNewTab(url) {
+									var win = window.open(url, '_blank');
+									win.focus();
+								}
+
+								$('#exMemb').click( function() {
+
+									$('#textAnn').val('HUMAN02353');
+								});
+
+								$('#searchAnn').click( function() {
+									var query= document.getElementById("textAnn").value;
+									var arrayQuery = query.split(" ");
+									var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
+									var x=1;
+									for (i in arrayQuery)
+									{
+										newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
+										x++;
+									}
+									newUrl=newUrl+'f=DisplayEntry';
+									window.location = newUrl;
+								});
+
+
+
+
+
+
+								</script>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% endblock content %}

@@ -1,0 +1,56 @@
+href="{% static "image/favicon.ico" %}"
+
+<div class="glyphicon glyphicon-home icon-md"></div>
+
+
+a
+
+{% include "modal.html" %}
+
+
+"{% url 'about'  %}"
+
+landHOG x
+landAnnotation x
+landsynteny x
+
+team x
+funding x
+license x
+
+current x 
+archives x
+APISOAP x
+
+APIDAS x
+type
+uses x
+
+genomePW x
+FAQ x
+nutshell
+
+Home x
+dataset dynamic ?
+landOMA x
+
+About x 
+
+{% block title %}OMA{% endblock %}
+
+HOG /oma/hogs/<entry>/<range>
+Syntheny {% url synteny <entry>
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="myModalLabel">The OMA Browser reports for every entry different types of orthology</h3>
+			</div>
+			<div class="modal-body">
+				{% include "modal.html" %}
+			</div>
+		</div>
+	</div>
+</div>
