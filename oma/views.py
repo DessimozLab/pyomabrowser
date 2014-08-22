@@ -31,8 +31,8 @@ def hogs(request, entry_id, level, idtype='OMA'):
     context = {'query': query, 'level': level, 'hog_members': hog_member_ids} 
     return render(request, 'hogs.html', context)
 
-def about(request):
+def home(request):
     context = {}
-    return render(request, 'about.html', context)
+    return render(request, 'home.html', context)
 
 
