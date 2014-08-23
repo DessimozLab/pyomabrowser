@@ -1,13 +1,10 @@
-
-
-
-
-
-
+{% load staticfiles %}
+{% load bootstrap3 %}
 
 <div class="panel-body">
 	<div class="col-md-4 ">
 		<ul class="nav nav-pills nav-stacked">
+
 			<li class="active">
 				<a href="#propagate" role="tab" data-toggle="tab">1:1 Orthologs
 				</a>
@@ -18,42 +15,46 @@
 					1:many Orthologs
 				</a>
 			</li>
-			<li ><a href="#twg" role="tab" data-toggle="tab">
-				many:1 Orthologs
+
+			<li >
+				<a href="#twg" role="tab" data-toggle="tab">
+					many:1 Orthologs
+				</a>
+			</li>
+
+			<li >
+				<a href="#Align" role="tab" data-toggle="tab">
+					many:many Orthologs
+				</a>
+			</li>
+
+			<li >
+				<a href="#vertebrates" role="tab" data-toggle="tab">
+					Close Paralogs
+				</a>
+			</li>
+
+			<li >
+				<a href="#orthologs" role="tab" data-toggle="tab">
+					Hierarchical Groups
+				</a>
+			</li>
+
+			<li ><a href="#Group" role="tab" data-toggle="tab">
+				OMA Group
 			</a>
 		</li>
-		<li ><a href="#Align" role="tab" data-toggle="tab">
-			many:many Orthologs
-		</a>
-	</li>
-	<li ><a href="#vertebrates" role="tab" data-toggle="tab">
-		Close Paralogs
-	</a>
-</li>
-<li ><a href="#orthologs" role="tab" data-toggle="tab">
-	Hierarchical Groups
-</a>
-</li>
-
-<li ><a href="#Group" role="tab" data-toggle="tab">
-	OMA Group
-
-</a>
-</li>
-
-</ul>
-
+	</ul>
 </div>
 
 <div class="col-md-8 " >
 	<div class="tab-content">
 		<div class="tab-pane active" id="propagate">
-			<p>The entry has only one ortholog in the other organism and the orthologous entries have only one ortholog in this organism.</p>
-
+			<p>The entry has only one ortholog in the other organism and the orthologous entries have only one ortholog in this organism.
+			</p>
 			<button class="btn btn-default" data-toggle="modal" data-target="#myModal1">
 				How to see this type of ortholog ?
 			</button>
-
 			<!-- Modal -->
 			<div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 				<div class="modal-dialog modal-lg">
@@ -66,33 +67,31 @@
 							<div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
 								<!-- Indicators -->
 								<ol class="carousel-indicators">
-									<li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
-									<li data-target="#carousel-example-generic" data-slide-to="1"></li>
-									<li data-target="#carousel-example-generic" data-slide-to="2"></li>
-
+									<li data-target="#carousel-example-generic" data-slide-to="0" class="active">
+									</li>
+									<li data-target="#carousel-example-generic" data-slide-to="1">
+									</li>
+									<li data-target="#carousel-example-generic" data-slide-to="2">
+									</li>
 								</ol>
 
 								<!-- Wrapper for slides -->
 								<div class="carousel-inner">
 									<div class="item active">
-										<img src="image/tuto1h.png" class="img-responsive margin-auto">
+										<img src="{% static "image/tuto1h.png" %}" class="img-responsive margin-auto">
 										<div class="carousel-caption">
-
 										</div>
 									</div>
 									<div class="item">
-										<img src="image/tuto2h.png" class="img-responsive margin-auto">
+										<img src="{% static "image/tuto2h.png" %}" class="img-responsive margin-auto">
 										<div class="carousel-caption">
-
 										</div>
 									</div>
 									<div class="item">
-										<img src="image/tuto3h.png" class="img-responsive margin-auto">
+										<img src="{% static "image/tuto3h.png" %}" class="img-responsive margin-auto">
 										<div class="carousel-caption">
-
 										</div>
 									</div>
-
 								</div>
 
 								<!-- Controls -->
@@ -106,16 +105,12 @@
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-
 						</div>
 					</div>
 				</div>
 			</div>
-
-
-
-
 		</div>
+
 		<div class="tab-pane" id="Identify">
 			<p>The entry has more than one ortholog in the other organism but all orthologous entries have only one ortholog in this organism. This implies that the gene was duplicated in an ancestor of the other organism, but after the speciation event.</p>
 		</div>
@@ -137,8 +132,4 @@
 			</div>
 		</div>
 	</div>
-
-
-
-
 </div>

@@ -5,6 +5,7 @@
 {% block title %}OMA: Landing OMA {% endblock %}
 
 {% block content %}
+
 <div class="container-fluid">
 	<div class="row">
 		<div class=" col-sm-12 col-md-10 col-md-offset-1">
@@ -12,175 +13,95 @@
 				<div class="container">
 					<div class="page-header ">
 						<h1 class="text-center">OMA groups</h1>
-
 						<div class="well well-sm entete"></div>
 					</div>
 					<div class="panel panel-default">
 						<div class="panel-body">
 
-
-
 							<p>
-								OMA groups are groups of protein sequences that are inferred to be related exclusively by speciation events. Consequently, there is at most one sequence per species in each OMA group. By convention, each sequence belongs to at most one OMA group.</p>
-								<p>
-									For an alternative, more inclusive definition of orthologous groups, consider using <a href="{% url 'landHOG'  %}">hierarchical orthologous groups</a> .
+								OMA groups are groups of protein sequences that are inferred to be related exclusively by speciation events. Consequently, there is at most one sequence per species in each OMA group. By convention, each sequence belongs to at most one OMA group.
+							</p>
+							<p>
+								For an alternative, more inclusive definition of orthologous groups, consider using <a href="{% url 'landHOG'  %}">hierarchical orthologous groups</a>.
+							</p>
+							<h3>Search an OMA group</h3> 
+							<br>
 
-								</p>
-
-
-
-
-
-								<h3>Search an OMA group</h3> <br>
-								<form class="form-horizontal" role="form">
-									<div class="form-group">
-										<label for="textG1" class="col-sm-4 control-label">Fingerprint (stable across releases):
-										</label>
-										<div class="col-sm-6">
-											<input type="email" class="form-control" id='textG1' placeholder="">
-										</div>
-										<div class="col-sm-2">
-											<span class="input-group btn btn-default" >
-												<a id='searchG1' > 
-													<span  class="glyphicon glyphicon-search grey" >
-													</span>
-												</a>
-											</span>
-										</div>
-										<br>
-										<div class="col-xs-6 col-xs-offset-4">
-
-											<h4>
-												<small> Example: 
-													<a id='exFinger'>PWINGNT</a>
-												</small>
-											</h4>
-
-										</div>
+							<form class="form-horizontal" role="form">
+								<div class="form-group">
+									<label for="textG1" class="col-sm-4 control-label">Fingerprint (stable across releases):
+									</label>
+									<div class="col-sm-6">
+										<input type="email" class="form-control" id='textG1' placeholder="">
 									</div>
-
-
-
-
-									<div class="form-group">
-										<label for="textG2" class="col-sm-4 control-label">Group number (not stable across releases):
-										</label>
-										<div class="col-sm-6">
-											<input type="email" class="form-control" id='textG2' placeholder="">
-										</div>
-										<div class="col-sm-2">
-											<span class="input-group btn btn-default" >
-												<a id='searchG2' > 
-													<span  class="glyphicon glyphicon-search grey" >
-													</span>
-												</a>
-											</span>
-										</div>
-										<br>
-										<div class="col-xs-6 col-xs-offset-4">
-
-											<h4>
-												<small> Example: 
-													<a id='exNumber'>70525</a>
-												</small>
-											</h4>
-
-										</div>
+									<div class="col-sm-2">
+										<span class="input-group btn btn-default" >
+											<a id='searchG1' > 
+												<span  class="glyphicon glyphicon-search grey" >
+												</span>
+											</a>
+										</span>
 									</div>
-									<div class="form-group">
-										<label for="textG3" class="col-sm-4 control-label">Member gene/protein:
-										</label>
-										<div class="col-sm-6">
-											<input type="email" class="form-control" id='textG3' placeholder="">
-										</div>
-										<div class="col-sm-2">
-											<span class="input-group btn btn-default" >
-												<a id='searchG3' > 
-													<span  class="glyphicon glyphicon-search grey" >
-													</span>
-												</a>
-											</span>
-										</div>
-										<br>
-										<div class="col-xs-6 col-xs-offset-4">
-
-											<h4>
-												<small> Example: 
-													<a id='exMemb'>	HUMAN02353</a>
-												</small>
-											</h4>
-
-										</div>
+									<br>
+									<div class="col-xs-6 col-xs-offset-4">
+										<h4>
+											<small> Example: 
+												<a id='exFinger'>PWINGNT</a>
+											</small>
+										</h4>
 									</div>
-
-								</form>
-
+								</div>
 
 
-							</div>
-							<script type="text/javascript">
-							function OpenInNewTab(url) {
-								var win = window.open(url, '_blank');
-								win.focus();
-							}
+								<div class="form-group">
+									<label for="textG2" class="col-sm-4 control-label">Group number (not stable across releases):
+									</label>
+									<div class="col-sm-6">
+										<input type="email" class="form-control" id='textG2' placeholder="">
+									</div>
+									<div class="col-sm-2">
+										<span class="input-group btn btn-default" >
+											<a id='searchG2' > 
+												<span  class="glyphicon glyphicon-search grey" >
+												</span>
+											</a>
+										</span>
+									</div>
+									<br>
+									<div class="col-xs-6 col-xs-offset-4">
+										<h4>
+											<small> Example: 
+												<a id='exNumber'>70525</a>
+											</small>
+										</h4>
+									</div>
+								</div>
 
-							$('#exMemb').click( function() {
+								<div class="form-group">
+									<label for="textG3" class="col-sm-4 control-label">Member gene/protein:
+									</label>
+									<div class="col-sm-6">
+										<input type="email" class="form-control" id='textG3' placeholder="">
+									</div>
+									<div class="col-sm-2">
+										<span class="input-group btn btn-default" >
+											<a id='searchG3' > 
+												<span  class="glyphicon glyphicon-search grey" >
+												</span>
+											</a>
+										</span>
+									</div>
+									<br>
+									<div class="col-xs-6 col-xs-offset-4">
+										<h4>
+											<small> Example: 
+												<a id='exMemb'>	HUMAN02353</a>
+											</small>
+										</h4>
+									</div>
+								</div>
+							</form>
 
-								$('#textG3').val('HUMAN02353');
-							});
-
-							$('#exNumber').click( function() {
-								$('#textG2').val('70525');
-
-							});
-							$('#exFinger').click( function() {
-								$('#textG1').val('PWINGNT');
-
-							});
-
-							$('#searchG3').click( function() {
-								var query= document.getElementById("textG3").value;
-								var arrayQuery = query.split(" ");
-								var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
-								var x=1;
-								for (i in arrayQuery)
-								{
-									newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
-									x++;
-								}
-								newUrl=newUrl+'f=DisplayGroup';
-								window.location = newUrl;
-							});
-
-							$('#searchG1').click( function() {
-								var query= document.getElementById("textG1").value;
-								var arrayQuery = query.split(" ");
-								var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
-								var x=1;
-								for (i in arrayQuery)
-								{
-									newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
-									x++;
-								}
-								newUrl=newUrl+'f=DisplayGroup';
-								window.location = newUrl;
-							});
-
-							$('#searchG2').click( function() {
-								var query= document.getElementById("textG2").value;
-								var arrayQuery = query.split(" ");
-								var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
-								var x=1;
-								for (i in arrayQuery)
-								{
-									newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
-									x++;
-								}
-								newUrl=newUrl+'f=DisplayGroup';
-								window.location = newUrl;
-							});
-
-							</script>
 						</div>
 					</div>
 				</div>
@@ -188,5 +109,70 @@
 		</div>
 	</div>
 </div>
+
+
+<script type="text/javascript">
+function OpenInNewTab(url) {
+	var win = window.open(url, '_blank');
+	win.focus();
+}
+
+$('#exMemb').click( function() {
+
+	$('#textG3').val('HUMAN02353');
+});
+
+$('#exNumber').click( function() {
+	$('#textG2').val('70525');
+
+});
+$('#exFinger').click( function() {
+	$('#textG1').val('PWINGNT');
+
+});
+
+$('#searchG3').click( function() {
+	var query= document.getElementById("textG3").value;
+	var arrayQuery = query.split(" ");
+	var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
+	var x=1;
+	for (i in arrayQuery)
+	{
+		newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
+		x++;
+	}
+	newUrl=newUrl+'f=DisplayGroup';
+	window.location = newUrl;
+});
+
+$('#searchG1').click( function() {
+	var query= document.getElementById("textG1").value;
+	var arrayQuery = query.split(" ");
+	var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
+	var x=1;
+	for (i in arrayQuery)
+	{
+		newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
+		x++;
+	}
+	newUrl=newUrl+'f=DisplayGroup';
+	window.location = newUrl;
+});
+
+$('#searchG2').click( function() {
+	var query= document.getElementById("textG2").value;
+	var arrayQuery = query.split(" ");
+	var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
+	var x=1;
+	for (i in arrayQuery)
+	{
+		newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
+		x++;
+	}
+	newUrl=newUrl+'f=DisplayGroup';
+	window.location = newUrl;
+});
+
+</script>
 
 {% endblock content %}

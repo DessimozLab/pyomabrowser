@@ -16,20 +16,11 @@
 					</div>
 					<div class="panel panel-default">
 						<div class="panel-body">
-
-
-
 							<p>The synteny view provides an overview of the genomic context of a particular entry and its orthologs in other species. This enables to see conservation or divergence of syntenic regions across species.
 							</p>
-
 							<p>As synteny is computed with respect to a reference entry, please first search for a protein sequence of interest and click on the “Synteny” tab.
 							</p>
-
-
-							
-
 							<br>
-
 							<form class="form-horizontal" role="form">
 								<div class="form-group">
 									<label for="textS" class="col-sm-4 control-label">Member gene/protein:
@@ -46,51 +37,47 @@
 										</span>
 									</div>
 									<br>
-									<div class="col-xs-6 col-xs-offset-4">
-										
+									<div class="col-xs-6 col-xs-offset-4">		
 										<h4>
 											<small> Example: 
 												<a id='exMemb'>	HUMAN02353</a>
 											</small>
-										</h4>
-										
+										</h4>										
 									</div>
 								</div>
-								<form><br>
-								</div>
-								<script type="text/javascript">
-								function OpenInNewTab(url) {
-									var win = window.open(url, '_blank');
-									win.focus();
-								}
-
-								$('#exMemb').click( function() {
-
-									$('#textS').val('HUMAN02353');
-								});
-
-								$('#searchS').click( function() {
-									var query= document.getElementById("textS").value;
-									var arrayQuery = query.split(" ");
-									var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
-									var x=1;
-									for (i in arrayQuery)
-									{
-										newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
-										x++;
-									}
-									newUrl=newUrl+'f=DisplayEntry';
-									window.location = newUrl;
-								});
-
-
-								</script>
-							</div>
+							</form><br>
 						</div>
+						<script type="text/javascript">
+						function OpenInNewTab(url) {
+							var win = window.open(url, '_blank');
+							win.focus();
+						}
+
+						$('#exMemb').click( function() {
+
+							$('#textS').val('HUMAN02353');
+						});
+
+						$('#searchS').click( function() {
+							var query= document.getElementById("textS").value;
+							var arrayQuery = query.split(" ");
+							var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
+							var x=1;
+							for (i in arrayQuery)
+							{
+								newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
+								x++;
+							}
+							newUrl=newUrl+'f=DisplayEntry';
+							window.location = newUrl;
+						});
+						</script>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+</div>
 
-	{% endblock content %}
+
+{% endblock content %}
