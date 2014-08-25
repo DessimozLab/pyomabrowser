@@ -30,6 +30,22 @@ urlpatterns = patterns('',
         url(r'^syntenySeqCV/$', views.syntenySeqCV, name='syntenySeqCV'),
         url(r'^HOGsSeqCV/$', views.HOGsSeqCV, name='HOGsSeqCV'),
         url(r'^OMAGSeqCV/$', views.OMAGSeqCV, name='OMAGSeqCV'),
+        url(r'^alignGroupCV/$', views.alignGroupCV, name='alignGroupCV'),
+        url(r'^closeGroupCV/$', views.closeGroupCV, name='closeGroupCV'),
+        url(r'^ontologyGroupCV/$', views.ontologyGroupCV, name='ontologyGroupCV'),
+        url(r'^proteinGroupCV/$', views.proteinGroupCV, name='proteinGroupCV'),
+        url(r'^seqCVprotein/$', views.seqCVprotein, name='seqCVprotein'),
+        url(r'^seqCValign/$', views.seqCValign, name='seqCValign'),
+        url(r'^seqCVclose/$', views.seqCVclose, name='seqCVclose'),
+        url(r'^seqCVontology/$', views.seqCVontology, name='seqCVontology'),
+        url(r'^HOGCV/$', views.HOGCV, name='HOGCV'),
+        url(r'^alignHOGCV/$', views.alignHOGCV, name='alignHOGCV'),
+        url(r'^ontologyHOGCV/$', views.ontologyHOGCV, name='ontologyHOGCV'),
+        url(r'^proteinHOGCV/$', views.proteinHOGCV, name='proteinHOGCV'),
+        url(r'^seqCVproteinHOG/$', views.seqCVproteinHOG, name='seqCVproteinHOG'),
+        url(r'^seqCValignHOG/$', views.seqCValignHOG, name='seqCValignHOG'),
+        url(r'^seqCVontologyHOG/$', views.seqCVontologyHOG, name='seqCVontologyHOG'),
+
 
 
 

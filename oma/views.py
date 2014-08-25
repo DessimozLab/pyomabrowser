@@ -39,8 +39,21 @@ def about(request):
     context = {}
     return render(request, 'about.html', context)
 
-def groupCV(request):
+def groupCV(request): #OMAGroupCV
     context = {}
+    # _groupNumber (22252)
+    # _description (calcium/calmodulin-dependent protein kinase IG)
+    # _numberOfMembers  [xEuka + xBact + xArch]
+    # _fingerprint (PWINGNT)
+    #
+    #
+    #
+    #
+    #
+    #
+    #
+    #
+    #
     return render(request, 'groupCV.html', context)
 
 def landHOG(request):
@@ -108,6 +121,10 @@ def dataset(request):
     context = {}
     return render(request, 'dataset.html', context)
 
+def seqCVprotein(request):
+    context = {}
+    return render(request, 'seqCVprotein.html', context)
+
 
 def landOMA(request):
     context = {}
@@ -172,6 +189,69 @@ def HOGsSeqCV(request):
 def OMAGSeqCV(request):
     context = {}
     return render(request, 'OMAGSeqCV.html', context)
+
+def alignGroupCV(request):
+    context = {}
+    # list of sequences with _speciesId & _sequence
+    return render(request, 'alignGroupCV.html', context)
+
+def closeGroupCV(request):
+    context = {}
+    return render(request, 'closeGroupCV.html', context)
+
+def seqCValign(request):
+    context = {}
+    return render(request, 'seqCValign.html', context)
+
+def seqCVclose(request):
+    context = {}
+    return render(request, 'seqCVclose.html', context)
+
+
+def ontologyHOGCV(request):
+    context = {}
+    return render(request, 'ontologyHOGCV.html', context)
+
+def alignHOGCV(request):
+    context = {}
+    return render(request, 'alignHOGCV.html', context)
+
+def proteinHOGCV(request):
+    context = {}
+    return render(request, 'proteinHOGCV.html', context)   
+
+def seqCVontology(request):
+    context = {}
+    return render(request, 'seqCVontology.html', context)
+
+def HOGCV(request):
+    context = {}
+    return render(request, 'HOGCV.html', context)
+
+def seqCVproteinHOG(request):
+    context = {}
+    return render(request, 'seqCVproteinHOG.html', context)
+
+def seqCValignHOG(request):
+    context = {}
+    return render(request, 'seqCValignHOG.html', context)
+
+def seqCVontologyHOG(request):
+    context = {}
+    return render(request, 'seqCVontologyHOG.html', context)
+
+
+
+def ontologyGroupCV(request):
+    context = {}
+    # list of rows with _speciesId & _dataOfTheSquare(orange,grey,invisible, IEA or IPI, etc) & annotation
+
+    return render(request, 'ontologyGroupCV.html', context)
+
+def proteinGroupCV(request):
+    context = {}
+    # list of orthologs with TAXON{E/A/B + _speciesName} & _speciesId & _crossReference & _annotation
+    return render(request, 'proteinGroupCV.html', context)
 
 
 
