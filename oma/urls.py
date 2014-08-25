@@ -24,6 +24,12 @@ urlpatterns = patterns('',
         url(r'^dataset/$', views.dataset, name='dataset'),
         url(r'^landOMA/$', views.landOMA, name='landOMA'),
         url(r'^genomeCV/$', views.genomeCV, name='genomeCV'),
+        url(r'^seqCV/$', views.seqCV, name='seqCV'),
+        url(r'^informationSeqCV/$', views.informationSeqCV, name='informationSeqCV'),
+        url(r'^orthologsSeqCV/$', views.orthologsSeqCV, name='orthologsSeqCV'),
+        url(r'^syntenySeqCV/$', views.syntenySeqCV, name='syntenySeqCV'),
+        url(r'^HOGsSeqCV/$', views.HOGsSeqCV, name='HOGsSeqCV'),
+        url(r'^OMAGSeqCV/$', views.OMAGSeqCV, name='OMAGSeqCV'),
 
 
 

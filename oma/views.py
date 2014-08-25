@@ -117,5 +117,61 @@ def genomeCV(request):
     context = {}
     return render(request, 'genomeCV.html', context)
 
+def seqCV(request):
+    context = {}
+    # Entry number of the protein
+    # Database id
+    # Specie name + E/A/B
+    #   <span class="label label-danger "><abbr class='abbrNoUnder'title="Eukariota">E</abbr></span> 
+    #   <span class="label label-success "><abbr class='abbrNoUnder'title="Archae">A</abbr></span> 
+    #   <span class="label label-primary "><abbr class='abbrNoUnder'title="Bacteria">B</abbr></span>
+    # Number Of orthologs
+    return render(request, 'seqCV.html', context)
+
+def informationSeqCV(request):
+    context = {}
+    # _description (calcium/calmodulin-dependent protein kinase IG [Source:HGNC Symbol;Acc:14585])
+    # _specieId (HUMAN)
+    # _specieName (Homo Sapiens)
+    # _locus (Chromosome 1: join(209...)
+    # _proteinId (Q96NX5)
+    # _uniprotId1 (KCC1G_HUMAN)
+    # _uniprotId2 (Acc.: Q96NX5)
+    # _EnsemblId1 (ENSG00000008118)
+    # _EnsemblId2 (ENSP00000009105)
+    # _EnsemblId3 (ENST00000009105)
+    # _RefseqId1 (NP_065172)
+    # _RefseqId2 (NP_065172.1)
+    # _RefseqId3 (GI: 14196445)
+    # _entrez (57172)
+    # _HGNCId (CAMK1G)
+    # _HGNCInfo (calcium/calmodulin-dependent protein kinase IG)
+    # _NCBIID1 (AAH32787.1)
+    # _NCBIID2 (AAL28100.1)
+    # _GOTerm (nucleotide binding)
+    # _GOId (GO:0000166)
+    # _evidenceType (Publication)
+    # _evidenceRef (PMID:18782753)
+    # _Sequence
+
+    return render(request, 'informationSeqCV.html', context)
+
+def orthologsSeqCV(request):
+    context = {}
+    # list of orthologs with E/A/B + _speciesName + _speciesId
+    return render(request, 'orthologsSeqCV.html', context)
+
+def syntenySeqCV(request):
+    context = {}
+    return render(request, 'syntenySeqCV.html', context)
+
+def HOGsSeqCV(request):
+    context = {}
+    return render(request, 'HOGsSeqCV.html', context)
+
+def OMAGSeqCV(request):
+    context = {}
+    return render(request, 'OMAGSeqCV.html', context)
+
 
 

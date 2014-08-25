@@ -3,7 +3,9 @@ href="{% static "image/favicon.ico" %}"
 <div class="glyphicon glyphicon-home icon-md"></div>
 
 
-a
+
+
+
 
 {% include "modal.html" %}
 
@@ -20,19 +22,19 @@ license x
 
 current x 
 archives x
-APISOAP x
+APISOAP xx
 
 APIDAS x
-type
-uses x
+type x
+uses xx
 
-genomePW x
-FAQ x
+genomePW xx
+FAQ xx
 nutshell
 
 Home x
 dataset dynamic ?
-landOMA x
+landOMA xx
 
 About x 
 

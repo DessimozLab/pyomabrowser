@@ -1,0 +1,126 @@
+{% extends  "seqCV.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+
+{% block activeTabOrthologs %} active {% endblock activeTabOrthologs %}
+{% block contentTab %} 
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="myModalLabel">The OMA Browser reports for every entry different types of orthology</h3>
+			</div>
+			<div class="modal-body">
+				{% include "modal.html" %}
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="tab-pane" id="Orthologs">
+	<br> 
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Pairwise orthologs 
+			<a href="#" class="small" role="button" data-toggle="modal" data-target=".bs-example-modal-lg">Explanations</a>
+			<small>
+				<a  class='pull-right'>
+					<span class="glyphicon glyphicon-download ">
+					</span> Download (fasta)
+				</a>
+			</small>
+		</div>
+		<div class="panel-body">
+			<dl class="dl-horizontal test">
+				<dt >1:1 Ortholog <a href="#" class="badge" role="button" data-toggle="modal" data-target=".bs-example-modal-lg">?</a> 
+				</dt>
+				<dd>
+					<table class="table table-hover ">
+						<tbody>
+							<tr>
+								<td class="col-md-6"><span class="label label-danger ">_</span> _speciesName</td>
+								<td class="col-md-6"><a>_speciesId </a> </td>
+							</tr>
+							<tr>
+								<td><span class="label label-danger ">_</span> _speciesName</td>
+								<td><a>_speciesId  </a> <img alt="pmp logo" src="{% static "image/pmp.png" %}" ></img></td>
+							</tr>
+							<tr>
+								<td><span class="label label-danger ">_</span> _speciesName</td>
+								<td><a>_speciesId  </a></td>
+							</tr>
+						</tbody>
+					</table>
+				</dd>
+				<dt>1:many Orthologs <a href="#" class="badge" role="button" data-toggle="modal" data-target=".bs-example-modal-lg">?</a> 
+				</dt>
+				<dd>
+					<table class="table table-hover ">
+						<tbody>
+							<tr>
+								<td class="col-md-6"><span class="label label-danger ">_</span> _speciesName</td>
+								<td class="col-md-6"><a>_speciesId </a> </td>
+							</tr>
+							<tr>
+								<td><span class="label label-danger ">_</span> _speciesName</td>
+								<td><a>_speciesId  </a> <img alt="pmp logo" src="{% static "image/pmp.png" %}" ></img></td>
+							</tr>
+							<tr>
+								<td><span class="label label-danger ">_</span> _speciesName</td>
+								<td><a>_speciesId  </a></td>
+							</tr>
+						</tbody>
+					</table>
+				</dd>
+				<dt> many:many Orthologs <a href="#" class="badge" role="button" data-toggle="modal" data-target=".bs-example-modal-lg">?</a> 
+				</dt>
+				<dd>
+					<table class="table table-hover ">
+						<tbody>
+							<tr>
+								<td class="col-md-6"><span class="label label-danger ">_</span> _speciesName</td>
+								<td class="col-md-6"><a>_speciesId </a> </td>
+							</tr>
+							<tr>
+								<td><span class="label label-danger ">_</span> _speciesName</td>
+								<td><a>_speciesId  </a> <img alt="pmp logo" src="{% static "image/pmp.png" %}" ></img></td>
+							</tr>
+							<tr>
+								<td><span class="label label-danger ">_</span> _speciesName</td>
+								<td><a>_speciesId  </a></td>
+							</tr>
+						</tbody>
+					</table>
+				</dd>
+				<dt> many:1 Orthologs <a href="#" class="badge" role="button" data-toggle="modal" data-target=".bs-example-modal-lg">?</a> 
+				</dt>
+				<dd>
+					<table class="table table-hover ">
+						<tbody>
+							<tr>
+								<td class="col-md-6"><span class="label label-danger ">_</span> _speciesName</td>
+								<td class="col-md-6"><a>_speciesId </a> </td>
+							</tr>
+							<tr>
+								<td><span class="label label-danger ">_</span> _speciesName</td>
+								<td><a>_speciesId  </a> <img alt="pmp logo" src="{% static "image/pmp.png" %}" ></img></td>
+							</tr>
+							<tr>
+								<td><span class="label label-danger ">_</span> _speciesName</td>
+								<td><a>_speciesId  </a></td>
+							</tr>
+						</tbody>
+					</table>
+				</dd>
+			</dl>
+		</div>
+	</div>
+</div>
+
+
+
+{% endblock contentTab %}
