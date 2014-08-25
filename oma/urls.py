@@ -23,6 +23,7 @@ urlpatterns = patterns('',
         url(r'^nutshell/$', views.nutshell, name='nutshell'),
         url(r'^dataset/$', views.dataset, name='dataset'),
         url(r'^landOMA/$', views.landOMA, name='landOMA'),
+        url(r'^genomeCV/$', views.genomeCV, name='genomeCV'),
 
 
 

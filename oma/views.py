@@ -113,5 +113,9 @@ def landOMA(request):
     context = {}
     return render(request, 'landOMA.html', context)
 
+def genomeCV(request):
+    context = {}
+    return render(request, 'genomeCV.html', context)
+
 
 
