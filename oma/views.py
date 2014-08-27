@@ -224,6 +224,40 @@ def seqCVontology(request):
     context = {}
     return render(request, 'seqCVontology.html', context)
 
+def ArchivesJul2013(request):
+    context = {}
+    return render(request, 'ArchivesJul2013.html', context)
+
+def ArchivesDec2012(request):
+    context = {}
+    return render(request, 'ArchivesDec2012.html', context)
+
+def ArchivesMar2012(request):
+    context = {}
+    return render(request, 'ArchivesMar2012.html', context)
+
+def ArchivesMay2011(request):
+    context = {}
+    return render(request, 'ArchivesMay2011.html', context)
+
+def ArchivesNov2010(request):
+    context = {}
+    return render(request, 'ArchivesNov2010.html', context)
+
+def ArchivesMay2010(request):
+    context = {}
+    return render(request, 'ArchivesMay2010.html', context)
+
+def ArchivesOct2009(request):
+    context = {}
+    return render(request, 'ArchivesOct2009.html', context)
+
+def ArchivesApr2009(request):
+    context = {}
+    return render(request, 'ArchivesApr2009.html', context)
+
+
+
 def HOGCV(request):
     context = {}
     return render(request, 'HOGCV.html', context)

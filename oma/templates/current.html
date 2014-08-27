@@ -2,8 +2,7 @@
 {% load staticfiles %}
 {% load bootstrap3 %}
 
-
-{% block title %}OMA: current{% endblock %}
+{% block title %}{% block titleTab %}OMA: current{% endblock titleTab %}{% endblock %}
 
 {% block content %}
 
@@ -15,12 +14,18 @@
 			<div class="jumbotron">
 				<div class="container">
 
-					<h1 class="text-center">Current release<br></h1>
+					<h1 class="text-center">{% block titleDownload %}Current release{% endblock titleDownload %}<br></h1>
 					<div class="well well-sm entete"></div>
 					<br>
 					<p>The entire OMA database is available for download in several formats. It is also possible to download each group separately. This option is available in the group view. Please read our terms and conditions before integrating OMA data into your own research or database.</p>
 
-					<br><br>
+					<br>
+					<br>
+
+					{% block yearPicker %}  {% endblock yearPicker %} 
+
+					{% block Orthology %}
+
 					<div class="panel panel-default ">
 						<div class="panel-heading">
 							<h4>Orthology Relationships
@@ -36,13 +41,13 @@
 										<td class="col-md-6" >OMA groups:
 										</td>
 										<td class="col-md-6">
-											<a>
+											<a href= {% block OMAGTF %}'http://omabrowser.org/All/oma-groups.txt.gz' {% endblock OMAGTF %} >
 												<span class="glyphicon glyphicon-download">
 												</span>
 												Text format
 											</a> 
 											<br>
-											<a>
+											<a href={% block OMAGOF %}'http://omabrowser.org/All/oma-groups.orthoXML.xml.gz' {% endblock OMAGOF %}>
 												<span class="glyphicon glyphicon-download">
 												</span>
 												OrthoXML format
@@ -53,12 +58,12 @@
 										<td class="col-md-6">Pairwise orthologs:
 										</td>
 										<td class="col-md-6">
-											<a>
+											<a href={% block POTF %}'http://omabrowser.org/All/oma-pairs.txt.gz'{% endblock POTF %}>
 												<span class="glyphicon glyphicon-download">
 												</span>  
 												Text format
 											</a> <br>
-											<a>
+											<a href={% block POOF %}'http://omabrowser.org/All/oma-pairs.orthoXML.xml.gz'{% endblock POOF %}>
 												<span class="glyphicon glyphicon-download">
 												</span>
 												OrthoXML format
@@ -69,13 +74,15 @@
 										<td class="col-md-6">Pairs between two species:
 										</td>
 										<td class="col-md-6">
-											<a>Genome Pair View <img alt="ext logo" src="image/ext.png" ></img></a>
+											<a href="{% url 'genomePW'  %}">Genome Pair View <img alt="ext logo" src="{% static "image/ext.png" %}" ></img></a>
 										</td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
-					</div>   
+					</div>
+					{% endblock Orthology %}   
+					{% block Sequences %} 
 					<div class="panel panel-default ">
 						<div class="panel-heading">
 							<h4>Sequences
@@ -91,13 +98,13 @@
 										<td class="col-md-6">Protein sequences:
 										</td>
 										<td class="col-md-6">
-											<a>
+											<a href= {% block PSFF %}'http://omabrowser.org/All/oma-seqs.fa.gz'{% endblock PSFF %}>
 												<span class="glyphicon glyphicon-download">
 												</span>  
-												Text format
+												Fasta format
 											</a> 
 											<br>
-											<a>
+											<a href= {% block PSSF %}'http://omabrowser.org/All/oma-seqs.seqxml.tgz' {% endblock PSSF %}>
 												<span class="glyphicon glyphicon-download">
 												</span>
 												SeqXML format
@@ -111,7 +118,7 @@
 										<td class="col-md-6">cDNA Eukaryotes:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
+											<a href={% block DEFF %}'http://omabrowser.org/All/eukaryotes.cdna.fa.gz' {% endblock DEFF %}><span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
 										</td>
 
 									</tr>
@@ -121,7 +128,7 @@
 										<td class="col-md-6">cDNA Prokaryotes:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
+											<a href={% block DPFF %}'http://omabrowser.org/All/prokaryotes.cdna.fa.gz' {% endblock DPFF %}> <span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
 										</td>
 
 									</tr>
@@ -130,7 +137,7 @@
 										<td class="col-md-6">Protein Annotations:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
+											<a href={% block PATF %}'http://omabrowser.org/All/oma-protein-annotations.txt.gz' {% endblock PATF %}><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
 										</td>
 
 									</tr>
@@ -138,7 +145,9 @@
 							</table>
 
 						</div>
-					</div>   
+					</div> 
+					{% endblock Sequences %}   
+					{% block Mapping %}   
 
 					<div class="panel panel-default ">
 						<div class="panel-heading">
@@ -155,55 +164,58 @@
 										<td class="col-md-6">Mapping to UniProt:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+											<a href='http://omabrowser.org/All/oma-uniprot.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6">Mapping to Ensembl:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+											<a href='http://omabrowser.org/All/oma-ensembl.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6" >Mapping to NCBI:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
+											<a href='http://omabrowser.org/All/oma-ncbi.txt.gz'><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6">Mapping to Wormbase:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+											<a href='http://omabrowser.org/All/oma-wormbase.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6">Mapping to JGI:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+											<a href='http://omabrowser.org/All/oma-jgi.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+										</td>
+									</tr>
+									<tr>	
+										<td class="col-md-6">Mapping to GO:
+										</td>
+										<td class="col-md-6">
+											<a href='http://omabrowser.org/All/oma-go.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6">Plant mapping: (ARATH and ORYSA) 
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+											<a href='http://omabrowser.org/All/oma-plants.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
 										</td>
 									</tr>
-									<tr>	
-										<td class="col-md-6">cDNA Eukaryotes:
-										</td>
-										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
-										</td>
-									</tr>
+									
 								</tbody>
 							</table>
 						</div>
 					</div>   
+					{% endblock Mapping %}   
+					{% block Other %}
 					<div class="panel panel-default ">
 						<div class="panel-heading">
 							<h4>Other files
@@ -216,14 +228,14 @@
 										<td class="col-md-6">OMA Groups/Sequences in COGs format:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> Cog format</a><br>
+											<a href={% block OGCF %}'http://omabrowser.org/All/All.cog.tar.gz'{% endblock OGCF %}><span class="glyphicon glyphicon-download"></span> Cog format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6">Species information: (Taxon IDs, scientific names, genome sources)
 										</td>
 										<td class="col-md-6">
-											<a>
+											<a href={% block SITF %}'http://omabrowser.org/All/oma-species.txt'{% endblock SITF %}>
 												<span class="glyphicon glyphicon-download">
 												</span> 	
 												Text format
@@ -234,20 +246,22 @@
 										<td class="col-md-6">Group descriptions:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+											<a href={% block GDTF %}'http://omabrowser.org/All/group-descriptions.txt.gz'{% endblock GDTF %}><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6">Close OMA Groups:
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+											<a href={% block CGTG %}'http://omabrowser.org/All/oma-close-groups.txt.gz'{% endblock CGTG %}> <span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
 										</td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
-					</div>  
+					</div> 
+					{% endblock Other %}
+					{% block History %} 
 					<div class="panel panel-default ">
 						<div class="panel-heading">
 							<h4>OMA ID History
@@ -263,34 +277,35 @@
 										<td class="col-md-6">From Jul 2013 release
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> Cog format</a><br>
+											<a href='http://omabrowser.org/All/IDHistory-Jul2013-to-Mar2014.txt.gz'><span class="glyphicon glyphicon-download"></span> Cog format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6">From Dec 2012 release
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+											<a href='http://omabrowser.org/All/IDHistory-Dec2012-to-Mar2014.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6">From Mar 2012 release
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+											<a href='http://omabrowser.org/All/IDHistory-Mar2012-to-Mar2014.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6">From May 2011 release
 										</td>
 										<td class="col-md-6">
-											<a><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
+											<a href='http://omabrowser.org/All/IDHistory-May2011-to-Mar2014.txt.gz'><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
 										</td>
 									</tr>
 								</tbody>
 							</table>            
 						</div>
 					</div>
+					{% endblock History %}
 				</div>
 			</div>
 		</div>	

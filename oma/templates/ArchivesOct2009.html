@@ -1,0 +1,240 @@
+{% extends  "current.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block titleTab %}OMA: Archives Oct 2009{% endblock %}
+
+
+
+{% block titleDownload %}Archives{% endblock %}
+
+
+
+{% block yearPicker %}
+<strong>OMA Browser Archive</strong>: the download files form the previous releases of OMA are still available:
+</p>
+<div class="text-center">
+	<ol class="breadcrumb ">
+		<li><a href="{% url 'ArchivesJul2013'  %}">Jul 2013</a></li>
+		<li><a href="{% url 'ArchivesDec2012'  %}">Dec 2012</a></li>
+		<li><a href="{% url 'ArchivesMar2012'  %}">Mar 2012</a></li>
+		<li><a href="{% url 'ArchivesMay2011'  %}">May 2011</a></li>
+		<li><a href="{% url 'ArchivesNov2010'  %}">Nov 2010</a></li>
+		<li><a href="{% url 'ArchivesMay2010'  %}">May 2010</a></li>
+		<li>Oct 2009</li>
+		<li><a href="{% url 'ArchivesApr2009'  %}">Apr 2009</a></li>
+	</ol>
+</div>
+{% endblock  %}
+
+
+{% block Orthology %}
+<div class="panel panel-default ">
+	<div class="panel-heading">
+		<h4>Orthology Relationships
+		</h4>
+	</div>
+	<div class="panel-body">
+		<p>
+			The orthology relationships are available in two types: groups or pairs of orthologs. The information is given in terms of OMA identifiers (of the form HUMAN04376).
+		</p>
+		<table class="table table-hover ">
+			<tbody>
+				<tr>
+					<td class="col-md-6" >OMA groups:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-groups.txt.gz' >
+							<span class="glyphicon glyphicon-download">
+							</span>
+							Text format
+						</a> 											
+					</td>
+				</tr>
+				<tr>	
+					<td class="col-md-6">Pairwise orthologs:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-pairs.txt.gz'>
+							<span class="glyphicon glyphicon-download">
+							</span>  
+							Text format
+						</a>
+					</td>
+				</tr>
+				<tr>	
+					<td class="col-md-6">Pairs between two species:
+					</td>
+					<td class="col-md-6">
+						<a href="{% url 'genomePW'  %}">Genome Pair View <img alt="ext logo" src="{% static "image/ext.png" %}" ></img></a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock  %}  
+
+{% block Sequences %}
+<div class="panel panel-default ">
+	<div class="panel-heading">
+		<h4>Sequences
+		</h4>
+	</div>
+	<div class="panel-body">
+		<p>
+			All sequences with the corresponding OMA identifiers can be downloaded in fasta files. The proteins are all in one file, while the coding DNA is split into two files, one for the Eukaryotes and one for the Prokaryotes.
+		</p>
+		<table class="table table-hover ">
+			<tbody>
+				<tr>
+					<td class="col-md-6">Protein sequences:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-seqs.fa.gz'>
+							<span class="glyphicon glyphicon-download">
+							</span>  
+							Fasta format
+						</a>  
+					</td>
+				</tr>
+
+
+				<tr>	
+
+					<td class="col-md-6">cDNA Eukaryotes:
+					</td>
+					<td class="col-md-6">
+						
+						<a href='http://omabrowser.org/All.Oct2009/eukaryotes.cdna.fa.gz'><span class="glyphicon glyphicon-download"></span> Fasta format</a>
+					</td>
+
+				</tr>
+
+				<tr>	
+
+					<td class="col-md-6">cDNA Prokaryotes:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/prokaryotes.cdna.fa.gz'> <span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
+					</td>
+				</tr>
+
+			</tbody>
+		</table>
+
+	</div>
+</div> 
+{% endblock  %}  
+
+{% block Mapping %}  
+
+<div class="panel panel-default ">
+	<div class="panel-heading">
+		<h4>Identifier Mapping
+		</h4>
+	</div>
+	<div class="panel-body">
+		<p>
+			Mappings of the OMA identifier to various other databases are available:
+		</p>
+		<table class="table table-hover ">
+			<tbody>
+				<tr>	
+					<td class="col-md-6">Mapping to UniProt:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-uniprot.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+					</td>
+				</tr>
+				<tr>	
+					<td class="col-md-6">Mapping to Ensembl:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-ensembl.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+					</td>
+				</tr>
+				<tr>	
+					<td class="col-md-6" >Mapping to NCBI:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-ncbi.txt.gz'><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
+					</td>
+				</tr>
+				<tr>	
+					<td class="col-md-6">Mapping to Wormbase:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-wormbase.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+					</td>
+				</tr>
+				<tr>	
+					<td class="col-md-6">Mapping to JGI:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-jgi.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+					</td>
+				</tr>
+				<tr>	
+					<td class="col-md-6">Mapping to GO:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-go.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+					</td>
+				</tr>
+				<tr>	
+					<td class="col-md-6">Plant mapping: (ARATH and ORYSA) 
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-plants.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+					</td>
+				</tr>
+				
+			</tbody>
+		</table>
+	</div>
+</div>  
+
+{% endblock  %}   
+{% block Other %}
+<div class="panel panel-default ">
+	<div class="panel-heading">
+		<h4>Other files
+		</h4>
+	</div>
+	<div class="panel-body">
+		<table class="table table-hover ">
+			<tbody>
+				<tr>	
+					<td class="col-md-6">OMA Groups/Sequences in COGs format:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/All.cog.tar.gz'><span class="glyphicon glyphicon-download"></span> Cog format</a><br>
+					</td>
+				</tr>
+				<tr>	
+					<td class="col-md-6">Species list: (Taxon IDs and scientific names)
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/oma-species.txt'>
+							<span class="glyphicon glyphicon-download">
+							</span> 	
+							Text format
+						</a><br>
+					</td>
+				</tr>
+				<tr>	
+					<td class="col-md-6">Group descriptions:
+					</td>
+					<td class="col-md-6">
+						<a href='http://omabrowser.org/All.Oct2009/group-descriptions.txt.gz'><span class="glyphicon glyphicon-download"></span> 	Text format</a><br>
+					</td>
+				</tr>
+
+			</tbody>
+		</table>
+	</div>
+</div> 
+{% endblock  %}
+{% block History %} 
+{% endblock  %}
