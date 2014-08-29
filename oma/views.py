@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
+from collections import OrderedDict
 
 from . import utils
 
@@ -16,6 +17,206 @@ def pairs(request, entry_id, idtype='OMA'):
     context = {'query': query, 'vps':vps}
     
     return render(request, 'vpairs.html', context)
+
+
+def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
+    """loads data to visualize the synteny around a query 
+    gene and it's orthologs.
+    the parameter 'mod' is used to keep the color between
+    calls on different entries compatible, i.e. they selected
+    gene should keep it's color.
+    the window paramter is used to select the size of the 
+    neighborhood."""
+    entry_nr = utils.id_resolver.resolve(entry_id)
+    genome=utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
+    try:
+        lin=utils.tax.get_parent_taxa(genome['NCBITaxonId'])
+    except Exception:
+        lin = []
+
+    taxa=[]
+    for i in lin:
+        taxa.append(i[2])
+    if len(taxa)>2:
+        sciname = taxa[0]
+        bae = taxa[-1][0]
+    else:
+        sciname = "unknown"
+        bae = "x"
+
+    windows = int(windows)
+    ngs_entry_nr = utils.db.neighbour_genes(entry_nr, windows)
+    positions = list(range(-windows, windows+1)) #list of intergers for gene positions
+
+    gene_left = ngs_entry_nr[-1]
+
+    blank_l=windows-gene_left
+
+    blank_r1=windows+len(ngs_entry_nr[0])-gene_left
+    blank_r2=windows+windows+1
+
+    geneinfos = []
+    md_geneinfos = {} #gene informations for first row, entry gene species
+    md_geneinfos['genes']={}
+    query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
+
+    species = query[0:5] #Species name of the entr gene
+
+
+    md_geneinfos['species']=species
+    for i in range(blank_l):
+        md_geneinfos['genes'][i]={"type":"blank"}
+    for i in range(blank_r1,blank_r2):
+        md_geneinfos['genes'][i]={"type":"blank"}
+
+
+    for index, info in enumerate(ngs_entry_nr[0][0:]):
+        geneinfo = {
+            "entryid":info[0],
+            "genename":utils.id_mapper[idtype].map_entry_nr(info[0]),
+            "dir":info[-2],
+            "type":(index-gene_left+int(mod))%(windows+windows+1),
+            "geneindex":index}
+
+        geneinfo["species"] = geneinfo["genename"][0:5]
+        geneinfo["genenumber"]= geneinfo["genename"][5:]
+        geneinfo["orthologs"] = utils.db.get_vpairs(info[0])['EntryNr2']
+
+        if geneinfo["geneindex"]==gene_left:
+            entry_dir = geneinfo["dir"]
+            md_geneinfos['entry_dir']=entry_dir
+
+
+        geneinfos.append(geneinfo)
+        md_geneinfos['genes'][index+blank_l]=geneinfo
+        md_geneinfos['genes'] = OrderedDict(
+                sorted(md_geneinfos['genes'].items(), 
+                key=lambda t: t[0]))
+
+
+    vps_entry_nr = utils.db.get_vpairs(entry_nr)
+    orthologs = vps_entry_nr['EntryNr2']
+
+    o_md_geneinfos = {}
+
+    colors = {0:'#9E0142',1:'#FDAE61',2:'#E6F598',3:'#3288BD',4:'#D53E4F', 5:'#FEE08B',
+    6:'#66C2A5',7:'#5E4FA2',8:'#F46D43',9:'#FFFFBF',10:'#ABDDA4'}
+    stripes ={}
+
+    o_sorting = {}
+    error_specie=''
+    for ortholog in orthologs:
+        if utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5] in o_sorting:
+            o_sorting = o_sorting
+        else:
+            o_genome=utils.id_mapper['OMA'].genome_of_entry_nr(ortholog)
+            try:
+                o_lin=utils.tax.get_parent_taxa(o_genome['NCBITaxonId'])
+            except Exception:
+                o_lin=[]
+                error_specie = error_specie +o_genome[1]+", "
+            o_taxa=[]
+            for i in o_lin:
+                o_taxa.append(i[2])
+
+            match = len(set(taxa) & set(o_taxa))
+            o_sorting[utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5]] = match
+    o_sorting= OrderedDict(sorted(o_sorting.items(), key=lambda t: t[1], reverse=True))
+    o_sorting = o_sorting.keys()[0:100]
+    osd = {} #ortholog sorting dictionary
+    for row, each in enumerate(o_sorting):
+        osd[each]=row
+
+    for ortholog in orthologs:
+        o_species =utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5]
+        if o_species in o_sorting:
+            #get neighbouring genes for each ortholog
+            o_ngs_entry_nr = utils.db.neighbour_genes(int(ortholog), windows) 
+
+            row_number = osd[o_species]
+
+            o_blank_l=windows-o_ngs_entry_nr[-1]
+            o_blank_r1=windows+len(o_ngs_entry_nr[0])-o_ngs_entry_nr[-1]
+            o_blank_r2=windows+windows+1
+
+            o_md_geneinfos[ortholog]={'o_species':o_species}
+            o_md_geneinfos[ortholog]['row_number']=row_number
+            o_md_geneinfos[ortholog]['o_genes']={}
+
+            for i in range(o_blank_l):
+                o_md_geneinfos[ortholog]['o_genes'][i]={"o_type":"blank"}
+            for i in range(o_blank_r1,o_blank_r2):
+                o_md_geneinfos[ortholog]['o_genes'][i]={"o_type":"blank"}
+
+            o_allinfo = o_ngs_entry_nr[0]
+            o_separate = o_allinfo[0:] #each gene information in original form
+
+
+            for index, info in enumerate(o_separate):
+                syntenyorthologs = ["not found"]
+
+                o_geneinfo = {
+                "entryid":info[0],
+                "genename":utils.id_mapper[idtype].map_entry_nr(info[0]),
+                "dir":info[-2],}
+
+                o_geneinfo["species"] = o_geneinfo["genename"][0:5]
+                o_geneinfo["genenumber"]= o_geneinfo["genename"][5:]
+
+
+                if o_geneinfo["entryid"]==ortholog:
+                    o_md_geneinfos[ortholog]["row_dir"]=o_geneinfo["dir"]
+
+                for geneinfo in geneinfos:
+                    if o_geneinfo["entryid"] in geneinfo["orthologs"]:
+                        syntenyorthologs.append(str(geneinfo["type"])) #type for color determination
+                        if geneinfo["type"]==gene_left:
+                            row_score=o_geneinfo["dir"]
+
+
+
+                if len(syntenyorthologs)==1:
+                    o_geneinfo["o_type"] = "not found"
+                elif len(syntenyorthologs)==2:
+                    o_geneinfo["o_type"]=syntenyorthologs[1]
+                elif len(syntenyorthologs)>=3:
+                    stripe=''
+                    st_name = ''
+                    x=0
+                    for i in syntenyorthologs[1:]:
+                        st_name=st_name+(i+"-")
+                        if st_name in stripe:
+                            stripe=stripe
+                        else:
+                            stripe=stripe+(colors[int(i)]+' '+str(x)+'px,'+colors[int(i)]+' '+str(x+15)+'px,')
+                        x += 15
+
+                    stripes[st_name]=stripe[:-1]
+                    syntenyorthologs.append(st_name)
+
+
+                    o_geneinfo["o_type"]=syntenyorthologs[1:]
+
+
+                o_md_geneinfos[ortholog]['o_genes'][index+o_blank_l]=o_geneinfo
+
+            if o_md_geneinfos[ortholog]["row_dir"] == md_geneinfos['entry_dir']:
+                o_md_geneinfos[ortholog]['o_genes'] = OrderedDict(sorted(o_md_geneinfos[ortholog]['o_genes'].items(), key=lambda t: t[0]))
+            elif o_md_geneinfos[ortholog]["row_dir"] != md_geneinfos['entry_dir']:
+                o_md_geneinfos[ortholog]['o_genes'] = OrderedDict(sorted(o_md_geneinfos[ortholog]['o_genes'].items(), key=lambda t: t[0], reverse=True))
+
+    o_md_geneinfos= OrderedDict(
+            sorted(o_md_geneinfos.items(), 
+            key=lambda t: t[1]['row_number']))
+
+    context = {'query':query,'positions':positions, 'windows':windows,
+          'md':md_geneinfos, 'o_md':o_md_geneinfos, 'colors':colors, 'stripes':stripes, 'sciname':sciname, 'bae':bae,
+          'error_specie':error_specie
+        }
+
+    return render(request, 'synteny.html', context)
+
+
 
 def hogs(request, entry_id, level, idtype='OMA'):
     entry_nr = utils.id_resolver.resolve(entry_id)
