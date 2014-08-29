@@ -1,0 +1,49 @@
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}OMA: APIDAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<h1 class="text-center">API: DAS </h1>
+					<h2 class="text-center grey">Distributed Annotation System</h2>
+					<div class="well well-sm entete"></div><br>
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h3>Display OMA data in Ensembl client</h3>
+						</div>
+						<div class="panel-body">
+							<p>There are two possibilities to display OMA annotations within Ensembl:</p>
+							<h4>Manual</h4> 
+							<p>
+								Everybody can add the OMA DAS source in Ensembl via the "Manage Sources" option (<a class='comment-text' href='http://www.ensembl.org/info/data/external_data/index.html'>http://www.ensembl.org/info/data/external_data/index.html</a>). Just select the OMA DAS source from the list of registered DAS sources when you clicked on "add data sources". But one has to add the OMA DAS source for every single genome separately this way. Note that you have to be registered at Ensembl. Otherwise your settings might get lost.
+							</p>
+							<h4>Automatic</h4> 
+							<p>
+								Just click on the following link: activate This link includes OMA DAS source automatically for all Ensembl genomes. In principle it sends the same query as the "Manage sources" option finally does, but for all genomes. Note again that you should be registered and logged in at Ensembl, otherwise your settings might get lost.
+							</p>
+						</div>
+					</div> 
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h3>How to find the OMA DAS Server in other DAS clients ?
+							</h3>
+						</div>
+						<div class="panel-body">
+							<p>
+								There are several DAS clients available on the Internet. Some of them search within the DAS registration server. The OMA DAS server is registered under the name "OMA" (posid: 265 DS_406) and is running on "<a class='comment-text' href='http://das.omabrowser.org:8891/das/OMA/'>http://das.omabrowser.org:8891/das/OMA/</a>". <br>If you use a client which does not use the DAS registry, you can query for annotations by UniProt,Protein Sequence (e.g. EAP_BOVIN), SwissProt, AC (e.g. Q24488) or Ensembl,Gene_ID (e.g. ENSGALG00000003650) segment IDs. For a quick test you could make queries like "<a class='comment-text' href='http://das.omabrowser.org:8891/das/OMA/features?segment=EAP_BOVIN;segment=ENSBTAG00000033545' >http://das.omabrowser.org:8891/das/OMA/features?segment=EAP_BOVIN;segment=ENSBTAG00000033545</a>." with your Internet browser. 
+							</p>
+						</div>
+					</div>  
+				</div>
+			</div> 
+		</div>
+	</div>
+</div>
+
+{% endblock content %}

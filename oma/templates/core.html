@@ -1,0 +1,178 @@
+
+
+
+
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}OMA{% endblock %}</title>
+  <link rel="shortcut icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
+  <link rel="icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
+  <link type="text/css" rel="stylesheet" href="{% static "css/home.css" %}"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap -->
+  <link href= "{% static "css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
+  <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="Stylesheet"></link>
+  <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js" ></script>
+  <script src="http://code.jquery.com/jquery.js"></script>
+  <script src="{% static "js/bootstrap.min.js" %}"></script>
+  <script src="{% static "js/bootstrap-typeahead.js" %}"></script>
+  
+  
+</head>
+<body>
+  <nav class="navbar navbar-default " role="navigation">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-nav visible-lg">
+        <a href="http://www.isb-sib.ch">
+          <img alt="SIB logo" src="{% static "image/SIBlogo.png" %}"  class="siblogo">
+
+        </a>
+      </div>
+      <div class="navbar-nav hidden-sm hidden-xs verticalbar"></div>
+      <div class="navbar-header navbar-nav">
+        <button type="button" class="navbar-toggle " data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a href="{% url 'home'  %}">
+          <img alt="OMA logo" src="{% static "image/omalogo.png" %}" class="omalogo">
+
+          <div class="glyphicon glyphicon-home icon-md"></div>
+        </a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav ">
+          <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Explore<span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a class="" href="{% url 'dataset'  %}">Release information</a></li>
+              <li class="divider"></li>
+              {% block seqName %} {% endblock %}
+              <li><a class="" href="{% url 'landOMA'  %}">OMA groups</a></li>
+              <li><a class="" href="{% url 'landHOG'  %}">Hierarchical orthologous groups (HOGs)</a></li>
+              <li><a class="" href="{% url 'landAnnotation'  %}">Functional annotations</a></li>
+              <li><a class="" href="{% url 'landsynteny'  %}">Synteny</a></li>
+              <li class="divider"></li>
+              <li><a class="" href="{% url 'genomePW'  %}">Orthology between two genomes</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <!--       -->
+        <!-- search    -->
+
+
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <select id="selectNav" class="form-control btn-mini">
+              <option>Keyword</option>
+              <option class="">Protein Sequence</option>
+              <option class="">OMA Group</option>
+              <option class="">Entry</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <input id="textNav" class="form-control" type="text">
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button" id="searchNav"><span class="glyphicon glyphicon-search grey"></span></button>
+            </span>
+
+          </div>
+        </form>
+
+        <script type="text/javascript">
+
+        $('#searchNav').click( function() {
+          var query= document.getElementById("textNav").value;
+          var arrayQuery = query.split(" ");
+          var category= document.getElementById("selectNav").value;
+          var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
+          var x=1;
+          for (i in arrayQuery)
+          {
+            newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
+            x++;
+          }
+          newUrl=newUrl+'f=';
+          if (category=='Keyword'){
+            newUrl=newUrl+'SearchDb';
+          }
+          else if (category=='Protein Sequence'){
+            newUrl=newUrl+'SearchSeqDb';  
+          }
+          else if (category=='OMA Group'){
+            newUrl=newUrl+'DisplayGroup'; 
+          }
+          else if (category=='Entry'){
+            newUrl=newUrl+'DisplayEntry'; 
+          }
+
+          window.location = newUrl;
+        });
+        </script>
+
+        <!--       -->
+        <!-- right-button    -->
+
+        <ul class="nav navbar-nav navbar-right">
+
+          <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">About<span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a class="" href="{% url 'about'  %}">OMA</a></li>
+              <li><a class="" href="{% url 'team'  %}">Team</a></li>
+              <li><a class="" href="{% url 'funding'  %}">Funding</a></li>
+              <li><a class="" href="{% url 'license'  %}">License</a></li>
+              <li class="divider"></li>
+              <li><a class="" href="mailto:contact@omabrowser.org"><span class="glyphicon glyphicon-envelope"></span> Contact</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Download <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a class="" href="{% url 'current'  %}">Current release</a></li>
+              <li><a class="" href="{% url 'archives'  %}">Archives</a></li>
+              <li><a class="" href="http://omabrowser.org/standalone/">OMA standalone</a></li>
+              <li><a class="" href="http://omabrowser.org/cgi-bin/gateway.pl?f=AllAllExport">Export All/All</a></li>
+            </ul>
+          </li>
+          <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">API  <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a class="" href="{% url 'APISOAP'  %}">SOAP</a></li>
+              <li><a class="" href="{% url 'APIDAS'  %}">DAS</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Help  <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a class="" href="{% url 'about'  %}">OMA in a nutshell</a></li>
+              <li><a class="" href="{% url 'type'  %}">Types of orthologs</a></li>
+              <li><a class="" href="{% url 'uses'  %}">Typical uses</a></li>
+              <li><a class="" href="{% url 'FAQ'  %}">FAQ</a></li>
+            </ul>
+          </li>
+
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container-fluid -->
+  </nav>
+
+
+
+
+  <div id="content">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

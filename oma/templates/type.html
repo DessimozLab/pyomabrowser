@@ -1,0 +1,37 @@
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}OMA: type{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<h1 class="text-center">Types of orthologs <br></h1>
+					<div class="well well-sm entete">
+					</div>
+					<br>
+					<p>
+						The study of genetic material almost always starts with identifying, within or across species,homologous regions—regions of common ancestry. 
+						Two differents classes of homologous can be distinguish : <i>orthologs</i>, which are pairs of genes that started diverging via evolutionary speciation, and paralogs, which are pairs of genes that started diverging via gene duplication.
+					</p>
+					<div class="row">
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h4>The OMA Browser reports for every entry different types of orthology:  
+								</h4>
+							</div>
+							{% include "modal.html" %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock content %}

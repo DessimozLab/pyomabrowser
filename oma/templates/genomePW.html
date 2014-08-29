@@ -1,0 +1,92 @@
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}OMA: genomePW{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class=" col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<div class="page-header ">
+						<h1 class="text-center">Genome Pair View <br>
+							<small> Download orthologs between two species</small>
+						</h1>
+						<div class="well well-sm entete"></div>
+					</div>
+
+					<p>Use the following form to download the list of all predicted orthologs
+						between a pair of genomes of interest. Since orthologs are sometimes 1:many
+						or many:many relations, this download will return more orthologs than what
+						is covered by the OMA groups. The result is returned as a tab-separated
+						text file, each line corresponding to one orthologous relation. The columns
+						are the two IDs, the type of orthology (1:1, 1:n, m:1 or m:n) and (if available)
+						the OMA group containing both sequences.
+					</p>
+
+					<form class="form-horizontal" role="form">
+						<div class="form-group">
+							<label for="textG1" class="col-sm-2 control-label">Species 1:
+							</label>
+							<div class="col-sm-7">
+								<input  id="textG2" type="text"  class="form-control typehead" placeholder="" autocomplete="off" >
+							</div>
+							<br>
+						</div>
+						<div class="form-group">
+							<label for="textG2" class="col-sm-2 control-label">Species 2:
+							</label>
+							<div class="col-sm-7">
+								<input type="email" class="form-control typehead" id='textG2' placeholder="" autocomplete="off" data-provide="typeahead" data-source='["Dipodomys ordii", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes", "Oryctolagus cuniculus", "Microcebus murinus", "Nomascus leucogenys", "Pan troglodytes"]'>
+							</div>
+							<br>
+						</div>
+					</form>
+
+					<form class="form-horizontal" role="form">
+						<div class="form-group">
+							<label for="textG2" class="col-xs-2 col-sm-2 control-label">Preferred ID:
+							</label>
+							<div class=" col-xs-6 col-sm-2 ">
+								<select id='selectBrowser' class="form-control " for="inputSuccess3">
+									<option >OMA IDs</option>
+									<option >Swissprot IDs</option>
+									<option >SIB IDs</option>
+								</select>
+							</div>
+							<div class="col-xs-2  col-sm-2 col-sm-offset-3  ">
+								<button type="button" class="btn btn-success greenb ">Get pairs 
+								</button>
+							</div>
+						</div>
+					</form>
+					<br>
+					<br>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>      
+
+<script type="text/javascript">
+$.getJSON( "static/flatgenomes.json", function( data ) {
+var json = [data];
+});
+
+alert(json);
+
+
+$('#textG2').typeahead({source: json}); 
+
+</script>
+
+
+
+
+
+
+{% endblock content %}

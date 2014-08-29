@@ -1,0 +1,49 @@
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}OMA: HOG {% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class=" col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+
+
+					<h2>Hierarchical Group of <a href="{% url 'seqCV'  %}"> _groupNumber</a> at _taxon level </h2>
+					<h4 class=""> _description </h4>
+					<h4 class=""> <small>This group has _numberOfMembers members: _numberOf-E-Members [E]ukaryota </small> </h4>
+					<h4 class=""> <small>Fingerprint: _fingerprint</small> </h4>
+					<br>
+
+					<ul class="nav nav-pills" >
+						<li class=" {% block activeTabList %}  {% endblock activeTabList %}"><a href="{% url 'proteinHOGCV'  %}">Protein List</a></li>
+						<li class=" {% block activeTabAlignment %}  {% endblock activeTabAlignment %}"><a href="{% url 'alignHOGCV'  %}" >Alignment</a></li>
+						<li class=" {% block activeTabOntology %}  {% endblock activeTabOntology %}"><a href="{% url 'ontologyHOGCV'  %}" >Ontology</a></li>
+					</ul>
+
+					<div>
+
+						
+
+						{% block groupcontentTab %}
+
+						 {% endblock groupcontentTab %}
+
+					</div>
+				</div>
+			</div>
+		</div>	
+	</div>
+</div>
+
+
+
+
+
+{% endblock content %}
+
+

@@ -1,0 +1,36 @@
+{% extends  "OMAGSeqCV.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+
+{% block activeTabAlignment %} active {% endblock activeTabAlignment %}
+{% block groupcontentTab %} 
+
+<div class="tab-pane" id="Alignment">
+	<div class="panel panel-default">
+
+		<div class="panel-heading">
+			<h4>Mafft Multiple Sequence Alignment</h4>
+			<strong>Coloring scheme: </strong> none | <a>conservation</a> <br>
+			<strong> Download MSA:</strong> <span class="glyphicon glyphicon-download"></span> <a>fasta file</a> <br>
+			<strong> Explore MSA:</strong> <a>jalview applet </a> <br>
+		</div>
+
+		<div class="panel-body">
+			<dl class="dl-horizontal seqwidthscroll">
+				
+				<dt>_speciesId</dt>
+				<dd>NGIVHRDLK_PENLLYLTPEENSKIMITDFGLSKMEQNGIMSTACGTPGYVAPEVLAQKPYSKAVDCWSIGVITYILLCGYPPFYEETESKLFEKIKEGYYEFESPFWDDISE_SAKDFICHLLEKDPTERYTCEKA</dd>
+
+				<dt>_speciesId</dt>
+				<dd>NGIVHRDLK_PENLLYLTPEENSKIMITDFGLSKMEQNGIMSTACGTPGYVAPEVLAQKPYSKAVDCWSIGVITYILLCGYPPFYEETESKLFEKIKEGYYEFESPFWDDISE_SAKDFICHLLEKDPNERYTCEKA</dd>
+
+				<dt>_speciesId</dt>
+				<dd>NGIVHRDLK_PENLLYLTPDENSKIMITDFGLSKMEQSGVMSTACGTPGYVAPEVLAQKPYSKAVDCWSIGVITYILLCGYPPFYEETESKLFEKIKEGYYEFESPFWDDISE_SAKDFICHLLEKDPNERYTCEKA</dd>
+
+			</dl>
+		</div>
+	</div>
+</div>
+
+{% endblock groupcontentTab %}
