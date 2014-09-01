@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from collections import OrderedDict
+import logging
 
 from . import utils
 
-# Create your views here.
+logger = logging.getLogger(__name__)
 
+# Create your views here.
 def pairs(request, entry_id, idtype='OMA'):
     
     entry_nr = utils.id_resolver.resolve(entry_id)
@@ -32,17 +34,19 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     try:
         lin=utils.tax.get_parent_taxa(genome['NCBITaxonId'])
     except Exception:
+        logger.warning("cannot get NCBI Taxonomy for {} ({})".format(
+            genome['UniProtSpeciesCode'],
+            genome['NCBITaxonId']))
         lin = []
-
     taxa=[]
     for i in lin:
         taxa.append(i[2])
     if len(taxa)>2:
         sciname = taxa[0]
-        bae = taxa[-1][0]
+        kingdom = taxa[-1]
     else:
         sciname = "unknown"
-        bae = "x"
+        kingdom = "unknown"
 
     windows = int(windows)
     ngs_entry_nr = utils.db.neighbour_genes(entry_nr, windows)
@@ -104,7 +108,6 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     stripes ={}
 
     o_sorting = {}
-    error_specie=''
     for ortholog in orthologs:
         if utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5] in o_sorting:
             o_sorting = o_sorting
@@ -113,8 +116,10 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
             try:
                 o_lin=utils.tax.get_parent_taxa(o_genome['NCBITaxonId'])
             except Exception:
+                logger.warning("cannot get NCBI Taxonomy for {} ({})".format(
+                    genome['UniProtSpeciesCode'],
+                    genome['NCBITaxonId']))
                 o_lin=[]
-                error_specie = error_specie +o_genome[1]+", "
             o_taxa=[]
             for i in o_lin:
                 o_taxa.append(i[2])
@@ -170,9 +175,6 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
                 for geneinfo in geneinfos:
                     if o_geneinfo["entryid"] in geneinfo["orthologs"]:
                         syntenyorthologs.append(str(geneinfo["type"])) #type for color determination
-                        if geneinfo["type"]==gene_left:
-                            row_score=o_geneinfo["dir"]
-
 
 
                 if len(syntenyorthologs)==1:
@@ -210,27 +212,34 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
             key=lambda t: t[1]['row_number']))
 
     context = {'query':query,'positions':positions, 'windows':windows,
-          'md':md_geneinfos, 'o_md':o_md_geneinfos, 'colors':colors, 'stripes':stripes, 'sciname':sciname, 'bae':bae,
-          'error_specie':error_specie
+          'md':md_geneinfos, 'o_md':o_md_geneinfos, 'colors':colors, 
+          'stripes':stripes, 'sciname':sciname, 'kingdom':kingdom,
+          'nr_vps':len(orthologs), 'entry':{'omaid':query},
+          'tab':'synteny'
         }
 
     return render(request, 'synteny.html', context)
 
 
 
-def hogs(request, entry_id, level, idtype='OMA'):
+def hogs(request, entry_id, level=None, idtype='OMA'):
     entry_nr = utils.id_resolver.resolve(entry_id)
     query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
     try:
         hog_members = utils.db.hog_members(entry_nr, level)
-        print(hog_members)
         hog_member_ids = map(utils.id_mapper[idtype].map_entry_nr, hog_members['EntryNr'])
     except utils.Singleton:
         hog_member_ids = [query]
     except ValueError as e:
         raise Http404(e.message)
-    context = {'query': query, 'level': level, 'hog_members': hog_member_ids} 
+    nr_vps = utils.db.count_vpairs(entry_nr)
+    context = {'entry':{'omaid':query}, 'level': level, 
+            'hog_members': hog_member_ids,
+            'nr_vps':nr_vps} 
     return render(request, 'hogs.html', context)
+
+
+
 
 def home(request):
     context = {}
@@ -335,7 +344,7 @@ def genomeCV(request):
     context = {}
     return render(request, 'genomeCV.html', context)
 
-def seqCV(request):
+def seqCV(request, entry_id, tab='hogs'):
     context = {}
     # Entry number of the protein
     # Database id

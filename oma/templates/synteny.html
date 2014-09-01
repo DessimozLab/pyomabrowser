@@ -1,22 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <meta charset="utf-8">
-        <title>OMA : synteny viewer</title>
-        <meta name="generator" content="Bootply" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+{% extends "seqCV.html" %}
 
-        <!--[if lt IE 9]>
-          <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
-        <link rel="shortcut icon" href="/bootstrap/img/favicon.ico">
-        <link rel="apple-touch-icon" href="/bootstrap/img/apple-touch-icon.png">
-        <link rel="apple-touch-icon" sizes="72x72" href="/bootstrap/img/apple-touch-icon-72x72.png">
-        <link rel="apple-touch-icon" sizes="114x114" href="/bootstrap/img/apple-touch-icon-114x114.png">
+{% block title %}OMA: synteny viewer{% endblock %}
 
-        <!-- CSS code from Bootply.com editor -->
+{% block css_hook %}
         <style type="text/css">
             /* CSS used here will be applied after bootstrap.css *//* CSS used here will be applied after bootstrap.css */
 
@@ -74,33 +60,28 @@
             }
 
         </style>
-    </head>
+{% endblock css_hook %}
 
-    <!-- HTML code from Bootply.com editor -->
+{% block js_hook %}
+        <script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+        <script type='text/javascript' src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <script type='text/javascript'>
+        $(document).ready(function() {
+            $(function() {
+                {% for key, value in colors.iteritems %}
+                    $('.btn-{{key}}').hover(
+                        function(){ $('.btn-{{key}}').addClass('active');},
+                        function(){ $('.btn-{{key}}').removeClass('active');}
+                    );
+                {% endfor %}
+                $('.table-fixed-header').fixedHeader();
 
-    <body  >
+            });
+        });
+        </script>
+{% endblock js_hook %}
 
-<div class="jumbotron">
-      <div class="container">
-            <div class="page-header ">
-                <h1 class="text-center">OMA synteny viewer<br></h1>
-                <div class="well well-sm entete"></div>
-            </div>
-            <div class="panel panel-default ">
-                <div class="panel-heading"><h2 class="">Synteny of <span class="label label-default">{{ query }}</span></h2>
-                    <h4 class="">
-                    {% if bae == 'E' %}
-                    <span class ="label label-danger">E</span>
-                    {% elif bae == "B" %}
-                    <span class ="label label-primary">B</span>
-                    {% elif bae == "A" %}
-                    <span class ="label label-success">A</span>
-                    {% else %}
-                    <span class ="label label-default">{{ bae }}</span>
-                    {% endif %}
-                       {{ sciname }}<br/>Error specie:{{ error_specie }}</h4>
-                </div>
-                <div class="panel-body">
+{% block contentTab %}
             <table class="table table-condensed table-striped syntenytable">
 
                 <tbody>
@@ -174,67 +155,5 @@
                 </tbody>
               </table>
             </div>
-  </div></div></div>
-</div>
-            <div id="push"></div>
+{% endblock contentTab %}
 
-
-        <script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-
-
-        <script type='text/javascript' src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-
-
-
-
-
-
-
-        <!-- JavaScript jQuery code from Bootply.com editor  -->
-
-        <script type='text/javascript'>
-
-
-        $(document).ready(function() {
-            $(function() {
-{% for key, value in colors.iteritems %}
-                $('.btn-{{key}}').hover(
-                    function(){ $('.btn-{{key}}').addClass('active');},
-                    function(){ $('.btn-{{key}}').removeClass('active');}
-                );
-{% endfor %}
-                $('.table-fixed-header').fixedHeader();
-
-            });
-        });
-
-        </script>
-
-        <script>
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-          ga('create', 'UA-40413119-1', 'bootply.com');
-          ga('send', 'pageview');
-        </script>
-        <!-- Quantcast Tag -->
-        <script type="text/javascript">
-        var _qevents = _qevents || [];
-
-        (function() {
-        var elem = document.createElement('script');
-        elem.src = (document.location.protocol == "https:" ? "https://secure" : "http://edge") + ".quantserve.com/quant.js";
-        elem.async = true;
-        elem.type = "text/javascript";
-        var scpt = document.getElementsByTagName('script')[0];
-        scpt.parentNode.insertBefore(elem, scpt);
-        })();
-
-        _qevents.push({
-        qacct:"p-0cXb7ATGU9nz5"
-        });
-        </script>
-
-    </body>
-</html>

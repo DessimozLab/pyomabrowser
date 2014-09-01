@@ -65,10 +65,16 @@ class Database(object):
             raise ValueError('there are %d entries with entry_nr %d'%(len(entry),entry_nr))
         return entry[0]
 
-
-    def get_vpairs(self, entry_nr):
+    def _get_vptab(self, entry_nr):
         genome = id_mapper['OMA'].genome_of_entry_nr(entry_nr)['UniProtSpeciesCode']
-        vpTab = self.db.get_node('/VPairs/%s'%(genome))
+        return self.db.get_node('/VPairs/{}'.format(genome))
+    
+    def count_vpairs(self, entry_nr):
+        vpTab = self._get_vptab(entry_nr)
+        return len(vpTab.read_where('(EntryNr1==%d)'%(entry_nr)))
+    
+    def get_vpairs(self, entry_nr):
+        vpTab = self._get_vptab(entry_nr)
         dat = vpTab.read_where('(EntryNr1==%d)'%(entry_nr))
         e = vpTab.get_enum('RelType')
         res = numpy.lib.recfunctions.append_fields(

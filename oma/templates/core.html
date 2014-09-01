@@ -7,26 +7,26 @@
 
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>{% block title %}OMA{% endblock %}</title>
-  <link rel="shortcut icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
-  <link rel="icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
-  <link type="text/css" rel="stylesheet" href="{% static "css/home.css" %}"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Bootstrap -->
-  <link href= "{% static "css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
-  <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-  <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="Stylesheet"></link>
-  <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js" ></script>
-  <script src="http://code.jquery.com/jquery.js"></script>
-  <script src="{% static "js/bootstrap.min.js" %}"></script>
-  <script src="{% static "js/bootstrap-typeahead.js" %}"></script>
-  
-  
-</head>
-<body>
-  <nav class="navbar navbar-default " role="navigation">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}OMA{% endblock %}</title>
+    <link rel="shortcut icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
+    <link rel="icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
+    <link type="text/css" rel="stylesheet" href="{% static "css/home.css" %}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href= "{% static "css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="Stylesheet"></link>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js" ></script>
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="{% static "js/bootstrap.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-typeahead.js" %}"></script>
+    {% block css_hook %}{% endblock %}
+    {% block js_hook %}{% endblock %}
+  </head>
+  <body>
+    <nav class="navbar navbar-default " role="navigation">
     <div class="container-fluid">
       <!-- Brand and toggle get grouped for better mobile display -->
       <div class="navbar-nav visible-lg">
