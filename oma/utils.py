@@ -5,6 +5,8 @@ import numpy
 import numpy.lib.recfunctions
 import django.conf
 import re
+import json
+import os
 
 def search_indexed_col(table, colname, element, side='left'):
     """return the row index of a table for which holds:
@@ -124,6 +126,10 @@ class Database(object):
         if m is None:
             raise Singleton(entry)
         return int(m.group('fam'))
+
+    def hog_levels_of_fam(self, fam_nr):
+        return self.db.root.HogLevel.read_where(
+                '(Fam=={})'.format(fam_nr))['Level']
     
     def hog_members(self, entry_nr, level):
         """Returns member entries for a given taxonomic level."""
@@ -138,8 +144,12 @@ class Database(object):
         if hoglev is None:
             raise ValueError('Level "%s" undefined for query gene'%(level))
         hog_range = self._hog_lex_range(hoglev['ID'])
+        # get the proteins which have that HOG number
         memb = self.db.root.Protein.Entries.read_where(
                 '(b"%s" <= OmaHOG) & (OmaHOG < b"%s")'%hog_range)
+        # last, we need to filter the proteins to the tax range of interest
+        memb = filter(lambda x: level in tax.get_parent_taxa(
+            id_mapper['OMA'].genome_of_entry_nr(x['EntryNr'])['NCBITaxonId'])['Name'], memb)
         return memb
         
     def _hog_lex_range(self, hog):
@@ -253,13 +263,23 @@ class Taxonomy(object):
     def __init__(self, db_handle):
         self.tax_table = db_handle.root.Taxonomy.read()
         self.taxid_key = self.tax_table.argsort(order=('NCBITaxonId'))
+        try:
+            with open(os.environ['DARWIN_BROWSERDATA_PATH']+'/TaxLevels.drw') as f:
+                taxStr = f.read()
+            tax_json = json.loads(("["+taxStr[14:-3]+"]").replace("'",'"'))
+            self.all_hog_levels = frozenset([t.encode('utf-8') for t in tax_json])
+        except Exception:
+            forbidden_chars = re.compile(r'[^A-Za-z. -]')
+            self.all_hog_levels = frozenset([l for l in self.tax_table['Name'] 
+                if forbidden_chars.search(l) is None])
+
 
     def _table_idx_from_numeric(self, tid):
         i = self.tax_table['NCBITaxonId'].searchsorted(tid, 
                 sorter=self.taxid_key) 
         idx = self.taxid_key[i]
         if self.tax_table[idx]['NCBITaxonId'] != tid:
-            raise InvalidId("%d is an invalid/unknown taxonomy id"%(tid))
+            raise InvalidTaxonId("%d is an invalid/unknown taxonomy id"%(tid))
         return idx
 
     def _taxon_from_numeric(self,tid):
@@ -278,6 +298,8 @@ class Taxonomy(object):
         return self.tax_table.take(idx)
 
 
+class InvalidTaxonId(Exception):
+    pass
 
 class InvalidId(Exception):
     pass

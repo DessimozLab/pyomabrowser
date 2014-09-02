@@ -2,8 +2,10 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from collections import OrderedDict
 import logging
+import itertools
 
 from . import utils
+from . import misc
 
 logger = logging.getLogger(__name__)
 
@@ -213,8 +215,8 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
     context = {'query':query,'positions':positions, 'windows':windows,
           'md':md_geneinfos, 'o_md':o_md_geneinfos, 'colors':colors, 
-          'stripes':stripes, 'sciname':sciname, 'kingdom':kingdom,
-          'nr_vps':len(orthologs), 'entry':{'omaid':query},
+          'stripes':stripes, 'nr_vps':len(orthologs), 
+          'entry':{'omaid':query, 'sciname':sciname, 'kingdom':kingdom,},
           'tab':'synteny'
         }
 
@@ -225,20 +227,51 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 def hogs(request, entry_id, level=None, idtype='OMA'):
     entry_nr = utils.id_resolver.resolve(entry_id)
     query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
+
+    entry = utils.db.entry_by_entry_nr(entry_nr)
+    genome=utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
+    
+    hog_member_entries = []
+    hog = None
+    levels = []
     try:
-        hog_members = utils.db.hog_members(entry_nr, level)
-        hog_member_ids = map(utils.id_mapper[idtype].map_entry_nr, hog_members['EntryNr'])
+        fam = utils.db.hog_family(entry)
+        levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam))
+        lineage = utils.tax.get_parent_taxa(genome['NCBITaxonId'])
+        levels = [l for l in itertools.chain(lineage['Name'], ('LUCA',)) 
+                if l in utils.tax.all_hog_levels and l in levs_of_fam]
+        hog = {'id': entry['OmaHOG'], 'fam': fam, 
+                'downloadURL':misc.downloadURL_hog(fam)}
+        if not level is None:
+            hog_member_entries = utils.db.hog_members(entry_nr, level)
     except utils.Singleton:
-        hog_member_ids = [query]
+        pass
     except ValueError as e:
         raise Http404(e.message)
+    except utils.InvalidTaxonId:
+        logger.error("cannot get NCBI Taxonomy for {} ({})".format(
+            genome['UniProtSpeciesCode'],
+            genome['NCBITaxonId']))
+    
+    hog_members = []
+    for memb in hog_member_entries:
+        t = {}
+        t['omaid'] = utils.id_mapper['OMA'].map_entry_nr(memb['EntryNr'])
+        g=utils.id_mapper['OMA'].genome_of_entry_nr(memb['EntryNr'])
+        t['sciname'] = g['SciName']
+        t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name']
+        hog_members.append(t)
+
     nr_vps = utils.db.count_vpairs(entry_nr)
-    context = {'entry':{'omaid':query}, 'level': level, 
-            'hog_members': hog_member_ids,
-            'nr_vps':nr_vps} 
+    context = {'entry': {'omaid': query, 'sciname': genome['SciName'],
+            'kingdom':utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name']}, 
+            'level': level, 'hog_members': hog_members,
+            'nr_vps': nr_vps, 'tab':'hogs', 'levels':levels[::-1]}
+    if not hog is None:
+        context['hog'] = hog
+
+    logging.debug("context:" + str(context))
     return render(request, 'hogs.html', context)
-
-
 
 
 def home(request):
