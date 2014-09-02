@@ -107,7 +107,7 @@ $('#loupeBrowser').click( function() {
 	var query= document.getElementById("inputBrowser").value;
 	var arrayQuery = query.split(" ");
 	var category= document.getElementById("selectBrowser").value;
-	var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
+	var newUrl="/cgi-bin/gateway.pl?";
 	var x=1;
 	for (i in arrayQuery)
 	{
@@ -210,9 +210,9 @@ $('#loupeBrowser').click( function() {
 								<h3>Latest news</h3>
 								<ul >
 									<li>Sneak peak: export genomes and all-against-all computations from OMA and combine them with your own sequencing data: 
-										<a href="http://omabrowser.org/export">http://omabrowser.org/export</a>
+										<a href="/export">http://omabrowser.org/export</a>
 									</li>
-									<li>Did you know that the OMA pipeline can also run on your own computer? <a href="http://omabrowser.org/standalone">http://omabrowser.org/standalone</a>
+									<li>Did you know that the OMA pipeline can also run on your own computer? <a href="/standalone">http://omabrowser.org/standalone</a>
 									</li>
 									<li>Big release coming up in a couple of weeks. Stay tuned…
 									</li>

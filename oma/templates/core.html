@@ -96,7 +96,7 @@
           var query= document.getElementById("textNav").value;
           var arrayQuery = query.split(" ");
           var category= document.getElementById("selectNav").value;
-          var newUrl="http://omabrowser.org/cgi-bin/gateway.pl?";
+          var newUrl="/cgi-bin/gateway.pl?";
           var x=1;
           for (i in arrayQuery)
           {
@@ -141,8 +141,8 @@
             <ul class="dropdown-menu" role="menu">
               <li><a class="" href="{% url 'current'  %}">Current release</a></li>
               <li><a class="" href="{% url 'archives'  %}">Archives</a></li>
-              <li><a class="" href="http://omabrowser.org/standalone/">OMA standalone</a></li>
-              <li><a class="" href="http://omabrowser.org/cgi-bin/gateway.pl?f=AllAllExport">Export All/All</a></li>
+              <li><a class="" href="/standalone/">OMA standalone</a></li>
+              <li><a class="" href="/export">Export All/All</a></li>
             </ul>
           </li>
           <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">API  <span class="caret"></span></a>
