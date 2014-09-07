@@ -31,6 +31,8 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     gene should keep it's color.
     the window paramter is used to select the size of the 
     neighborhood."""
+   
+    
     entry_nr = utils.id_resolver.resolve(entry_id)
     genome=utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
     try:
@@ -109,11 +111,11 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     6:'#66C2A5',7:'#5E4FA2',8:'#F46D43',9:'#FFFFBF',10:'#ABDDA4'}
     stripes ={}
 
+
     o_sorting = {}
     for ortholog in orthologs:
-        if utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5] in o_sorting:
-            o_sorting = o_sorting
-        else:
+        o_species = utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5]
+        if not o_species in o_sorting:
             o_genome=utils.id_mapper['OMA'].genome_of_entry_nr(ortholog)
             try:
                 o_lin=utils.tax.get_parent_taxa(o_genome['NCBITaxonId'])
@@ -122,20 +124,23 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
                     genome['UniProtSpeciesCode'],
                     genome['NCBITaxonId']))
                 o_lin=[]
-            o_taxa=[]
-            for i in o_lin:
-                o_taxa.append(i[2])
-
-            match = len(set(taxa) & set(o_taxa))
-            o_sorting[utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5]] = match
+            num_match = 0
+            no = len(o_lin)
+            nt = len(taxa) 
+            nmin = min(no,nt)
+            for i in range(1, nmin): 
+                if taxa[-i] == o_lin[-i]["Name"]:
+                    num_match += 1 
+            o_sorting[o_species] = num_match
     o_sorting= OrderedDict(sorted(o_sorting.items(), key=lambda t: t[1], reverse=True))
-    o_sorting = o_sorting.keys()[0:100]
+    o_sorting = o_sorting.keys()[0:50]
     osd = {} #ortholog sorting dictionary
     for row, each in enumerate(o_sorting):
         osd[each]=row
 
+
     for ortholog in orthologs:
-        o_species =utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5]
+        o_species = utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5]
         if o_species in o_sorting:
             #get neighbouring genes for each ortholog
             o_ngs_entry_nr = utils.db.neighbour_genes(int(ortholog), windows) 
