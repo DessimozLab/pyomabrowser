@@ -291,10 +291,17 @@ class Taxonomy(object):
         root of the taxonomy."""
         idx = []
         parent = query
+        count = 0
         while parent != 0:
             i = self._table_idx_from_numeric(parent)
             idx.append(i)
-            parent = self.tax_table[i]['ParentTaxonId']
+            tmp = self.tax_table[i]['ParentTaxonId']
+            if tmp == parent:
+                raise InvalidTaxonId("%d has itself as parent"%(tmp))
+            parent = tmp 
+            count += 1
+            if count > 100:
+                raise InvalidTaxonId("%d exceeds max depth of 100. Infinite recursion?"%(query))
         return self.tax_table.take(idx)
 
 
