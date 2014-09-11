@@ -35,7 +35,7 @@
 									<label for="textHOG" class="col-sm-4 control-label">Member gene/protein:
 									</label>
 									<div class="col-sm-6">
-										<input type="email" class="form-control" id='textHOG' placeholder="">
+										<input type="text" class="form-control" id="textHOG" placeholder="">
 									</div>
 									<div class="col-sm-2">
 										<span class="input-group btn btn-default" >
@@ -71,15 +71,7 @@
 								});
 								$('#searchHOG').click( function() {
 									var query= document.getElementById("textHOG").value;
-									var arrayQuery = query.split(" ");
-									var newUrl="/cgi-bin/gateway.pl?";
-									var x=1;
-									for (i in arrayQuery)
-									{
-										newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
-										x++;
-									}
-									newUrl=newUrl+'f=DisplayEntry';
+									var newUrl="/oma/hogs/"+query+"/";
 									window.location = newUrl;
 								});
 
