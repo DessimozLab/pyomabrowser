@@ -3,7 +3,7 @@
 {% block title %}OMA HOGs {% endblock %}
 
 {% block contentTab %}
- 
+
 <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
@@ -25,25 +25,25 @@
 <li {% ifequal lev level %}class="active" {%endifequal%}><a href="{%url 'hogs' entry.omaid lev %}">{{lev}}</a></li>
 {% endfor %}
 </ol>
-{% else %} 
+{% else %}
 This entry is not part of any hierarchical orthologous group.
 
 {% endif %}
 
-<div class="well well-sm "></div>
+
 
 
 {% if hog_members %}
 <h3>Hierarchical group {{ hog.id }} at {{ level }}</h3>
-<h4 class="small">This group contains {{ hog_members|length }} members: 
+<h4 class="small">This group contains {{ hog_members|length }} members:
     {%for kingdom, cnt in cnt_per_kingdom.items %}
         {{cnt}} {% include "includes/kingdom.html" %}
     {%endfor %}
 </h4>
 
-<div class="panel panel-default">                                                                                                                                           
+<div class="panel panel-default">
     <div class="panel-heading">
-        <h4 class='tete'>Download: </h4><a href="{{hog.downloadURL|safe}}"> <span class="glyphicon glyphicon-download "></span> orthoXML</a> 
+        <h4 class='tete'>Download: </h4><a href="{{hog.downloadURL|safe}}"> <span class="glyphicon glyphicon-download "></span> orthoXML</a>
     </div>
     <table class="table table-hover">
         <thead><tr><td class="col-md-3">Taxon</td><td class="col-md-2">Protein ID</td></tr></thead>
@@ -57,6 +57,6 @@ This entry is not part of any hierarchical orthologous group.
     </tbody></table>
 </div>
 
-{% endif %} 
+{% endif %}
 {% endblock contentTab %}
- 
+

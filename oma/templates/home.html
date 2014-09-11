@@ -16,7 +16,7 @@
 		<div class="col-sm-12 col-md-10 col-md-offset-1">
 
 			<div class="alert">
-				<div class="alert alert-success thd" role="alert">The OMA Browser has a new website layout! <a href="mailto:contact@omabrowser.org" class="btn btn-default btn-xs">Send feedback</a> 
+				<div class="alert alert-success thd" role="alert">The OMA Browser has a new website layout! <a href="mailto:contact@omabrowser.org" class="btn btn-default btn-xs">Send feedback</a>
 				</div>
 			</div>
 			<!-- 	end	   -->
@@ -40,6 +40,7 @@
 					<img src="{% static "image/oma2.png" %}" class="img-responsive margin-auto">
 
 					<p><br></p>
+                    <form>
 					<div class="col-md-10 col-md-offset-1">
 						<div class="input-group">
 							<span class="input-group-btn">
@@ -54,8 +55,9 @@
 							<span class="input-group-btn">
 								<button class="btn btn-default" id='loupeBrowser' type="button"><span class="glyphicon glyphicon-search "></span></button>
 							</span>
-						</div>	
+						</div>
 					</div>
+                    </form>
 
 
 					<br>
@@ -119,13 +121,13 @@ $('#loupeBrowser').click( function() {
 		newUrl=newUrl+'SearchDb';
 	}
 	else if (category=='Protein Sequence'){
-		newUrl=newUrl+'SearchSeqDb';	
+		newUrl=newUrl+'SearchSeqDb';
 	}
 	else if (category=='Group'){
-		newUrl=newUrl+'DisplayGroup';	
+		newUrl=newUrl+'DisplayGroup';
 	}
 	else if (category=='Entry'){
-		newUrl=newUrl+'DisplayEntry';	
+		newUrl=newUrl+'DisplayEntry';
 	}
 
 	window.location = newUrl;
@@ -152,19 +154,19 @@ $('#loupeBrowser').click( function() {
 
 								<h3>First time here?</h3>
 								<ul>
-									<li>Read our 
+									<li>Read our
 										<a href="{% url 'about'  %}">brief introduction to OMA
 										</a>.
 									</li>
-									<li>Familiarise yourself with the 
+									<li>Familiarise yourself with the
 										<a href="{% url 'type'  %}">different types of orthologs provided</a>.
 									</li>
-									<li>Get ideas about 
+									<li>Get ideas about
 										<a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
 									</li>
 								</ul>
 							</div>
-						</div>                 
+						</div>
 					</div>
 					<div class="col-sm-4 col-md-4">
 						<div class="thumbnail oma-3-panels">
@@ -209,7 +211,7 @@ $('#loupeBrowser').click( function() {
 								</p>
 								<h3>Latest news</h3>
 								<ul >
-									<li>Sneak peak: export genomes and all-against-all computations from OMA and combine them with your own sequencing data: 
+									<li>Sneak peak: export genomes and all-against-all computations from OMA and combine them with your own sequencing data:
 										<a href="/export">http://omabrowser.org/export</a>
 									</li>
 									<li>Did you know that the OMA pipeline can also run on your own computer? <a href="/standalone">http://omabrowser.org/standalone</a>
