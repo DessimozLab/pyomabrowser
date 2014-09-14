@@ -287,6 +287,10 @@ def about(request):
     context = {}
     return render(request, 'about.html', context)
 
+def export(request):
+    context = {}
+    return render(request, 'export.html', context)
+
 def groupCV(request): #OMAGroupCV
     context = {}
     # _groupNumber (22252)

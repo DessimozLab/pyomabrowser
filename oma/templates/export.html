@@ -1,0 +1,944 @@
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% block title %}OMA: Export for OMA Standalone{% endblock %}
+
+{% block css_hook %}
+	<link type="text/css" rel="stylesheet" href="/static/css/phylotree.css"/>
+{% endblock css_hook %}
+
+	
+{% block content %}
+<div id="exportTool">
+<div class="ui-widget">
+	<label for="tags"> </label>
+	<input id="tags" placeholder="Search a genome or taxon..."  >
+	<button class = 'buttonGO 'id='searchGenome'> GO</button>
+	<script type="text/javascript" >
+	(function() {
+		document.getElementById("searchGenome").onclick = function() { 
+			var selectname =document.getElementById('tags').value;
+			if (hashGenome){
+				for (var i=0; i<hashGenome.length;i++){
+					if (hashGenome[i][0]==selectname){
+						var searchGenomeGo=hashGenome[i][1];
+						expandAllTheBranch(searchGenomeGo);
+						return;
+					}
+					else if (hashGenome[i][2]==selectname){
+						var searchGenomeGo=hashGenome[i][1];
+						expandAllTheBranch(searchGenomeGo);
+						return;
+					}
+					else if (hashGenome[i][3]==selectname){
+						var searchGenomeGo=hashGenome[i][1];
+						expandAllTheBranch(searchGenomeGo);
+						return;
+					}
+				}
+			} 
+		};
+	})();
+	</script>
+
+</div>
+
+
+
+<button class = 'SUBMIT' id='SubmitButton'> SUBMIT</button>
+<script type="text/javascript" >
+(function() {
+	document.getElementById("SubmitButton").onclick = function() { 
+		var urlExport= 'http://omabrowser.org/cgi-bin/gateway.pl?f=AllAllExport';
+		for (var i in arrayIdSelectedGenome){
+			urlExport=urlExport+'&p'+i+'='+arrayIdSelectedGenome[i];
+		}
+		OpenInNewTab(urlExport);	
+	};
+})();
+
+</script>
+
+<button class = 'DELETEALL' id='deleteAllButton'> UNSELECT ALL</button>
+<script type="text/javascript" >
+(function() {
+	document.getElementById("deleteAllButton").onclick = function() { 
+		visit(root,function(d){d.isSelected=false},getChildren);
+		numberOfSelectedGenome=0;
+		arrayIdSelectedGenome=[];
+
+		needUpdate=true;
+		update(root);
+	};
+})();
+
+</script>
+<div class = 'LEFT' id='leftarrow'> &lt;- </div>
+<div class = 'RIGHT' id='rightarrow'> -&gt; </div>
+<script>
+(function() {
+	document.getElementById("rightarrow").onclick = function() { 
+		scrollByX('right');
+	};
+})();
+(function() {
+	document.getElementById("leftarrow").onclick = function() { 
+		scrollByX('left');
+	};
+})();
+
+</script>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+
+//############################################################################################################################
+//############################################################################################################################
+//############################################################################################################################
+//############################################################################################################################
+
+
+//Use the mouse and return the position
+var mouse = {x: 0, y: 0}; 
+document.addEventListener('mousemove', function(e){ 
+	mouse.x = e.clientX || e.pageX; 
+	mouse.y = e.clientY || e.pageY 
+}, false);
+
+//
+var numberOfSelectedGenome=0;
+var arrayGenome=[];
+var hashGenome=[];
+	var maxGenome =55; //number max of selected genomes
+	var needUpdate=false;//Toolbox need to be update ?
+	var dblclick_timer = false;
+	var viewerWidth = $(document).width()*0.9;
+	var viewerHeight = $(document).height()*0.9;
+	var margin = {top: 70, right: 120, bottom: 20, left: 120},
+	width = 5500 - margin.right - margin.left,
+	height = viewerHeight - margin.top - margin.bottom;
+	var i = 0,
+	duration = 500,
+	root;
+	var arrayIdSelectedGenome=[];
+	var insearch=false;
+	var contectMenu=false;
+	var contextNode=null;
+	
+// create the empty toolbox (TB) at the begining 
+
+	//create the div TB, set the class and add to <body>
+	var div = document.createElement('div');
+	div.setAttribute('class', 'toolbox'); 
+	document.getElementById("exportTool").appendChild(div);
+
+	//create a <p> behind the genome title 
+	var p = document.createElement('p');
+	p.innerHTML = '      hidden'; 
+	p.setAttribute('class', 'genome'); 
+	div.appendChild(p);
+
+	//title of the TB
+	var p = document.createElement('p');
+	p.innerHTML = 'Selected Genome ('  + numberOfSelectedGenome + ')'; 
+	p.setAttribute('class', 'genomeTitle');
+	p.setAttribute('id', 'titreBox');
+	div.appendChild(p);
+
+
+// create the tree
+var tree = d3.layout.tree()
+.size([height, width]);
+
+//??
+var diagonal = d3.svg.diagonal()
+.projection(function(d) { return [d.y, d.x]; });
+
+//create the svg countainer, and put it with the margin/offset
+var svg = d3.select("#exportTool").append("svg")
+.attr("width", width + margin.right + margin.left)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+//load the data from the Json file
+d3.json("/All/genomes.json", function(error, flare) {
+	root = flare;
+	root.x0 = height / 2;
+	root.y0 = 0;
+
+	//collapse all the nodes at the beginning
+	function collapse(d) {
+		if (d.children) {
+			d._children = d.children;
+			d._children.forEach(collapse);
+			d.children = null;
+		}
+	}
+	root.children.forEach(collapse);
+
+	//update the tree
+	update(root);
+});
+
+d3.select(self.frameElement).style("height", "width");
+
+
+
+//############################################################################################################################
+//############################################################################################################################
+//############################################################################################################################
+//############################################################################################################################
+
+//FUNCTION FOR UPDATE THE TREE
+
+function update(source) {
+	//create a array with all the genomes (name + object)
+	arrayGenome=[];
+	hashGenome=[];
+	visit(root, function(d){ 
+		var genometmp=[]; 
+		
+		genometmp[0] = d.name, 
+		genometmp[1]=d ; 
+		genometmp[2] = d.id;
+		genometmp[3] = d.taxid;
+		arrayGenome.push(d.name);
+		if(!(d.children || d._children)){arrayGenome.push(d.id);} 
+		hashGenome.push(genometmp);
+	},
+	function(d) {if (d.children && d.children.length > 0  ){
+		return d.children;
+	} else if (d._children && d._children.length >0){
+		return d._children;
+	} 
+});
+	// $(function() {$( "#tags" ).autocomplete({source: arrayGenome});});
+
+	//recursiv iteration all over the tree to establish the relation father/son
+	visit(source,WhoIsDaddy,getChildren);
+
+	//??
+	var levelWidth = [1];
+	var childCount = function(level, n) {
+		if (n.children && n.children.length > 0) {
+			if (levelWidth.length <= level + 1) levelWidth.push(0);
+
+			levelWidth[level + 1] += n.children.length;
+			n.children.forEach(function(d) {
+				childCount(level + 1, d);
+			});
+		}
+	};
+	childCount(0, root);
+
+	var newHeight = d3.max(levelWidth) * 25;   
+	d3.select(self.frameElement).style(newHeight, '5500px'); // 5500px must be automaticaly calculate
+
+ 	// Compute the new tree layout.
+ 	var nodes = tree.nodes(root).reverse(),
+ 	links = tree.links(nodes);
+
+    // Normalize for fixed-depth.
+    nodes.forEach(function(d) { d.y = d.depth * 210; });
+
+    // Update the nodes…
+    var node = svg.selectAll("g.node")
+    .data(nodes, function(d) { return d.id || (d.id = ++i); })
+
+	// Enter any new nodes at the parent's previous position.
+	var nodeEnter = node.enter().append("g")
+	.attr("class", "node")
+	.attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+	//MouveOver : make the node bigger and create a bubble notification if leaf
+	.on("mouseover", function(d) {
+		if(!(d._children || d.children)){createNotification(d);} 
+		
+		d3.select(this).select("circle").style("stroke-width", 3);
+
+	})
+	//MouseOut : return to the default style of the node and delete the notification if leaf
+	.on("mouseout",  function(d) {if(!(d._children || d.children)){deleteNotification(d);}; d3.select(this).select("circle").style("stroke-width", 1.5);})
+	//Onclick : single click = expand/collapse and double click = select/unselect node/branch
+	.on("click", function(d) {
+		createContextMenu(d);
+		
+	});
+
+
+//NODE ENTER
+
+	//Style circles
+	nodeEnter.append("circle")
+	.attr("r", 1e-6)
+	.style("stroke", function(d) { return d._children ? "#22780F" : "#85C17E"; })
+	.style("fill", function(d) { return d.isSelected ? "#99d699" : "#fff"; });
+
+	
+
+	//Style the text
+	nodeEnter.append("text")
+	.attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+	.attr("dy", ".35em")
+	.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+	.text(function(d) { 
+		var fullName=d.name;
+		var splitName=fullName.split(' ');
+		if (splitName[1]){var newName=splitName[0] + ' '+ splitName[1];}
+		else{var newName=splitName[0]}
+			return d._children || d.children   ? d.name   :  newName + ' ' + d.id; 
+	})
+	.style("fill-opacity", 1e-6)
+	.style('font-style', function(d) { return d._children  || d.children  ? 'normal'  :  'italic' })
+	.style('font-weight', function(d) { return d._children || d.children  ? 'bold'  :  'normal' })
+	/*.on('click' , function(d) { 
+		if (!(d.children || d._children)){
+			if (confirm('Do you want to open the OMA page ?')){
+				var url= 'http://omabrowser.org/cgi-bin/gateway.pl?f=DisplayOS&p1=' + d.id;
+				OpenInNewTab(url);
+			}
+		}
+	})*/;
+
+nodeEnter.append("text")
+.attr("class", "symbol")
+.attr("text-anchor", "middle")
+.attr("dy", ".35em")
+.style('font-weight', 'bold')
+.text(function(d) {
+	if (d.children){return'-';}
+	else if (d._children){return'+';};
+});
+
+
+//TRANSITION + NODE EXIT
+
+	// Transition nodes to their new position.
+	var nodeUpdate = node.transition()
+	.duration(duration)
+	.attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+	nodeUpdate.select("circle")
+	.attr("r", 5.5)
+	.style("fill", function(d) { return d.isSelected ? "#99d699" : "#fff"; });
+
+	nodeUpdate.select("text")
+	.style("fill-opacity", 1);
+
+	nodeUpdate.select(".symbol")
+	.style("fill-opacity", 1)
+	.text(function(d) {
+		if (d.children){return'-';}
+		else if (d._children){return'+';};
+	});
+	
+	
+	// Transition exiting nodes to the parent's new position.
+	var nodeExit = node.exit().transition()
+	.duration(duration)
+	.attr("transform", function(d) { return "translate(" + source.y-500 + "," + source.x-500 + ")"; });
+
+	nodeExit.select("circle")
+	.attr("r", 0);
+
+	nodeExit.select("text")
+	.style("fill-opacity", 0);
+
+	nodeExit.select(".symbol")
+	.style("fill-opacity", 0);
+
+	
+
+
+//LINKS
+
+	// Update the links…
+	var link = svg.selectAll("path.link")
+	.data(links, function(d) { return d.target.id; });
+
+	// Enter any new links at the parent's previous position.
+	link.enter().insert("path", "g")
+	.attr("class", "link")
+	.attr("d", function(d) {
+		var o = {x: source.x0, y: source.y0};
+		return diagonal({source: o, target: o});
+	});
+
+	// Transition links to their new position.
+	link.transition()
+	.duration(duration)
+	.attr("d", diagonal);
+
+	// Transition exiting nodes to the parent's new position.
+	link.exit().transition()
+	.duration(duration)
+	.attr("d", function(d) {
+		var o = {x: source.x, y: source.y};
+		return diagonal({source: o, target: o});
+	})
+	.remove();
+
+	// Stash the old positions for transition.
+	nodes.forEach(function(d) {
+		d.x0 = d.x;
+		d.y0 = d.y;
+	});
+
+	if (needUpdate){
+	//remove the old table
+	$( ".table" ).remove();
+	//create a new table with the selected genomes raws update
+	var table = document.createElement('table');
+	table.setAttribute('class', 'table');
+	div.appendChild(table);
+	//search in the whole tree the selected genomes for add them in the table
+	visit(root,addToInfo,getChildren);
+	needUpdate=false;
+	var titre= document.getElementById('titreBox') ;
+	titre.innerHTML = 'Selected Genome ('  + numberOfSelectedGenome + ')';
+}
+
+
+if (!(insearch)&& source.father){
+	checkChildren(source.father);
+}
+
+}
+
+
+
+//############################################################################################################################
+//############################################################################################################################
+//############################################################################################################################
+//############################################################################################################################
+
+
+//     FUNCTION
+
+// Toggle children on click.
+function clickcollapse(d) {
+	if (d.children) {
+		d._children = d.children;
+		d.children = null;
+	} else {
+		d.children = d._children;
+	}
+	update(d);
+}
+
+//Recursive tree visit with function for the actual node and for select children
+function visit(parent, visitFn, childrenFn) {
+	if (!parent) return;
+	visitFn(parent);
+	var children = childrenFn(parent);
+	if (children) {
+		var count = children.length;
+		for (var i = 0; i < count; i++) {
+			visit(children[i], visitFn, childrenFn);
+		}
+	}
+}
+
+//all the children of the node parent receive the attritube 'father' with value 'parent.name'
+function WhoIsDaddy(parent){
+	if (parent.children){
+		var fan= parent.children;
+		for (var i=0; i<fan.length;i++){
+			fan[i].father=parent;
+		}
+	}
+	else if (parent._children){
+		var fan= parent._children;
+		for (var i=0; i<fan.length;i++){
+			fan[i].father=parent;
+		}
+	}
+}
+
+function getChildren(d){
+
+	if (d.children && d.children.length > 0  ){
+		return d.children;
+	} else if (d._children && d._children.length >0){
+		return d._children;
+	} 
+}
+
+// create a notification with the genome informations
+function createNotification(d){
+	//create and set the notification div
+	var div = document.createElement('div');
+	div.setAttribute('class', 'notification'); 
+	div.setAttribute('id', 'noti');
+	document.getElementById("exportTool").appendChild(div);
+
+	//create and set the genome title + information
+	var pName = document.createElement('p');
+	var pId = document.createElement('p');
+	pName.innerHTML='<b>'+d.name+ '</b>'  ;
+	pId.innerHTML='<strong> ID :</strong> '+ '<i>'+d.id +'</i>'+'<br>'+' <strong> Release :</strong> '+  d.release +'<br>'+' <strong> Clade :</strong> '+  d.father.name;
+	pName.setAttribute('class', 'pName'); 
+	div.appendChild(pName);
+	div.appendChild(pId);
+
+	//the notification is append and put in the right place depending of the mouse position
+	$("notification").append($(p).fadeIn('slow'));
+
+	$('.notification').css('top', function(){if (mouse.y > 0.85*height){return 0.85*height;}else if (mouse.y < 0.15*height){return 0.15*height;}else{return mouse.y -50;}}); 
+	$('.notification').css('left', mouse.x +100 );
+}
+
+function  deleteNotification(d){
+	$( ".notification" ).remove();
+}
+
+//add the row on the table with informations (name, id release, clade)
+function addToInfo(d){
+	if (d.isSelected && !(d._children || d.children)){
+		//create the row <tr>
+		var ptr = document.createElement('tr');
+		//Create the delete button
+		var deleteB = document.createElement('button');
+		var pbuttonCo = document.createElement('p');
+		pbuttonCo.setAttribute('class', 'pbuttonCo');
+		deleteB.setAttribute('class', 'deleteButton');
+		//create the title <p>
+		var pName = document.createElement('p');
+		pName.innerHTML='<b>'+d.name+ '</b>'  ;
+		pName.setAttribute('class', 'pName');
+		//create the ID <p>
+		var pId = document.createElement('p');
+		pId.innerHTML= '<i>'+'ID : '+'</i>'+ d.id ;
+		pId.setAttribute('class', 'pClade');
+		//create the release <p>
+		var pRel = document.createElement('p');
+		pRel.setAttribute('class', 'pRel');
+		pRel.innerHTML='<i>'+'Release : '+'</i>'+  d.release ;
+		//create the Clade <p>
+
+		
+
+		var pClade = document.createElement('p');
+		pClade.innerHTML='<i>'+'Clade : '+'</i>'+  d.father.name +' ' ;
+		pClade.setAttribute('class', 'pId');
+
+		var pTaxid = document.createElement('p');
+		pTaxid.innerHTML='<i>'+'Taxon ID : '+'</i>'+  d.taxid ;
+
+		var pClaTax = document.createElement('div');
+		pTaxid.setAttribute('class', 'pTaxid');
+		pClaTax.appendChild(pId);
+		pClaTax.appendChild(pTaxid);
+		pClaTax.setAttribute('class', 'pClaTax');
+
+		pbuttonCo.appendChild(deleteB);
+		var pNameButton = document.createElement('div');
+
+		pNameButton.appendChild(pName);
+		pNameButton.appendChild(pbuttonCo);
+		pNameButton.setAttribute('class', 'pNameButton');
+		
+		
+		//append the item to the <tr>
+		ptr.appendChild(pNameButton);
+		ptr.appendChild(pClade);
+		ptr.appendChild(pClaTax);
+		ptr.appendChild(pRel);
+		
+		ptr.setAttribute('class', 'genome'); 
+		
+
+		$(".table").append($(ptr));
+
+		//add the function for delete a genome or get his OMA page>
+		pId.onclick=function(){var url= 'http://omabrowser.org/cgi-bin/gateway.pl?f=DisplayOS&p1=' + d.id;
+		OpenInNewTab(url);};
+		pTaxid.onclick=function(){var url= 'http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=' + d.taxid;
+		OpenInNewTab(url);};
+
+
+		pName.onclick=function(){expandAllTheBranch(d);};
+		pClade.onclick=function(){expandAllTheBranch(d.father);};
+		deleteB.onclick=function(){
+			unselectTheNode(d);
+			needUpdate=true;
+			update(d);
+
+		};
+	}
+}
+
+
+function createContextMenu(d){
+	var numberChildren=0;
+	visit(d,function(d){if (!(d.children || d._children)){numberChildren++;}}, function(d) {if (d.children && d.children.length > 0  ){
+		return d.children;
+	} else if (d._children && d._children.length >0){
+		return d._children;
+	} 
+});
+	var numberSelectedChildren=0;
+	visit(d,function(d){if (!(d.children || d._children)&& d.isSelected){numberSelectedChildren++;}}, function(d) {if (d.children && d.children.length > 0  ){
+		return d.children;
+	} else if (d._children && d._children.length >0){
+		return d._children;
+	} 
+});
+	if (contextNode==d){
+		$('.expandBut').remove();
+		$('.expandBut2').remove();
+		contectMenu=false;
+		contextNode=null;
+		return;
+	}
+
+
+	if (!(d.children || d._children)){
+		$('.expandBut').remove();
+		$('.expandBut2').remove();
+		var expandBut2 = document.createElement('button');
+		expandBut2.innerHTML=d.isSelected ? 'UNSELECT':'SELECT';
+		expandBut2.setAttribute('class', 'expandBut');
+		document.getElementById("exportTool").appendChild(expandBut2);
+		$('.expandBut').css('left', d.y +75+ 'px');
+		$('.expandBut').css('top', d.x  +45+ 'px');	
+		expandBut2.onclick=function(){
+	if (d.isSelected){ //Node already selected = unselected all the branch and the node
+		visit(d,unselectTheNode,getChildren);
+		if (numberOfSelectedGenome<0){
+			numberOfSelectedGenome=0;
+				} //put the minimal number of selected genome at 0.
+				d.isSelected=false;
+				needUpdate=true;
+				$('.expandBut').remove();
+				$('.expandBut2').remove();
+				contectMenu=false;contextNode=null;
+				update(d);
+			}
+			else{ //Node Not selected = select the node and the children (till maxGenome==numberOfSelectedGenome)
+				if (numberOfSelectedGenome==maxGenome+1){
+					alert("You have already selected "+ (maxGenome) +" genomes, you have to unselect genomes from the selection before adding new ones.");
+				}
+				else {
+					visit(d,selectTheNode,getChildren);
+					needUpdate=true;
+					$('.expandBut').remove();
+					$('.expandBut2').remove();
+					contectMenu=false;contextNode=null;
+					update(d);
+					if ( numberOfSelectedGenome>maxGenome){
+						alert("The maximum number of selected genomes is "+ (maxGenome+1) +", so not all genomes in this clade could be selected.");
+					}
+				}
+			}
+		}
+		var expandBut2 = document.createElement('button');
+		expandBut2.innerHTML='DETAILS';
+		expandBut2.setAttribute('class', 'expandBut2');
+		document.getElementById("exportTool").appendChild(expandBut2);
+		$('.expandBut2').css('left', d.y +75+ 'px');
+		$('.expandBut2').css('top', d.x +80 + 'px');
+		expandBut2.onclick=function(){
+			if (!(d.children || d._children)){
+				
+				var url= 'http://omabrowser.org/cgi-bin/gateway.pl?f=DisplayOS&p1=' + d.id;
+				OpenInNewTab(url);
+				
+			}
+		};
+		contextNode=d;
+		contectMenu=true;
+		return;
+	}
+
+
+	$('.expandBut').remove();
+	$('.expandBut2').remove();
+
+	var expandBut = document.createElement('button');
+	expandBut.innerHTML=d.children ? 'COLLAPSE':'EXPAND';
+	expandBut.setAttribute('class', 'expandBut');
+	var expandBut2 = document.createElement('button');
+	expandBut2.innerHTML=d.isSelected ? 'UNSELECT ALL ('  + numberSelectedChildren + ')':'SELECT ALL ('  + numberChildren + ')';
+	expandBut2.setAttribute('class', 'expandBut2');
+	document.getElementById("exportTool").appendChild(expandBut);
+	document.getElementById("exportTool").appendChild(expandBut2);
+
+
+	$('.expandBut').css('left', d.y +75+ 'px');
+	$('.expandBut').css('top', d.x  +45+ 'px');	
+	$('.expandBut2').css('left', d.y +75+ 'px');
+	$('.expandBut2').css('top', d.x +80 + 'px');
+
+	contextNode=d;
+	contectMenu=true;
+
+	expandBut.onclick=function(){clickcollapse(d);$('.expandBut').remove();
+	$('.expandBut2').remove();};
+	expandBut2.onclick=function(){
+		if (d.isSelected){ 
+			visit(d,unselectTheNode,getChildren);
+			if (numberOfSelectedGenome<0){
+				numberOfSelectedGenome=0;
+			} 
+			d.isSelected=false;
+			needUpdate=true;
+			$('.expandBut').remove();
+			$('.expandBut2').remove();
+			contectMenu=false;contextNode=null;
+			update(d);
+		}
+		else{ 
+			//Node Not selected = select the node and the children (till maxGenome==numberOfSelectedGenome)
+			if (numberOfSelectedGenome==maxGenome+1){
+				alert("You have already selected "+ (maxGenome+1) +" genomes, you have to unselect genomes from the selection before adding new ones.");
+			}
+			else {
+				visit(d,selectTheNode,getChildren);
+				needUpdate=true;
+				$('.expandBut').remove();
+				$('.expandBut2').remove();
+				contectMenu=false;contextNode=null;
+				update(d);
+				if ( numberOfSelectedGenome>maxGenome){
+					alert("The maximum number of selected genomes is "+ (maxGenome) +", so not all genomes in this clade could be selected.");
+				}
+			}
+		}
+	}
+};
+
+
+
+
+
+function selectTheNode(d){
+	if (numberOfSelectedGenome>maxGenome)
+		{return d}
+	d.isSelected=true;
+	if(!(d._children || d.children)){
+		numberOfSelectedGenome++;
+		arrayIdSelectedGenome.push(d.id);
+	}
+	return d;
+}
+
+function unselectTheNode(d){
+
+	d.isSelected=false;
+	if(!(d._children || d.children)){
+		for (var i in arrayIdSelectedGenome){
+			if (d.id==arrayIdSelectedGenome[i]){
+				removeByIndex(arrayIdSelectedGenome,i);
+				numberOfSelectedGenome--;
+				return d;
+			}
+		}
+	}
+	return d;
+}
+
+function OpenInNewTab(url) {
+	var win = window.open(url, '_blank');
+	win.focus();
+}
+
+function expandAllTheBranch(d){	
+	var source=d;
+	insearch=true;
+	var path=[];
+	while (d){
+		path.push(d);
+		d=d.father;
+	}
+	path.reverse();
+	path.pop();
+	for (var i in path){
+		if (!(path[i].children)) {
+			path[i].children = path[i]._children;
+		}
+		update(path[i]);
+	}
+	insearch=false;
+	window.scrollTo(source.y,0);
+
+}
+function removeByIndex(arr, index) {
+	arr.splice(index, 1);
+}
+
+function checkChildren(d){
+	OnechildrenAtLeastSelected=false;
+
+	for (var i in d.children){
+		if (d.children[i].isSelected){
+			OnechildrenAtLeastSelected=true;
+		}
+	}
+	if(OnechildrenAtLeastSelected){d.isSelected=true;update(d);}
+	else {d.isSelected=false;update(d);}
+}
+
+
+
+function getFather(d){return d.father;}
+
+
+//############################################################################################################################
+//############################################################################################################################
+//############################################################################################################################
+//############################################################################################################################
+
+function scrollByX(direction){
+	
+	var step=300;
+	if (direction=='right'){window.scrollBy(step,0);}
+	else if (direction=='left'){window.scrollBy(-step,0);}
+}
+
+</script>
+
+
+
+
+<script>
+$(function() {
+	$( "#info" ).button({
+		icons: {
+			primary: "ui-icon-info",
+
+		},
+		text: false
+	});
+});
+$(function() {
+	$( "#help" ).button({
+		icons: {
+			primary: "ui-icon-help",
+
+		},
+		text: false
+	});
+});
+</script>
+<button id='info'>INFORMATION ABOUT THIS PAGE</button>
+<script type="text/javascript" >
+
+function showinfo(){
+	var div = document.createElement('div');
+div.setAttribute('class', 'test'); 
+
+
+
+var p = document.createElement('p');
+p.innerHTML = ' <b> EXPORT OF GENOMES AND ALLALL FOR OMA STANDALONE </b> '; 
+p.setAttribute('class', 'genome'); 
+div.appendChild(p);
+
+var p2 = document.createElement('p');
+p2.innerHTML = 'In order to simplify analysis of customized genomes using the OMA Standalone application, we provide here users with precomputed all-against-all results, i.e. the most time-consuming part of the OMA pipeline. Users can simply augment the dataset with their new genomes and only the new genome-pairs will have to be aligned.'; 
+p2.setAttribute('class', 'genome'); 
+div.appendChild(p2);
+
+var p3 = document.createElement('p');
+p3.innerHTML = ' <b> Important limitations and notices </b> '; 
+p3.setAttribute('class', 'genome'); 
+div.appendChild(p3);
+
+var ul = document.createElement('ul');
+var li = document.createElement('li');
+li.innerHTML='Note that for OMA we only store pairwise matches of alignments with a Smith-Waterman score of at least 130 and where the alignment extends over at least 30% of the smaller sequence. If you need more relaxed parameters, you will have to do the alignments again from scratch.';
+li.setAttribute('class', 'genome'); 
+ul.appendChild(li);
+var li = document.createElement('li');
+li.innerHTML='The selected genomes cannot be modified. Do not try to add, remove or change any sequences. The changes will not get incorporated, but might invalidate any later inference due to indexing mistakes.';
+li.setAttribute('class', 'genome'); 
+ul.appendChild(li);
+var li = document.createElement('li');
+li.innerHTML='The number of genomes and corresponding AllAll data available for download is limited to 55 genomes. This is due to storage limitations. If you need a larger dataset, please contact us directly.';
+li.setAttribute('class', 'genome'); 
+ul.appendChild(li);
+div.appendChild(ul);
+document.getElementById("exportTool").appendChild(div);
+$( ".test" ).click(function() {
+		
+		$( ".test" ).remove();
+		infoshow=false;
+	});
+}
+var infoshow=false;
+(function() {
+	document.getElementById("info").onclick = function() { 
+		
+		if (infoshow){
+			$( ".test" ).hide('fold');
+			infoshow=false;
+		}
+		else if (helpshow){$( ".tuto" ).remove();$( ".overlay" ).remove();helpshow=false;showinfo();
+		infoshow=true;}
+		else{
+			showinfo();
+			infoshow=true;
+		}
+	};
+})();
+
+
+</script>
+
+
+
+
+<button id='help'>HELP</button>
+<script type="text/javascript" >
+
+function showtuto(){
+	var div = document.createElement('div');
+	div.setAttribute('class', 'tuto'); 	
+	document.getElementById("exportTool").appendChild(div);
+	var img = document.createElement("IMG");
+	img.setAttribute('class', 'image')
+	img.src = "/static/image/tutof.png";
+	div.appendChild(img);
+	var div = document.createElement('div');
+	div.setAttribute('class', 'overlay'); 	
+	document.getElementById("exportTool").appendChild(div);
+	$( ".overlay" ).click(function() {
+		$( ".tuto" ).remove();
+		$( ".overlay" ).remove();
+		helpshow=false;
+	});
+	$( ".tuto" ).click(function() {
+		$( ".tuto" ).remove();
+		$( ".overlay" ).remove();
+		helpshow=false;
+	});
+}
+
+var helpshow=false;
+(function() {
+	document.getElementById("help").onclick = function() { 
+		if (helpshow){
+			$( ".tuto" ).remove();
+			$( ".overlay" ).remove();
+			helpshow=false;
+		}
+		else if (infoshow){
+			$( ".test" ).hide('fold');
+			infoshow=false;
+			showtuto();
+
+			helpshow=true;}
+			else{
+				showtuto();
+				helpshow=true;
+			}
+		};
+	})();
+
+
+	</script>
+</div>
+{% endblock content %}
+

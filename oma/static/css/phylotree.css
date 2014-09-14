@@ -1,0 +1,264 @@
+#exportTool {
+    overflow-y: scroll;
+}
+
+
+.node {
+	cursor: pointer;
+}
+.node circle {
+	fill: #fff;
+	stroke: #22780F;
+	stroke-width: 1.5px;
+}
+.node text {
+	font: 10px sans-serif;
+}
+.link {
+	fill: none;
+	stroke: #ccc;
+	stroke-width: 1.5px;
+}
+
+#header{background:#000000; width:100%;height:35px;position:fixed;bottom:0;left:0;}
+#footer{background:#22780F;width:100%;height:45px;position:fixed;top:0;left:0;}
+
+.LEFT{position:fixed;bottom:45px;left:0;height:auto;width:auto;padding: 5px;font-size:3em;opacity:0.2;border: 3px solid #22780F;cursor: pointer;
+	margin: 5px;}
+.RIGHT{position:fixed;bottom:45px;right:27%;height:auto;width:auto;padding: 5px;font-size:3em;opacity:0.2;border: 3px solid #22780F;cursor: pointer;
+	margin: 5px;}
+
+.RIGHT:hover, .LEFT:hover {opacity:0.4;}
+
+.toolbox {
+	font-family: Arial;
+	font-size: 0.8em;
+	position: fixed;
+	border: 3px solid #22780F;
+	background: #fff;
+	padding: 5px;
+	margin: 5px;
+	margin-bottom: 10px;
+	color: #555;
+	right: 0px;
+	top: 50px;
+	height: 77%;
+	width: 25%;
+	overflow: auto;
+}
+.deleteButton{
+	background: url('/imgs/delete.png') ;
+	background-size: 100% auto ;
+    background-repeat: no-repeat;
+	display:inline;
+	top:0px;
+	right:0px;
+	height:15px;
+	width:12px;
+	padding-top:10px;
+	border: none;
+	
+	
+}
+.pbuttonCo{display:inline;width:100%;}
+
+.notification{
+	position: fixed;
+	padding : 5px;
+	border: 1px solid #22780F;
+	background: #fff;
+	opacity: 0.9;
+	z-index: 200;
+}
+
+.genome  {
+	font-family: Arial;
+	font-size: 1em;
+	color: #404040;
+}
+
+.pName  {
+	font-family: Arial;
+	font-size: 1.1em;
+	cursor: pointer;
+	color: #404040;
+	text-align:left;
+	margin:2px;
+	padding: 3px;
+	width:87%;
+	display:inline-block;
+
+}
+
+.pId{cursor:pointer;margin:3px;display:block;padding: 0px;
+	}
+.pClade {cursor:pointer;display:inline;margin:3px;padding: 0px;
+	}
+.pTaxid {cursor:pointer;display:inline;margin:3px;padding: 0px;
+	}
+.pRel {display:block;margin:3px;padding: 0px;
+	}
+
+.genomeTitle{
+	position: fixed;
+	background:#22780F ;
+	border: 3px solid #22780F;
+	font-weight:bold;
+	text-align: center;
+	font-size: 1.3em;
+	color: #fff;
+	padding: 5px;
+	margin: 5px;
+	width: 25%;
+	right: 0px;
+	top: 50px;
+
+}
+.pClaTax{width:100%;}
+.pNameButton{width:100%;display:inline;height:auto;}
+
+.SUBMIT{
+	position: fixed;
+	background:#22780F ;
+	border: 3px solid #22780F;
+	text-align: center;
+	font-size: 1em;
+	color: #fff;
+	padding: 5px;
+	margin: 10px;
+	width: 12%;
+	right: 0px;
+	bottom: 40px;
+	z-index:10;
+	height:5%;
+	opacity: 0.5;
+
+}
+
+.expandBut{
+	position:absolute;
+	background:#22780F ;
+	border: 3px solid #22780F;
+	text-align: center;
+	font-size: 1em;
+	color: #fff;
+	
+	width:120px;
+	left: 0;
+	top: 0;
+	z-index:10;
+	height:auto;
+	opacity: 0.9;
+
+}
+.expandBut2{
+	position:absolute;
+	background:#22780F ;
+	border: 3px solid #22780F;
+	text-align: center;
+	font-size: 1em;
+	color: #fff;
+	width: 120px;
+	left: 0;
+	top: 0;
+	z-index:10;
+	height:auto;
+	opacity: 0.9;
+
+}
+.expandBut2:hover, .expandBut:hover{opacity:1;}
+
+.SUBMIT:hover{opacity:1;}
+
+.DELETEALL{
+	position: fixed;
+	background:#22780F ;
+	border: 3px solid #22780F;
+	text-align: center;
+	font-size: 1em;
+	color: #fff;
+	padding: 5px;
+	margin: 10px;
+	width: 12%;
+	right: 13%;
+	bottom: 40px;
+	z-index:10;
+	height:5%;
+	opacity: 0.5;
+
+}
+
+.DELETEALL:hover{opacity:1;}
+
+.table{
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.table tr {
+	border-bottom: 1px groove #22780F;
+} 
+
+.buttonGO {
+	position:relative;
+	padding:6px 15px;
+	left:-8px;
+	border:2px solid #22780F;
+	background-color:#22780F;
+	color:#fafafa;
+	height:auto;
+
+	opacity: 0.5;
+}
+
+
+
+#help{position:fixed;top: 50px;
+	right:31%;border-radius:0px;opacity:0.5;z-index: 100;width:3%;height:5%;margin:1%;}
+
+#info{position:fixed;top: 50px;
+	right:27%;border-radius:0px;opacity:0.5;z-index: 100;width:3%;height:5%;margin:1%;}
+#info:hover, #help:hover{opacity:1;}
+.ui-icon-info{transform: scale(1.5);opacity: 0.9}
+.ui-icon-help{transform: scale(1.5);opacity: 0.9}
+
+.buttonGO:hover{opacity:1;}
+
+
+.test{position:fixed;top:25%;left:25%;border:2px solid #22780F;width:50%;height:auto;opacity: 0.9; background-color:#fff; padding:20px;}
+
+.tuto{position:fixed;top:5%;width:100%;height:70%;z-index: 99;margin: auto;padding: auto;left:10%;transform: scale(0.80);}
+.image{
+    max-width:150%;
+    max-height:150%;
+    vertical-align: middle;
+    border:2px solid #22780F;
+}
+
+.overlay{position:fixed;width:100%;height:100%;background-color:#fff; opacity:0.8;top:0;left: 0;z-index: 50;}
+#tags{opacity: 0.5}
+#tags:hover{opacity: 1}
+
+.ui-widget{margin: 8px;position :fixed; top: 50px;font-size: 0.8em !important;}
+.ui-widget input{width:300px;}
+.ui-autocomplete {
+	max-height: 200px;
+	overflow-y: auto;
+	/* prevent horizontal scrollbar */
+	overflow-x: hidden;
+}
+/* IE 6 doesn't support max-height
+* we use height instead, but this forces the menu to always be this tall
+*/
+* html .ui-autocomplete {
+	height: 200px;
+}
+
+ .ui-tabs-vertical { width: 55em; }
+.ui-tabs-vertical .ui-tabs-nav { padding: .2em .1em .2em .2em; float: left; width: 12em; }
+.ui-tabs-vertical .ui-tabs-nav li { clear: left; width: 100%; border-bottom-width: 1px !important; border-right-width: 0 !important; margin: 0 -1px .2em 0; }
+.ui-tabs-vertical .ui-tabs-nav li a { display:block; }
+.ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active { padding-bottom: 0; padding-right: .1em; border-right-width: 1px; border-right-width: 1px; }
+.ui-tabs-vertical .ui-tabs-panel { padding: 1em; float: right; width: 40em;}
+
+    

@@ -1,4 +1,5 @@
-from django.conf.urls import patterns, url
+from django.conf import settings
+from django.conf.urls import include, patterns, url
 from . import views
 urlpatterns = patterns('',
           url(r'^pairs/(?P<entry_id>\w+)/$', views.pairs, name='index'),
@@ -11,6 +12,7 @@ urlpatterns = patterns('',
         url(r'^$', views.home),
         url(r'^home/$', views.home, name='home'),
         url(r'^about/$', views.about, name='about'),
+        url(r'^export/$', views.export, name='export'),
         url(r'^groupCV/$', views.groupCV, name='groupCV'),
         url(r'^landHOG/$', views.landHOG, name='landHOG'),
         url(r'^landAnnotation/$', views.landAnnotation, name='landAnnotation'),
@@ -67,3 +69,10 @@ urlpatterns = patterns('',
 
 #        url(r'^synteny/(?P<entry_id>\w+)/(?P<windows>\w+)/$', views.synteny, name='synteny'),
 )
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += patterns('',
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    )
+
