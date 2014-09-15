@@ -1,4 +1,6 @@
 from django.shortcuts import render
+import tweepy
+#import re
 from django.http import HttpResponse, Http404
 from collections import OrderedDict
 import logging
@@ -280,7 +282,25 @@ def hogs(request, entry_id, level=None, idtype='OMA'):
 
 
 def home(request):
-    context = {}
+   
+    n_latest_tweets = 3
+    auth = tweepy.OAuthHandler('Aw21HEok8E6YIhTbthJiFsbXy', 'HaqiwJm3sbVVN8GLjaMRJBLzSwAGSrG163tlohD2buCtvzIQaz')
+    auth.set_access_token('2216530352-HQEG8i87Q3FjngbeYno1HitSpOTa1Ur4HyiLYdl','wBQDobkrHXAha8IJEEHFiuB1BGeRDE7PaUZrQ0xqEXfRd')
+
+    api = tweepy.API(auth)
+
+    public_tweets = api.user_timeline('@OMABrowser', exclude_replies=True, 
+        trim_user=True, include_rts=False, include_entities=True  )
+    #r = re.compile(r"(http://[^ ]+)")
+    tweets = []
+    for tweet in public_tweets[:n_latest_tweets]:
+        text = tweet.text
+        # replace t.co shortened URLs by true urls
+        for url in sorted(tweet.entities['urls'], key=lambda x: x['indices'], reverse=True):
+            text = text[:url['indices'][0]] + '<a href="' + url['expanded_url'] + '">' + url['expanded_url'] + '</a>' + text[url['indices'][1]:]
+        tweets.append(text)
+
+    context = {'tweets':tweets}
     return render(request, 'home.html', context)
 
 def about(request):

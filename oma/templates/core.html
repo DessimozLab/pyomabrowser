@@ -12,7 +12,7 @@
     <!-- Bootstrap -->
     <link href= "{% static "css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
     <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="Stylesheet"></link>
+    <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="Stylesheet">
     <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js" ></script>
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="{% static "js/bootstrap.min.js" %}"></script>
@@ -47,7 +47,7 @@
 
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav ">
+        <ul class="nav navbar-nav">
           <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Explore<span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
               <li><a class="" href="{% url 'dataset'  %}">Release information</a></li>
@@ -67,57 +67,23 @@
         <!-- search    -->
 
 
-        <form class="navbar-form navbar-left" role="search">
+        <form class="navbar-form navbar-left" role="search" id="searchNavForm" action="/cgi-bin/gateway.pl" method="GET">
           <div class="form-group">
-            <select id="selectNav" class="form-control btn-mini">
-              <option>Keyword</option>
-              <option class="">Protein Sequence</option>
-              <option class="">OMA Group</option>
-              <option class="">Entry</option>
+            <select id="selectNav" class="form-control btn-mini" name="f">
+              <option value="SearchDb">Keyword</option>
+              <option value="SearchSeqDb">Protein Sequence</option>
+              <option value="DisplayGroup">OMA Group</option>
+              <option value="DisplayEntry">Entry</option>
             </select>
           </div>
           <div class="input-group">
-            <input id="textNav" class="form-control" type="text">
+            <input id="textNav" class="form-control" type="text" name="p1">
             <span class="input-group-btn">
-              <button class="btn btn-default" type="button" id="searchNav"><span class="glyphicon glyphicon-search grey"></span></button>
+              <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search grey"></span></button>
             </span>
 
           </div>
         </form>
-
-        <script type="text/javascript">
-
-        $('#searchNav').click( function() {
-          var query= document.getElementById("textNav").value;
-          var arrayQuery = query.split(" ");
-          var category= document.getElementById("selectNav").value;
-          var newUrl="/cgi-bin/gateway.pl?";
-          var x=1;
-          for (i in arrayQuery)
-          {
-            newUrl=newUrl+'p'+x+'='+arrayQuery[i]+'&';
-            x++;
-          }
-          newUrl=newUrl+'f=';
-          if (category=='Keyword'){
-            newUrl=newUrl+'SearchDb';
-          }
-          else if (category=='Protein Sequence'){
-            newUrl=newUrl+'SearchSeqDb';  
-          }
-          else if (category=='OMA Group'){
-            newUrl=newUrl+'DisplayGroup'; 
-          }
-          else if (category=='Entry'){
-            newUrl=newUrl+'DisplayEntry'; 
-          }
-
-          window.location = newUrl;
-        });
-        </script>
-
-        <!--       -->
-        <!-- right-button    -->
 
         <ul class="nav navbar-nav navbar-right">
 

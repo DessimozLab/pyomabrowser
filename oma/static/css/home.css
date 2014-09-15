@@ -27,12 +27,13 @@
 .dl-horizontal dt{white-space: normal !important; }
 .dl-horizontal dd{width:60% !important;}
 a{cursor: pointer;}
-.alert{margin:0px !important;
-	margin-bottom:10px !important;
-	padding: 0px !important;
-}
+
 .thd{
 	padding: 10px !important;
+}
+
+.jumbotron p {
+    font-size: 16px;
 }
 
 /*  green well */
@@ -149,6 +150,7 @@ a{cursor: pointer;}
 	}
 	
 
+    .top-buffer { margin-top:20px; }
 
 
 
