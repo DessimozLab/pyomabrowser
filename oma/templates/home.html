@@ -43,7 +43,7 @@
                         </div>
                         <div class="col-md-8">
                             <div class="input-group">
-                                <input id='inputBrowser' type="text" class="form-control">
+                                <input id='inputBrowser' name="p1" type="text" class="form-control">
                                 <span class="input-group-btn">
                                 <button class="btn btn-default" id='loupeBrowser' type="submit">
                                     <span class="glyphicon glyphicon-search "></span>
@@ -72,12 +72,12 @@
 
 $('#exPhoto').click( function() {
     $('#selectBrowser').val('SearchDb');
-    $('#inputBrowser').val('photoreceptor');
+    $('#inputBrowser').val('photoreceptor').focus();
 });
 
 $('#exEntry').click( function() {
     $('#selectBrowser').val('DisplayEntry');
-    $('#inputBrowser').val('HUMAN16963');
+    $('#inputBrowser').val('HUMAN16963').focus();
 });
 
 </script>
