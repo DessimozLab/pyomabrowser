@@ -1,6 +1,6 @@
 from django.shortcuts import render
+from django.conf import settings
 import tweepy
-#import re
 from django.http import HttpResponse, Http404
 from collections import OrderedDict
 import logging
@@ -284,8 +284,8 @@ def hogs(request, entry_id, level=None, idtype='OMA'):
 def home(request):
    
     n_latest_tweets = 3
-    auth = tweepy.OAuthHandler('Aw21HEok8E6YIhTbthJiFsbXy', 'HaqiwJm3sbVVN8GLjaMRJBLzSwAGSrG163tlohD2buCtvzIQaz')
-    auth.set_access_token('2216530352-HQEG8i87Q3FjngbeYno1HitSpOTa1Ur4HyiLYdl','wBQDobkrHXAha8IJEEHFiuB1BGeRDE7PaUZrQ0xqEXfRd')
+    auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
+    auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
 
     api = tweepy.API(auth)
 
