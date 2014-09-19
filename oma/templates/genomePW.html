@@ -100,6 +100,9 @@ $(document).ready(function() {
    
       // an array that will be populated with substring matches
       matches = [];
+      if (q.length < 2) {
+          return(cb(matches));
+      }
    
       // regex used to determine if a string contains the substring `q`
       substrRegex = new RegExp(q, 'i');
@@ -128,9 +131,9 @@ $(document).ready(function() {
     source: substringMatcher(genomeNames)
   }).blur(function(){
       if(genomeIDs[$(this).val()] == null) {
-        $('#textG1').val('');
+        $(this).val('');
       }
-  });; 
+  }); 
   $('#textG2').typeahead({
     hint: true
   },
@@ -140,7 +143,7 @@ $(document).ready(function() {
     source: substringMatcher(genomeNames)
   }).blur(function(){
       if(genomeIDs[$(this).val()] == null) {
-        $('#textG1').val('');
+        $(this).val('');
       }
   });; 
   

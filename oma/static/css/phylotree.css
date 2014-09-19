@@ -70,9 +70,11 @@
 		#tags{opacity: 0.5}
 		#tags:hover{opacity: 1}
 
-		.ui-widget{margin: 8px;position :absolute;font-size: 0.8em !important;}
-		.ui-widget input{width:300px;}
-		
+/*		.ui-widget{margin: 8px;position :absolute;font-size: 0.8em !important;}
+		.ui-widget input{
+                   width:300px;
+                }
+*/		
 
 
 

@@ -64,6 +64,33 @@ $(document).ready(function() {
 
     d3.select(self.frameElement).style("height", "width");
 
+  var substringMatcher = function(strs) {
+    return function findMatches(q, cb) {
+      var matches, substrRegex;
+   
+      // an array that will be populated with substring matches
+      matches = [];
+      if (q.length < 2) {
+          return(cb(matches));
+      }
+   
+      // regex used to determine if a string contains the substring `q`
+      substrRegex = new RegExp(q, 'i');
+   
+      // iterate through the pool of strings and for any string that
+      // contains the substring `q`, add it to the `matches` array
+      $.each(strs, function(i, str) {
+        if (substrRegex.test(str)) {
+          // the typeahead jQuery plugin expects suggestions to a
+          // JavaScript object, refer to typeahead docs for more info
+          matches.push({ value: str });
+        }
+      });
+   
+      cb(matches);
+    };
+  };
+   
     //FUNCTION FOR UPDATE THE TREE
 
     function update(source) {
@@ -88,8 +115,21 @@ $(document).ready(function() {
         } 
     });
         //$(function() {$( "#tags" ).autocomplete({source: arrayGenome});});
-        
-
+        $("#tags").typeahead({
+           hint: true
+         },
+         {
+           name: 'genomes',
+           minLength: 3,
+           limit: 10,
+           source: substringMatcher(arrayGenome)
+         });
+        $("#tags").keyup(function(event){
+           if(event.keyCode == 13){
+               $("#searchGenome").click();
+           }
+        }); 
+ 
         //recursiv iteration all over the tree to establish the relation father/son
         visit(source,WhoIsDaddy,getChildren);
 
@@ -578,7 +618,7 @@ $(document).ready(function() {
 
         (function() {
             document.getElementById("infoButton").onclick = function() { 
-                var url= 'http://omabrowser.org/cgi-bin/gateway.pl?f=DisplayOS&p1=' + d.id;
+                var url= '/cgi-bin/gateway.pl?f=DisplayOS&p1=' + d.id;
                 window.location = url;
             };
         })();
@@ -744,7 +784,7 @@ $(document).ready(function() {
 
             (function() {
                 document.getElementById("buttonSubmit").onclick = function() { 
-                    var urlExport= 'http://omabrowser.org/cgi-bin/gateway.pl?f=AllAllExport';
+                    var urlExport= '/cgi-bin/gateway.pl?f=AllAllExport';
                     for (var i in arrayIdSelectedGenome){
                         urlExport=urlExport+'&p'+i+'='+arrayIdSelectedGenome[i];
                     }

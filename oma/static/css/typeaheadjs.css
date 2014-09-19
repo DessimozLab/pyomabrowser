@@ -9,7 +9,7 @@ span.twitter-typeahead .tt-dropdown-menu {
   padding: 5px 0;
   margin: 2px 0 0;
   list-style: none;
-  font-size: 14px;
+  font-size: 12px;
   text-align: left;
   background-color: #ffffff;
   border: 1px solid #cccccc;
@@ -18,13 +18,16 @@ span.twitter-typeahead .tt-dropdown-menu {
   -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
   background-clip: padding-box;
+  max-height: 400px;
+  overflow-y: scroll;
 }
 span.twitter-typeahead .tt-suggestion > p {
   display: block;
   padding: 3px 20px;
   clear: both;
   font-weight: normal;
-  line-height: 1.42857143;
+  font-size: 14px;
+  line-height: 1.2;
   color: #333333;
   white-space: nowrap;
 }
