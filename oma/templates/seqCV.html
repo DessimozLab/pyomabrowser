@@ -16,7 +16,7 @@
 					<ul class="nav nav-tabs" role="tablist">
                         <li {% ifequal tab 'info' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}" >Information</a></li>
                         <li {% ifequal tab 'orthologs' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}&amp;p2=orthologs" >Orthologs {% if nr_vps %}<span class="badge">{{nr_vps}}</span>{% endif %}</a></li>
-                        {% if is_homeolog_species %}
+                        {% if entry.is_homeolog_species %}
                            <li {% ifequal tab 'homeologs' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}&amp;p2=homeologs" >Homeologs {% if nr_hps %}<span class="badge">{{nr_hps}}</span>{% endif %}</a></li>
                         {% endif %}
                         <li {% ifequal tab 'synteny' %} class="active" {%endifequal%} ><a href="{% url 'synteny' entry.omaid 4 4 %}" >Synteny</a></li>
