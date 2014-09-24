@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.conf import settings
-import tweepy
 from django.http import HttpResponse, Http404
 from collections import OrderedDict
+from django.views.decorators.cache import cache_control
+
+import tweepy
 import logging
 import itertools
 
@@ -283,8 +285,8 @@ def hogs(request, entry_id, level=None, idtype='OMA'):
     return render(request, 'hogs.html', context)
 
 
+@cache_control(max_age=1800)
 def home(request):
-   
     n_latest_tweets = 3
     auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
     auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
@@ -304,6 +306,7 @@ def home(request):
 
     context = {'tweets':tweets}
     return render(request, 'home.html', context)
+
 
 def about(request):
     context = {}
