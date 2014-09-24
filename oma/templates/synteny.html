@@ -81,6 +81,10 @@
                 //$('.table-fixed-header').fixedHeader();
 
             });
+            jQuery('.cursor_wait').click(function(){
+              jQuery('body').css('cursor', 'wait');
+                $(this).css('cursor', 'wait');
+            });
         });
         </script>
 {% endblock js_hook %}
@@ -104,7 +108,7 @@
                                     <td></td>
                                     {% elif infotype == 'genenumber' %}
                                     <td>
-                                    <a href = "/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/" class="btn btn-default btn-synteny btn-{{ geneinfo.type }}">
+                                    <a href = "/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/" class="btn btn-default btn-synteny cursor_wait btn-{{ geneinfo.type }}">
                                     {% if geneinfo.dir = -1 %}
                                     <span class="glyphicon glyphicon-chevron-left"> </span>
                                     {% endif %}
@@ -134,7 +138,7 @@
                                 {% elif infotype == 'genenumber' %}
                                 <td>
                                 <a href = "/oma/synteny/{{ geneinfo.entryid }}/{% if geneinfo.o_type == 'not found' %}{{ windows }}{% else %}{{ geneinfo.o_type.0 }}{% endif %}/{{ windows }}/"
-                                class="btn btn-default btn-synteny
+                                class="btn btn-default btn-synteny cursor_wait
                                     {% for entry_ortholog in geneinfo.o_type %}
                                     btn-{{ entry_ortholog }}
                                     {% endfor %}">

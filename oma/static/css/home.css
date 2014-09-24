@@ -32,7 +32,7 @@ a{cursor: pointer;}
 	padding: 10px !important;
 }
 
-.label {
+.badge, .label {
     margin-right: 3px;
     margin-left: 3px;
 }

@@ -33,7 +33,7 @@
                     <p><br></p>
                     <form role="search" id="searchForm" action="/cgi-bin/gateway.pl" method="GET">
                     <div class="col-md-10 col-md-offset-1">
-                        <div class="col-md-4">
+                        <div class="col-sm-4">
                             <select id="selectBrowser" class="form-control btn-mini" name="f">
                                 <option value="SearchDb">Keyword</option>
                                 <option value="SearchSeqDb">Protein Sequence</option>
@@ -41,7 +41,7 @@
                                 <option value="DisplayEntry">Entry</option>
                             </select>
                         </div>
-                        <div class="col-md-8">
+                        <div class="col-sm-8">
                             <div class="input-group">
                                 <input id='inputBrowser' name="p1" type="text" class="form-control">
                                 <span class="input-group-btn">
@@ -128,12 +128,12 @@ $('#exEntry').click( function() {
                                     </li>
 
                                     <li>
-                                        <b><a href="#">OMA Standalone</a>:</b>
+                                        <b><a href="/standalone">OMA Standalone</a>:</b>
                                         If you want more privacy the standalone allow you to work your own set of genomes.
                                     </li>
 
                                     <li>
-                                        <b><a href="#">Export All-All</a>:</b>
+                                        <b><a href="{% url 'export' %}">Export All-All</a>:</b>
                                         You can export a set of genome for the OMA Standalone.
                                     </li>
 
@@ -161,7 +161,7 @@ $('#exEntry').click( function() {
 				    {% endautoescape %}
 
                                 </ul>
-                                <p><a href="https://twitter.com/intent/user?screen_name=OMABrowser" class="btn btn-default btn-sm bottomright" role="button">Follow us on twitter</a></p>
+                                <p><a href="https://twitter.com/intent/user?screen_name=OMABrowser" class="btn btn-primary btn-sm bottomright" role="button">Follow us on Twitter</a></p>
                             </div>
                         </div>
                     </div>
