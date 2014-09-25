@@ -54,8 +54,8 @@
 
               {% if entry.omaid %}
                 <li role="presentation" class="dropdown-header">{{entry.omaid}}</li>
-                <li><a class="" href="/cgi-bin/gateway.pl?f=DisplayGroup&amp;p1={{entry.omaid}}">OMA Group</a></li>
-                <li><a class="" href="{% url 'hogs' entry.omaid  %}">Hierarchical orthologous groups (HOGs)</a></li>
+                <li><a class="" href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{entry.omaid}}&amp;p2=groups">OMA Group</a></li>
+                <li><a class="" href="{% url 'hogs' entry.omaid  %}">Hierarchical orthologous group (HOG)</a></li>
                 <li><a class="" href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{entry.omaid}}">Functional annotations</a></li>
                 <li><a class="" href="{% url 'synteny' entry.omaid  %}">Synteny</a></li>
               {% else %}
