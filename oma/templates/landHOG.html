@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {% load bootstrap3 %}
 
-{% block title %}OMA: landHOG{% endblock %}
+{% block title %}OMA: HOGs{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -58,7 +58,7 @@
                                 });
                                 function goHOG() {
                                     var query= document.getElementById("textHOG").value;
-                                    var newUrl="/oma/hogs/"+query+"/";
+                                    var newUrl="{% url 'hogs' %}"+query;
                                     window.location = newUrl;
                                     return false;
                                 }
