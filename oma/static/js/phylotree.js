@@ -533,7 +533,7 @@ $(document).ready(function() {
             update(path[i]);
         }
         insearch=false;
-        window.scrollTo(source.y,0);
+        $( "#svgg" ).scrollLeft( source.y );
 
     }
 
@@ -749,7 +749,7 @@ $(document).ready(function() {
 
             var viewerHeight = $(document).height();  //height of the browser window
             var navHeight = $('#navbb').height(); // height of the navbar
-            $('#svgg').css('height', viewerHeight - navHeight -50 ); // svgheight = window size - navheight - (some of margin + padding)
+            $('#svgg').css('height', viewerHeight - navHeight -110 ); // svgheight = window size - navheight - (some of margin + padding)
             var svgdivHeight = $('#svgdiv').height(); // height of the svgdiv
             var buttonHeight = $('#buttondiv').height();
             $('#UISelected').css('height', svgdivHeight -25 -buttonHeight); //Selectedgenomediv = svgdivheight - margin between the two UI div

@@ -49,26 +49,25 @@
                                         </h4>
                                     </div>
                                 </div>
-                                <form><br>
-                                </div>
+                            </form>
 
-                                <script type="text/javascript">
-                                $('#exMemb').click( function() {
-                                    $('#textHOG').val('HUMAN02353').focus();
-                                });
-                                function goHOG() {
-                                    var query= document.getElementById("textHOG").value;
-                                    var newUrl="{% url 'hogs' %}"+query;
-                                    window.location = newUrl;
-                                    return false;
-                                }
-                                </script>
-                            </div>
+                            <script type="text/javascript">
+                            $('#exMemb').click( function() {
+                                $('#textHOG').val('HUMAN02353').focus();
+                            });
+                            function goHOG() {
+                                var query= document.getElementById("textHOG").value;
+                                var newUrl="{% url 'hogs' %}"+query;
+                                window.location = newUrl;
+                                return false;
+                            }
+                            </script>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    {% endblock content %}
+{% endblock content %}
