@@ -125,14 +125,11 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
                 o_lin=utils.tax.get_parent_taxa(o_genome['NCBITaxonId'])
             except Exception:
                 logger.warning("cannot get NCBI Taxonomy for {} ({})".format(
-                    genome['UniProtSpeciesCode'],
-                    genome['NCBITaxonId']))
+                    o_genome['UniProtSpeciesCode'],
+                    o_genome['NCBITaxonId']))
                 o_lin=[]
             num_match = 0
-            no = len(o_lin)
-            nt = len(taxa) 
-            nmin = min(no,nt)
-            for i in range(1, nmin): 
+            for i in range(1, min(len(o_lin), len(taxa))): 
                 if taxa[-i] == o_lin[-i]["Name"]:
                     num_match += 1 
             o_sorting[o_species] = num_match
@@ -144,7 +141,8 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
 
     for ortholog in orthologs:
-        o_species = utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5]
+        genome = utils.id_mapper[idtype].genome_from_entry_nr(ortholog)
+        o_species = genome['UniProtSpeciesCode']
         if o_species in o_sorting:
             #get neighbouring genes for each ortholog
             o_ngs_entry_nr = utils.db.neighbour_genes(int(ortholog), windows) 
@@ -155,9 +153,10 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
             o_blank_r1=windows+len(o_ngs_entry_nr[0])-o_ngs_entry_nr[-1]
             o_blank_r2=windows+windows+1
 
-            o_md_geneinfos[ortholog]={'o_species':o_species}
-            o_md_geneinfos[ortholog]['row_number']=row_number
-            o_md_geneinfos[ortholog]['o_genes']={}
+            o_md_geneinfos[ortholog]={'o_species': o_species, 
+                                      'o_sciname': genome['SciName'],
+                                      'row_number': row_number,
+                                      'o_genes': {},}
 
             for i in range(o_blank_l):
                 o_md_geneinfos[ortholog]['o_genes'][i]={"o_type":"blank"}
@@ -170,15 +169,14 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
             for index, info in enumerate(o_separate):
                 syntenyorthologs = ["not found"]
+                o_genome = utils.id_mapper[idtype].genome_from_entry_nr(info['EntryId'])
 
                 o_geneinfo = {
-                "entryid":info[0],
-                "genename":utils.id_mapper[idtype].map_entry_nr(info[0]),
-                "dir":info[-2],}
-
-                o_geneinfo["species"] = o_geneinfo["genename"][0:5]
-                o_geneinfo["genenumber"]= o_geneinfo["genename"][5:]
-
+                    "entryid": info['EntryId'],
+                    "species": o_genome['UniProtSpeciesCode'],
+                    "genenumber": info['EntryId']-o_genome['EntryOff'],
+                    "sciname": o_genome['SciName'],
+                    "dir":info['LocusStrand'],}
 
                 if o_geneinfo["entryid"]==ortholog:
                     o_md_geneinfos[ortholog]["row_dir"]=o_geneinfo["dir"]
