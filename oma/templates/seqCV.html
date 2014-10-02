@@ -12,6 +12,7 @@
 				<div class="container">
                     <h2 class="">Entry {{ entry.omaid }} {% if entry.uniprot %} ({{entry.uniprot}}) {% endif %} </h2>
                     <h4 ><b>{% include "includes/kingdom.html" with kingdom=entry.kingdom %} {{entry.sciname}}</b></h4>
+                    {% block seqhead_hook %}{% endblock %}
 					<br>
 					<ul class="nav nav-tabs" role="tablist">
                         <li {% ifequal tab 'info' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}" >Information</a></li>
