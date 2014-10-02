@@ -141,7 +141,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
 
     for ortholog in orthologs:
-        genome = utils.id_mapper[idtype].genome_from_entry_nr(ortholog)
+        genome = utils.id_mapper[idtype].genome_of_entry_nr(ortholog)
         o_species = genome['UniProtSpeciesCode']
         if o_species in o_sorting:
             #get neighbouring genes for each ortholog
@@ -169,14 +169,14 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
             for index, info in enumerate(o_separate):
                 syntenyorthologs = ["not found"]
-                o_genome = utils.id_mapper[idtype].genome_from_entry_nr(info['EntryId'])
+                o_genome = utils.id_mapper[idtype].genome_of_entry_nr(info[0])
 
                 o_geneinfo = {
-                    "entryid": info['EntryId'],
+                    "entryid": info[0],
                     "species": o_genome['UniProtSpeciesCode'],
-                    "genenumber": info['EntryId']-o_genome['EntryOff'],
+                    "genenumber": info[0]-o_genome['EntryOff'],
                     "sciname": o_genome['SciName'],
-                    "dir":info['LocusStrand'],}
+                    "dir":info[-2],}
 
                 if o_geneinfo["entryid"]==ortholog:
                     o_md_geneinfos[ortholog]["row_dir"]=o_geneinfo["dir"]
