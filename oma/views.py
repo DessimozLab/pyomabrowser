@@ -57,23 +57,19 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
         kingdom = "unknown"
 
     windows = int(windows)
-    ngs_entry_nr = utils.db.neighbour_genes(entry_nr, windows)
+    ngs_entry_nr, gene_left = utils.db.neighbour_genes(entry_nr, windows)
     positions = list(range(-windows, windows+1)) #list of intergers for gene positions
 
-    gene_left = ngs_entry_nr[-1]
-
     blank_l=windows-gene_left
-
-    blank_r1=windows+len(ngs_entry_nr[0])-gene_left
-    blank_r2=windows+windows+1
+    blank_r1=windows+len(ngs_entry_nr)-gene_left
+    blank_r2=2*windows+1
 
     geneinfos = []
     md_geneinfos = {} #gene informations for first row, entry gene species
     md_geneinfos['genes']={}
     query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
 
-    species = query[0:5] #Species name of the entr gene
-
+    species = genome['UniProtSpeciesCode'] #Species name of the entr gene
 
     md_geneinfos['species']=species
     for i in range(blank_l):
@@ -81,18 +77,16 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     for i in range(blank_r1,blank_r2):
         md_geneinfos['genes'][i]={"type":"blank"}
 
-
-    for index, info in enumerate(ngs_entry_nr[0][0:]):
+ 
+    for index, info in enumerate(ngs_entry_nr):
         geneinfo = {
-            "entryid":info[0],
-            "genename":utils.id_mapper[idtype].map_entry_nr(info[0]),
-            "dir":info[-2],
+            "entryid":info['EntryNr'],
+            "species":species,
+            "genenumber":"{0:05d}".format(info['EntryNr'] - genome['EntryOff']),
+            "dir":info['LocusStrand'],
             "type":(index-gene_left+int(mod))%(windows+windows+1),
             "geneindex":index}
-
-        geneinfo["species"] = geneinfo["genename"][0:5]
-        geneinfo["genenumber"]= geneinfo["genename"][5:]
-        geneinfo["orthologs"] = utils.db.get_vpairs(info[0])['EntryNr2']
+        geneinfo["orthologs"] = utils.db.get_vpairs(info['EntryNr'])['EntryNr2']
 
         if geneinfo["geneindex"]==gene_left:
             entry_dir = geneinfo["dir"]
@@ -172,11 +166,11 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
                 o_genome = utils.id_mapper[idtype].genome_of_entry_nr(info[0])
 
                 o_geneinfo = {
-                    "entryid": info[0],
+                    "entryid": info['EntryNr'],
                     "species": o_genome['UniProtSpeciesCode'],
-                    "genenumber": info[0]-o_genome['EntryOff'],
+                    "genenumber": "{0:05d}".format(info['EntryNr']-o_genome['EntryOff']),
                     "sciname": o_genome['SciName'],
-                    "dir":info[-2],}
+                    "dir":info['LocusStrand'],}
 
                 if o_geneinfo["entryid"]==ortholog:
                     o_md_geneinfos[ortholog]["row_dir"]=o_geneinfo["dir"]
