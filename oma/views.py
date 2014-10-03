@@ -217,7 +217,8 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     context = {'query':query,'positions':positions, 'windows':windows,
           'md':md_geneinfos, 'o_md':o_md_geneinfos, 'colors':colors, 
           'stripes':stripes, 'nr_vps':len(orthologs), 
-          'entry':{'omaid':query, 'sciname':sciname, 'kingdom':kingdom,
+          'entry':{'omaid':query, 'sciname':misc.format_sciname(sciname), 
+                   'kingdom':kingdom,
                    'is_homeolog_species':("WHEAT"==species)}, 
           'tab':'synteny'
         }
@@ -260,16 +261,17 @@ def hogs(request, entry_id, level=None, idtype='OMA'):
         t = {}
         t['omaid'] = utils.id_mapper['OMA'].map_entry_nr(memb['EntryNr'])
         g=utils.id_mapper['OMA'].genome_of_entry_nr(memb['EntryNr'])
-        t['sciname'] = g['SciName']
+        t['sciname'] = misc.format_sciname(g['SciName'])
         t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name']
         hog_members.append(t)
 
     nr_vps = utils.db.count_vpairs(entry_nr)
-    context = {'entry': {'omaid': query, 'sciname': genome['SciName'],
+    context = {'entry': {'omaid': query, 
+            'sciname': misc.format_sciname(genome['SciName']),
             'kingdom':utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'],
             'is_homeolog_species':("WHEAT"==genome['UniProtSpeciesCode'])}, 
-            'level': level, 'hog_members': hog_members,
-            'nr_vps': nr_vps, 'tab':'hogs', 'levels':levels[::-1]}
+        'level': level, 'hog_members': hog_members,
+        'nr_vps': nr_vps, 'tab':'hogs', 'levels':levels[::-1]}
     if not hog is None:
         context['hog'] = hog
 

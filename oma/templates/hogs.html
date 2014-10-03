@@ -50,7 +50,7 @@ This entry is not part of any hierarchical orthologous group.
         <tbody>
         {% for memb in hog_members %}
         <tr><td>{% include "includes/kingdom.html" with kingdom=memb.kingdom %}
-                {{memb.sciname}} </td>
+                <b>{{memb.sciname.species}}</b>{{memb.sciname.strain}} </td>
             <td><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{memb.omaid}}">{{memb.omaid}}</td>
         </tr>
         {% endfor %}

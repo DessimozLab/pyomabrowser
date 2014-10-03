@@ -11,7 +11,7 @@
 			<div class="jumbotron">
 				<div class="container">
                     <h2 class="">Entry {{ entry.omaid }} {% if entry.uniprot %} ({{entry.uniprot}}) {% endif %} </h2>
-                    <h4 ><b>{% include "includes/kingdom.html" with kingdom=entry.kingdom %} {{entry.sciname}}</b></h4>
+                    <h4>{% include "includes/kingdom.html" with kingdom=entry.kingdom %} <b>{{entry.sciname.species}}</b>{{entry.sciname.strain}}</h4>
                     {% block seqhead_hook %}{% endblock %}
 					<br>
 					<ul class="nav nav-tabs" role="tablist">
