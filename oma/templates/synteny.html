@@ -1,92 +1,91 @@
 {% extends "seqCV.html" %}
-
+{% load staticfiles %}
 {% block title %}OMA: synteny viewer{% endblock %}
 
 {% block css_hook %}
-        <style type="text/css">
-            /* CSS used here will be applied after bootstrap.css *//* CSS used here will be applied after bootstrap.css */
+<style type="text/css">
+/* CSS used here will be applied after bootstrap.css *//* CSS used here will be applied after bootstrap.css */
 
 /*            .jumbotron{width:80%;margin-left:10%;max-width: 1200px;margin-left:auto; margin-right:auto; }*/
-            .img-center {margin:0 auto;}
-            .dl-horizontal dt{white-space: normal;width:250px;margin-right:50px;}
-            .omacenter{margin-left:auto; margin-right:auto;}
-            .titre{color:#fff;}
+.img-center {margin:0 auto;}
+.dl-horizontal dt{white-space: normal;width:250px;margin-right:50px;}
+.omacenter{margin-left:auto; margin-right:auto;}
+.titre{color:#fff;}
 
-            .syntenytable {
-                margin-bottom: 0px;
-                min-width:870px;
-            }
+.syntenytable {
+    margin-bottom: 0px;
+    min-width:870px;
+}
 
-            .syntenytable th{width:10%;}
-            .syntenytable th {
-               text-align: center;
-            }
-            .syntenytable td {
-               vertical-align: middle !important;
-             }
+.syntenytable th{width:10%;}
+.syntenytable th {
+    text-align: center;
+}
+.syntenytable td {
+    vertical-align: middle !important;
+}
 
-            .btn-synteny{
-                 background-color:#C8C8C8;
-                 color: #000;
-                 border-width: 2px;
-                 text-shadow: 1px 0 0 #DDD, 0 -1px 0 #DDD, 0 1px 0 #DDD, -1px 0 0 #DDD;
-            }
+.btn-synteny{
+    background-color:#C8C8C8;
+    color: #000;
+    border-width: 2px;
+    text-shadow: 1px 0 0 #DDD, 0 -1px 0 #DDD, 0 1px 0 #DDD, -1px 0 0 #DDD;
+}
 
-            {% for key, value in colors.iteritems %}
-            .btn-{{ key }} {background-color:{{ value }}; border-width: 2px;}
-            .btn-{{ key }}.active, .btn-{{ key }}:active{
-                background-color:{{ value }};
-                border-color: #000;
-            }
-            {% endfor %}
+{% for key, value in colors.iteritems %}
+.btn-{{ key }} {background-color:{{ value }}; border-width: 2px;}
+.btn-{{ key }}.active, .btn-{{ key }}:active{
+    background-color:{{ value }};
+    border-color: #000;
+}
+{% endfor %}
 
-            {% for key, value in stripes.iteritems %}
-            .btn-{{ key }}{
-                background-image:
-                    repeating-linear-gradient(
-                        45deg, {{ value }}
-                        ) !important;
-            }
-            {% endfor %}
+{% for key, value in stripes.iteritems %}
+.btn-{{ key }}{
+    background-image:
+    repeating-linear-gradient(
+    45deg, {{ value }}
+    ) !important;
+}
+{% endfor %}
 
-            .entete{background-color: #22780F;width:80%;margin-left:10%;}
+.entete{background-color: #22780F;width:80%;margin-left:10%;}
 
-            table {
-                table-layout:fixed;
-            }
-            .twotables {
-                overflow-y:hidden;
-            }
-            .div-table-content {
-              height:auto;
-              max-height:640px;
-              overflow-y:auto;
-              overflow-x:hidden;
-              min-width:870px;
-            }
+table {
+    table-layout:fixed;
+    border-top: none;
+    border-bottom: none;
+    background-color: #FFF;
+}
+.twotables {
+    overflow-y:hidden;
+}
 
-        </style>
+</style>
 {% endblock css_hook %}
 
 {% block js_hook %}
-        <script type='text/javascript'>
-        $(document).ready(function() {
-            $(function() {
-                {% for key, value in colors.iteritems %}
-                    $('.btn-{{key}}').hover(
-                        function(){ $('.btn-{{key}}').addClass('active');},
-                        function(){ $('.btn-{{key}}').removeClass('active');}
-                    );
-                {% endfor %}
-                //$('.table-fixed-header').fixedHeader();
-
+<script src="{%static "js/jquery.floatThead.min.js" %}"></script>
+<script type='text/javascript'>
+$(document).ready(function() {
+        $(function() {
+            {% for key, value in colors.iteritems %}
+            $('.btn-{{key}}').hover(
+                function(){ $('.btn-{{key}}').addClass('active');},
+                function(){ $('.btn-{{key}}').removeClass('active');}
+                );
+            {% endfor %}
+            //$('.table-fixed-header').fixedHeader();
             });
-            jQuery('.cursor_wait').click(function(){
-              jQuery('body').css('cursor', 'wait');
-                $(this).css('cursor', 'wait');
+        jQuery('.cursor_wait').click(function(){
+            jQuery('body').css('cursor', 'wait');
+            $(this).css('cursor', 'wait');
             });
         });
-        </script>
+$(window).load(function(){
+    $(".table").floatThead();
+    });
+</script>
 {% endblock js_hook %}
 
 {% block seqhead_hook %}
@@ -107,97 +106,92 @@
                 <img src="/static/image/tutsyn.png" class="img-responsive margin-auto" alt="help synteny">
             </div>
             <div class="modal-footer">
-               <button type="button" class="btn btn-default" data-dismiss="modal"> <span class="glyphicon glyphicon-chevron-left"></span>Back</button>
-           </div>
+                <button type="button" class="btn btn-default" data-dismiss="modal"> <span class="glyphicon glyphicon-chevron-left"></span>Back</button>
+            </div>
         </div>
     </div>
 </div>
 {% endblock seqhead_hook %}
 
 {% block contentTab %}
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Synteny Conservation 
-                <a href="#" class="badge" role="button" data-toggle="modal" data-target="#myModal" id="modalhelp">?</a>
-            </h3>
-        </div>
-        <div class="panel-body">
-            <div class="twotables">
-                <table class="table table-condensed table-striped syntenytable">
-    
-                    <tbody>
-                        <tr>
-                            <th></th>
-                            {% for position in positions %}
-                            <th>{{ position }}</th>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            <td><span title="{{ entry.sciname }}">{{ md.species }}</span></td>
-                                {% for index, geneinfo in md.genes.iteritems %}
-                                    {% for infotype, genetype in geneinfo.iteritems %}
-                                        {% if genetype == 'blank' %}
-                                        <td></td>
-                                        {% elif infotype == 'genenumber' %}
-                                        <td>
-                                        <a href = "/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/" class="btn btn-default btn-synteny cursor_wait btn-{{ geneinfo.type }}">
-                                        {% if geneinfo.dir = -1 %}
-                                        <span class="glyphicon glyphicon-chevron-left"> </span>
-                                        {% endif %}
-                                            {{ genetype }}
-                                        {% if geneinfo.dir = 1 %}
-                                        <span class="glyphicon glyphicon-chevron-right"> </span>
-                                        {% endif %}
-                                        </a>
-                                        </td>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endfor %}
-                        </tr>
-                   </tbody><!-- -->
-                   </table><!-- end table with fixed row -->
-    
-                  <div class="div-table-content"> <!-- div for the scrollable table-->
-                    <table class="table table-condensed table-striped syntenytable"><!-- -->
-                      <tbody class="div-table-content"><!-- -->
-                      <tr>
-                        {% for ortholog_id, ortholog_info in o_md.iteritems %}
-                        <td><span title="{{ortholog_info.o_sciname}}">{{ ortholog_info.o_species }}</span></td>
-                            {% for gene, geneinfo in ortholog_info.o_genes.iteritems %}
-                                {% for infotype, genetype in geneinfo.iteritems %}
-                                    {% if genetype == 'blank' %}
-                                    <td></td>
-                                    {% elif infotype == 'genenumber' %}
-                                    <td>
-                                    <a href = "/oma/synteny/{{ geneinfo.entryid }}/{% if geneinfo.o_type == 'not found' %}{{ windows }}{% else %}{{ geneinfo.o_type.0 }}{% endif %}/{{ windows }}/"
-                                    class="btn btn-default btn-synteny cursor_wait
-                                        {% for entry_ortholog in geneinfo.o_type %}
-                                        btn-{{ entry_ortholog }}
-                                        {% endfor %}">
-                                    {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir = -1 %}
-                                    <span class="glyphicon glyphicon-chevron-left"> </span>
-                                    {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir = 1 %}
-                                    <span class="glyphicon glyphicon-chevron-left"> </span>
-                                    {% endif %}
-                                    {{ genetype }}
-                                    {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir = 1 %}
-                                    <span class="glyphicon glyphicon-chevron-right"> </span>
-                                    {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir = -1 %}
-                                    <span class="glyphicon glyphicon-chevron-right"> </span>
-                                    {% endif %}
-                                    </span>
-                                    </a>
-                                    </td>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-             </div>
-         </div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Synteny Conservation 
+            <a href="#" class="badge" role="button" data-toggle="modal" data-target="#myModal" id="modalhelp">?</a>
+        </h3>
     </div>
+    <div class="panel-body">
+        <div class="twotables">
+            <table class="table table-condensed table-striped syntenytable">
+                <thead>
+                    <tr>
+                        <th></th>
+                        {% for position in positions %}
+                        <th>{{ position }}</th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><span title="{{ entry.sciname }}">{{ md.species }}</span></td>
+                        {% for index, geneinfo in md.genes.iteritems %}
+                        {% for infotype, genetype in geneinfo.iteritems %}
+                        {% if genetype == 'blank' %}
+                        <td></td>
+                        {% elif infotype == 'genenumber' %}
+                        <td>
+                            <a href = "/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/" class="btn btn-default btn-synteny cursor_wait btn-{{ geneinfo.type }}">
+                                {% if geneinfo.dir = -1 %}
+                                <span class="glyphicon glyphicon-chevron-left"> </span>
+                                {% endif %}
+                                {{ genetype }}
+                                {% if geneinfo.dir = 1 %}
+                                <span class="glyphicon glyphicon-chevron-right"> </span>
+                                {% endif %}
+                            </a>
+                        </td>
+                        {% endif %}
+                        {% endfor %}
+                        {% endfor %}
+                    </tr>
+                </thead><!-- -->
+
+                <tbody><!-- -->
+                {% for ortholog_id, ortholog_info in o_md.iteritems %}
+                <tr>
+                    <td><span title="{{ortholog_info.o_sciname}}">{{ ortholog_info.o_species }}</span></td>
+                    {% for gene, geneinfo in ortholog_info.o_genes.iteritems %}
+                    {% for infotype, genetype in geneinfo.iteritems %}
+                    {% if genetype == 'blank' %}
+                    <td></td>
+                    {% elif infotype == 'genenumber' %}
+                    <td>
+                        <a href = "/oma/synteny/{{ geneinfo.entryid }}/{% if geneinfo.o_type == 'not found' %}{{ windows }}{% else %}{{ geneinfo.o_type.0 }}{% endif %}/{{ windows }}/"
+                            class="btn btn-default btn-synteny cursor_wait
+                            {% for entry_ortholog in geneinfo.o_type %}
+                            btn-{{ entry_ortholog }}
+                            {% endfor %}">
+                            {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir = -1 %}
+                            <span class="glyphicon glyphicon-chevron-left"> </span>
+                            {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir = 1 %}
+                            <span class="glyphicon glyphicon-chevron-left"> </span>
+                            {% endif %}
+                            {{ genetype }}
+                            {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir = 1 %}
+                            <span class="glyphicon glyphicon-chevron-right"> </span>
+                            {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir = -1 %}
+                            <span class="glyphicon glyphicon-chevron-right"> </span>
+                            {% endif %}
+                            </span>
+                        </a>
+                    </td>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock contentTab %}
 
