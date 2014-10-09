@@ -2,7 +2,7 @@ $(document).ready(function() {
     var numberOfSelectedGenome=0;
     var arrayGenome=[];
     var hashGenome=[];
-    var maxGenome =54; //number max of selected genomes
+    var maxGenome = 50; //number max of selected genomes
     var needUpdate=false;//Toolbox need to be update ?
     var dblclick_timer = false;
     var viewerWidth = $(document).width()*0.9;
@@ -17,6 +17,7 @@ $(document).ready(function() {
     var insearch=false;
     var contectMenu=false;
     var contextNode=null;
+    var tooManyGenomesInBranch=false;
     
     var mouse = {x: 0, y: 0}; 
     document.addEventListener('mousemove', function(e){ 
@@ -414,26 +415,28 @@ $(document).ready(function() {
 
 
     function selectTheNode(d){
-        if (numberOfSelectedGenome>maxGenome)
-            {return d;}
-        d.isSelected=true;
-        if(!(d._children || d.children)){
-            numberOfSelectedGenome++;
-            arrayIdSelectedGenome.push(d.id);
+        if (numberOfSelectedGenome>=maxGenome){
+            tooManyGenomesInBranch = true;
+        }else{
+            d.isSelected=true;
+            if(!(d._children || d.children)){
+                numberOfSelectedGenome++;
+                arrayIdSelectedGenome.push(d.id);
+            }
         }
         return d;
     }
 
-    function _selectAlltheBranch(d)
-    {
-        if (numberOfSelectedGenome==maxGenome+1){
+    function _selectAlltheBranch(d){
+        if (numberOfSelectedGenome==maxGenome){
             alert("You have already selected "+ (maxGenome) +" genomes, you have to unselect genomes from the selection before adding new ones.");
         }
         else {
+            tooManyGenomesInBranch = false;
             visit(d,selectTheNode,getChildren);
             needUpdate=true;
             update(d);
-            if ( numberOfSelectedGenome>maxGenome){
+            if (tooManyGenomesInBranch) {
                 alert("The maximum number of selected genomes is "+ (maxGenome) +", so not all genomes in this clade could be selected.");
             }
         }
