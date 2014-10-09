@@ -190,6 +190,25 @@ a.uncurated{
     font-size: small;
 }
 
+.kw1 {
+    font-weight: bold;
+    background-color: #FFFF66;
+}
+
+.kw2 {
+    font-weight: bold;
+    background-color: #A0FFFF;
+}
+
+.kw3 {
+    font-weight: bold;
+    background-color: #99FF99;
+}
+
+.kw4 {
+    font-weight: bold;
+    background-color: #FF9999;
+}
 
 
 
