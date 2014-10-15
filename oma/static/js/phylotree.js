@@ -42,6 +42,58 @@ $(document).ready(function() {
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+    
+    var substringMatcher = function(strs) {
+      return function findMatches(q, cb) {
+        var matches, substrRegex;
+     
+        // an array that will be populated with substring matches
+        matches = [];
+        if (q.length < 2) {
+            return(cb(matches));
+        }
+     
+        // regex used to determine if a string contains the substring `q`
+        substrRegex = new RegExp(q, 'i');
+     
+        // iterate through the pool of strings and for any string that
+        // contains the substring `q`, add it to the `matches` array
+        $.each(strs, function(i, str) {
+          if (substrRegex.test(str)) {
+            // the typeahead jQuery plugin expects suggestions to a
+            // JavaScript object, refer to typeahead docs for more info
+            matches.push({ value: str });
+          }
+        });
+     
+        cb(matches);
+      };
+    };
+    
+    function build_dicts(){
+        arrayGenome=[];
+        hashGenome=[];
+        visit(root, function(d){ 
+            var genometmp=[]; 
+            
+            genometmp[0] = d.name, 
+            genometmp[1]=d ; 
+            genometmp[2] = d.id;
+            genometmp[3] = d.taxid;
+            arrayGenome.push(d.name);
+            if(!(d.children || d._children)){arrayGenome.push(d.id);} 
+            hashGenome.push(genometmp);
+        },
+        function(d) {
+            if (d.children && d.children.length > 0  ){
+                return d.children;
+            } else if (d._children && d._children.length >0){
+                return d._children;
+            } 
+        });
+    };
+
 
     //load the data from the Json file
     d3.json("/All/genomes.json", function(error, flare) {
@@ -58,64 +110,9 @@ $(document).ready(function() {
             }
         }
         root.children.forEach(collapse);
-
-        //update the tree
-        update(root);
-    });
-
-    d3.select(self.frameElement).style("height", "width");
-
-  var substringMatcher = function(strs) {
-    return function findMatches(q, cb) {
-      var matches, substrRegex;
-   
-      // an array that will be populated with substring matches
-      matches = [];
-      if (q.length < 2) {
-          return(cb(matches));
-      }
-   
-      // regex used to determine if a string contains the substring `q`
-      substrRegex = new RegExp(q, 'i');
-   
-      // iterate through the pool of strings and for any string that
-      // contains the substring `q`, add it to the `matches` array
-      $.each(strs, function(i, str) {
-        if (substrRegex.test(str)) {
-          // the typeahead jQuery plugin expects suggestions to a
-          // JavaScript object, refer to typeahead docs for more info
-          matches.push({ value: str });
-        }
-      });
-   
-      cb(matches);
-    };
-  };
-   
-    //FUNCTION FOR UPDATE THE TREE
-
-    function update(source) {
-
-        arrayGenome=[];
-        hashGenome=[];
-        visit(root, function(d){ 
-            var genometmp=[]; 
-            
-            genometmp[0] = d.name, 
-            genometmp[1]=d ; 
-            genometmp[2] = d.id;
-            genometmp[3] = d.taxid;
-            arrayGenome.push(d.name);
-            if(!(d.children || d._children)){arrayGenome.push(d.id);} 
-            hashGenome.push(genometmp);
-        },
-        function(d) {if (d.children && d.children.length > 0  ){
-            return d.children;
-        } else if (d._children && d._children.length >0){
-            return d._children;
-        } 
-    });
-        //$(function() {$( "#tags" ).autocomplete({source: arrayGenome});});
+        build_dicts();
+        
+        // autocomplete registration
         $("#tags").typeahead({
            hint: true
          },
@@ -125,12 +122,21 @@ $(document).ready(function() {
            limit: 10,
            source: substringMatcher(arrayGenome)
          });
-        $("#tags").keyup(function(event){
-           if(event.keyCode == 13){
-               $("#searchGenome").click();
-           }
-        }); 
- 
+
+        //update the tree
+        update(root);
+    });
+
+    d3.select(self.frameElement).style("height", "width");
+
+    $("#tags").keyup(function(event){
+       if(event.keyCode == 13){
+           $("#searchGenome").click();
+       }
+    }); 
+  
+    //FUNCTION FOR UPDATE THE TREE
+    function update(source) {
         //recursiv iteration all over the tree to establish the relation father/son
         visit(source,WhoIsDaddy,getChildren);
 

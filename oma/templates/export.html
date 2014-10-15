@@ -4,73 +4,73 @@
 {% block title %}OMA: Export for OMA Standalone{% endblock %}
 
 {% block css_hook %}
-    <link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
-    <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
+<link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
+<link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
 {% endblock css_hook %}
 {% block js_hook %}
-    <script src="{% static "js/phylotree.js" %}"></script>
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script src="{% static "js/typeahead.bundle.js" %}"></script>
+<script src="{% static "js/phylotree.js" %}"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="{% static "js/typeahead.bundle.js" %}"></script>
 {% endblock js_hook %}
 
-    
+
 {% block content %}
 <div class="container-fluid">
-	<div class="row">       
-	    <div class="col-md-9" id="svgdiv"> <!-- svg -->
+    <div class="row">       
+        <div class="col-md-9" id="svgdiv"> <!-- svg -->
             <div class="jumbotron" id="svgg" style="overflow-x:scroll;" >
-                 <div class="col-sm-8" style="position:absolute;">
-                   <div class="input-group">
-                      <input class="form-control typeahead" id="tags" type="text" placeholder="Search for a genome or a taxon">
-                      <span class="input-group-btn"><button class='btn btn-success greenb' id='searchGenome'>Highlight</button></span>
-                   </div>
-                 </div>
-                   <button class="btn btn-lg" data-toggle="modal" data-target="#myModal" id="modalhelp">
-                       <span class="glyphicon glyphicon-question-sign"></span>
-                   </button>
-                   <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                       <div class="modal-dialog modal-lg">
-                           <div class="modal-content">
-                               <div class="modal-header">
-                                   <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                   <h4 class="modal-title" id="myModalLabel">Export of genomes and All/All for OMA standalone</h4>
-                               </div>
-                               <div class="modal-body">
-                                   <p>In order to simplify analysis of customized genomes using the OMA Standalone application, we provide here users with precomputed all-against-all results, i.e. the most time-consuming part of the OMA pipeline. Users can simply augment the dataset with their new genomes and only the new genome-pairs will have to be aligned.</p>
-                                   <p> <b>Important limitations and notices</b> </p>
-                                   <ul>
-                                       <li><p>Note that for OMA we only store pairwise matches of alignments with a Smith-Waterman score of at least 130 and where the alignment extends over at least 30% of the smaller sequence. If you need more relaxed parameters, you will have to do the alignments again from scratch.</p></li>
-                                       <li><p>The selected genomes cannot be modified. Do not try to add, remove or change any sequences. The changes will not get incorporated, but might invalidate any later inference due to indexing mistakes.</p></li>
-                                       <li><p>The selected genomes cannot be modified. Do not try to add, remove or change any sequences. The changes will not get incorporated, but might invalidate any later inference due to indexing mistakes.</p></li>
-                                   </ul>
-                               </div>
-                               <div class="modal-footer">
-                                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                   <button class="btn btn-primary " data-toggle="modal" data-target="#myModaltuto">
-                                       How to use the genome-picker 
-                                   </button>
-                               </div>
-                           </div>
-                       </div>
-                   </div>
-                   <div class="modal fade" id="myModaltuto" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                       <div class="modal-dialog modal-lg">
-                           <div class="modal-content">
-                               <div class="modal-header">
-                                   <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                   <h4 class="modal-title" id="myModalLabel2">How to use the genome-picker ?</h4>
-                               </div>
-                               <div class="modal-body">
-                                   <img src="/static/image/tutof.png" class="img-responsive margin-auto" alt="OMA genomepicker how to use">
-                               </div>
-                               <div class="modal-footer">
-                                   <button type="button" class="btn btn-default" data-dismiss="modal"> <span class="glyphicon glyphicon-chevron-left"></span> Back</button>
-                               </div>
-                           </div>
-                       </div>
-                   </div>
-               </div>
-           </div>
+                <div class="col-sm-8" style="position:absolute;">
+                    <div class="input-group">
+                        <input class="form-control typeahead" id="tags" type="text" placeholder="Search for a genome or a taxon">
+                        <span class="input-group-btn"><button class='btn btn-success greenb' id='searchGenome'>Highlight</button></span>
+                    </div>
+                </div>
+                <button class="btn btn-lg" data-toggle="modal" data-target="#myModal" id="modalhelp">
+                    <span class="glyphicon glyphicon-question-sign"></span>
+                </button>
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                <h4 class="modal-title" id="myModalLabel">Export of genomes and All/All for OMA standalone</h4>
+                            </div>
+                            <div class="modal-body">
+                                <p>In order to simplify analysis of customized genomes using the OMA Standalone application, we provide here users with precomputed all-against-all results, i.e. the most time-consuming part of the OMA pipeline. Users can simply augment the dataset with their new genomes and only the new genome-pairs will have to be aligned.</p>
+                                <p> <b>Important limitations and notices</b> </p>
+                                <ul>
+                                    <li><p>Note that for OMA we only store pairwise matches of alignments with a Smith-Waterman score of at least 130 and where the alignment extends over at least 30% of the smaller sequence. If you need more relaxed parameters, you will have to do the alignments again from scratch.</p></li>
+                                    <li><p>The selected genomes cannot be modified. Do not try to add, remove or change any sequences. The changes will not get incorporated, but might invalidate any later inference due to indexing mistakes.</p></li>
+                                    <li><p>The selected genomes cannot be modified. Do not try to add, remove or change any sequences. The changes will not get incorporated, but might invalidate any later inference due to indexing mistakes.</p></li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button class="btn btn-primary " data-toggle="modal" data-target="#myModaltuto">
+                                    How to use the genome-picker 
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="myModaltuto" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                <h4 class="modal-title" id="myModalLabel2">How to use the genome-picker ?</h4>
+                            </div>
+                            <div class="modal-body">
+                                <img src="/static/image/tutof.png" class="img-responsive margin-auto" alt="OMA genomepicker how to use">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal"> <span class="glyphicon glyphicon-chevron-left"></span> Back</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="col-md-3" id="row3"> <!-- UI -->
             <div class="row">
                 <div class="col-md-12">
