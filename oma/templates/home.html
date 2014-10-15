@@ -35,10 +35,10 @@
                     <div class="col-md-10 col-md-offset-1">
                         <div class="col-sm-4">
                             <select id="selectBrowser" class="form-control btn-mini" name="f">
-                                <option value="SearchDb">Keyword</option>
+                                <option value="SearchDb">Fulltext Search</option>
                                 <option value="SearchSeqDb">Protein Sequence</option>
                                 <option value="DisplayGroup">OMA Group</option>
-                                <option value="DisplayEntry">Entry</option>
+                                <option value="DisplayEntry" selected="selected">Entry</option>
                             </select>
                         </div>
                         <div class="col-sm-8">
@@ -77,7 +77,7 @@ $('#exPhoto').click( function() {
 
 $('#exEntry').click( function() {
     $('#selectBrowser').val('DisplayEntry');
-    $('#inputBrowser').val('HUMAN16963').focus();
+    $('#inputBrowser').val('HUMAN22168').focus();
 });
 
 </script>
