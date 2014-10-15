@@ -78,18 +78,17 @@
         <form class="navbar-form navbar-left" role="search" id="searchNavForm" action="/cgi-bin/gateway.pl" method="GET">
           <div class="form-group">
             <select id="selectNav" class="form-control btn-mini" name="f">
-              <option value="SearchDb">Fulltext Search</option>
+              <option value="DisplayEntry" selected="selected">ID</option>
               <option value="SearchSeqDb">Protein Sequence</option>
               <option value="DisplayGroup">OMA Group</option>
-              <option value="DisplayEntry" selected="selected">Entry</option>
+              <option value="SearchDb">Fulltext Search</option>
             </select>
           </div>
           <div class="input-group">
-            <textarea id="textNav" class="form-control" rows="1" name="p1"></textarea>
+            <input id="textNav" class="form-control" type="text" name="p1">
             <span class="input-group-btn">
               <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search grey"></span></button>
             </span>
-
           </div>
         </form>
 

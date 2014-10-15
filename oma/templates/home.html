@@ -35,31 +35,34 @@
                     <div class="col-md-10 col-md-offset-1">
                         <div class="col-sm-4">
                             <select id="selectBrowser" class="form-control btn-mini" name="f">
-                                <option value="SearchDb">Fulltext Search</option>
+                                <option value="DisplayEntry" selected="selected">ID</option>
                                 <option value="SearchSeqDb">Protein Sequence</option>
                                 <option value="DisplayGroup">OMA Group</option>
-                                <option value="DisplayEntry" selected="selected">Entry</option>
+                                <option value="SearchDb">Fulltext Search</option>
                             </select>
                         </div>
                         <div class="col-sm-8">
                             <div class="input-group">
-                                <textarea id='inputBrowser' name="p1" rows="1" class="form-control"></textarea>
+                                <input id='inputBrowser' name="p1" type="text" class="form-control" />
                                 <span class="input-group-btn">
                                 <button class="btn btn-default" id='loupeBrowser' type="submit">
                                     <span class="glyphicon glyphicon-search "></span>
                                 </button>
-                            </span>
+                                </span>
                             </div>
+                            <a href="#" id="toggle">Expand (e.g. to paste a long amino-acid sequence)</a>
                         </div>
                     </div>
                     </form>
                     <br>
                 </div>
-
                 <div class="row top-buffer">
                     <div class="col-md-8 col-md-offset-2">
                         <div class="text-center">
-                            Example: <a id='exPhoto'>Search for "photoreceptor"</a> - <a id='exEntry'>Entry HUMAN22168</a>
+                            Examples: 
+                            <a id='exEntry'>Entry HUMAN22168</a>
+                          - <a id='exEntry2'>Entry P53_RAT</a>
+                          -  <a id='exPhoto'>Search for "photoreceptor"</a> 
                         </div>
                     </div>
                 </div>
@@ -73,11 +76,39 @@
 $('#exPhoto').click( function() {
     $('#selectBrowser').val('SearchDb');
     $('#inputBrowser').val('photoreceptor').focus();
+    $('#textarea').val('photoreceptor').focus();
 });
 
 $('#exEntry').click( function() {
     $('#selectBrowser').val('DisplayEntry');
     $('#inputBrowser').val('HUMAN22168').focus();
+    $('#textarea').val('HUMAN22168').focus();
+});
+
+$('#exEntry2').click( function() {
+    $('#selectBrowser').val('DisplayEntry');
+    $('#inputBrowser').val('P53_RAT').focus();
+    $('#textarea').val('P53_RAT').focus();
+});
+var textbox = $("#inputBrowser");
+var textarea = $("<textarea id='textarea' rows='3'></textarea>");
+$("#toggle").click(function () {
+    //Check for textbox or textarea
+    if ($("#inputBrowser").length === 1) {
+        //Copy value to textarea
+        textarea.val(textbox.val());
+        textarea.css("width", textbox.width());
+        //Replace textbox with textarea
+        textbox = textbox.replaceWith(textarea);
+        $("#toggle").text('Revert to normal');
+    } else {
+        //Copy value to textbox
+        textbox.val(textarea.val());
+        //Replace textarea with textbox
+        textarea = textarea.replaceWith(textbox);
+        $("#toggle").text('Expand (e.g. to paste a long amino-acid sequence)');
+    }
+    $('#selectBrowser').val('SearchSeqDb');
 });
 
 </script>
@@ -98,8 +129,7 @@ $('#exEntry').click( function() {
                                 <h3>First time here?</h3>
                                 <ul>
                                     <li>Read our
-                                        <a href="{% url 'about'  %}">brief introduction to OMA
-                                        </a>.
+                                        <a href="{% url 'about'  %}">brief introduction to OMA</a>.
                                     </li>
                                     <li>Familiarise yourself with the
                                         <a href="{% url 'type'  %}">different types of orthologs provided</a>.
@@ -124,7 +154,7 @@ $('#exEntry').click( function() {
                                 <ul>
                                     <li>
                                         <b><a href="{% url 'current'  %}">Current release</a>:</b>
-                                        All the database is available for downloading, you will find all the data we use on the OMA Browser
+                                        All the database is available for downloading, you will find all the data we use on the OMA Browser.
                                     </li>
 
                                     <li>
