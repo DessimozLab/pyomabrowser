@@ -203,6 +203,7 @@ $(document).ready(function() {
         .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
         .attr("dy", ".35em")
         .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+        .attr("class","taxonname")
         .text(function(d) { 
             var fullName=d.name;
             var splitName=fullName.split(' ');
@@ -234,6 +235,9 @@ $(document).ready(function() {
             if (d.children){return'-';}
             else if (d._children){return'+';};
         });
+
+        svg.selectAll(".taxonname").call(wrap, 100);
+        
 
 
     //TRANSITION + NODE EXIT
@@ -329,6 +333,30 @@ $(document).ready(function() {
     //--------------------------------------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------------------------
 
+    function wrap(text, width) {
+      text.each(function() {
+        var text = d3.select(this),
+            words = text.text().split(/\s+/).reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 1.1, // ems
+            y = text.attr("y"),
+            dy = parseFloat(text.attr("dy")),
+            x = text.attr("x"),
+            tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+        while (word = words.pop()) {
+          line.push(word);
+          tspan.text(line.join(" "));
+          if (tspan.node().getComputedTextLength() > width && line.length > 1){
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+          }
+        }
+      });
+    };
 
     function updateInfo(){
 
@@ -806,19 +834,10 @@ $(document).ready(function() {
             var selectname =document.getElementById('tags').value;
             if (hashGenome){
                 for (var i=0; i<hashGenome.length;i++){
-                    if (hashGenome[i][0]==selectname){
-                        var searchGenomeGo=hashGenome[i][1];
-                        expandAllTheBranch(searchGenomeGo);
-                        return;
-                    }
-                    else if (hashGenome[i][2]==selectname){
-                        var searchGenomeGo=hashGenome[i][1];
-                        expandAllTheBranch(searchGenomeGo);
-                        return;
-                    }
-                    else if (hashGenome[i][3]==selectname){
-                        var searchGenomeGo=hashGenome[i][1];
-                        expandAllTheBranch(searchGenomeGo);
+                    h = hashGenome[i];
+                    if (h[0]==selectname || h[2]==selectname || h[3]==selectname){
+                        expandAllTheBranch(h[1]);
+                        update(root);
                         return;
                     }
                 }
