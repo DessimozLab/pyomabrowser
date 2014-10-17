@@ -78,10 +78,10 @@
         <form class="navbar-form navbar-left" role="search" id="searchNavForm" action="/cgi-bin/gateway.pl" method="GET">
           <div class="form-group">
             <select id="selectNav" class="form-control btn-mini" name="f">
-              <option value="DisplayEntry" selected="selected">ID</option>
-              <option value="SearchSeqDb">Protein Sequence</option>
-              <option value="DisplayGroup">OMA Group</option>
-              <option value="SearchDb">Fulltext Search</option>
+              <option value="DisplayEntry" selected="selected">Identifier</option>
+              <option value="SearchSeqDb">Protein sequence</option>
+              <option value="DisplayGroup">OMA group</option>
+              <option value="SearchDb">Full-text search</option>
             </select>
           </div>
           <div class="input-group">
@@ -107,8 +107,11 @@
 
           <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Download <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
+              <li role="presentation" class="dropdown-header">OMA database files</li>
               <li><a class="" href="{% url 'current'  %}">Current release</a></li>
               <li><a class="" href="{% url 'archives'  %}">Archives</a></li>
+              <li class="divider"></li>
+              <li role="presentation" class="dropdown-header">User-side computations</li>
               <li><a class="" href="/standalone/">OMA standalone</a></li>
               <li><a class="" href="/oma/export">Export All/All</a></li>
             </ul>

@@ -236,7 +236,7 @@ $(document).ready(function() {
             else if (d._children){return'+';};
         });
 
-        svg.selectAll(".taxonname").call(wrap, 100);
+        //svg.selectAll(".taxonname").call(wrap, 100);
         
 
 
