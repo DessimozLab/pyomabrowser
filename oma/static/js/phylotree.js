@@ -203,7 +203,7 @@ $(document).ready(function() {
         .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
         .attr("dy", ".35em")
         .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-        .attr("class","taxonname")
+        .attr("class","wraptext")
         .text(function(d) { 
             var fullName=d.name;
             var splitName=fullName.split(' ');
@@ -215,15 +215,10 @@ $(document).ready(function() {
         .style('font-style', function(d) { return d._children  || d.children  ? 'normal'  :  'italic' })
         .style('font-weight', function(d) { return d._children || d.children  ? 'bold'  :  'normal' })
         .on("mouseover", function(d) {
-            if(!(d._children || d.children)){
-                _createNotification(d);
-            } 
-            ;
-        })  
+            _createNotification(d);
+        })
         .on("mouseout",  function(d) {
-            if(!(d._children || d.children)){
-                $( ".notification" ).remove();
-            };
+            $( ".notification" ).remove();
         });
 
         nodeEnter.append("text")
@@ -236,7 +231,7 @@ $(document).ready(function() {
             else if (d._children){return'+';};
         });
 
-        svg.selectAll(".taxonname").call(wrap, 100);
+        svg.selectAll(".wraptext").call(truncate, 100);
         
 
 
@@ -332,7 +327,92 @@ $(document).ready(function() {
     //--------------------------------------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------------------------
-
+/*    function wrap(text, width, paddingRightLeft, paddingTopBottom) {
+        paddingRightLeft = paddingRightLeft || 5; //Default padding (5px)
+        paddingTopBottom = (paddingTopBottom || 5) - 2; //Default padding (5px), remove 2 pixels because of the borders
+        var maxWidth = width; //I store the tooltip max width
+        width = width - (paddingRightLeft * 2); //Take the padding into account
+    
+        var arrLineCreatedCount = [];
+        text.each(function() {
+            var text = d3.select(this),
+                words = text.text().split(/[ \f\n\r\t\v]+/).reverse(), //Don't cut non-breaking space (\xA0), as well as the Unicode characters \u00A0 \u2028 \u2029)
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1.1, //Ems
+                x,
+                y = text.attr("y"),
+                dy = parseFloat(text.attr("dy")),
+                createdLineCount = 1, //Total line created count
+                textAlign = text.style('text-anchor') || 'start'; //'start' by default (start, middle, end, inherit)
+    
+            //Clean the data in case <text> does not define those values
+            if (isNaN(dy)) dy = 0; //Default padding (0em) : the 'dy' attribute on the first <tspan> _must_ be identical to the 'dy' specified on the <text> element, or start at '0em' if undefined
+    
+            //Offset the text position based on the text-anchor
+            var wrapTickLabels = d3.select(text.node().parentNode).classed('tick'); //Don't wrap the 'normal untranslated' <text> element and the translated <g class='tick'><text></text></g> elements the same way..
+            if (wrapTickLabels) {
+                switch (textAlign) {
+                    case 'start':
+                        x = -width / 2;
+                        break;
+                    case 'middle':
+                        x = 0;
+                        break;
+                    case 'end':
+                        x = width / 2;
+                        break;
+                    default :
+                }
+            }
+            else { //untranslated <text> elements
+                switch (textAlign) {
+                    case 'start':
+                        x = paddingRightLeft;
+                        break;
+                    case 'middle':
+                        x = maxWidth / 2;
+                        break;
+                    case 'end':
+                        x = maxWidth - paddingRightLeft;
+                        break;
+                    default :
+                }
+            }
+            y = +((null === y)?paddingTopBottom:y);
+    
+            var tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+            //noinspection JSHint
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width && line.length > 1) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                    ++createdLineCount;
+                }
+            }
+    
+            arrLineCreatedCount.push(createdLineCount); //Store the line count in the array
+        });
+        return arrLineCreatedCount;
+    }
+*/
+    function truncate(text, width) {
+      text.each(function(){
+        var text = d3.select(this),
+            full_text = text.text();
+        while (text.node().getComputedTextLength()>width){
+            full_text = full_text.slice(0, - 1);
+            text.text(full_text+"...");
+        }
+      });
+    };
+                
+    
     function wrap(text, width) {
       text.each(function() {
         var text = d3.select(this),
@@ -574,6 +654,22 @@ $(document).ready(function() {
 
     }
 
+    function recExpand(d){
+        if($('.tooltip')){
+            $('.tooltip').remove();
+            contectMenu=false;
+            contextNode=null;
+        }
+        visit(d,function(d){
+            if (d._children && d._children.length > 0){
+                d.children = d._children;
+                d._children = null;
+            }
+        }, getChildren);
+        update(root);
+        $("#svgg").scrollLeft(d.y);
+    }
+
     function getFather(d){return d.father;}
 
     function addTooltipTaxon(d, leX, leY){
@@ -596,10 +692,12 @@ $(document).ready(function() {
         div.transition()
         .duration(200)  
         .style("opacity", .9);  
-        div.html( '<button id="expandButton">'+expandOrCollapse+'</button>'+'<button id="selectButton">'+ selectOrUnselect+'</button>' );
+        div.html( '<button id="expandButton">'+expandOrCollapse+'</button>'
+            +'<button id="selectButton">'+ selectOrUnselect+'</button><br>'
+            +'<button id="recExpandButton">Expand all</button>');
 
 
-        var toolwidth=$('#expandButton').width();
+        var toolwidth=$('#recExpandButton').width();
         div.style("left", leX -toolwidth*1.5 + "px")             
         .style("top", leY  +5 + "px");
 
@@ -625,6 +723,15 @@ $(document).ready(function() {
 
             };
         })();
+        (function(){
+            document.getElementById("recExpandButton").onclick = function(){
+                recExpand(d);
+                $('.tooltip').remove();
+                contectMenu=false;
+                contextNode=null;
+            };
+        })();
+
         contextNode=d;
         contectMenu=true;
 
@@ -685,16 +792,20 @@ $(document).ready(function() {
         .style("opacity", 0);
         div.transition()
         .duration(200)  
-        .style("opacity", .9);  
-        div.html('<b>'+d.name+ '</b> <br> <strong> ID :</strong> '+ '<i>'+d.id +'</i>'+'<br>'+' <strong> Release :</strong> '+  d.release +'<br>'+' <strong> Clade :</strong> '+  d.father.name)
+        .style("opacity", .9);
+        var txt = "<b>"+d.name+"</b>"
+        var xpos = mouse.x;
+        if(!(d._children || d.children)){
+            txt += ("<br><strong>ID:</strong><i>"+d.id+"</i><br><strong>Release:</strong> "+ d.release +'<br><strong>Clade:</strong> '+ d.father.name);
+            xpos += 100;
+        }
+        
+        div.html(txt);
         //.style("left", leX+ "px")          
         //.style("top", leY  + "px");
 
         $('.notification').css('top',  mouse.y ); 
-        $('.notification').css('left', mouse.x +100 );
-
-
-
+        $('.notification').css('left', xpos );
     }
 
     function addToInfo(d)
@@ -837,6 +948,7 @@ $(document).ready(function() {
                     h = hashGenome[i];
                     if (h[0]==selectname || h[2]==selectname || h[3]==selectname){
                         expandAllTheBranch(h[1]);
+                        recExpand(h[1]);
                         update(root);
                         return;
                     }
