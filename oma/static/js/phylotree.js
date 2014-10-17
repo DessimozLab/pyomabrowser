@@ -232,6 +232,7 @@ $(document).ready(function() {
         });
 
         svg.selectAll(".wraptext").call(truncate, 100);
+        //svg.selectAll(".taxonname").call(wrap, 100);
         
 
 
