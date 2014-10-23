@@ -7,6 +7,7 @@ import django.conf
 import re
 import json
 import os
+import collections
 
 def search_indexed_col(table, colname, element, side='left'):
     """return the row index of a table for which holds:
@@ -117,7 +118,7 @@ class Database(object):
         idx = data['EntryNr'].searchsorted(entry_nr)
         res = data[max(0,idx-windows):min(len(data),idx+windows+1)]
         idx = res['EntryNr'].searchsorted(entry_nr)
-        return (res, idx)
+        return res, idx
 
 
     def hog_family(self, entry):
@@ -241,7 +242,13 @@ class IDResolver(object):
         return id_mapper['OMA'].omaid_to_entry_nr(e_id)
 
     def search_xrefs(self, e_id):
-        raise NotImplemented('xref search not yet implemented')
+        """search for all xrefs. TODO: what happens if xref is ambiguous?"""
+        res = set([x['EntryNr'] for x in id_mapper['XRef'].search_xref(e_id)])
+        if len(res)==0:
+            raise InvalidId(e_id)
+        elif len(res) > 1:
+            raise NotImplemented('Cross-ref "{}" is ambiguous'.format(e_id))
+        return res[0]
 
     def resolve(self, e_id):
         """maps an id to the entry_nr of the current OMA release."""
@@ -341,6 +348,88 @@ class IdMapperFactory(object):
             except KeyError:
                 raise UnknownIdType(str(idtype)+' is unknown')
         return mapper 
+
+
+class XrefIdMapper(object):
+    def __init__(self, db_handle):
+        self.xref_tab = db_handle.get_node('/XRef')
+        self.xrefEnum = self.xref_tab.get_enum('XRefSource')
+        self.idtype = frozenset(self.xrefEnum._values.keys())
+
+    def map_entry_nr(self, entry_nr):
+        res = set([row for row in self.xref_tab.where('EntryNr=={}'.format(entry_nr))
+            if row['XRefSource'] in self.idtype])
+        return res
+
+    def _combine_query_values(self, field, values):
+        parts = ['({}=={})'.format(field, z) for z in values]
+        return '|'.join(parts)
+
+
+    def map_many_entry_nrs(self, entry_nrs):
+        """map several entry_nrs with as few db queries as possible to their
+        cross-references. The function returns a numpy recarray containing all 
+        fields as defined in the table."""
+        mapped_junks = []
+        junk_size = 240 - len(self.idtype) # respect max number of condtion variables.
+        source_condition = self._combine_query_values('XRefSource',self.idtype)
+        for start in range(0, len(entry_nrs), junk_size):
+            condition = "({}) & ({})".format(
+                    self._combine_query_values('EntryNr',
+                        entry_nrs[start:start+junk_size]),
+                    source_condition)
+            mapped_junks.append(self.xref_tab.read_where(condition))
+        return numpy.lib.recfunctions.merge_arrays(
+                mapped_junks,
+                usemask=False)
+
+    def search_xref(self, xref):
+        res = set([row for row in self.xref_tab.where('XRefId=="{}"'.format(xref)) 
+            if row['XRefSource'] in self.idtype])
+        return res
+
+    def xreftab_to_dict(self, tab):
+        xrefdict = collections.defaultdict(dict)
+        for row in tab:
+            typ = self.xrefEnum._values[row['XRefSource']]
+            if typ not in xrefdict[row['EntryNr']]:
+                xrefdict[row['EntryNr']][typ] = {'id':row['XRefId']}
+        return xrefdict
+
+
+        
+class UniProtIdMapper(XrefIdMapper):
+    def __init__(self, db):
+        super().__init__(db)
+        self.idtype = frozenset([self.xrefEnum[z] 
+            for z in ['UniProtKB/SwissProt','UniProtKB/TrEMBL']])
+
+
+class LinkoutIdMapper(XrefIdMapper):
+    def __init__(self, db):
+        super().__init__(db)
+        self.idtype = frozenset([self.xrefEnum[z]
+            for z in ['UniProtKB/SwissProt','UniProtKB/TrEMBL',
+                      'Ensembl Protein', 'EntrezGene']])
+
+    def url(self, typ, id_):
+        # TODO: improve url generator in external module with all xrefs
+        url = None
+        if typ.startswith('UniProtKB'):
+            url = 'http://uniprot.org/uniprot/{}'.format(id_)
+        elif typ == 'EntrezGene':
+            url = 'http://www.ncbi.nlm.nih.gov/gene/{}'.format(id_)
+        elif typ.startswith('Ensembl'):
+            url = 'http://ensembl.org/id/{}'.format(id_)
+        return url
+
+
+    def xreftab_to_dict(self, tab):
+        xref = super().xreftab_to_dict(tab)
+        for d in xref.values():
+            for typ, elem in d.items():
+                elem['url'] = self.url(typ, elem['id'])
+        return xref
 
 
 db = Database()

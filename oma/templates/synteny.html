@@ -81,6 +81,9 @@ $(document).ready(function() {
             jQuery('body').css('cursor', 'wait');
             $(this).css('cursor', 'wait');
             });
+        $("[data-toggle=tooltip]").tooltip({html:true,
+                     placement:'auto',
+                     delay: { "show": 200, "hide": 200 }});
         });
 $(window).load(function(){
     $(".table").floatThead();
@@ -138,13 +141,14 @@ $(window).load(function(){
                         <td></td>
                         {% elif infotype == 'genenumber' %}
                         <td>
-                            <a href = "/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/" class="btn btn-default btn-synteny cursor_wait btn-{{ geneinfo.type }}">
+                            <a href = "/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/" class="btn btn-default btn-synteny cursor_wait btn-{{ geneinfo.type }}"
+                                data-toggle="tooltip" data-title="{% include "includes/synteny_xref.html" with eNr=geneinfo.entryid %}" >
                                 {% if geneinfo.dir = -1 %}
-                                <span class="glyphicon glyphicon-chevron-left"> </span>
+                                <span class="glyphicon glyphicon-chevron-left"></span>
                                 {% endif %}
                                 {{ genetype }}
                                 {% if geneinfo.dir = 1 %}
-                                <span class="glyphicon glyphicon-chevron-right"> </span>
+                                <span class="glyphicon glyphicon-chevron-right"></span>
                                 {% endif %}
                             </a>
                         </td>
@@ -163,22 +167,23 @@ $(window).load(function(){
                     {% if genetype == 'blank' %}
                     <td></td>
                     {% elif infotype == 'genenumber' %}
-                    <td>
+                    <td> 
                         <a href = "/oma/synteny/{{ geneinfo.entryid }}/{% if geneinfo.o_type == 'not found' %}{{ windows }}{% else %}{{ geneinfo.o_type.0 }}{% endif %}/{{ windows }}/"
                             class="btn btn-default btn-synteny cursor_wait
-                            {% for entry_ortholog in geneinfo.o_type %}
-                            btn-{{ entry_ortholog }}
-                            {% endfor %}">
+                                {% for entry_ortholog in geneinfo.o_type %}
+                                btn-{{ entry_ortholog }}
+                                {% endfor %}"
+                                data-toggle="tooltip" data-title="{% include "includes/synteny_xref.html" with eNr=geneinfo.entryid %}" >
                             {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir = -1 %}
-                            <span class="glyphicon glyphicon-chevron-left"> </span>
+                            <span class="glyphicon glyphicon-chevron-left"></span>
                             {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir = 1 %}
-                            <span class="glyphicon glyphicon-chevron-left"> </span>
+                            <span class="glyphicon glyphicon-chevron-left"></span>
                             {% endif %}
                             {{ genetype }}
                             {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir = 1 %}
-                            <span class="glyphicon glyphicon-chevron-right"> </span>
+                            <span class="glyphicon glyphicon-chevron-right"></span>
                             {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir = -1 %}
-                            <span class="glyphicon glyphicon-chevron-right"> </span>
+                            <span class="glyphicon glyphicon-chevron-right"></span>
                             {% endif %}
                             </span>
                         </a>

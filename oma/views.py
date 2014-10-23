@@ -77,7 +77,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     for i in range(blank_r1,blank_r2):
         md_geneinfos['genes'][i]={"type":"blank"}
 
- 
+    all_entry_nrs = []
     for index, info in enumerate(ngs_entry_nr):
         geneinfo = {
             "entryid":info['EntryNr'],
@@ -94,6 +94,8 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
 
         geneinfos.append(geneinfo)
+        all_entry_nrs.append(info['EntryNr'])
+
         md_geneinfos['genes'][index+blank_l]=geneinfo
         md_geneinfos['genes'] = OrderedDict(
                 sorted(md_geneinfos['genes'].items(), 
@@ -112,9 +114,8 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
     o_sorting = {}
     for ortholog in orthologs:
-        o_species = utils.id_mapper[idtype].map_entry_nr(ortholog)[0:5]
-        if not o_species in o_sorting:
-            o_genome=utils.id_mapper['OMA'].genome_of_entry_nr(ortholog)
+        o_genome=utils.id_mapper['OMA'].genome_of_entry_nr(ortholog)
+        if not o_genome['UniProtSpeciesCode'] in o_sorting:
             try:
                 o_lin=utils.tax.get_parent_taxa(o_genome['NCBITaxonId'])
             except Exception:
@@ -126,7 +127,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
             for i in range(1, min(len(o_lin), len(taxa))): 
                 if taxa[-i] == o_lin[-i]["Name"]:
                     num_match += 1 
-            o_sorting[o_species] = num_match
+            o_sorting[o_genome['UniProtSpeciesCode']] = num_match
     o_sorting= OrderedDict(sorted(o_sorting.items(), key=lambda t: t[1], reverse=True))
     o_sorting = o_sorting.keys()[0:50]
     osd = {} #ortholog sorting dictionary
@@ -135,16 +136,16 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
 
     for ortholog in orthologs:
-        genome = utils.id_mapper[idtype].genome_of_entry_nr(ortholog)
+        genome = utils.id_mapper['OMA'].genome_of_entry_nr(ortholog)
         o_species = genome['UniProtSpeciesCode']
         if o_species in o_sorting:
             #get neighbouring genes for each ortholog
-            o_ngs_entry_nr = utils.db.neighbour_genes(int(ortholog), windows) 
+            o_neighbors, centerIdx = utils.db.neighbour_genes(int(ortholog), windows) 
 
             row_number = osd[o_species]
 
-            o_blank_l=windows-o_ngs_entry_nr[-1]
-            o_blank_r1=windows+len(o_ngs_entry_nr[0])-o_ngs_entry_nr[-1]
+            o_blank_l=windows-centerIdx
+            o_blank_r1=windows+len(o_neighbors)-centerIdx
             o_blank_r2=windows+windows+1
 
             o_md_geneinfos[ortholog]={'o_species': o_species, 
@@ -157,13 +158,10 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
             for i in range(o_blank_r1,o_blank_r2):
                 o_md_geneinfos[ortholog]['o_genes'][i]={"o_type":"blank"}
 
-            o_allinfo = o_ngs_entry_nr[0]
-            o_separate = o_allinfo[0:] #each gene information in original form
-
-
-            for index, info in enumerate(o_separate):
+            for index, info in enumerate(o_neighbors):
+                all_entry_nrs.append(info['EntryNr'])
                 syntenyorthologs = ["not found"]
-                o_genome = utils.id_mapper[idtype].genome_of_entry_nr(info[0])
+                o_genome = utils.id_mapper['OMA'].genome_of_entry_nr(info[0])
 
                 o_geneinfo = {
                     "entryid": info['EntryNr'],
@@ -210,6 +208,16 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
             elif o_md_geneinfos[ortholog]["row_dir"] != md_geneinfos['entry_dir']:
                 o_md_geneinfos[ortholog]['o_genes'] = OrderedDict(sorted(o_md_geneinfos[ortholog]['o_genes'].items(), key=lambda t: t[0], reverse=True))
 
+    linkout_mapper = utils.id_mapper['Linkout']
+    xrefs = linkout_mapper.xreftab_to_dict(
+            linkout_mapper.map_many_entry_nrs(all_entry_nrs))
+    for key in md_geneinfos['genes'].keys():
+        md_geneinfos['genes'][key]['xrefs'] = xrefs[key]
+    for o in  o_md_geneinfos.values():
+        for key in o['o_genes'].keys():
+                o['o_genes'][key]['xrefs'] = xrefs[key]
+
+
     o_md_geneinfos= OrderedDict(
             sorted(o_md_geneinfos.items(), 
             key=lambda t: t[1]['row_number']))
@@ -220,7 +228,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
           'entry':{'omaid':query, 'sciname':misc.format_sciname(sciname), 
                    'kingdom':kingdom,
                    'is_homeolog_species':("WHEAT"==species)}, 
-          'tab':'synteny'
+          'tab':'synteny','xrefs':xrefs
         }
 
     return render(request, 'synteny.html', context)
