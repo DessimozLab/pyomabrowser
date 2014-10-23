@@ -106,7 +106,7 @@ LOGGING = {
             'propagate': True,
             'level':'WARNING',
         },
-        'MYAPP': {
+        'oma': {
             'handlers': ['file'],
             'level': 'DEBUG',
         },

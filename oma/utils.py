@@ -8,6 +8,9 @@ import re
 import json
 import os
 import collections
+import logging
+
+logger = logging.getLogger(__name__)
 
 def search_indexed_col(table, colname, element, side='left'):
     """return the row index of a table for which holds:
@@ -371,15 +374,16 @@ class XrefIdMapper(object):
         cross-references. The function returns a numpy recarray containing all 
         fields as defined in the table."""
         mapped_junks = []
-        junk_size = 240 - len(self.idtype) # respect max number of condtion variables.
+        junk_size = 32 - len(self.idtype) # respect max number of condtion variables.
         source_condition = self._combine_query_values('XRefSource',self.idtype)
         for start in range(0, len(entry_nrs), junk_size):
             condition = "({}) & ({})".format(
                     self._combine_query_values('EntryNr',
                         entry_nrs[start:start+junk_size]),
                     source_condition)
+            logger.debug('xref map condition: '+condition)
             mapped_junks.append(self.xref_tab.read_where(condition))
-        return numpy.lib.recfunctions.merge_arrays(
+        return numpy.lib.recfunctions.stack_arrays(
                 mapped_junks,
                 usemask=False)
 
@@ -391,7 +395,11 @@ class XrefIdMapper(object):
     def xreftab_to_dict(self, tab):
         xrefdict = collections.defaultdict(dict)
         for row in tab:
-            typ = self.xrefEnum._values[row['XRefSource']]
+            try:
+                typ = self.xrefEnum._values[row['XRefSource']]
+            except IndexError as e:
+                logger.warn('invalid XRefSource value in {}'.format(row))
+                continue
             if typ not in xrefdict[row['EntryNr']]:
                 xrefdict[row['EntryNr']][typ] = {'id':row['XRefId']}
         return xrefdict

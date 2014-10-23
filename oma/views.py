@@ -208,14 +208,15 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
             elif o_md_geneinfos[ortholog]["row_dir"] != md_geneinfos['entry_dir']:
                 o_md_geneinfos[ortholog]['o_genes'] = OrderedDict(sorted(o_md_geneinfos[ortholog]['o_genes'].items(), key=lambda t: t[0], reverse=True))
 
+    logger.debug('nr of entry_nrs: {}'.format(len(all_entry_nrs)))
     linkout_mapper = utils.id_mapper['Linkout']
     xrefs = linkout_mapper.xreftab_to_dict(
             linkout_mapper.map_many_entry_nrs(all_entry_nrs))
-    for key in md_geneinfos['genes'].keys():
-        md_geneinfos['genes'][key]['xrefs'] = xrefs[key]
+    for genedict in md_geneinfos['genes'].values():
+        genedict['xrefs'] = xrefs[genedict['entryid']]
     for o in  o_md_geneinfos.values():
-        for key in o['o_genes'].keys():
-                o['o_genes'][key]['xrefs'] = xrefs[key]
+        for genedict in o['o_genes'].values():
+            genedict['xrefs'] = xrefs[genedict['entryid']]
 
 
     o_md_geneinfos= OrderedDict(
