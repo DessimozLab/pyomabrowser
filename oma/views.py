@@ -213,10 +213,12 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     xrefs = linkout_mapper.xreftab_to_dict(
             linkout_mapper.map_many_entry_nrs(all_entry_nrs))
     for genedict in md_geneinfos['genes'].values():
-        genedict['xrefs'] = xrefs[genedict['entryid']]
+        if 'entryid' in genedict:
+            genedict['xrefs'] = xrefs[genedict['entryid']]
     for o in  o_md_geneinfos.values():
         for genedict in o['o_genes'].values():
-            genedict['xrefs'] = xrefs[genedict['entryid']]
+            if 'entryid' in genedict:
+                genedict['xrefs'] = xrefs[genedict['entryid']]
 
 
     o_md_geneinfos= OrderedDict(
