@@ -251,7 +251,7 @@ class IDResolver(object):
             raise InvalidId(e_id)
         elif len(res) > 1:
             raise NotImplemented('Cross-ref "{}" is ambiguous'.format(e_id))
-        return res[0]
+        return int(res.pop())
 
     def resolve(self, e_id):
         """maps an id to the entry_nr of the current OMA release."""
@@ -260,7 +260,7 @@ class IDResolver(object):
         except ValueError:
             try: 
                 nr = self._from_omaid(e_id)
-            except InvalidOmaId:
+            except (InvalidOmaId, UnknownSpecies) as e:
                 nr = self.search_xrefs(e_id)
         return nr
 
@@ -388,8 +388,9 @@ class XrefIdMapper(object):
                 usemask=False)
 
     def search_xref(self, xref):
-        res = set([row for row in self.xref_tab.where('XRefId=="{}"'.format(xref)) 
-            if row['XRefSource'] in self.idtype])
+        res = self.xref_tab.read_where('XRefId=="{}"'.format(xref.encode('utf-8')))
+        if len(res)>0 and len(self.idtype)<len(self.xrefEnum):
+            res = res[numpy.in1d(res['XRefSource'], list(self.idtype))]
         return res
 
     def xreftab_to_dict(self, tab):

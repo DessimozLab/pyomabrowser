@@ -37,7 +37,11 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     neighborhood."""
    
     
-    entry_nr = utils.id_resolver.resolve(entry_id)
+    try:
+        entry_nr = utils.id_resolver.resolve(entry_id)
+    except utils.InvalidId:
+        raise Http404('requested id unknown')
+
     genome=utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
     try:
         lin=utils.tax.get_parent_taxa(genome['NCBITaxonId'])
@@ -239,7 +243,11 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
 
 def hogs(request, entry_id, level=None, idtype='OMA'):
-    entry_nr = utils.id_resolver.resolve(entry_id)
+    try:
+        entry_nr = utils.id_resolver.resolve(entry_id)
+    except utils.InvalidId as e:
+        raise Http404('requested id is unknown')
+
     query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
 
     entry = utils.db.entry_by_entry_nr(entry_nr)
