@@ -44,7 +44,7 @@
                                     <div class="col-xs-6 col-xs-offset-4">
                                         <h4>
                                             <small> Example: 
-                                                <a id='exMemb'>HUMAN02353</a>
+                                                <a id='exMemb'>HUMAN02353</a> - <a id='exMemb2'>B1B1A8</a>
                                             </small>
                                         </h4>
                                     </div>
@@ -54,6 +54,9 @@
                             <script type="text/javascript">
                             $('#exMemb').click( function() {
                                 $('#textHOG').val('HUMAN02353').focus();
+                            });
+                            $('#exMemb2').click( function() {
+                                $('#textHOG').val('B1B1A8').focus();
                             });
                             function goHOG() {
                                 var query= document.getElementById("textHOG").value;

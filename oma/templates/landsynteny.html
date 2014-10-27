@@ -21,14 +21,13 @@
                             <p>As synteny is computed with respect to a reference entry, please first search for a protein sequence of interest and click on the “Synteny” tab.
                             </p>
                             <br>
-                            <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
-                                <input type="hidden" name="f" value="DisplayEntry"/>
+                            <form class="form-horizontal" id="searchForm" onSubmit="goSynteny(); return false;">
                                 <div class="form-group">
-                                    <label for="textAnn" class="col-sm-4 control-label">Member gene/protein:
+                                    <label for="textID" class="col-sm-4 control-label">Member gene/protein:
                                     </label>
                                     <div class="col-sm-6">
                                         <div class="input-group">
-                                            <input id='textAnn' name="p1" type="text" class="form-control">
+                                            <input id='textID' type="text" class="form-control">
                                             <span class="input-group-btn">
                                             <button class="btn btn-default" type="submit">
                                                 <span class="glyphicon glyphicon-search "></span>
@@ -45,19 +44,25 @@
                                         </h4>
                                     </div>
                                 </div>
-                                </form><br>
-                                <script type="text/javascript">
-                                $('#exMemb1').click( function() {
-                                    $('#textAnn').val('ADH1A_HUMAN').focus();
-                                });
-                                $('#exMemb2').click( function() {
-                                    $('#textAnn').val('CESA1_ARATH').focus();
-                                });
-                                $('#exMemb3').click( function() {
-                                    $('#textAnn').val('NP_001104739').focus();
-                                });
-                                </script>
-                           </div>
+                            </form><br>
+                            <script type="text/javascript">
+                            $('#exMemb1').click( function() {
+                                $('#textID').val('ADH1A_HUMAN').focus();
+                            });
+                            $('#exMemb2').click( function() {
+                                $('#textID').val('CESA1_ARATH').focus();
+                            });
+                            $('#exMemb3').click( function() {
+                                $('#textID').val('NP_001104739').focus();
+                            });
+                            function goSynteny() {
+                                var query= document.getElementById("textID").value;
+                                var newUrl="{% url 'synteny' %}"+query;
+                                window.location = newUrl;
+                                return false;
+                            }
+                            </script>
+                        </div>
                     </div>
                 </div>
             </div>
