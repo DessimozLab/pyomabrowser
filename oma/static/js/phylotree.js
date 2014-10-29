@@ -40,6 +40,7 @@ $(document).ready(function() {
     var svg = d3.select("#svgg").append("svg")
     .attr("width", width + margin.right + margin.left)
     .attr("height", height + margin.top + margin.bottom)
+    .attr("id","svgpane")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
@@ -127,7 +128,7 @@ $(document).ready(function() {
         update(root);
     });
 
-    d3.select(self.frameElement).style("height", "width");
+    //d3.select(self.frameElement).style("height", "width");
 
     $("#tags").keyup(function(event){
        if(event.keyCode == 13){
@@ -154,15 +155,23 @@ $(document).ready(function() {
         };
         childCount(0, root);
 
-        var newHeight = d3.max(levelWidth) * 25;   
-        d3.select(self.frameElement).style(newHeight, '5500px'); // 5500px must be automaticaly calculate
+        var newHeight = Math.max(d3.max(levelWidth) * 25, height),
+            newWidth = 210*(levelWidth.length+1)
+        //d3.select(self.frameElement).style(newHeight, 210*levelWidth.length); // 5500px must be automaticaly calculate
+        var svgpane = d3.select('#svgpane'),
+            height_scale_factor = (1.0 * newHeight) / svgpane.attr('height')
+        svgpane.attr('height',newHeight+margin.top).attr('width', newWidth); // 5500px must be automaticaly calculate
+        tree.size([newHeight,newWidth])
 
         // Compute the new tree layout.
         var nodes = tree.nodes(root).reverse(),
         links = tree.links(nodes);
 
         // Normalize for fixed-depth.
-        nodes.forEach(function(d) { d.y = d.depth * 210; });
+        nodes.forEach(function(d) { 
+            d.y = d.depth * 210; 
+            //d.x *= height_scale_factor 
+        });
 
         // Update the nodes…
         var node = svg.selectAll("g.node")
@@ -669,6 +678,7 @@ $(document).ready(function() {
         }, getChildren);
         update(root);
         $("#svgg").scrollLeft(d.y);
+        $("#svgg").scrollTop(d.x);
     }
 
     function getFather(d){return d.father;}
