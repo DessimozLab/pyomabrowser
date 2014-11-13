@@ -31,7 +31,7 @@ DEBUG = False
 
 TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = ['omabrowser.org','.ethz.ch']
+ALLOWED_HOSTS = ['omabrowser.org','.ethz.ch','.cs.ucl.ac.uk']
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 SHOW_TOOLBAR_CALLBACK = lambda x: True
