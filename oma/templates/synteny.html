@@ -84,6 +84,9 @@ $(document).ready(function() {
         $("[data-toggle=tooltip]").tooltip({html:true,
                      placement:'bottom',
                      delay: { "show": 750, "hide": 2500 }});
+        $("[data-toggle=tooltip_right]").tooltip({html:true,
+                     placement:'right',
+                     delay: { "show": 750, "hide": 2500 }});
         });
 $(window).load(function(){
     $(".table").floatThead();
@@ -134,7 +137,7 @@ $(window).load(function(){
                         {% endfor %}
                     </tr>
                     <tr>
-                        <td><span data-toggle="tooltip" data-html=false data-title="{{ entry.sciname.species }} {{ entry.sciname.strain }}">{{ md.species }}</span></td>
+                        <td><span data-toggle="tooltip_right" data-html=false data-title="{{ entry.sciname.species }} {{ entry.sciname.strain }}">{{ md.species }}</span></td>
                         {% for index, geneinfo in md.genes.iteritems %}
                         {% for infotype, genetype in geneinfo.iteritems %}
                         {% if genetype == 'blank' %}
@@ -161,7 +164,7 @@ $(window).load(function(){
                 <tbody><!-- -->
                 {% for ortholog_id, ortholog_info in o_md.iteritems %}
                 <tr>
-                    <td><span data-toggle="tooltip" data-html=false data-title="{{ortholog_info.o_sciname}}">{{ ortholog_info.o_species }}</span></td>
+                    <td><span data-toggle="tooltip_right" data-html=false data-title="{{ortholog_info.o_sciname}}">{{ ortholog_info.o_species }}</span></td>
                     {% for gene, geneinfo in ortholog_info.o_genes.iteritems %}
                     {% for infotype, genetype in geneinfo.iteritems %}
                     {% if genetype == 'blank' %}
