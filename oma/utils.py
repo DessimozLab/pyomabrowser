@@ -170,7 +170,13 @@ class Database(object):
     def _genome_range(self, g):
         return id_mapper['OMA'].genome_range(g)
 
-        
+    def get_sequence(self, entry):
+        """get the protein sequence of a given entry as a string"""
+        entry = self.ensure_entry(entry)
+        seqArr = self.db.get_node('/Protein/SequenceBuffer')
+        seq = seqArr[entry['SeqBufferOffset']:entry['SeqBufferOffset']+entry['SeqBufferLength']-1]
+        return seq.tostring()
+
 
 class OmaIdMapper(object):
     def __init__(self, db):

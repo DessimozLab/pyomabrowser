@@ -5,8 +5,10 @@ from . import views
 
 urlpatterns = patterns('',
         #  url(r'^pairs/(?P<entry_id>\w+)/$', views.pairs, name='index'),
-        url(r'^hogs/(?P<entry_id>\w+)/$', views.hogs, name='hogs'),
-        url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 -]+)/$', views.hogs, name='hogs'),
+        url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGsView.as_view(), name='hogs'),
+        url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 -]+)/$', views.HOGsView.as_view(), name='hogs'),
+        url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 -]+)/fasta/$', 
+            views.HOGsFastaView.as_view(), name='hogs_fasta'),
         url(r'^synteny/(?P<entry_id>\w+)/$', views.synteny, name='synteny'),
         url(r'^synteny/(?P<entry_id>\w+)/(?P<windows>\d)/$', views.synteny, name='synteny'),
         url(r'^synteny/(?P<entry_id>\w+)/(?P<mod>\d)/(?P<windows>\d)/$', 

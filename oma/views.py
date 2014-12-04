@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404
-from collections import OrderedDict
 from django.views.decorators.cache import cache_control
+from django.views.generic import TemplateView
 
+from collections import OrderedDict
 import tweepy
 import logging
 import itertools
@@ -242,60 +243,86 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
 
 
-def hogs(request, entry_id, level=None, idtype='OMA'):
-    try:
-        entry_nr = utils.id_resolver.resolve(entry_id)
-    except utils.InvalidId as e:
-        raise Http404('requested id is unknown')
+class HOGsView(TemplateView):
+    template_name = "hogs.html"
+    attr_of_member = ('omaid','sciname','kingdom')
 
-    query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
-
-    entry = utils.db.entry_by_entry_nr(entry_nr)
-    genome=utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
+    def get_context_data(self, entry_id, level=None, idtype='OMA', **kwargs):
+        context = super(HOGsView,self).get_context_data(**kwargs)
+        
+        try:
+            entry_nr = utils.id_resolver.resolve(entry_id)
+        except utils.InvalidId as e:
+            raise Http404('requested id is unknown')
     
-    hog_member_entries = []
-    hog = None
-    levels = []
-    try:
-        fam = utils.db.hog_family(entry)
-        levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam))
-        lineage = utils.tax.get_parent_taxa(genome['NCBITaxonId'])
-        levels = [l for l in itertools.chain(lineage['Name'], ('LUCA',)) 
-                if l in utils.tax.all_hog_levels and l in levs_of_fam]
-        hog = {'id': entry['OmaHOG'], 'fam': fam, 
-                'downloadURL':misc.downloadURL_hog(fam)}
-        if not level is None:
-            hog_member_entries = utils.db.hog_members(entry_nr, level)
-    except utils.Singleton:
-        pass
-    except ValueError as e:
-        raise Http404(e.message)
-    except utils.InvalidTaxonId:
-        logger.error("cannot get NCBI Taxonomy for {} ({})".format(
-            genome['UniProtSpeciesCode'],
-            genome['NCBITaxonId']))
+        query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
     
-    hog_members = []
-    for memb in hog_member_entries:
-        t = {}
-        t['omaid'] = utils.id_mapper['OMA'].map_entry_nr(memb['EntryNr'])
-        g=utils.id_mapper['OMA'].genome_of_entry_nr(memb['EntryNr'])
-        t['sciname'] = misc.format_sciname(g['SciName'])
-        t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name']
-        hog_members.append(t)
+        entry = utils.db.entry_by_entry_nr(entry_nr)
+        genome=utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
+        
+        hog_member_entries = []
+        hog = None
+        levels = []
+        try:
+            fam = utils.db.hog_family(entry)
+            levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam))
+            lineage = utils.tax.get_parent_taxa(genome['NCBITaxonId'])
+            levels = [l for l in itertools.chain(lineage['Name'], ('LUCA',)) 
+                    if l in utils.tax.all_hog_levels and l in levs_of_fam]
+            hog = {'id': entry['OmaHOG'], 'fam': fam, 
+                    'downloadURL':misc.downloadURL_hog(fam)}
+            if not level is None:
+                hog_member_entries = utils.db.hog_members(entry_nr, level)
+        except utils.Singleton:
+            pass
+        except ValueError as e:
+            raise Http404(e.message)
+        except utils.InvalidTaxonId:
+            logger.error("cannot get NCBI Taxonomy for {} ({})".format(
+                genome['UniProtSpeciesCode'],
+                genome['NCBITaxonId']))
+        
+        hog_members = []
+        for memb in hog_member_entries:
+            t = {}
+            t['omaid'] = utils.id_mapper['OMA'].map_entry_nr(memb['EntryNr'])
+            g=utils.id_mapper['OMA'].genome_of_entry_nr(memb['EntryNr'])
+            t['sciname'] = misc.format_sciname(g['SciName'])
+            t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name']
+            t['hogid'] = memb['OmaHOG']
+            if 'sequence' in self.attr_of_member:
+                t['sequence'] = utils.db.get_sequence(memb)
+            hog_members.append(t)
+    
+        nr_vps = utils.db.count_vpairs(entry_nr)
+        context.update(
+            {'entry': {'omaid': query, 
+                'sciname': misc.format_sciname(genome['SciName']),
+                'kingdom':utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'],
+                'is_homeolog_species':("WHEAT"==genome['UniProtSpeciesCode'])}, 
+            'level': level, 'hog_members': hog_members,
+            'nr_vps': nr_vps, 'tab':'hogs', 'levels':levels[::-1]})
+        if not hog is None:
+            context['hog'] = hog
+        return context 
 
-    nr_vps = utils.db.count_vpairs(entry_nr)
-    context = {'entry': {'omaid': query, 
-            'sciname': misc.format_sciname(genome['SciName']),
-            'kingdom':utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'],
-            'is_homeolog_species':("WHEAT"==genome['UniProtSpeciesCode'])}, 
-        'level': level, 'hog_members': hog_members,
-        'nr_vps': nr_vps, 'tab':'hogs', 'levels':levels[::-1]}
-    if not hog is None:
-        context['hog'] = hog
 
-    logging.debug("context:" + str(context))
-    return render(request, 'hogs.html', context)
+class HOGsFastaView(HOGsView):
+    attr_of_member = ('omaid','sciname','kingdom', 'sequence')
+    template_name = 'proteins.fasta'
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        seqs = []
+        header = []
+        for memb in context['hog_members']:
+            seqs.append(memb['sequence'])
+            header.append(' | '.join(
+                [memb['omaid'], memb['hogid'], '[{species}{strain}]'.format(**memb['sciname'])])) 
+
+        response = HttpResponse(content_type='text/plain')
+        response.write(misc.as_fasta(seqs, header))
+        return response
 
 
 @cache_control(max_age=1800)
