@@ -328,23 +328,26 @@ class HOGsFastaView(HOGsView):
 @cache_control(max_age=1800)
 def home(request):
     n_latest_tweets = 3
-    auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
-    auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
+    try:
+        auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
+        auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
 
-    api = tweepy.API(auth)
+        api = tweepy.API(auth)
 
-    public_tweets = api.user_timeline('@OMABrowser', exclude_replies=True, 
-        trim_user=True, include_rts=False, include_entities=True  )
-    #r = re.compile(r"(http://[^ ]+)")
-    tweets = []
-    for tweet in public_tweets[:n_latest_tweets]:
-        text = tweet.text
-        # replace t.co shortened URLs by true urls
-        for url in sorted(tweet.entities['urls'], key=lambda x: x['indices'], reverse=True):
-            text = (text[:url['indices'][0]] + 
-                    '<a href="' + url['expanded_url'] + '">' + url['expanded_url'] + '</a>' + 
-                    text[url['indices'][1]:])
-        tweets.append(text)
+        public_tweets = api.user_timeline('@OMABrowser', exclude_replies=True,
+            trim_user=True, include_rts=False, include_entities=True)
+        #r = re.compile(r"(http://[^ ]+)")
+        tweets = []
+        for tweet in public_tweets[:n_latest_tweets]:
+            text = tweet.text
+            # replace t.co shortened URLs by true urls
+            for url in sorted(tweet.entities['urls'], key=lambda x: x['indices'], reverse=True):
+                text = (text[:url['indices'][0]] +
+                        '<a href="' + url['expanded_url'] + '">' + url['expanded_url'] + '</a>' +
+                        text[url['indices'][1]:])
+            tweets.append(text)
+    except tweepy.TweepError:
+        tweets = ['Currently no tweets found']
 
     context = {'tweets':tweets}
     return render(request, 'home.html', context)
