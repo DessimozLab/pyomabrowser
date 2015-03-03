@@ -11,13 +11,12 @@
 <!-- alert    -->
 <div class="container-fluid">
 
-    <div class="row">
+    <!-- <div class="row">
         <div class="col-sm-12 col-md-10 col-md-offset-1">
-	       <div class="alert alert-success thd" role="alert">The OMA Browser has a new website layout! <a href="mailto:contact@omabrowser.org" class="btn btn-default btn-xs">Send feedback</a>
-	      </div>
+	       <div class="alert alert-success thd" role="alert"></div>
         </div>
     </div>
-
+    -->
 
     <!--           -->
     <!-- content    -->
@@ -154,22 +153,22 @@ $("#toggle").click(function () {
                                 <ul>
                                     <li>
                                         <b><a href="{% url 'current'  %}">Current release</a>:</b>
-                                        All the database is available for downloading, you will find all the data we use on the OMA Browser.
+                                        All data is available for downloading in a variety of formats.
                                     </li>
 
                                     <li>
                                         <b><a href="/standalone">OMA Standalone</a>:</b>
-                                        If you want more privacy the standalone allow you to work your own set of genomes.
+                                        OMA standalone allows you to infer orthologs on your own set of genomes.
                                     </li>
 
                                     <li>
                                         <b><a href="{% url 'export' %}">Export All-All</a>:</b>
-                                        You can export a set of genome for the OMA Standalone.
+                                        Export a set of genomes and their precomputed all-against-all comparisons for OMA standalone.
                                     </li>
 
                                     <li>
                                         <b><a href="{% url 'archives'  %}">Archives</a>:</b>
-                                        All previous dataset are also available if you want to work on a old version of OMA.
+                                        Previous OMA releases remain available in this section. 
                                     </li>
                                 </ul>
                             </div>
