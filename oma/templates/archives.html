@@ -10,7 +10,7 @@
 <div class="text-center">
 	<ol class="breadcrumb ">
         {%  for rel in all_releases %}
-		    <li><a href="{% url 'archives' rel.id %}">{{ rel.name }}</a></li>
+		    <li>{% if rel.id != release.id %}<a href="{% url 'archives' rel.id %}">{% endif %}{{ rel.name }}</a></li>
         {%  endfor %}
 	</ol>
 </div>
