@@ -368,10 +368,10 @@ class CurrentView(TemplateView):
         except KeyError:
             logger.warn('Cannot determine root dir for downloads.')
             root = ""
-        candidate_dirs = glob.glob(root + prefix_filter + "*")
-        rels = [{'name': self._name_from_release(d), 'id': d, 'date': d[max(0, d.find('.')):]}
-                for d in candidate_dirs if os.path.exists(os.path.join(d, "downloads"))]
-        rels = sorted(rels, key=lambda x: -time.mktime(time.strptime(x, "%b %Y")))
+        candidate_dirs = map(os.path.basename, glob.glob(root + prefix_filter + "*"))
+        rels = [{'name': self._name_from_release(d), 'id': d, 'date': d[max(0, d.find('.')+1):]}
+                for d in candidate_dirs if os.path.exists(os.path.join(root, d, "downloads"))]
+        rels = sorted(rels, key=lambda x: -time.mktime(time.strptime(x['name'], "%b %Y")))
         return rels
 
     def _name_from_release(self, rel):
@@ -385,32 +385,44 @@ class CurrentView(TemplateView):
         """return the cnt previous releases from a list of all.
 
         The method assumes the list is sorted from new releases to old ones."""
-        for i, rel in enumerate(all):
-            if rel.id == cur.id:
-                return all[i:i+cnt]
+        try:
+            for i, rel in enumerate(all):
+                if rel['id'] == cur['id']:
+                    return all[i+1:i+cnt+1]
+        except KeyError:
+            pass
 
     def download_root(self, context):
         return "/All"
 
+    def get_release_data(self, release):
+        relname = utils.db.get_release_name()
+        relid = 'All.' + relname.replace(' ', '')
+        return {'name': relname, 'id': relid, 'date': relname.replace(' ', '')}
+
     def get_context_data(self, release=None, **kwargs):
         context = super(CurrentView, self).get_context_data(**kwargs)
-        if release is None:
-            relname = utils.db.get_release_name()
-            relid = 'All.' + relname.replace(' ', '')
-        else:
-            relid = release
-            relname = self._name_from_release(release)
-        context['release'] = {'name': relname, 'id': relid}
+        context['release'] = self.get_release_data(release)
         context['all_releases'] = self._get_all_releases_with_downloads()
         context['release_with_backlinks'] = self._get_previous_releases(context['release'], context['all_releases'])
         context['download_root'] = self.download_root(context)
+        logger.info(release)
+        logger.info(context)
         return context
 
 
 class ArchiveView(CurrentView):
     template_name = "archives.html"
 
+    def get_release_data(self, release):
+        res = {}
+        if not release is None:
+            res['id'] = release
+            res['name'] = self._name_from_release(release)
+            res['date'] = res['name'].replace(' ', '')
+        return res
+
     def download_root(self, context):
-        return "/"+context['release']['id']
+        return "/" + context['release'].get('id', '')
 
 

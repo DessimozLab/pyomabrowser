@@ -35,7 +35,7 @@ urlpatterns = patterns('',
 
         url(r'^current/$', views.CurrentView.as_view(), name='current'),
         url(r'^archives/$', views.ArchiveView.as_view(), name='archives'),
-        url(r'^archives/(?P<release>\w+)/$', views.ArchiveView.as_view(), name='archives'),
+        url(r'^archives/(?P<release>[A-Za-z0-9.]+)/$', views.ArchiveView.as_view(), name='archives'),
 
 )
 

@@ -3,7 +3,7 @@
 {% load bootstrap3 %}
 
 {% block titleTab %}OMA: Archives {{ release.name }} {% endblock %}
-{% block titleDownload %}Archives{% endblock %}
+{% block titleDownload %}Archives {{ release.name }} {% endblock %}
 {% block yearPicker %}
 <strong>OMA Browser Archive</strong>: the download files form the previous releases of OMA are still available:
 </p>
@@ -18,10 +18,8 @@
 
 {% block genomePW %} {% endblock genomePW %}
 
-{% if not release.id %}
-    {% block Orthology %}{% endblock  %}
-    {% block Sequences %}{% endblock  %}
-    {% block Mapping %}{% endblock  %}
-    {% block Other %}{% endblock  %}
-    {% block History %}{% endblock  %}
-{% endif %}
+{% block Orthology %}{% if release.id %} {{ block.super }} {% endif %}{% endblock  %}
+{% block Sequences %}{% if release.id %} {{ block.super }}{% endif %}{% endblock  %}
+{% block Mapping %}{% if release.id %} {{ block.super }} {% endif %}{% endblock  %}
+{% block Other %}{% if release.id %} {{ block.super }} {% endif %}{% endblock  %}
+{% block History %}{% if release.id %} {{ block.super }} {% endif %}{% endblock  %}
