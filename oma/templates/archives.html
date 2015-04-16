@@ -2,39 +2,26 @@
 {% load staticfiles %}
 {% load bootstrap3 %}
 
-{% block titleTab %}OMA: Archives{% endblock %}
-
-
-
+{% block titleTab %}OMA: Archives {{ release.name }} {% endblock %}
 {% block titleDownload %}Archives{% endblock %}
-
-
-
 {% block yearPicker %}
 <strong>OMA Browser Archive</strong>: the download files form the previous releases of OMA are still available:
 </p>
 <div class="text-center">
 	<ol class="breadcrumb ">
-		<li><a href="{% url 'ArchivesJul2013'  %}">Jul 2013</a></li>
-		<li><a href="{% url 'ArchivesDec2012'  %}">Dec 2012</a></li>
-		<li><a href="{% url 'ArchivesMar2012'  %}">Mar 2012</a></li>
-		<li><a href="{% url 'ArchivesMay2011'  %}">May 2011</a></li>
-		<li><a href="{% url 'ArchivesNov2010'  %}">Nov 2010</a></li>
-		<li><a href="{% url 'ArchivesMay2010'  %}">May 2010</a></li>
-		<li><a href="{% url 'ArchivesOct2009'  %}">Oct 2009</a></li>
-		<li><a href="{% url 'ArchivesApr2009'  %}">Apr 2009</a></li>
+        {%  for rel in all_releases %}
+		    <li><a href="{% url 'archives' rel.id %}">{{ rel.name }}</a></li>
+        {%  endfor %}
 	</ol>
 </div>
 {% endblock  %}
 
+{% block genomePW %} {% endblock genomePW %}
 
-{% block Orthology %}
-{% endblock  %}   
-{% block Sequences %}
-{% endblock  %}   
-{% block Mapping %}   
-{% endblock  %}   
-{% block Other %}
-{% endblock  %}
-{% block History %} 
-{% endblock  %}
+{% if not release.id %}
+    {% block Orthology %}{% endblock  %}
+    {% block Sequences %}{% endblock  %}
+    {% block Mapping %}{% endblock  %}
+    {% block Other %}{% endblock  %}
+    {% block History %}{% endblock  %}
+{% endif %}

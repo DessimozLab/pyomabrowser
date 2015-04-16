@@ -25,7 +25,6 @@ urlpatterns = patterns('',
         url(r'^team/$', TemplateView.as_view(template_name='team.html'), name='team'),
         url(r'^funding/$', TemplateView.as_view(template_name='funding.html'), name='funding'),
         url(r'^license/$', TemplateView.as_view(template_name='license.html'), name='license'),
-        url(r'^current/$', TemplateView.as_view(template_name='current.html'), name='current'),
         url(r'^APISOAP/$', TemplateView.as_view(template_name='APISOAP.html'), name='APISOAP'),
         url(r'^APIDAS/$', TemplateView.as_view(template_name='APIDAS.html'), name='APIDAS'),
         url(r'^type/$', TemplateView.as_view(template_name='type.html'), name='type'),
@@ -33,16 +32,10 @@ urlpatterns = patterns('',
         url(r'^FAQ/$', TemplateView.as_view(template_name='FAQ.html'), name='FAQ'),
         url(r'^genomePW/$', TemplateView.as_view(template_name='genomePW.html'), name='genomePW'),
         url(r'^landOMA/$', TemplateView.as_view(template_name='landOMA.html'), name='landOMA'),
-        
-        url(r'^archives/$', TemplateView.as_view(template_name='archives.html'), name='archives'),
-        url(r'^ArchivesJul2013/$', views.ArchivesJul2013, name='ArchivesJul2013'),
-        url(r'^ArchivesDec2012/$', views.ArchivesDec2012, name='ArchivesDec2012'),
-        url(r'^ArchivesMar2012/$', views.ArchivesMar2012, name='ArchivesMar2012'),
-        url(r'^ArchivesMay2011/$', views.ArchivesMay2011, name='ArchivesMay2011'),
-        url(r'^ArchivesNov2010/$', views.ArchivesNov2010, name='ArchivesNov2010'),
-        url(r'^ArchivesMay2010/$', views.ArchivesMay2010, name='ArchivesMay2010'),
-        url(r'^ArchivesOct2009/$', views.ArchivesOct2009, name='ArchivesOct2009'),
-        url(r'^ArchivesApr2009/$', views.ArchivesApr2009, name='ArchivesApr2009'),
+
+        url(r'^current/$', views.CurrentView.as_view(), name='current'),
+        url(r'^archives/$', views.ArchiveView.as_view(), name='archives'),
+        url(r'^archives/(?P<release>\w+)/$', views.ArchiveView.as_view(), name='archives'),
 
 )
 

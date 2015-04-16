@@ -41,13 +41,13 @@
 										<td class="col-md-6" >OMA groups:
 										</td>
 										<td class="col-md-6">
-											<a href= {% block OMAGTF %}'/All/oma-groups.txt.gz' {% endblock OMAGTF %} >
+											<a href="{{ download_root }}/oma-groups.txt.gz" >
 												<span class="glyphicon glyphicon-download">
 												</span>
 												Text format
 											</a> 
 											<br>
-											<a href={% block OMAGOF %}'/All/oma-groups.orthoXML.xml.gz' {% endblock OMAGOF %}>
+											<a href="{{ download_root }}/oma-groups.orthoXML.xml.gz">
 												<span class="glyphicon glyphicon-download">
 												</span>
 												OrthoXML format
@@ -58,7 +58,7 @@
 										<td class="col-md-6">Hierarchical ortholgous groups:
 										</td>
 										<td class="col-md-6">
-											<a href={% block HOGOF %}'/All/oma-hogs.orthoXML.gz'{% endblock HOGOF %}>
+											<a href="{{ download_root }}/oma-hogs.orthoXML.gz">
 												<span class="glyphicon glyphicon-download"></span>
 												OrthoXML format
 											</a>
@@ -68,18 +68,19 @@
 										<td class="col-md-6">Pairwise orthologs:
 										</td>
 										<td class="col-md-6">
-											<a href={% block POTF %}'/All/oma-pairs.txt.gz'{% endblock POTF %}>
+											<a href="{{ download_root }}/oma-pairs.txt.gz">
 												<span class="glyphicon glyphicon-download">
 												</span>
 												Text format
 											</a> <br>
-											<a href={% block POOF %}'/All/oma-pairs.orthoXML.xml.gz'{% endblock POOF %}>
+											<a href="{{ download_root }}/oma-pairs.orthoXML.xml.gz">
 												<span class="glyphicon glyphicon-download">
 												</span>
 												OrthoXML format
 											</a>
 										</td>
 									</tr>
+                                    {% block genomePW %}
 									<tr>	
 										<td class="col-md-6">Pairs between two species:
 										</td>
@@ -87,11 +88,12 @@
 											<a href="{% url 'genomePW'  %}">Genome Pair View <img alt="ext logo" src="{% static "image/ext.png" %}" ></img></a>
 										</td>
 									</tr>
+                                    {% endblock genomePW %}
 								</tbody>
 							</table>
 						</div>
 					</div>
-					{% endblock Orthology %}   
+					{% endblock Orthology %}
 					{% block Sequences %} 
 					<div class="panel panel-default ">
 						<div class="panel-heading">
@@ -105,47 +107,36 @@
 							<table class="table table-hover ">
 								<tbody>
 									<tr>
-										<td class="col-md-6">Protein sequences:
-										</td>
+										<td class="col-md-6">Protein sequences:</td>
 										<td class="col-md-6">
-											<a href= {% block PSFF %}'/All/oma-seqs.fa.gz'{% endblock PSFF %}>
+											<a href="{{ download_root }}/oma-seqs.fa.gz">
 												<span class="glyphicon glyphicon-download"></span>
 												Fasta format
 											</a> 
 											<br>
-											<a href= {% block PSSF %}'/All/oma-seqs.seqxml.tgz' {% endblock PSSF %}>
+											<a href="{{ download_root }}/oma-seqs.seqxml.tgz">
 												<span class="glyphicon glyphicon-download"></span>
 												SeqXML format
 											</a>
 										</td>
 									</tr>
-
-
-									<tr>	
-
-										<td class="col-md-6">cDNA Eukaryotes:
-										</td>
+									<tr>
+										<td class="col-md-6">cDNA Eukaryotes:</td>
 										<td class="col-md-6">
-											<a href={% block DEFF %}'/All/eukaryotes.cdna.fa.gz' {% endblock DEFF %}><span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
+											<a href="{{ download_root }}/eukaryotes.cdna.fa.gz"><span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
 										</td>
 
 									</tr>
-
-									<tr>	
-
-										<td class="col-md-6">cDNA Prokaryotes:
-										</td>
+									<tr>
+										<td class="col-md-6">cDNA Prokaryotes:</td>
 										<td class="col-md-6">
-											<a href={% block DPFF %}'/All/prokaryotes.cdna.fa.gz' {% endblock DPFF %}> <span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
+											<a href="{{ download_root }}/prokaryotes.cdna.fa.gz"> <span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
 										</td>
-
 									</tr>
 									<tr>	
-
-										<td class="col-md-6">Protein Annotations:
-										</td>
+										<td class="col-md-6">Protein Annotations:</td>
 										<td class="col-md-6">
-											<a href={% block PATF %}'/All/oma-protein-annotations.txt.gz' {% endblock PATF %}><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
+											<a href="{{ download_root }}/oma-protein-annotations.txt.gz"><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
 										</td>
 
 									</tr>
@@ -156,7 +147,6 @@
 					</div> 
 					{% endblock Sequences %}   
 					{% block Mapping %}   
-
 					<div class="panel panel-default ">
 						<div class="panel-heading">
 							<h4>Identifier Mapping
@@ -169,52 +159,46 @@
 							<table class="table table-hover ">
 								<tbody>
 									<tr>	
-										<td class="col-md-6">Mapping to UniProt:
-										</td>
+										<td class="col-md-6">Mapping to UniProt:</td>
 										<td class="col-md-6">
-											<a href='/All/oma-uniprot.txt.gz'><span class="glyphicon glyphicon-download"></span>		Text format</a><br>
+											<a href="{{ download_root }}/oma-uniprot.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
-										<td class="col-md-6">Mapping to Ensembl:
-										</td>
+										<td class="col-md-6">Mapping to Ensembl:</td>
 										<td class="col-md-6">
-											<a href='/All/oma-ensembl.txt.gz'><span class="glyphicon glyphicon-download"></span>		Text format</a><br>
+											<a href="{{ download_root }}"/oma-ensembl.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
-										<td class="col-md-6" >Mapping to NCBI:
-										</td>
+										<td class="col-md-6" >Mapping to NCBI:</td>
 										<td class="col-md-6">
-											<a href='/All/oma-ncbi.txt.gz'><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
+											<a href="{{ download_root }}"/oma-ncbi.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
 										<td class="col-md-6">Mapping to Wormbase:
 										</td>
 										<td class="col-md-6">
-											<a href='/All/oma-wormbase.txt.gz'><span class="glyphicon glyphicon-download"></span>	Text format</a><br>
+											<a href="{{ download_root }}/oma-wormbase.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
-										<td class="col-md-6">Mapping to JGI:
-										</td>
+										<td class="col-md-6">Mapping to JGI:</td>
 										<td class="col-md-6">
-											<a href='/All/oma-jgi.txt.gz'><span class="glyphicon glyphicon-download"></span>		Text format</a><br>
+											<a href="{{ download_root }}/All/oma-jgi.txt.gz"><span class="glyphicon glyphicon-download"></span>	Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
-										<td class="col-md-6">Mapping to GO:
-										</td>
+										<td class="col-md-6">Mapping to GO:</td>
 										<td class="col-md-6">
-											<a href='/All/oma-go.txt.gz'><span class="glyphicon glyphicon-download"></span>	Text format</a><br>
+											<a href="{{ download_root }}/oma-go.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
-										<td class="col-md-6">Plant mapping: (ARATH and ORYSA) 
-										</td>
+										<td class="col-md-6">Plant mapping: (ARATH and ORYSA)</td>
 										<td class="col-md-6">
-											<a href='/All/oma-plants.txt.gz'><span class="glyphicon glyphicon-download"></span>	Text format</a><br>
+											<a href="{{ download_root }}/oma-plants.txt.gz"><span class="glyphicon glyphicon-download"></span>	Text format</a><br>
 										</td>
 									</tr>
 									
@@ -236,32 +220,25 @@
 										<td class="col-md-6">OMA Groups/Sequences in COGs format:
 										</td>
 										<td class="col-md-6">
-											<a href={% block OGCF %}'/All/All.cog.tar.gz'{% endblock OGCF %}><span class="glyphicon glyphicon-download"></span> Cog format</a><br>
+											<a href="{{ download_root }}/All.cog.tar.gz"><span class="glyphicon glyphicon-download"></span> Cog format</a><br>
 										</td>
 									</tr>
 									<tr>	
-										<td class="col-md-6">Species information: (Taxon IDs, scientific names, genome sources)
-										</td>
+										<td class="col-md-6">Species information: (Taxon IDs, scientific names, genome sources)</td>
 										<td class="col-md-6">
-											<a href={% block SITF %}'/All/oma-species.txt'{% endblock SITF %}>
-												<span class="glyphicon glyphicon-download">
-												</span>		
-												Text format
-											</a><br>
+											<a href="{{ download_root }}/oma-species.txt"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
 										</td>
 									</tr>
 									<tr>	
-										<td class="col-md-6">Group descriptions:
-										</td>
+										<td class="col-md-6">Group descriptions:</td>
 										<td class="col-md-6">
-											<a href={% block GDTF %}'/All/group-descriptions.txt.gz'{% endblock GDTF %}><span class="glyphicon glyphicon-download"></span>		Text format</a><br>
-										</td>
+											<a href="{{ download_root }}/group-descriptions.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
+                                        </td>
 									</tr>
 									<tr>	
-										<td class="col-md-6">Close OMA Groups:
-										</td>
+										<td class="col-md-6">Close OMA Groups:</td>
 										<td class="col-md-6">
-											<a href={% block CGTG %}'/All/oma-close-groups.txt.gz'{% endblock CGTG %}> <span class="glyphicon glyphicon-download"></span>	Text format</a><br>
+											<a href="{{ download_root }}/oma-close-groups.txt.gz"> <span class="glyphicon glyphicon-download"></span> Text format</a><br>
 										</td>
 									</tr>
 								</tbody>
@@ -281,34 +258,15 @@
 							</p>  
 							<table class="table table-hover ">
 								<tbody>
+                                    {% for back in release_with_backlinks %}
 									<tr>	
-										<td class="col-md-6">From Mar 2014 release
+										<td class="col-md-6">From {{ back.name }} release
 										</td>
 										<td class="col-md-6">
-											<a href='/All/IDHistory-Mar2014-to-Sep2014.txt.gz'><span class="glyphicon glyphicon-download"></span>Text format</a><br>
+											<a href="/{{ download_root }}/IDHistory-{{ back.date }}-to-{{ release.date }}.txt.gz"><span class="glyphicon glyphicon-download"></span>Text format</a><br>
 										</td>
 									</tr>
-									<tr>	
-										<td class="col-md-6">From Jul 2013 release
-										</td>
-										<td class="col-md-6">
-											<a href='/All/IDHistory-Jul2013-to-Sep2014.txt.gz'><span class="glyphicon glyphicon-download"></span>Text format</a><br>
-										</td>
-									</tr>
-									<tr>	
-										<td class="col-md-6">From Dec 2012 release
-										</td>
-										<td class="col-md-6">
-											<a href='/All/IDHistory-Dec2012-to-Sep2014.txt.gz'><span class="glyphicon glyphicon-download"></span>Text format</a><br>
-										</td>
-									</tr>
-									<tr>	
-										<td class="col-md-6">From Mar 2012 release
-										</td>
-										<td class="col-md-6">
-											<a href='/All/IDHistory-Mar2012-to-Sep2014.txt.gz'><span class="glyphicon glyphicon-download"></span>Text format</a><br>
-										</td>
-									</tr>
+                                    {% endfor %}
 								</tbody>
 							</table>            
 						</div>

@@ -1,3 +1,4 @@
+import glob
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404
@@ -8,6 +9,10 @@ from collections import OrderedDict
 import tweepy
 import logging
 import itertools
+import os
+import re
+import time
+from io import BytesIO
 
 from . import utils
 from . import misc
@@ -352,36 +357,60 @@ def home(request):
     context = {'tweets':tweets}
     return render(request, 'home.html', context)
 
-def ArchivesJul2013(request):
-    context = {}
-    return render(request, 'ArchivesJul2013.html', context)
 
-def ArchivesDec2012(request):
-    context = {}
-    return render(request, 'ArchivesDec2012.html', context)
+class CurrentView(TemplateView):
+    template_name = "current.html"
+    _re_rel2name = re.compile(r'(?:(?P<scope>[A-Za-z]+).)?(?P<month>[A-Za-z]{3})(?P<year>\d{4})')
 
-def ArchivesMar2012(request):
-    context = {}
-    return render(request, 'ArchivesMar2012.html', context)
+    def _get_all_releases_with_downloads(self, prefix_filter='All.'):
+        try:
+            root = os.environ['DARWIN_BROWSER_SHARE']
+        except KeyError:
+            logger.warn('Cannot determine root dir for downloads.')
+            root = ""
+        candidate_dirs = glob.glob(root + prefix_filter + "*")
+        rels = [{'name': self._name_from_release(d), 'id': d, 'date': d[max(0, d.find('.')):]}
+                for d in candidate_dirs if os.path.exists(os.path.join(d, "downloads"))]
+        rels = sorted(rels, key=lambda x: -time.mktime(time.strptime(x, "%b %Y")))
+        return rels
 
-def ArchivesMay2011(request):
-    context = {}
-    return render(request, 'ArchivesMay2011.html', context)
+    def _name_from_release(self, rel):
+        """returns the human readable name of a release id, i.e. All.Sep2014 --> Sep 2014"""
+        m = self._re_rel2name.match(rel)
+        if not m is None:
+            rel = "{month} {year}".format(**m.groupdict())
+        return rel
 
-def ArchivesNov2010(request):
-    context = {}
-    return render(request, 'ArchivesNov2010.html', context)
+    def _get_previous_releases(self, cur, all, cnt=4):
+        """return the cnt previous releases from a list of all.
 
-def ArchivesMay2010(request):
-    context = {}
-    return render(request, 'ArchivesMay2010.html', context)
+        The method assumes the list is sorted from new releases to old ones."""
+        for i, rel in enumerate(all):
+            if rel.id == cur.id:
+                return all[i:i+cnt]
 
-def ArchivesOct2009(request):
-    context = {}
-    return render(request, 'ArchivesOct2009.html', context)
+    def download_root(self, context):
+        return "/All"
 
-def ArchivesApr2009(request):
-    context = {}
-    return render(request, 'ArchivesApr2009.html', context)
+    def get_context_data(self, release=None, **kwargs):
+        context = super(CurrentView, self).get_context_data(**kwargs)
+        if release is None:
+            relname = utils.db.get_release_name()
+            relid = 'All.' + relname.replace(' ', '')
+        else:
+            relid = release
+            relname = self._name_from_release(release)
+        context['release'] = {'name': relname, 'id': relid}
+        context['all_releases'] = self._get_all_releases_with_downloads()
+        context['release_with_backlinks'] = self._get_previous_releases(context['release'], context['all_releases'])
+        context['download_root'] = self.download_root(context)
+        return context
+
+
+class ArchiveView(CurrentView):
+    template_name = "archives.html"
+
+    def download_root(self, context):
+        return "/"+context['release']['id']
 
 

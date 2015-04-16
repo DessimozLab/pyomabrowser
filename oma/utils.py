@@ -177,6 +177,9 @@ class Database(object):
         seq = seqArr[entry['SeqBufferOffset']:entry['SeqBufferOffset']+entry['SeqBufferLength']-1]
         return seq.tostring()
 
+    def get_release_name(self):
+        return self.db.get_node_attr('/', 'oma_version').decode()
+
 
 class OmaIdMapper(object):
     def __init__(self, db):
