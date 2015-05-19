@@ -1,7 +1,7 @@
 import glob
 from django.shortcuts import render
 from django.conf import settings
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
 
@@ -16,6 +16,7 @@ from io import BytesIO
 
 from . import utils
 from . import misc
+from . import forms
 
 logger = logging.getLogger(__name__)
 
@@ -247,13 +248,25 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     return render(request, 'synteny.html', context)
 
 
+class PairsView(TemplateView):
+    template_name = "pairs.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(PairsView, self).get_context_data(**kwargs)
+        try:
+            entry_nr = utils.id_resolver.resolve(entry_id)
+        except utils.InvalidId as e:
+            raise Http404('requested id {} is unknown'.format(entry_id))
+        entry = utils.db.entry_by_entry_nr(entry_nr)
+
+
 
 class HOGsView(TemplateView):
     template_name = "hogs.html"
     attr_of_member = ('omaid','sciname','kingdom')
 
     def get_context_data(self, entry_id, level=None, idtype='OMA', **kwargs):
-        context = super(HOGsView,self).get_context_data(**kwargs)
+        context = super(HOGsView, self).get_context_data(**kwargs)
         
         try:
             entry_nr = utils.id_resolver.resolve(entry_id)
@@ -263,7 +276,7 @@ class HOGsView(TemplateView):
         query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
     
         entry = utils.db.entry_by_entry_nr(entry_nr)
-        genome=utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
+        genome = utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
         
         hog_member_entries = []
         hog = None
@@ -358,6 +371,22 @@ def home(request):
     return render(request, 'home.html', context)
 
 
+def fellowship(request):
+    if request.method == 'POST':
+        form = forms.FellowshipApplicationForm(request.POST, request.FILES)
+        if form.is_valid():
+            att = [(request.FILES[c].name, request.FILES[c]) for c in request.FILES]
+            from django.core.mail import EmailMessage
+            msg = EmailMessage('OMA Fellowship Application', form.cleaned_data['interest'],
+                               form.cleaned_data['email'], to=('adrian.altenhoff@inf.ethz.ch',), attachments=att)
+            msg.send()
+            return HttpResponseRedirect('/thanks/')  # Redirect after POST
+    else:
+        form = forms.FellowshipApplicationForm()
+
+    return render(request, 'fellowship.html', {'form': form})
+
+
 class CurrentView(TemplateView):
     template_name = "current.html"
     _re_rel2name = re.compile(r'(?:(?P<scope>[A-Za-z]+).)?(?P<month>[A-Za-z]{3})(?P<year>\d{4})')
@@ -424,5 +453,3 @@ class ArchiveView(CurrentView):
 
     def download_root(self, context):
         return "/" + context['release'].get('id', '')
-
-

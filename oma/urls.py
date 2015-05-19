@@ -32,6 +32,7 @@ urlpatterns = patterns('',
         url(r'^FAQ/$', TemplateView.as_view(template_name='FAQ.html'), name='FAQ'),
         url(r'^genomePW/$', TemplateView.as_view(template_name='genomePW.html'), name='genomePW'),
         url(r'^landOMA/$', TemplateView.as_view(template_name='landOMA.html'), name='landOMA'),
+        url(r'^fellowship/?$', views.fellowship, name="fellowship"),
 
         url(r'^current/$', views.CurrentView.as_view(), name='current'),
         url(r'^archives/$', views.ArchiveView.as_view(), name='archives'),
