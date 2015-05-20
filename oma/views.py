@@ -377,13 +377,27 @@ def fellowship(request):
         if form.is_valid():
             att = [(request.FILES[c].name, request.FILES[c]) for c in request.FILES]
             from django.core.mail import EmailMessage
-            msg = EmailMessage('OMA Fellowship Application', form.cleaned_data['interest'],
-                               form.cleaned_data['email'], to=('adrian.altenhoff@inf.ethz.ch',), attachments=att)
-            msg.send()
-            return HttpResponseRedirect('/thanks/')  # Redirect after POST
+            msg = EmailMessage('OMA Travel Fellowship Application',
+                               'Application from: {}\nEmail: {}\nStatement of interest:{}\n'.format(
+                                   form.cleaned_data['name'], form.cleaned_data['email'],
+                                   form.cleaned_data['interest']),
+                               form.cleaned_data['email'], to=('adrian.altenhoff@inf.ethz.ch',
+                                                               'christophe.dessimoz@ucl.ac.uk'),
+                               attachments=att)
+            confirmation = EmailMessage('OMA Travel Fellowship Application',
+                                        "Dear {},\nwe received your application for an OMA Travel Fellowship. "
+                                        "Thank you very much for your interest.\n\nKind regards\nOMA team"
+                                            .format(form.cleaned_data['name']),
+                                        from_email='contact@omabrowser.org',
+                                        to=(form.cleaned_data['email'],))
+            try:
+                msg.send()
+                confirmation.send()
+            except Exception:
+                pass
+            return HttpResponseRedirect('/oma/thanks/')  # Redirect after POST
     else:
         form = forms.FellowshipApplicationForm()
-
     return render(request, 'fellowship.html', {'form': form})
 
 
