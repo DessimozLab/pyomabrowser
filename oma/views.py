@@ -376,25 +376,14 @@ def fellowship(request):
         form = forms.FellowshipApplicationForm(request.POST, request.FILES)
         if form.is_valid():
             att = [(request.FILES[c].name, request.FILES[c]) for c in request.FILES]
-            from django.core.mail import EmailMessage
-            msg = EmailMessage('OMA Travel Fellowship Application',
-                               'Application from: {}\nEmail: {}\nStatement of interest:{}\n'.format(
-                                   form.cleaned_data['name'], form.cleaned_data['email'],
-                                   form.cleaned_data['interest']),
-                               form.cleaned_data['email'], to=('adrian.altenhoff@inf.ethz.ch',
-                                                               'christophe.dessimoz@ucl.ac.uk'),
-                               attachments=att)
-            confirmation = EmailMessage('OMA Travel Fellowship Application',
-                                        "Dear {},\nwe received your application for an OMA Travel Fellowship. "
-                                        "Thank you very much for your interest.\n\nKind regards\nOMA team"
-                                            .format(form.cleaned_data['name']),
-                                        from_email='contact@omabrowser.org',
-                                        to=(form.cleaned_data['email'],))
-            try:
-                msg.send()
-                confirmation.send()
-            except Exception:
-                pass
+            dir = os.path.expanduser(os.path.join('~', 'log', 'fellowship', time.strftime('%Y%b%d-%H%M%S')))
+            os.makedirs(dir)
+            with open(dir+'/info.txt', 'w') as fh:
+                fh.write("Name: {name}\nEmail: {email}\n\nStatement: {interest}".format(**form.cleaned_data))
+            for attachement in att:
+                with open(dir+'/'+attachement[0], 'wb') as fh:
+                    fh.write(attachement[1].read())
+
             return HttpResponseRedirect('/oma/thanks/')  # Redirect after POST
     else:
         form = forms.FellowshipApplicationForm()
