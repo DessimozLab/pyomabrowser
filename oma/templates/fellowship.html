@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {% load bootstrap3 %}
 
-{% block title %}OMA Visitor Fellowship{% endblock %}
+{% block title %}OMA Visiting Fellowship{% endblock %}
 
 {% block content %}
 
@@ -18,20 +18,18 @@
 <p>The OMA Visiting Fellowship programme would be particularly suited to PhD students or postdocs with direct experience using OMA, but this is not a requirement. Likewise, applicants will be typically on leave from their institution, but independent researchers are also eligible.</p>
 <p>To apply, send a brief CV and a statement of interest briefly outlining the collaborative project foreseen (~1 page), the duration of the visit, and a potential start date. The submission form is available at <a href="http://omabrowser.org/fellowship" rel="nofollow">http://omabrowser.org/fellowship</a></p>
 <p>For informal queries, contact Dr. Adrian Altenhoff, OMA project manager at <a href="mailto:adrian.altenhoff@inf.ethz.ch">adrian.altenhoff@inf.ethz.ch</a>.</p>
-<p><strong>Deadline:</strong> 14 June 2015</p>
+<p><strong>Deadline:</strong> 30 June 2015</p>
 					<div class="row">
 						<div class="panel panel-default">
 							<div class="panel-heading">
 								<h4>Application Form</h4>
 							</div>
                             <div class="panel-body">
-                            <form class="form-horizontal" action="/oma/fellowship" method="POST" enctype="multipart/form-data">
+                            <form class="form-horizontal" action="{% url 'fellowship' %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
     {% bootstrap_form form %}
     {% buttons %}
-        <button type="submit" class="btn btn-primary">
-            {% bootstrap_icon "star" %} Submit
-        </button>
+        <button type="submit" class="btn btn-default">Apply</button>
     {% endbuttons %}
              <!--
   <div class="form-group">
