@@ -45,7 +45,7 @@ This entry is not part of any hierarchical orthologous group.
     <div class="panel-heading clearfix">
         <div class="pull-right">
             Download: 
-            <a href="{{hog.downloadURL|safe}}"><span class="glyphicon glyphicon-download">OrthoXML</span></a>
+            <a href="{% url 'hogs_orthoxml' entry.omaid %}"><span class="glyphicon glyphicon-download">OrthoXML</span></a>
             <a href="{% url 'hogs_fasta' entry.omaid level %}"><span class="glyphicon glyphicon-download">Fasta</span></a>
         </div>
     </div>

@@ -155,12 +155,22 @@ class Database(object):
         memb = filter(lambda x: level in tax.get_parent_taxa(
             id_mapper['OMA'].genome_of_entry_nr(x['EntryNr'])['NCBITaxonId'])['Name'], memb)
         return memb
+
+    def get_orthoxml(self, fam):
+        """returns the orthoxml of a given toplevel HOG family
+
+        :param fam: numeric id of requested toplevel hog"""
+        idx = self.db.root.OrthoXML.Index.read_where('Fam == {}'.format(fam))
+        if len(idx) < 1:
+            raise ValueError('cannot retrieve orthoxml for {}'.format(fam))
+        idx = idx[0]
+        return self.db.root.OrthoXML.Buffer[idx['HogBufferOffset']:idx['HogBufferOffset']+idx['HogBufferLength']].tostring()
         
     def _hog_lex_range(self, hog):
         """return the lexographic range of a hog. 
         
         This can be used to search of sub-hogs which are nested in
-        the query hog. The semantics is such that 
+        the query hog. The semantics is such that
         _hog_lex_range[0] <= hog < _hog_lex_range[1].
         This is equivalent to say that a sub-hog starts with the
         query hog."""

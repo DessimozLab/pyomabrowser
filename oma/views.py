@@ -287,8 +287,7 @@ class HOGsView(TemplateView):
             lineage = utils.tax.get_parent_taxa(genome['NCBITaxonId'])
             levels = [l for l in itertools.chain(lineage['Name'], ('LUCA',)) 
                     if l in utils.tax.all_hog_levels and l in levs_of_fam]
-            hog = {'id': entry['OmaHOG'], 'fam': fam, 
-                    'downloadURL':misc.downloadURL_hog(fam)}
+            hog = {'id': entry['OmaHOG'], 'fam': fam}
             if not level is None:
                 hog_member_entries = utils.db.hog_members(entry_nr, level)
         except utils.Singleton:
@@ -327,7 +326,6 @@ class HOGsView(TemplateView):
 
 class HOGsFastaView(HOGsView):
     attr_of_member = ('omaid','sciname','kingdom', 'sequence')
-    template_name = 'proteins.fasta'
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -340,6 +338,20 @@ class HOGsFastaView(HOGsView):
 
         response = HttpResponse(content_type='text/plain')
         response.write(misc.as_fasta(seqs, header))
+        return response
+
+class HOGsOrthoXMLView(HOGsView):
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        try:
+            fam = context['hog']['fam']
+            orthoxml = utils.db.get_orthoxml(fam)
+        except KeyError:
+            raise Http404('requested id is not part of any HOG')
+        except ValueError as e:
+            raise Http404(e.message)
+        response = HttpResponse(content_type='text/plain')
+        response.write(orthoxml)
         return response
 
 
