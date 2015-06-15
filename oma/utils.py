@@ -404,7 +404,6 @@ class XrefIdMapper(object):
                     self._combine_query_values('EntryNr',
                         entry_nrs[start:start+junk_size]),
                     source_condition)
-            logger.debug('xref map condition: '+condition)
             mapped_junks.append(self.xref_tab.read_where(condition))
         return numpy.lib.recfunctions.stack_arrays(
                 mapped_junks,
