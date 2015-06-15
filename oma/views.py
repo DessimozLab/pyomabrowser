@@ -325,7 +325,7 @@ class HOGsView(TemplateView):
 
 
 class HOGsFastaView(HOGsView):
-    attr_of_member = ('omaid','sciname','kingdom', 'sequence')
+    attr_of_member = ('omaid', 'sciname', 'kingdom', 'sequence')
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -412,7 +412,7 @@ class CurrentView(TemplateView):
         except KeyError:
             logger.warn('Cannot determine root dir for downloads.')
             root = ""
-        candidate_dirs = map(os.path.basename, glob.glob(root + prefix_filter + "*"))
+        candidate_dirs = map(os.path.basename, glob.glob(root + "/" + prefix_filter + "*"))
         rels = [{'name': self._name_from_release(d), 'id': d, 'date': d[max(0, d.find('.')+1):]}
                 for d in candidate_dirs if os.path.exists(os.path.join(root, d, "downloads"))]
         rels = sorted(rels, key=lambda x: -time.mktime(time.strptime(x['name'], "%b %Y")))
