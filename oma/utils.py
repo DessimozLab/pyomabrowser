@@ -65,11 +65,15 @@ class Database(object):
     def entry_by_entry_nr(self, entry_nr):
         """Returns the entry from the /Protein/Entries table
         corresponding to entry_nr."""
-        entry = self.db.root.Protein.Entries.read_where(
+        entry = self.db.root.Protein.Entries[entry_nr-1]
+        if entry['EntryNr'] != entry_nr:
+            logger.warning('EntryNr {} not at position {}. Using index instead'.format(entry_nr, entry_nr-1))
+            entry = self.db.root.Protein.Entries.read_where(
                    'EntryNr == %d'%(entry_nr))
-        if len(entry) != 1:
-            raise ValueError('there are %d entries with entry_nr %d'%(len(entry),entry_nr))
-        return entry[0]
+            if len(entry) != 1:
+                raise ValueError("there are {} entries with entry_nr {}".format(len(entry), entry_nr))
+            entry = entry[0]
+        return entry
 
     def _get_vptab(self, entry_nr):
         genome = id_mapper['OMA'].genome_of_entry_nr(entry_nr)['UniProtSpeciesCode']
