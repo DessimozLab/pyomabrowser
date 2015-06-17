@@ -293,19 +293,23 @@ class Taxonomy(object):
     
     For performance reasons, it will load at instantiation the data
     into memory. Hence, it should only be instantiated once."""
+
     def __init__(self, db_handle):
         self.tax_table = db_handle.root.Taxonomy.read()
         self.taxid_key = self.tax_table.argsort(order=('NCBITaxonId'))
-        try:
-            with open(os.environ['DARWIN_BROWSERDATA_PATH']+'/TaxLevels.drw') as f:
-                taxStr = f.read()
-            tax_json = json.loads(("["+taxStr[14:-3]+"]").replace("'",'"'))
-            self.all_hog_levels = frozenset([t.encode('utf-8') for t in tax_json])
-        except Exception:
-            forbidden_chars = re.compile(r'[^A-Za-z. -]')
-            self.all_hog_levels = frozenset([l for l in self.tax_table['Name'] 
-                if forbidden_chars.search(l) is None])
+        self._load_valid_taxlevels()
 
+    def _load_valid_taxlevels(self):
+        forbidden_chars = re.compile(r'[^A-Za-z. -]')
+        try:
+            with open(os.environ['DARWIN_BROWSERDATA_PATH'] + '/TaxLevels.drw') as f:
+                taxStr = f.read()
+            tax_json = json.loads(("[" + taxStr[14:-3] + "]").replace("'", '"'))
+            self.all_hog_levels = frozenset([t.encode('utf-8') for t in
+                                             tax_json if forbidden_chars.search(t) is None])
+        except Exception:
+            self.all_hog_levels = frozenset([l for l in self.tax_table['Name']
+                                             if forbidden_chars.search(l) is None])
 
     def _table_idx_from_numeric(self, tid):
         i = self.tax_table['NCBITaxonId'].searchsorted(tid, 
