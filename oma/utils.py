@@ -242,7 +242,7 @@ class IDResolver(object):
     def __init__(self, db_handle):
         self.db = db_handle
         entry_nr_Col = db_handle.root.Protein.Entries.cols.EntryNr
-        self.max_entry_nr = entry_nr_Col[entry_nr_Col.index[-1]]
+        self.max_entry_nr = entry_nr_Col[int(entry_nr_Col.index[-1])]
 
     def _from_numeric(self, e_id):
         nr = int(e_id)
