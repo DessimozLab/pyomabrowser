@@ -58,9 +58,15 @@ class Database(object):
         """This method allows to use an entry or an entry_nr.
         If necessary it will load the entry from the entry_nr,
         otherwise returning the same object again."""
-        if isinstance(entry, int):
-            return self.entry_by_entry_nr(entry)
-        return entry
+        try:
+            t = entry['AltSpliceVariant']
+            return entry
+        except (TypeError, AttributeError, IndexError):
+            if isinstance(entry, (int, numpy.number)):
+                return self.entry_by_entry_nr(entry)
+            raise TypeError('Invalid type to retrieve an Entry')
+        except Exception:
+            raise TypeError('Invalid type to retrieve an Entry')
 
     def entry_by_entry_nr(self, entry_nr):
         """Returns the entry from the /Protein/Entries table
@@ -256,7 +262,7 @@ class IDResolver(object):
     def __init__(self, db_handle):
         self.db = db_handle
         entry_nr_Col = db_handle.root.Protein.Entries.cols.EntryNr
-        self.max_entry_nr = entry_nr_Col[entry_nr_Col.index[-1]]
+        self.max_entry_nr = entry_nr_Col[int(entry_nr_Col.index[-1])]
 
     def _from_numeric(self, e_id):
         nr = int(e_id)
@@ -374,9 +380,9 @@ class IdMapperFactory(object):
         except KeyError:
             try:
                 mapper = globals()[str(idtype).title()+'IdMapper'](self.db.db)
-                self.mappers[idtype]=mapper
+                self.mappers[idtype] = mapper
             except KeyError:
-                raise UnknownIdType(str(idtype)+' is unknown')
+                raise UnknownIdType('{} is unknown'.format(str(idtype)))
         return mapper 
 
 
@@ -415,7 +421,7 @@ class XrefIdMapper(object):
 
     def search_xref(self, xref):
         res = self.xref_tab.read_where('XRefId=="{}"'.format(xref.encode('utf-8')))
-        if len(res)>0 and len(self.idtype)<len(self.xrefEnum):
+        if len(res) > 0 and len(self.idtype) < len(self.xrefEnum):
             res = res[numpy.in1d(res['XRefSource'], list(self.idtype))]
         return res
 
@@ -437,14 +443,14 @@ class UniProtIdMapper(XrefIdMapper):
     def __init__(self, db):
         super().__init__(db)
         self.idtype = frozenset([self.xrefEnum[z] 
-            for z in ['UniProtKB/SwissProt','UniProtKB/TrEMBL']])
+            for z in ['UniProtKB/SwissProt', 'UniProtKB/TrEMBL']])
 
 
 class LinkoutIdMapper(XrefIdMapper):
     def __init__(self, db):
         super().__init__(db)
         self.idtype = frozenset([self.xrefEnum[z]
-            for z in ['UniProtKB/SwissProt','UniProtKB/TrEMBL',
+            for z in ['UniProtKB/SwissProt', 'UniProtKB/TrEMBL',
                       'Ensembl Protein', 'EntrezGene']])
 
     def url(self, typ, id_):
