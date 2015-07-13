@@ -200,6 +200,12 @@ class Database(object):
     def get_release_name(self):
         return self.db.get_node_attr('/', 'oma_version').decode()
 
+    def get_domains(self, entry_nr):
+        try:
+            return self.db.root.Annotations.Domains.read_where('EntryNr == {:d}'.format(entry_nr))
+        except ValueError as e:
+            raise InvalidId('require a numeric entry id, got {}'.format(entry_nr))
+
 
 class OmaIdMapper(object):
     def __init__(self, db):
