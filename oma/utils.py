@@ -9,6 +9,7 @@ import json
 import os
 import collections
 import logging
+from ete2 import Tree, SeqMotifFace, TreeStyle, add_face_to_node, NodeStyle
 
 logger = logging.getLogger(__name__)
 
@@ -478,6 +479,219 @@ class LinkoutIdMapper(XrefIdMapper):
                 elem['url'] = self.url(typ, elem['id'])
         return xref
 
+class DrawDomains(object):
+    def __init__(self, domains, seq, height=20, width=None, arch=True, name='motifs'):
+        """Creating an instance of the class for a protein sequence creates an ETE tree branch with the architecture."""
+        motifs, cath_ids = self.get_motifs(domains, seq, height, width, arch)
+        if len(motifs) > 0: 
+            architecture = self.branch(seq, motifs)
+            self.svg_string = self.get_svg_string(architecture, cath_ids, name)
+
+    def chunks(self, l, n):
+        for i in range(0, len(l), n):
+            yield l[i:i+n]
+
+    def regions(self, regions_string):
+        rlist = regions_string.split(':')
+        rintlist = list(map(int, rlist))
+        return(list(self.chunks(rintlist, 2)))
+
+    def branch(self, seq, motifs):
+        t = Tree()
+        t.populate(1) # Make a single branch tree
+        for l in t.iter_leaves():
+            l.add_face(SeqMotifFace(seq, motifs), 0, "aligned")
+        nstyle = NodeStyle()
+        nstyle["size"] = 0 # As good as remove the node which we don't need
+        for n in t.traverse():
+            n.set_style(nstyle)
+        return t
+
+    def get_motifs(self, domains, seq, height=20, width=None, arch=True):
+        motifs = []
+        cath_ids = []
+        dt = 0 # the number of unique domain types
+        for row in domains:
+            cath_ids.append(row[1])
+            cath_list = row[1].split('.')
+            if cath_list[0] == '1' or cath_list[0] == '2' or cath_list[0] == '3' or cath_list[0] == '4':
+                col, shape, architecture = self.col_shape_arch(cath_list) # row[1] is the CATH code domain string
+                for pos in self.regions(row[2]):
+                    if arch:
+                        motifs.append([pos[0], pos[1], shape, width, height, None, col, "arial|8|black|"+architecture+": "+row[1]])
+                    else:
+                        motifs.append([pos[0], pos[1], shape, width, height, None, col, "arial|8|black|"+row[1]])
+        return motifs, cath_ids
+
+    def col_shape_arch(self, cath): 
+        """Assign a colour and shape for each of the 40 domain architectures in CATH"""
+        if cath[0] == '1': # Mainly Alpha
+            shape = '[]'
+            if cath[1] == '10':
+                col = '#FFB2B2'
+                arch = 'Orthogonal Bundle'
+            elif cath[1] == '20':
+                col = '#FF8080'
+                arch = 'Up-down Bundle'
+            elif cath[1] == '25':
+                col = '#FF4D4D'
+                arch = 'Alpha Horseshoe'
+            elif cath[1] == '40':
+                col = '#FF1919'
+                arch = 'Alpha solenoid'
+            elif cath[1] == '50':
+                col = '#E60000'
+                arch = 'Alpha/alpha barrel'
+            else:
+                col = None
+                arch = None
+        elif cath[0] == '2': # Mainly Beta
+            shape = 'o'
+            if cath[1] == '10':
+                col = '#E6E6FF'
+                arch = 'Ribbon'
+            elif cath[1] == '20':
+                col = '#B2B2FF'
+                arch = 'Single Sheet'
+            elif cath[1] == '30':
+                col = '#8080FF'
+                arch = 'Roll'
+            elif cath[1] == '40':
+                col = '#4D4DFF'
+                arch = 'Beta Barrel'
+            elif cath[1] == '50':
+                col = '#1919FF'
+                arch = 'Clam'
+            elif cath[1] == '60':
+                col = '#0000E6'
+                arch = 'Sandwich'
+            elif cath[1] == '70':
+                col = '#008AB8'
+                arch = 'Distorted Sandwich'
+            elif cath[1] == '80':
+                col = '#19A3D1'
+                arch = 'Trefoil'
+            elif cath[1] == '90':
+                col = '#4DB8DB'
+                arch = 'Orthogonal Prism'
+            elif cath[1] == '100':
+                col = '#80CCE6'
+                arch = 'Aligned Prism'
+            elif cath[1] == '102':
+                col = '#70DBDB'
+                arch = '3-layer Sandwich'
+            elif cath[1] == '105':
+                col = '#33CCCC'
+                arch = '3 Propellor'
+            elif cath[1] == '110':
+                col = '#29A3A3'
+                arch = '4 Propellor'
+            elif cath[1] == '115':
+                col = '#00B85C'
+                arch = '5 Propellor'
+            elif cath[1] == '120':
+                col = '#19D175'
+                arch = '6 Propellor'
+            elif cath[1] == '130':
+                col = '#4DDB94'
+                arch = '7 Propellor'
+            elif cath[1] == '140':
+                col = '#80E6B2'
+                arch = '8 Propellor'
+            elif cath[1] == '150':
+                col = '#B2F0D1'
+                arch = '2 Solenoid'
+            elif cath[1] == '160':
+                col = '#B2CC80'
+                arch = '3 Solenoid'
+            elif cath[1] == '170':
+                col = '#94B84D'
+                arch = 'Beta Complex'
+            else:
+                col = None
+                arch = None
+        elif cath[0] == '3': # Alpha Beta
+            shape = '<>'
+            if cath[1] == '10':
+                col = '#FFFF80'
+                arch = 'Roll'
+            elif cath[1] == '15':
+                col = '#FFFF19'
+                arch = 'Super Roll'
+            elif cath[1] == '20':
+                col = '#E6E600'
+                arch = 'Alpha-Beta Barrel'
+            elif cath[1] == '30':
+                col = '#B2B200'
+                arch = '2-Layer Sandwich'
+            elif cath[1] == '40':
+                col = '#E68A00'
+                arch = '3-Layer(aba) Sandwich'
+            elif cath[1] == '50':
+                col = '#FFA319'
+                arch = '3-Layer(bba) Sandwich'
+            elif cath[1] == '55':
+                col = '#FFB84D'
+                arch = '3-Layer(bab) Sandwich'
+            elif cath[1] == '60':
+                col = '#FFCC80'
+                arch = '4-Layer Sandwich'
+            elif cath[1] == '65':
+                col = '#FFE0B2'
+                arch = 'Alpha-beta prism'
+            elif cath[1] == '70':
+                col = '#FFF5E6'
+                arch = 'Box'
+            elif cath[1] == '75':
+                col = '#F5D6CC'
+                arch = '5-Stranded Propellor'
+            elif cath[1] == '80':
+                col = '#EBAD99'
+                arch = 'Alpha-Beta Horseshoe'
+            elif cath[1] == '90':
+                col = '#E08566'
+                arch = 'Alpha-Beta Complex'
+            elif cath[1] == '100':
+                col = '#D14719'
+                arch = 'Ribosomal Protein L15; Chain: K; domain 2'
+            else:
+                col = None
+                arch = None
+        elif cath[0] == '4': # Few Secondary Structures
+            shape = 'v'
+            if cath[1] == '10':
+                col = '#CC00FF'
+                arch = 'Irregular'
+            else:
+                col = None
+                arch = None
+        return col, shape, arch
+                
+    def get_svg_string(self, architecture, cath_ids, name="motif"):
+        """Create an svg of the domain architecture"""
+        ts = TreeStyle()
+        ts.show_leaf_name = False
+        ts.show_scale = False
+        architecture.render("oma/static/image/domains/%s.svg"%name, tree_style=ts, units="mm")
+        f = open("oma/static/image/domains/%s.svg"%name, "r")
+        svg_string = f.read()
+        f.close()
+        """Edit the svg to include relevant CATH page link for each domain"""
+        svg_string_original = svg_string
+        for cath_id in cath_ids:
+            string_indices = [m.start() for m in re.finditer(cath_id, svg_string_original)]
+            for string_index in string_indices:
+                substring = svg_string_original[0:string_index]
+                sub_rev = substring[::-1]
+                x = [m.start() for m in re.finditer('txet<', sub_rev)][0]
+                pos = len(sub_rev)-x-1
+                text = "<tex"+svg_string_original[pos:string_index+len(cath_id)+7]
+                link = 'xlink:href="http://www.cathdb.info/version/latest/superfamily/' + cath_id + '"'
+                new_text = '<a ' + link + '>' + text + '</a>'
+                if new_text not in svg_string:
+                    svg_string = svg_string.replace(text, new_text)
+        os.remove("oma/static/image/domains/%s.svg"%name)
+        return svg_string
 
 db = Database()
 id_resolver = IDResolver(db.db)

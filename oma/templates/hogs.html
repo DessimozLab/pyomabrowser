@@ -1,6 +1,6 @@
 {% extends "seqCV.html" %}
 
-{% block title %}OMA HOGs for {{ entry.omaid }}{% endblock %}
+{% block title %}OMA HOGs {% endblock %}
 
 {% block contentTab %}
 
@@ -45,17 +45,18 @@ This entry is not part of any hierarchical orthologous group.
     <div class="panel-heading clearfix">
         <div class="pull-right">
             Download: 
-            <a href="{% url 'hogs_orthoxml' entry.omaid %}"><span class="glyphicon glyphicon-download">OrthoXML</span></a>
+            <a href="{{hog.downloadURL|safe}}"><span class="glyphicon glyphicon-download">OrthoXML</span></a>
             <a href="{% url 'hogs_fasta' entry.omaid level %}"><span class="glyphicon glyphicon-download">Fasta</span></a>
         </div>
     </div>
     <table class="table table-hover">
-        <thead><tr><td class="col-md-3">Taxon</td><td class="col-md-2">Protein ID</td></tr></thead>
+        <thead><tr><td class="col-md-3">Taxon</td><td class="col-md-2">Protein ID</td><td class="col-md-2"><a href="http://www.cathdb.info/">CATH</a> Domains</td></tr></thead>
         <tbody>
         {% for memb in hog_members %}
            <tr><td>{% include "includes/kingdom.html" with kingdom=memb.kingdom %}
                    <b>{{memb.sciname.species}}</b>{{memb.sciname.strain}} </td>
                <td><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{memb.omaid}}">{{memb.omaid}}</td>
+               <td>{{memb.domains|safe}}</td>
            </tr>
         {% endfor %}
         </tbody>
