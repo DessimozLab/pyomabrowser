@@ -47,7 +47,7 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
-    'debug_toolbar_line_profiler.panel.ProfilingPanel',
+    #'debug_toolbar_line_profiler.panel.ProfilingPanel',
 )
 
 # Application definition
@@ -60,7 +60,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
-    'debug_toolbar_line_profiler',
+    #'debug_toolbar_line_profiler',
     'oma',
     'bootstrap3',
 )
@@ -96,7 +96,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(os.getenv('DARWIN_LOG_PATH',default=''),'pyoma.log'),
+            'filename': os.path.join(os.getenv('DARWIN_LOG_PATH', default=''), 'pyoma.log'),
             'formatter': 'verbose'
         },
     },

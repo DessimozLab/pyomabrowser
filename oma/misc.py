@@ -1,9 +1,10 @@
+from builtins import range
 import math
 from io import BytesIO
 
 def format_sciname(sci, short=False):
-    p = set(map(lambda x:sci.find(x), ['(','serogroup','serotype','serovar',
-                                         'biotype','subsp','pv.','bv.']))
+    p = set([sci.find(x) for x in ['(','serogroup','serotype','serovar',
+                                         'biotype','subsp','pv.','bv.']])
     if sci.startswith('Escherichia coli'):
        p.add(sci.find('O'))
     p.discard(-1)
@@ -12,15 +13,15 @@ def format_sciname(sci, short=False):
 
 def as_fasta(seqs, headers=None):
     if headers is None:
-        headers =['seq{}'.format(i+1) for i in range(len(seqs))]
+        headers = ['seq{}'.format(i+1) for i in range(len(seqs))]
     if len(seqs) != len(headers):
         raise ValueError('number of headers and sequences does not match')
 
     buf = BytesIO()
     for i, seq in enumerate(seqs):
-        buf.write('> {}\n'.format(headers[i]))
-        for k in range(0,len(seq),80):
+        buf.write(('> {}\n'.format(headers[i])).encode('utf-8'))
+        for k in range(0, len(seq), 80):
             buf.write(seq[k:k+80])
-            buf.write('\n')
-        buf.write('\n')
+            buf.write(b'\n')
+        buf.write(b'\n')
     return buf.getvalue()

@@ -1,3 +1,7 @@
+from __future__ import print_function
+from builtins import map
+from builtins import str
+from builtins import range
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -47,7 +51,7 @@ def pairs(request, entry_id, idtype='OMA'):
     vps_entry_nr = utils.db.get_vpairs(entry_nr)
 
     query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
-    vps = map(utils.id_mapper[idtype].map_entry_nr, vps_entry_nr['EntryNr2'])
+    vps = list(map(utils.id_mapper[idtype].map_entry_nr, vps_entry_nr['EntryNr2']))
     print(len(vps))
     context = {'query': query, 'vps': vps}
 
@@ -80,11 +84,11 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     for i in lin:
         taxa.append(i[2])
     if len(taxa) > 2:
-        sciname = taxa[0]
-        kingdom = taxa[-1]
+        sciname = taxa[0].decode()
+        kingdom = taxa[-1].decode()
     else:
-        sciname = "unknown"
-        kingdom = "unknown"
+        sciname = u"unknown"
+        kingdom = u"unknown"
 
     windows = int(windows)
     ngs_entry_nr, gene_left = utils.db.neighbour_genes(entry_nr, windows)
@@ -99,7 +103,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     md_geneinfos['genes'] = {}
     query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
 
-    species = genome['UniProtSpeciesCode']  # Species name of the entr gene
+    species = genome['UniProtSpeciesCode'].decode()  # Species name of the entr gene
 
     md_geneinfos['species'] = species
     for i in range(blank_l):
@@ -127,7 +131,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
         md_geneinfos['genes'][index + blank_l] = geneinfo
         md_geneinfos['genes'] = OrderedDict(
-            sorted(md_geneinfos['genes'].items(),
+            sorted(list(md_geneinfos['genes'].items()),
                    key=lambda t: t[0]))
 
     vps_entry_nr = utils.db.get_vpairs(entry_nr)
@@ -155,15 +159,15 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
                 if taxa[-i] == o_lin[-i]["Name"]:
                     num_match += 1
             o_sorting[o_genome['UniProtSpeciesCode']] = num_match
-    o_sorting = OrderedDict(sorted(o_sorting.items(), key=lambda t: t[1], reverse=True))
-    o_sorting = o_sorting.keys()[0:50]
+    o_sorting = OrderedDict(sorted(list(o_sorting.items()), key=lambda t: t[1], reverse=True))
+    o_sorting = [g.decode() for g in o_sorting.keys()][0:50]
     osd = {}  # ortholog sorting dictionary
     for row, each in enumerate(o_sorting):
         osd[each] = row
 
     for ortholog in orthologs:
         genome = utils.id_mapper['OMA'].genome_of_entry_nr(ortholog)
-        o_species = genome['UniProtSpeciesCode']
+        o_species = genome['UniProtSpeciesCode'].decode()
         if o_species in o_sorting:
             # get neighbouring genes for each ortholog
             o_neighbors, centerIdx = utils.db.neighbour_genes(int(ortholog), windows)
@@ -175,7 +179,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
             o_blank_r2 = windows + windows + 1
 
             o_md_geneinfos[ortholog] = {'o_species': o_species,
-                                        'o_sciname': genome['SciName'],
+                                        'o_sciname': genome['SciName'].decode(),
                                         'row_number': row_number,
                                         'o_genes': {}, }
 
@@ -191,9 +195,9 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
                 o_geneinfo = {
                     "entryid": info['EntryNr'],
-                    "species": o_genome['UniProtSpeciesCode'],
+                    "species": o_genome['UniProtSpeciesCode'].decode(),
                     "genenumber": "{0:05d}".format(info['EntryNr'] - o_genome['EntryOff']),
-                    "sciname": o_genome['SciName'],
+                    "sciname": o_genome['SciName'].decode(),
                     "dir": info['LocusStrand'], }
 
                 if o_geneinfo["entryid"] == ortholog:
@@ -229,25 +233,24 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
             if o_md_geneinfos[ortholog]["row_dir"] == md_geneinfos['entry_dir']:
                 o_md_geneinfos[ortholog]['o_genes'] = OrderedDict(
-                    sorted(o_md_geneinfos[ortholog]['o_genes'].items(), key=lambda t: t[0]))
+                    sorted(list(o_md_geneinfos[ortholog]['o_genes'].items()), key=lambda t: t[0]))
             elif o_md_geneinfos[ortholog]["row_dir"] != md_geneinfos['entry_dir']:
                 o_md_geneinfos[ortholog]['o_genes'] = OrderedDict(
-                    sorted(o_md_geneinfos[ortholog]['o_genes'].items(), key=lambda t: t[0], reverse=True))
+                    sorted(list(o_md_geneinfos[ortholog]['o_genes'].items()), key=lambda t: t[0], reverse=True))
 
-    logger.debug('nr of entry_nrs: {}'.format(len(all_entry_nrs)))
     linkout_mapper = utils.id_mapper['Linkout']
     xrefs = linkout_mapper.xreftab_to_dict(
         linkout_mapper.map_many_entry_nrs(all_entry_nrs))
-    for genedict in md_geneinfos['genes'].values():
+    for genedict in list(md_geneinfos['genes'].values()):
         if 'entryid' in genedict:
             genedict['xrefs'] = xrefs[genedict['entryid']]
-    for o in o_md_geneinfos.values():
-        for genedict in o['o_genes'].values():
+    for o in list(o_md_geneinfos.values()):
+        for genedict in list(o['o_genes'].values()):
             if 'entryid' in genedict:
                 genedict['xrefs'] = xrefs[genedict['entryid']]
 
     o_md_geneinfos = OrderedDict(
-        sorted(o_md_geneinfos.items(),
+        sorted(list(o_md_geneinfos.items()),
                key=lambda t: t[1]['row_number']))
 
     context = {'query': query, 'positions': positions, 'windows': windows,
@@ -255,7 +258,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
                'stripes': stripes, 'nr_vps': len(orthologs),
                'entry': {'omaid': query, 'sciname': misc.format_sciname(sciname),
                          'kingdom': kingdom,
-                         'is_homeolog_species': ("WHEAT" == species)},
+                         'is_homeolog_species': (b"WHEAT" == species)},
                'tab': 'synteny', 'xrefs': xrefs
     }
 
@@ -275,8 +278,8 @@ class PairsView(EntryCentricView):
         for vp in vps_raw:
             t = {'omaid': utils.id_mapper['OMA'].map_entry_nr(vp['EntryNr2'])}
             g = utils.id_mapper['OMA'].genome_of_entry_nr(vp['EntryNr2'])
-            t['sciname'] = misc.format_sciname(g['SciName'])
-            t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name']
+            t['sciname'] = misc.format_sciname(g['SciName'].decode())
+            t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name'].decode()
             t['RelType'] = vp['RelType']
             if 'sequence' in self.attr_of_member:
                 t['sequence'] = utils.db.get_sequence(vp['EntryNr2'])
@@ -284,8 +287,8 @@ class PairsView(EntryCentricView):
 
         context.update(
             {'entry': {'omaid': utils.id_mapper['OMA'].map_entry_nr(entry['EntryNr']),
-                       'sciname': misc.format_sciname(genome['SciName']),
-                       'kingdom': utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'],
+                       'sciname': misc.format_sciname(genome['SciName'].decode()),
+                       'kingdom': utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'].decode(),
                        'is_homeolog_species': ("WHEAT" == genome['UniProtSpeciesCode']),
                        'RelType': 'self'},
              'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs'})
@@ -304,7 +307,7 @@ class PairsViewFasta(PairsView):
         for memb in itertools.chain([context['entry']], context['vps']):
             seqs.append(memb['sequence'])
             header.append(' | '.join(
-                [memb['omaid'], memb['RelType'], '[{species}{strain}]'.format(**memb['sciname'])]))
+                [memb['omaid'], memb['RelType'], '[{species}{strain}]'.format(**memb['sciname'].decode())]))
 
         response = HttpResponse(content_type='text/plain')
         response.write(misc.as_fasta(seqs, header))
@@ -355,9 +358,9 @@ class HOGsView(TemplateView):
             t = {}
             t['omaid'] = utils.id_mapper['OMA'].map_entry_nr(memb['EntryNr'])
             g = utils.id_mapper['OMA'].genome_of_entry_nr(memb['EntryNr'])
-            t['sciname'] = misc.format_sciname(g['SciName'])
-            t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name']
-            t['hogid'] = memb['OmaHOG']
+            t['sciname'] = misc.format_sciname(g['SciName'].decode())
+            t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name'].decode()
+            t['hogid'] = memb['OmaHOG'].decode()
             if 'sequence' in self.attr_of_member:
                 t['sequence'] = utils.db.get_sequence(memb)
             hog_members.append(t)
@@ -365,9 +368,9 @@ class HOGsView(TemplateView):
         nr_vps = utils.db.count_vpairs(entry_nr)
         context.update(
             {'entry': {'omaid': query,
-                       'sciname': misc.format_sciname(genome['SciName']),
-                       'kingdom': utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'],
-                       'is_homeolog_species': ("WHEAT" == genome['UniProtSpeciesCode'])},
+                       'sciname': misc.format_sciname(genome['SciName'].decode()),
+                       'kingdom': utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'].decode(),
+                       'is_homeolog_species': (b"WHEAT" == genome['UniProtSpeciesCode'])},
              'level': level, 'hog_members': hog_members,
              'nr_vps': nr_vps, 'tab': 'hogs', 'levels': levels[::-1]})
         if not hog is None:
@@ -464,7 +467,7 @@ class CurrentView(TemplateView):
         except KeyError:
             logger.warn('Cannot determine root dir for downloads.')
             root = ""
-        candidate_dirs = map(os.path.basename, glob.glob(root + "/" + prefix_filter + "*"))
+        candidate_dirs = list(map(os.path.basename, glob.glob(root + "/" + prefix_filter + "*")))
         rels = [{'name': self._name_from_release(d), 'id': d, 'date': d[max(0, d.find('.') + 1):]}
                 for d in candidate_dirs if os.path.exists(os.path.join(root, d, "downloads"))]
         rels = sorted(rels, key=lambda x: -time.mktime(time.strptime(x['name'], "%b %Y")))
@@ -502,8 +505,6 @@ class CurrentView(TemplateView):
         context['all_releases'] = self._get_all_releases_with_downloads()
         context['release_with_backlinks'] = self._get_previous_releases(context['release'], context['all_releases'])
         context['download_root'] = self.download_root(context)
-        logger.info(release)
-        logger.info(context)
         return context
 
 
