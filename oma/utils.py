@@ -417,7 +417,7 @@ class XrefIdMapper(object):
         cross-references. The function returns a numpy recarray containing all 
         fields as defined in the table."""
         mapped_junks = []
-        junk_size = 32 - len(self.idtype) # respect max number of condtion variables.
+        junk_size = 32 - len(self.idtype)  # respect max number of condition variables.
         source_condition = self._combine_query_values('XRefSource', self.idtype)
         for start in range(0, len(entry_nrs), junk_size):
             condition = "({}) & ({})".format(

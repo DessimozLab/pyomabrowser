@@ -261,7 +261,6 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
                          'is_homeolog_species': (b"WHEAT" == species)},
                'tab': 'synteny', 'xrefs': xrefs
     }
-
     return render(request, 'synteny.html', context)
 
 
@@ -347,7 +346,7 @@ class HOGsView(TemplateView):
         except utils.Singleton:
             pass
         except ValueError as e:
-            raise Http404(e.message)
+            raise Http404(str(e))
         except utils.InvalidTaxonId:
             logger.error("cannot get NCBI Taxonomy for {} ({})".format(
                 genome['UniProtSpeciesCode'],
