@@ -118,7 +118,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
             "species": species,
             "genenumber": "{0:05d}".format(info['EntryNr'] - genome['EntryOff']),
             "dir": info['LocusStrand'],
-            "type": (index - gene_left + int(mod)) % (windows + windows + 1),
+            "type": str((index - gene_left + int(mod)) % (windows + windows + 1)),
             "geneindex": index}
         geneinfo["orthologs"] = utils.db.get_vpairs(info['EntryNr'])['EntryNr2']
 
