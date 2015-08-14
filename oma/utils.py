@@ -1,6 +1,8 @@
 from builtins import chr
 from builtins import range
 from builtins import object
+from builtins import zip
+import itertools
 
 import tables
 import numpy
@@ -36,6 +38,12 @@ def search_indexed_col(table, colname, element, side='left'):
             if element < c[idx[mid]]: hi = mid
             else: lo = mid+1
     return idx[lo], lo
+
+def count_elements(iterable):
+    """return the number of elements in an iterator in the most efficient way."""
+    counter = itertools.count()
+    collections.deque(zip(iterable, counter), maxlen=0)  # (consume at C speed)
+    return next(counter)
 
 
 class Database(object):
@@ -88,9 +96,13 @@ class Database(object):
         return self.db.get_node('/VPairs/{}'.format(genome))
     
     def count_vpairs(self, entry_nr):
-        vpTab = self._get_vptab(entry_nr)
-        return len(vpTab.read_where('(EntryNr1=={:d})'.format(entry_nr)))
-    
+        vptab = self._get_vptab(entry_nr)
+        try:
+            cnt = count_elements(vptab.where('(EntryNr1=={:d})'.format(entry_nr)))
+        except (TypeError, ValueError):
+            cnt = 0
+        return cnt
+
     def get_vpairs(self, entry_nr):
         vpTab = self._get_vptab(entry_nr)
         dat = vpTab.read_where('(EntryNr1=={:d})'.format(entry_nr))
