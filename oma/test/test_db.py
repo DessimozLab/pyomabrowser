@@ -88,8 +88,8 @@ class SyntenyViewTester(TestCase):
                             self.assertIn(query_gene['type'], o_neighbor['o_type'])
                         else:
                             self.assertEqual(query_gene['type'], o_neighbor['o_type'],
-                                     'colors of {} disagrees with {}'
-                                     .format(o_neighbor['entryid'], query_gene['entryid']))
+                                             'colors of {} disagrees with {}'
+                                             .format(o_neighbor['entryid'], query_gene['entryid']))
 
     def test_colors_of_neighbors_various_windowsize(self):
         queries = 'YEAST00055', 'YEAST00056', 'ASHGO01345'

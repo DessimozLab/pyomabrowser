@@ -1,7 +1,7 @@
 {% extends "seqCV.html" %}
 
-{% block title %}OMA Pairwise Orthologs for {{ entry.omaid }}{% endblock %}
-
+{% block title %}OMA orthology database: Pairwise Orthologs for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ vps|length }} pairwise orthologs{% endblock %}
 {% block contentTab %}
 
 <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
