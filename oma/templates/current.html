@@ -2,8 +2,8 @@
 {% load staticfiles %}
 {% load bootstrap3 %}
 
-{% block title %}{% block titleTab %}OMA: current{% endblock titleTab %}{% endblock %}
-
+{% block title %}{% block titleTab %}OMA orthology database: current release{% endblock titleTab %}{% endblock %}
+{% block meta_description %}Download all the data in various formats from the {% firstof release.name "current" %} OMA release.{% endblock %}
 {% block content %}
 
 <div class="container-fluid">

@@ -1,7 +1,7 @@
 {% extends "seqCV.html" %}
 {% load staticfiles %}
-{% block title %}OMA: synteny viewer{% endblock %}
-
+{% block title %}OMA: Explore conserved neighboring genes of {{ entry.omaid }} across genomes{% endblock %}
+{% block meta_description %}Explore the synthenic genes around {{ entry.omaid }} across its orthologs. Find out about highly conserved regions, rearangements, segmental duplications and other evolutionary events in this region{% endblock %}
 {% block css_hook %}
 <style type="text/css">
 /* CSS used here will be applied after bootstrap.css *//* CSS used here will be applied after bootstrap.css */
@@ -95,12 +95,6 @@ $(window).load(function(){
 {% endblock js_hook %}
 
 {% block seqhead_hook %}
-<!--
-<div style="float: right;">
-<button class="btn" data-toggle="modal" data-target="#myModal" id="modalhelp">
-    <span class="glyphicon glyphicon-question-sign"></span>
-</button>
-</div> -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

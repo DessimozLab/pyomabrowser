@@ -3,44 +3,27 @@
 {% load bootstrap3 %}
 
 
-{% block title %}OMA: license{% endblock %}
-
+{% block title %}OMA: License of service{% endblock %}
+{% block meta_description %}OMA Browser is licenced under the Creative Commons Attribution-Share Alike 2.5 license{% endblock %}
 {% block content %}
-
-
-
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-sm-12 col-md-10 col-md-offset-1">
 			<div class="jumbotron">
 				<div class="container">
-
-					
 					<h1 class="text-center">License</h1>
 					<div class="well well-sm entete"></div>
 					<br>
 					<div class="panel panel-default">
 						<div class="panel-body">
-
-							<p></p>
-							Our work (which include the OMA browser web site, the API and the predictions of orthology) is licensed under a Creative Commons Attribution-Share Alike 2.5 License. The OMA standalone package is under the MPL 2.0 licence.
-
-						</p></p>
-						<img src="{% static "image/cclicense.png" %}" class="img-responsive margin-auto">
-						<br>
-						<p></p>
-						The underlying sequences and annotations may be subject to third-party constraints. Users of the data are solely responsible for establishing the nature of and complying with any such intellectual property restrictions.
-					</p></p>
-
-
-
-
-
-				</div>
-			</div>	
-		</div>
-	</div>
-</div>	
-</div>
+							<p>Our work (which include the OMA browser web site, the API and the predictions of orthology) is licensed under a Creative Commons Attribution-Share Alike 2.5 License. The OMA standalone package is under the MPL 2.0 licence.</p>
+						    <img src="{% static "image/cclicense.png" %}" class="img-responsive margin-auto">
+						    <p>The underlying sequences and annotations may be subject to third-party constraints. Users of the data are solely responsible for establishing the nature of and complying with any such intellectual property restrictions.</p>
+				        </div>
+			        </div>
+		        </div>
+	        </div>
+        </div>
+    </div>
 </div>
 {% endblock content %}
