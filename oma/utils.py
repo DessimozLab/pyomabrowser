@@ -44,7 +44,7 @@ class Database(object):
         if db is None:
             db = django.conf.settings.HDF5DB['PATH']
 
-        if isinstance(db, (str, unicode)):
+        if isinstance(db, str):
             self.db = tables.open_file(db, 'r')
         elif isinstance(db, tables.File):
             self.db = db
