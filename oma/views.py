@@ -354,15 +354,12 @@ class HOGsView(TemplateView):
         for memb in hog_member_entries:
             t = {}
             t['omaid'] = utils.id_mapper['OMA'].map_entry_nr(memb['EntryNr'])
-            g=utils.id_mapper['OMA'].genome_of_entry_nr(memb['EntryNr'])
+            g = utils.id_mapper['OMA'].genome_of_entry_nr(memb['EntryNr'])
             t['sciname'] = misc.format_sciname(g['SciName'])
             t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name']
             t['hogid'] = memb['OmaHOG']
-            # if 'sequence' in self.attr_of_member: # what does this actually do?
-            t['sequence'] = utils.db.get_sequence(memb)
-            domains = utils.db.get_domains(memb['EntryNr'])
-            a = utils.DrawDomains(domains, t['sequence'], arch=False, name=t['omaid'])
-            t['domains'] = a.svg_string
+            if 'sequence' in self.attr_of_member:
+                t['sequence'] = utils.db.get_sequence(memb)
             hog_members.append(t)
 
         nr_vps = utils.db.count_vpairs(entry_nr)
