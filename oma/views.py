@@ -403,6 +403,36 @@ class HOGsOrthoXMLView(HOGsView):
         return response
 
 
+class HOGsVis(EntryCentricView):
+    template_name = "hog_vis.html"
+
+    def get_context_data(self, entry_id, idtype='OMA', **kwargs):
+        context = super(HOGsVis, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+        query = utils.id_mapper[idtype].map_entry_nr(entry['EntryNr'])
+        genome = utils.id_mapper['OMA'].genome_of_entry_nr(entry['EntryNr'])
+
+        context.update({'tab': 'hogs',
+                        'entry': {'omaid': query,
+                                  'entry_nr': entry['EntryNr'],
+                                  'sciname': misc.format_sciname(genome['SciName'].decode()),
+                                  'kingdom': utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'].decode(),
+                                  'is_homeolog_species': (b"WHEAT" == genome['UniProtSpeciesCode'])},
+                        })
+        try:
+            fam = utils.db.hog_family(entry)
+            levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam))
+
+            context.update({'fam': {'id': 'HOGTest'},
+                                    'hog_members': [1, 2, 3, 4, 5, 6, 7],
+                                    'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
+                            })
+        except utils.Singleton:
+            context['isSingleton'] = True
+        return context
+
+
+
 @cache_control(max_age=1800)
 def home(request):
     n_latest_tweets = 3
