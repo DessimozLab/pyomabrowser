@@ -325,6 +325,7 @@ class Taxonomy(object):
     def __init__(self, db_handle):
         self.tax_table = db_handle.root.Taxonomy.read()
         self.taxid_key = self.tax_table.argsort(order=('NCBITaxonId'))
+        self.parent_key = self.tax_table.argsort(order=('ParentTaxonId'))
         self._load_valid_taxlevels()
 
     def _load_valid_taxlevels(self):
@@ -340,8 +341,7 @@ class Taxonomy(object):
                                              if forbidden_chars.search(l.decode()) is None])
 
     def _table_idx_from_numeric(self, tid):
-        i = self.tax_table['NCBITaxonId'].searchsorted(tid, 
-                sorter=self.taxid_key) 
+        i = self.tax_table['NCBITaxonId'].searchsorted(tid, sorter=self.taxid_key)
         idx = self.taxid_key[i]
         if self.tax_table[idx]['NCBITaxonId'] != tid:
             raise InvalidTaxonId(u"{0:d} is an invalid/unknown taxonomy id".format(tid))
@@ -350,6 +350,14 @@ class Taxonomy(object):
     def _taxon_from_numeric(self,tid):
         idx = self._table_idx_from_numeric(tid)
         return self.tax_table[idx]
+
+    def _direct_children_taxa(self, tid):
+        i = self.tax_table['ParentTaxonId'].searchsorted(tid, sorter=self.parent_key)
+        idx = []
+        while i < len(self.parent_key) and self.tax_table[self.parent_key[i]]['ParentTaxonId'] == tid:
+            idx.append(self.parent_key[i])
+            i += 1
+        return self.tax_table.take(idx)
 
     def get_parent_taxa(self, query):
         """Get array of taxonomy entries leading towards the 
@@ -369,6 +377,54 @@ class Taxonomy(object):
                 raise InvalidTaxonId(u"{0:d} exceeds max depth of 100. Infinite recursion?".format(query))
         return self.tax_table.take(idx)
 
+    def newick(self, members):
+        """Get a Newick representation of the part of the tree that is covered by
+        the species and levels in `members`
+
+        Note: many newick parsers do not support quoted labels. Consider using the
+        :meth:`phylogeny` method instead."""
+
+        def _rec_newick(node):
+            children = []
+            for child in self._direct_children_taxa(node['NCBITaxonId']):
+                t = _rec_newick(child)
+                if t is not None:
+                    children.append(t)
+
+            if len(children) == 0 and node['Name'] in members:
+                return '"'+node['Name'].decode()+'"'
+            elif len(children) == 1:
+                return children[0]
+            elif len(children) > 1:
+                t = ",".join(children)
+                if node['Name'] in members:
+                    return '('+t+')"'+(node['Name'].decode())+'"'
+
+        return _rec_newick({'NCBITaxonId': 0, 'Name': b'LUCA'})
+
+    def phylogeny(self, members):
+        """Encode the part of the reference species topology covered by the species
+        and internal levels in `members` in a json formatable object."""
+        def _rec_phylogeny(node):
+            children = []
+            for child in self._direct_children_taxa(node['NCBITaxonId']):
+                t = _rec_phylogeny(child)
+                children.extend(t)
+            if len(children) == 0 and node['Name'] in members:
+                return [{'name': node['Name'].decode()}]
+            elif len(children) == 1:
+                return children
+            elif len(children) > 1:
+                if node['Name'] in members:
+                    return [{'name': node['Name'].decode(), 'children': children}]
+                else:
+                    return children
+            else:
+                return []
+        res_obj = _rec_phylogeny({'NCBITaxonId': 0, 'Name': b'LUCA'})
+        if len(res_obj) > 1:
+            raise ValueError(u"Specified members cannot encode phylogeny in a single topology.")
+        return res_obj[0]
 
 class InvalidTaxonId(Exception):
     pass
