@@ -314,22 +314,16 @@ class PairsViewFasta(PairsView):
 
 
 
-class HOGsView(TemplateView):
+class HOGsView(EntryCentricView):
     template_name = "hogs.html"
     attr_of_member = ('omaid', 'sciname', 'kingdom')
 
     def get_context_data(self, entry_id, level=None, idtype='OMA', **kwargs):
         context = super(HOGsView, self).get_context_data(**kwargs)
 
-        try:
-            entry_nr = utils.id_resolver.resolve(entry_id)
-        except utils.InvalidId as e:
-            raise Http404('requested id is unknown')
-
-        query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
-
-        entry = utils.db.entry_by_entry_nr(entry_nr)
-        genome = utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
+        entry = self.get_entry(entry_id)
+        query = utils.id_mapper[idtype].map_entry_nr(entry['EntryNr'])
+        genome = utils.id_mapper['OMA'].genome_of_entry_nr(entry['EntryNr'])
 
         hog_member_entries = []
         hog = None
@@ -342,7 +336,7 @@ class HOGsView(TemplateView):
                       if l in utils.tax.all_hog_levels and l in levs_of_fam]
             hog = {'id': entry['OmaHOG'], 'fam': fam}
             if not level is None:
-                hog_member_entries = utils.db.hog_members(entry_nr, level)
+                hog_member_entries = utils.db.hog_members(entry['EntryNr'], level)
         except utils.Singleton:
             pass
         except ValueError as e:
@@ -364,7 +358,7 @@ class HOGsView(TemplateView):
                 t['sequence'] = utils.db.get_sequence(memb)
             hog_members.append(t)
 
-        nr_vps = utils.db.count_vpairs(entry_nr)
+        nr_vps = utils.db.count_vpairs(entry['EntryNr'])
         context.update(
             {'entry': {'omaid': query,
                        'sciname': misc.format_sciname(genome['SciName'].decode()),
