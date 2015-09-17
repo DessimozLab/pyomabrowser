@@ -422,9 +422,11 @@ class HOGsVis(EntryCentricView):
         try:
             fam = utils.db.hog_family(entry)
             levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam))
+            phylo = utils.tax.phylogeny(levs_of_fam)
+            all_fam_memb = utils.db.member_of_fam(fam)
 
-            context.update({'fam': {'id': 'HOGTest'},
-                                    'hog_members': [1, 2, 3, 4, 5, 6, 7],
+            context.update({'fam': {'id': 'HOG:{:07d}'.format(fam)},
+                                    'hog_members': all_fam_memb,
                                     'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
                             })
         except utils.Singleton:

@@ -159,6 +159,25 @@ class Database(object):
         return self.db.root.HogLevel.read_where(
                 '(Fam=={})'.format(fam_nr))['Level']
 
+    def get_subhogids_at_level(self, fam_nr, level):
+        """get all the hog ids within a given family at a given taxonomic
+        level of interest.
+
+        After a duplication in an ancestor lineage, there exists multiple
+        sub-hogs for any taxonomic level after the duplication. This method
+        allows to get the list of hogids at the requested taxonomic level.
+
+        E.g. assume in family 1 (HOG:0000001) there has been a duplication
+        between Eukaryota and Metazoa. this method would return for
+        get_subhogids_at_level(1, 'Eukaryota') --> ['HOG:0000001']
+        and for
+        get_subhogids_at_level(1, 'Metazoa') --> ['HOG:0000001.1a', 'HOG:0000001.1b']
+
+        :param fam_nr: the numeric family id
+        :param level: the taxonomic level of interest"""
+        return self.db.root.HogLevel.read_where(
+            '(Fam=={}) & (Level=={!r})'.format(fam_nr, level.encode('ascii')))['ID']
+
     def member_of_hog_id(self, hog_id):
         """return an array of protein entries which belong to a given hog_id.
 
@@ -172,6 +191,12 @@ class Database(object):
         memb = self.db.root.Protein.Entries.read_where(
                 '({!r} <= OmaHOG) & (OmaHOG < {!r})'.format(*hog_range))
         return memb
+
+    def member_of_fam(self, fam):
+        """returns an array of protein entries which belong to a given fam"""
+        if not isinstance(fam, (int, numpy.number)):
+            raise ValueError('expect a numeric family id')
+        return self.member_of_hog_id('HOG:{:07d}'.format(fam))
 
     def hog_members(self, entry, level):
         """Returns member entries for a given taxonomic level that includes the

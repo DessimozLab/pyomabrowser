@@ -63,7 +63,6 @@ class HogView_Test(TestCase):
 
 class SyntenyViewTester(TestCase):
     def verify_colors(self, query, window):
-        query_nr = query[5:]
         reply = self.client.get(reverse('synteny', args=[query, window]))
         self.assertEqual(reply.status_code, 200)
         query_genome_genes = reply.context['md']['genes']
