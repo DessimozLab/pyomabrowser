@@ -158,10 +158,27 @@ class Database(object):
     def hog_levels_of_fam(self, fam_nr):
         return self.db.root.HogLevel.read_where(
                 '(Fam=={})'.format(fam_nr))['Level']
-    
-    def hog_members(self, entry_nr, level):
-        """Returns member entries for a given taxonomic level."""
-        query = self.entry_by_entry_nr(entry_nr)
+
+    def member_of_hog_id(self, hog_id):
+        """return an array of protein entries which belong to a given hog_id.
+
+        E.g. if hog_id = 'HOG122.1a', the method returns all the proteins that
+        have either exactly this hog id or an inparalogous id such a HOG122.1a.4b.2a
+
+        :param hog_id str: the requested hog_id.
+        :return a numpy.array with the protein entries belonging to the requested hog."""
+        hog_range = self._hog_lex_range(hog_id)
+        # get the proteins which have that HOG number
+        memb = self.db.root.Protein.Entries.read_where(
+                '({!r} <= OmaHOG) & (OmaHOG < {!r})'.format(*hog_range))
+        return memb
+
+    def hog_members(self, entry, level):
+        """Returns member entries for a given taxonomic level that includes the
+        reference protein entry.
+
+        """
+        query = self.ensure_entry(entry)
         queryFam = self.hog_family(query)
         hoglev = None
         for hog_candidate in self.db.root.HogLevel.where(
@@ -171,10 +188,8 @@ class Database(object):
                 break
         if hoglev is None:
             raise ValueError(u'Level "{0:s}" undefined for query gene'.format(level))
-        hog_range = self._hog_lex_range(hoglev['ID'])
-        # get the proteins which have that HOG number
-        memb = self.db.root.Protein.Entries.read_where(
-                '({!r} <= OmaHOG) & (OmaHOG < {!r})'.format(*hog_range))
+        # get the entries which have this hogid (or a sub-hog)
+        memb = self.member_of_hog_id(hoglev['ID'])
         # last, we need to filter the proteins to the tax range of interest
         memb = [x for x in memb if level.encode('ascii') in tax.get_parent_taxa(
             id_mapper['OMA'].genome_of_entry_nr(x['EntryNr'])['NCBITaxonId'])['Name']]
@@ -191,15 +206,15 @@ class Database(object):
         return self.db.root.OrthoXML.Buffer[idx['HogBufferOffset']:idx['HogBufferOffset']+idx['HogBufferLength']].tostring()
         
     def _hog_lex_range(self, hog):
-        """return the lexographic range of a hog. 
+        """return the lexographic range of a hog.
         
         This can be used to search of sub-hogs which are nested in
         the query hog. The semantics is such that
         _hog_lex_range[0] <= hog < _hog_lex_range[1].
         This is equivalent to say that a sub-hog starts with the
         query hog."""
-        hog_str = hog.decode()
-        return hog, (hog_str[0:-1]+chr(1+ord(hog_str[-1]))).encode('ascii')
+        hog_str = hog.decode() if isinstance(hog, bytes) else hog
+        return hog_str.encode('ascii'), (hog_str[0:-1]+chr(1+ord(hog_str[-1]))).encode('ascii')
 
             
     def _genome_range(self, g):

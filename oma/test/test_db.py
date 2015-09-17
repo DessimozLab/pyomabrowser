@@ -31,3 +31,13 @@ class TaxonomyTest(TestCase):
                        '{"name": "Saccharomyces cerevisiae (strain ATCC 204508 / S288c)"}]' \
                      '}]}, {"name": "Plasmodium falciparum (isolate 3D7)"}]}'
         self.assertJSONEqual(expected, json_phylo)
+
+
+class DatabaseTest(TestCase):
+    def test_lex_range_of_hogs(self):
+        cases = [[u'HOG22.1a', (b'HOG22.1a', b'HOG22.1b')],
+                 ['HOG00001', (b'HOG00001', b'HOG00002')],
+                ]
+        for case in cases:
+            hog, expected = case
+            self.assertEqual(expected, db._hog_lex_range(hog))

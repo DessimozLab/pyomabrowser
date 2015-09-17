@@ -336,7 +336,7 @@ class HOGsView(EntryCentricView):
                       if l in utils.tax.all_hog_levels and l in levs_of_fam]
             hog = {'id': entry['OmaHOG'], 'fam': fam}
             if not level is None:
-                hog_member_entries = utils.db.hog_members(entry['EntryNr'], level)
+                hog_member_entries = utils.db.hog_members(entry, level)
         except utils.Singleton:
             pass
         except ValueError as e:
