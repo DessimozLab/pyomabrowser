@@ -124,6 +124,27 @@ $(document).ready(function() {
            source: substringMatcher(arrayGenome)
          });
 
+
+        var autoArrayId = [];
+
+        arrayGenome.forEach(function(d) { 
+            if (d.length==5){
+                autoArrayId.push(d);   
+
+            }
+        });
+
+
+         $("#tagsId").typeahead({
+           hint: true
+         },
+         {
+           name: 'genomes',
+           minLength: 3,
+           limit: 10,
+           source: substringMatcher(autoArrayId)
+         });
+
         //update the tree
         update(root);
     });
@@ -133,6 +154,13 @@ $(document).ready(function() {
     $("#tags").keyup(function(event){
        if(event.keyCode == 13){
            $("#searchGenome").click();
+       }
+    }); 
+
+
+    $("#tagsId").keyup(function(event){
+       if(event.keyCode == 13){
+           $("#AddId").click();
        }
     }); 
   
@@ -960,6 +988,23 @@ $(document).ready(function() {
                     if (h[0]==selectname || h[2]==selectname || h[3]==selectname){
                         expandAllTheBranch(h[1]);
                         recExpand(h[1]);
+                        update(root);
+                        return;
+                    }
+                }
+            } 
+        };
+    })();
+
+    (function() {
+        document.getElementById("AddId").onclick = function() { 
+            var selectname =document.getElementById('tagsId').value;
+            if (hashGenome){
+                for (var i=0; i<hashGenome.length;i++){
+                    h = hashGenome[i];
+                    if (h[0]==selectname || h[2]==selectname || h[3]==selectname){
+                        selectTheNode(h[1]);
+                        needUpdate=true;
                         update(root);
                         return;
                     }

@@ -32,7 +32,7 @@
     text-shadow: 1px 0 0 #DDD, 0 -1px 0 #DDD, 0 1px 0 #DDD, -1px 0 0 #DDD;
 }
 
-{% for key, value in colors.iteritems %}
+{% for key, value in colors.items %}
 .btn-{{ key }} {background-color:{{ value }}; border-width: 2px;}
 .btn-{{ key }}.active, .btn-{{ key }}:active{
     background-color:{{ value }};
@@ -40,7 +40,7 @@
 }
 {% endfor %}
 
-{% for key, value in stripes.iteritems %}
+{% for key, value in stripes.items %}
 .btn-{{ key }}{
     background-image:
     repeating-linear-gradient(
@@ -69,7 +69,7 @@ table {
 <script type='text/javascript'>
 $(document).ready(function() {
         $(function() {
-            {% for key, value in colors.iteritems %}
+            {% for key, value in colors.items %}
             $('.btn-{{key}}').hover(
                 function(){ $('.btn-{{key}}').addClass('active');},
                 function(){ $('.btn-{{key}}').removeClass('active');}
@@ -132,19 +132,19 @@ $(window).load(function(){
                     </tr>
                     <tr>
                         <td><span data-toggle="tooltip_right" data-html=false data-title="{{ entry.sciname.species }} {{ entry.sciname.strain }}">{{ md.species }}</span></td>
-                        {% for index, geneinfo in md.genes.iteritems %}
-                        {% for infotype, genetype in geneinfo.iteritems %}
+                        {% for index, geneinfo in md.genes.items %}
+                        {% for infotype, genetype in geneinfo.items %}
                         {% if genetype == 'blank' %}
                         <td></td>
                         {% elif infotype == 'genenumber' %}
                         <td>
                             <a href = "/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/" class="btn btn-default btn-synteny cursor_wait btn-{{ geneinfo.type }}"
                                 data-toggle="tooltip" data-title="{% include "includes/synteny_xref.html" with eNr=geneinfo.entryid %}" >
-                                {% if geneinfo.dir = -1 %}
+                                {% if geneinfo.dir == -1 %}
                                 <span class="glyphicon glyphicon-chevron-left"></span>
                                 {% endif %}
                                 {{ genetype }}
-                                {% if geneinfo.dir = 1 %}
+                                {% if geneinfo.dir == 1 %}
                                 <span class="glyphicon glyphicon-chevron-right"></span>
                                 {% endif %}
                             </a>
@@ -156,11 +156,11 @@ $(window).load(function(){
                 </thead><!-- -->
 
                 <tbody><!-- -->
-                {% for ortholog_id, ortholog_info in o_md.iteritems %}
+                {% for ortholog_id, ortholog_info in o_md.items %}
                 <tr>
                     <td><span data-toggle="tooltip_right" data-html=false data-title="{{ortholog_info.o_sciname}}">{{ ortholog_info.o_species }}</span></td>
-                    {% for gene, geneinfo in ortholog_info.o_genes.iteritems %}
-                    {% for infotype, genetype in geneinfo.iteritems %}
+                    {% for gene, geneinfo in ortholog_info.o_genes.items %}
+                    {% for infotype, genetype in geneinfo.items %}
                     {% if genetype == 'blank' %}
                     <td></td>
                     {% elif infotype == 'genenumber' %}
@@ -171,15 +171,15 @@ $(window).load(function(){
                                 btn-{{ entry_ortholog }}
                                 {% endfor %}"
                                 data-toggle="tooltip" data-title="{% include "includes/synteny_xref.html" with eNr=geneinfo.entryid %}" >
-                            {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir = -1 %}
+                            {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir == -1 %}
                             <span class="glyphicon glyphicon-chevron-left"></span>
-                            {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir = 1 %}
+                            {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir == 1 %}
                             <span class="glyphicon glyphicon-chevron-left"></span>
                             {% endif %}
                             {{ genetype }}
-                            {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir = 1 %}
+                            {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir == 1 %}
                             <span class="glyphicon glyphicon-chevron-right"></span>
-                            {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir = -1 %}
+                            {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir == -1 %}
                             <span class="glyphicon glyphicon-chevron-right"></span>
                             {% endif %}
                             </span>

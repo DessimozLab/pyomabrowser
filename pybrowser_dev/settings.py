@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+# deployment, either DEV (default) or PRODUCTION
+DEPLOYMENT = os.getenv('DEPLOYMENT_TYPE', default="DEV").upper()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -27,11 +29,11 @@ TWITTER_ACCESS_TOKEN_SECRET = 'wBQDobkrHXAha8IJEEHFiuB1BGeRDE7PaUZrQ0xqEXfRd'
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = (DEPLOYMENT != "PRODUCTION")
 
 TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = ['omabrowser.org','.ethz.ch','.cs.ucl.ac.uk']
+ALLOWED_HOSTS = ['omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk']
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 SHOW_TOOLBAR_CALLBACK = lambda x: True
@@ -47,7 +49,7 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
-    'debug_toolbar_line_profiler.panel.ProfilingPanel',
+    #'debug_toolbar_line_profiler.panel.ProfilingPanel',
 )
 
 # Application definition
@@ -60,7 +62,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
-    'debug_toolbar_line_profiler',
+    #'debug_toolbar_line_profiler',
     'oma',
     'bootstrap3',
 )
@@ -96,7 +98,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(os.getenv('DARWIN_LOG_PATH',default=''),'pyoma.log'),
+            'filename': os.path.join(os.getenv('DARWIN_LOG_PATH', default=''), 'pyoma.log'),
             'formatter': 'verbose'
         },
     },
@@ -126,8 +128,7 @@ DATABASES = {
 
 HDF5DB = {
     'NAME': 'Production',
-    'PATH': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'],
-                         'OmaServer.h5')
+    'PATH': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'OmaServer.h5')
 }
 
 # Internationalization
@@ -146,5 +147,5 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
-STATIC_ROOT = os.path.join(os.path.expanduser("~"),"Browser","htdocs","static")
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "static")

@@ -1,0 +1,55 @@
+{% extends "seqCV.html" %}
+
+{% block title %}OMA orthology database: Pairwise Orthologs for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ vps|length }} pairwise orthologs{% endblock %}
+{% block contentTab %}
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="myModalLabel">The OMA Browser reports for every entry different types of orthology</h3>
+			</div>
+			<div class="modal-body">
+				{% include "includes/otypes.html" %}
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <div class="pull-left">
+            Pairwise Orthologs <a href="#" class="badge" role="button" data-toggle="modal" data-target=".bs-example-modal-lg">?</a>
+        </div>
+        <div class="pull-right">
+            Download:
+            <a href="{% url 'pairs_fasta' entry.omaid %}"><span class="glyphicon glyphicon-download">Fasta</span></a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <dl class="dl-horizontal">
+        {%  regroup vps by RelType as vps_grouped %}
+        {% for one_rel_vps in vps_grouped %}
+          <dt>{{ one_rel_vps.grouper }}</dt>
+          <dd>
+            <table class="table table-hover">
+                <thead><tr><td class="col-md-3">Taxon</td><td class="col-md-2">Protein ID</td></tr></thead>
+                <tbody>
+                    {% for vp in one_rel_vps.list %}
+                    <tr>
+                        <td>{% include "includes/kingdom.html" with kingdom=vp.kingdom %} <b>{{vp.sciname.species}}</b>{{vp.sciname.strain}} </td>
+                        <td><a href="{% url "pairs" vp.omaid %}">{{vp.omaid}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+          </dd>
+        {% endfor %}
+        </dl>
+    </div>
+</div>
+
+{% endblock contentTab %}
