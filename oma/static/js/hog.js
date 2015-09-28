@@ -6,7 +6,7 @@ var tnt_theme_tree_hog = function () {
     var annot;
     // var collapsed_nodes = [];
 
-    var theme = function (ta, div, query, per_species3, tree) {
+    var theme = function (ta, div, query, per_species3, tree, gene_data) {
 	/////////////
 	// TREE /////
 	/////////////
@@ -37,6 +37,42 @@ var tnt_theme_tree_hog = function () {
 	    .add ("internal", function (node) {
 		return !node.is_leaf();
 	    }, int_node);
+
+    // Tooltips
+    var node_tooltip = function (node) {
+		var obj = {};
+		obj.header = node.node_name();
+		obj.rows = [];
+		obj.rows.push({
+			label: 'Distance to root',
+			value: node.root_dist()
+		});
+
+		if (node.is_collapsed()) {
+			obj.rows.push({
+				label: 'Action',
+				link: function (node) {
+					node.toggle();
+					ta.update();
+				},
+				obj: node,
+				value: "Uncollapse subtree"
+			});
+		}
+
+		if (!node.is_leaf()) {
+			obj.rows.push({
+				label: 'Action',
+				link: function (node) {
+					node.toggle();
+					ta.update();
+				},
+				obj: node,
+				value: "Collapse subtree"
+			});
+		}
+		tnt.tooltip.table().call(this, obj);
+	}
 
 	// mouse over a node
 	var mouse_over_node = function (node) {
@@ -78,7 +114,8 @@ var tnt_theme_tree_hog = function () {
 		    })
 		   )
 	    .link_color ("black")
-	    .on_mouseover (mouse_over_node)
+	    .on_click(node_tooltip)
+		.on_mouseover (mouse_over_node)
 	    .node_display(node_display)
 	    .link_color ("black");
 
@@ -88,6 +125,14 @@ var tnt_theme_tree_hog = function () {
 	//// PARSE HOG INFO /////
 	/////////////////////////
 	var maxs = get_maxs(per_species3);
+	var gene_tooltip = function(gene){
+		var obj = {};
+        obj.header = gene_data[gene.id]['omaid'];
+        obj.rows = [];
+        obj.rows.push ({label : "Name", value : gene_data[gene.id]['id']});
+
+        tnt.tooltip.table().call (this, obj);
+    };
 
 	// TnT doesn't have the features we need, so create ower own
 	var hog_feature = tnt.track.feature()
@@ -147,17 +192,17 @@ var tnt_theme_tree_hog = function () {
 	    	    .attr ("width", side)
 	    	    .attr ("height", side)
 	    	    .attr ("fill", function(d){
-				return (d.id == query.id ? "green" : "grey")
-			})
+			return (d.id == query.id ? "green" : "grey")
+				})
 	    })
-
+		.on_click(gene_tooltip)
 	    .updater (function (elems, x_scale) {
-		var track = this;
+			var track = this;
 	    	var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
 	    	// otherwise it is repeated with every create event
 	    	var side = track.height() - ~~(padding * 2);
 
-		elems.select ("rect")
+			elems.select ("rect")
 		    .transition()
 		    .attr("x", function (d) {
 			return (d.pos * track.height()) + (d.hog * 20) + padding;

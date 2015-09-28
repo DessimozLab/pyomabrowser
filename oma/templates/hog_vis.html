@@ -29,12 +29,12 @@
         var tree = {{ species_tree|safe }};
         var query = {'id': {{ entry.entry_nr }} };
         var per_species = {{ per_species|safe }};
-        var tooltips = {{ xrefs|safe }};
+        var tooltip_data = {{ xrefs|safe }};
 
 
       var viz = tnt.tree_annot();
       var theme = tnt_theme_tree_hog();
-      theme (viz, document.getElementById ("hog_vis"), query, per_species, tree);
+      theme (viz, document.getElementById ("hog_vis"), query, per_species, tree, tooltip_data);
     }) ();
   </script>
 
