@@ -21,11 +21,6 @@
     {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
     {% else %}
 <h3>Hierarchical group {{ fam.id }}</h3>
-<h4>This group contains {{ hog_members|length }} members:
-    {%for kingdom, cnt in cnt_per_kingdom.items %}
-        {{cnt}} {% include "includes/kingdom.html" %}
-    {%endfor %}
-</h4>
   <div id="hog_vis"></div>
 
   <script>
@@ -34,6 +29,7 @@
         var tree = {{ species_tree|safe }};
         var query = {'id': {{ entry.entry_nr }} };
         var per_species = {{ per_species|safe }};
+        var tooltips = {{ xrefs|safe }};
 
 
       var viz = tnt.tree_annot();

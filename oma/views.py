@@ -448,12 +448,14 @@ class HOGsVis(EntryCentricView):
             subhogids_per_level = dict((lev, utils.db.get_subhogids_at_level(fam_nr, lev)) for lev in phylo2.tax_table['Name'])
             fam_memb = utils.db.member_of_fam(fam_nr)
             per_species = self._build_per_species_table(fam_memb, subhogids_per_level, phylo2)
+            xrefs = {int(e['EntryNr']): {'omaid': utils.id_mapper['OMA'].map_entry_nr(e['EntryNr']),
+                                    'id': e['CanonicalId'].decode()} for e in fam_memb}
 
             context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
                             'hog_members': fam_memb,
                             'per_species': json.dumps(per_species),
                             'species_tree': json.dumps(phylo),
-                            'xrefs': json.dumps([]),
+                            'xrefs': json.dumps(xrefs),
                             'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
                             })
         except utils.Singleton:
