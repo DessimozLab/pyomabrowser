@@ -2,6 +2,8 @@ from __future__ import print_function
 from builtins import map
 from builtins import str
 from builtins import range
+import collections
+import json
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -406,6 +408,24 @@ class HOGsOrthoXMLView(HOGsView):
 class HOGsVis(EntryCentricView):
     template_name = "hog_vis.html"
 
+    def _build_per_species_table(self, entries, subhogids_per_lev, taxonomy):
+        per_species = {}
+        for e in entries:
+            genome = utils.id_mapper['OMA'].genome_of_entry_nr(e['EntryNr'])
+            species_dict = per_species.get(genome['SciName'].decode(), {})
+            for lin in taxonomy.get_parent_taxa(genome['NCBITaxonId']):
+                lin_str = lin['Name'].decode()
+                if not lin_str in species_dict:
+                    species_dict[lin_str] = [[] for _ in range(len(subhogids_per_lev[lin['Name']]))]
+                for k, subhogid in enumerate(subhogids_per_lev[lin['Name']]):
+                    if e['OmaHOG'].startswith(subhogid):
+                        species_dict[lin_str][k].append(int(e['EntryNr']))
+                        break
+                else:
+                    raise ValueError('no id found for {}({})'.format(e['EntryNr'], e['OmaHOG']))
+            per_species[genome['SciName'].decode()] = species_dict
+        return per_species
+
     def get_context_data(self, entry_id, idtype='OMA', **kwargs):
         context = super(HOGsVis, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
@@ -420,14 +440,21 @@ class HOGsVis(EntryCentricView):
                                   'is_homeolog_species': (b"WHEAT" == genome['UniProtSpeciesCode'])},
                         })
         try:
-            fam = utils.db.hog_family(entry)
-            levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam))
+            fam_nr = utils.db.hog_family(entry)
+            levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam_nr))
+            # TODO: avoid doing work twice!
             phylo = utils.tax.phylogeny(levs_of_fam)
-            all_fam_memb = utils.db.member_of_fam(fam)
+            phylo2 = utils.tax.get_induced_taxonomy(levs_of_fam)
+            subhogids_per_level = dict((lev, utils.db.get_subhogids_at_level(fam_nr, lev)) for lev in phylo2.tax_table['Name'])
+            fam_memb = utils.db.member_of_fam(fam_nr)
+            per_species = self._build_per_species_table(fam_memb, subhogids_per_level, phylo2)
 
-            context.update({'fam': {'id': 'HOG:{:07d}'.format(fam)},
-                                    'hog_members': all_fam_memb,
-                                    'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
+            context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
+                            'hog_members': fam_memb,
+                            'per_species': json.dumps(per_species),
+                            'species_tree': json.dumps(phylo),
+                            'xrefs': json.dumps([]),
+                            'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
                             })
         except utils.Singleton:
             context['isSingleton'] = True

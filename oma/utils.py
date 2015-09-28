@@ -175,8 +175,9 @@ class Database(object):
 
         :param fam_nr: the numeric family id
         :param level: the taxonomic level of interest"""
+        lev = level if isinstance(level, bytes) else level.encode('ascii')
         return self.db.root.HogLevel.read_where(
-            '(Fam=={}) & (Level=={!r})'.format(fam_nr, level.encode('ascii')))['ID']
+            '(Fam=={}) & (Level=={!r})'.format(fam_nr, lev))['ID']
 
     def member_of_hog_id(self, hog_id):
         """return an array of protein entries which belong to a given hog_id.
@@ -362,8 +363,10 @@ class Taxonomy(object):
     For performance reasons, it will load at instantiation the data
     into memory. Hence, it should only be instantiated once."""
 
-    def __init__(self, db_handle):
-        self.tax_table = db_handle.root.Taxonomy.read()
+    def __init__(self, data):
+        if not isinstance(data, numpy.ndarray):
+            raise ValueError('Taxonomy expects a numpy table.')
+        self.tax_table = data
         self.taxid_key = self.tax_table.argsort(order=('NCBITaxonId'))
         self.parent_key = self.tax_table.argsort(order=('ParentTaxonId'))
         self._load_valid_taxlevels()
@@ -416,6 +419,82 @@ class Taxonomy(object):
             if count > 100:
                 raise InvalidTaxonId(u"{0:d} exceeds max depth of 100. Infinite recursion?".format(query))
         return self.tax_table.take(idx)
+
+    def _get_taxids_from_any(self, it, skip_missing=True):
+        if not isinstance(it, numpy.ndarray):
+            try:
+                it = numpy.fromiter(it, dtype='i4')
+            except ValueError:
+                it = numpy.fromiter(it, dtype='S255')
+        if it.dtype.type is numpy.string_:
+            try:
+                ns = self.name_key
+            except AttributeError:
+                ns = self.name_key = self.tax_table.argsort(order='Name')
+            idxs = self.tax_table['Name'].searchsorted(it, sorter=ns)
+            taxs = self.tax_table[ns[idxs]]
+            keep = taxs['Name'] == it
+            if not skip_missing and not keep.all():
+                raise KeyError('not all taxonomy names could be found')
+            res = taxs['NCBITaxonId'][keep]
+        else:
+            res = it
+        return res
+
+    def get_induced_taxonomy(self, members, collapse=True):
+        """Extract the taxonomy induced by a given set of `members`.
+
+        This method allows to extract the part which is induced bay a
+        given set of levels and leaves that should be part of the
+        new taxonomy. `members` must be an iterable, the levels
+        must be either numeric taxids or scientific names.
+
+        :param iterable members: an iterable containing the levels
+            and leaves that should remain in the new taxonomy. can be
+            either axonomic ids or scientific names.
+        :param bool collapse: whether or not levels with only one child
+            should be skipped or not."""
+        taxids_to_keep = numpy.sort(self._get_taxids_from_any(members))
+        idxs = numpy.searchsorted(self.tax_table['NCBITaxonId'], taxids_to_keep, sorter=self.taxid_key)
+        subtaxdata = self.tax_table[self.taxid_key[idxs]]
+        if not numpy.alltrue(subtaxdata['NCBITaxonId'] == taxids_to_keep):
+            raise KeyError('not all levels in members exists in this taxonomy')
+
+        updated_parent = numpy.zeros(len(subtaxdata), 'bool')
+        for i, cur_tax in enumerate(taxids_to_keep):
+            if updated_parent[i]:
+                continue
+            # get all the parents and check which ones we keep in the new taxonomy.
+            parents = self.get_parent_taxa(cur_tax)['NCBITaxonId']
+            mask = numpy.in1d(parents, taxids_to_keep)
+            # find the position of them in subtaxdata (note: subtaxdata and
+            # taxids_to_keep have the same ordering).
+            new_idx = taxids_to_keep.searchsorted(parents[mask])
+            taxids = taxids_to_keep[new_idx]
+            # parent taxid are ncbitaxonids shifted by one position!
+            parents = numpy.roll(taxids, -1)
+            parents[-1] = 0
+            subtaxdata['ParentTaxonId'][new_idx] = parents
+            updated_parent[new_idx] = True
+
+        if collapse:
+            nr_children = collections.defaultdict(int)
+            for p in subtaxdata['ParentTaxonId']:
+                nr_children[p] += 1
+            rem = [p for (p, cnt) in nr_children.items() if cnt == 1 and p != 0]
+            if len(rem) > 0:
+                idx = taxids_to_keep.searchsorted(rem)
+                return self.get_induced_taxonomy(numpy.delete(taxids_to_keep, idx))
+        return Taxonomy(subtaxdata)
+
+    def to_json(self):
+        pass
+
+
+
+
+
+
 
     def newick(self, members):
         """Get a Newick representation of the part of the tree that is covered by
@@ -595,4 +674,4 @@ class LinkoutIdMapper(XrefIdMapper):
 db = Database()
 id_resolver = IDResolver(db.db)
 id_mapper = IdMapperFactory(db)
-tax = Taxonomy(db.db)
+tax = Taxonomy(db.db.root.Taxonomy.read())

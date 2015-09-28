@@ -5,10 +5,10 @@
 {% block meta_description %}Hierarchical orthologous groups (HOGs) provide a set of genes that have all started diverging from a single ancestral gene at the taxonomic range of interest.{% endblock %}
 {% block js_hook %}
  <!-- D3 -->
-  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>
 
   <!-- Underscore -->
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+  <script src="{% static "js/underscore-min.js" %}"></script>
 
   <!-- TnT -->
   <link rel="stylesheet" href="{% static "css/tnt.css" %}" type="text/css" />
@@ -31,85 +31,14 @@
   <script>
 
     (function () {
-        var tree_newick = '(((((((Human, Chimp)Primates, (Rat, Mouse)Rodents)Euarchontoglires, Dog)Mammals, Frog)Tetrapoda, (Zebrafish, Pufferfish)Neopterygii)Vertebrates,(CionaS, CionaI)Ciona)Chordata';
+        var tree = {{ species_tree|safe }};
         var query = {'id': {{ entry.entry_nr }} };
-        var per_species = {
-    'Human' : {
-	'Human'            : [[1], [2], [3], [4], [5, 6]],
-	'Primates'         : [[1], [2], [3], [4], [5, 6]],
-	'Euarchontoglires' : [[1, 2], [3], [4, 5, 6]],
-	'Mammals'          : [[1, 2, 3], [4, 5, 6], []],
-	'Tetrapoda'        : [[1, 2, 3], [4, 5, 6], []],
-	'Vertebrates'      : [[1, 2, 3, 4, 5, 6], []],
-	'Chordata'         : [[1, 2, 3, 4, 5, 6], [], []]
-    },
-    'Chimp' : {
-	'Chimp'            : [[11], [12], [13], [14], [15, 16, 17]],
-	'Primates'         : [[11], [12], [13], [14], [15, 16, 17]],
-	'Euarchontoglires' : [[11, 12], [13], [14, 15, 16], [17]],
-	'Mammals'          : [[11, 12, 13], [14, 15, 16, 17], []],
-	'Tetrapoda'        : [[11, 12, 13], [14, 15, 16, 17], []],
-	'Vertebrates'      : [[11, 12, 13, 14, 15, 16, 17], []],
-	'Chordata'         : [[11, 12, 13, 14, 15, 16, 17], [], []]
-    },
-    'Mouse' : {
-	'Mouse'            : [[21], [22], [23, 24, 25], [26], [27],[28]],
-	'Rodents'          : [[21], [22], [23, 24, 25], [26], [27],[28]],
-	'Euarchontoglires' : [[21, 22], [], [23, 24, 25], [26], [27, 28]],
-	'Mammals'          : [[21, 22], [23, 24, 25, 26], [27, 28]],
-	'Tetrapoda'        : [[21, 22], [23, 24, 25, 26], [27, 28]],
-	'Vertebrates'      : [[21, 22, 23, 24, 25, 26], [27, 28]],
-	'Chordata'         : [[21, 22, 23, 24, 25, 26], [27, 28], []]
-    },
-    'Rat' : {
-	'Rat'              : [[31], [32], [33, 34, 35], [36], [37]],
-	'Rodents'          : [[31], [32], [33, 34, 35], [36], [37]],
-	'Euarchontoglires' : [[31, 32], [], [33, 34, 35], [36], [37]],
-	'Mammals'          : [[31, 32], [33, 34, 35, 36], [37]],
-	'Tetrapoda'        : [[31, 32], [33, 34, 35, 36], [37]],
-	'Vertebrates'      : [[31, 32, 33, 34, 35, 36], [37]],
-	'Chordata'         : [[31, 32, 33, 34, 35, 36], [37], []]
-    },
-    'Dog' : {
-	'Dog'              : [[41], [42, 43]],
-	'Mammals'          : [[41], [42, 43], []],
-	'Tetrapoda'        : [[41], [42, 43], []],
-	'Vertebrates'      : [[41, 42, 43], []],
-	'Chordata'         : [[41, 42, 43], [], []]
-    },
-    'Frog' : {
-	'Frog'             : [[51], [52]],
-	'Tetrapoda'        : [[51], [52], []],
-	'Vertebrates'      : [[51, 52], []],
-	'Chordata'         : [[51, 52], [], []]
-    },
-    'Zebrafish' : {
-	'Zebrafish'        : [[61, 62], [63], [64, 65]],
-	'Neopterygii'      : [[61, 62], [63], [64, 65]],
-	'Vertebrates'      : [[61, 62], [63, 64, 65]],
-	'Chordata'         : [[61, 62], [63, 64, 65], []]
-    },
-    'Pufferfish' : {
-	'Pufferfish'       : [[71, 72], [73]],
-	'Neopterygii'      : [[71, 72], [], [73]],
-	'Vertebrates'      : [[71, 72], [73]],
-	'Chordata'         : [[71, 72], [73], []]
-    },
-    'CionaS' : {
-	'CionaS'           : [[81, 82, 83, 84, 85], [86], [87, 88, 89]],
-	'Ciona'            : [[81, 82, 83, 84, 85], [86], [87, 88, 89]],
-	'Chordata'         : [[81, 82, 83, 84, 85], [], [86, 87, 88, 89]]
-    },
-    'CionaI' : {
-	'CionaI'           : [[91, 92], [93, 94, 95]],
-	'Ciona'            : [[91, 92], [], [93, 94, 95]],
-	'Chordata'         : [[91, 92], [], [94, 95, 96]]
-    }
-};
+        var per_species = {{ per_species|safe }};
+
 
       var viz = tnt.tree_annot();
       var theme = tnt_theme_tree_hog();
-      theme (viz, document.getElementById ("hog_vis"), query, per_species, tree_newick);
+      theme (viz, document.getElementById ("hog_vis"), query, per_species, tree);
     }) ();
   </script>
 

@@ -6,8 +6,7 @@ var tnt_theme_tree_hog = function () {
     var annot;
     // var collapsed_nodes = [];
 
-    var theme = function (ta, div, query, per_species3, tree_newick3) {
-        console.log(tnt.tree.parse_newick (tree_newick3))
+    var theme = function (ta, div, query, per_species3, tree) {
 	/////////////
 	// TREE /////
 	/////////////
@@ -56,7 +55,7 @@ var tnt_theme_tree_hog = function () {
 	};
 
 	var tree = tnt.tree()
-	    .data (tnt.tree.parse_newick (tree_newick3))
+	    .data (tree)
 	    .layout (tnt.tree.layout.vertical()
 		     .width(350)
 		     .scale(false)

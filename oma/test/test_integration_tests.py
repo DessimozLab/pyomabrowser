@@ -1,3 +1,4 @@
+import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 import re
@@ -59,6 +60,25 @@ class HogView_Test(TestCase):
         """test that an invalid level (level not belonging to species) will return an error message"""
         reply = self.client.get(reverse('hogs', args=['YEAST12', 'Mammalia']))
         self.assertEqual(reply.status_code, 404)
+
+class HogVisViewTest(TestCase):
+    def test_simple_fam_encoding(self):
+        exp_tree = {'name': 'Eukaryota',
+                    'children': [{'name': 'Ascomycota',
+                                  'children': [{'name': 'Schizosaccharomyces pombe (strain 972 / ATCC 24843)'},
+                                               {'name': 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)'}]},
+                                 {'name': 'Plasmodium falciparum (isolate 3D7)'}]}
+        reply = self.client.get(reverse('hog_vis', args=['YEAST12']))
+        phylo = json.loads(reply.context['species_tree'])
+        self.assertDictEqual(exp_tree, phylo)
+
+        per_species = json.loads(reply.context['per_species'])
+        for spec, lev, cnts in [('Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'Eukaryota', [2]),
+                                ('Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', [1,1]),
+                                ]:
+            nr_genes_per_subhog = [len(z) for z in per_species[spec][lev]]
+            self.assertEqual(nr_genes_per_subhog, cnts, 'missmatch of subhogs at {}/{}: {} vs {}'
+                             .format(spec, lev, nr_genes_per_subhog, cnts))
 
 
 class SyntenyViewTester(TestCase):
