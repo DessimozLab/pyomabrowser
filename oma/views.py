@@ -413,7 +413,13 @@ class HOGsVis(EntryCentricView):
         for e in entries:
             genome = utils.id_mapper['OMA'].genome_of_entry_nr(e['EntryNr'])
             species_dict = per_species.get(genome['SciName'].decode(), {})
-            for lin in taxonomy.get_parent_taxa(genome['NCBITaxonId']):
+            try:
+                lineage = taxonomy.get_parent_taxa(genome['NCBITaxonId'])
+            except utils.InvalidTaxonId:
+                logger.exception("cannot find lineage inforamtion for {}".format(genome['NCBITaxonId']))
+                continue
+
+            for lin in lineage:
                 lin_str = lin['Name'].decode()
                 if not lin_str in species_dict:
                     species_dict[lin_str] = [[] for _ in range(len(subhogids_per_lev[lin['Name']]))]
