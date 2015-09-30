@@ -93,18 +93,23 @@ var tnt_theme_tree_hog = function () {
 	var tree = tnt.tree()
 	    .data (tree)
 	    .layout (tnt.tree.layout.vertical()
-		     .width(350)
+		     .width(500)
 		     .scale(false)
 		    )
 	    .label (tnt.tree.label.text()
 		    .fontsize(12)
 		    .height(height)
 		    .text (function (node) {
-			var data = node.data();
+			var limit = 50;
+                        var data = node.data();
+                        if (data.children && data.children.length > 0) return "";
 			if (node.is_collapsed()) {
 			    return "[" + node.n_hidden() + " hidden taxa]";
 			}
-			return data.name.replace (/_/g, ' ');
+                        if (data.name.length - 3 > limit ){
+                            data.name = data.name.substring(0,limit)+"...";
+                        }
+			return data.name.replace (/_/g, ' ')
 		    })
 		    .color (function (node) {
 			if (node.is_collapsed()) {
@@ -214,7 +219,7 @@ var tnt_theme_tree_hog = function () {
 	    .zoom_in(1)
 	    .allow_drag(false)
 	    .to(5)
-	    .width(600) // TODO: This shouldn't be hardcoded?
+	    .width(500) // TODO: This shouldn't be hardcoded?
 	    .right(5);
 
 	var track = function (leaf) {
