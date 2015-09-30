@@ -469,6 +469,12 @@ class HOGsVis(EntryCentricView):
         return context
 
 
+class HogVisWithoutInternalLabels(HOGsVis):
+    def get_context_data(self, entry_id, idtype='OMA', **kwargs):
+        context = super(HogVisWithoutInternalLabels, self).get_context_data(entry_id, idtype, **kwargs)
+        context['show_internal_labels'] = "false"
+        return context
+
 
 @cache_control(max_age=1800)
 def home(request):

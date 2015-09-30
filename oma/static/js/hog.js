@@ -6,7 +6,7 @@ var tnt_theme_tree_hog = function () {
     var annot;
     // var collapsed_nodes = [];
 
-    var theme = function (ta, div, query, per_species3, tree, gene_data) {
+    var theme = function (ta, div, query, per_species3, tree, gene_data, show_internal_labels) {
 	/////////////
 	// TREE /////
 	/////////////
@@ -101,14 +101,16 @@ var tnt_theme_tree_hog = function () {
 		    .height(height)
 		    .text (function (node) {
 			var limit = 50;
-                        var data = node.data();
-                        if (data.children && data.children.length > 0) return "";
-			if (node.is_collapsed()) {
+            var data = node.data();
+            if (node.is_collapsed()) {
 			    return "[" + node.n_hidden() + " hidden taxa]";
 			}
-                        if (data.name.length - 3 > limit ){
-                            data.name = data.name.substring(0,limit)+"...";
-                        }
+            if (!show_internal_labels && data.children && data.children.length > 0) {
+                return "";
+            }
+            if (data.name.length > limit ){
+                data.name = data.name.substring(0,limit - 3) + "...";
+            }
 			return data.name.replace (/_/g, ' ')
 		    })
 		    .color (function (node) {
