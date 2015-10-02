@@ -30,11 +30,12 @@
         var query = {'id': {{ entry.entry_nr }} };
         var per_species = {{ per_species|safe }};
         var tooltip_data = {{ xrefs|safe }};
-        var show_internal_labels = {{ show_internal_labels|default:"true" }};
+        var options = {'show_internal_labels': {{ show_internal_labels|default:"true" }},
+                       'oma_info_url_template': "http://omabrowser.org/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1="};
 
         var viz = tnt.tree_annot();
         var theme = tnt_theme_tree_hog();
-        theme (viz, document.getElementById ("hog_vis"), query, per_species, tree, tooltip_data, show_internal_labels);
+        theme (viz, document.getElementById ("hog_vis"), query, per_species, tree, tooltip_data, options);
     }) ();
   </script>
 
