@@ -390,6 +390,14 @@ class Taxonomy(object):
             raise InvalidTaxonId(u"{0:d} is an invalid/unknown taxonomy id".format(tid))
         return idx
 
+    def _get_root_taxon(self):
+        i = self.tax_table['ParentTaxonId'].searchsorted(0, sorter=self.parent_key)
+        res = self.tax_table[self.parent_key[i]]
+        if res['ParentTaxonId'] != 0:
+            raise DBConsistencyError('Not a single root in Taxonomy: {}'
+                                     .format(self.tax_table[self.parent_key[i]]))
+        return res
+
     def _taxon_from_numeric(self,tid):
         idx = self._table_idx_from_numeric(tid)
         return self.tax_table[idx]
@@ -487,65 +495,46 @@ class Taxonomy(object):
                 return self.get_induced_taxonomy(numpy.delete(taxids_to_keep, idx))
         return Taxonomy(subtaxdata)
 
-    def to_json(self):
-        pass
+    def newick(self):
+        """Get a Newick representation of the Taxonomy
 
-
-
-
-
-
-
-    def newick(self, members):
-        """Get a Newick representation of the part of the tree that is covered by
-        the species and levels in `members`
-
-        Note: many newick parsers do not support quoted labels. Consider using the
-        :meth:`phylogeny` method instead."""
+        Note: as many newick parsers do not support quoted labels,
+        the method instead replaces spaces with underscores."""
 
         def _rec_newick(node):
             children = []
             for child in self._direct_children_taxa(node['NCBITaxonId']):
-                t = _rec_newick(child)
-                if t is not None:
-                    children.append(t)
+                children.append(_rec_newick(child))
 
-            if len(children) == 0 and node['Name'] in members:
-                return '"'+node['Name'].decode()+'"'
-            elif len(children) == 1:
-                return children[0]
-            elif len(children) > 1:
+            if len(children) == 0:
+                return node['Name'].decode().replace(' ', '_')
+            else:
                 t = ",".join(children)
-                if node['Name'] in members:
-                    return '('+t+')"'+(node['Name'].decode())+'"'
+                return '(' + t + ')' + node['Name'].decode().replace(' ', '_')
 
-        return _rec_newick({'NCBITaxonId': 0, 'Name': b'LUCA'})
+        return _rec_newick(self._get_root_taxon())
 
-    def phylogeny(self, members):
-        """Encode the part of the reference species topology covered by the species
-        and internal levels in `members` in a json formatable object."""
+    def as_dict(self):
+        """Encode the Taxonomy as a nested dict.
+
+         This representation can for example be used to serialize
+         a Taxonomy in json format."""
         def _rec_phylogeny(node):
+            res = {'name': node['Name'].decode(), 'id': int(node['NCBITaxonId'])}
             children = []
             for child in self._direct_children_taxa(node['NCBITaxonId']):
-                t = _rec_phylogeny(child)
-                children.extend(t)
-            if len(children) == 0 and node['Name'] in members:
-                return [{'name': node['Name'].decode()}]
-            elif len(children) == 1:
-                return children
-            elif len(children) > 1:
-                if node['Name'] in members:
-                    return [{'name': node['Name'].decode(), 'children': children}]
-                else:
-                    return children
-            else:
-                return []
-        res_obj = _rec_phylogeny({'NCBITaxonId': 0, 'Name': b'LUCA'})
-        if len(res_obj) > 1:
-            raise ValueError(u"Specified members cannot encode phylogeny in a single topology.")
-        return res_obj[0]
+                children.append(_rec_phylogeny(child))
+            if len(children) > 0:
+                res['children'] = children
+            return res
+
+        return _rec_phylogeny(self._get_root_taxon())
+
 
 class InvalidTaxonId(Exception):
+    pass
+
+class DBConsistencyError(Exception):
     pass
 
 class InvalidId(Exception):

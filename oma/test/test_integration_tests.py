@@ -63,11 +63,12 @@ class HogView_Test(TestCase):
 
 class HogVisViewTest(TestCase):
     def test_simple_fam_encoding(self):
-        exp_tree = {'name': 'Eukaryota',
-                    'children': [{'name': 'Ascomycota',
-                                  'children': [{'name': 'Schizosaccharomyces pombe (strain 972 / ATCC 24843)'},
-                                               {'name': 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)'}]},
-                                 {'name': 'Plasmodium falciparum (isolate 3D7)'}]}
+        self.maxDiff = None
+        exp_tree = {'name': 'Eukaryota', 'id':2759,
+                    'children': [{'name': 'Ascomycota', 'id':4890,
+                                  'children': [{'name': 'Schizosaccharomyces pombe (strain 972 / ATCC 24843)', 'id': 284812},
+                                               {'name': 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'id': 559292}]},
+                                 {'name': 'Plasmodium falciparum (isolate 3D7)', 'id': 36329}]}
         reply = self.client.get(reverse('hog_vis', args=['YEAST12']))
         phylo = json.loads(reply.context['species_tree'])
         self.assertDictEqual(exp_tree, phylo)
