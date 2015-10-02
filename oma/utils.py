@@ -379,7 +379,7 @@ class Taxonomy(object):
             tax_json = json.loads(("[" + taxStr[14:-3] + "]").replace("'", '"'))
             self.all_hog_levels = frozenset([t.encode('ascii') for t in
                                              tax_json if forbidden_chars.search(t) is None])
-        except Exception:
+        except IOError:
             self.all_hog_levels = frozenset([l for l in self.tax_table['Name']
                                              if forbidden_chars.search(l.decode()) is None])
 
