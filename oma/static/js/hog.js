@@ -4,6 +4,7 @@ var tnt_theme_tree_hog = function () {
     var height = 30;
     var curr_taxa = '';
     var annot;
+    var is_node_frozen = false;
     // var collapsed_nodes = [];
 
     var theme = function (ta, div, query, per_species3, tree_obj, gene_data, options) {
@@ -47,10 +48,10 @@ var tnt_theme_tree_hog = function () {
             obj.rows.push({
                 label: 'Freeze',
                 link: function (node) {
-                    alert('freeze clicked ' + node.id());
+                    is_node_frozen = !is_node_frozen;
                 },
                 obj: node,
-                value: node.root_dist()
+                value: is_node_frozen ? "Unfreeze tree node" : "Freeze tree node"
             });
 
             if (node.is_collapsed()) {
@@ -82,6 +83,9 @@ var tnt_theme_tree_hog = function () {
         // mouse over a node
         var mouse_over_node = function (node) {
             // Update annotation board
+            if (is_node_frozen){
+                return;
+            }
             var name = node.node_name();
             curr_taxa = name;
             annot.update();
