@@ -150,7 +150,8 @@ var tnt_theme_tree_hog = function () {
             obj.rows.push({
                 label: "Information",
                 link: function (gene) {
-                    return options.oma_info_url_template + gene.id;
+                    window.location = options.oma_info_url_template + gene.id;
+                    return
                 },
                 obj: gene, value: gene_data[gene.id].omaid
             });
