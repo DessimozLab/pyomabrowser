@@ -6,7 +6,7 @@ var tnt_theme_tree_hog = function () {
     var annot;
     // var collapsed_nodes = [];
 
-    var theme = function (ta, div, query, per_species3, tree, gene_data, options) {
+    var theme = function (ta, div, query, per_species3, tree_obj, gene_data, options) {
         /////////////
         // TREE /////
         /////////////
@@ -29,7 +29,7 @@ var tnt_theme_tree_hog = function () {
             return false;
         }, highlight_node)
             .add("collapsed", function (node) {
-            return node.is_collapsed()
+            return node.is_collapsed();
         }, collapsed_node)
             .add("leaf", function (node) {
             return node.is_leaf();
@@ -47,7 +47,7 @@ var tnt_theme_tree_hog = function () {
             obj.rows.push({
                 label: 'Freeze',
                 link: function (node) {
-                    alert('freeze clicked ' + node.id())
+                    alert('freeze clicked ' + node.id());
                 },
                 obj: node,
                 value: node.root_dist()
@@ -77,7 +77,7 @@ var tnt_theme_tree_hog = function () {
                 });
             }
             tnt.tooltip.table().call(this, obj);
-        }
+        };
 
         // mouse over a node
         var mouse_over_node = function (node) {
@@ -96,7 +96,7 @@ var tnt_theme_tree_hog = function () {
         };
 
         var tree = tnt.tree()
-            .data(tree)
+            .data(tree_obj)
             .layout(tnt.tree.layout.vertical()
                 .width(Math.max(200, ~~(tot_width * 0.4)))
                 .scale(false)
@@ -114,9 +114,10 @@ var tnt_theme_tree_hog = function () {
                     return "";
                 }
                 if (data.name.length > limit) {
-                    return (data.name.substring(0, limit - 3) + "...").replace(/_/g, ' ');
+                    var truncName = data.name.substr(0,limit-3) + "...";
+                    return truncName.replace(/_/g, ' ');
                 }
-                return data.name.replace(/_/g, ' ')
+                return data.name.replace(/_/g, ' ');
             })
                 .color(function (node) {
                 if (node.is_collapsed()) {
@@ -139,15 +140,15 @@ var tnt_theme_tree_hog = function () {
         var maxs = get_maxs(per_species3);
         var gene_tooltip = function (gene) {
             var obj = {};
-            obj.header = gene_data[gene.id]['omaid'];
+            obj.header = gene_data[gene.id].omaid;
             obj.rows = [];
-            obj.rows.push({label: "Name", value: gene_data[gene.id]['id']});
+            obj.rows.push({label: "Name", value: gene_data[gene.id].id});
             obj.rows.push({
                 label: "Information",
                 link: function (gene) {
                     return options.oma_info_url_template + gene.id;
                 },
-                obj: gene, value: gene_data[gene.id]['omaid']
+                obj: gene, value: gene_data[gene.id].omaid
             });
 
             tnt.tooltip.table().call(this, obj);
@@ -188,8 +189,8 @@ var tnt_theme_tree_hog = function () {
                 })
                 .attr("x2", function (d, i) {
                     return (d.total_genes * track.height()) + (d.hog * 20) + 10;
-                })
-        })
+                });
+        });
 
         var hog_gene_feature = tnt.track.feature()
             .index(function (d) {
@@ -205,14 +206,14 @@ var tnt_theme_tree_hog = function () {
                 .append("rect")
                 .attr("class", "hog_gene")
                 .attr("x", function (d) {
-                return (d.pos * track.height()) + (d.hog * 20) + padding
+                return (d.pos * track.height()) + (d.hog * 20) + padding;
             })
                 .attr("y", padding)
                 .attr("width", side)
                 .attr("height", side)
                 .attr("fill", function (d) {
-                return (d.id == query.id ? "green" : "grey")
-            })
+                return (d.id == query.id ? "green" : "grey");
+            });
         })
             .on_mouseover(gene_tooltip)
             .updater(function (elems, x_scale) {
@@ -258,7 +259,7 @@ var tnt_theme_tree_hog = function () {
                 .display(tnt.track.feature.composite()
                     .add("genes", hog_gene_feature)
                     .add("hogs", hog_feature)
-            )
+            );
         };
 
         var genes_2_xcoords = function (arr, maxs) {
@@ -271,35 +272,30 @@ var tnt_theme_tree_hog = function () {
             var genes = [];
             var hogs_boundaries = [];
             var total_pos = 0;
-            for (var hog = 0; hog < arr.length; hog++) {
+            arr.forEach(function(hog_genes, hog){
                 var hog_gene_names = [];
-                var hog_genes = arr[hog];
-                var max_in_hog = maxs[hog];
-                for (var gene_pos = 0; gene_pos < max_in_hog; gene_pos++) { // TODO: wasting cycles (up to max_in_hog)
-                    var gene = hog_genes[gene_pos];
-                    if (gene !== undefined) {
-                        genes.push({
-                            id: gene,
-                            hog: hog,
-                            pos: total_pos,
-                            max_in_hog: maxs[hog],
-                            pos_in_hog: gene_pos
-                        });
-                        hog_gene_names.push(gene);
-                    }
-                    total_pos++;
-                }
+                hog_genes.forEach(function(gene, gene_pos){
+                    genes.push({
+                        id: gene,
+                        hog: hog,
+                        pos: total_pos+gene_pos,
+                        max_in_hog: maxs[hog],
+                        pos_in_hog: gene_pos
+                    });
+                    hog_gene_names.push(gene);
+                });
+                total_pos += maxs[hog];
                 hogs_boundaries.push({
                     total_genes: total_pos,
                     hog: hog,
                     id: hog_gene_names.length ? hog_gene_names.join('_') : ("hog_" + hog)
                 });
-            }
+            });
 
             return {
-                "genes": genes,
-                "hogs": hogs_boundaries
-            }
+                genes: genes,
+                hogs: hogs_boundaries
+            };
         };
 
         ta.tree(tree);
