@@ -217,7 +217,7 @@ var tnt_theme_tree_hog = function () {
                 .attr("width", side)
                 .attr("height", side)
                 .attr("fill", function (d) {
-                return (d.id == query.id ? "green" : "grey");
+                return (query && d.id === query.id ? "green" : "grey");
             });
         })
             .on_mouseover(gene_tooltip)
