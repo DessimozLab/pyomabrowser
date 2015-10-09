@@ -4,7 +4,7 @@ from builtins import str
 from builtins import range
 from django.shortcuts import render
 from django.conf import settings
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
 from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
 
@@ -407,6 +407,16 @@ class HOGsOrthoXMLView(HOGsView):
         response = HttpResponse(content_type='text/plain')
         response.write(orthoxml)
         return response
+
+
+def DomainsJson(request,entry_id):
+    # Load the entry and its domains, before forming the JSON to draw client-side.
+    entry_nr = utils.id_resolver.resolve(entry_id)
+    entry   = utils.db.entry_by_entry_nr(int(entry_nr))
+    domains = utils.db.get_domains(entry['EntryNr'])
+    response = utils.CathDomainsJson(utils.db.get_sequence(entry),domains)
+
+    return JsonResponse(response.json)
 
 
 @cache_control(max_age=1800)
