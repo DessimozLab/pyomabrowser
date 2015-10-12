@@ -33,8 +33,8 @@
         var options = {'show_internal_labels': {{ show_internal_labels|default:"true" }},
                        'oma_info_url_template': "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1="};
 
-        var viz = tnt.tree_annot();
-        var theme = tnt_theme_tree_hog();
+        var viz = tnt();
+        var theme = hog_theme();
         theme (viz, document.getElementById ("hog_vis"), query, per_species, tree, tooltip_data, options);
     }) ();
   </script>
