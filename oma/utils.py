@@ -499,8 +499,8 @@ class CathDomainsJson(object):
     def __init__(self,seq,domains):
         self.json = self.getJson(seq,domains)
 
-    def getJson(self,seq,domains):
-        # Input: protein sequence and list of domains
+    def getJson(self,seqlen,domains):
+        # Input: protein sequence length and list of domains
         # This function is a reordering of that by Ed ..., Summer 2015
         regions = []
 
@@ -523,7 +523,7 @@ class CathDomainsJson(object):
 
             # Colours for each CATH domain should be stored in CSS
 
-        return { 'length' : len(seq), 'regions' : regions }
+        return { 'length' : seqlen, 'regions' : regions }
 
 
     def getArch(self,cath_id):

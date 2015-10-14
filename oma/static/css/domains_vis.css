@@ -16,6 +16,7 @@
   .domain_vis svg .cath_domain {
     stroke-width: 1.5px;
     stroke: #4F4F4F;
+    cursor: pointer;
   }
 
   /* Colours for CATH domain annotations */

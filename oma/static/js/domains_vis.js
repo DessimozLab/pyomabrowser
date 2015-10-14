@@ -83,8 +83,8 @@ function domain_vis() {
                       +"<p><strong>Location:</strong></p>"
                       +"<p>"+location[0]+" to "+location[1]+"</p>"
                       +"<p><strong>Source:</strong></p>"
-                      +"<p><a href='...'>"+region.source+"</a></p>");
-              
+                      +"<p>"+region.source+"</p>");
+                    
               // Draw the domain
               svg_container.append("rect")
                 .classed(class_name,true)
@@ -97,7 +97,13 @@ function domain_vis() {
                 .attr("ry",5)
                 .call(tip)  // Setup the tooltip
                 .on('mouseover', tip.show)
-                .on('mouseout', tip.hide);
+                .on('mouseout', tip.hide)
+                .on('mousedown',function() {
+                  // Open CATH Link in new tab
+                  var url = 'http://www.cathdb.info/version/latest/superfamily/'+region.cath_id;
+                  window.open(url,'_blank')
+                    .focus();
+                });
             });
           });
         }

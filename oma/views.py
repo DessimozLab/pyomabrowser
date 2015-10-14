@@ -414,7 +414,7 @@ def DomainsJson(request,entry_id):
     entry_nr = utils.id_resolver.resolve(entry_id)
     entry   = utils.db.entry_by_entry_nr(int(entry_nr))
     domains = utils.db.get_domains(entry['EntryNr'])
-    response = utils.CathDomainsJson(utils.db.get_sequence(entry),domains)
+    response = utils.CathDomainsJson(str(entry['SeqBufferLength']),domains)
 
     return JsonResponse(response.json)
 
