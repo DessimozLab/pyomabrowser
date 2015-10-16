@@ -2,22 +2,22 @@
  *
  * -- Alex Warwick Vesztrocy 2015
  */
-domain_vis();
 
-function domain_vis() {
-  "use strict"; // MUST be inside, else non-strict libraries will fail.
+var domain_vis = function() {
+    "use strict";
+  // MUST be inside, else non-strict libraries will fail.
   var debug = 1; // Debug messages if set to 1
   
-  
-  $( document ).ready(function() {
-    var hog_members = $( ".hog_member" );
+  var domain_vis_func = function(class_of_entries){
+      "use strict";
+    var hog_members = $( class_of_entries );
     var longest_seq = 0; // Length of longest sequence.
     var hog_size = hog_members.length;
     var mem_proc = 0;
                       
     var domains = [];
-    
-    
+
+
     $.each(hog_members,function(each,value) {
       // Check if element already read (function can be fired multiple times)
       if($( this ).hasClass("read")) return;
@@ -109,7 +109,7 @@ function domain_vis() {
         }
       });
     });
-  });
-
+  };
+  return domain_vis_func;
 };
 
