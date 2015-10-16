@@ -1,7 +1,7 @@
 "use strict";
 var hog_theme = function () {
 
-    var height = 30;
+    var label_height = 30;
     var curr_taxa = '';
     var annot;
     var is_node_frozen = false;
@@ -108,7 +108,7 @@ var hog_theme = function () {
                )
             .label(tnt.tree.label.text()
                 .fontsize(12)
-                .height(height)
+                .height(label_height)
                 .text(function (node) {
                     var limit = 30;
                     var data = node.data();
@@ -131,8 +131,8 @@ var hog_theme = function () {
                     return 'black';
                 })
                )
-            .on("mouseover", mouse_over_node)
             .on("click", node_tooltip)
+            .on("mouseover", mouse_over_node)
             .node_display(node_display)
             .branch_color("black");
 
@@ -169,14 +169,23 @@ var hog_theme = function () {
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
                 // otherwise it is repeated with every create event
 
-                var new_boundary = new_hog
+                var height = track.height() - ~~(padding * 2);
+                var dom1 = x_scale.domain()[1];
+
+                new_hog
                     .append("line")
                     .attr("class", "hog_boundary")
-                    .attr("x1", function (d, i) {
-                        return (d.total_genes * track.height()) + (d.hog * 20) + 10;
+                    .attr("x1", function (d) {
+                        var width = d3.min([x_scale(dom1/d.max), height]);
+                        var x = width * (d.max_in_hog-1);
+                        var xnext = width * d.max_in_hog;
+                        return x + (xnext - x + width)/2 + ~~(padding/2)-1;
                     })
-                    .attr("x2", function (d, i) {
-                        return (d.total_genes * track.height()) + (d.hog * 20) + 10;
+                    .attr("x2", function (d) {
+                        var width = d3.min([x_scale(dom1/d.max), height]);
+                        var x = width * (d.max_in_hog-1);
+                        var xnext = width * d.max_in_hog;
+                        return x + (xnext - x + width)/2 + ~~(padding/2)-1;
                     })
                     .attr("y1", 0)
                     .attr("y2", track.height())
@@ -187,13 +196,22 @@ var hog_theme = function () {
                 var track = this;
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
 
+                var height = track.height() - ~~(padding * 2);
+                var dom1 = x_scale.domain()[1];
+
                 hogs.select("line")
                     .transition()
-                    .attr("x1", function (d, i) {
-                        return (d.total_genes * track.height()) + (d.hog * 20) + 10;
+                    .attr("x1", function (d) {
+                        var width = d3.min([x_scale(dom1/d.max), height]);
+                        var x = width * (d.max_in_hog-1);
+                        var xnext = width * d.max_in_hog;
+                        return x + (xnext - x + width)/2 + ~~(padding/2)-1;
                     })
-                    .attr("x2", function (d, i) {
-                        return (d.total_genes * track.height()) + (d.hog * 20) + 10;
+                    .attr("x2", function (d) {
+                        var width = d3.min([x_scale(dom1/d.max), height]);
+                        var x = width * (d.max_in_hog-1);
+                        var xnext = width * d.max_in_hog;
+                        return x + (xnext - x + width)/2 + ~~(padding/2)-1;
                     });
             });
 
@@ -205,7 +223,8 @@ var hog_theme = function () {
                 var track = this;
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
                 // otherwise it is repeated with every create event
-                var side = track.height() - ~~(padding * 2);
+                var height = track.height() - ~~(padding * 2);
+                var dom1 = x_scale.domain()[1];
 
                 new_elems
                     .append("rect")
@@ -213,11 +232,16 @@ var hog_theme = function () {
                         return "hog_gene" + (query && d.id === query.id ? " ref_gene": "" )
                     })
                     .attr("x", function (d) {
-                        return (d.pos * track.height()) + (d.hog * 20) + padding;
+                        var width = d3.min([x_scale(dom1 / d.max), height]);
+                        var x = width * d.pos;
+                        return x + padding;
                     })
                     .attr("y", padding)
-                    .attr("width", side)
-                    .attr("height", side)
+                    .attr("width", function(d){
+                        var width = d3.min([x_scale(dom1 / d.max), height]);
+                        return width - 2*padding;
+                    })
+                    .attr("height", height)
                     .attr("fill", function (d) {
                         return (query && d.id === query.id ? "green" : "grey");
                     });
@@ -226,13 +250,21 @@ var hog_theme = function () {
                 var track = this;
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
                 // otherwise it is repeated with every create event
-                var side = track.height() - ~~(padding * 2);
+                var height = track.height() - ~~(padding * 2);
+                var dom1 = x_scale.domain()[1];
 
                 elems.select("rect")
                     .transition()
                     .attr("x", function (d) {
-                        return (d.pos * track.height()) + (d.hog * 20) + padding;
+                        var width = d3.min([x_scale(dom1 / d.max), height]);
+                        var x = width * d.pos;
+                        return x + padding;
+                    })
+                    .attr("width", function(d){
+                        var width = d3.min([x_scale(dom1 / d.max), height]);
+                        return width - 2*padding;
                     });
+
             })
             .on("mouseover", gene_tooltip);
 
@@ -286,14 +318,16 @@ var hog_theme = function () {
                         id: gene,
                         hog: hog,
                         pos: total_pos+gene_pos,
+                        max: d3.sum(maxs),
                         max_in_hog: maxs[hog],
-                        pos_in_hog: gene_pos
+                        pos_in_hog: gene_pos,
                     });
                     hog_gene_names.push(gene);
                 });
                 total_pos += maxs[hog];
                 hogs_boundaries.push({
-                    total_genes: total_pos,
+                    max: d3.sum(maxs),
+                    max_in_hog: total_pos,
                     hog: hog,
                     id: hog_gene_names.length ? hog_gene_names.join('_') : ("hog_" + hog)
                 });
@@ -310,21 +344,6 @@ var hog_theme = function () {
         ta.track(track);
         ta(div);
 
-    };
-
-    // converts the argument into an arrays
-    // if the argument is already an array, just returns it
-    // NOTE: AFAIK, this is not used now
-    var obj2array = function (o) {
-        if (o === undefined) {
-            return [];
-        }
-
-        if (Object.prototype.toString.call(o) === '[object Array]') {
-            return o;
-        }
-
-        return [o];
     };
 
     var truncate = function (text, width) {
