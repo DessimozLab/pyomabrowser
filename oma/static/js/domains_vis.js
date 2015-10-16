@@ -78,12 +78,12 @@ function domain_vis() {
                 .direction('w')
                 .offset([0,-10])
                 .html("<h1>"+region.cath_id+"</h1>"
-                     +"<p><strong>CATH Architecture:</strong></p>"
-                     +"<p>"+region.name+"</p>"
-                      +"<p><strong>Location:</strong></p>"
-                      +"<p>"+location[0]+" to "+location[1]+"</p>"
-                      +"<p><strong>Source:</strong></p>"
-                      +"<p>"+region.source+"</p>");
+                     +"<p><strong>CATH Architecture:</strong> "
+                     +region.name+"</p>"
+                      +"<p><strong>Location:</strong> "
+                      +location[0]+" - "+location[1]+"</p>"
+                      +"<p><strong>Source:</strong> "
+                      +region.source+"</p>");
                     
               // Draw the domain
               svg_container.append("rect")
