@@ -5,11 +5,8 @@
 
 var domain_vis = function () {
     "use strict";
-    // MUST be inside, else non-strict libraries will fail.
-    var debug = 1; // Debug messages if set to 1
 
     var domain_vis_func = function (class_of_entries) {
-        "use strict";
         var hog_members = $(class_of_entries);
         var longest_seq = 0; // Length of longest sequence.
         var hog_size = hog_members.length;
@@ -93,8 +90,8 @@ var domain_vis = function () {
                                 .attr("y", (svg_height / 2) - height / 2)
                                 .attr("width", length)
                                 .attr("height", height)
-                                .attr("rx", 5) // Rounded corners
-                                .attr("ry", 5)
+                                .attr("rx", 2.5) // Rounded corners
+                                .attr("ry", 2.5)
                                 .call(tip)  // Setup the tooltip
                                 .on('mouseover', tip.show)
                                 .on('mouseout', tip.hide)
