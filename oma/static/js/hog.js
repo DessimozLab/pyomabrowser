@@ -130,6 +130,12 @@ var hog_theme = function () {
                     }
                     return 'black';
                 })
+                .fontweight(function (node){
+                    if (highlight_condition(node)){
+                        return "bold";
+                    }
+                    return "normal";
+                })
                )
             .on("click", node_tooltip)
             .on("mouseover", mouse_over_node)
@@ -176,13 +182,13 @@ var hog_theme = function () {
                     .append("line")
                     .attr("class", "hog_boundary")
                     .attr("x1", function (d) {
-                        var width = d3.min([x_scale(dom1/d.max), height]);
+                        var width = d3.min([x_scale(dom1/d.max), height+2*padding]);
                         var x = width * (d.max_in_hog-1);
                         var xnext = width * d.max_in_hog;
                         return x + (xnext - x + width)/2 + ~~(padding/2)-1;
                     })
                     .attr("x2", function (d) {
-                        var width = d3.min([x_scale(dom1/d.max), height]);
+                        var width = d3.min([x_scale(dom1/d.max), height+2*padding]);
                         var x = width * (d.max_in_hog-1);
                         var xnext = width * d.max_in_hog;
                         return x + (xnext - x + width)/2 + ~~(padding/2)-1;
@@ -202,13 +208,13 @@ var hog_theme = function () {
                 hogs.select("line")
                     .transition()
                     .attr("x1", function (d) {
-                        var width = d3.min([x_scale(dom1/d.max), height]);
+                        var width = d3.min([x_scale(dom1/d.max), height+2*padding]);
                         var x = width * (d.max_in_hog-1);
                         var xnext = width * d.max_in_hog;
                         return x + (xnext - x + width)/2 + ~~(padding/2)-1;
                     })
                     .attr("x2", function (d) {
-                        var width = d3.min([x_scale(dom1/d.max), height]);
+                        var width = d3.min([x_scale(dom1/d.max), height+2*padding]);
                         var x = width * (d.max_in_hog-1);
                         var xnext = width * d.max_in_hog;
                         return x + (xnext - x + width)/2 + ~~(padding/2)-1;
@@ -232,13 +238,13 @@ var hog_theme = function () {
                         return "hog_gene" + (query && d.id === query.id ? " ref_gene": "" )
                     })
                     .attr("x", function (d) {
-                        var width = d3.min([x_scale(dom1 / d.max), height]);
+                        var width = d3.min([x_scale(dom1 / d.max), height+2*padding]);
                         var x = width * d.pos;
                         return x + padding;
                     })
                     .attr("y", padding)
                     .attr("width", function(d){
-                        var width = d3.min([x_scale(dom1 / d.max), height]);
+                        var width = d3.min([x_scale(dom1 / d.max), height+2*padding]);
                         return width - 2*padding;
                     })
                     .attr("height", height)
@@ -256,12 +262,12 @@ var hog_theme = function () {
                 elems.select("rect")
                     .transition()
                     .attr("x", function (d) {
-                        var width = d3.min([x_scale(dom1 / d.max), height]);
+                        var width = d3.min([x_scale(dom1 / d.max), height + 2*padding]);
                         var x = width * d.pos;
                         return x + padding;
                     })
                     .attr("width", function(d){
-                        var width = d3.min([x_scale(dom1 / d.max), height]);
+                        var width = d3.min([x_scale(dom1 / d.max), height+2*padding]);
                         return width - 2*padding;
                     });
 
