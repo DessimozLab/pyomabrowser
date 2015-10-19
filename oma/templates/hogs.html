@@ -53,7 +53,7 @@ This entry is not part of any hierarchical orthologous group.
 <div class="panel panel-default">
     <div class="panel-heading clearfix">
         <div class="pull-right">
-            Download: 
+            Download:
             <a href="{% url 'hogs_orthoxml' entry.omaid %}"><span class="glyphicon glyphicon-download">OrthoXML</span></a>
             <a href="{% url 'hogs_fasta' entry.omaid level %}"><span class="glyphicon glyphicon-download">Fasta</span></a>
         </div>
@@ -71,7 +71,7 @@ This entry is not part of any hierarchical orthologous group.
            <tr class="hog_member" id="{{memb.omaid}}">
              <td>{% include "includes/kingdom.html" with kingdom=memb.kingdom %}
                    <b>{{memb.sciname.species}}</b>{{memb.sciname.strain}} </td>
-             <td><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{memb.omaid}}">{{memb.omaid}}</td>
+             <td><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{memb.omaid}}">{{memb.omaid}}</a></td>
              <td class="domain_vis"></td>
            </tr>
         {% endfor %}
