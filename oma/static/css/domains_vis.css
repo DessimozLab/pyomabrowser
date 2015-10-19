@@ -1,0 +1,124 @@
+/* CSS style file for domains visualisation.
+ *
+ * -- Alex Warwick Vesztrocy 2015
+ */
+
+.domain_vis svg {
+  height: 30px; /* This can be changed. */
+  width:  100%;
+  min-width: 200px;
+}
+
+  /* Colour of sequnce line */
+  .domain_vis svg .sequence { fill: #4F4F4F; }
+
+  /* Border colour for CATH domains */
+  .domain_vis svg .cath_domain {
+    stroke-width: 1.5px;
+    stroke: #4F4F4F;
+    cursor: pointer;
+  }
+
+  /* Colours for CATH domain annotations */
+  /* Mainly Alpha */
+  .domain_vis svg ._1_10  { fill: #FFB2B2; }
+  .domain_vis svg ._1_20  { fill: #FF8080; }
+  .domain_vis svg ._1_25  { fill: #FF4D4D; }
+  .domain_vis svg ._1_40  { fill: #FF1919; }
+  .domain_vis svg ._1_50  { fill: #E60000; }
+  /* Mainly Beta */
+  .domain_vis svg ._2_10  { fill: #E6E6FF; }
+  .domain_vis svg ._2_20  { fill: #B2B2FF; }
+  .domain_vis svg ._2_30  { fill: #8080FF; }
+  .domain_vis svg ._2_40  { fill: #4D4DFF; }
+  .domain_vis svg ._2_50  { fill: #1919FF; }
+  .domain_vis svg ._2_60  { fill: #0000E6; }
+  .domain_vis svg ._2_70  { fill: #008AB8; }
+  .domain_vis svg ._2_80  { fill: #19A3D1; }
+  .domain_vis svg ._2_90  { fill: #4DB8DB; }
+  .domain_vis svg ._2_100 { fill: #80CCE6; }
+  .domain_vis svg ._2_102 { fill: #70DBDB; }
+  .domain_vis svg ._2_105 { fill: #33CCCC; }
+  .domain_vis svg ._2_110 { fill: #29A3A3; }
+  .domain_vis svg ._2_115 { fill: #00B85C; }
+  .domain_vis svg ._2_120 { fill: #19D175; }
+  .domain_vis svg ._2_130 { fill: #4DDB94; }
+  .domain_vis svg ._2_140 { fill: #80E6B2; }
+  .domain_vis svg ._2_150 { fill: #B2F0D1; }
+  .domain_vis svg ._2_160 { fill: #B2CC80; }
+  .domain_vis svg ._2_170 { fill: #94B84D; }
+  /* Alpha Beta */
+  .domain_vis svg ._3_10  { fill: #FFFF80; }
+  .domain_vis svg ._3_15  { fill: #FFFF19; }
+  .domain_vis svg ._3_20  { fill: #E6E600; }
+  .domain_vis svg ._3_30  { fill: #B2B200; }
+  .domain_vis svg ._3_40  { fill: #E68A00; }
+  .domain_vis svg ._3_50  { fill: #FFA319; }
+  .domain_vis svg ._3_55  { fill: #FFB84D; }
+  .domain_vis svg ._3_60  { fill: #FFCC80; }
+  .domain_vis svg ._3_65  { fill: #FFE0B2; }
+  .domain_vis svg ._3_70  { fill: #FFF5E6; }
+  .domain_vis svg ._3_75  { fill: #F5D6CC; }
+  .domain_vis svg ._3_80  { fill: #EBAD99; }
+  .domain_vis svg ._3_90  { fill: #E08566; }
+  .domain_vis svg ._3_100 { fill: #D14719; }
+  /* Few Secondary Structures */
+  .domain_vis svg ._4_10  { fill: #CC00FF; }
+
+
+/* Tool tips */
+.domain-info {
+  font-size: 0.8em;
+  line-height: 1;
+  padding: 12px;
+  background: rgba(255,255,255,0.99);
+  color: #000000;
+  border: 3px solid #4F4F4F;
+  border-radius: 10px;
+  pointer-events: none;
+  width: 150px;
+}
+
+  /* Creates a small triangle extender for the tooltip */
+  .domain-info:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 15px;
+    width: 100%;
+    line-height: 1;
+    color: #4F4F4F;
+    position: absolute;
+    pointer-events: none;
+  }
+    .domain-info.n:after {
+      content: "\25BC";
+      margin: -1px 0 0 0;
+      top: 100%;
+      left: 0;
+      text-align: center;
+    }
+    .domain-info.e:after {
+      content: "\25C0";
+      margin: -7px 0 0 0;
+      top: 50%;
+      left: -8px;
+    }
+    .domain-info.s:after {
+      content: "\25B2";
+      margin: 0 0 1px 0;
+      top: -8px;
+      left: 0;
+      text-align: center;
+    }
+    .domain-info.w:after {
+      content: "\25B6";
+      margin: -7px 0 0 -1px;
+      top: 50%;
+      left: 100%;
+    }
+
+  /* Heading size */
+  .domain-info h1 {
+    margin: 0 0 10px 0;
+    font-size: 1.5em;
+  }

@@ -495,6 +495,96 @@ class LinkoutIdMapper(XrefIdMapper):
                 elem['url'] = self.url(typ, elem['id'])
         return xref
 
+class CathDomainsJson(object):
+    def __init__(self,seq,domains):
+        self.json = self.getJson(seq,domains)
+
+    def getJson(self,seqlen,domains):
+        # Input: protein sequence length and list of domains
+        # This function is a reordering of that by Ed ..., Summer 2015
+        regions = []
+
+        # Remove the non-CATH domains from the results.
+        domains = [x for x in domains if x[1].decode('utf-8').split('.')[0] \
+                   in ["1","2","3","4"]]
+
+        for row in domains:
+            cath_id = (row[1].decode('utf-8')).split('.')
+
+            if len(cath_id) != 0:
+                region = {
+                    'name'     : self.getArch(cath_id),
+                    'source'   : 'CATH/Gene3D',
+                    'cath_id'  : row[1].decode('utf-8'), # NOT split
+                    'location' : row[2].decode('utf-8')
+                }
+
+                regions.append(region)
+
+            # Colours for each CATH domain should be stored in CSS
+
+        return { 'length' : seqlen, 'regions' : regions }
+
+
+    def getArch(self,cath_id):
+        # This could be replaced with a call to a DB holding the EXACT name for
+        # each CATH ID - available on the CATH FTP site.
+        archs = {
+            '1' : { # Mainly Alpha
+                '10' : 'Orthogonal Bundle',
+                '20' : 'Up-down Bundle',
+                '25' : 'Alpha Horseshoe',
+                '40' : 'Alpha solenoid',
+                '50' : 'Alpha/alpha barrel'
+            },
+            '2' : { # Mainly Beta
+                '10' : 'Ribbon',
+                '20' : 'Single Sheet',
+                '30' : 'Roll',
+                '40' : 'Beta Barrel',
+                '50' : 'Clam',
+                '60' : 'Sandwich',
+                '70' : 'Distorted Sandwich',
+                '80' : 'Trefoil',
+                '90' : 'Orthogonal Prism',
+                '100' : 'Aligned Prism',
+                '102' : '3-layer Sandwich',
+                '105' : '3 Propellor',
+                '110' : '4 Propellor',
+                '115' : '5 Propellor',
+                '120' : '6 Propellor',
+                '130' : '7 Propellor',
+                '140' : '8 Propellor',
+                '150' : '2 Solenoid',
+                '160' : '3 Solenoid',
+                '170' : 'Beta Complex'
+            },
+            '3' : { # Alpha Beta
+                '10' : 'Roll',
+                '15' : 'Super Roll',
+                '20' : 'Alpha-Beta Barrel',
+                '30' : '2-Layer Sandwich',
+                '40' : '3-Layer(aba) Sandwich',
+                '50' : '3-Layer(bba) Sandwich',
+                '55' : '3-Layer(bab) Sandwich',
+                '60' : '4-Layer Sandwich',
+                '65' : 'Alpha-beta prism',
+                '70' : 'Box',
+                '75' : '5-stranded Propeller',
+                '80' : 'Alpha-Beta Horseshoe',
+                '90' : 'Alpha-Beta Complex',
+                '100' : 'Ribosomal Protein L15; Chain: K; domain 2'
+            },
+            '4' : { # Few Secondary Structures
+                '10' : 'Irregular'
+            }
+        }
+
+        if cath_id[0] in archs and cath_id[1] in archs[cath_id[0]]:
+            return archs[cath_id[0]][cath_id[1]]
+        else:
+            return '' # Unrecognised CATH ID - these should probably be logged.
+
 
 db = Database()
 id_resolver = IDResolver(db.db)

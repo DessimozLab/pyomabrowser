@@ -5,6 +5,7 @@ from . import views
 
 urlpatterns = patterns('',
         #  url(r'^pairs/(?P<entry_id>\w+)/$', views.pairs, name='index'),
+        url(r'^domains/(?P<entry_id>\w+)/json/$', views.DomainsJson, name='domains_json'),
         url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGsView.as_view(), name='hogs'),
         url(r'^hogs/(?P<entry_id>\w+)/orthoxml/$', views.HOGsOrthoXMLView.as_view(), name='hogs_orthoxml'),
         url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 -]+)/$', views.HOGsView.as_view(), name='hogs'),
