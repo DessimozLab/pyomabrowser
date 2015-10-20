@@ -7,36 +7,21 @@ var domain_vis = function () {
     "use strict";
 
     var domain_vis_func = function (class_of_entries, longest_seq) {
-        var hog_members = $(class_of_entries);
-        var hog_size = hog_members.length;
-        var mem_proc = 0;
-
-        var domains = [];
-
-
-        $.each(hog_members, function (each, value) {
-            // Check if element already read (function can be fired multiple times)
-            if ($(this).hasClass("read")) return;
-            $(this).addClass("read");
-
+        $.each($(class_of_entries), function (each, value) {
             // Retreive the entry ID
             var entry_id = $(this).attr('id');
 
             // Grab the domain annotations
             $.getJSON("/oma/domains/" + entry_id + "/json/", function (data) {
-                // Store this entry's domain annotations
-                var domain = {'entry_id': entry_id, 'data': data};
-                domains.push(domain);
-
                 // Draw the sequence with domain annotations
-                var svg_container = d3.select("tr#" + domain.entry_id + " td.domain_vis")
+                var svg_container = d3.select("tr#" + entry_id + " td.domain_vis")
                     .append("svg:svg");
 
                 // Read the height from the CSS
-                var svg_height = $("tr#" + domain.entry_id + " td.domain_vis svg").height();
+                var svg_height = $("tr#" + entry_id + " td.domain_vis svg").height();
 
                 // Line length (in %) is relative to the longest sequence.
-                var line_length = String((domain.data.length / longest_seq) * 100) + "%";
+                var line_length = String((data.length / longest_seq) * 100) + "%";
                 var line_weight = 3;
 
                 var line = svg_container.append("rect")
@@ -48,7 +33,7 @@ var domain_vis = function () {
                     .attr("ry", 1);
 
                 // Draw each of the regions
-                $.each(domain.data.regions, function (i, region) {
+                $.each(data.regions, function (i, region) {
                     var locs = region.location.split(':');
 
                     if(locs.length === 2) {
