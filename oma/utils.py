@@ -495,18 +495,19 @@ class LinkoutIdMapper(XrefIdMapper):
                 elem['url'] = self.url(typ, elem['id'])
         return xref
 
-class CathDomainsJson(object):
-    def __init__(self,seq,domains):
-        self.json = self.getJson(seq,domains)
 
-    def getJson(self,seqlen,domains):
+class CathDomainsJson(object):
+    def __init__(self,seqlen, domains):
+        self.json = self.getJson(seqlen, domains)
+
+    def getJson(self, seqlen, domains):
         # Input: protein sequence length and list of domains
         # This function is a reordering of that by Ed ..., Summer 2015
         regions = []
 
         # Remove the non-CATH domains from the results.
         domains = [x for x in domains if x[1].decode('utf-8').split('.')[0] \
-                   in ["1","2","3","4"]]
+                   in ["1", "2", "3", "4"]]
 
         for row in domains:
             cath_id = (row[1].decode('utf-8')).split('.')
