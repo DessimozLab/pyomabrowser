@@ -371,7 +371,8 @@ class HOGsView(TemplateView):
                        'kingdom': utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'].decode(),
                        'is_homeolog_species': (b"WHEAT" == genome['UniProtSpeciesCode'])},
              'level': level, 'hog_members': hog_members,
-             'nr_vps': nr_vps, 'tab': 'hogs', 'levels': levels[::-1]})
+             'nr_vps': nr_vps, 'tab': 'hogs', 'levels': levels[::-1],
+             'longest_seq': memb['SeqBufferLength'].max()})
         if not hog is None:
             context['hog'] = hog
         return context
