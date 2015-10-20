@@ -365,6 +365,7 @@ class HOGsView(TemplateView):
             hog_members.append(t)
 
         nr_vps = utils.db.count_vpairs(entry_nr)
+        longest_seq = max(e['SeqBufferLength'] for e in hog_member_entries)
         context.update(
             {'entry': {'omaid': query,
                        'sciname': misc.format_sciname(genome['SciName'].decode()),
@@ -372,8 +373,8 @@ class HOGsView(TemplateView):
                        'is_homeolog_species': (b"WHEAT" == genome['UniProtSpeciesCode'])},
              'level': level, 'hog_members': hog_members,
              'nr_vps': nr_vps, 'tab': 'hogs', 'levels': levels[::-1],
-             'longest_seq': memb['SeqBufferLength'].max()})
-        if not hog is None:
+             'longest_seq': longest_seq})
+        if hog is not None:
             context['hog'] = hog
         return context
 
@@ -413,10 +414,9 @@ class HOGsOrthoXMLView(HOGsView):
 def DomainsJson(request,entry_id):
     # Load the entry and its domains, before forming the JSON to draw client-side.
     entry_nr = utils.id_resolver.resolve(entry_id)
-    entry   = utils.db.entry_by_entry_nr(int(entry_nr))
+    entry = utils.db.entry_by_entry_nr(int(entry_nr))
     domains = utils.db.get_domains(entry['EntryNr'])
     response = utils.CathDomainsJson(int(entry['SeqBufferLength']), domains)
-
     return JsonResponse(response.json)
 
 
