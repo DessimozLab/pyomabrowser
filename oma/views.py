@@ -365,7 +365,9 @@ class HOGsView(TemplateView):
             hog_members.append(t)
 
         nr_vps = utils.db.count_vpairs(entry_nr)
-        longest_seq = max(e['SeqBufferLength'] for e in hog_member_entries)
+        longest_seq = 0
+        if len(hog_member_entries) > 0:
+            longest_seq = max(e['SeqBufferLength'] for e in hog_member_entries)
         context.update(
             {'entry': {'omaid': query,
                        'sciname': misc.format_sciname(genome['SciName'].decode()),
