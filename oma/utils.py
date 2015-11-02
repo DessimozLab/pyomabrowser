@@ -202,7 +202,6 @@ class Database(object):
         hog_str = hog.decode()
         return hog, (hog_str[0:-1]+chr(1+ord(hog_str[-1]))).encode('ascii')
 
-            
     def _genome_range(self, g):
         return id_mapper['OMA'].genome_range(g)
 
@@ -212,6 +211,19 @@ class Database(object):
         seqArr = self.db.get_node('/Protein/SequenceBuffer')
         seq = seqArr[entry['SeqBufferOffset']:entry['SeqBufferOffset']+entry['SeqBufferLength']-1]
         return seq.tostring()
+
+    def get_cdna(self, entry):
+        """get the protein sequence of a given entry as a string"""
+        entry = self.ensure_entry(entry)
+        seqArr = self.db.get_node('/Protein/CDNABuffer')
+        seq = seqArr[entry['CDNABufferOffset']:entry['CDNABufferOffset']+entry['CDNABufferLength']-1]
+        return seq.tostring()
+
+    def get_description(self, entry):
+        entry = self.ensure_entry(entry)
+        descArr = self.db.get_node('/Protein/DescriptionBuffer')
+        desc = descArr[entry['DescriptionOffset']:entry['DescriptionOffset']+entry['DescriptionLength']]
+        return desc.tostring()
 
     def get_release_name(self):
         return self.db.get_node_attr('/', 'oma_version').decode()
@@ -334,10 +346,10 @@ class Taxonomy(object):
             with open(os.environ['DARWIN_BROWSERDATA_PATH'] + '/TaxLevels.drw') as f:
                 taxStr = f.read()
             tax_json = json.loads(("[" + taxStr[14:-3] + "]").replace("'", '"'))
-            self.all_hog_levels = frozenset([t.encode('ascii') for t in
-                                             tax_json if forbidden_chars.search(t) is None])
+            self.all_hog_levels = frozenset([t for t in tax_json
+                                             if forbidden_chars.search(t) is None])
         except Exception:
-            self.all_hog_levels = frozenset([l for l in self.tax_table['Name']
+            self.all_hog_levels = frozenset([l.decode() for l in self.tax_table['Name']
                                              if forbidden_chars.search(l.decode()) is None])
 
     def _table_idx_from_numeric(self, tid):

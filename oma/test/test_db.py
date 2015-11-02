@@ -11,6 +11,27 @@ def decode_replycontent(reply):
     return reply.content.decode(enc)
 
 
+class EntryFasta_Test(TestCase):
+    def test_extract_fasta_formatted_entry(self):
+        query = 'YEAST{:05d}'.format(12)
+        reply = self.client.get(reverse('entry_fasta', args=[query]))
+        self.assertEqual(reply.status_code, 200)
+        self.assertEqual(reply['Content-Type'], 'text/plain')
+        self.assertIn('> {}'.format(query), decode_replycontent(reply))
+
+
+class VPairsViews_Test(TestCase):
+    def test_html_contains_orthologs(self):
+        query = 'YEAST00012'
+        reply = self.client.get(reverse('pairs', args=[query]))
+        self.assertEqual(reply.status_code, 200)
+        content = decode_replycontent(reply)
+        vps = [z.omaid for z in reply.context['vps']]
+        self.assertGreater(len(vps), 0)
+        for vp in vps:
+            self.assertIn(vp, content, 'VP {} not found on page.'.format(vp))
+
+
 class HogFastaView_Test(TestCase):
     def get_fasta_and_verify_sequences_and_nr_members(self, query, level, seqs, nr_expected_members):
         if isinstance(seqs, str):

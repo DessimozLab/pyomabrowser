@@ -40,7 +40,7 @@
                 <tbody>
                     {% for vp in one_rel_vps.list %}
                     <tr>
-                        <td>{% include "includes/kingdom.html" with kingdom=vp.kingdom %} <b>{{vp.sciname.species}}</b>{{vp.sciname.strain}} </td>
+                        <td>{% include "includes/kingdom.html" with kingdom=vp.genome.kingdom %} <b>{{vp.genome.species}}</b>{{vp.genome.strain}} </td>
                         <td><a href="{% url "pairs" vp.omaid %}">{{vp.omaid}}</td>
                     </tr>
                     {% endfor %}
