@@ -52,6 +52,8 @@ class ProteinEntry(object):
     def hog_family_nr(self):
         return utils.db.hog_family(self._entry)
 
+    def __repr__(self):
+        return "<{}({}, {})>".format(self.__class__.__name__, self.entry_nr, self.omaid)
 
 
 class Genome(object):
@@ -93,9 +95,6 @@ class Genome(object):
     def lineage(self):
         return [lev['Name'].decode() for lev in utils.tax.get_parent_taxa(self._genome['NCBITaxonId'])]
 
-    @misc.LazyProperty
-    def ll(self):
-        raise utils.InvalidTaxonId()
-
     def __repr__(self):
-        return "<Genome({uniprot_species_code} ({ncbi_taxon_id}))>".format(self)
+        return "<{}({}, {})>".format(self.__class__.__name__, self.uniprot_species_code,
+                                     self.ncbi_taxon_id)
