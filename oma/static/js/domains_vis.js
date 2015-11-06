@@ -88,7 +88,7 @@ var domain_vis = function () {
                             .call(tip)  // Setup the tooltip
                             .on('mouseover', tip.show)
                             .on('mouseout', tip.hide)
-                            .on('mousedown', function () {
+                            .on('click', function () {
                                 // Open CATH Link in new tab
                                 var url = 'http://www.cathdb.info/version/latest/superfamily/' + region.cath_id;
                                 window.open(url, '_blank')

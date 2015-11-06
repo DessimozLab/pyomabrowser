@@ -64,6 +64,8 @@
   .domain_vis svg ._3_100 { fill: #D14719; }
   /* Few Secondary Structures */
   .domain_vis svg ._4_10  { fill: #CC00FF; }
+  /* n/a */
+  .domain_vis svg ._0_00  { fill: #ABABAB;}
 
 
 /* Tool tips */

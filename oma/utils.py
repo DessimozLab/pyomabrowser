@@ -494,7 +494,23 @@ class LinkoutIdMapper(XrefIdMapper):
         return xref
 
 
-class CathDomainsJson(object):
+class DomainNameMapper(object):
+    def __init__(self, db_handle):
+        self.domain_src = db_handle.root.Annotations.DomainDescription.read().sort(order='DomainId')
+
+    def _get_dominfo(self, domain_id):
+        idx = self.domain_src['DomainId'].searchsorted(domain_id)
+        if self.domain_src[idx]['DomainId'] != domain_id:
+            raise KeyError("no domain info available for {}".format(domain_id))
+        return self.domain_src[idx]
+
+    def get_info_dict_from_domainid(self, domain_id):
+        info = self._get_dominfo(domain_id)
+        return {'name': info['Description'].decode(), 'source': info['Source'].decode(),
+                'domainid': domain_id.decode()}
+
+
+class Gene3dDomainsJson(object):
     def __init__(self,seqlen, domains):
         self.json = self.getJson(seqlen, domains)
 
@@ -502,90 +518,24 @@ class CathDomainsJson(object):
         # Input: protein sequence length and list of domains
         # This function is a reordering of that by Ed ..., Summer 2015
         regions = []
+        if len(domains) == 0:
+            return {'length': seqlen,
+                    'regions': [{'name': 'n/a', 'source': 'n/a',
+                                 'location': "{}:{}".format(int(seqlen*.1), int(seqlen*.9))}]}
 
-        # Remove the non-CATH domains from the results.
-        domains = [x for x in domains if x[1].decode('utf-8').split('.')[0] \
-                   in ["1", "2", "3", "4"]]
-
-        for row in domains:
-            cath_id = (row[1].decode('utf-8')).split('.')
-
-            if len(cath_id) != 0:
-                region = {
-                    'name'     : self.getArch(cath_id),
-                    'source'   : 'CATH/Gene3D',
-                    'cath_id'  : row[1].decode('utf-8'), # NOT split
-                    'location' : row[2].decode('utf-8')
-                }
-
+        for dom in domains:
+            try:
+                region = domain_source.get_info_dict_from_domainid(dom['DomainId'])
+                region['location'] = dom['Coords'].decode()
                 regions.append(region)
-
-            # Colours for each CATH domain should be stored in CSS
+            except KeyError as e:
+                logger.info('ignoring domain annotation: {}'.format(e))
 
         return {'length': seqlen, 'regions': regions}
-
-
-    def getArch(self,cath_id):
-        # This could be replaced with a call to a DB holding the EXACT name for
-        # each CATH ID - available on the CATH FTP site.
-        archs = {
-            '1': {  # Mainly Alpha
-                '10': 'Orthogonal Bundle',
-                '20': 'Up-down Bundle',
-                '25': 'Alpha Horseshoe',
-                '40': 'Alpha solenoid',
-                '50': 'Alpha/alpha barrel'
-            },
-            '2': {  # Mainly Beta
-                '10': 'Ribbon',
-                '20': 'Single Sheet',
-                '30': 'Roll',
-                '40': 'Beta Barrel',
-                '50': 'Clam',
-                '60': 'Sandwich',
-                '70': 'Distorted Sandwich',
-                '80': 'Trefoil',
-                '90': 'Orthogonal Prism',
-                '100': 'Aligned Prism',
-                '102': '3-layer Sandwich',
-                '105': '3 Propellor',
-                '110': '4 Propellor',
-                '115': '5 Propellor',
-                '120': '6 Propellor',
-                '130': '7 Propellor',
-                '140': '8 Propellor',
-                '150': '2 Solenoid',
-                '160': '3 Solenoid',
-                '170': 'Beta Complex'
-            },
-            '3': {  # Alpha Beta
-                '10': 'Roll',
-                '15': 'Super Roll',
-                '20': 'Alpha-Beta Barrel',
-                '30': '2-Layer Sandwich',
-                '40': '3-Layer(aba) Sandwich',
-                '50': '3-Layer(bba) Sandwich',
-                '55': '3-Layer(bab) Sandwich',
-                '60': '4-Layer Sandwich',
-                '65': 'Alpha-beta prism',
-                '70': 'Box',
-                '75': '5-stranded Propeller',
-                '80': 'Alpha-Beta Horseshoe',
-                '90': 'Alpha-Beta Complex',
-                '100': 'Ribosomal Protein L15; Chain: K; domain 2'
-            },
-            '4': {  # Few Secondary Structures
-                '10': 'Irregular'
-            }
-        }
-
-        if cath_id[0] in archs and cath_id[1] in archs[cath_id[0]]:
-            return archs[cath_id[0]][cath_id[1]]
-        else:
-            return ''  # Unrecognised CATH ID - these should probably be logged.
 
 
 db = Database()
 id_resolver = IDResolver(db.db)
 id_mapper = IdMapperFactory(db)
 tax = Taxonomy(db.db)
+domain_source = DomainNameMapper(db.db)
