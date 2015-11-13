@@ -65,7 +65,8 @@
   /* Few Secondary Structures */
   .domain_vis svg ._4_10  { fill: #CC00FF; }
   /* n/a */
-  .domain_vis svg ._0_00  { fill: #ABABAB;}
+  .domain_vis svg ._n_a  { fill: #ABABAB;}
+  .domain_vis svg ._pfam { fill: #A47291; rx: 8px; ry: 8px;}
 
 
 /* Tool tips */

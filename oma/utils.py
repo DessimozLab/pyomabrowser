@@ -51,6 +51,8 @@ class Database(object):
     """This is the main interface to the oma database. Queries 
     will typically be issued by methods of this object. Typically
     the result of queries will be numpy recarray objects."""
+    EXPECTED_DB_SCHEMA = "2.0"
+
     def __init__(self, db=None):
         if db is None:
             db = django.conf.settings.HDF5DB['PATH']
@@ -61,7 +63,16 @@ class Database(object):
             self.db = db
         else:
             raise ValueError(str(db)+' is not a valid database type')
-        
+
+        try:
+            db_version = self.db.get_node_attr('/', 'db_schema_version')
+        except AttributeError:
+            db_version = "1.0"
+
+        if db_version != self.EXPECTED_DB_SCHEMA:
+            raise DBVersionError('Unsupported database version: {} != {} ({})'
+                                 .format(db_version, self.EXPECTED_DB_SCHEMA, self.db.filename))
+
         self.id_resolver = IDResolver(self.db)
         self.re_fam = re.compile(r'HOG:(?P<fam>\d{7,})')
 
@@ -94,7 +105,7 @@ class Database(object):
 
     def _get_vptab(self, entry_nr):
         genome = id_mapper['OMA'].genome_of_entry_nr(entry_nr)['UniProtSpeciesCode'].decode()
-        return self.db.get_node('/VPairs/{}'.format(genome))
+        return self.db.get_node('/PairwiseRelation/{}/VPairs'.format(genome))
     
     def count_vpairs(self, entry_nr):
         vptab = self._get_vptab(entry_nr)
@@ -109,9 +120,9 @@ class Database(object):
         dat = vpTab.read_where('(EntryNr1=={:d})'.format(entry_nr))
         e = vpTab.get_enum('RelType')
         res = numpy.lib.recfunctions.append_fields(
-                dat[['EntryNr1','EntryNr2']],
-                names = 'RelType',
-                data = [e(x) for x in dat['RelType']],
+                dat[['EntryNr1', 'EntryNr2']],
+                names='RelType',
+                data=[e(x) for x in dat['RelType']],
                 usemask=False)
         return res
 
@@ -147,7 +158,6 @@ class Database(object):
         res = data[max(0,idx-windows):min(len(data),idx+windows+1)]
         idx = res['EntryNr'].searchsorted(entry_nr)
         return res, idx
-
 
     def hog_family(self, entry):
         entry = self.ensure_entry(entry)
@@ -371,6 +381,9 @@ class Taxonomy(object):
         return self.tax_table.take(idx)
 
 
+class DBVersionError(Exception):
+    pass
+
 class InvalidTaxonId(Exception):
     pass
 
@@ -496,7 +509,8 @@ class LinkoutIdMapper(XrefIdMapper):
 
 class DomainNameMapper(object):
     def __init__(self, db_handle):
-        self.domain_src = db_handle.root.Annotations.DomainDescription.read().sort(order='DomainId')
+        self.domain_src = db_handle.root.Annotations.DomainDescription.read()
+        self.domain_src.sort(order='DomainId')
 
     def _get_dominfo(self, domain_id):
         idx = self.domain_src['DomainId'].searchsorted(domain_id)
