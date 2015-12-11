@@ -36,7 +36,7 @@ class EntryCentricMixin(object):
         except utils.InvalidId:
             raise Http404('requested id is unknown')
         entry = utils.db.entry_by_entry_nr(entry_nr)
-        return models.ProteinEntry(entry)
+        return models.ProteinEntry(utils.db, entry)
 
 
 class FastaResponseMixin(object):
@@ -84,7 +84,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
         entry_nr = utils.id_resolver.resolve(entry_id)
     except utils.InvalidId:
         raise Http404('requested id unknown')
-    entry = models.ProteinEntry(utils.db.entry_by_entry_nr(entry_nr))
+    entry = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
     genome = utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
     try:
         taxa = entry.genome.lineage
@@ -269,7 +269,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
         vps = []
         for vp in vps_raw:
-            ortholog = models.ProteinEntry.from_entry_nr(vp['EntryNr2'])
+            ortholog = models.ProteinEntry.from_entry_nr(utils.db, vp['EntryNr2'])
             ortholog.reltype = vp['RelType']
             vps.append(ortholog)
 
@@ -340,7 +340,7 @@ class HOGsBase(ContextMixin, EntryCentricMixin):
                 entry.genome.uniprot_species_code,
                 entry.genome.ncbi_taxon_id))
 
-        hog_members = [models.ProteinEntry(e) for e in hog_member_entries]
+        hog_members = [models.ProteinEntry(utils.db, e) for e in hog_member_entries]
         nr_vps = utils.db.count_vpairs(entry.entry_nr)
         longest_seq = 0
         if len(hog_member_entries) > 0:

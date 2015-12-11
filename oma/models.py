@@ -1,15 +1,68 @@
-from . import utils
-from . import misc
+def format_sciname(sci, short=False):
+    p = set([sci.find(x) for x in ['(', 'serogroup', 'serotype', 'serovar',
+                                   'biotype', 'subsp', 'pv.', 'bv.']])
+    if sci.startswith('Escherichia coli'):
+        p.add(sci.find('O'))
+    p.discard(-1)
+    p = min(p) if len(p) > 0 else len(sci)
+    return {'species': sci[0:p], 'strain': sci[p:]}
+
+
+class LazyProperty(object):
+    """Decorator to evaluate a property only on access.
+
+    Compute the attribute value and caches it in the instance.
+    Python Cookbook (Denis Otkidach) http://stackoverflow.com/users/168352/denis-otkidach
+    This decorator allows you to create a property which can be computed once and
+    accessed many times."""
+
+    def __init__(self, method, name=None):
+        # record the unbound-method and the name
+        self.method = method
+        self.name = name or method.__name__
+        self.__doc__ = method.__doc__
+
+    def __get__(self, inst, cls):
+        if inst is None:
+            return self
+        # compute, cache and return the instance's attribute value
+        result = self.method(inst)
+        # setattr redefines the instance's attribute so this doesn't get called again
+        setattr(inst, self.name, result)
+        return result
+
+
+class Singleton(type):
+    """A meta-class to enforce a Singleton, e.g. a class that can be
+    instantiated only exactly once.
+
+    Modified from Python Cookbook, 3rd Edition, p 357ff.
+
+    :Example:
+
+        class Foo(metaclass=Singleton):
+            def __init__(self):
+                pass  #This part is executed only once
+    """
+    def __init__(self, *args, **kwargs):
+        self.__instance = None
+        super(Singleton, self).__init__(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        if self.__instance is None:
+            self.__instance = super(Singleton, self).__call__(*args, **kwargs)
+        return self.__instance
 
 
 class ProteinEntry(object):
-    def __init__(self, e):
+    def __init__(self, db, e):
         self._entry = e
+        self._db = db
 
     @classmethod
-    def from_entry_nr(cls, eNr):
-        e = utils.db.entry_by_entry_nr(eNr)
-        return cls(e)
+    def from_entry_nr(cls, db, eNr):
+        e = db.entry_by_entry_nr(eNr)
+        return cls(db, e)
 
     @property
     def entry_nr(self):
@@ -27,38 +80,39 @@ class ProteinEntry(object):
     def canonicalid(self):
         return self._entry['CanonicalId'].decode()
 
-    @misc.LazyProperty
+    @LazyProperty
     def genome(self):
-        g = utils.id_mapper['OMA'].genome_of_entry_nr(self._entry['EntryNr'])
-        return Genome(g)
+        g = self._db.id_mapper['OMA'].genome_of_entry_nr(self._entry['EntryNr'])
+        return Genome(self._db, g)
 
-    @misc.LazyProperty
+    @LazyProperty
     def omaid(self):
-        return utils.id_mapper['OMA'].map_entry_nr(self._entry['EntryNr'])
+        return self._db.id_mapper['OMA'].map_entry_nr(self._entry['EntryNr'])
 
-    @misc.LazyProperty
+    @LazyProperty
     def cdna(self):
-        return utils.db.get_cdna(self._entry).decode()
+        return self._db.get_cdna(self._entry).decode()
 
-    @misc.LazyProperty
+    @LazyProperty
     def sequence(self):
-        return utils.db.get_sequence(self._entry).decode()
+        return self._db.get_sequence(self._entry).decode()
 
-    @misc.LazyProperty
+    @LazyProperty
     def description(self):
-        return utils.db.get_description(self._entry).decode()
+        return self._db.get_description(self._entry).decode()
 
-    @misc.LazyProperty
+    @LazyProperty
     def hog_family_nr(self):
-        return utils.db.hog_family(self._entry)
+        return self._db.hog_family(self._entry)
 
     def __repr__(self):
         return "<{}({}, {})>".format(self.__class__.__name__, self.entry_nr, self.omaid)
 
 
 class Genome(object):
-    def __init__(self, g):
+    def __init__(self, db, g):
         self._genome = g
+        self._db = db
 
     @property
     def ncbi_taxon_id(self):
@@ -72,9 +126,9 @@ class Genome(object):
     def sciname(self):
         return self._genome['SciName'].decode()
 
-    @misc.LazyProperty
+    @LazyProperty
     def species_and_strain_as_dict(self):
-        return misc.format_sciname(self.sciname)
+        return format_sciname(self.sciname)
 
     def species(self):
         return self.species_and_strain_as_dict['species']
@@ -82,18 +136,17 @@ class Genome(object):
     def strain(self):
         return self.species_and_strain_as_dict['strain']
 
-    @misc.LazyProperty
+    @LazyProperty
     def kingdom(self):
         # TODO: store directly in db
-        return utils.tax.get_parent_taxa(self._genome['NCBITaxonId'])[-1]['Name'].decode()
+        return self._db.tax.get_parent_taxa(self._genome['NCBITaxonId'])[-1]['Name'].decode()
 
     def is_polyploid(self):
-        #TODO: update once stored in database
-        return self._genome['UniProtSpeciesCode'] == b'WHEAT'
+        return self._genome['IsPolyploid']
 
-    @misc.LazyProperty
+    @LazyProperty
     def lineage(self):
-        return [lev['Name'].decode() for lev in utils.tax.get_parent_taxa(self._genome['NCBITaxonId'])]
+        return [lev['Name'].decode() for lev in self._db.tax.get_parent_taxa(self._genome['NCBITaxonId'])]
 
     def __repr__(self):
         return "<{}({}, {})>".format(self.__class__.__name__, self.uniprot_species_code,
