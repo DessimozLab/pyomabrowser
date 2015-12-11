@@ -31,6 +31,11 @@ class VPairsViews_Test(TestCase):
         for vp in vps:
             self.assertIn(vp, content, 'VP {} not found on page.'.format(vp))
 
+    def test_inexistant_query_genome(self):
+        query = 'ECOLI00411'
+        reply = self.client.get(reverse('pairs', args=[query]))
+        self.assertEqual(reply.status_code, 404)
+
 
 class HogFastaView_Test(TestCase):
     def get_fasta_and_verify_sequences_and_nr_members(self, query, level, seqs, nr_expected_members):
