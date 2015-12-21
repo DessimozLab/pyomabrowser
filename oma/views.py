@@ -388,8 +388,9 @@ def domains_json(request, entry_id):
     entry_nr = utils.id_resolver.resolve(entry_id)
     entry = utils.db.entry_by_entry_nr(int(entry_nr))
     domains = utils.db.get_domains(entry['EntryNr'])
-    response = utils.Gene3dDomainsJson(int(entry['SeqBufferLength']), domains)
-    return JsonResponse(response.json)
+    response = misc.encode_domains_to_dict(int(entry['SeqBufferLength']),
+                                           domains, utils.domain_source)
+    return JsonResponse(response)
 
 
 @cache_control(max_age=1800)
