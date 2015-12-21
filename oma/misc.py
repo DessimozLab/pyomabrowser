@@ -1,23 +1,31 @@
-from builtins import range
-import math
-from functools import wraps
 from io import StringIO
+import logging
+import itertools
+from future.moves.itertools import zip_longest
 
 
 logger = logging.getLogger(__name__)
 
 
 def as_fasta(seqs, headers=None):
+    """format an iterable of sequences in fasta format.
+
+    The sequences are written as they are, i.e. they are treated
+    as plain strings, meaning no checking of symbols,...
+
+    :param seqs: an iterable yielding the sequences.
+    :param headers: an iterable yielding the headers, one per sequence. """
     if headers is None:
-        headers = ['seq{}'.format(i+1) for i in range(len(seqs))]
-    if len(seqs) != len(headers):
-        raise ValueError('number of headers and sequences does not match')
+        headers = ("seq{}".format(i) for i in itertools.count(1))
 
     buf = StringIO()
-    for i, seq in enumerate(seqs):
-        buf.write(u'> {}\n'.format(headers[i]))
+    sentinel = object()
+    for header, seq in zip_longest(headers, seqs, fillvalue=sentinel):
+        if sentinel in (header, seq):
+            raise ValueError(u"header and seqs do not have the same length")
+        buf.write(u'> {}\n'.format(header))
         for k in range(0, len(seq), 80):
-            buf.write(seq[k:k+80])
+            buf.write(seq[k:k + 80])
             buf.write(u'\n')
         buf.write(u'\n')
     return buf.getvalue()
