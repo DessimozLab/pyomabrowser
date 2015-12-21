@@ -6,7 +6,8 @@ from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
 from django.views.decorators.cache import cache_control
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
+from django.views.generic.base import ContextMixin
 
 from collections import OrderedDict
 import numpy
@@ -22,40 +23,53 @@ from io import BytesIO
 from . import utils
 from . import misc
 from . import forms
+from pyoma.browser import db
+from pyoma.browser import models
 
 logger = logging.getLogger(__name__)
 
 
-class EntryCentricView(TemplateView):
+class EntryCentricMixin(object):
     def get_entry(self, entry_id):
         """resolve any ID and return an entry or a 404 if it is unknown"""
         try:
             entry_nr = utils.id_resolver.resolve(entry_id)
-        except utils.InvalidId:
+        except db.InvalidId:
             raise Http404('requested id is unknown')
         entry = utils.db.entry_by_entry_nr(entry_nr)
-        return entry
-
-    def get_vpairs(self, entry):
-        vps = utils.db.get_vpairs(entry['EntryNr'])
-        for vp in vps:
-            yield vp
-
-    def get_hog(self, entry, level):
-        pass
+        return models.ProteinEntry(utils.db, entry)
 
 
-# Create your views here.
-def pairs(request, entry_id, idtype='OMA'):
-    entry_nr = utils.id_resolver.resolve(entry_id)
-    vps_entry_nr = utils.db.get_vpairs(entry_nr)
+class FastaResponseMixin(object):
+    """A mixin to generate Fasta response."""
+    def get_fastaheader(self, member):
+        return " | ".join([member.omaid, member.canonicalid, '[{}]'.format(member.genome.sciname)])
 
-    query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
-    vps = list(map(utils.id_mapper[idtype].map_entry_nr, vps_entry_nr['EntryNr2']))
-    print(len(vps))
-    context = {'query': query, 'vps': vps}
+    def get_sequence(self, member):
+        return member.sequence
 
-    return render(request, 'vpairs.html', context)
+    def render_to_fasta_response(self, members):
+        seqs = []
+        headers = []
+        for memb in members:
+            seqs.append(self.get_sequence(memb))
+            headers.append(self.get_fastaheader(memb))
+        return HttpResponse(content_type='text/plain', content=misc.as_fasta(seqs, headers))
+
+
+class FastaView(FastaResponseMixin, ContextMixin, View):
+    """Renders a context into fasta format.
+
+    The default implementation of :meth:`render_to_response` passes the complete
+    context to the render method. This usually needs to be overwritten such that an
+    iterable with :class:`ProteinEntry` is passed."""
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
+
+    def render_to_response(self, context):
+        return self.render_to_fasta_response(context)
 
 
 def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
@@ -71,24 +85,13 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
         entry_nr = utils.id_resolver.resolve(entry_id)
     except utils.InvalidId:
         raise Http404('requested id unknown')
-
+    entry = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
     genome = utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
     try:
-        lin = utils.tax.get_parent_taxa(genome['NCBITaxonId'])
-    except Exception:
-        logger.warning("cannot get NCBI Taxonomy for {} ({})".format(
-            genome['UniProtSpeciesCode'],
-            genome['NCBITaxonId']))
-        lin = []
-    taxa = []
-    for i in lin:
-        taxa.append(i[2])
-    if len(taxa) > 2:
-        sciname = taxa[0].decode()
-        kingdom = taxa[-1].decode()
-    else:
-        sciname = u"unknown"
-        kingdom = u"unknown"
+        taxa = entry.genome.lineage
+    except utils.InvalidTaxonId:
+        logger.warning("cannot get NCBI Taxonomy for {!r}".format(entry.genome))
+        taxa = []
 
     windows = int(windows)
     ngs_entry_nr, gene_left = utils.db.neighbour_genes(entry_nr, windows)
@@ -99,10 +102,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     blank_r2 = 2 * windows + 1
 
     geneinfos = []
-    md_geneinfos = {}  # gene informations for first row, entry gene species
-    md_geneinfos['genes'] = {}
-    query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
-
+    md_geneinfos = {'genes': {}}  # gene informations for first row, entry gene species
     species = genome['UniProtSpeciesCode'].decode()  # Species name of the entr gene
 
     md_geneinfos['species'] = species
@@ -115,7 +115,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     for index, info in enumerate(ngs_entry_nr):
         geneinfo = {
             "entryid": info['EntryNr'],
-            "species": species,
+            "species": entry.genome.uniprot_species_code,
             "genenumber": "{0:05d}".format(info['EntryNr'] - genome['EntryOff']),
             "dir": info['LocusStrand'],
             "type": str((index - gene_left + int(mod)) % (windows + windows + 1)),
@@ -253,126 +253,101 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
         sorted(list(o_md_geneinfos.items()),
                key=lambda t: t[1]['row_number']))
 
-    context = {'query': query, 'positions': positions, 'windows': windows,
+    context = {'positions': positions, 'windows': windows,
                'md': md_geneinfos, 'o_md': o_md_geneinfos, 'colors': colors,
                'stripes': stripes, 'nr_vps': len(orthologs),
-               'entry': {'omaid': query, 'sciname': misc.format_sciname(sciname),
-                         'kingdom': kingdom,
-                         'is_homeolog_species': (b"WHEAT" == species)},
+               'entry': entry,
                'tab': 'synteny', 'xrefs': xrefs
     }
     return render(request, 'synteny.html', context)
 
 
-class PairsView(EntryCentricView):
-    template_name = "pairs.html"
-    attr_of_member = ('omaid', 'sciname', 'kingdom', 'RelType')
-
+class PairsBase(ContextMixin, EntryCentricMixin):
+    """Base class to collect data for pairwise orthologs."""
     def get_context_data(self, entry_id, **kwargs):
-        context = super(PairsView, self).get_context_data(**kwargs)
+        context = super(PairsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
-        genome = utils.id_mapper['OMA'].genome_of_entry_nr(entry['EntryNr'])
-        vps_raw = sorted(self.get_vpairs(entry), key=lambda x: x['RelType'])
+        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
         vps = []
         for vp in vps_raw:
-            t = {'omaid': utils.id_mapper['OMA'].map_entry_nr(vp['EntryNr2'])}
-            g = utils.id_mapper['OMA'].genome_of_entry_nr(vp['EntryNr2'])
-            t['sciname'] = misc.format_sciname(g['SciName'].decode())
-            t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name'].decode()
-            t['RelType'] = vp['RelType']
-            if 'sequence' in self.attr_of_member:
-                t['sequence'] = utils.db.get_sequence(vp['EntryNr2'])
-            vps.append(t)
+            ortholog = models.ProteinEntry.from_entry_nr(utils.db, vp['EntryNr2'])
+            ortholog.reltype = vp['RelType']
+            vps.append(ortholog)
 
+        entry.reltype = 'self'
         context.update(
-            {'entry': {'omaid': utils.id_mapper['OMA'].map_entry_nr(entry['EntryNr']),
-                       'sciname': misc.format_sciname(genome['SciName'].decode()),
-                       'kingdom': utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'].decode(),
-                       'is_homeolog_species': ("WHEAT" == genome['UniProtSpeciesCode']),
-                       'RelType': 'self'},
+            {'entry': entry,
              'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs'})
-        if 'sequence' in self.attr_of_member:
-            context['entry']['sequence'] = utils.db.get_sequence(entry)
         return context
 
 
-class PairsViewFasta(PairsView):
-    attr_of_member = ('omaid', 'sciname', 'kingdom', 'RelType', 'sequence')
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        seqs = []
-        header = []
-        for memb in itertools.chain([context['entry']], context['vps']):
-            seqs.append(memb['sequence'])
-            header.append(' | '.join(
-                [memb['omaid'], memb['RelType'], '[{species}{strain}]'.format(**memb['sciname'].decode())]))
-
-        response = HttpResponse(content_type='text/plain')
-        response.write(misc.as_fasta(seqs, header))
-        return response
+class PairsView(TemplateView, PairsBase):
+    template_name = "pairs.html"
 
 
+class PairsViewFasta(FastaView, PairsBase):
+    """returns a fasta represenation of all the pairwise orthologs"""
+    def get_fastaheader(self, memb):
+        return ' | '.join(
+                [memb.omaid, memb.reltype, '[{}]'.format(memb.genome.sciname)])
 
-class HOGsView(TemplateView):
-    template_name = "hogs.html"
-    attr_of_member = ('omaid', 'sciname', 'kingdom')
+    def render_to_response(self, context, **kwargs):
+        return self.render_to_fasta_response(itertools.chain([context['entry']], context['vps']))
+
+
+class InfoBase(ContextMixin, EntryCentricMixin):
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(InfoBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+        context.update({'entry': entry})
+        return context
+
+
+class InfoView(InfoBase, TemplateView):
+    template_name = "info.html"
+
+
+class InfoViewFasta(InfoBase, FastaView):
+    def get_fastaheader(self, member):
+        return " | ".join([member.omaid, member.canonicalid,
+                           "[{}]".format(member.genome.sciname)])
+
+    def render_to_response(self, context, **kwargs):
+        return self.render_to_fasta_response([context['entry']])
+
+
+class HOGsBase(ContextMixin, EntryCentricMixin):
 
     def get_context_data(self, entry_id, level=None, idtype='OMA', **kwargs):
-        context = super(HOGsView, self).get_context_data(**kwargs)
-
-        try:
-            entry_nr = utils.id_resolver.resolve(entry_id)
-        except utils.InvalidId as e:
-            raise Http404('requested id is unknown')
-
-        query = utils.id_mapper[idtype].map_entry_nr(entry_nr)
-
-        entry = utils.db.entry_by_entry_nr(entry_nr)
-        genome = utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
+        context = super(HOGsBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
 
         hog_member_entries = []
         hog = None
         levels = []
         try:
-            fam = utils.db.hog_family(entry)
-            levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam))
-            lineage = utils.tax.get_parent_taxa(genome['NCBITaxonId'])
-            levels = [l for l in itertools.chain(lineage['Name'], ('LUCA',))
+            levs_of_fam = frozenset([z.decode() for z in utils.db.hog_levels_of_fam(entry.hog_family_nr)])
+            levels = [l for l in itertools.chain(entry.genome.lineage, ('LUCA',))
                       if l in utils.tax.all_hog_levels and l in levs_of_fam]
-            hog = {'id': entry['OmaHOG'], 'fam': fam}
+            hog = {'id': entry.oma_hog, 'fam': entry.hog_family_nr}
             if not level is None:
-                hog_member_entries = utils.db.hog_members(entry_nr, level)
-        except utils.Singleton:
+                hog_member_entries = utils.db.hog_members(entry.entry_nr, level)
+        except db.Singleton:
             pass
         except ValueError as e:
             raise Http404(str(e))
-        except utils.InvalidTaxonId:
+        except db.InvalidTaxonId:
             logger.error("cannot get NCBI Taxonomy for {} ({})".format(
-                genome['UniProtSpeciesCode'],
-                genome['NCBITaxonId']))
+                entry.genome.uniprot_species_code,
+                entry.genome.ncbi_taxon_id))
 
-        hog_members = []
-        for memb in hog_member_entries:
-            t = {}
-            t['omaid'] = utils.id_mapper['OMA'].map_entry_nr(memb['EntryNr'])
-            g = utils.id_mapper['OMA'].genome_of_entry_nr(memb['EntryNr'])
-            t['sciname'] = misc.format_sciname(g['SciName'].decode())
-            t['kingdom'] = utils.tax.get_parent_taxa(g['NCBITaxonId'])[-1]['Name'].decode()
-            t['hogid'] = memb['OmaHOG'].decode()
-            if 'sequence' in self.attr_of_member:
-                t['sequence'] = utils.db.get_sequence(memb)
-            hog_members.append(t)
-
-        nr_vps = utils.db.count_vpairs(entry_nr)
+        hog_members = [models.ProteinEntry(utils.db, e) for e in hog_member_entries]
+        nr_vps = utils.db.count_vpairs(entry.entry_nr)
         longest_seq = 0
         if len(hog_member_entries) > 0:
             longest_seq = max(e['SeqBufferLength'] for e in hog_member_entries)
         context.update(
-            {'entry': {'omaid': query,
-                       'sciname': misc.format_sciname(genome['SciName'].decode()),
-                       'kingdom': utils.tax.get_parent_taxa(genome['NCBITaxonId'])[-1]['Name'].decode(),
-                       'is_homeolog_species': (b"WHEAT" == genome['UniProtSpeciesCode'])},
+            {'entry': entry,
              'level': level, 'hog_members': hog_members,
              'nr_vps': nr_vps, 'tab': 'hogs', 'levels': levels[::-1],
              'longest_seq': longest_seq})
@@ -381,21 +356,16 @@ class HOGsView(TemplateView):
         return context
 
 
-class HOGsFastaView(HOGsView):
-    attr_of_member = ('omaid', 'sciname', 'kingdom', 'sequence')
+class HOGsView(HOGsBase, TemplateView):
+    template_name = "hogs.html"
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        seqs = []
-        header = []
-        for memb in context['hog_members']:
-            seqs.append(memb['sequence'])
-            header.append(' | '.join(
-                [memb['omaid'], memb['hogid'], '[{species}{strain}]'.format(**memb['sciname'])]))
 
-        response = HttpResponse(content_type='text/plain')
-        response.write(misc.as_fasta(seqs, header))
-        return response
+class HOGsFastaView(FastaView, HOGsBase):
+    def get_fastaheader(self, memb):
+        return ' | '.join([memb.omaid, memb.canonicalid, memb.oma_hog, '[]'.format(memb.genome.sciname)])
+
+    def render_to_response(self, context, **response_kwargs):
+        return self.render_to_fasta_response(context['hog_members'])
 
 
 class HOGsOrthoXMLView(HOGsView):
@@ -413,13 +383,14 @@ class HOGsOrthoXMLView(HOGsView):
         return response
 
 
-def DomainsJson(request, entry_id):
+def domains_json(request, entry_id):
     # Load the entry and its domains, before forming the JSON to draw client-side.
     entry_nr = utils.id_resolver.resolve(entry_id)
     entry = utils.db.entry_by_entry_nr(int(entry_nr))
     domains = utils.db.get_domains(entry['EntryNr'])
-    response = utils.Gene3dDomainsJson(int(entry['SeqBufferLength']), domains)
-    return JsonResponse(response.json)
+    response = misc.encode_domains_to_dict(int(entry['SeqBufferLength']),
+                                           domains, utils.domain_source)
+    return JsonResponse(response)
 
 
 @cache_control(max_age=1800)

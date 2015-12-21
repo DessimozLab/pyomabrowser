@@ -7,10 +7,8 @@ import os
 
 admin.autodiscover()
 
-urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'pybrowser_dev.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
+urlpatterns = patterns(
+    '',  # prefix
     url(r'^oma/', include('oma.urls')),
 )
 
