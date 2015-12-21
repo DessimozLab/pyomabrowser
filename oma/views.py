@@ -23,7 +23,8 @@ from io import BytesIO
 from . import utils
 from . import misc
 from . import forms
-from . import models
+from pyoma.browser import db
+from pyoma.browser import models
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class EntryCentricMixin(object):
         """resolve any ID and return an entry or a 404 if it is unknown"""
         try:
             entry_nr = utils.id_resolver.resolve(entry_id)
-        except utils.InvalidId:
+        except db.InvalidId:
             raise Http404('requested id is unknown')
         entry = utils.db.entry_by_entry_nr(entry_nr)
         return models.ProteinEntry(utils.db, entry)
@@ -331,11 +332,11 @@ class HOGsBase(ContextMixin, EntryCentricMixin):
             hog = {'id': entry.oma_hog, 'fam': entry.hog_family_nr}
             if not level is None:
                 hog_member_entries = utils.db.hog_members(entry.entry_nr, level)
-        except utils.Singleton:
+        except db.Singleton:
             pass
         except ValueError as e:
             raise Http404(str(e))
-        except utils.InvalidTaxonId:
+        except db.InvalidTaxonId:
             logger.error("cannot get NCBI Taxonomy for {} ({})".format(
                 entry.genome.uniprot_species_code,
                 entry.genome.ncbi_taxon_id))
@@ -382,7 +383,7 @@ class HOGsOrthoXMLView(HOGsView):
         return response
 
 
-def DomainsJson(request, entry_id):
+def domains_json(request, entry_id):
     # Load the entry and its domains, before forming the JSON to draw client-side.
     entry_nr = utils.id_resolver.resolve(entry_id)
     entry = utils.db.entry_by_entry_nr(int(entry_nr))
