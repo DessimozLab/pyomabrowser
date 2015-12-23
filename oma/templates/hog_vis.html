@@ -1,0 +1,43 @@
+{% extends "seqCV.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA: Hierarchical Orthologous Groups for {{ fam.id }}{% endblock %}
+{% block meta_description %}Hierarchical orthologous groups (HOGs) provide a set of genes that have all started diverging from a single ancestral gene at the taxonomic range of interest.{% endblock %}
+{% block js_hook %}
+ <!-- D3 -->
+  <script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>
+
+  <!-- Underscore -->
+  <script src="{% static "js/underscore-min.js" %}"></script>
+
+  <!-- TnT -->
+  <link rel="stylesheet" href="{% static "css/tnt.css" %}" type="text/css" />
+  <link rel="stylesheet" href="{% static "css/hog.css" %}" type="text/css" />
+  <script src="{% static "js/tnt.min.js" %}"></script>
+  <script src="{% static "js/hog.js" %}"></script>
+{% endblock %}
+
+{% block contentTab %}
+    {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
+    {% else %}
+<h3>Hierarchical group {{ fam.id }}</h3>
+  <div id="hog_vis"></div>
+
+  <script>
+
+    (function () {
+        var tree = {{ species_tree|safe }};
+        var query = {'id': {{ entry.entry_nr }} };
+        var per_species = {{ per_species|safe }};
+        var tooltip_data = {{ xrefs|safe }};
+        var options = {'show_internal_labels': {{ show_internal_labels|default:"true" }},
+                       'oma_info_url_template': "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1="};
+
+        var viz = tnt();
+        var theme = hog_theme();
+        theme (viz, document.getElementById ("hog_vis"), query, per_species, tree, tooltip_data, options);
+    }) ();
+  </script>
+
+{% endif %}
+{% endblock %}

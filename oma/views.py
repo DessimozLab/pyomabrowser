@@ -2,6 +2,8 @@ from __future__ import print_function
 from builtins import map
 from builtins import str
 from builtins import range
+import collections
+import json
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
@@ -23,8 +25,7 @@ from io import BytesIO
 from . import utils
 from . import misc
 from . import forms
-from pyoma.browser import db
-from pyoma.browser import models
+from pyoma.browser import db, models
 
 logger = logging.getLogger(__name__)
 
@@ -321,14 +322,13 @@ class HOGsBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, level=None, idtype='OMA', **kwargs):
         context = super(HOGsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
-
         hog_member_entries = []
         hog = None
         levels = []
         try:
             levs_of_fam = frozenset([z.decode() for z in utils.db.hog_levels_of_fam(entry.hog_family_nr)])
             levels = [l for l in itertools.chain(entry.genome.lineage, ('LUCA',))
-                      if l in utils.tax.all_hog_levels and l in levs_of_fam]
+                      if l.encode('ascii') in utils.tax.all_hog_levels and l in levs_of_fam]
             hog = {'id': entry.oma_hog, 'fam': entry.hog_family_nr}
             if not level is None:
                 hog_member_entries = utils.db.hog_members(entry.entry_nr, level)
@@ -381,6 +381,67 @@ class HOGsOrthoXMLView(HOGsView):
         response = HttpResponse(content_type='text/plain')
         response.write(orthoxml)
         return response
+
+
+class HOGsVis(EntryCentricMixin, TemplateView):
+    template_name = "hog_vis.html"
+    show_internal_labels = True
+
+    def _build_per_species_table(self, entries, subhogids_per_lev, taxonomy):
+        per_species = {}
+        for e in entries:
+            genome = utils.id_mapper['OMA'].genome_of_entry_nr(e['EntryNr'])
+            species_dict = per_species.get(genome['SciName'].decode(), {})
+            try:
+                lineage = taxonomy.get_parent_taxa(genome['NCBITaxonId'])
+            except utils.InvalidTaxonId:
+                logger.exception("cannot find lineage information for {}".format(genome['NCBITaxonId']))
+                continue
+
+            for lin in lineage:
+                lin_str = lin['Name'].decode()
+                if lin_str not in species_dict:
+                    species_dict[lin_str] = [[] for _ in range(len(subhogids_per_lev[lin['Name']]))]
+                for k, subhogid in enumerate(subhogids_per_lev[lin['Name']]):
+                    if e['OmaHOG'].startswith(subhogid):
+                        species_dict[lin_str][k].append(int(e['EntryNr']))
+                        break
+                else:
+                    raise ValueError('no id found for {}({})'.format(e['EntryNr'], e['OmaHOG']))
+            per_species[genome['SciName'].decode()] = species_dict
+        return per_species
+
+    def get_context_data(self, entry_id, idtype='OMA', **kwargs):
+        context = super(HOGsVis, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+        context.update({'tab': 'hogs',
+                        'entry': entry,
+                        })
+        try:
+            fam_nr = entry.hog_family_nr
+            levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam_nr))
+            phylo = utils.tax.get_induced_taxonomy(levs_of_fam)
+            subhogids_per_level = dict((lev, utils.db.get_subhogids_at_level(fam_nr, lev)) for lev in phylo.tax_table['Name'])
+            fam_memb = utils.db.member_of_fam(fam_nr)
+            per_species = self._build_per_species_table(fam_memb, subhogids_per_level, phylo)
+            xrefs = {int(e['EntryNr']): {'omaid': utils.id_mapper['OMA'].map_entry_nr(e['EntryNr']),
+                                    'id': e['CanonicalId'].decode()} for e in fam_memb}
+
+            context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
+                            'hog_members': fam_memb,
+                            'per_species': json.dumps(per_species),
+                            'species_tree': json.dumps(phylo.as_dict()),
+                            'xrefs': json.dumps(xrefs),
+                            'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
+                            'show_internal_labels': self.show_internal_labels,
+                            })
+        except pyoma.browser.db.Singleton:
+            context['isSingleton'] = True
+        return context
+
+
+class HogVisWithoutInternalLabels(HOGsVis):
+    show_internal_labels = False
 
 
 def domains_json(request, entry_id):

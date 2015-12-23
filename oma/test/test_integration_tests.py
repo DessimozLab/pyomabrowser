@@ -1,3 +1,5 @@
+from __future__ import print_function, absolute_import, division
+import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 import re
@@ -87,9 +89,29 @@ class HogView_Test(TestCase):
         self.assertEqual(reply.status_code, 404)
 
 
+class HogVisViewTest(TestCase):
+    def test_simple_fam_encoding(self):
+        self.maxDiff = None
+        exp_tree = {'name': 'Eukaryota', 'id':2759,
+                    'children': [{'name': 'Ascomycota', 'id':4890,
+                                  'children': [{'name': 'Schizosaccharomyces pombe (strain 972 / ATCC 24843)', 'id': 284812},
+                                               {'name': 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'id': 559292}]},
+                                 {'name': 'Plasmodium falciparum (isolate 3D7)', 'id': 36329}]}
+        reply = self.client.get(reverse('hog_vis', args=['YEAST12']))
+        phylo = json.loads(reply.context['species_tree'])
+        self.assertDictEqual(exp_tree, phylo)
+
+        per_species = json.loads(reply.context['per_species'])
+        for spec, lev, cnts in [('Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'Eukaryota', [2]),
+                                ('Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', [1,1]),
+                                ]:
+            nr_genes_per_subhog = [len(z) for z in per_species[spec][lev]]
+            self.assertEqual(nr_genes_per_subhog, cnts, 'missmatch of subhogs at {}/{}: {} vs {}'
+                             .format(spec, lev, nr_genes_per_subhog, cnts))
+
+
 class SyntenyViewTester(TestCase):
     def verify_colors(self, query, window):
-        query_nr = query[5:]
         reply = self.client.get(reverse('synteny', args=[query, window]))
         self.assertEqual(reply.status_code, 200)
         query_genome_genes = reply.context['md']['genes']
