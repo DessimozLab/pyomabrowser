@@ -30,7 +30,7 @@
         var query = {'id': {{ entry.entry_nr }} };
         var per_species = {{ per_species|safe }};
         var tooltip_data = {{ xrefs|safe }};
-        var options = {'show_internal_labels': {{ show_internal_labels|default:"true" }},
+        var options = {'show_internal_labels': {{ show_internal_labels|yesno:"true,false" }},
                        'oma_info_url_template': "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1="};
 
         var viz = tnt();
