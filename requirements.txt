@@ -8,4 +8,4 @@ tweepy>=2.3.0
 django_debug_toolbar>=1.2.1
 django_debug_toolbar_line_profiler>=0.4.0
 
--e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@master=egg#pyoma
+-e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@master#egg=pyoma
