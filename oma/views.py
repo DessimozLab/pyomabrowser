@@ -84,13 +84,13 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
     try:
         entry_nr = utils.id_resolver.resolve(entry_id)
-    except utils.InvalidId:
+    except db.InvalidId:
         raise Http404('requested id unknown')
     entry = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
     genome = utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
     try:
         taxa = entry.genome.lineage
-    except utils.InvalidTaxonId:
+    except db.InvalidTaxonId:
         logger.warning("cannot get NCBI Taxonomy for {!r}".format(entry.genome))
         taxa = []
 
@@ -394,7 +394,7 @@ class HOGsVis(EntryCentricMixin, TemplateView):
             species_dict = per_species.get(genome['SciName'].decode(), {})
             try:
                 lineage = taxonomy.get_parent_taxa(genome['NCBITaxonId'])
-            except utils.InvalidTaxonId:
+            except db.InvalidTaxonId:
                 logger.exception("cannot find lineage information for {}".format(genome['NCBITaxonId']))
                 continue
 
@@ -435,7 +435,7 @@ class HOGsVis(EntryCentricMixin, TemplateView):
                             'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
                             'show_internal_labels': self.show_internal_labels,
                             })
-        except pyoma.browser.db.Singleton:
+        except db.Singleton:
             context['isSingleton'] = True
         return context
 
