@@ -449,8 +449,7 @@ def domains_json(request, entry_id):
     entry_nr = utils.id_resolver.resolve(entry_id)
     entry = utils.db.entry_by_entry_nr(int(entry_nr))
     domains = utils.db.get_domains(entry['EntryNr'])
-    response = misc.encode_domains_to_dict(int(entry['SeqBufferLength']),
-                                           domains, utils.domain_source)
+    response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
     return JsonResponse(response)
 
 

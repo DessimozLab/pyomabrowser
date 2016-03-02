@@ -31,7 +31,7 @@ def as_fasta(seqs, headers=None):
     return buf.getvalue()
 
 
-def encode_domains_to_dict(seqlen, domains, domain_mapper):
+def encode_domains_to_dict(entry, domains, domain_mapper):
     """return an dict structure of the given domains.
 
     The result can be serialized with json and is in the expected format
@@ -43,8 +43,11 @@ def encode_domains_to_dict(seqlen, domains, domain_mapper):
     :param domain_mapper: an instance of :class:`pyoma.browser.db.DomainNameMapper`"""
 
     regions = []
+    seqlen = int(entry['SeqBufferLength'])
+    seqid = entry['MD5ProteinHash'].decode()
     if len(domains) == 0:
         return {'length': seqlen,
+                'seq_id': seqid,
                 'regions': [{'name': 'n/a', 'source': 'n/a',
                              'location': "{}:{}".format(int(seqlen * .1), int(seqlen * .9))}]}
 
@@ -56,4 +59,4 @@ def encode_domains_to_dict(seqlen, domains, domain_mapper):
         except KeyError as e:
             logger.info('ignoring domain annotation: {}'.format(e))
 
-    return {'length': seqlen, 'regions': regions}
+    return {'length': seqlen, 'seq_id': seqid, 'regions': regions}

@@ -64,9 +64,11 @@ var domain_vis = function () {
                             // Get the class
                             var class_name = "_n_a";
                             var base_url;
+                            var gene3d_base_url = "http://gene3d.biochem.ucl.ac.uk/search?sterm="
                             if (region.source === "Pfam"){
                                 class_name = "_pfam"
                                 base_url = "http://pfam.xfam.org/family/"
+
                             } else if (region.source === "CATH/Gene3D") {
                                 var cathid = region.domainid.split('.');
                                 class_name = "_" + String(cathid[0]) + "_" + String(cathid[1]);
@@ -107,7 +109,7 @@ var domain_vis = function () {
                                     .on('mouseover', tip.show)
                                     .on('mouseout', tip.hide)
                                     .on('click', function () {
-                                        var url = base_url + region.domainid;
+                                        var url = gene3d_base_url + data.seq_id;
                                         window.open(url, '_blank')
                                             .focus();
                                     });

@@ -6,4 +6,3 @@ id_resolver = db.id_resolver
 id_mapper = db.id_mapper
 tax = db.tax
 domain_source = pyoma.browser.db.DomainNameIdMapper(db)
-
