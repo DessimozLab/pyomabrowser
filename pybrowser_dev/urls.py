@@ -13,6 +13,9 @@ urlpatterns = patterns(
 )
 
 if settings.DEPLOYMENT != "PRODUCTION":
+    from django.views.generic.base import RedirectView
+    urlpatterns += patterns('', url(r'^/$', RedirectView.as_view(url="/oma/home/")))
+
     dwnld_folder = os.path.normpath(os.path.join(os.getenv('DARWIN_BROWSERDATA_PATH', default="./"), '..', 'downloads'))
     urlpatterns += static(r'All/', document_root=dwnld_folder)
 
