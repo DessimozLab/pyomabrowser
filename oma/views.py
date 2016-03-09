@@ -269,16 +269,21 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         context = super(PairsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
+        close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
         vps = []
-        for vp in vps_raw:
-            ortholog = models.ProteinEntry.from_entry_nr(utils.db, vp['EntryNr2'])
-            ortholog.reltype = vp['RelType']
-            vps.append(ortholog)
+        for vp in itertools.chain(vps_raw, close_paralogs):
+            pw_relation = models.ProteinEntry.from_entry_nr(utils.db, vp['EntryNr2'])
+            pw_relation.reltype = vp['RelType']
+            vps.append(pw_relation)
 
         entry.reltype = 'self'
+        longest_seq = 0
+        if len(vps) > 0:
+            longest_seq = max(e.sequence_length for e in vps)
         context.update(
             {'entry': entry,
-             'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs'})
+             'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs',
+             'longest_seq': longest_seq})
         return context
 
 

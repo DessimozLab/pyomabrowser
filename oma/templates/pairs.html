@@ -1,4 +1,5 @@
 {% extends "seqCV.html" %}
+{% load staticfiles %}
 
 {% block title %}OMA orthology database: Pairwise Orthologs for {{ entry.omaid }}{% endblock %}
 {% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ vps|length }} pairwise orthologs{% endblock %}
@@ -30,26 +31,46 @@
         </div>
     </div>
     <div class="panel-body">
-        <dl class="dl-horizontal">
-        {%  regroup vps by RelType as vps_grouped %}
+        {% regroup vps by reltype as vps_grouped %}
+        <ul class="nav nav-pills" role="tablist">
         {% for one_rel_vps in vps_grouped %}
-          <dt>{{ one_rel_vps.grouper }}</dt>
-          <dd>
-            <table class="table table-hover">
-                <thead><tr><td class="col-md-3">Taxon</td><td class="col-md-2">Protein ID</td></tr></thead>
-                <tbody>
-                    {% for vp in one_rel_vps.list %}
-                    <tr>
-                        <td>{% include "includes/kingdom.html" with kingdom=vp.genome.kingdom %} <b>{{vp.genome.species}}</b>{{vp.genome.strain}} </td>
-                        <td><a href="{% url "pairs" vp.omaid %}">{{vp.omaid}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-          </dd>
+            <li role="presentation" class="{% if forloop.first %}active{% endif %}" role="tab">
+                <a href="#rels{{ forloop.counter }}" data-toggle="tab">{{ one_rel_vps.grouper }}</a></li>
         {% endfor %}
-        </dl>
+        </ul>
+        <div class="tab-content">
+        {% for one_rel_vps in vps_grouped %}
+            <div role="tabpanel" class="tab-pane {% if forloop.first %}active{% endif %}" id="rels{{ forloop.counter }}">
+                <table class="table table-hover">
+                    <thead><tr><td class="col-md-3">Taxon</td><td class="col-md-2">Protein ID</td>
+                               <td class="col-md-2">Cross reference</td><td class="col-md-3">Domain Architectures</td></tr></thead>
+                    <tbody>
+                        {% for vp in one_rel_vps.list %}
+                        <tr class="protein" id="{{ vp.omaid }}">
+                            <td>{% include "includes/kingdom.html" with kingdom=vp.genome.kingdom %} <b>{{vp.genome.species}}</b>{{vp.genome.strain}} </td>
+                            <td><a href="{% url "pairs" vp.omaid %}">{{vp.omaid}}</td>
+                            <td><a class="external" href="">{{ vp.canonicalid }}</a></td>
+                            <td class="domain_vis"></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+        </div>
+
     </div>
 </div>
-
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+<!-- Domain Visualisation -->
+<script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+<script>
+(function () {
+    var domains = domain_vis();
+    domains(".protein", {{ longest_seq }});
+}())
+</script>
 {% endblock contentTab %}
