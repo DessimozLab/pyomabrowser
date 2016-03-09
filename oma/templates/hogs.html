@@ -6,12 +6,7 @@
 {% block contentTab %}
 
 {% block js_hook %}
-	<!-- D3 and D3 Tooltip -->
-  <script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
-  <script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
-  <!-- Domain Visualisation -->
-  <script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
-  <link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+
 {% endblock %}
 
 
@@ -78,13 +73,19 @@ This entry is not part of any hierarchical orthologous group.
         </tbody>
     </table>
 </div>
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+<!-- Domain Visualisation -->
+<script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+<script>
+  (function () {
+    var domains = domain_vis();
+    domains(".hog_member", {{ longest_seq }});
+  }())
+</script>
 
- <script>
-    (function () {
-        var domains = domain_vis();
-        domains(".hog_member", {{ longest_seq }});
-    }())
-  </script>
 {% endif %}
 {% endblock contentTab %}
 
