@@ -271,9 +271,11 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
         close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
         vps = []
-        for vp in itertools.chain(vps_raw, close_paralogs):
-            pw_relation = models.ProteinEntry.from_entry_nr(utils.db, vp['EntryNr2'])
-            pw_relation.reltype = vp['RelType']
+        for rel in itertools.chain(vps_raw, close_paralogs):
+            pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
+            pw_relation.reltype = rel['RelType']
+            if len(rel['RelType']) == 3:
+                pw_relation.reltype += " ortholog"
             vps.append(pw_relation)
 
         entry.reltype = 'self'
@@ -295,7 +297,8 @@ class PairsViewFasta(FastaView, PairsBase):
     """returns a fasta represenation of all the pairwise orthologs"""
     def get_fastaheader(self, memb):
         return ' | '.join(
-                [memb.omaid, memb.reltype, '[{}]'.format(memb.genome.sciname)])
+                [memb.omaid, memb.canonicalid, memb.reltype,
+                 '[{}]'.format(memb.genome.sciname)])
 
     def render_to_response(self, context, **kwargs):
         return self.render_to_fasta_response(itertools.chain([context['entry']], context['vps']))
