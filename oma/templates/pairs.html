@@ -32,33 +32,51 @@
     </div>
     <div class="panel-body">
         {% regroup vps by reltype as vps_grouped %}
-        <ul class="nav nav-pills" role="tablist">
-        {% for one_rel_vps in vps_grouped %}
-            <li role="presentation" class="{% if forloop.first %}active{% endif %}" role="tab">
-                <a href="#rels{{ forloop.counter }}" data-toggle="tab">{{ one_rel_vps.grouper }}</a></li>
-        {% endfor %}
-        </ul>
-        <div class="tab-content">
-        {% for one_rel_vps in vps_grouped %}
-            <div role="tabpanel" class="tab-pane {% if forloop.first %}active{% endif %}" id="rels{{ forloop.counter }}">
-                <table class="table table-hover">
-                    <thead><tr><td class="col-md-3">Taxon</td><td class="col-md-2">Protein ID</td>
-                               <td class="col-md-2">Cross reference</td><td class="col-md-3">Domain Architectures</td></tr></thead>
-                    <tbody>
-                        {% for vp in one_rel_vps.list %}
-                        <tr class="protein" id="{{ vp.omaid }}">
-                            <td>{% include "includes/kingdom.html" with kingdom=vp.genome.kingdom %} <b>{{vp.genome.species}}</b>{{vp.genome.strain}} </td>
-                            <td><a href="{% url "pairs" vp.omaid %}">{{vp.omaid}}</td>
-                            <td><a class="external" href="">{{ vp.canonicalid }}</a></td>
-                            <td class="domain_vis"></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <nav id="nav_reltypes" class="navbar navbar-default navbar-static">
+
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".navbar-scrollspy">
+                        <span class="sr-only">Toggle</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="navbar-collapse navbar-scrollspy collapse" style="height: 1px;">
+                    <ul class="nav navbar-nav">
+                    {% for one_rel_vps in vps_grouped %}
+                        <li class="{% if forloop.first %}active{% endif %}">
+                            <a href="#reltype{{ forloop.counter }}">{{ one_rel_vps.grouper }}s</a></li>
+                    {% endfor %}
+                    </ul>
+                </div>
             </div>
+        </nav>
+
+        <div data-target="#nav_reltypes" data-spy="scroll" style="height:300px; position: relative; margin-top:10px; overflow:auto" >
+        {% for one_rel_vps in vps_grouped %}
+            <h4 id="reltype{{ forloop.counter }}">{{ one_rel_vps.grouper }}{{ one_rel_vps|length|pluralize }}</h4>
+            <table class="table table-hover">
+                <thead><tr>
+                    <td class="col-md-3">Taxon</td>
+                    <td class="col-md-2">Protein ID</td>
+                    <td class="col-md-2">Cross reference</td>
+                    <td class="col-md-3">Domain Architectures</td>
+                </tr></thead>
+                <tbody>
+                    {% for vp in one_rel_vps.list %}
+                    <tr class="protein" id="{{ vp.omaid }}">
+                        <td>{% include "includes/kingdom.html" with kingdom=vp.genome.kingdom %} <b>{{vp.genome.species}}</b>{{vp.genome.strain}} </td>
+                        <td><a href="{% url "pairs" vp.omaid %}">{{vp.omaid}}</a></td>
+                        <td>{% if vp.canonicalid %}<a class="external" href="">{{ vp.canonicalid }}</a>{% endif %}</td>
+                        <td class="domain_vis"></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         {% endfor %}
         </div>
-
     </div>
 </div>
 <!-- D3 and D3 Tooltip -->
