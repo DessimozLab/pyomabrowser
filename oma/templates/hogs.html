@@ -58,6 +58,7 @@ This entry is not part of any hierarchical orthologous group.
             <tr>
                 <td class="col-md-3">Taxon</td>
                 <td class="col-md-2">Protein ID</td>
+                <td class="col-md-2">Cross reference</td>
                 <td class="col-md-3">Domain Architectures</td>
             </tr>
         </thead>
@@ -67,6 +68,7 @@ This entry is not part of any hierarchical orthologous group.
              <td>{% include "includes/kingdom.html" with kingdom=memb.genome.kingdom %}
                    <b>{{memb.genome.species}}</b>{{memb.genome.strain}} </td>
              <td><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{memb.omaid}}">{{memb.omaid}}</a></td>
+               <td>{% if memb.canonicalid %}<a href="" class="external">{{ memb.canonicalid }}</a>{% endif %}</td>
              <td class="domain_vis"></td>
            </tr>
         {% endfor %}
