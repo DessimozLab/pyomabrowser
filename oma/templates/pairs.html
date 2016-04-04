@@ -40,24 +40,13 @@
                data-id-field="protid" data-row-attributes="add_row_attr"
                data-url="{% url 'pairs_json' entry.omaid %}">
             <thead><tr>
-                <th data-field="reltype" data-sortable="true" data-filter-control="select" class="col-md-1">Type of relation</th>
-                <th data-field="kingdom" data-sortable="true" data-filter-control="select" data-formatter="format_as_kingdom_tag"><span title="Kingdom">K</span></th>
-                <th data-field="taxon" data-sortable="true" data-filter-control="select" data-formatter="format_sciname" class="col-md-3">Taxon</th>
-                <th data-field="protid" data-sortable="true" data-formatter="format_protid" class="col-md-1">Protein ID</th>
-                <th data-field="xrefid" data-sortable="true" data-formatter="format_xref" class="col-md-2">Cross reference</th>
-                <th data-field="protid" data-formatter="format_domain" class="col-md-3 domain_vis">Domain Architectures</th>
+                <th data-field="reltype" data-sortable="true" data-filter-control="select">Type of relation</th>
+                <th data-field="kingdom" data-sortable="true" data-filter-control="select" data-formatter="format_as_kingdom_tag"><span title="Kingdom">Kingdom</span></th>
+                <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="format_sciname">Taxon</th>
+                <th data-field="protid" data-sortable="true" data-formatter="format_protid">Protein ID</th>
+                <th data-field="xrefid" data-sortable="true" data-formatter="format_xref">Cross reference</th>
+                <th data-sortable="false" data-formatter="format_domain" class="domain_vis">Domain Architectures</th>
             </tr></thead>
-            <!--<tbody>
-            {% for vp in vps %}
-                <tr class="protein" id="{{ vp.omaid }}">
-                    <td>{{ vp.reltype }}</td>
-                    <td>{% include "includes/kingdom.html" with kingdom=vp.genome.kingdom %} <b>{{vp.genome.species}}</b>{{vp.genome.strain}} </td>
-                    <td><a href="{% url "pairs" vp.omaid %}">{{vp.omaid}}</a></td>
-                    <td>{% if vp.canonicalid %}<a class="external" href="">{{ vp.canonicalid }}</a>{% endif %}</td>
-                    <td class="domain_vis"></td>
-                </tr>
-            {% endfor %}
-            </tbody> -->
         </table>
 
     </div>
