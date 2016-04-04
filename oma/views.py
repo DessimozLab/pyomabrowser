@@ -370,7 +370,7 @@ class HOGsView(HOGsBase, TemplateView):
 
 class HOGsFastaView(FastaView, HOGsBase):
     def get_fastaheader(self, memb):
-        return ' | '.join([memb.omaid, memb.canonicalid, memb.oma_hog, '[]'.format(memb.genome.sciname)])
+        return ' | '.join([memb.omaid, memb.canonicalid, memb.oma_hog, '[{}]'.format(memb.genome.sciname)])
 
     def render_to_response(self, context, **response_kwargs):
         return self.render_to_fasta_response(context['hog_members'])
