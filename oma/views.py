@@ -41,6 +41,40 @@ class EntryCentricMixin(object):
         return models.ProteinEntry(utils.db, entry)
 
 
+class JsonModelMixin(object):
+    """Mixin class to serialize parts of an object to json.
+
+    This class provides the means to serialize the desired parts
+    of an object as json. The method :py:meth:`to_json_dict` can
+    be called on an iterable, and attributes or methods without
+    any argument can will be converted to a dict. This is restricted
+    to the attributes/methods defined in :py:attr:`json_fields`.
+    These can also be chained together.
+
+    :Example:
+
+    TODO!"""
+    json_fields = None
+
+    def to_json_dict(self, iter):
+        for row in iter:
+            obj_dict = {}
+            for accessor, name in self.json_fields.items():
+                if name is None:
+                    name = accessor
+                obj = row
+                try:
+                    for attr in accessor.split('.'):
+                        obj = getattr(obj, attr)
+                        if isinstance(obj, classmethod):
+                            obj = obj()
+                except AttributeError as e:
+                    logger.warn('cannot access '+accessor+ ": "+ e)
+                    raise
+                obj_dict[name] = obj
+            yield obj_dict
+
+
 class FastaResponseMixin(object):
     """A mixin to generate Fasta response."""
     def get_fastaheader(self, member):
@@ -287,6 +321,17 @@ class PairsBase(ContextMixin, EntryCentricMixin):
              'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs',
              'longest_seq': longest_seq})
         return context
+
+
+class PairsJson(PairsBase, JsonModelMixin, View):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'reltype': None}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['vps']))
+        return JsonResponse(data, safe=False)
 
 
 class PairsView(TemplateView, PairsBase):
