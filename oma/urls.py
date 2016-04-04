@@ -25,6 +25,7 @@ urlpatterns = patterns(
     url(r'^home/$', views.home, name='home'),
     url(r'^vps/(?P<entry_id>\w+)/$', views.PairsView.as_view(), name="pairs"),
     url(r'^vps/(?P<entry_id>\w+)/fasta/$', views.PairsViewFasta.as_view(), name="pairs_fasta"),
+    url(r'^vps/(?P<entry_id>\w+)/json/$', views.PairsJson.as_view(), name="pairs_json"),
     # static pages that can be rendered directly to a template.
     url(r'^hogs/$', TemplateView.as_view(template_name='landHOG.html'), name='hogs'),
     url(r'^synteny/$', TemplateView.as_view(template_name='landsynteny.html'), name='synteny'),

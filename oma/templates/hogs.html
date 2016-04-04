@@ -82,10 +82,7 @@ This entry is not part of any hierarchical orthologous group.
 <script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
 <link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
 <script>
-  (function () {
-    var domains = domain_vis();
-    domains(".hog_member", {{ longest_seq }});
-  }())
+    domains.visualize_all(".hog_member", {{ longest_seq }});
 </script>
 
 {% endif %}
