@@ -23,7 +23,7 @@ def as_fasta(seqs, headers=None):
     for header, seq in zip_longest(headers, seqs, fillvalue=sentinel):
         if sentinel in (header, seq):
             raise ValueError(u"header and seqs do not have the same length")
-        buf.write(u'> {}\n'.format(header))
+        buf.write(u'>{}\n'.format(header))
         for k in range(0, len(seq), 80):
             buf.write(seq[k:k + 80])
             buf.write(u'\n')
