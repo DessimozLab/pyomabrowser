@@ -3,8 +3,7 @@ from django.conf.urls import include, patterns, url
 from django.views.generic.base import TemplateView
 from . import views
 
-urlpatterns = patterns(
-    '',  # prefix
+urlpatterns = [
     url(r'^domains/(?P<entry_id>\w+)/json/$', views.domains_json, name='domains_json'),
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGsView.as_view(), name='hogs'),
     url(r'^hogs/(?P<entry_id>\w+)/orthoxml/$', views.HOGsOrthoXMLView.as_view(),
@@ -49,11 +48,11 @@ urlpatterns = patterns(
     url(r'^current/$', views.CurrentView.as_view(), name='current'),
     url(r'^archives/$', views.ArchiveView.as_view(), name='archives'),
     url(r'^archives/(?P<release>[A-Za-z0-9.]+)/$', views.ArchiveView.as_view(), name='archives'),
-)
+]
 
 if settings.DEBUG:
     import debug_toolbar
 
-    urlpatterns += patterns('',
-                            url(r'^__debug__/', include(debug_toolbar.urls)),
-                            )
+    urlpatterns.extend([
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ])

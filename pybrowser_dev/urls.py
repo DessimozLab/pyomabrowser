@@ -7,17 +7,15 @@ import os
 
 admin.autodiscover()
 
-urlpatterns = patterns(
-    '',  # prefix
+urlpatterns = [
     url(r'^oma/', include('oma.urls')),
-)
+]
 
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView
-    urlpatterns += patterns(
-        '',  # prefix
-        url(r'^/$', RedirectView.as_view(url="/oma/home/", permanent=True))
-    )
+    urlpatterns += [
+        url(r'^$', RedirectView.as_view(url="/oma/home/", permanent=True))
+    ]
 
     dwnld_folder = os.path.normpath(os.path.join(os.getenv('DARWIN_BROWSERDATA_PATH', default="./"), '..', 'downloads'))
     urlpatterns += static(r'All/', document_root=dwnld_folder)

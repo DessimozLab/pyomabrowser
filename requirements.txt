@@ -1,4 +1,4 @@
-Django>=1.6.5
+Django>=1.8
 numexpr>=2.4-rc2
 numpy>=1.8.1
 tables>=3.2
