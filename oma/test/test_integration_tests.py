@@ -19,7 +19,7 @@ class EntryFasta_Test(TestCase):
         reply = self.client.get(reverse('entry_fasta', args=[query]))
         self.assertEqual(reply.status_code, 200)
         self.assertEqual(reply['Content-Type'], 'text/plain')
-        self.assertIn('> {}'.format(query), decode_replycontent(reply))
+        self.assertIn('>{}'.format(query), decode_replycontent(reply))
 
 
 class VPairsViews_Test(TestCase):
