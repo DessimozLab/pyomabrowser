@@ -18,6 +18,7 @@
     <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js" ></script> -->
     <script src="{% static "js/jquery.js" %}"></script>
     <script src="{% static "js/bootstrap.min.js" %}"></script>
+    <script>var static_root = "{% static "" %}";</script>
     {% block css_hook %}{% endblock %}
     {% block js_hook %}{% endblock %}
   </head>

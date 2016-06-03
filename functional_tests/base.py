@@ -87,7 +87,6 @@ class FunctionalTest(StaticLiveServerTestCase):
         # one more try, which will raise any errors if they are outstanding
         return function_with_assertion()
 
-
     def wait_for_element_with_id(self, element_id):
         WebDriverWait(self.browser, timeout=30).until(
                 lambda b: b.find_element_by_id(element_id),
