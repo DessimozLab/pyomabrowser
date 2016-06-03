@@ -65,6 +65,7 @@
         // Grab the domain annotations
         cachedAjaxPromise("/oma/domains/" + entry_id + "/json/")
             .done(function (data) {
+                if (!data) return;
                 // Draw the sequence with domain annotations
                 var svg_container = d3.select(container).append("svg:svg");
 
