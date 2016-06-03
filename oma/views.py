@@ -413,6 +413,17 @@ class HOGsView(HOGsBase, TemplateView):
     template_name = "hogs.html"
 
 
+class HOGsJson(HOGsBase, JsonModelMixin, View):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid'}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['hog_members']))
+        return JsonResponse(data, safe=False)
+
+
 class HOGsFastaView(FastaView, HOGsBase):
     def get_fastaheader(self, memb):
         return ' | '.join([memb.omaid, memb.canonicalid, memb.oma_hog, '[{}]'.format(memb.genome.sciname)])

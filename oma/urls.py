@@ -15,6 +15,8 @@ urlpatterns = [
         name='hogs'),
     url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 -]+)/fasta/$',
         views.HOGsFastaView.as_view(), name='hogs_fasta'),
+    url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 -]+)/json/$',
+        views.HOGsJson.as_view(), name='hog_json'),
     url(r'^synteny/(?P<entry_id>\w+)/$', views.synteny, name='synteny'),
     url(r'^synteny/(?P<entry_id>\w+)/(?P<windows>\d)/$', views.synteny, name='synteny'),
     url(r'^synteny/(?P<entry_id>\w+)/(?P<mod>\d)/(?P<windows>\d)/$',
