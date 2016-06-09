@@ -31,6 +31,7 @@
         </div>
     </div>
     <div class="panel-body">
+        {% if entry.omaid == entry.alt_splicing_variant %}
         <table class="table table-hover" id="pairTable"
                data-show-toggle="true"
                data-show-columns="true" data-search="true" data-show-export="true"
@@ -50,6 +51,10 @@
                 <th data-sortable="false" class="domain_vis">Domain Architectures</th>
             </tr></thead>
         </table>
+        {% else %}
+            <p>Orthologs for this gene have been computed for a different splicing variant:
+            <a href="{% url pairs entry.alt_splicing_variant %}">{{ entry.alt_splicing_variant }}</a></p>
+        {% endif %}
 
     </div>
 </div>
@@ -59,6 +64,8 @@
 <!-- Domain Visualisation -->
 <script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
 <link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+
+{% if entry.omaid == entry.alt_splicing_variant %}
 <!-- bootstrap-table -->
 <script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
@@ -78,5 +85,5 @@ $("#pairTable").bootstrapTable({
     }
 });
 </script>
-
+{% endif %}
 {% endblock contentTab %}
