@@ -313,7 +313,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
             vps.append(pw_relation)
 
         entry.reltype = 'self'
-        entry.alt_splicing_variant = utils.id_mapper['OMA'].map_entry_nr(entry.entry_nr)
+        entry.alt_splicing_variant = utils.id_mapper['OMA'].map_entry_nr(entry._entry['AltSpliceVariant'])
 
         longest_seq = 0
         if len(vps) > 0:
