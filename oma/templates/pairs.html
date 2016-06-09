@@ -52,8 +52,8 @@
             </tr></thead>
         </table>
         {% else %}
-            <p>Orthologs for this gene have been computed for a different splicing variant:
-            <a href="{% url pairs entry.alt_splicing_variant %}">{{ entry.alt_splicing_variant }}</a></p>
+            <div>Orthologs for this gene have been computed for a different splicing variant:
+            <a href="{% url 'pairs' entry.alt_splicing_variant %}">{{ entry.alt_splicing_variant }}</a></div>
         {% endif %}
 
     </div>
