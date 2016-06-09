@@ -318,7 +318,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
             longest_seq = max(e.sequence_length for e in vps)
         context.update(
             {'entry': entry,
-             'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs',
+             'vps': vps, 'nr_vps': len(vps_raw), 'tab': 'orthologs',
              'longest_seq': longest_seq})
         return context
 
