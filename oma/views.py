@@ -572,8 +572,9 @@ class CurrentView(TemplateView):
         try:
             root = os.environ['DARWIN_BROWSER_SHARE']
         except KeyError:
-            logger.warn('Cannot determine root dir for downloads.')
+            logger.warning('Cannot determine root dir for downloads.')
             root = ""
+        logger.debug('params for archive search: root={}, prefix_filter={}'.format(root, prefix_filter))
         candidate_dirs = list(map(os.path.basename, glob.glob(root + "/" + prefix_filter + "*")))
         rels = [{'name': self._name_from_release(d), 'id': d, 'date': d[max(0, d.find('.') + 1):]}
                 for d in candidate_dirs if os.path.exists(os.path.join(root, d, "downloads"))]
