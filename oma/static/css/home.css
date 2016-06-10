@@ -213,7 +213,10 @@ a.uncurated{
 }
 
 
-
+.ribbon {
+    height: 10px;
+    background: linear-gradient(90deg, black 33.3%, yellow 33.3%, yellow 66.6%, red 66.6%, red 100%);
+}
 
 
 
