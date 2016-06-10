@@ -1,0 +1,74 @@
+{% load staticfiles %}
+<div class="panel panel-default">
+    <p>OMA groups contain sets of genes which are all orthologous to one another within the group. This implies that
+        there is at most one entry from each species in a group.</p>
+
+    <div class="panel-header">
+        <h4>OMA Group IDs</h4>
+    </div>
+    <div class="panel-body">
+        <div class="col-md-4">
+            <ul class="nav nav-pills nav-stacked" role="tablist">
+                <li class="active"><a href="#finger" role="tab" data-toggle="tab">Fingerprint</a></li>
+                <li><a href="#groupnr" role="tab" data-toggle="tab">Group Nr</a></li>
+            </ul>
+        </div>
+
+        <div class="col-md-8">
+            <div class="tab-content">
+                <div class="tab-pane active" id="finger">
+                    <p>The fingerprint is a subsequence that is specific to a certain group in the current OMA release.
+                        Since the group number is specific to a release, this is the best way to track a group across
+                        releases.
+                    </p>
+                </div>
+
+                <div class="tab-pane" id="groupnr">
+                    <p>The numeric OMA Group id is release specific. It is therefor not recommended to use it to track a
+                        group between different releases. Use instead the fingerprint.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-header">
+        <h4>Provided informations on OMA Groups</h4>
+    </div>
+    <div class="panel-body">
+        <div class="col-md-4">
+            <ul class="nav nav-pills nav-stacked" role="tablist">
+                <li class="active"><a href="#list" role="tab" data-toggle="tab">Protein List</a></li>
+                <li><a href="#msa" role="tab" data-toggle="tab">Alignment</a></li>
+                <li><a href="#close" role="tab" data-toggle="tab">Close Groups</a></li>
+                <li><a href="#onto" role="tab" data-toggle="tab">Ontology</a></li>
+            </ul>
+        </div>
+
+        <div class="col-md-8">
+            <div class="tab-content">
+                <div class="tab-pane active" id="list">
+                    <p>Lists all the member proteins of this OMA group in a table.
+                        The protein list can also be exported as unaligned sequences.</p>
+                </div>
+
+                <div class="tab-pane" id="msa">
+                    <p>Show a <a href="http://mbe.oxfordjournals.org/content/30/4/772">Mafft</a> multiple
+                        sequence alignment of the current OMA Group member proteins. Note that this MSA is
+                        computed on the fly. The aligned sequences can be exported in fasta format.</p>
+                </div>
+
+                <div class="tab-pane" id="close">
+                    <img src="{% static "image/tut_close_grp.png" %}" class="img-responsive margin-auto" alt="tutorial on close groups">
+                </div>
+
+                <div class="tab-pane" id="onto">
+                    <img src="{% static "image/tut_grp_onto.png" %}" class="img-responsive margin-auto" alt="tutorial on ontology tab">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

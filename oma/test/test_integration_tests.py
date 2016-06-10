@@ -1,3 +1,5 @@
+from __future__ import print_function, absolute_import, division
+import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 import re
@@ -9,6 +11,32 @@ def decode_replycontent(reply):
     match = re.search('charset=(?P<encoding>[A-Za-z0-9-]+)', content_type)
     enc = 'ascii' if match is None else match.group('encoding')
     return reply.content.decode(enc)
+
+
+class EntryFasta_Test(TestCase):
+    def test_extract_fasta_formatted_entry(self):
+        query = 'YEAST{:05d}'.format(12)
+        reply = self.client.get(reverse('entry_fasta', args=[query]))
+        self.assertEqual(reply.status_code, 200)
+        self.assertEqual(reply['Content-Type'], 'text/plain')
+        self.assertIn('>{}'.format(query), decode_replycontent(reply))
+
+
+class VPairsViews_Test(TestCase):
+    def test_html_contains_orthologs(self):
+        query = 'YEAST00012'
+        reply = self.client.get(reverse('pairs', args=[query]))
+        self.assertEqual(reply.status_code, 200)
+        content = decode_replycontent(reply)
+        vps = [z.omaid for z in reply.context['vps']]
+        self.assertGreater(len(vps), 0)
+        for vp in vps:
+            self.assertIn(vp, content, 'VP {} not found on page.'.format(vp))
+
+    def test_inexistant_query_genome(self):
+        query = 'ECOLI00411'
+        reply = self.client.get(reverse('pairs', args=[query]))
+        self.assertEqual(reply.status_code, 404)
 
 
 class HogFastaView_Test(TestCase):
@@ -61,9 +89,29 @@ class HogView_Test(TestCase):
         self.assertEqual(reply.status_code, 404)
 
 
+class HogVisViewTest(TestCase):
+    def test_simple_fam_encoding(self):
+        self.maxDiff = None
+        exp_tree = {'name': 'Eukaryota', 'id':2759,
+                    'children': [{'name': 'Ascomycota', 'id':4890,
+                                  'children': [{'name': 'Schizosaccharomyces pombe (strain 972 / ATCC 24843)', 'id': 284812},
+                                               {'name': 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'id': 559292}]},
+                                 {'name': 'Plasmodium falciparum (isolate 3D7)', 'id': 36329}]}
+        reply = self.client.get(reverse('hog_vis', args=['YEAST12']))
+        phylo = json.loads(reply.context['species_tree'])
+        self.assertDictEqual(exp_tree, phylo)
+
+        per_species = json.loads(reply.context['per_species'])
+        for spec, lev, cnts in [('Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'Eukaryota', [2]),
+                                ('Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', [1,1]),
+                                ]:
+            nr_genes_per_subhog = [len(z) for z in per_species[spec][lev]]
+            self.assertEqual(nr_genes_per_subhog, cnts, 'missmatch of subhogs at {}/{}: {} vs {}'
+                             .format(spec, lev, nr_genes_per_subhog, cnts))
+
+
 class SyntenyViewTester(TestCase):
     def verify_colors(self, query, window):
-        query_nr = query[5:]
         reply = self.client.get(reverse('synteny', args=[query, window]))
         self.assertEqual(reply.status_code, 200)
         query_genome_genes = reply.context['md']['genes']

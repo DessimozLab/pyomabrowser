@@ -165,28 +165,28 @@ h3.panel-title {
 
 .external { 
     padding-right:11px;
-    background: url(/imgs/ext.png) 0 no-repeat;
+    background: url(../image/ext.png) 0 no-repeat;
     background-position:center right;
     white-space: nowrap;
 }
 
 a.experimental {
     padding-right:11px;
-    background: url(/imgs/ext.png) 0 no-repeat;
+    background: url(../image/ext.png) 0 no-repeat;
     background-position:center right;
     color: #000000;
     font-size: small;
 }
 a.curated {
     padding-right:11px;
-    background: url(/imgs/ext.png) 0 no-repeat;
+    background: url(../image/ext.png) 0 no-repeat;
     background-position:center right;
     color: #3333FF;
     font-size: small;
 }
 a.uncurated{
     padding-right:11px;
-    background: url(/imgs/ext.png) 0 no-repeat;
+    background: url(../image/ext.png) 0 no-repeat;
     background-position:center right;
     color: #FF9933;
     font-size: small;

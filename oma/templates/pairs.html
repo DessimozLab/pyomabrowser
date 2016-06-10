@@ -1,4 +1,5 @@
 {% extends "seqCV.html" %}
+{% load staticfiles %}
 
 {% block title %}OMA orthology database: Pairwise Orthologs for {{ entry.omaid }}{% endblock %}
 {% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ vps|length }} pairwise orthologs{% endblock %}
@@ -30,26 +31,59 @@
         </div>
     </div>
     <div class="panel-body">
-        <dl class="dl-horizontal">
-        {%  regroup vps by RelType as vps_grouped %}
-        {% for one_rel_vps in vps_grouped %}
-          <dt>{{ one_rel_vps.grouper }}</dt>
-          <dd>
-            <table class="table table-hover">
-                <thead><tr><td class="col-md-3">Taxon</td><td class="col-md-2">Protein ID</td></tr></thead>
-                <tbody>
-                    {% for vp in one_rel_vps.list %}
-                    <tr>
-                        <td>{% include "includes/kingdom.html" with kingdom=vp.kingdom %} <b>{{vp.sciname.species}}</b>{{vp.sciname.strain}} </td>
-                        <td><a href="{% url "pairs" vp.omaid %}">{{vp.omaid}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-          </dd>
-        {% endfor %}
-        </dl>
+        {% if entry.omaid == entry.alt_splicing_variant %}
+        <table class="table table-hover" id="pairTable"
+               data-show-toggle="true"
+               data-show-columns="true" data-search="true" data-show-export="true"
+               data-pagination="true" data-page-size="10" data-page-list="[10, 25, 50, 100, All]"
+               data-mobile-responsive="true" data-check-on-init="true"
+               data-undefined-text=""
+               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
+               data-url="{% url 'pairs_json' entry.omaid %}">
+            <thead><tr>
+                <th data-field="reltype" data-sortable="true" data-filter-control="select">Relation</th>
+                <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                    data-formatter="tablehooks.format_as_kindom_tag" data-title-tooltip="Kingdom">King</th>
+                <th data-field="taxon" data-sortable="true" data-filter-control="input"
+                    data-formatter="tablehooks.format_sciname">Taxon</th>
+                <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                <th data-sortable="false" class="domain_vis">Domain Architectures</th>
+            </tr></thead>
+        </table>
+        {% else %}
+            <div>Orthologs for this gene have been computed for a different splicing variant:
+            <a href="{% url 'pairs' entry.alt_splicing_variant %}">{{ entry.alt_splicing_variant }}</a></div>
+        {% endif %}
+
     </div>
 </div>
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+<!-- Domain Visualisation -->
+<script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
 
+{% if entry.omaid == entry.alt_splicing_variant %}
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+<script type="text/javascript" src="https://rawgit.com/wenzhixin/bootstrap-table/master/dist/extensions/filter-control/bootstrap-table-filter-control.js"></script>
+<script type="text/javascript" src="https://rawgit.com/wenzhixin/bootstrap-table/master/dist/extensions/export/bootstrap-table-export.js"></script>
+<script type="text/javascript" src="https://rawgit.com/wenzhixin/bootstrap-table/master/dist/extensions/mobile/bootstrap-table-mobile.js"></script>
+<script type="text/javascript" src="{% static "js/tableExport.min.js" %}"></script>
+<script>
+$("#pairTable").bootstrapTable({
+    reorderableColumns: true,
+    clickToSelect: false,
+    filterControl: false,
+    showMultiSort: true,
+    onPostBody: function(){
+        domains.visualize_all(".protein", {{ longest_seq }});
+    }
+});
+</script>
+{% endif %}
 {% endblock contentTab %}

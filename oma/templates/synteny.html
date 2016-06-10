@@ -131,7 +131,7 @@ $(window).load(function(){
                         {% endfor %}
                     </tr>
                     <tr>
-                        <td><span data-toggle="tooltip_right" data-html=false data-title="{{ entry.sciname.species }} {{ entry.sciname.strain }}">{{ md.species }}</span></td>
+                        <td><span data-toggle="tooltip_right" data-html=false data-title="{{ entry.genome.sciname }}">{{ md.species }}</span></td>
                         {% for index, geneinfo in md.genes.items %}
                         {% for infotype, genetype in geneinfo.items %}
                         {% if genetype == 'blank' %}

@@ -1,8 +1,14 @@
 {% extends "seqCV.html" %}
+{% load staticfiles %}
 
 {% block title %}OMA: Hierarchical Orthologous Groups for {{ entry.omaid }}{% endblock %}
 {% block meta_description %}Hierarchical orthologous groups (HOGs) provide a set of genes that have all started diverging from a single ancestral gene at the taxonomic range of interest.{% endblock %}
 {% block contentTab %}
+
+{% block js_hook %}
+
+{% endblock %}
+
 
 <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg">
@@ -42,24 +48,57 @@ This entry is not part of any hierarchical orthologous group.
 <div class="panel panel-default">
     <div class="panel-heading clearfix">
         <div class="pull-right">
-            Download: 
+            Download:
             <a href="{% url 'hogs_orthoxml' entry.omaid %}"><span class="glyphicon glyphicon-download">OrthoXML</span></a>
             <a href="{% url 'hogs_fasta' entry.omaid level %}"><span class="glyphicon glyphicon-download">Fasta</span></a>
         </div>
     </div>
-    <table class="table table-hover">
-        <thead><tr><td class="col-md-3">Taxon</td><td class="col-md-2">Protein ID</td></tr></thead>
-        <tbody>
-        {% for memb in hog_members %}
-           <tr><td>{% include "includes/kingdom.html" with kingdom=memb.kingdom %}
-                   <b>{{memb.sciname.species}}</b>{{memb.sciname.strain}} </td>
-               <td><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{memb.omaid}}">{{memb.omaid}}</td>
-           </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="panel-body">
+        <table class="table table-hover" id="grpTable"
+               data-show-toggle="true"
+               data-show-columns="true" data-search="true" data-show-export="true"
+               data-pagination="true" data-page-size="10" data-page-list="[10, 25, 50, 100, All]"
+               data-mobile-responsive="true" data-check-on-init="true"
+               data-undefined-text=""
+               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
+               data-url="{% url 'hog_json' entry.omaid level %}">
+            <thead><tr>
+                <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                    data-formatter="tablehooks.format_as_kindom_tag" data-title-tooltip="Kingdom">King</th>
+                <th data-field="taxon" data-sortable="true" data-filter-control="input"
+                    data-formatter="tablehooks.format_sciname">Taxon</th>
+                <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_info_link">Protein ID</th>
+                <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                <th data-sortable="false" class="domain_vis">Domain Architectures</th>
+            </tr></thead>
+        </table>
+    </div>
 </div>
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+<!-- Domain Visualisation -->
+<script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+<script type="text/javascript" src="https://rawgit.com/wenzhixin/bootstrap-table/master/dist/extensions/filter-control/bootstrap-table-filter-control.js"></script>
+<script type="text/javascript" src="https://rawgit.com/wenzhixin/bootstrap-table/master/dist/extensions/export/bootstrap-table-export.js"></script>
+<script type="text/javascript" src="https://rawgit.com/wenzhixin/bootstrap-table/master/dist/extensions/mobile/bootstrap-table-mobile.js"></script>
+<script type="text/javascript" src="{% static "js/tableExport.min.js" %}"></script>
+<script>
+$("#grpTable").bootstrapTable({
+    reorderableColumns: true,
+    clickToSelect: false,
+    filterControl: false,
+    showMultiSort: true,
+    onPostBody: function(){
+        domains.visualize_all(".protein", {{ longest_seq }});
+    }
+});
+</script>
 
 {% endif %}
 {% endblock contentTab %}
-

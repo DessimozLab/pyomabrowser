@@ -1,9 +1,11 @@
-Django>=1.6.5
+Django==1.9.7
 numexpr>=2.4-rc2
 numpy>=1.8.1
-tables>=3.1.1
+tables>=3.2
 future>=0.12.3
-django-bootstrap3>=4.11.0
+django-bootstrap3>=7.0.1
 tweepy>=2.3.0
-django_debug_toolbar>=1.2.1
-django_debug_toolbar_line_profiler>=0.4.0
+django_debug_toolbar>=1.4
+django_debug_toolbar_line_profiler>=0.6.1
+
+-e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@master#egg=pyoma
