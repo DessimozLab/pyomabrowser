@@ -7,7 +7,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pybrowser_dev.settings')
 
 from django.conf import settings  # noqa
 
-app = Celery('proj')
+app = Celery('browser')
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
