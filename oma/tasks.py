@@ -1,24 +1,44 @@
 from __future__ import absolute_import
 
 import collections
+import logging
 import os
 import tarfile
 import io
 import time
+
+from django.core.files import File
+from django.conf import settings
 from celery import shared_task
 import pyoma.browser.models
 from . import utils, misc
+from .models import FileResult
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task
 def export_marker_genes(genomes, data_id, min_species_coverage=0.5, top_N_grps=None):
-    grps = collect_groups(genomes, min_species_coverage=min_species_coverage)
-    if top_N_grps is not None:
-        size_ordered_grpids = sorted(grps.keys(), key=lambda x: -len(grps[x]))
-        grps = {k: grps[k] for k in size_ordered_grpids[0:top_N_grps]}
-    with FastaTarballResultBuilder('marker_genes', 'OMAGroup_', data_id) as exporter:
-        exporter.add_groups(grps)
-    return exporter.fname
+    logger.debug('')
+    db_entry = FileResult.objects.get(data_hash=data_id)
+    db_entry.state = 'running'
+    db_entry.save()
+    try:
+        grps = collect_groups(genomes, min_species_coverage=min_species_coverage)
+        if top_N_grps is not None:
+            size_ordered_grpids = sorted(grps.keys(), key=lambda x: -len(grps[x]))
+            grps = {k: grps[k] for k in size_ordered_grpids[0:top_N_grps]}
+        with FastaTarballResultBuilder('marker_genes', 'OMAGroup_', data_id) as exporter:
+            exporter.add_groups(grps)
+
+        db_entry.result = exporter.fname
+        db_entry.state = 'done'
+
+    except Exception:
+        logger.exception()
+        db_entry.state = 'error'
+    finally:
+        db_entry.save()
 
 
 def collect_groups(genomes, min_species_coverage):
@@ -40,12 +60,14 @@ class FastaTarballResultBuilder(object):
     def __init__(self, prefix, grouptype, data_id):
         self.prefix = prefix
         self.grouptype = grouptype
-        self.fname = os.path.join(
-            os.environ['DARWIN_BROWSERDATA_PATH'],
-            'AllAllExport', "{}_{}.tgz".format(prefix, data_id))
+        self.fname = os.path.join("markers","{}_{}.tgz".format(prefix, data_id))
+        self.fpath = os.path.join(settings.MEDIA_ROOT, self.fname)
 
     def __enter__(self):
-        self.tar = tarfile.open(self.fname, mode='w:gz')
+        file_dir = os.path.dirname(self.fpath)
+        if not os.path.isdir(file_dir):
+            os.makedirs(file_dir)
+        self.tar = tarfile.open(self.fpath, mode='w:gz')
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

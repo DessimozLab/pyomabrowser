@@ -1,4 +1,6 @@
 from __future__ import print_function
+
+import hashlib
 from builtins import map
 from builtins import str
 from builtins import range
@@ -10,6 +12,8 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonRespons
 from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView, View
 from django.views.generic.base import ContextMixin
+from django.core.urlresolvers import reverse
+from django.utils import timezone
 
 from collections import OrderedDict
 import numpy
@@ -22,9 +26,11 @@ import time
 import glob
 from io import BytesIO
 
+from . import tasks
 from . import utils
 from . import misc
 from . import forms
+from .models import FileResult
 from pyoma.browser import db, models
 
 logger = logging.getLogger(__name__)
@@ -567,6 +573,40 @@ def fellowship(request):
     else:
         form = forms.FellowshipApplicationForm()
     return render(request, 'fellowship.html', {'form': form})
+
+
+def export_marker_genes(request):
+    if request.method == 'GET' and 'genomes' in request.GET:
+        genomes = request.GET.getlist('genomes')
+        min_species_coverage = float(request.GET.get('min_species_coverage', 0.5))
+        top_N_genomes = int(request.GET.get('max_nr_markers', None))
+        if len(genomes) >= 2 and 0 < min_species_coverage <= 1:
+            data_id = hashlib.md5(
+                    (str(genomes) + str(min_species_coverage) + str(top_N_genomes)).encode('utf-8')
+                ).hexdigest()
+            do_compute = False
+            try:
+                r = FileResult.objects.get(data_hash=data_id)
+                if r.state == "error" or (r.state == "pending" and
+                        (timezone.now() - r.create_time).total_seconds() > 300):
+                    do_compute = True
+            except FileResult.DoesNotExist:
+                do_compute = True
+
+            if do_compute:
+                r = FileResult(data_hash=data_id, state="pending")
+                r.save()
+                tasks.export_marker_genes.delay(genomes, data_id, min_species_coverage, top_N_genomes)
+            return HttpResponseRedirect(reverse('marker_genes', args=(data_id,)))
+    return render(request, "export_marker.html")
+
+
+def marker_genes_retrieve_results(request, data_id):
+    try:
+        result = FileResult.objects.get(data_hash=data_id)
+    except FileResult.DoesNotExist:
+        raise Http404('invalid marker gene dataset')
+    return render(request, "marker_download.html", {'file_result': result})
 
 
 class CurrentView(TemplateView):

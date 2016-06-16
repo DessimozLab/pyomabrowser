@@ -40,15 +40,17 @@
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                <h4 class="modal-title" id="myModalLabel">Export of genomes and All/All for OMA standalone</h4>
+                                <h4 class="modal-title" id="myModalLabel">{% block modal_title %}Export of genomes and All/All for OMA standalone{% endblock modal_title %}</h4>
                             </div>
                             <div class="modal-body">
+                                {% block modal_body %}
                                 <p>In order to simplify analysis of customized genomes using the OMA Standalone application, we provide here users with precomputed all-against-all results, i.e. the most time-consuming part of the OMA pipeline. Users can simply augment the dataset with their new genomes and only the new genome-pairs will have to be aligned.</p>
                                 <p> <b>Important limitations and notices</b> </p>
                                 <ul>
                                     <li><p>Note that for OMA we only store pairwise matches of alignments with a Smith-Waterman score of at least 130 and where the alignment extends over at least 30% of the smaller sequence. If you need more relaxed parameters, you will have to do the alignments again from scratch.</p></li>
                                     <li><p>The selected genomes cannot be modified. Do not try to add, remove or change any sequences. The changes will not get incorporated, but might invalidate any later inference due to indexing mistakes.</p></li>
                                 </ul>
+                                {% endblock modal_body %}
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -89,8 +91,8 @@
                         <div class="col-sm-6 col-md-6">
                             <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff;" id="buttonUnselect">Unselect all</button>
                         </div>
-                        <div class=" col-sm-6 col-md-6">
-                            <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff;" id="buttonSubmit">Submit</button>
+                        <div class="col-sm-6 col-md-6">
+                            <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff;" id="{% block submit_button_id %}buttonSubmit{% endblock %}">Submit</button>
                         </div>
                     </div>
                 </div>
