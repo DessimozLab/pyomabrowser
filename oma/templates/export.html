@@ -17,6 +17,7 @@
 
 {% block content %}
 <div class="container-fluid">
+    {% block above_svg %}{% endblock %}
     <div class="row">       
         <div class="col-md-9" id="svgdiv"> <!-- svg -->
             <div class="jumbotron" id="svgg" style="overflow-x:scroll;" >
@@ -86,6 +87,7 @@
                         <h3 class="text-center searchg greenb" id="textSel" style="font-size: 18px; color: #fff;padding-top: 10px; padding-bottom: 10px; margin:0px !important;" >Selected genomes</h3>
                     </div>
                 </div>
+                {% block menu_additional_inputs %}{% endblock %}
                 <div class="col-md-12"  id="buttondiv">
                     <div class="row">
                         <div class="col-sm-6 col-md-6">

@@ -9,7 +9,7 @@ import json
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
 from django.views.generic.base import ContextMixin
 from django.core.urlresolvers import reverse
@@ -601,6 +601,7 @@ def export_marker_genes(request):
     return render(request, "export_marker.html")
 
 
+@never_cache
 def marker_genes_retrieve_results(request, data_id):
     try:
         result = FileResult.objects.get(data_hash=data_id)

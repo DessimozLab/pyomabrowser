@@ -35,7 +35,7 @@ def export_marker_genes(genomes, data_id, min_species_coverage=0.5, top_N_grps=N
         db_entry.state = 'done'
 
     except Exception:
-        logger.exception()
+        logger.exception('failed to create marker genes:')
         db_entry.state = 'error'
     finally:
         db_entry.save()
@@ -83,7 +83,7 @@ class FastaTarballResultBuilder(object):
             grpfile = io.BytesIO(self._group_to_fasta(membs).encode('utf-8'))
             t = tarfile.TarInfo('{}/{}{}.fa'.format(
                 self.prefix, self.grouptype, grp_key))
-            t.size = grpfile.getbuffer().nbytes
+            t.size = len(grpfile.getvalue())
             t.type = tarfile.REGTYPE
             t.mode = 0o644
             t.uid = 501
