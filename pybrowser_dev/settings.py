@@ -169,3 +169,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "static")
+MEDIA_URL = "/media/"
+if DEPLOYMENT == "PRODUCTION":
+    MEDIA_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "media")
+else:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

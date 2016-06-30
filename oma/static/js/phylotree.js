@@ -970,14 +970,30 @@ $(document).ready(function() {
             })();
 
             (function() {
-                document.getElementById("buttonSubmit").onclick = function() { 
-                    var urlExport= '/cgi-bin/gateway.pl?f=AllAllExport';
-                    for (var i in arrayIdSelectedGenome){
-                        urlExport=urlExport+'&p'+i+'='+arrayIdSelectedGenome[i];
-                    }
-                    OpenInNewTab(urlExport);    
-                };
+                var export_button = document.getElementById("buttonSubmit");
+
+                if (export_button) {
+                    export_button.onclick = function() {
+                        var urlExport= '/cgi-bin/gateway.pl?f=AllAllExport';
+                        for (var i in arrayIdSelectedGenome){
+                            urlExport=urlExport+'&p'+i+'='+arrayIdSelectedGenome[i];
+                        }
+                        OpenInNewTab(urlExport);
+                    };
+                } else {
+                    export_button = document.getElementById('buttonSubmitMarkerGenes')
+                    export_button.onclick = function() {
+                        var urlExport = "/oma/export_markers/?";
+                        urlExport += "min_species_coverage=0.5";
+                        urlExport += "&max_nr_markers=1000";
+                        for (var i in arrayIdSelectedGenome){
+                            urlExport += "&genomes="+arrayIdSelectedGenome[i];
+                        }
+                        OpenInNewTab(urlExport);
+                    };
+                }
             })();
+
 
     (function() {
         document.getElementById("searchGenome").onclick = function() { 

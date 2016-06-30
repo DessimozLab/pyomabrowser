@@ -64,7 +64,10 @@
 		#svgg{padding: 0px;background: #fff;}
 		#divList{overflow-y:auto!important;}
 
-		#buttonSubmit, #buttonUnselect{margin:5px;border-radius:0px !important;}
+		#buttonSubmit, #buttonSubmitMarkerGenes, #buttonUnselect{
+			margin:5px;
+			border-radius:0px !important;
+		}
 
 
 		#tags{opacity: 0.5}
