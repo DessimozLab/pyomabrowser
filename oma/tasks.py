@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def export_marker_genes(genomes, data_id, min_species_coverage=0.5, top_N_grps=None):
-    logger.debug('')
+    logger.debug('starting task export_marker_genes for {}'.format(data_id))
     db_entry = FileResult.objects.get(data_hash=data_id)
     db_entry.state = 'running'
     db_entry.save()
