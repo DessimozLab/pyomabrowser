@@ -87,6 +87,9 @@ $(document).ready(function() {
         $("[data-toggle=tooltip_right]").tooltip({html:true,
                      placement:'right',
                      delay: { "show": 750, "hide": 2500 }});
+        $("[data-toggle=tooltip_top]").tooltip({html:true,
+                     placement: 'top',
+                     delay: { "show": 750, "hide": 2500 }});
         });
 $(window).load(function(){
     $(".table").floatThead();
@@ -157,6 +160,7 @@ $(window).load(function(){
 
                 <tbody><!-- -->
                 {% for ortholog_id, ortholog_info in o_md.items %}
+                {% with lastrow=forloop.last %}
                 <tr>
                     <td><span data-toggle="tooltip_right" data-html=false data-title="{{ortholog_info.o_sciname}}">{{ ortholog_info.o_species }}</span></td>
                     {% for gene, geneinfo in ortholog_info.o_genes.items %}
@@ -170,7 +174,8 @@ $(window).load(function(){
                                 {% for entry_ortholog in geneinfo.o_type %}
                                 btn-{{ entry_ortholog }}
                                 {% endfor %}"
-                                data-toggle="tooltip" data-title="{% include "includes/synteny_xref.html" with eNr=geneinfo.entryid %}" >
+                                data-toggle="{% if lastrow %}tooltip_top{% else %}tooltip{% endif %}"
+                                data-title="{% include "includes/synteny_xref.html" with eNr=geneinfo.entryid %}" >
                             {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir == -1 %}
                             <span class="glyphicon glyphicon-chevron-left"></span>
                             {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir == 1 %}
@@ -189,6 +194,7 @@ $(window).load(function(){
                     {% endfor %}
                     {% endfor %}
                 </tr>
+                {% endwith %}
                 {% endfor %}
                 </tbody>
             </table>
