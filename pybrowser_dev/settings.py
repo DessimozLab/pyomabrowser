@@ -146,6 +146,7 @@ DATABASES = {
     }
 }
 
+os.environ.setdefault('DARWIN_BROWSERDATA_PATH', './')
 HDF5DB = {
     'NAME': 'Production',
     'PATH': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'OmaServer.h5')
