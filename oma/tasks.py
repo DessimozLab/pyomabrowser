@@ -113,6 +113,7 @@ class FastaTarballResultBuilder(object):
 
 @shared_task
 def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
+    t0 = time.time()
     logger.info('starting computing MSA')
     db_entry = FileResult.objects.get(data_hash=data_id)
     db_entry.state = "running"
@@ -120,14 +121,16 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
 
     if group_type == 'hog':
         level = args[0]
-        members = [pyoma.browser.models.ProteinEntry(utils.db, e)
-                       for e in utils.db.hog_members(entry_nr_or_grp_nr, level)]
+        memb = utils.db.hog_members(entry_nr_or_grp_nr, level)
     elif group_type == 'og':
-        pass
-    seqs = (SeqRecord(Seq(m.sequence, IUPAC.protein), id=m.omaid) for m in members)
+        memb = []
+    members = [pyoma.browser.models.ProteinEntry(utils.db, e) for e in memb]
+    seqs = [SeqRecord(Seq(m.sequence, IUPAC.protein), id=m.omaid) for m in members]
+    logger.info('msa for {:d} sequences (avg length: {:.1f})'.format(len(seqs), 500))
     try:
-        msa = Mafft(seqs, datatype=DataType.PROTEIN)()
-        name = os.path.join('msa', data_id[:-2], data_id[:-4:-2], data_id)
+        mafft = Mafft(seqs, datatype=DataType.PROTEIN)
+        msa = mafft()
+        name = os.path.join('msa', data_id[-2:], data_id[-4:-2], data_id)
         path = os.path.join(settings.MEDIA_ROOT, name)
         if not os.path.isdir(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
@@ -135,8 +138,10 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
             SeqIO.write(msa, fh, 'fasta')
         db_entry.result = name
         db_entry.state = 'done'
+        tot_time = time.time() - t0
+        logger.info('finished compute_msa task. took {:.3f}sec, {:.3%} for mafft'.format(tot_time, mafft.elapsed_time/tot_time))
     except (IOError, WrapperError) as e:
         logger.exception('error while computing msa for dataset: {}'.format(
-            ', '.join([group_type, entry_nr_or_grp_nr, *args])))
+            ', '.join([group_type, str(entry_nr_or_grp_nr), *args])))
         db_entry.state = 'error'
     db_entry.save()

@@ -471,6 +471,7 @@ class AsyncMsaMixin(object):
             do_compute = True
 
         if do_compute:
+            logger.info('require computing msa for {} {}'.format(group_type, args))
             r = FileResult(data_hash=msa_id, result_type='msa_{}'.format(group_type),
                            state="pending")
             r.save()
@@ -482,7 +483,6 @@ class HOGsMSA(AsyncMsaMixin, HOGsBase, TemplateView):
     template_name = "hog_msa.html"
 
     def get_context_data(self, entry_id, level, **kwargs):
-        logger.info('entering get_context_data')
         context = super(HOGsMSA, self).get_context_data(entry_id, level)
         context.update(self.get_msa_results('hog', context['entry'].entry_nr, level))
         return context
