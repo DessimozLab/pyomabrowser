@@ -154,7 +154,7 @@
 						</div>
 						<div class="panel-body">
 							<p>
-								Mappings of the OMA identifier to various other databases are available:
+								Mappings of the OMA identifier to various other databases are available. Mappings to UniProt, RefSeq and EntrezGene IDs are based on <em>exact</em> sequence matches, other cross-references come from source genome files directly. :
 							</p>
 							<table class="table table-hover ">
 								<tbody>
@@ -171,7 +171,25 @@
 										</td>
 									</tr>
 									<tr>	
-										<td class="col-md-6" >Mapping to NCBI:</td>
+										<td class="col-md-6" >Mapping to Refseq ACs:</td>
+										<td class="col-md-6">
+											<a href="{{ download_root }}/oma-refseq.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
+										</td>
+									</tr>
+                                    <tr>
+										<td class="col-md-6" >Mapping to Entrez Gene IDs:</td>
+										<td class="col-md-6">
+											<a href="{{ download_root }}/oma-entrez.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
+										</td>
+									</tr>
+                                    <tr>
+										<td class="col-md-6" >Mapping to NCBI GIs:</td>
+										<td class="col-md-6">
+											<a href="{{ download_root }}/oma-gi.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
+										</td>
+									</tr>
+                                    <tr>
+										<td class="col-md-6" >Mapping to NCBI GenBank IDs:</td>
 										<td class="col-md-6">
 											<a href="{{ download_root }}/oma-ncbi.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
 										</td>
@@ -196,7 +214,7 @@
 										</td>
 									</tr>
 									<tr>	
-										<td class="col-md-6">Plant mapping: (ARATH and ORYSA)</td>
+										<td class="col-md-6">Plant mappings:</td>
 										<td class="col-md-6">
 											<a href="{{ download_root }}/oma-plants.txt.gz"><span class="glyphicon glyphicon-download"></span>	Text format</a><br>
 										</td>
