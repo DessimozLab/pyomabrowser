@@ -9,6 +9,7 @@ import json
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
+from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
 from django.views.generic.base import ContextMixin
@@ -479,6 +480,7 @@ class AsyncMsaMixin(object):
         return {'msa_file_obj': r}
 
 
+@method_decorator(never_cache, name='dispatch')
 class HOGsMSA(AsyncMsaMixin, HOGsBase, TemplateView):
     template_name = "hog_msa.html"
 

@@ -12,7 +12,6 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 from zoo.wrappers.aligners import Mafft, DataType, WrapperError
 
-from django.core.files import File
 from django.conf import settings
 from celery import shared_task
 import pyoma.browser.models

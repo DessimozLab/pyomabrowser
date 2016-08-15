@@ -3,13 +3,18 @@
 
 {% block title %}OMA: MSA of Hierarchical Orthologous Groups for {{ entry.omaid }}{% endblock %}
 {% block meta_description %}Multiple sequence alignment of the member proteins of the hierarchical orthologous group (HOG) for {{ entry.omaid }}{% if level %} at {{ level }}{% endif %}.{% endblock %}
-{% block contentTab %}
+
+{% block meta_hook %}
+{% if msa_file_obj.state == "pending" or msa_file_obj.state == "running" %}
+    <meta http-equiv="refresh" content="5" />
+{% endif %}
+{% endblock %}
 
 {% block js_hook %}
 <script src="//cdn.bio.sh/msa/latest/msa.min.gz.js"></script>
 {% endblock %}
 
-
+{% block contentTab %}
 <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
@@ -85,10 +90,12 @@ This entry is not part of any hierarchical orthologous group.
         };
         opts.conf = {
             dropImport: true,
-            debug: true
+            debug: false
         };
         opts.zoomer = {
             menuFontsize: "12px",
+            labelIdLength: 20,
+            rowHeight: 20,
             autoResize: true
         };
         opts.importURL = "{{ msa_file_obj.result.url }}";
