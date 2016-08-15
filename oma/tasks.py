@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import division
 
 import collections
 import logging
@@ -125,7 +126,9 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
         memb = []
     members = [pyoma.browser.models.ProteinEntry(utils.db, e) for e in memb]
     seqs = [SeqRecord(Seq(m.sequence, IUPAC.protein), id=m.omaid) for m in members]
-    logger.info('msa for {:d} sequences (avg length: {:.1f})'.format(len(seqs), 500))
+    logger.info(u"msa for {:d} sequences (avg length: {:.1f})"
+                .format(len(seqs),
+                        sum([len(str(s.seq)) for s in seqs])/len(seqs)))
     try:
         mafft = Mafft(seqs, datatype=DataType.PROTEIN)
         msa = mafft()

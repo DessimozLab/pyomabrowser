@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block js_hook %}
-<script src="//cdn.bio.sh/msa/latest/msa.min.gz.js"></script>
+<script src="//cdn.bio.sh/msa/latest/msa.js"></script>
 {% endblock %}
 
 {% block contentTab %}
@@ -61,9 +61,11 @@ This entry is not part of any hierarchical orthologous group.
     </div>
     <div class="panel-body">
         {% if msa_file_obj.state == "pending" or msa_file_obj.state == "running" %}
-            The MSA you requested is currently being computed in the background.
+            <p>The MSA you requested is currently being computed in the background.
             Depending on the length and the number of sequences, the computation
-            will take from a few seconds up to several minutes
+            will take from a few seconds up to several minutes.</p>
+
+            <input type="button" value="Refresh Page" onClick="window.location.reload()">
         {% elif msa_file_obj.state == "error" %}
             An server error occured. The functionality to compute MSAs is
             currently not available. Please come back later.
@@ -100,6 +102,10 @@ This entry is not part of any hierarchical orthologous group.
         };
         opts.importURL = "{{ msa_file_obj.result.url }}";
         opts.bootstrapMenu = true;
+        opts.menu = {
+            menuFontsize: "11px"
+        };
+
 
         // init msa
         var m = new msa.msa(opts);
