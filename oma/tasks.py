@@ -143,7 +143,9 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
         tot_time = time.time() - t0
         logger.info('finished compute_msa task. took {:.3f}sec, {:.3%} for mafft'.format(tot_time, mafft.elapsed_time/tot_time))
     except (IOError, WrapperError) as e:
+        arglist = [group_type, str(entry_nr_or_grp_nr)]
+        arglist.extend(args)
         logger.exception('error while computing msa for dataset: {}'.format(
-            ', '.join([group_type, str(entry_nr_or_grp_nr), *args])))
+            ', '.join(arglist)))
         db_entry.state = 'error'
     db_entry.save()
