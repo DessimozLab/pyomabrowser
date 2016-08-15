@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import division
 
 import collections
 import logging
@@ -6,13 +7,18 @@ import os
 import tarfile
 import io
 import time
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import IUPAC
+from zoo.wrappers.aligners import Mafft, DataType, WrapperError
 
-from django.core.files import File
 from django.conf import settings
 from celery import shared_task
 import pyoma.browser.models
 from . import utils, misc
 from .models import FileResult
+
 
 logger = logging.getLogger(__name__)
 
@@ -103,3 +109,41 @@ class FastaTarballResultBuilder(object):
             headers.append(self.format_fasta_header(e))
             seqs.append(e.sequence)
         return misc.as_fasta(headers=headers, seqs=seqs)
+
+
+@shared_task
+def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
+    t0 = time.time()
+    logger.info('starting computing MSA')
+    db_entry = FileResult.objects.get(data_hash=data_id)
+    db_entry.state = "running"
+    db_entry.save()
+
+    if group_type == 'hog':
+        level = args[0]
+        memb = utils.db.hog_members(entry_nr_or_grp_nr, level)
+    elif group_type == 'og':
+        memb = []
+    members = [pyoma.browser.models.ProteinEntry(utils.db, e) for e in memb]
+    seqs = [SeqRecord(Seq(m.sequence, IUPAC.protein), id=m.omaid) for m in members]
+    logger.info(u"msa for {:d} sequences (avg length: {:.1f})"
+                .format(len(seqs),
+                        sum([len(str(s.seq)) for s in seqs])/len(seqs)))
+    try:
+        mafft = Mafft(seqs, datatype=DataType.PROTEIN)
+        msa = mafft()
+        name = os.path.join('msa', data_id[-2:], data_id[-4:-2], data_id)
+        path = os.path.join(settings.MEDIA_ROOT, name)
+        if not os.path.isdir(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
+        with open(path, 'w') as fh:
+            SeqIO.write(msa, fh, 'fasta')
+        db_entry.result = name
+        db_entry.state = 'done'
+        tot_time = time.time() - t0
+        logger.info('finished compute_msa task. took {:.3f}sec, {:.3%} for mafft'.format(tot_time, mafft.elapsed_time/tot_time))
+    except (IOError, WrapperError) as e:
+        logger.exception('error while computing msa for dataset: {}'.format(
+            ', '.join([group_type, str(entry_nr_or_grp_nr), *args])))
+        db_entry.state = 'error'
+    db_entry.save()

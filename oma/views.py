@@ -9,6 +9,7 @@ import json
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
+from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
 from django.views.generic.base import ContextMixin
@@ -458,6 +459,37 @@ class HOGsOrthoXMLView(HOGsView):
         return response
 
 
+class AsyncMsaMixin(object):
+    def get_msa_results(self, group_type, *args):
+        msa_id = hashlib.md5(group_type.encode('utf-8'))
+        for arg in args:
+            msa_id.update(str(arg).encode('utf-8'))
+        msa_id = msa_id.hexdigest()
+        try:
+            r = FileResult.objects.get(data_hash=msa_id)
+            do_compute = r.remove_erroneous_or_long_pending()
+        except FileResult.DoesNotExist:
+            do_compute = True
+
+        if do_compute:
+            logger.info('require computing msa for {} {}'.format(group_type, args))
+            r = FileResult(data_hash=msa_id, result_type='msa_{}'.format(group_type),
+                           state="pending")
+            r.save()
+            tasks.compute_msa(msa_id, group_type, *args)
+        return {'msa_file_obj': r}
+
+
+@method_decorator(never_cache, name='dispatch')
+class HOGsMSA(AsyncMsaMixin, HOGsBase, TemplateView):
+    template_name = "hog_msa.html"
+
+    def get_context_data(self, entry_id, level, **kwargs):
+        context = super(HOGsMSA, self).get_context_data(entry_id, level)
+        context.update(self.get_msa_results('hog', context['entry'].entry_nr, level))
+        return context
+
+
 class HOGsVis(EntryCentricMixin, TemplateView):
     template_name = "hog_vis.html"
     show_internal_labels = True
@@ -584,17 +616,14 @@ def export_marker_genes(request):
             data_id = hashlib.md5(
                     (str(genomes) + str(min_species_coverage) + str(top_N_genomes)).encode('utf-8')
                 ).hexdigest()
-            do_compute = False
             try:
                 r = FileResult.objects.get(data_hash=data_id)
-                if r.state == "error" or (r.state == "pending" and
-                        (timezone.now() - r.create_time).total_seconds() > 300):
-                    do_compute = True
+                do_compute = r.remove_erroneous_or_long_pending()
             except FileResult.DoesNotExist:
                 do_compute = True
 
             if do_compute:
-                r = FileResult(data_hash=data_id, state="pending")
+                r = FileResult(data_hash=data_id, result_type='markers', state="pending")
                 r.save()
                 tasks.export_marker_genes.delay(genomes, data_id, min_species_coverage, top_N_genomes)
             return HttpResponseRedirect(reverse('marker_genes', args=(data_id,)))
