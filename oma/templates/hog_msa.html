@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block js_hook %}
-<script src="//cdn.bio.sh/msa/latest/msa.js"></script>
+<script src="{% static "js/msa.js"%}"></script>
 {% endblock %}
 
 {% block contentTab %}
@@ -84,7 +84,7 @@ This entry is not part of any hierarchical orthologous group.
         opts.el = document.getElementById("msa_div");
         opts.vis = {
             conserv: false,
-            overviewbox: false,
+            overviewbox: true,
             seqlogo: true,
             labels: true,
             labelName: true,
@@ -95,20 +95,24 @@ This entry is not part of any hierarchical orthologous group.
             debug: false
         };
         opts.zoomer = {
-            menuFontsize: "12px",
             labelIdLength: 20,
             rowHeight: 20,
-            autoResize: true
+            boxRectWidth: 2,
+            autoResize: true,
+            overviewboxHeight: 200,
+            overviewboxWidth: "auto"
         };
         opts.importURL = "{{ msa_file_obj.result.url }}";
         opts.bootstrapMenu = true;
         opts.menu = {
             menuFontsize: "11px"
         };
+        opts.visorder = {'overviewBox': -30};
 
 
         // init msa
         var m = new msa.msa(opts);
+
     })();
             </script>
         {% endif %}
