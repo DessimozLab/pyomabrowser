@@ -14,8 +14,11 @@
   <!-- TnT -->
   <link rel="stylesheet" href="{% static "css/tnt.css" %}" type="text/css" />
   <link rel="stylesheet" href="{% static "css/hog.css" %}" type="text/css" />
+  <link rel="stylesheet" href="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.css" type="text/css" />
   <script src="{% static "js/tnt.min.js" %}"></script>
   <script src="{% static "js/hog.js" %}"></script>
+  <script src="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.min.js" charset="utf-8"></script>
+
 {% endblock %}
 
 {% block contentTab %}
@@ -34,9 +37,8 @@
         var options = {'show_internal_labels': {{ show_internal_labels|yesno:"true,false" }},
                        'oma_info_url_template': "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1="};
 
-        var viz = tnt();
         var theme = hog_theme();
-        theme (viz, document.getElementById ("hog_vis"), query, per_species, tree, tooltip_data, options);
+        theme(document.getElementById ("hog_vis"), query, per_species, tree, tooltip_data, options);
     }) ();
   </script>
 

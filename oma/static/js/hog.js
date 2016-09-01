@@ -7,7 +7,7 @@ var hog_theme = function () {
     var is_node_frozen = false;
     // var collapsed_nodes = [];
 
-    var theme = function (ta, div, query, per_species3, tree_obj, gene_data, options) {
+    var theme = function (div, query, per_species3, tree_obj, gene_data, options) {
         /////////////
         // TREE /////
         /////////////
@@ -63,7 +63,7 @@ var hog_theme = function () {
                     label: 'Action',
                     link: function (node) {
                         node.toggle();
-                        ta.update();
+                        tree.update();
                     },
                     obj: node,
                     value: "Uncollapse subtree"
@@ -75,7 +75,7 @@ var hog_theme = function () {
                     label: 'Action',
                     link: function (node) {
                         node.toggle();
-                        ta.update();
+                        tree.update();
                     },
                     obj: node,
                     value: "Collapse subtree"
@@ -97,7 +97,7 @@ var hog_theme = function () {
             highlight_condition = function (n) {
                 return node.id() === n.id();
             };
-            ta.update();
+            tree.update_nodes();
         };
 
         var tree = tnt.tree()
@@ -166,12 +166,14 @@ var hog_theme = function () {
         };
 
         // TnT doesn't have the features we need, so create our own
-        var hog_feature = tnt.board.track.feature()
+        var hog_feature = tnt.board.track.feature();
+        hog_feature
             .index(function (d) {
                 return d.id;
             })
-            .create(function (new_hog, x_scale) {
+            .create(function (new_hog) {
                 var track = this;
+                var x_scale = hog_feature.scale();
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
                 // otherwise it is repeated with every create event
 
@@ -198,8 +200,9 @@ var hog_theme = function () {
                     .attr("stroke-width", 2)
                     .attr("stroke", "black");
             })
-            .updater(function (hogs, x_scale) {
+            .move(function (hogs) {
                 var track = this;
+                var x_scale = hog_feature.scale();
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
 
                 var height = track.height() - ~~(padding * 2);
@@ -221,12 +224,14 @@ var hog_theme = function () {
                     });
             });
 
-        var hog_gene_feature = tnt.board.track.feature()
+        var hog_gene_feature = tnt.board.track.feature();
+        hog_gene_feature
             .index(function (d) {
                 return d.id;
             })
-            .create(function (new_elems, x_scale) {
+            .create(function (new_elems) {
                 var track = this;
+                var x_scale = hog_gene_feature.scale();
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
                 // otherwise it is repeated with every create event
                 var height = track.height() - ~~(padding * 2);
@@ -252,8 +257,9 @@ var hog_theme = function () {
                         return (query && d.id === query.id ? "green" : "grey");
                     });
             })
-            .updater(function (elems, x_scale) {
+            .move(function (elems) {
                 var track = this;
+                var x_scale = hog_gene_feature.scale();
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
                 // otherwise it is repeated with every create event
                 var height = track.height() - ~~(padding * 2);
@@ -279,27 +285,26 @@ var hog_theme = function () {
             .zoom_in(1)
             .allow_drag(false)
             .to(5)
-            .width(~~(tot_width * 0.6))
-            .right(5);
+            .width(~~(tot_width * 0.6));
+
 
         var track = function (leaf) {
             var sp = leaf.node_name();
             return tnt.board.track()
-                .background_color("#EEEEEE")
-                .data(tnt.board.track.data()
-                    .update(tnt.board.track.data.retriever.sync()
-                        .retriever(function () {
-                            // return _.flatten(per_species2[sp].Vertebrates);
-                            // return per_species2[sp].Vertebrates;
-                            if (per_species3[sp] === undefined) {
-                                return {
-                                    genes: [],
-                                    hogs: []
-                                };
-                            }
-                            return genes_2_xcoords(per_species3[sp][curr_taxa], maxs[curr_taxa]);
-                        })
-                    )
+                .color("#EEEEEE")
+                .data(tnt.board.track.data.sync()
+                    .retriever(function () {
+                        // return _.flatten(per_species2[sp].Vertebrates);
+                        // return per_species2[sp].Vertebrates;
+                        if (per_species3[sp] === undefined) {
+                            return {
+                                genes: [],
+                                hogs: []
+                            };
+                        }
+                        return genes_2_xcoords(per_species3[sp][curr_taxa], maxs[curr_taxa]);
+                    })
+
                 )
                 .display(tnt.board.track.feature.composite()
                     .add("genes", hog_gene_feature)
@@ -345,10 +350,11 @@ var hog_theme = function () {
             };
         };
 
-        ta.tree(tree);
-        ta.annotation(annot);
-        ta.track(track);
-        ta(div);
+        var vis = tnt()
+            .tree(tree)
+            .board(annot)
+            .track(track);
+        vis(div);
 
     };
 
