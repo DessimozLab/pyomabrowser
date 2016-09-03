@@ -27,7 +27,7 @@
                             {% if file_result.state == "done" %}
                                 <p>Your dataset is now ready. You can download it from <a href="{{ file_result.result.url }} ">here</a>.</p>
                             {% else %}
-                                <p>Your dataset is currently being assembled. It's status is {{ file_result.state }}.
+                                <p>Your dataset is currently being assembled. Its status is {{ file_result.state }}.
                                     This may take another couple of minutes. Once the file is ready, we will store it
                                     for 7 days. You can come back to this page using this link:
                                     <a href="">{{ request.get_host }}{% url 'marker_genes' file_result.data_hash %}</a>
