@@ -87,7 +87,7 @@ $(document).ready(function() {
   
   var genomeNames = new Array();
   var genomeIDs = new Object();
-  $.getJSON( "/static/flatgenomes.json", function( jsonData ) {
+  $.getJSON( "/All/flatgenomes.json", function( jsonData ) {
      $.each( jsonData, function ( id, genome ) {
          var tmp = genome.name+ ' (' + genome.id + ')';
          genomeNames.push ( tmp );
