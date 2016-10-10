@@ -116,10 +116,10 @@ class FastaView(FastaResponseMixin, ContextMixin, View):
 
 def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     """loads data to visualize the synteny around a query 
-    gene and it's orthologs.
+    gene and its orthologs.
     the parameter 'mod' is used to keep the color between
     calls on different entries compatible, i.e. they selected
-    gene should keep it's color.
+    gene should keep its color.
     the window paramter is used to select the size of the 
     neighborhood."""
 
