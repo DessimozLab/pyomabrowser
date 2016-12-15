@@ -42,89 +42,90 @@
 
             <li ><a href="#omagroups" role="tab" data-toggle="tab">
                 OMA Group
-            </a>
-        </li>
-    </ul>
-</div>
+                </a>
+            </li>
+        </ul>
+    </div>
 
-<div class="col-md-8 " >
-    <div class="tab-content">
-        <div class="tab-pane active" id="one-to-one">
-            <p>The entry has only one ortholog in the other species and the orthologous entries have only one ortholog in this species.
-            </p>
-            <button class="btn btn-default" data-toggle="modal" data-target="#myModal1">
-                How to see this type of ortholog ?
-            </button>
-            <!-- Modal -->
-            <div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            <h4 class="modal-title" id="myModalLabel">How to find 1:1 Orthologs</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
-                                <!-- Indicators -->
-                                <ol class="carousel-indicators">
-                                    <li data-target="#carousel-example-generic" data-slide-to="0" class="active">
-                                    </li>
-                                    <li data-target="#carousel-example-generic" data-slide-to="1">
-                                    </li>
-                                    <li data-target="#carousel-example-generic" data-slide-to="2">
-                                    </li>
-                                </ol>
-
-                                <!-- Wrapper for slides -->
-                                <div class="carousel-inner">
-                                    <div class="item active">
-                                        <img alt="oma tutorial page 1" src="{% static "image/tuto1h.png" %}" class="img-responsive margin-auto">
-                                        <div class="carousel-caption">
-                                        </div>
-                                    </div>
-                                    <div class="item">
-                                        <img alt="oma tutorial page 2" src="{% static "image/tuto2h.png" %}" class="img-responsive margin-auto">
-                                        <div class="carousel-caption">
-                                        </div>
-                                    </div>
-                                    <div class="item">
-                                        <img alt="oma tutorial page 3" src="{% static "image/tuto3h.png" %}" class="img-responsive margin-auto">
-                                        <div class="carousel-caption">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Controls -->
-                                <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
-                                    <span class="glyphicon glyphicon-chevron-left"></span>
-                                </a>
-                                <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
-                                    <span class="glyphicon glyphicon-chevron-right"></span>
-                                </a>
+    <div class="col-md-8 " >
+        <div class="tab-content">
+            <div class="tab-pane active" id="one-to-one">
+                <p>The entry has only one ortholog in the other species and the orthologous entries have only one ortholog in this species.
+                </p>
+                <button class="btn btn-default" data-toggle="modal" data-target="#myModal1">
+                    How to see this type of ortholog ?
+                </button>
+                <!-- Modal -->
+                <div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                <h4 class="modal-title" id="myModalLabel">How to find 1:1 Orthologs</h4>
                             </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <div class="modal-body">
+                                <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                                    <!-- Indicators -->
+                                    <ol class="carousel-indicators">
+                                        <li data-target="#carousel-example-generic" data-slide-to="0" class="active">
+                                        </li>
+                                        <li data-target="#carousel-example-generic" data-slide-to="1">
+                                        </li>
+                                        <li data-target="#carousel-example-generic" data-slide-to="2">
+                                        </li>
+                                    </ol>
+
+                                    <!-- Wrapper for slides -->
+                                    <div class="carousel-inner">
+                                        <div class="item active">
+                                            <img alt="oma tutorial page 1" src="{% static "image/tuto1h.png" %}" class="img-responsive margin-auto">
+                                            <div class="carousel-caption">
+                                            </div>
+                                        </div>
+                                        <div class="item">
+                                            <img alt="oma tutorial page 2" src="{% static "image/tuto2h.png" %}" class="img-responsive margin-auto">
+                                            <div class="carousel-caption">
+                                            </div>
+                                        </div>
+                                        <div class="item">
+                                            <img alt="oma tutorial page 3" src="{% static "image/tuto3h.png" %}" class="img-responsive margin-auto">
+                                            <div class="carousel-caption">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Controls -->
+                                    <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+                                        <span class="glyphicon glyphicon-chevron-left"></span>
+                                    </a>
+                                    <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+                                        <span class="glyphicon glyphicon-chevron-right"></span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="tab-pane" id="one-to-many">
-            <p>The entry has more than one ortholog in the other species but all orthologous entries have only one ortholog in this species. This implies that the gene was duplicated in an ancestor of the other species, but after the speciation event.</p>
-        </div>
-        <div class="tab-pane" id="many-to-one">
-            <p>The entry has only one ortholog in the other species, but the orthologous entry has more than one ortholog in this species. This implies that the gene was duplicated in an ancestor of this species, but after the speciation event.</p>
-        </div>
-        <div class="tab-pane" id="many-to-many">
-            <p>The entry has more than one ortholog in the other species and the orthologous entries have more than one ortholog in this species. This implies that the gene was duplicated at least twice: in the lineage of the query species and in the lineage of the other species, yet all descend from a common ancestral gene in the last common ancestor of the two species.</p>
-        </div>
-        <div class="tab-pane" id="close-paralogs">
-            <p>We call "close" paralogs the paralogous sequence pairs that are co-orthologous to at least one other entry reported in the list of orthologs. Or in other words, they are in-paralogs with respect to the last common ancestor of all the species represented among the orthologs.</p>
-        </div>
-        <div class="tab-pane" id="hogs">
-            <p>Hierarchical groups contain genes that descend from a single common ancestral gene within a given taxonomic range.</p>
+            <div class="tab-pane" id="one-to-many">
+                <p>The entry has more than one ortholog in the other species but all orthologous entries have only one ortholog in this species. This implies that the gene was duplicated in an ancestor of the other species, but after the speciation event.</p>
+            </div>
+            <div class="tab-pane" id="many-to-one">
+                <p>The entry has only one ortholog in the other species, but the orthologous entry has more than one ortholog in this species. This implies that the gene was duplicated in an ancestor of this species, but after the speciation event.</p>
+            </div>
+            <div class="tab-pane" id="many-to-many">
+                <p>The entry has more than one ortholog in the other species and the orthologous entries have more than one ortholog in this species. This implies that the gene was duplicated at least twice: in the lineage of the query species and in the lineage of the other species, yet all descend from a common ancestral gene in the last common ancestor of the two species.</p>
+            </div>
+            <div class="tab-pane" id="close-paralogs">
+                <p>We call "close" paralogs the paralogous sequence pairs that are co-orthologous to at least one other entry reported in the list of orthologs. Or in other words, they are in-paralogs with respect to the last common ancestor of all the species represented among the orthologs.</p>
+            </div>
+            <div class="tab-pane" id="hogs">
+                <p>Hierarchical groups contain genes that descend from a single common ancestral gene within a given taxonomic range.</p>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/5p5x5gxzhZA?rel=0" frameborder="0" allowfullscreen></iframe>
             </div>
             <div class="tab-pane" id="omagroups">
                 <p>OMA groups contain sets of genes which are all orthologous to one another within group. This implies that there is at most one entry from each species in a group.</p>
