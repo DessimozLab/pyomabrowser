@@ -63,7 +63,7 @@ var hog_theme = function () {
                     label: 'Action',
                     link: function (node) {
                         node.toggle();
-                        tree.update();
+                        vis.update();
                     },
                     obj: node,
                     value: "Uncollapse subtree"
@@ -75,7 +75,7 @@ var hog_theme = function () {
                     label: 'Action',
                     link: function (node) {
                         node.toggle();
-                        tree.update();
+                        vis.update();
                     },
                     obj: node,
                     value: "Collapse subtree"
@@ -85,19 +85,38 @@ var hog_theme = function () {
         };
 
         // mouse over a node
+        var node_hover_tooltip;
         var mouse_over_node = function (node) {
             // Update annotation board
             if (is_node_frozen){
                 return;
             }
-            var name = node.node_name();
-            curr_taxa = name;
+
+            curr_taxa = node.node_name();
             annot.update();
 
             highlight_condition = function (n) {
                 return node.id() === n.id();
             };
             tree.update_nodes();
+
+            // Show a mouse over tooltip for internal nodes
+            if (!options.show_internal_labels && node.data().children && node.data().children.length) {
+                var obj = {};
+                obj.header = "";
+                obj.body = node.node_name();
+                node_hover_tooltip = tooltip.plain()
+                    .width(140)
+                    .show_closer(false)
+                    .call(this, obj);
+            }
+        };
+
+        // node mouseout
+        var mouse_out_node = function (node) {
+            if (!options.show_internal_labels) {
+                node_hover_tooltip.close();
+            }
         };
 
         var tree = tnt.tree()
@@ -139,6 +158,7 @@ var hog_theme = function () {
                )
             .on("click", node_tooltip)
             .on("mouseover", mouse_over_node)
+            .on("mouseout", mouse_out_node)
             .node_display(node_display)
             .branch_color("black");
 
@@ -157,7 +177,6 @@ var hog_theme = function () {
                 label: "Information",
                 link: function (gene) {
                     window.location = options.oma_info_url_template + gene.id;
-                    return
                 },
                 obj: gene, value: gene_data[gene.id].omaid
             });
@@ -166,14 +185,14 @@ var hog_theme = function () {
         };
 
         // TnT doesn't have the features we need, so create our own
+        // This one if for the lines defining hogs
         var hog_feature = tnt.board.track.feature();
         hog_feature
             .index(function (d) {
                 return d.id;
             })
-            .create(function (new_hog) {
+            .create(function (new_hog, x_scale) {
                 var track = this;
-                var x_scale = hog_feature.scale();
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
                 // otherwise it is repeated with every create event
 
@@ -200,9 +219,8 @@ var hog_theme = function () {
                     .attr("stroke-width", 2)
                     .attr("stroke", "black");
             })
-            .move(function (hogs) {
+            .distribute(function (hogs, x_scale) {
                 var track = this;
-                var x_scale = hog_feature.scale();
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
 
                 var height = track.height() - ~~(padding * 2);
@@ -210,6 +228,7 @@ var hog_theme = function () {
 
                 hogs.select("line")
                     .transition()
+                    .duration(200)
                     .attr("x1", function (d) {
                         var width = d3.min([x_scale(dom1/d.max), height+2*padding]);
                         var x = width * (d.max_in_hog-1);
@@ -225,15 +244,17 @@ var hog_theme = function () {
             });
 
         var hog_gene_feature = tnt.board.track.feature();
+        var gene_color_scale = d3.scale.category10();
+
         hog_gene_feature
             .index(function (d) {
                 return d.id;
             })
-            .create(function (new_elems) {
+            .create(function (new_elems, x_scale) {
                 var track = this;
-                var x_scale = hog_gene_feature.scale();
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
                 // otherwise it is repeated with every create event
+
                 var height = track.height() - ~~(padding * 2);
                 var dom1 = x_scale.domain()[1];
 
@@ -254,19 +275,21 @@ var hog_theme = function () {
                     })
                     .attr("height", height)
                     .attr("fill", function (d) {
+                        // return gene_color_scale(Math.random());
                         return (query && d.id === query.id ? "green" : "grey");
                     });
             })
-            .move(function (elems) {
+            .distribute(function (elems, x_scale) {
                 var track = this;
-                var x_scale = hog_gene_feature.scale();
                 var padding = ~~(track.height() - (track.height() * 0.8)) / 2; // TODO: can this be factored out??
                 // otherwise it is repeated with every create event
+
                 var height = track.height() - ~~(padding * 2);
                 var dom1 = x_scale.domain()[1];
 
                 elems.select("rect")
                     .transition()
+                    .duration(200)
                     .attr("x", function (d) {
                         var width = d3.min([x_scale(dom1 / d.max), height + 2*padding]);
                         var x = width * d.pos;
@@ -302,7 +325,8 @@ var hog_theme = function () {
                                 hogs: []
                             };
                         }
-                        return genes_2_xcoords(per_species3[sp][curr_taxa], maxs[curr_taxa]);
+                        var genes2Xcoords = genes_2_xcoords(per_species3[sp][curr_taxa], maxs[curr_taxa]);
+                        return genes2Xcoords;
                     })
 
                 )
@@ -324,6 +348,7 @@ var hog_theme = function () {
             var total_pos = 0;
             arr.forEach(function(hog_genes, hog){
                 var hog_gene_names = [];
+                hog_genes.sort();
                 hog_genes.forEach(function(gene, gene_pos){
                     genes.push({
                         id: gene,
@@ -331,7 +356,7 @@ var hog_theme = function () {
                         pos: total_pos+gene_pos,
                         max: d3.sum(maxs),
                         max_in_hog: maxs[hog],
-                        pos_in_hog: gene_pos,
+                        pos_in_hog: gene_pos
                     });
                     hog_gene_names.push(gene);
                 });
