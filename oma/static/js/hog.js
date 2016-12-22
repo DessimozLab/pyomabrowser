@@ -6,8 +6,24 @@ var hog_theme = function () {
     var annot;
     var is_node_frozen = false;
     // var collapsed_nodes = [];
+    var genedatavis = [{
+            name: 'Query Gene',
+            scale: 'on_off'
+        },
+        {
+            name: "Gene Length",
+            scale: "linear",
+            field: "sequence_length",
+            func: "color1d"
+        }
+    ];
 
-    var theme = function (div, query, per_species3, tree_obj, gene_data, options) {
+    var gene_length_color = function(gene){
+
+    };
+
+
+    var theme = function (div, query, per_species3, tree_obj, gene_data, options, genedata_picker_div) {
         /////////////
         // TREE /////
         /////////////
@@ -28,6 +44,7 @@ var hog_theme = function () {
         var highlight_condition = function(){
             return false;
         };
+        var gene_color_function;
 
         var node_display = tnt.tree.node_display()
             .display(function (node){
@@ -134,7 +151,8 @@ var hog_theme = function () {
                     if (node.is_collapsed()) {
                         return "[" + node.n_hidden() + " hidden taxa]";
                     }
-                    if (!options.show_internal_labels && data.children && data.children.length > 0) {
+                    if ((!options.show_internal_labels || !highlight_condition(node)) &&
+                        data.children && data.children.length > 0) {
                         return "";
                     }
                     if (data.name.length > limit) {
@@ -168,6 +186,8 @@ var hog_theme = function () {
         //// PARSE HOG INFO /////
         /////////////////////////
         var maxs = get_maxs(per_species3);
+        var gene_color_data;
+
         var gene_tooltip = function (gene) {
             var obj = {};
             obj.header = gene_data[gene.id].omaid;
@@ -274,10 +294,7 @@ var hog_theme = function () {
                         return width - 2*padding;
                     })
                     .attr("height", height)
-                    .attr("fill", function (d) {
-                        // return gene_color_scale(Math.random());
-                        return (query && d.id === query.id ? "green" : "grey");
-                    });
+                    .attr("fill", gene_color_function);
             })
             .distribute(function (elems, x_scale) {
                 var track = this;
@@ -375,12 +392,64 @@ var hog_theme = function () {
             };
         };
 
+
+        var col_scale;
+
+        var change_genedata_vis = function(d){
+            if (d.name === "Query Gene"){
+                col_scale = undefined;
+                gene_color_function = function(gene){
+                    return (query && gene.id === query.id ? "green" : "gray");
+                };
+            }
+            $.getJSON("/oma/hogdata/"+query.id+"/json", function(data){
+                gene_color_data = {};
+                data.forEach(function(gene){
+                    gene_color_data[gene.id] = gene[d.field];
+                });
+                if (d.func === "color1d"){
+                    col_scale = d3.scale.linear()
+                        .domain(d3.extent(d3.values(gene_color_data)))
+                        .range(["red", "blue"]);
+                    gene_color_function = function(gene){
+                        return col_scale(gene_color_data[gene.id]);
+                    };
+                }
+            });
+            annot.update();
+        };
+
+        change_genedata_vis(genedatavis[0]);
+        var genedata_picker = d3.select(genedata_picker_div).selectAll(".genedata-button")
+            .data(genedatavis);
+
+        genedata_picker.enter()
+            .append("input")
+            .attr("value", function(d){ return d.name })
+            .attr("type", "button")
+            .attr("class", "genedata-button")
+            .on("click", function(d) {
+                change_genedata_vis(d);
+                if (col_scale) {
+                    colorbar = Colorbar()
+                        .scale(col_scale)
+                        .orient('horizontal')
+                        .thickness(18)
+                        .barlength(500);
+                    colorbar_obj.call(colorbar);
+                } else {
+                    colorbar_obj.call({});
+                }
+            });
+
+        var colorbar;
+        var colorbar_obj = d3.select("#colorbar");
+
         var vis = tnt()
             .tree(tree)
             .board(annot)
             .track(track);
         vis(div);
-
     };
 
     var truncate = function (text, width) {
@@ -430,4 +499,3 @@ var hog_theme = function () {
 
     return theme;
 };
-

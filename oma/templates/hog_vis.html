@@ -6,7 +6,8 @@
 {% block js_hook %}
  <!-- D3 -->
   <!--<script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>-->
-   <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="http://benschmidt.org/colorbar/colorbar.js" charset="utf-8"></script>
 
   <!-- Underscore -->
   <script src="{% static "js/underscore-min.js" %}"></script>
@@ -16,8 +17,8 @@
   <link rel="stylesheet" href="{% static "css/hog.css" %}" type="text/css" />
   <link rel="stylesheet" href="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.css" type="text/css" />
   <script src="http://tntvis.github.io/tnt/build/tnt.min.js" charset="utf-8"></script>
-  <script src="{% static "js/hog.js" %}" charset="UTF-8"></script>
   <script src="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.min.js" charset="UTF-8"></script>
+  <script src="{% static "js/hog.js" %}" charset="UTF-8"></script>
 
 {% endblock %}
 
@@ -25,7 +26,9 @@
     {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
     {% else %}
 <h3>Hierarchical group {{ fam.id }}</h3>
+  <div id="genedata-vis"></div>
   <div id="hog_vis"></div>
+  <div id="colorbar"></div>
 
   <script>
 
@@ -38,7 +41,8 @@
                        'oma_info_url_template': "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1="};
 
         var theme = hog_theme();
-        theme(document.getElementById ("hog_vis"), query, per_species, tree, tooltip_data, options);
+        theme(document.getElementById ("hog_vis"), query, per_species,
+                tree, tooltip_data, options, document.getElementById("genedata-vis"));
     }) ();
   </script>
 

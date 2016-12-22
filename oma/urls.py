@@ -31,6 +31,8 @@ urlpatterns = [
     url(r'^vps/(?P<entry_id>\w+)/json/$', views.PairsJson.as_view(), name="pairs_json"),
     url(r'^export_markers', views.export_marker_genes, name='export_markers'),
     url(r'^markers/(?P<data_id>\w+)/$', views.marker_genes_retrieve_results, name='marker_genes'),
+    # hogdata
+    url(r'^hogdata/(?P<entry_id>\w+)/json', views.FamGeneDataJson.as_view(), name="fam_genedata"),
     # static pages that can be rendered directly to a template.
     url(r'^hogs/$', TemplateView.as_view(template_name='landHOG.html'), name='hogs'),
     url(r'^synteny/$', TemplateView.as_view(template_name='landsynteny.html'), name='synteny'),

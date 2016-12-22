@@ -361,6 +361,27 @@ class PairsViewFasta(FastaView, PairsBase):
         return self.render_to_fasta_response(itertools.chain([context['entry']], context['vps']))
 
 
+class FamBase(ContextMixin, EntryCentricMixin):
+
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(FamBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+        fam_members = [models.ProteinEntry(utils.db, z) for z in
+                       utils.db.member_of_fam(utils.db.hog_family(entry.entry_nr))]
+        context.update({'entry': entry, 'fam_members': fam_members})
+        return context
+
+
+class FamGeneDataJson(FamBase, JsonModelMixin, View):
+    json_fields = {'entry_nr': 'id', 'omaid': 'protid', 'sequence_length': None,
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid'}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = [x for x in self.to_json_dict(context['fam_members'])]
+        return JsonResponse(data, safe=False)
+
 class InfoBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoBase, self).get_context_data(**kwargs)
