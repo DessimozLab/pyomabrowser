@@ -498,7 +498,7 @@ class AsyncMsaMixin(object):
             r = FileResult(data_hash=msa_id, result_type='msa_{}'.format(group_type),
                            state="pending")
             r.save()
-            tasks.compute_msa(msa_id, group_type, *args)
+            tasks.compute_msa.delay(msa_id, group_type, *args)
         return {'msa_file_obj': r}
 
 
