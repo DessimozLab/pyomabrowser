@@ -6,6 +6,7 @@ var hog_theme = function () {
     var annot;
     var is_node_frozen = false;
     // var collapsed_nodes = [];
+    var fam_genedata;
     var genedatavis = [{
             name: 'Query Gene',
             scale: 'on_off'
@@ -17,11 +18,6 @@ var hog_theme = function () {
             func: "color1d"
         }
     ];
-
-    var gene_length_color = function(gene){
-
-    };
-
 
     var theme = function (div, query, per_species3, tree_obj, gene_data, options, genedata_picker_div) {
         /////////////
@@ -315,7 +311,8 @@ var hog_theme = function () {
                     .attr("width", function(d){
                         var width = d3.min([x_scale(dom1 / d.max), height+2*padding]);
                         return width - 2*padding;
-                    });
+                    })
+                    .attr("fill", gene_color_function);
 
             })
             .on("mouseover", gene_tooltip);
@@ -392,36 +389,43 @@ var hog_theme = function () {
             };
         };
 
-
         var col_scale;
-
         var change_genedata_vis = function(d){
-            if (d.name === "Query Gene"){
-                col_scale = undefined;
-                gene_color_function = function(gene){
-                    return (query && gene.id === query.id ? "green" : "gray");
-                };
-            }
-            $.getJSON("/oma/hogdata/"+query.id+"/json", function(data){
-                gene_color_data = {};
-                data.forEach(function(gene){
-                    gene_color_data[gene.id] = gene[d.field];
+            col_scale = undefined;
+            gene_color_function = function(gene){
+                return (query && gene.id === query.id ? "green" : "gray");
+            };
+            if (fam_genedata === undefined){
+                $.getJSON("/oma/hogdata/"+query.id+"/json", function(data){
+                    fam_genedata = {};
+                    data.forEach(function(gene) {
+                        fam_genedata[gene.id] = gene;
+                    });
+                    change_genedata_vis(d);
                 });
-                if (d.func === "color1d"){
-                    col_scale = d3.scale.linear()
-                        .domain(d3.extent(d3.values(gene_color_data)))
-                        .range(["red", "blue"]);
-                    gene_color_function = function(gene){
-                        return col_scale(gene_color_data[gene.id]);
-                    };
-                }
-            });
-            annot.update();
+                return;
+            }
+
+            var field = d.field;
+            if (d.func === "color1d") {
+                col_scale = d3.scale.linear()
+                    .domain(d3.extent(d3.values(fam_genedata)
+                        .map(function (gene){
+                            return gene[field];
+                        })))
+                    .range(["red", "blue"]);
+                gene_color_function = function (gene) {
+                    return col_scale(fam_genedata[gene.id][field]);
+                };
+            };
+            vis.update();
         };
 
         change_genedata_vis(genedatavis[0]);
         var genedata_picker = d3.select(genedata_picker_div).selectAll(".genedata-button")
             .data(genedatavis);
+        var colorbar;
+        var bar = d3.select("#colorbar");
 
         genedata_picker.enter()
             .append("input")
@@ -432,18 +436,18 @@ var hog_theme = function () {
                 change_genedata_vis(d);
                 if (col_scale) {
                     colorbar = Colorbar()
+                        .origin([Math.max(200, ~~(tot_width * 0.4)), 0])
                         .scale(col_scale)
                         .orient('horizontal')
                         .thickness(18)
-                        .barlength(500);
-                    colorbar_obj.call(colorbar);
+                        .barlength(~~(tot_width * 0.6));
+                    bar.call(colorbar);
                 } else {
-                    colorbar_obj.call({});
+                    bar.selectAll("svg").remove();
                 }
             });
 
-        var colorbar;
-        var colorbar_obj = d3.select("#colorbar");
+
 
         var vis = tnt()
             .tree(tree)

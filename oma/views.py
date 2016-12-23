@@ -382,6 +382,7 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         data = [x for x in self.to_json_dict(context['fam_members'])]
         return JsonResponse(data, safe=False)
 
+
 class InfoBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoBase, self).get_context_data(**kwargs)
