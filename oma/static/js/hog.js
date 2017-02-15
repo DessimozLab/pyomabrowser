@@ -16,6 +16,12 @@ var hog_theme = function () {
             scale: "linear",
             field: "sequence_length",
             func: "color1d"
+        },
+        {
+            name: "EC Content",
+            scale: "linear",
+            field: "ec_content",
+            func: "color1d"
         }
     ];
 

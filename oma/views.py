@@ -76,7 +76,7 @@ class JsonModelMixin(object):
                         if isinstance(obj, classmethod):
                             obj = obj()
                 except AttributeError as e:
-                    logger.warn('cannot access '+accessor+ ": "+ e)
+                    logger.warning('cannot access ' + accessor + ": " + str(e))
                     raise
                 obj_dict[name] = obj
             yield obj_dict
@@ -375,7 +375,7 @@ class FamBase(ContextMixin, EntryCentricMixin):
 class FamGeneDataJson(FamBase, JsonModelMixin, View):
     json_fields = {'entry_nr': 'id', 'omaid': 'protid', 'sequence_length': None,
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid'}
+                   'canonicalid': 'xrefid', 'ec_content': None}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
