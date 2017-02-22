@@ -9,6 +9,8 @@ django_debug_toolbar>=1.4
 django_debug_toolbar_line_profiler>=0.6.1
 celery>=3.1
 biopython
+djangorestframework
+coreapi
 
 -e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@master#egg=pyoma
 -e git+ssh://gitolite@lab.dessimoz.org:2222/zoo@master#egg=zoo

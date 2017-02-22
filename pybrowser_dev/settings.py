@@ -61,7 +61,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'debug_toolbar',
     #'debug_toolbar_line_profiler',
+    'rest_framework',
     'oma',
+    'oma_rest',
     'bootstrap3',
 )
 
@@ -74,6 +76,13 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+
+REST_FRAMEWORK = {
+    #'DEFAULT_PERMISSION_CLASSES': [
+    #    'rest_framework.permissions.IsAdminUser',
+    #],
+    'PAGE_SIZE': 10
+}
 
 
 ROOT_URLCONF = 'pybrowser_dev.urls'

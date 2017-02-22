@@ -8,6 +8,7 @@ import os
 admin.autodiscover()
 
 urlpatterns = [
+    url(r'^api/', include('oma_rest.urls')),
     url(r'^oma/', include('oma.urls')),
 ]
 
