@@ -1,3 +1,5 @@
+import functools
+import numpy
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
@@ -49,6 +51,38 @@ class OmaGroupViewSet(ViewSet):
         serializer = serializers.ProteinEntrySerializer(
             instance=(models.ProteinEntry(utils.db, memb) for memb in group),
             many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class APIVersion(ViewSet):
+    def list(self, request, format=None):
+        return Response({'oma-version': utils.db.get_release_name()})
+
+
+class XRefsViewSet(ViewSet):
+    serializer_class = serializers.XRefSerializer
+    lookup_field = 'entry_id'
+
+    def list(self, request, format=None):
+        pattern = request.query_params.get('search', None)
+        res = []
+        if pattern is not None and len(pattern) >= 3:
+            make_genome = functools.partial(models.Genome, utils.db)
+            enr_to_genome = utils.id_mapper['OMA'].genome_of_entry_nr
+            for ref in utils.id_mapper['XRef'].search_xref(pattern, is_prefix=True):
+                res.append({'entry_nr': ref['EntryNr'],
+                            'source': ref['XRefSource'],
+                            'xref': ref['XRefId'],
+                            'genome': make_genome(enr_to_genome(ref['EntryNr']))})
+        serializer = serializers.XRefSerializer(instance=res, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, entry_id, format=None):
+        entry_nr = utils.id_resolver.resolve(entry_id)
+        xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
+        for ref in xrefs:
+            ref['entry_nr'] = entry_nr
+        serializer = serializers.XRefSerializer(instance=xrefs, many=True)
         return Response(serializer.data)
 
 

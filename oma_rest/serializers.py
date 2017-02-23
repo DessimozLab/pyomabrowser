@@ -27,11 +27,31 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
 
 
+class GenomeInfoSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=5, source='uniprot_species_code')
+    taxon_id = serializers.IntegerField(source='ncbi_taxon_id')
+    species = serializers.CharField(source='sciname')
+    common = serializers.CharField(required=False)
+
+
+class XRefSerializer(serializers.Serializer):
+    xref = serializers.CharField()
+    source = serializers.CharField()
+    entry_nr = serializers.IntegerField()
+    genome = GenomeInfoSerializer(required=False)
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+
 class DomainSerializer(serializers.Serializer):
-    source = serializers.CharField(max_length=30)
-    domainid = serializers.CharField(max_length=20)
-    name = serializers.CharField(max_length=255)
-    location = serializers.CharField(max_length=255)
+    source = serializers.CharField()
+    domainid = serializers.CharField()
+    name = serializers.CharField()
+    location = serializers.CharField()
 
     def create(self, validated_data):
         pass
