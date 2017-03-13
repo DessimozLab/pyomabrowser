@@ -1,7 +1,7 @@
 "use strict";
 var hog_theme = function () {
 
-    var label_height = 30;
+    var label_height = 20;
     var curr_taxa = '';
     var annot;
     var is_node_frozen = false;
@@ -100,7 +100,8 @@ var hog_theme = function () {
                     value: "Collapse subtree"
                 });
             }
-            tnt.tooltip.table().call(this, obj);
+            tnt.tooltip.table()
+            .call(this, obj);
         };
 
         // mouse over a node
@@ -127,6 +128,7 @@ var hog_theme = function () {
                 node_hover_tooltip = tooltip.plain()
                     .width(140)
                     .show_closer(false)
+                    .position("left")
                     .call(this, obj);
             }
         };
@@ -197,10 +199,8 @@ var hog_theme = function () {
             obj.rows.push({label: "Name", value: gene_data[gene.id].id});
             obj.rows.push({
                 label: "Information",
-                link: function (gene) {
-                    window.location = options.oma_info_url_template + gene.id;
-                },
-                obj: gene, value: gene_data[gene.id].omaid
+                obj: gene,
+                value: "<a href='"+options.oma_info_url_template + gene.id+"'>"+gene_data[gene.id].omaid+"</a>"
             });
 
             tnt.tooltip.table().call(this, obj);
