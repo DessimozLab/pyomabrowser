@@ -239,7 +239,7 @@ var hog_theme = function () {
                     .attr("y1", 0)
                     .attr("y2", track.height())
                     .attr("stroke-width", 2)
-                    .attr("stroke", "black");
+                    .attr("stroke", "#34495e");
             })
             .distribute(function (hogs, x_scale) {
                 var track = this;
@@ -334,7 +334,7 @@ var hog_theme = function () {
         var track = function (leaf) {
             var sp = leaf.node_name();
             return tnt.board.track()
-                .color("#EEEEEE")
+                .color("#FFF")
                 .data(tnt.board.track.data.sync()
                     .retriever(function () {
                         // return _.flatten(per_species2[sp].Vertebrates);
@@ -399,7 +399,7 @@ var hog_theme = function () {
         var change_genedata_vis = function(d){
             col_scale = undefined;
             gene_color_function = function(gene){
-                return (query && gene.id === query.id ? "green" : "gray");
+                return (query && gene.id === query.id ? "#27ae60" : "#95a5a6");
             };
             if (fam_genedata === undefined){
                 $.getJSON("/oma/hogdata/"+query.id+"/json", function(data){

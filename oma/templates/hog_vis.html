@@ -23,6 +23,9 @@
 {% endblock %}
 
 {% block contentTab %}
+
+<div style="background-color: white; padding:10px">
+
     {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
     {% else %}
 <h3>Hierarchical group {{ fam.id }}</h3>
@@ -47,4 +50,7 @@
   </script>
 
 {% endif %}
+
+</div>
+
 {% endblock %}
