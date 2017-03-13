@@ -35,13 +35,13 @@ var hog_theme = function () {
             .fill("grey")
             .size(4);
         var leaf_node = tnt.tree.node_display.circle()
-            .fill("black")
+            .fill("#2c3e50")
             .size(4);
         var int_node = tnt.tree.node_display.circle()
-            .fill("black")
-            .size(2);
+            .fill("#34495e")
+            .size(4);
         var highlight_node = tnt.tree.node_display.circle()
-            .fill("brown")
+            .fill("#e74c3c")
             .size(6);
         var highlight_condition = function(){
             return false;
@@ -266,7 +266,7 @@ var hog_theme = function () {
             });
 
         var hog_gene_feature = tnt.board.track.feature();
-        var gene_color_scale = d3.scale.category10();
+        var gene_color_scale = d3.scale.category10(); // ADRIAN: What is the use of this
 
         hog_gene_feature
             .index(function (d) {
@@ -419,7 +419,7 @@ var hog_theme = function () {
                         .map(function (gene){
                             return gene[field];
                         })))
-                    .range(["red", "blue"]);
+                    .range([d3.rgb("#e74c3c"), d3.rgb('#3498db')]);
                 gene_color_function = function (gene) {
                     return col_scale(fam_genedata[gene.id][field]);
                 };

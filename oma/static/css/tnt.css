@@ -10,9 +10,8 @@
 .tnt_tree_node_proxy {
 	opacity: 0;
 	pointer-events: all;
+	cursor:pointer;
 }
-
-
 
 svg text {
 	-webkit-user-select: none;
