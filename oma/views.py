@@ -387,7 +387,10 @@ class InfoBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
-        context.update({'entry': entry})
+        xrefs = list(utils.id_mapper['Linkout'].iter_xrefs_for_entry_nr(entry.entry_nr))
+        # gos =
+        # locus =
+        context.update({'entry': entry, 'xrefs': xrefs})
         return context
 
 
@@ -402,6 +405,10 @@ class InfoViewFasta(InfoBase, FastaView):
 
     def render_to_response(self, context, **kwargs):
         return self.render_to_fasta_response([context['entry']])
+
+class InfoViewCDSFasta(InfoViewFasta):
+    def get_sequence(self, member):
+        return member.cdna
 
 
 class HOGsBase(ContextMixin, EntryCentricMixin):
