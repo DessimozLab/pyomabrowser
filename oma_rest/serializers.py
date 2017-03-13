@@ -38,6 +38,7 @@ class XRefSerializer(serializers.Serializer):
     xref = serializers.CharField()
     source = serializers.CharField()
     entry_nr = serializers.IntegerField()
+    omaid = serializers.CharField()
     genome = GenomeInfoSerializer(required=False)
 
     def create(self, validated_data):

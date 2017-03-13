@@ -1,10 +1,9 @@
 import functools
-import numpy
-from django.shortcuts import render
-from rest_framework.views import APIView
+import operator
+
+import itertools
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
-from rest_framework import status
 from oma import utils, misc
 from . import serializers
 from pyoma.browser import models
@@ -63,17 +62,33 @@ class XRefsViewSet(ViewSet):
     serializer_class = serializers.XRefSerializer
     lookup_field = 'entry_id'
 
+    def _order_xrefs(self, xrefs, key='entry_nr'):
+        if isinstance(key, str):
+            return sorted(xrefs, key=operator.itemgetter(key))
+        else:
+            return sorted(xrefs, key=operator.itemgetter(*key))
+
+    def _remove_redundant_xrefs(self, xrefs):
+        xrefs = self._order_xrefs(xrefs, ('xref', 'source'))
+        res = []
+        for k, grp in itertools.groupby(xrefs, key=operator.itemgetter('xref')):
+            res.append(next(grp))
+        return res
+
     def list(self, request, format=None):
         pattern = request.query_params.get('search', None)
         res = []
         if pattern is not None and len(pattern) >= 3:
             make_genome = functools.partial(models.Genome, utils.db)
             enr_to_genome = utils.id_mapper['OMA'].genome_of_entry_nr
-            for ref in utils.id_mapper['XRef'].search_xref(pattern, is_prefix=True):
+            xref_mapper = utils.id_mapper['XRef']
+            for ref in xref_mapper.search_xref(pattern, is_prefix=True):
                 res.append({'entry_nr': ref['EntryNr'],
-                            'source': ref['XRefSource'],
-                            'xref': ref['XRefId'],
+                            'omaid': utils.id_mapper['OMA'].map_entry_nr(ref['EntryNr']),
+                            'source': xref_mapper.source_as_string(ref['XRefSource']),
+                            'xref': ref['XRefId'].decode(),
                             'genome': make_genome(enr_to_genome(ref['EntryNr']))})
+            res = self._remove_redundant_xrefs(res)
         serializer = serializers.XRefSerializer(instance=res, many=True)
         return Response(serializer.data)
 
@@ -82,6 +97,7 @@ class XRefsViewSet(ViewSet):
         xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
         for ref in xrefs:
             ref['entry_nr'] = entry_nr
+            ref['omaid'] = utils.id_mapper['OMA'].map_entry_nr(entry_nr)
         serializer = serializers.XRefSerializer(instance=xrefs, many=True)
         return Response(serializer.data)
 
