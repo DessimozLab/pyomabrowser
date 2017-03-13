@@ -218,5 +218,28 @@ a.uncurated{
     background: linear-gradient(90deg, black 33.3%, yellow 33.3%, yellow 66.6%, red 66.6%, red 100%);
 }
 
-
+.autocomplete-suggestions { border: 1px solid #999; background: #FFF; overflow: auto; }
+.autocomplete-suggestion {
+	padding: 2px 5px;
+	/*white-space: nowrap; */
+	overflow: hidden; }
+.autocomplete-suggestion span.auto-xref{
+	display: inline-block;
+	width: 70%;
+}
+.autocomplete-suggestion span.auto-omaid{
+	display: inline-block;
+	width: 30%;
+	font-size: 75%;
+}
+.autocomplete-suggestion span.auto-species{
+	display: inline-block;
+	width: 100%;
+	font-size: 75%;
+	font-style: italic;
+}
+.autocomplete-selected { background: #F0F0F0; }
+.autocomplete-suggestions strong { font-weight: bold; color: black;border-bottom: 1px solid #307C3B }
+.autocomplete-group { padding: 3px 20px; text-align: right;}
+.autocomplete-group strong {display: block; border-bottom: 1px solid #ddd; color: #777; }
 

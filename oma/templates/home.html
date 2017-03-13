@@ -25,7 +25,7 @@
                     <form role="search" id="searchForm" action="/cgi-bin/gateway.pl" method="GET">
                     <div class="col-md-10 col-md-offset-1">
                         <div class="col-sm-4">
-                            <select id="selectBrowser" class="form-control btn-mini" name="f">
+                            <select id="selectBrowser" class="form-control btn-mini" name="f" onchange="update_autocomplete()">
                                 <option value="DisplayEntry" selected="selected">Identifier</option>
                                 <option value="SearchSeqDb">Protein sequence</option>
                                 <option value="DisplayGroup">OMA group</option>
@@ -101,6 +101,18 @@ $("#toggle").click(function () {
     }
     $('#selectBrowser').val('SearchSeqDb');
 });
+
+function update_autocomplete() {
+        var sel=document.getElementById('selectBrowser');
+        var txt=document.getElementById('inputBrowser');
+        if (sel.value === "DisplayEntry"){
+            $('#inputBrowser').autocomplete('enable');
+        } else {
+            $('#inputBrowser').autocomplete('disable');
+        }
+    }
+$('#inputBrowser').autocomplete(autocomplete_opts);
+
 
 </script>
 <div class="row">

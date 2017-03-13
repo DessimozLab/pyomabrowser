@@ -18,6 +18,7 @@
     <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js" ></script> -->
     <script src="{% static "js/jquery.js" %}"></script>
     <script src="{% static "js/bootstrap.min.js" %}"></script>
+    <script src="https://rawgit.com/devbridge/jQuery-Autocomplete/master/dist/jquery.autocomplete.min.js"></script>
     <script>var static_root = "{% static "" %}";</script>
     {% block css_hook %}{% endblock %}
     {% block js_hook %}{% endblock %}
@@ -81,7 +82,7 @@
 
         <form class="navbar-form navbar-left" role="search" id="searchNavForm" action="/cgi-bin/gateway.pl" method="GET">
           <div class="form-group">
-            <select id="selectNav" class="form-control btn-mini" name="f">
+            <select id="selectNav" class="form-control btn-mini" name="f" onchange="update_navbar_autocomplete()">
               <option value="DisplayEntry" selected="selected">Identifier</option>
               <option value="SearchSeqDb">Protein sequence</option>
               <option value="DisplayGroup">OMA group</option>
@@ -145,12 +146,63 @@
     <!-- /.container-fluid -->
   </nav>
 
-
-
+  <script type="text/javascript">
+    function update_navbar_autocomplete() {
+        var sel=document.getElementById('selectNav');
+        if (sel.value === "DisplayEntry"){
+            $('#textNav').autocomplete('enable');
+        } else {
+            $('#textNav').autocomplete('disable');
+        }
+    }
+    var autocomplete_opts = {
+        paramName: 'search',
+        serviceUrl: '/api/xref/',
+        minChars: 3,
+        deferRequestBy: 200,
+        transformResult: function (response) {
+            var json = JSON.parse(response);
+            return {
+                suggestions: $.map(json, function (dataItem) {
+                    return {value: dataItem.xref, data: dataItem};
+                })
+            };
+        },
+        groupBy: 'source',
+        formatResult: function(suggestion, currentValue) {
+            // Do not replace anything if there current value is empty
+            if (!currentValue) {
+                return suggestion.value;
+            }
+            // escape any special char
+            var pattern = '(' + currentValue.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&") + ')';
+            var highlight_and_escape = function(val){
+                return val.replace(new RegExp(pattern, 'gi'), '<strong>$1<\/strong>')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/&lt;(\/?strong)&gt;/g, '<$1>');
+            };
+            var label = '<span class="auto-xref">' + highlight_and_escape(suggestion.data.xref) +'</span> &nbsp;'+
+                        '<span class="auto-omaid">' + suggestion.data.omaid + '</span>'+
+                        '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
+            return label;
+        },
+        onSelect: function(item){
+            window.location.href = "/cgi-bin/gateway.pl?f=DisplayEntry&p1=" + item.data.entry_nr;
+            return false;
+        }
+    };
+    $('#textNav').autocomplete(autocomplete_opts);
+    update_navbar_autocomplete();
+  </script>
 
   <div id="content">
     {% block content %}{% endblock %}
   </div>
+
+
   {% include 'includes/analytics.html' %}
 
 </body>
