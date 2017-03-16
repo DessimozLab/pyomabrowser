@@ -30,8 +30,13 @@ class VPairsViews_Test(TestCase):
         content = decode_replycontent(reply)
         vps = [z.omaid for z in reply.context['vps']]
         self.assertGreater(len(vps), 0)
+        api_url = re.search(r'data-url="(?P<url>[^"]*)"', content)
+        self.assertIsNotNone(api_url)
+        api_data = self.client.get(api_url.group('url'))
+        self.assertEqual(api_data.status_code, 200)
+        api_data = decode_replycontent(api_data)
         for vp in vps:
-            self.assertIn(vp, content, 'VP {} not found on page.'.format(vp))
+            self.assertIn(vp, api_data, 'VP {} not found on page.'.format(vp))
 
     def test_inexistant_query_genome(self):
         query = 'ECOLI00411'
