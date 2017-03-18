@@ -113,6 +113,8 @@ var hog_theme = function () {
             }
 
             curr_taxa = node.node_name();
+            var text_currentLevel = document.getElementById("current_level_text");
+            text_currentLevel.innerHTML = curr_taxa;
             annot.update();
 
             highlight_condition = function (n) {

@@ -4,37 +4,47 @@
 {% block title %}OMA: Hierarchical Orthologous Groups for {{ fam.id }}{% endblock %}
 {% block meta_description %}Hierarchical orthologous groups (HOGs) provide a set of genes that have all started diverging from a single ancestral gene at the taxonomic range of interest.{% endblock %}
 {% block js_hook %}
- <!-- D3 -->
-  <!--<script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>-->
-  <script src="https://d3js.org/d3.v3.min.js"></script>
-  <script src="http://benschmidt.org/colorbar/colorbar.js" charset="utf-8"></script>
+<!-- D3 -->
+<!--<script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>-->
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="http://benschmidt.org/colorbar/colorbar.js" charset="utf-8"></script>
 
-  <!-- Underscore -->
-  <script src="{% static "js/underscore-min.js" %}"></script>
+<!-- Underscore -->
+<script src="{% static "js/underscore-min.js" %}"></script>
 
   <!-- TnT -->
   <link rel="stylesheet" href="{% static "css/tnt.css" %}" type="text/css" />
   <link rel="stylesheet" href="{% static "css/hog.css" %}" type="text/css" />
   <link rel="stylesheet" href="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.css" type="text/css" />
   <script src="http://tntvis.github.io/tnt/build/tnt.min.js" charset="utf-8"></script>
-  <script src="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.min.js" charset="UTF-8"></script>
-  <script src="{% static "js/hog.js" %}" charset="UTF-8"></script>
+<script src="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.min.js" charset="UTF-8"></script>
+<script src="{% static "js/hog.js" %}" charset="UTF-8"></script>
 
 {% endblock %}
 
 {% block contentTab %}
 
-<div style="background-color: white; padding:10px">
+<div  style="background-color: white; padding:10px;">
+
+<div id="gap_conpenser"> </div>
+
+<div id="hogvisheader">
 
     {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
     {% else %}
-<h3>Hierarchical group {{ fam.id }}</h3>
-  <div id="genedata-vis"></div>
-  <div id="hog_vis"></div>
-  <div id="colorbar"></div>
+    <h3>Hierarchical group {{ fam.id }} open at level of <span id="current_level_text" style="font-weight:bold;"></span> </h3>
+
+    <div id="genedata-vis"> </div>
+    <div id="colorbar"> </div>
+
+  </div>
+
+  <div id="hog_vis"> </div>
+
 
   <script>
 
+  // Init the hogvis
     (function () {
         var tree = {{ species_tree|safe }};
         var query = {'id': {{ entry.entry_nr }} };
@@ -47,7 +57,51 @@
         theme(document.getElementById ("hog_vis"), query, per_species,
                 tree, tooltip_data, options, document.getElementById("genedata-vis"));
     }) ();
-  </script>
+
+
+    // Set up the annot board width depending on screen resize
+
+    function set_scroller_width(){
+        var viewerC = document.getElementById("hog_vis");
+        var viewerS = document.getElementById("tnt_annot_container_hog_vis");
+        var viewerT = document.getElementById("tnt_tree_container_hog_vis");
+
+        var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 100;
+        viewerS.style.width = scroller_width + "px";
+    }
+
+    set_scroller_width();
+
+    window.onresize = function() {
+        set_scroller_width()
+    }
+
+
+  // Top-fixed div with scroll made using the code from http://jsfiddle.net/uFq2k/1224/
+
+  $(function () {
+    var stickyHeaderTop = $('#hogvisheader').offset().top;
+
+    $(window).scroll(function () {
+        if ($(window).scrollTop() > stickyHeaderTop) {
+            $('#hogvisheader').css({
+                position: 'fixed',
+                top: '0px'
+            });
+            $('#hog_vis').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
+        } else {
+            $('#hogvisheader').css({
+                position: 'static',
+                top: '0px'
+            });
+            $('#hog_vis').css('margin-top', '0px');
+        }
+    });
+});
+
+
+</script>
+
 
 {% endif %}
 
