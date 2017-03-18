@@ -84,6 +84,8 @@
 
   $(function () {
     var stickyHeaderTop = $('#hogvisheader').offset().top;
+    var shw = $('#hogvisheader').width();
+
 
     $(window).scroll(function () {
         if ($(window).scrollTop() > stickyHeaderTop) {
@@ -91,12 +93,14 @@
                 position: 'fixed',
                 top: '0px'
             });
+            $('#hogvisheader').width(shw);
             $('#hog_vis').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
         } else {
             $('#hogvisheader').css({
                 position: 'static',
                 top: '0px'
             });
+            $('#hogvisheader').width(shw);
             $('#hog_vis').css('margin-top', '0px');
         }
     });

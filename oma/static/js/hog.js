@@ -146,7 +146,7 @@ var hog_theme = function () {
         var tree = tnt.tree()
             .data(tree_obj)
             .layout(tnt.tree.layout.vertical()
-                .width(Math.max(200, ~~(tot_width * 0.4)))
+                .width(Math.max(240, ~~(tot_width * 0.4)))
                 .scale(false)
                )
             .label(tnt.tree.label.text()
