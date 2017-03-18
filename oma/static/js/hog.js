@@ -429,7 +429,9 @@ var hog_theme = function () {
                     return col_scale(fam_genedata[gene.id][field]);
                 };
             };
+            annot.update();
             vis.update();
+
         };
 
         change_genedata_vis(genedatavis[0]);
