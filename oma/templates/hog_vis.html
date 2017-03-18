@@ -51,22 +51,25 @@
         var per_species = {{ per_species|safe }};
         var tooltip_data = {{ xrefs|safe }};
         var options = {'show_internal_labels': {{ show_internal_labels|yesno:"true,false" }},
-                       'oma_info_url_template': "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1="};
+                       'oma_info_url_template': "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1=",
+                       'current_level_div': "current_level_text"}
 
         var theme = hog_theme();
         theme(document.getElementById ("hog_vis"), query, per_species,
                 tree, tooltip_data, options, document.getElementById("genedata-vis"));
+
     }) ();
 
 
     // Set up the annot board width depending on screen resize
 
     function set_scroller_width(){
+
         var viewerC = document.getElementById("hog_vis");
         var viewerS = document.getElementById("tnt_annot_container_hog_vis");
         var viewerT = document.getElementById("tnt_tree_container_hog_vis");
 
-        var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 100;
+        var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 40;
         viewerS.style.width = scroller_width + "px";
     }
 

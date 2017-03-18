@@ -47,6 +47,8 @@ var hog_theme = function () {
             return false;
         };
         var gene_color_function;
+        var text_currentLevel = document.getElementById(options.current_level_div);
+
 
         var node_display = tnt.tree.node_display()
             .display(function (node){
@@ -113,7 +115,6 @@ var hog_theme = function () {
             }
 
             curr_taxa = node.node_name();
-            var text_currentLevel = document.getElementById("current_level_text");
             text_currentLevel.innerHTML = curr_taxa;
             annot.update();
 
@@ -187,6 +188,8 @@ var hog_theme = function () {
             .branch_color("black");
 
         curr_taxa = tree.root().node_name();
+
+
 
         /////////////////////////
         //// PARSE HOG INFO /////
@@ -462,6 +465,9 @@ var hog_theme = function () {
             .board(annot)
             .track(track);
         vis(div);
+
+        // open at root level when created
+        mouse_over_node(tree.root());
     };
 
     var truncate = function (text, width) {
