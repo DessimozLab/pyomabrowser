@@ -1,5 +1,5 @@
 .grey {
-    fill : grey;
+    fill : #95a5a6;
 }
 
 .brown {
@@ -20,3 +20,45 @@
     font-family: sans-serif;
     font-size: 11px;
 }
+
+.tnt_framed {border: none; border-left: 2px solid !important; border-radius: 0px !important}
+
+#hog_vis{
+    display: inline-block;
+    padding: 10px;
+    width: 100%;
+}
+
+.tnt_groupDiv{
+    display: inline-block;
+}
+
+#tnt_tree_container_hog_vis{
+    display: inherit;
+}
+
+#tnt_annot_container_hog_vis{
+    display: inherit;
+    overflow-x: scroll;
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 7px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 1px;
+  background-color: rgba(0, 0, 0, .5);
+}
+
+#hogvisheader {
+    background:white;
+    z-index:100;
+    margin-bottom: 10px;
+}
+
+#gap_conpenser {
+    margin-bottom: 15px;
+}
+
+#colorbar{margin:12px;}

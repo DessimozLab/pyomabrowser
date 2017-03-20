@@ -1,7 +1,7 @@
 "use strict";
 var hog_theme = function () {
 
-    var label_height = 30;
+    var label_height = 20;
     var curr_taxa = '';
     var annot;
     var is_node_frozen = false;
@@ -35,18 +35,20 @@ var hog_theme = function () {
             .fill("grey")
             .size(4);
         var leaf_node = tnt.tree.node_display.circle()
-            .fill("black")
+            .fill("#2c3e50")
             .size(4);
         var int_node = tnt.tree.node_display.circle()
-            .fill("black")
-            .size(2);
+            .fill("#34495e")
+            .size(4);
         var highlight_node = tnt.tree.node_display.circle()
-            .fill("brown")
+            .fill("#e74c3c")
             .size(6);
         var highlight_condition = function(){
             return false;
         };
         var gene_color_function;
+        var text_currentLevel = document.getElementById(options.current_level_div);
+
 
         var node_display = tnt.tree.node_display()
             .display(function (node){
@@ -100,7 +102,8 @@ var hog_theme = function () {
                     value: "Collapse subtree"
                 });
             }
-            tnt.tooltip.table().call(this, obj);
+            tnt.tooltip.table()
+            .call(this, obj);
         };
 
         // mouse over a node
@@ -112,6 +115,7 @@ var hog_theme = function () {
             }
 
             curr_taxa = node.node_name();
+            text_currentLevel.innerHTML = curr_taxa;
             annot.update();
 
             highlight_condition = function (n) {
@@ -127,6 +131,7 @@ var hog_theme = function () {
                 node_hover_tooltip = tooltip.plain()
                     .width(140)
                     .show_closer(false)
+                    .position("left")
                     .call(this, obj);
             }
         };
@@ -141,7 +146,7 @@ var hog_theme = function () {
         var tree = tnt.tree()
             .data(tree_obj)
             .layout(tnt.tree.layout.vertical()
-                .width(Math.max(200, ~~(tot_width * 0.4)))
+                .width(Math.max(240, ~~(tot_width * 0.4)))
                 .scale(false)
                )
             .label(tnt.tree.label.text()
@@ -184,6 +189,8 @@ var hog_theme = function () {
 
         curr_taxa = tree.root().node_name();
 
+
+
         /////////////////////////
         //// PARSE HOG INFO /////
         /////////////////////////
@@ -197,10 +204,8 @@ var hog_theme = function () {
             obj.rows.push({label: "Name", value: gene_data[gene.id].id});
             obj.rows.push({
                 label: "Information",
-                link: function (gene) {
-                    window.location = options.oma_info_url_template + gene.id;
-                },
-                obj: gene, value: gene_data[gene.id].omaid
+                obj: gene,
+                value: "<a href='"+options.oma_info_url_template + gene.id+"'>"+gene_data[gene.id].omaid+"</a>"
             });
 
             tnt.tooltip.table().call(this, obj);
@@ -239,7 +244,7 @@ var hog_theme = function () {
                     .attr("y1", 0)
                     .attr("y2", track.height())
                     .attr("stroke-width", 2)
-                    .attr("stroke", "black");
+                    .attr("stroke", "#34495e");
             })
             .distribute(function (hogs, x_scale) {
                 var track = this;
@@ -266,7 +271,7 @@ var hog_theme = function () {
             });
 
         var hog_gene_feature = tnt.board.track.feature();
-        var gene_color_scale = d3.scale.category10();
+        var gene_color_scale = d3.scale.category10(); // ADRIAN: What is the use of this
 
         hog_gene_feature
             .index(function (d) {
@@ -334,7 +339,7 @@ var hog_theme = function () {
         var track = function (leaf) {
             var sp = leaf.node_name();
             return tnt.board.track()
-                .color("#EEEEEE")
+                .color("#FFF")
                 .data(tnt.board.track.data.sync()
                     .retriever(function () {
                         // return _.flatten(per_species2[sp].Vertebrates);
@@ -399,7 +404,7 @@ var hog_theme = function () {
         var change_genedata_vis = function(d){
             col_scale = undefined;
             gene_color_function = function(gene){
-                return (query && gene.id === query.id ? "green" : "gray");
+                return (query && gene.id === query.id ? "#27ae60" : "#95a5a6");
             };
             if (fam_genedata === undefined){
                 $.getJSON("/oma/hogdata/"+query.id+"/json", function(data){
@@ -419,12 +424,14 @@ var hog_theme = function () {
                         .map(function (gene){
                             return gene[field];
                         })))
-                    .range(["red", "blue"]);
+                    .range([d3.rgb("#e74c3c"), d3.rgb('#3498db')]);
                 gene_color_function = function (gene) {
                     return col_scale(fam_genedata[gene.id][field]);
                 };
             };
+            annot.update();
             vis.update();
+
         };
 
         change_genedata_vis(genedatavis[0]);
@@ -460,6 +467,9 @@ var hog_theme = function () {
             .board(annot)
             .track(track);
         vis(div);
+
+        // open at root level when created
+        mouse_over_node(tree.root());
     };
 
     var truncate = function (text, width) {
