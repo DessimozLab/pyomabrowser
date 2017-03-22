@@ -21,7 +21,7 @@
     font-size: 11px;
 }
 
-.tnt_framed {border: none; border-radius: 0px !important}
+.tnt_framed {border: none;  border-radius: 0px !important}
 
 #hog_vis{
     display: inline-block;
