@@ -478,7 +478,56 @@ var hog_theme = function () {
         set_fixed_header_on_window_scroll();
 
         // make the vis panel resizable
-        set_resize_on_drag();
+        set_resize_on_drag(tree);
+
+    // function to set up drag to resize tree and board panel
+    // rearranged code from http://stackoverflow.com/questions/26233180/resize-div-on-border-drag-and-drop
+    function set_resize_on_drag(tree_to_resize){
+
+    // Add a drag div between tree and board panel
+    var dragDiv = document.createElement("div");
+    var tree_panel = document.getElementById("tnt_tree_container_hog_vis");
+    dragDiv.id = 'drag';
+    dragDiv.style.height = $("#tnt_tree_container_hog_vis").height() + "px";
+    tree_panel.parentNode.insertBefore(dragDiv, tree_panel.nextSibling);
+
+    var isResizing = false,
+    lastDownX = 0;
+
+    var container = $('#hog_vis'),
+        left = $('#tnt_tree_container_hog_vis'),
+        right = $('#tnt_annot_container_hog_vis'),
+        handle = $('#drag');
+
+    handle.on('mousedown', function (e) {
+        isResizing = true;
+        lastDownX = e.clientX;
+    });
+
+    $(document).on('mousemove', function (e) {
+        // we don't want to do anything if we aren't resizing.
+        if (!isResizing)
+            return;
+
+        // compute the new width of tree panel
+        var nw = e.clientX - container.offset().left;
+        //make sure that we left at least 50 px to the board panel and that at least 50 px large
+        var nwld = Math.min(container.width()-50, nw);
+        nwld = Math.max(50, nwld);
+
+        // resize tree panel to new width and update board panel
+        left.css('width', nwld);
+        set_scroller_width();
+
+        // update the tree according to the new tree panel size with min 100px width
+        tree_to_resize.layout().width(Math.max(200, nwld - 20));
+        tree_to_resize.update();
+    }).on('mouseup', function (e) {
+        // stop resizing
+        isResizing = false;
+
+});
+    };
 
     };
 
@@ -571,51 +620,7 @@ var hog_theme = function () {
     });
     };
 
-    // function to set up drag to resize tree and board panel
-    // rearranged code from http://stackoverflow.com/questions/26233180/resize-div-on-border-drag-and-drop
-    function set_resize_on_drag(){
 
-    // Add a drag div between tree and board panel
-    var dragDiv = document.createElement("div");
-    var tree_panel = document.getElementById("tnt_tree_container_hog_vis");
-    dragDiv.id = 'drag';
-    dragDiv.style.height = $("#tnt_tree_container_hog_vis").height() + "px";
-    tree_panel.parentNode.insertBefore(dragDiv, tree_panel.nextSibling);
-
-
-    var isResizing = false,
-    lastDownX = 0;
-
-
-    var container = $('#hog_vis'),
-        left = $('#tnt_tree_container_hog_vis'),
-        right = $('#tnt_annot_container_hog_vis'),
-        handle = $('#drag');
-
-    handle.on('mousedown', function (e) {
-        isResizing = true;
-        lastDownX = e.clientX;
-    });
-
-    $(document).on('mousemove', function (e) {
-        // we don't want to do anything if we aren't resizing.
-        if (!isResizing)
-            return;
-
-        var nw = e.clientX - container.offset().left;
-
-        //make sure that we left at least 50 px to the board panel and that at least 50 px large
-        var nwld = Math.min(container.width()-50, nw);
-        nwld = Math.max(50, nwld);
-
-        left.css('width', nwld);
-        set_scroller_width();
-    }).on('mouseup', function (e) {
-        // stop resizing
-        isResizing = false;
-
-});
-    };
 
     return theme;
 };
