@@ -118,6 +118,10 @@ var hog_theme = function () {
             text_currentLevel.innerHTML = curr_taxa;
             annot.update();
 
+            // when update the board make sure that the scroll is reset to left
+            var annot_scroller = $('#tnt_annot_container_hog_vis');
+            annot_scroller.scrollLeft(0);
+
             highlight_condition = function (n) {
                 return node.id() === n.id();
             };
