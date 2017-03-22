@@ -106,10 +106,21 @@
     });
 });
 
-    //div on the board/tree border to resize them
-    var dragDiv = document.createElement('div');
-    dragDiv.id = 'drag';
-    document.getElementById('tnt_tnt_annot_container_hog_vis').appendChild(dragDiv);
+    //create the drag div on the board/tree border to resize them
+    //var dragDiv = document.createElement('div');
+    //dragDiv.id = 'drag';
+    //document.getElementById('tnt_tnt_annot_container_hog_vis').appendChild(dragDiv);
+
+    function insertAfter(referenceNode, newNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
+var dragDiv = document.createElement("div");
+var div = document.getElementById("tnt_tree_container_hog_vis");
+dragDiv.id = 'drag';
+dragDiv.style.height = $("#tnt_tree_container_hog_vis").height() + "px";
+
+insertAfter(div, dragDiv);
 
 // code rearranged from http://stackoverflow.com/questions/26233180/resize-div-on-border-drag-and-drop
 var isResizing = false,
@@ -118,7 +129,6 @@ var isResizing = false,
 $(function () {
     var container = $('#hog_vis'),
         left = $('#tnt_tree_container_hog_vis'),
-        //left = document.getElementById("tnt_tree_container_hog_vis"),
         right = $('#tnt_annot_container_hog_vis'),
         handle = $('#drag');
 
@@ -132,14 +142,14 @@ $(function () {
         if (!isResizing)
             return;
 
-
-        //var offsetRight = container.width() - (e.clientX - container.offset().left);
-
         var nw = e.clientX - container.offset().left;
 
-        left.css('width', nw);
-        set_scroller_width()
-        //right.css('width', offsetRight);
+        //make sure that we left at least 50 px to the board panel and that at least 50 px large
+        nwld = Math.min(container.width()-50, nw);
+        nwld = Math.max(50, nwld);
+
+        left.css('width', nwld);
+        set_scroller_width();
     }).on('mouseup', function (e) {
         // stop resizing
         isResizing = false;

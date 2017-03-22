@@ -21,7 +21,7 @@
     font-size: 11px;
 }
 
-.tnt_framed {border: none; border-left: 2px solid !important; border-radius: 0px !important}
+.tnt_framed {border: none; border-radius: 0px !important}
 
 #hog_vis{
     display: inline-block;
@@ -40,7 +40,7 @@
 
 #tnt_annot_container_hog_vis{
     display: inherit;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 ::-webkit-scrollbar {
@@ -65,10 +65,10 @@
 #colorbar{margin:12px;}
 
 #drag {
-    position: absolute;
-    left: -4px;
-    top: 0;
-    bottom: 0;
+    display: inherit;
+    position: relative;
+    height: 0px;
     width: 8px;
     cursor: col-resize;
+    border-left: 3px solid !important;
 }
