@@ -106,6 +106,46 @@
     });
 });
 
+    //div on the board/tree border to resize them
+    var dragDiv = document.createElement('div');
+    dragDiv.id = 'drag';
+    document.getElementById('tnt_tnt_annot_container_hog_vis').appendChild(dragDiv);
+
+// code rearranged from http://stackoverflow.com/questions/26233180/resize-div-on-border-drag-and-drop
+var isResizing = false,
+    lastDownX = 0;
+
+$(function () {
+    var container = $('#hog_vis'),
+        left = $('#tnt_tree_container_hog_vis'),
+        //left = document.getElementById("tnt_tree_container_hog_vis"),
+        right = $('#tnt_annot_container_hog_vis'),
+        handle = $('#drag');
+
+    handle.on('mousedown', function (e) {
+        isResizing = true;
+        lastDownX = e.clientX;
+    });
+
+    $(document).on('mousemove', function (e) {
+        // we don't want to do anything if we aren't resizing.
+        if (!isResizing)
+            return;
+
+
+        //var offsetRight = container.width() - (e.clientX - container.offset().left);
+
+        var nw = e.clientX - container.offset().left;
+
+        left.css('width', nw);
+        set_scroller_width()
+        //right.css('width', offsetRight);
+    }).on('mouseup', function (e) {
+        // stop resizing
+        isResizing = false;
+    });
+});
+
 
 </script>
 

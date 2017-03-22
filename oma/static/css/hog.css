@@ -34,6 +34,7 @@
 }
 
 #tnt_tree_container_hog_vis{
+    overflow-x: auto;
     display: inherit;
 }
 
@@ -53,7 +54,7 @@
 
 #hogvisheader {
     background:white;
-    z-index:100;
+    z-index:1000000;
     margin-bottom: 10px;
 }
 
@@ -62,3 +63,12 @@
 }
 
 #colorbar{margin:12px;}
+
+#drag {
+    position: absolute;
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: col-resize;
+}
