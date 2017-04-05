@@ -21,7 +21,7 @@
     font-size: 11px;
 }
 
-.tnt_framed {border: none; border-left: 2px solid !important; border-radius: 0px !important}
+.tnt_framed {border: none;  border-radius: 0px !important}
 
 #hog_vis{
     display: inline-block;
@@ -34,12 +34,13 @@
 }
 
 #tnt_tree_container_hog_vis{
+    overflow-x: auto;
     display: inherit;
 }
 
 #tnt_annot_container_hog_vis{
     display: inherit;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 ::-webkit-scrollbar {
@@ -53,7 +54,7 @@
 
 #hogvisheader {
     background:white;
-    z-index:100;
+    z-index:1000000;
     margin-bottom: 10px;
 }
 
@@ -62,3 +63,12 @@
 }
 
 #colorbar{margin:12px;}
+
+#drag {
+    display: inherit;
+    position: relative;
+    height: 0px;
+    width: 8px;
+    cursor: col-resize;
+    border-left: 3px solid !important;
+}

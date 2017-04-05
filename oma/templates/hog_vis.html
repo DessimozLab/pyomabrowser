@@ -60,53 +60,6 @@
 
     }) ();
 
-
-    // Set up the annot board width depending on screen resize
-
-    function set_scroller_width(){
-
-        var viewerC = document.getElementById("hog_vis");
-        var viewerS = document.getElementById("tnt_annot_container_hog_vis");
-        var viewerT = document.getElementById("tnt_tree_container_hog_vis");
-
-        var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 40;
-        viewerS.style.width = scroller_width + "px";
-    }
-
-    set_scroller_width();
-
-    window.onresize = function() {
-        set_scroller_width()
-    }
-
-
-  // Top-fixed div with scroll made using the code from http://jsfiddle.net/uFq2k/1224/
-
-  $(function () {
-    var stickyHeaderTop = $('#hogvisheader').offset().top;
-    var shw = $('#hogvisheader').width();
-
-
-    $(window).scroll(function () {
-        if ($(window).scrollTop() > stickyHeaderTop) {
-            $('#hogvisheader').css({
-                position: 'fixed',
-                top: '0px'
-            });
-            $('#hogvisheader').width(shw);
-            $('#hog_vis').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
-        } else {
-            $('#hogvisheader').css({
-                position: 'static',
-                top: '0px'
-            });
-            $('#hogvisheader').width(shw);
-            $('#hog_vis').css('margin-top', '0px');
-        }
-    });
-});
-
-
 </script>
 
 

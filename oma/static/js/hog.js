@@ -118,6 +118,10 @@ var hog_theme = function () {
             text_currentLevel.innerHTML = curr_taxa;
             annot.update();
 
+            // when update the board make sure that the scroll is reset to left
+            var annot_scroller = $('#tnt_annot_container_hog_vis');
+            annot_scroller.scrollLeft(0);
+
             highlight_condition = function (n) {
                 return node.id() === n.id();
             };
@@ -470,6 +474,65 @@ var hog_theme = function () {
 
         // open at root level when created
         mouse_over_node(tree.root());
+
+        // make board panel sticky to tree panel and right
+        set_board_width_on_window_resize();
+
+        // make hogvis header block (scale, hogid, etc..) fixed to top when scroll
+        set_fixed_header_on_window_scroll();
+
+        // make the vis panel resizable
+        set_resize_on_drag(tree);
+
+    // function to set up drag to resize tree and board panel
+    // rearranged code from http://stackoverflow.com/questions/26233180/resize-div-on-border-drag-and-drop
+    function set_resize_on_drag(tree_to_resize){
+
+    // Add a drag div between tree and board panel
+    var dragDiv = document.createElement("div");
+    var tree_panel = document.getElementById("tnt_tree_container_hog_vis");
+    dragDiv.id = 'drag';
+    dragDiv.style.height = $("#tnt_tree_container_hog_vis").height() + "px";
+    tree_panel.parentNode.insertBefore(dragDiv, tree_panel.nextSibling);
+
+    var isResizing = false,
+    lastDownX = 0;
+
+    var container = $('#hog_vis'),
+        left = $('#tnt_tree_container_hog_vis'),
+        right = $('#tnt_annot_container_hog_vis'),
+        handle = $('#drag');
+
+    handle.on('mousedown', function (e) {
+        isResizing = true;
+        lastDownX = e.clientX;
+    });
+
+    $(document).on('mousemove', function (e) {
+        // we don't want to do anything if we aren't resizing.
+        if (!isResizing)
+            return;
+
+        // compute the new width of tree panel
+        var nw = e.clientX - container.offset().left;
+        //make sure that we left at least 50 px to the board panel and that at least 50 px large
+        var nwld = Math.min(container.width()-50, nw);
+        nwld = Math.max(50, nwld);
+
+        // resize tree panel to new width and update board panel
+        left.css('width', nwld);
+        set_scroller_width();
+
+        // update the tree according to the new tree panel size with min 100px width
+        tree_to_resize.layout().width(Math.max(200, nwld - 20));
+        tree_to_resize.update();
+    }).on('mouseup', function (e) {
+        // stop resizing
+        isResizing = false;
+
+});
+    };
+
     };
 
     var truncate = function (text, width) {
@@ -516,6 +579,52 @@ var hog_theme = function () {
         }
         return maxs;
     };
+
+    // resize the board container to fill space between tree panel and right
+    function set_scroller_width(){
+
+        var viewerC = document.getElementById("hog_vis");
+        var viewerS = document.getElementById("tnt_annot_container_hog_vis");
+        var viewerT = document.getElementById("tnt_tree_container_hog_vis");
+
+        var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 40;
+        viewerS.style.width = scroller_width + "px";
+    };
+
+    // function to set up automatic board resizing on window resize
+    function set_board_width_on_window_resize(){
+
+    set_scroller_width();
+
+    window.onresize = function() {
+        set_scroller_width();
+        }
+    };
+
+    // function to fixed the hogvis header block to top when scroll
+    function set_fixed_header_on_window_scroll(){
+    var stickyHeaderTop = $('#hogvisheader').offset().top;
+        var shw = $('#hogvisheader').width();
+        $(window).scroll(function () {
+        if ($(window).scrollTop() > stickyHeaderTop) {
+            $('#hogvisheader').css({
+                position: 'fixed',
+                top: '0px'
+            });
+            $('#hogvisheader').width(shw);
+            $('#hog_vis').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
+        } else {
+            $('#hogvisheader').css({
+                position: 'static',
+                top: '0px'
+            });
+            $('#hogvisheader').width(shw);
+            $('#hog_vis').css('margin-top', '0px');
+        }
+    });
+    };
+
+
 
     return theme;
 };
