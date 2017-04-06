@@ -113,22 +113,22 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['file'],
             'propagate': True,
             'level': 'WARNING',
         },
         'django.request': {
-            'handlers': ['console'],
+            'handlers': ['file'],
             'propagate': True,
             'level': 'INFO'
         },
         'oma': {
-            'handlers': ['console'],
+            'handlers': ['file'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True
         },
         'pyoma': {
-            'handlers': ['console'],
+            'handlers': ['file'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True
         }

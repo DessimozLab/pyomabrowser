@@ -551,9 +551,9 @@ class HOGsVis(EntryCentricMixin, TemplateView):
             levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam_nr))
             phylo = utils.tax.get_induced_taxonomy(levs_of_fam)
             subhogids_per_level = {lev: utils.db.get_subhogids_at_level(fam_nr, lev) for lev in phylo.tax_table['Name']}
-            logger.info("HOG:{:d}: found {:d} levels for this hog with {:d} total subhogs_per_level"
-                        .format(fam_nr, len(levs_of_fam), sum(len(h) for h in subhogids_per_level.values())))
             fam_memb = utils.db.member_of_fam(fam_nr)
+            logger.info("HOG:{:d}: found {:d} levels for this hog with {:d} total subhogs_per_level, {} fam_members"
+                        .format(fam_nr, len(levs_of_fam), sum(len(h) for h in subhogids_per_level.values()), len(fam_memb)))
             per_species = self._build_per_species_table(fam_memb, subhogids_per_level, phylo)
             xrefs = {int(e['EntryNr']): {'omaid': utils.id_mapper['OMA'].map_entry_nr(e['EntryNr']),
                                     'id': e['CanonicalId'].decode()} for e in fam_memb}
