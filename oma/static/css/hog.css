@@ -23,6 +23,15 @@
 
 .tnt_framed {border: none;  border-radius: 0px !important}
 
+.tnt_tooltip_active{
+    opacity:0.95 !important;
+}
+
+.tnt_tooltip{
+    border:none !important;
+    z-index:1000000 !important;
+}
+
 #hog_vis{
     display: inline-block;
     padding: 10px;
@@ -54,7 +63,7 @@
 
 #hogvisheader {
     background:white;
-    z-index:1000000;
+    z-index:10000;
     margin-bottom: 10px;
 }
 

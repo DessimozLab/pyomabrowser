@@ -587,7 +587,7 @@ var hog_theme = function () {
         var viewerC = document.getElementById("hog_vis");
         var viewerS = document.getElementById("tnt_annot_container_hog_vis");
         var viewerT = document.getElementById("tnt_tree_container_hog_vis");
-        
+
         var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 40;
         viewerS.style.width = scroller_width + "px";
 
