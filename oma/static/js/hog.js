@@ -439,6 +439,7 @@ var hog_theme = function () {
         };
 
         change_genedata_vis(genedatavis[0]);
+
         var genedata_picker = d3.select(genedata_picker_div).selectAll(".genedata-button")
             .data(genedatavis);
         var colorbar;
@@ -463,8 +464,6 @@ var hog_theme = function () {
                     bar.selectAll("svg").remove();
                 }
             });
-
-
 
         var vis = tnt()
             .tree(tree)
@@ -589,6 +588,10 @@ var hog_theme = function () {
 
         var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 40;
         viewerS.style.width = scroller_width + "px";
+
+        $('#hogvisheader').width($('#hogs').width()-20); // Because padding of #hogs is 10px
+
+
     };
 
     // function to set up automatic board resizing on window resize
@@ -604,27 +607,22 @@ var hog_theme = function () {
     // function to fixed the hogvis header block to top when scroll
     function set_fixed_header_on_window_scroll(){
     var stickyHeaderTop = $('#hogvisheader').offset().top;
-        var shw = $('#hogvisheader').width();
         $(window).scroll(function () {
         if ($(window).scrollTop() > stickyHeaderTop) {
             $('#hogvisheader').css({
                 position: 'fixed',
                 top: '0px'
             });
-            $('#hogvisheader').width(shw);
             $('#hog_vis').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
         } else {
             $('#hogvisheader').css({
                 position: 'static',
                 top: '0px'
             });
-            $('#hogvisheader').width(shw);
             $('#hog_vis').css('margin-top', '0px');
         }
     });
     };
-
-
 
     return theme;
 };
