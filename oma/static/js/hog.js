@@ -212,7 +212,9 @@ var hog_theme = function () {
                 value: "<a href='"+options.oma_info_url_template + gene.id+"'>"+gene_data[gene.id].omaid+"</a>"
             });
 
-            tnt.tooltip.table().call(this, obj);
+            tnt.tooltip.table()
+                .container(document.getElementsByClassName("tnt_groupDiv")[0])
+                .call(this, obj);
         };
 
         // TnT doesn't have the features we need, so create our own
@@ -530,7 +532,7 @@ var hog_theme = function () {
         isResizing = false;
 
 });
-    };
+    }
 
     };
 
@@ -585,14 +587,14 @@ var hog_theme = function () {
         var viewerC = document.getElementById("hog_vis");
         var viewerS = document.getElementById("tnt_annot_container_hog_vis");
         var viewerT = document.getElementById("tnt_tree_container_hog_vis");
-
+        
         var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 40;
         viewerS.style.width = scroller_width + "px";
 
         $('#hogvisheader').width($('#hogs').width()-20); // Because padding of #hogs is 10px
 
 
-    };
+    }
 
     // function to set up automatic board resizing on window resize
     function set_board_width_on_window_resize(){
@@ -602,7 +604,7 @@ var hog_theme = function () {
     window.onresize = function() {
         set_scroller_width();
         }
-    };
+    }
 
     // function to fixed the hogvis header block to top when scroll
     function set_fixed_header_on_window_scroll(){
