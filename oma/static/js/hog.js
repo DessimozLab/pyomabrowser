@@ -50,6 +50,7 @@ var hog_theme = function () {
         var text_currentLevel = document.getElementById(options.current_level_div);
 
 
+
         var node_display = tnt.tree.node_display()
             .display(function (node){
                 if (highlight_condition(node)){
@@ -442,16 +443,19 @@ var hog_theme = function () {
 
         change_genedata_vis(genedatavis[0]);
 
-        var genedata_picker = d3.select(genedata_picker_div).selectAll(".genedata-button")
+        var genedata_picker = d3.select(genedata_picker_div).selectAll(".genedata-li")
             .data(genedatavis);
+
         var colorbar;
         var bar = d3.select("#colorbar");
 
+        var barText = d3.select('[id="colorbarText"]')[0][0];
+
         genedata_picker.enter()
-            .append("input")
+            .append("li")
             .attr("value", function(d){ return d.name })
-            .attr("type", "button")
-            .attr("class", "genedata-button")
+            .html(function(d){ return "<a>" + d.name + "</a>" })
+            .attr("class", "genedata-li")
             .on("click", function(d) {
                 change_genedata_vis(d);
                 if (col_scale) {
@@ -462,8 +466,10 @@ var hog_theme = function () {
                         .thickness(18)
                         .barlength(~~(tot_width * 0.6));
                     bar.call(colorbar);
+                    barText.innerHTML = d.name;
                 } else {
                     bar.selectAll("svg").remove();
+                    barText.innerHTML = null;
                 }
             });
 

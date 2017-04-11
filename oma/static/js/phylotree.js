@@ -97,7 +97,7 @@ $(document).ready(function() {
 
 
     //load the data from the Json file
-    d3.json("/All/genomes.json", function(error, flare) {
+    d3.json("http://cbrg-oma.ethz.ch/All/genomes.json", function(error, flare) {
         root = flare;
         root.x0 = height / 2;
         root.y0 = 0;
