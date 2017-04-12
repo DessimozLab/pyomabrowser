@@ -24,7 +24,7 @@
 .tnt_framed {border: none;  border-radius: 0px !important}
 
 .tnt_tooltip_active{
-    opacity:0.95 !important;
+    opacity:0.98 !important;
 }
 
 .tnt_tooltip{
@@ -111,7 +111,7 @@
 
 .btn-primary.btn_display_settings {
     border: 1px solid #7f8c8d;
-    color: #7f8c8d;
+    color: black;
 }
 
 .scale-item{

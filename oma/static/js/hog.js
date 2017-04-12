@@ -66,46 +66,75 @@ var hog_theme = function () {
 
         var tot_width = parseInt(d3.select(div).style("width")) - 30;
 
-        // Tooltips
-        var node_tooltip = function (node) {
-            var obj = {};
-            obj.header = node.node_name();
-            obj.rows = [];
-            obj.rows.push({
-                label: 'Freeze',
-                link: function () {
-                    is_node_frozen = !is_node_frozen;
-                },
-                obj: node,
-                value: is_node_frozen ? "Unfreeze tree node" : "Freeze tree node"
+
+        // Node tooltip
+
+        var treeNode_tooltip = tnt.tooltip()
+            .fill (function (node) {
+                // The DOM element is passed as "this"
+                var container = d3.select(this);
+
+                var table = container
+                    .append("table")
+                    .attr("class", "tnt_zmenu")
+                    .attr("border", "solid")
+
+                    table
+                        .append("tr")
+                        .attr("class", "tnt_zmenu_header")
+                        .append("th")
+                        .text(node.node_name());
+
+                // There is 3 freezing possibilites: "Freeze tree at this node", "Unfreeze the tree", "Re-freeze tree at this node"
+
+                    table
+                        .append("tr")
+                        .attr("class", "tnt_zmenu_row")
+                        .append("td")
+                        .style("text-align", "center")
+                        .html(function(){return is_node_frozen ? "<a>Unfreeze the tree</a>" : "<a>Freeze tree at this node</a>"})
+                        .on("click", function () {
+                            if (is_node_frozen){is_node_frozen = false;}
+                            else {is_node_frozen = node.id;}
+                            treeNode_tooltip.close();
+                        });
+
+                    if (is_node_frozen && is_node_frozen != node.id){
+
+                        table
+                            .append("tr")
+                            .attr("class", "tnt_zmenu_row")
+                            .append("td")
+                            .style("text-align", "center")
+                            .html("<a>Re-freeze tree at this node</a>")
+                            .on("click", function () {
+                                is_node_frozen = false;
+                                mouse_over_node(node);
+                                is_node_frozen = node.id ;
+                                treeNode_tooltip.close();
+                            });
+
+                    }
+
+
+                    if (!node.is_leaf() || node.is_collapsed()) {
+                        table
+                            .append("tr")
+                            .attr("class", "tnt_zmenu_row")
+                            .append("td")
+                            .style("text-align", "center")
+                            .html(function () {
+                                return node.is_collapsed() ? "<a> Uncollapse subtree </a>" : "<a> Collapse subtree </a>"
+                            })
+                            .on("click", function () {
+                                node.toggle();
+                                vis.update();
+                                treeNode_tooltip.close();
+                            });
+                    }
+
+
             });
-
-            if (node.is_collapsed()) {
-                obj.rows.push({
-                    label: 'Action',
-                    link: function (node) {
-                        node.toggle();
-                        vis.update();
-                    },
-                    obj: node,
-                    value: "Uncollapse subtree"
-                });
-            }
-
-            if (!node.is_leaf()) {
-                obj.rows.push({
-                    label: 'Action',
-                    link: function (node) {
-                        node.toggle();
-                        vis.update();
-                    },
-                    obj: node,
-                    value: "Collapse subtree"
-                });
-            }
-            tnt.tooltip.table()
-            .call(this, obj);
-        };
 
         // mouse over a node
         var node_hover_tooltip;
@@ -186,7 +215,9 @@ var hog_theme = function () {
                     return "normal";
                 })
                )
-            .on("click", node_tooltip)
+            .on("click", function (d) {
+                treeNode_tooltip.call(this, d);
+            })
             .on("mouseover", mouse_over_node)
             .on("mouseout", mouse_out_node)
             .node_display(node_display)
