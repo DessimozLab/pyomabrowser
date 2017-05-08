@@ -516,30 +516,6 @@ class HOGsVis(EntryCentricMixin, TemplateView):
     template_name = "hog_vis.html"
     show_internal_labels = True
 
-    def _build_per_species_table(self, entries, subhogids_per_lev, taxonomy):
-        per_species = {}
-        for e in entries:
-            genome = utils.id_mapper['OMA'].genome_of_entry_nr(e['EntryNr'])
-            species_dict = per_species.get(genome['SciName'].decode(), {})
-            try:
-                lineage = taxonomy.get_parent_taxa(genome['NCBITaxonId'])
-            except db.InvalidTaxonId:
-                logger.exception("cannot find lineage information for {}".format(genome['NCBITaxonId']))
-                continue
-
-            for lin in lineage:
-                lin_str = lin['Name'].decode()
-                if lin_str not in species_dict:
-                    species_dict[lin_str] = [[] for _ in range(len(subhogids_per_lev[lin['Name']]))]
-                for k, subhogid in enumerate(subhogids_per_lev[lin['Name']]):
-                    if e['OmaHOG'].startswith(subhogid):
-                        species_dict[lin_str][k].append(int(e['EntryNr']))
-                        break
-                else:
-                    raise ValueError('no id found for {}({})'.format(e['EntryNr'], e['OmaHOG']))
-            per_species[genome['SciName'].decode()] = species_dict
-        return per_species
-
     def get_context_data(self, entry_id, idtype='OMA', **kwargs):
         context = super(HOGsVis, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
@@ -548,20 +524,12 @@ class HOGsVis(EntryCentricMixin, TemplateView):
                         })
         try:
             fam_nr = entry.hog_family_nr
-            levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam_nr))
-            phylo = utils.tax.get_induced_taxonomy(levs_of_fam)
-            subhogids_per_level = {lev: utils.db.get_subhogids_at_level(fam_nr, lev) for lev in phylo.tax_table['Name']}
             fam_memb = utils.db.member_of_fam(fam_nr)
-            logger.info("HOG:{:d}: found {:d} levels for this hog with {:d} total subhogs_per_level, {} fam_members"
-                        .format(fam_nr, len(levs_of_fam), sum(len(h) for h in subhogids_per_level.values()), len(fam_memb)))
-            per_species = self._build_per_species_table(fam_memb, subhogids_per_level, phylo)
             xrefs = {int(e['EntryNr']): {'omaid': utils.id_mapper['OMA'].map_entry_nr(e['EntryNr']),
                                     'id': e['CanonicalId'].decode()} for e in fam_memb}
 
             context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
                             'hog_members': fam_memb,
-                            'per_species': json.dumps(per_species),
-                            'species_tree': json.dumps(phylo.as_dict()),
                             'xrefs': json.dumps(xrefs),
                             'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
                             'show_internal_labels': self.show_internal_labels,

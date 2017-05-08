@@ -19,6 +19,7 @@
   <script src="http://tntvis.github.io/tnt/build/tnt.min.js" charset="utf-8"></script>
 <script src="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.min.js" charset="UTF-8"></script>
 <script src="{% static "js/hog.js" %}" charset="UTF-8"></script>
+    <script src="{% static "js/orthoxml-hogvis.min.js" %}" charset="UTF-8"></script>
 
 {% endblock %}
 
@@ -46,18 +47,23 @@
 
   // Init the hogvis
     (function () {
-        var tree = {{ species_tree|safe }};
         var query = {'id': {{ entry.entry_nr }} };
-        var per_species = {{ per_species|safe }};
         var tooltip_data = {{ xrefs|safe }};
-        var options = {'show_internal_labels': {{ show_internal_labels|yesno:"true,false" }},
+
+        $.when(
+            $.ajax({url: "/oma/hogs/{{ entry.entry_nr }}/orthoxml",
+                    dataType: "text"}),
+            $.ajax({url: "/All/speciestree.nwk"})
+        ).then(function(orthoxml, speciestree){
+            var hog_data = hogvis.parse_orthoxml(speciestree[0], orthoxml[0]);
+            var options = {'show_internal_labels': {{ show_internal_labels|yesno:"true,false" }},
                        'oma_info_url_template': "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1=",
-                       'current_level_div': "current_level_text"}
+                       'current_level_div': "current_level_text"};
 
-        var theme = hog_theme();
-        theme(document.getElementById ("hog_vis"), query, per_species,
-                tree, tooltip_data, options, document.getElementById("genedata-vis"));
-
+            var theme = hog_theme();
+            theme(document.getElementById ("hog_vis"), query, hog_data.per_species,
+                  hog_data.tree, tooltip_data, options, document.getElementById("genedata-vis"));
+        });
     }) ();
 
 </script>
