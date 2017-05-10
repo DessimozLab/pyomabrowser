@@ -48,7 +48,7 @@
   // Init the hogvis
     (function () {
         var query = {'id': {{ entry.entry_nr }} };
-        var tooltip_data = {{ xrefs|safe }};
+        var tooltip_data = undefined; //{{ xrefs|safe }};
 
         $.when(
             $.ajax({url: "/oma/hogs/{{ entry.entry_nr }}/orthoxml",

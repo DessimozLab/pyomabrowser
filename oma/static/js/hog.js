@@ -48,6 +48,19 @@ var hog_theme = function () {
         };
         var gene_color_function;
         var text_currentLevel = document.getElementById(options.current_level_div);
+        var tooltip_data;
+        if (gene_data !== undefined){
+            tooltip_data = gene_data;
+        } else {
+            $.getJSON("/oma/hogdata/"+query.id+"/json", function(data) {
+                fam_genedata = {};
+                tooltip_data = {};
+                data.forEach(function (gene) {
+                    fam_genedata[gene.id] = gene;
+                    tooltip_data[gene.id] = {omaid: gene.protid, id: gene.xrefid};
+                });
+            });
+        }
 
 
         var node_display = tnt.tree.node_display()
@@ -203,13 +216,13 @@ var hog_theme = function () {
 
         var gene_tooltip = function (gene) {
             var obj = {};
-            obj.header = gene_data[gene.id].omaid;
+            obj.header = tooltip_data[gene.id].omaid;
             obj.rows = [];
-            obj.rows.push({label: "Name", value: gene_data[gene.id].id});
+            obj.rows.push({label: "Name", value: tooltip_data[gene.id].id});
             obj.rows.push({
                 label: "Information",
                 obj: gene,
-                value: "<a href='"+options.oma_info_url_template + gene.id+"'>"+gene_data[gene.id].omaid+"</a>"
+                value: "<a href='"+options.oma_info_url_template + gene.id+"'>"+tooltip_data[gene.id].omaid+"</a>"
             });
 
             tnt.tooltip.table().call(this, obj);

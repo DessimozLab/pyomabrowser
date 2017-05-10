@@ -524,13 +524,7 @@ class HOGsVis(EntryCentricMixin, TemplateView):
                         })
         try:
             fam_nr = entry.hog_family_nr
-            fam_memb = utils.db.member_of_fam(fam_nr)
-            xrefs = {int(e['EntryNr']): {'omaid': utils.id_mapper['OMA'].map_entry_nr(e['EntryNr']),
-                                    'id': e['CanonicalId'].decode()} for e in fam_memb}
-
             context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
-                            'hog_members': fam_memb,
-                            'xrefs': json.dumps(xrefs),
                             'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
                             'show_internal_labels': self.show_internal_labels,
                             })
