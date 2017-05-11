@@ -33,11 +33,10 @@
 
     {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
     {% else %}
-    <h3>Hierarchical group {{ fam.id }} open at level of <span id="current_level_text" style="font-weight:bold;"></span> </h3>
-
+        <h3>Hierarchical group {{ fam.id }} <span id="open_txt">open at level of </span><span id="current_level_text" style="font-weight:bold;"></span> </h3>
+    <div id="loader"><img src="{% static "image/loading.gif"%}"></div>
     <div id="genedata-vis"> </div>
     <div id="colorbar"> </div>
-
   </div>
 
   <div id="hog_vis"> </div>
@@ -47,6 +46,7 @@
 
   // Init the hogvis
     (function () {
+        $('#open_txt').hide();
         var query = {'id': {{ entry.entry_nr }} };
         var tooltip_data = undefined; //{{ xrefs|safe }};
 
@@ -59,10 +59,15 @@
             var options = {'show_internal_labels': {{ show_internal_labels|yesno:"true,false" }},
                        'oma_info_url_template': "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1=",
                        'current_level_div': "current_level_text"};
+            var when_ready = function(){
+                $('#open_txt').show();
+                $('#loader').hide();
+            };
 
             var theme = hog_theme();
             theme(document.getElementById ("hog_vis"), query, hog_data.per_species,
-                  hog_data.tree, tooltip_data, options, document.getElementById("genedata-vis"));
+                  hog_data.tree, tooltip_data, options, document.getElementById("genedata-vis"),
+                  when_ready);
         });
     }) ();
 

@@ -25,7 +25,7 @@ var hog_theme = function () {
         }
     ];
 
-    var theme = function (div, query, per_species3, tree_obj, gene_data, options, genedata_picker_div) {
+    var theme = function (div, query, per_species3, tree_obj, gene_data, options, genedata_picker_div, ready_callback) {
         /////////////
         // TREE /////
         /////////////
@@ -216,6 +216,8 @@ var hog_theme = function () {
 
         var gene_tooltip = function (gene) {
             var obj = {};
+            if (typeof(tooltip_data) !== Object) return;
+
             obj.header = tooltip_data[gene.id].omaid;
             obj.rows = [];
             obj.rows.push({label: "Name", value: tooltip_data[gene.id].id});
@@ -484,6 +486,7 @@ var hog_theme = function () {
             .board(annot)
             .track(track);
         vis(div);
+        ready_callback();
 
         // open at root level when created
         mouse_over_node(tree.root());

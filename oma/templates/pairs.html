@@ -35,7 +35,7 @@
         <table class="table table-hover" id="pairTable"
                data-show-toggle="true"
                data-show-columns="true" data-search="true" data-show-export="true"
-               data-pagination="true" data-page-size="10" data-page-list="[10, 25, 50, 100, All]"
+               data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
                data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
@@ -83,11 +83,15 @@ tab.bootstrapTable({
     showMultiSort: true,
     onPostBody: function(){
         domains.visualize_all(".protein", {{ longest_seq }});
+    },
+    onLoadSuccess: function(data){
+        tab.bootstrapTable('hideLoading');
     }
 });
 var icons = tab.bootstrapTable('getOptions').icons;
 $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
 tab.bootstrapTable('refreshOptions', {'icons': icons});
+tab.bootstrapTable('showLoading');
 </script>
 {% endif %}
 {% endblock contentTab %}
