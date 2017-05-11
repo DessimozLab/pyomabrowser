@@ -216,7 +216,7 @@ var hog_theme = function () {
 
         var gene_tooltip = function (gene) {
             var obj = {};
-            if (typeof(tooltip_data) !== Object) return;
+            if (typeof(tooltip_data) !== "object") return;
 
             obj.header = tooltip_data[gene.id].omaid;
             obj.rows = [];
