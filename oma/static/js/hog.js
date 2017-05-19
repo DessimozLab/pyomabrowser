@@ -480,7 +480,7 @@ var hog_theme = function () {
         var colorbar;
         var bar = d3.select("#colorbar");
 
-        var barText = d3.select('[id="colorbarText"]')[0][0];
+        var barText = d3.select('[id="colorbarText"]')[0][0]; // )0_o(
 
         genedata_picker.enter()
             .append("li")
