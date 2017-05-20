@@ -640,7 +640,7 @@ def release(request):
 
 class GenomesJson(JsonModelMixin, View):
     json_fields = {'uniprot_species_code': None,
-                   'sciname': None, 'ncbi_taxon_id':"ncbi","totEntries":"prots"
+                   'sciname': None, 'ncbi_taxon_id':"ncbi","totEntries":"prots", "kingdom":"kingdom"
                    }
 
     def get(self, request, *args, **kwargs):

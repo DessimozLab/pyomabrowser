@@ -84,17 +84,17 @@
                 <p class="section-title">SPECIES INFORMATION
 
 
-                    <button type="button" class="btn btn-default pull-right icon_selector disabled">
+                    <button type="button" id="btree" class="btn btn-default pull-right icon_selector">
                         <span class="glyphicon glyphicon-tree-deciduous pull-right " aria-hidden="true"
                               data-toggle="tooltip" data-placement="top" title="view as species tree" ></span>
                     </button>
 
-                    <button type="button" class="btn btn-default pull-right icon_selector" >
+                    <button type="button" id="blist"  class="btn btn-default pull-right icon_selector" >
                         <span class="glyphicon glyphicon-list pull-right " aria-hidden="true"
                               data-toggle="tooltip" data-placement="top" title="view as species list" ></span>
                     </button>
 
-                    <button type="button" class="btn btn-default pull-right icon_selector disabled" >
+                    <button type="button" id="bhist"  class="btn btn-default pull-right icon_selector" >
                         <span class="glyphicon  glyphicon-stats pull-right " aria-hidden="true"
                               data-toggle="tooltip" data-placement="top" title="view as species histogram"></span>
                     </button>
@@ -106,33 +106,10 @@
 
                 <div class="section-box">
 
-                    <div class="panel panel-default">
 
-                        <div class="panel-body">
-
-                            <table class="table table-hover" id="genomeTable"
-                                   data-show-toggle="true"
-                                   data-show-columns="true" data-search="true" data-show-export="true"
-                                   data-pagination="true" data-page-size="10" data-page-list="[10, 25, 50, 100, All]"
-                                   data-mobile-responsive="true" data-check-on-init="true"
-                                   data-undefined-text=""
-                                   data-id-field="code" data-row-attributes="tablehooks.add_proteinrow_attrs"
-                                   data-url="{% url 'genomes_json' %}">
-                                    <thead>
-                                        <tr>
-                                            <th data-field="uniprot_species_code" data-sortable="true" data-filter-control="select">Code</th>
-                                            <th data-field="sciname" data-sortable="true" data-filter-control="select">Scientific Name</th>
-                                            <th data-field="prots" data-sortable="true" data-filter-control="select"># of Sequences</th>
-                                            <th data-field="ncbi" data-sortable="true" data-filter-control="select">NCBI TaxonId</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-
-
-                            </table>
+                        <div class="panel-body" id="genome_panel" >
 
                         </div>
-                    </div>
 
                 </div>
 
@@ -162,25 +139,116 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/extensions/mobile/bootstrap-table-mobile.min.js"></script>
 <script src="{% static "js/tableExport.min.js" %}"></script>
 
-<!-- activate tooltip -->
-<script>
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-})
-</script>
 
-<!-- table settings -->
 <script>
-    var tab = $("#genomeTable");
-    tab.bootstrapTable({
-        reorderableColumns: true,
-        clickToSelect: false,
-        filterControl: false,
-        showMultiSort: true,
+
+    // turn on tooltips
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+
+    // get the button and set update genome function
+    var btree = document.getElementById("btree");
+    btree.addEventListener("click", function(){
+        btree.addEventListener("click", update_genome_viewer(this.id));
     });
+
+    var blist = document.getElementById("blist");
+    blist.addEventListener("click", function(){
+        blist.addEventListener("click", update_genome_viewer(this.id));
+        });
+
+    var bhist = document.getElementById("bhist");
+    bhist.addEventListener("click", function(){
+        bhist.addEventListener("click", update_genome_viewer(this.id));
+        });
+
+    function update_genome_viewer(bid){
+
+        // clean current viewer
+        var cviewer = document.getElementById("genome_panel");
+        cviewer.innerHTML='';
+        while (cviewer.firstChild) {
+            cviewer.removeChild(cviewer.firstChild);
+        }
+
+        // build tree view
+        if (bid === "btree") {
+
+            // display under construction
+            var under = document.createElement('h3');
+            under.innerHTML = "This part is under construction!";
+            under.className = "text-center";
+            cviewer.appendChild(under);
+
+        }
+
+        // build table view
+        else if (bid === "blist") {
+
+            // create empty table
+            var tbl = document.createElement('table');
+            tbl.id = "genomeTable";
+            cviewer.appendChild(tbl);
+
+            // feed it !
+            init_table('genomeTable');}
+
+        // build hist view
+        else if (bid === "bhist") {
+            // display under construction
+            var under = document.createElement('h3');
+            under.innerHTML = "This part is under construction!";
+            under.className = "text-center";
+            cviewer.appendChild(under);
+        }
+
+    }
+
+    function init_table(div_id){
+
+    var tab = $('#' + div_id);
+    tab.bootstrapTable({
+        url: "{% url 'genomes_json' %}",
+        reorderableColumns:true,
+        pagination: true,
+        pageSize:10,
+        showColumns: true,
+        search: true,
+        showExport: true,
+        pageList: [10, 25, 50, 100, "All"],
+        mobileResponsive: true,
+        checkOnInit: true,
+        undefinedText: "",
+        idField: 'code',
+        showToggle: 'true',
+
+        columns: [{
+            field: 'uniprot_species_code',
+            title: 'Code'
+        }, {
+            field: 'sciname',
+            title: 'Scientific Name'
+        }, {
+            field: 'prots',
+            title: '# of Sequences'
+        },
+        {
+            field: 'ncbi',
+            title: 'NCBI TaxonId'
+        },
+        {
+            field: 'kingdom',
+            title: 'Kingdom'
+        }]
+    });
+
     var icons = tab.bootstrapTable('getOptions').icons;
     $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
     tab.bootstrapTable('refreshOptions', {'icons': icons});
+    }
+
 </script>
+
 
 {% endblock content %}
