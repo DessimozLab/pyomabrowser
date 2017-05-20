@@ -1,0 +1,126 @@
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}Matrix specifications{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .master-tile{
+        background-color: #f8f9fa;
+        padding: 30px
+    }
+
+    .section-title{
+        color:#bbb;
+        font-weight: bold;
+        font-size: 1.2em !important;
+
+    }
+
+    .section-tile{
+        margin-bottom:24px;
+    }
+
+    .section-box{
+        background-color: #fff;
+        padding: 16px;
+        box-shadow: 2px 2px 1px #eee;
+        border-radius: 4px;
+        margin:8px;
+    }
+
+    .icon_selector{
+        margin-right:8px;
+        color:#555;
+    }
+
+    .text_selector{
+        margin-right:8px;
+        color:#555;
+    }
+
+
+    .number-span{margin-left:1em;}
+
+
+</style>
+
+<div class="container-fluid" >
+
+    <div class="row">
+
+        <div class="col-sm-12 col-md-10 col-md-offset-1 master-tile">
+
+            <div class="section-tile">
+
+
+                <p class="section-title">OMA RELEASE OF {{ rel_name }}</p>
+
+
+                <div class="section-box">
+
+
+                    <ul class="list-unstyled">
+                        <li><b>Number of species: </b> <span class="number-span"> {{ nb_genome }}</span></li>
+                        <li><b>Number of OMA groups: </b> <span class="number-span">779787</span></li>
+                        <li><b>Number of proteins: </b> <span class="number-span">11404511</span></li>
+                        <li><b>Proteins with external links: </b> <span class="number-span">10699635 (93.8 %)</span></li>
+                        <li><b>Gene Ontology: </b> <span class="number-span">7820348 entries in 470620 OMA groups</span></li>
+                    </ul>
+
+
+                </div>
+
+            </div>
+
+            <div class="section-tile">
+
+
+                <p class="section-title">SPECIES INFORMATION
+
+
+                    <button type="button" class="btn btn-default pull-right icon_selector">
+                        <span class="glyphicon glyphicon-tree-deciduous pull-right " aria-hidden="true"
+                        data-toggle="tooltip" data-placement="top" title="view as species tree" ></span>
+                    </button>
+
+                    <button type="button" class="btn btn-default pull-right icon_selector" >
+                        <span class="glyphicon glyphicon-list pull-right " aria-hidden="true"
+                        data-toggle="tooltip" data-placement="top" title="view as species list" ></span>
+                    </button>
+
+                    <button type="button" class="btn btn-default pull-right icon_selector" >
+                        <span class="glyphicon  glyphicon-stats pull-right " aria-hidden="true"
+                        data-toggle="tooltip" data-placement="top" title="view as species histogram"></span>
+                    </button>
+
+                    <span class="pull-right text_selector">Change the view: </span>
+
+                </p>
+
+
+                <div class="section-box">
+
+
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+
+{% endblock content %}

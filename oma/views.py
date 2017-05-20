@@ -628,6 +628,12 @@ def fellowship(request):
         form = forms.FellowshipApplicationForm()
     return render(request, 'fellowship.html', {'form': form})
 
+def release(request):
+    release_name = utils.db.get_release_name()
+    genome_key = utils.id_mapper['OMA']._genome_keys
+    number_genome = len(genome_key)
+    return render(request, 'release.html', {'rel_name': release_name, 'nb_genome': number_genome })
+
 
 def export_marker_genes(request):
     if request.method == 'GET' and 'genomes' in request.GET:
