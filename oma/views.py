@@ -628,11 +628,26 @@ def fellowship(request):
         form = forms.FellowshipApplicationForm()
     return render(request, 'fellowship.html', {'form': form})
 
+
 def release(request):
     release_name = utils.db.get_release_name()
     genome_key = utils.id_mapper['OMA']._genome_keys
     number_genome = len(genome_key)
-    return render(request, 'release.html', {'rel_name': release_name, 'nb_genome': number_genome })
+    number_proteins = utils.id_resolver.max_entry_nr
+
+    return render(request, 'release.html', {'rel_name': release_name, 'nb_genome': number_genome, 'nb_prot': number_proteins })
+
+
+class GenomesJson(JsonModelMixin, View):
+    json_fields = {'uniprot_species_code': None,
+                   'sciname': None, 'ncbi_taxon_id':"ncbi","totEntries":"prots"
+                   }
+
+    def get(self, request, *args, **kwargs):
+        genome_key = utils.id_mapper['OMA']._genome_keys
+        lg = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_table[utils.db.id_mapper['OMA']._entry_off_keys[e - 1]]) for e in genome_key]
+        data = list(self.to_json_dict(lg))
+        return JsonResponse(data, safe=False)
 
 
 def export_marker_genes(request):

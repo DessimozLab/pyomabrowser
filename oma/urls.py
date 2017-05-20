@@ -54,6 +54,7 @@ urlpatterns = [
     url(r'^thanks/', TemplateView.as_view(template_name='thanks.html'), name='thanks'),
 
     url(r'^release/$', views.release, name='release'),
+    url(r'^release/json/$', views.GenomesJson.as_view(), name="genomes_json"),
     url(r'^current/$', views.CurrentView.as_view(), name='current'),
     url(r'^archives/$', views.ArchiveView.as_view(), name='archives'),
     url(r'^archives/(?P<release>[A-Za-z0-9.]+)/$', views.ArchiveView.as_view(), name='archives'),
