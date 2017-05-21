@@ -1,10 +1,7 @@
 // turn on bootstrap function
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip();
 
-    $('.collapse').collapse();
+$('[data-toggle="tooltip"]').tooltip();
 
-});
 
 ///////////////
 /// setting_div DOM  ///
@@ -139,6 +136,8 @@ function update_genome_viewer(bid) {
 
         // build it !
         init_hist('hist_div');
+
+        $('.collapse').collapse();
     }
 
 }
@@ -252,9 +251,9 @@ function init_hist(div_id) {
 
     // define the color schema
     color_schema = [
-        {name: "Archaea", color: "#ecf0f1"},
-        {name: "Bacteria", color: "#bdc3c7"},
-        {name: "Eukaryota", color: "#7f8c8d"},
+        {name: "Archaea", color: "#428bca"},
+        {name: "Bacteria", color: "#5cb85c"},
+        {name: "Eukaryota", color: "#d9534f"},
     ];
 
     add_legend("hist_legend");
@@ -349,14 +348,14 @@ function init_hist(div_id) {
             .on("mouseover", function (d) {
                 d3.select("#bar_"+ d).each(function(v, i) {
                     mouseover_bar(v);
-                    d3.select(this).attr('fill','rgba(65,193,194,0.4)');
+                    d3.select(this).attr("opacity", '.80');
                 })
             })
             .on("mouseout", function (d) {
                 d3.select("#bar_"+ d).each(function(v, i) {
                     mouseout_bar(v);
                     var color_d =  color_schema.filter(function(w){ return w.name === v.kingdom; })[0];
-                    d3.select(this).attr('fill',function(){return color_d ? color_d.color : "rgb(255,0,0)"});
+                    d3.select(this).attr("opacity", '1');
                 })
             });
 

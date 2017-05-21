@@ -43,13 +43,18 @@
   }
 .x.axis text{
     font-weight: lighter;
+    font-family: monospace;
+}
+.y.axis text{
+    font-weight: bolder;
 }
 .x.axis text:hover  {
     font-size: 8px;
     font-weight: bold;
 }
 .bar:hover {
-    fill: rgba(65,193,194,0.4);
+    opacity: 0.8;
+    /* fill: rgba(65,193,194,0.4); */
   }
 svg text.label {
   fill:black;
