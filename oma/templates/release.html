@@ -260,6 +260,12 @@
             div.style.width = "100%";
             cviewer.appendChild(div);
 
+            // create legend div
+            var div = document.createElement('div');
+            div.id = "hist_legend";
+            div.style.width = "100%";
+            cviewer.appendChild(div);
+
             (function() {
   var filter_ui_checks = document.getElementsByName("filter_ui");
   for (i = 0; i < filter_ui_checks.length; i++) {
@@ -328,9 +334,66 @@ function make_y_gridlines() {
         .ticks(5)
 }
 
+
+
     function init_hist(div_id){
 
+        function add_legend(div_id){
+
+            d3.select("svg").remove();
+
+            var margin = {top:10, right:10, bottom:90, left:10};
+
+
+            var height = 500 - margin.top - margin.bottom;
+
+            // Legend part
+
+            var svgLegend = d3.select("#" + div_id).append("svg")
+                    .attr("width", 800)
+                    .attr("height",30)
+                    .append("g").attr("class", "container")
+                    .attr("transform", "translate("+ margin.left +","+ margin.top +")");
+
+                // draw legend
+  var legend = svgLegend.selectAll(".legend")
+      .data([{
+                name: "Archaea",
+                color: "#ecf0f1"},
+      {
+                name: "Bacteria",
+                color: "#bdc3c7"},
+      {
+                name: "Eukaryota",
+                color: "#7f8c8d"},
+      {
+                color: "#2c3e50",
+                name: "_default"}])
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(" + i * 100 + ",0 )"; });
+
+  // draw legend colored rectangles
+  legend.append("rect")
+      .attr("x",  18)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", function(d){return d.color});
+
+  // draw legend text
+  legend.append("text")
+      .attr("x",  40)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "start")
+      .text(function(d) { return d.name;})
+
+                }
+
         d3.select("svg").remove();
+
+
+        add_legend("hist_legend");
 
 
         d3.json("{% url 'genomes_json' %}", function(error, data) {
@@ -458,19 +521,66 @@ function make_y_gridlines() {
                     .attr("transform", "rotate(-90)")
                     .style("text-anchor", "start");
 
-
-            svgContainer.append("g")
+                svgContainer.append("g")
         .attr("class", "grid")
         .call(make_y_axis()
             .tickSize(-width, 0, 0)
             .tickFormat("")
         )
 
-        }
+            function add_legend(div_id){
+
+            // Legend part
+
+            var svgLegend = d3.select("#" + div_id).append("svg")
+                    .attr("width", 800)
+                    .attr("height",100)
+                    .append("g").attr("class", "container")
+                    .attr("transform", "translate("+ margin.left +","+ margin.top +")");
+
+                // draw legend
+  var legend = svgContainer.selectAll(".legend")
+      .data([{
+                name: "Archaea",
+                color: "#ecf0f1"},
+      {
+                name: "Bacteria",
+                color: "#bdc3c7"},
+      {
+                name: "Eukaryota",
+                color: "#7f8c8d"},
+      {
+                color: "#2c3e50",
+                name: "_default"}])
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+  // draw legend colored rectangles
+  legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", function(d){return d.color});
+
+  // draw legend text
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { return d.name;})
+
+                }
+
+        })
 
 
 
-        )}
+
+
+
+    }
 
     function filterJSON(json, key, values) {
               var result = [];
