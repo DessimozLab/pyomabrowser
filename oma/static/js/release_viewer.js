@@ -347,15 +347,19 @@ function init_hist(div_id) {
             .attr("id", function (d) {return "xlab_" + d})
             .style("text-anchor", "end")
             .on("mouseover", function (d) {
-                console.log(d);
-                var xlabel = d3.select("#bar_"+ d.uniprot_species_code).each(function(v, i) {
-                    d3.select(this).style("font-weight", "bold");
-                });
-
+                d3.select("#bar_"+ d).each(function(v, i) {
+                    mouseover_bar(v);
+                    d3.select(this).attr('fill','rgba(65,193,194,0.4)');
+                })
             })
             .on("mouseout", function (d) {
-
+                d3.select("#bar_"+ d).each(function(v, i) {
+                    mouseout_bar(v);
+                    var color_d =  color_schema.filter(function(w){ return w.name === v.kingdom; })[0];
+                    d3.select(this).attr('fill',function(){return color_d ? color_d.color : "rgb(255,0,0)"});
+                })
             });
+
 
         svgContainer.selectAll(".bar")
             .data(data)
@@ -378,25 +382,12 @@ function init_hist(div_id) {
                 return height - yScale(d.prots)
             })
             .on("mouseover", function (d) {
-                var xlabel = d3.select("#xlab_"+ d.uniprot_species_code).each(function(v, i) {
-                    d3.select(this).style("font-weight", "bold");
-                });
-                tooltip.transition()
-                    .duration(200)
-                    .style("opacity", .95);
-                tooltip.html(d.sciname + "</br><b>" + d.uniprot_species_code
-                    + ", " + d.prots + "</b>")
-                    .style("left", (d3.event.pageX + 5) + "px")
-                    .style("top", (d3.event.pageY - 60) + "px");
+
+                mouseover_bar(d);
+
             })
             .on("mouseout", function (d) {
-                var xlabel = d3.select("#xlab_"+ d.uniprot_species_code).each(function(v, i) {
-                        d3.select(this)
-                            .style("font-weight", "");
-                });
-                tooltip.transition()
-                    .duration(500)
-                    .style("opacity", 0);
+                mouseout_bar(d);
             });
 
         var yAxis_g = svgContainer.append("g")
@@ -417,6 +408,29 @@ function init_hist(div_id) {
                 .tickSize(-width, 0, 0)
                 .tickFormat("")
             );
+
+        function mouseover_bar(d){
+            d3.select("#xlab_"+ d.uniprot_species_code).each(function(v, i) {
+                    d3.select(this).style("font-weight", "bold");
+                });
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .95);
+                tooltip.html(d.sciname + "</br><b>" + d.uniprot_species_code
+                    + ", " + d.prots + "</b>")
+                    .style("left", (d3.event.pageX + 5) + "px")
+                    .style("top", (d3.event.pageY - 60) + "px");
+        }
+
+        function mouseout_bar(d){
+            d3.select("#xlab_"+ d.uniprot_species_code).each(function(v, i) {
+                        d3.select(this)
+                            .style("font-weight", "");
+                });
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+        }
 
         function add_legend(div_id) {
 
