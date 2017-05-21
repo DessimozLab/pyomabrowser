@@ -316,6 +316,8 @@ function init_hist(div_id) {
             .append("g").attr("class", "container")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+        var hovered_bar;
+
 
         xScale.domain(data.map(function (d) {
             return d.uniprot_species_code;
@@ -333,23 +335,33 @@ function init_hist(div_id) {
                 .ticks(10)
         }
 
-
         var xAxis_g = svgContainer.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + (height) + ")")
             .call(xAxis)
             .selectAll("text")
-            .attr("y", 0)
-            .attr("x", 9)
-            .attr("dy", ".35em")
-            .attr("transform", "rotate(90)")
-            .style("text-anchor", "start");
+            .attr("y", -14)
+            .attr("x", -10)
+            .attr("dy", "2em")
+            .attr("transform", "rotate(-90)")
+            .attr("id", function (d) {return "xlab_" + d})
+            .style("text-anchor", "end")
+            .on("mouseover", function (d) {
+                console.log(d);
+                var xlabel = d3.select("#bar_"+ d.uniprot_species_code).each(function(v, i) {
+                    d3.select(this).style("font-weight", "bold");
+                });
 
+            })
+            .on("mouseout", function (d) {
+
+            });
 
         svgContainer.selectAll(".bar")
             .data(data)
             .enter()
             .append("rect")
+            .attr("id", function (d) {return "bar_" + d.uniprot_species_code})
             .attr("class", "bar")
             .attr("x", function (d) {
                 return xScale(d.uniprot_species_code);
@@ -366,6 +378,9 @@ function init_hist(div_id) {
                 return height - yScale(d.prots)
             })
             .on("mouseover", function (d) {
+                var xlabel = d3.select("#xlab_"+ d.uniprot_species_code).each(function(v, i) {
+                    d3.select(this).style("font-weight", "bold");
+                });
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", .95);
@@ -375,6 +390,10 @@ function init_hist(div_id) {
                     .style("top", (d3.event.pageY - 60) + "px");
             })
             .on("mouseout", function (d) {
+                var xlabel = d3.select("#xlab_"+ d.uniprot_species_code).each(function(v, i) {
+                        d3.select(this)
+                            .style("font-weight", "");
+                });
                 tooltip.transition()
                     .duration(500)
                     .style("opacity", 0);
@@ -384,11 +403,13 @@ function init_hist(div_id) {
             .attr("class", "y axis")
             .call(yAxis)
             .selectAll("text")
-            .attr("y", 0)
+            .attr("y", -2)
             .attr("x", 9)
             .attr("dy", "-.15em")
             .attr("transform", "rotate(-90)")
             .style("text-anchor", "end");
+
+
 
         svgContainer.append("g")
             .attr("class", "grid")

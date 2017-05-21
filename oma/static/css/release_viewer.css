@@ -31,65 +31,70 @@
 }
 .number-span{margin-left:1em;}
 
-
-
-    .axis path, .axis line {
-        fill: none;
-        stroke: #fff;
-    }
-
-    .axis text {
-        font-size: 8px;
-      }
-
-    .bar {
-      }
-
-    .bar:hover {
-        fill: rgba(65,193,194,0.4);
-      }
-
-    svg text.label {
-      fill:black;
-      font-weight: 400;
-      text-anchor: middle;
-    }
-
-    .tooltip {
-        background-color: white;
-      position: absolute;
-      width: auto;
-      height: auto;
-      pointer-events: none;
+/* histogram  */
+.axis path, .axis line {
+    fill: none;
+    stroke: #fff;
 }
-
-    .settings_hist{
-        position: absolute;
-        top: 40px;
-        right: 0px;
-        width: auto;
-        height: auto;
-        background-color: white;
-        padding:8px;
-    }
-
-    .hide_setting
-    {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-        width: auto;
-        height: auto;
-        background-color: white;
-        padding:8px;
-    }
-
-    .grid .tick {
-    stroke: lightgrey;
-    opacity: 0.7;
+.axis text {
+    font-size: 8px;
+    font-weight: lighter;
+    cursor:default
+  }
+.x.axis text{
+    font-weight: lighter;
 }
-    .grid path {
-      stroke-width: 0;
+.x.axis text:hover  {
+    font-size: 8px;
+    font-weight: bold;
+}
+.bar:hover {
+    fill: rgba(65,193,194,0.4);
+  }
+svg text.label {
+  fill:black;
+  font-weight: 400;
+  text-anchor: middle;
+}
+.tooltip {
+    background-color: rgba(255,255,255,0.9);
+  position: absolute;
+  width: auto;
+  height: auto;
+  pointer-events: none;
+    padding:4px;
+    margin:4px;
+}
+.settings_hist{
+    position: absolute;
+    top: 40px;
+    right: 0px;
+    width: auto;
+    height: auto;
+    background-color: white;
+}
+.collapse.in{
+    margin:4px;
+    padding:8px;
+    border:1px #ccc solid !important;
+    border-radius: 2px;
+
+}
+.hide_setting {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: auto;
+    height: auto;
+    background-color: white;
+    padding:8px;
+}
+.grid .tick {
+stroke: lightgrey;
+opacity: 0.7;
+}
+.grid path {
+  stroke-width: 0;
 }
 
 
