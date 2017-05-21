@@ -211,7 +211,9 @@
 
     // turn on tooltips
     $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
+        $('[data-toggle="tooltip"]').tooltip();
+
+        $('.collapse').collapse();
 
     })
 
@@ -271,7 +273,7 @@
             UI.className += "UI_hist";
 
             var UI_col = document.createElement('div');
-            UI.id = "UI_hist_collapse";
+            UI_col.id = "UI_hist_collapse";
             UI_col.className += "collapse in";
             UI_col.innerHTML += ' <b>Sort by:</b> <form > <input type="radio" name="sort_ui" value="prots" checked> Size<br> <input type="radio" name="sort_ui" value="kingdom" > Kingdom<br>  </form>';
             UI_col.innerHTML += '<b>Show:</b>  <form > <input type="checkbox" name="filter_ui" value="Eukaryota" checked> Eukaryota<br> <input type="checkbox" name="filter_ui" value="Bacteria" checked> Bacteria<br>  <input type="checkbox" name="filter_ui" value="Archaea" checked> Archaea<br>  </form>'
