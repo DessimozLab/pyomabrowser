@@ -88,13 +88,20 @@ function update_genome_viewer(bid) {
         // add the sorting setting
         setting_div_col.innerHTML += '<b>Sort by:</b> ' +
             '<form > <input type="radio" name="sort_ui" value="prots" checked> Size<br>  ' +
-            '<input type="radio" name="sort_ui" value="kingdom" > Kingdom<br>  </form>';
+            '<input type="radio" name="sort_ui" value="kingdom" > Kingdom<br> ' +
+            '<input type="radio" name="sort_ui" value="uniprot_species_code' +
+            '" > Name<br> </form>';
 
         // add the filtering setting
         setting_div_col.innerHTML += '<b>Show:</b>' +
             '<form > <input type="checkbox" name="filter_ui" value="Eukaryota" checked> Eukaryota<br> ' +
             '<input type="checkbox" name="filter_ui" value="Bacteria" checked> Bacteria<br> ' +
             '  <input type="checkbox" name="filter_ui" value="Archaea" checked> Archaea<br>  </form>'
+
+        // add the size setting
+        setting_div_col.innerHTML += '<b>View:</b> ' +
+            '<form > <input type="radio" name="view_ui" value="light" checked> Light<br>  ' +
+            '<input type="radio" name="view_ui" value="compact" > Compact<br> </form>';
 
         setting_div.appendChild(setting_div_col);
         cviewer.appendChild(setting_div);
@@ -130,6 +137,14 @@ function update_genome_viewer(bid) {
         var sort_ui_checks = document.getElementsByName("sort_ui");
         for (i = 0; i < sort_ui_checks.length; i++) {
             sort_ui_checks[i].addEventListener("click", function () {
+                init_hist("hist_div")
+            })
+        }
+
+        // bind settings button with histogram update
+        var view_ui_checks = document.getElementsByName("view_ui");
+        for (i = 0; i < view_ui_checks.length; i++) {
+            view_ui_checks[i].addEventListener("click", function () {
                 init_hist("hist_div")
             })
         }
@@ -286,7 +301,22 @@ function init_hist(div_id) {
 
         var margin = {top: 10, right: 10, bottom: 90, left: 10};
 
-        var width = (data.length) * 10 - margin.left - margin.right;
+        // select view mode
+        var view_type;
+        var view_ui_checkbox = document.getElementsByName("view_ui");
+        for (i = 0; i < view_ui_checkbox.length; i++) {
+            if (view_ui_checkbox[i].checked) {
+                view_type = view_ui_checkbox[i].value
+            }
+        }
+
+        if (view_type === "compact"){
+            var margin = {top: 10, right: 10, bottom: 10, left: 10};
+            var width = cviewer.offsetWidth  - 3*margin.left - 3*margin.right;}
+        else {
+            var margin = {top: 10, right: 10, bottom: 60, left: 10};
+            var width = (data.length) * 10 - margin.left - margin.right;
+        }
 
         var height = 500 - margin.top - margin.bottom;
 
@@ -334,7 +364,11 @@ function init_hist(div_id) {
                 .ticks(10)
         }
 
-        var xAxis_g = svgContainer.append("g")
+        if (view_type === "compact"){
+
+        }
+        else {
+            var xAxis_g = svgContainer.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + (height) + ")")
             .call(xAxis)
@@ -358,6 +392,7 @@ function init_hist(div_id) {
                     d3.select(this).attr("opacity", '1');
                 })
             });
+        }
 
 
         svgContainer.selectAll(".bar")

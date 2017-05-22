@@ -78,7 +78,7 @@ svg text.label {
     height: auto;
     background-color: white;
 }
-.collapse.in{
+#settings_hist_collapse.collapse.in{
     margin:4px;
     padding:8px;
     border:1px #ccc solid !important;
