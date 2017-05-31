@@ -100,8 +100,8 @@ function update_genome_viewer(bid) {
 
         // add the size setting
         setting_div_col.innerHTML += '<b>View:</b> ' +
-            '<form > <input type="radio" name="view_ui" value="light" checked> Light<br>  ' +
-            '<input type="radio" name="view_ui" value="compact" > Compact<br> </form>';
+            '<form > <input type="radio" name="view_ui" value="light" > Expanded<br>  ' +
+            '<input type="radio" name="view_ui" value="compact" checked > Compacted<br> </form>';
 
         setting_div.appendChild(setting_div_col);
         cviewer.appendChild(setting_div);
