@@ -1,16 +1,19 @@
 "use strict";
-var hog_theme = function () {
 
-    var label_height = 20;
-    var curr_taxa = '';
-    var annot;
-    var is_node_frozen = false;
-    // var collapsed_nodes = [];
-    var fam_genedata;
-    var genedatavis = [{
-            name: 'Query Gene',
-            scale: 'on_off'
-        },
+var hog_theme;
+
+hog_theme = function (settings_theme) {
+
+    // settings_theme is the variable for hog_theme, it can be customize by using the settings_theme parameters
+    var settings_theme = settings_theme || {};
+
+    // label_height defines the text size of the tree labels and indirectly the square sizes.
+    settings_theme.label_height = settings_theme.hasOwnProperty('label_height') ? settings_theme.label_height : 20;
+
+    var genedatavis_default = [{
+        name: 'Query Gene',
+        scale: 'on_off'
+    },
         {
             name: "Gene Length",
             scale: "linear",
@@ -25,7 +28,24 @@ var hog_theme = function () {
         }
     ];
 
-    var theme = function (div, query, per_species3, tree_obj, gene_data, options, genedata_picker_div) {
+    // genedatavis defines the type of data used to color the gene square and the related color scheme.
+    settings_theme.genedatavis = settings_theme.hasOwnProperty('genedatavis') ? settings_theme.genedatavis : genedatavis_default;
+
+    // Hogvis is the main object to be created, it take a div and others parameters to set up an hogvis instance
+    function Hogvis(hogvis_container, query_gene, per_species3, tree_obj, gene_data, options, genedata_picker_div) {
+
+        var options = options || {};
+        options.show_internal_labels = options.hasOwnProperty('show_internal_labels') ? options.show_internal_labels : "true";
+        options.oma_info_url_template = options.hasOwnProperty('oma_info_url_template') ? options.oma_info_url_template : "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1=";
+        options.current_level_div = options.hasOwnProperty('current_level_div') ? options.current_level_div : "current_level_text";
+
+
+        var curr_taxa = '';
+        var annot;
+        var is_node_frozen = false;
+        var fam_genedata;
+
+
         /////////////
         // TREE /////
         /////////////
@@ -43,34 +63,33 @@ var hog_theme = function () {
         var highlight_node = tnt.tree.node_display.circle()
             .fill("#e74c3c")
             .size(6);
-        var highlight_condition = function(){
+        var highlight_condition = function () {
             return false;
         };
         var gene_color_function;
         var text_currentLevel = document.getElementById(options.current_level_div);
 
 
-
         var node_display = tnt.tree.node_display()
-            .display(function (node){
-                if (highlight_condition(node)){
+            .display(function (node) {
+                if (highlight_condition(node)) {
                     highlight_node.display().call(this, node);
-                } else if (node.is_collapsed()){
+                } else if (node.is_collapsed()) {
                     collapsed_node.display().call(this, node);
-                } else if (node.is_leaf()){
+                } else if (node.is_leaf()) {
                     leaf_node.display().call(this, node);
                 } else if (!node.is_leaf()) {
                     int_node.display().call(this, node);
                 }
             });
 
-        var tot_width = parseInt(d3.select(div).style("width")) - 30;
+        var tot_width = parseInt(d3.select(hogvis_container).style("width")) - 30;
 
 
         // Node tooltip
 
         var treeNode_tooltip = tnt.tooltip()
-            .fill (function (node) {
+            .fill(function (node) {
                 // The DOM element is passed as "this"
                 var container = d3.select(this);
 
@@ -79,59 +98,65 @@ var hog_theme = function () {
                     .attr("class", "tnt_zmenu")
                     .attr("border", "solid")
 
-                    table
-                        .append("tr")
-                        .attr("class", "tnt_zmenu_header")
-                        .append("th")
-                        .text(node.node_name());
+                table
+                    .append("tr")
+                    .attr("class", "tnt_zmenu_header")
+                    .append("th")
+                    .text(node.node_name());
 
                 // There is 3 freezing possibilites: "Freeze tree at this node", "Unfreeze the tree", "Re-freeze tree at this node"
+
+                table
+                    .append("tr")
+                    .attr("class", "tnt_zmenu_row")
+                    .append("td")
+                    .style("text-align", "center")
+                    .html(function () {
+                        return is_node_frozen ? "<a>Unfreeze the tree</a>" : "<a>Freeze tree at this node</a>"
+                    })
+                    .on("click", function () {
+                        if (is_node_frozen) {
+                            is_node_frozen = false;
+                        }
+                        else {
+                            is_node_frozen = node.id;
+                        }
+                        treeNode_tooltip.close();
+                    });
+
+                if (is_node_frozen && is_node_frozen != node.id) {
 
                     table
                         .append("tr")
                         .attr("class", "tnt_zmenu_row")
                         .append("td")
                         .style("text-align", "center")
-                        .html(function(){return is_node_frozen ? "<a>Unfreeze the tree</a>" : "<a>Freeze tree at this node</a>"})
+                        .html("<a>Re-freeze tree at this node</a>")
                         .on("click", function () {
-                            if (is_node_frozen){is_node_frozen = false;}
-                            else {is_node_frozen = node.id;}
+                            is_node_frozen = false;
+                            mouse_over_node(node);
+                            is_node_frozen = node.id;
                             treeNode_tooltip.close();
                         });
 
-                    if (is_node_frozen && is_node_frozen != node.id){
-
-                        table
-                            .append("tr")
-                            .attr("class", "tnt_zmenu_row")
-                            .append("td")
-                            .style("text-align", "center")
-                            .html("<a>Re-freeze tree at this node</a>")
-                            .on("click", function () {
-                                is_node_frozen = false;
-                                mouse_over_node(node);
-                                is_node_frozen = node.id ;
-                                treeNode_tooltip.close();
-                            });
-
-                    }
+                }
 
 
-                    if (!node.is_leaf() || node.is_collapsed()) {
-                        table
-                            .append("tr")
-                            .attr("class", "tnt_zmenu_row")
-                            .append("td")
-                            .style("text-align", "center")
-                            .html(function () {
-                                return node.is_collapsed() ? "<a> Uncollapse subtree </a>" : "<a> Collapse subtree </a>"
-                            })
-                            .on("click", function () {
-                                node.toggle();
-                                vis.update();
-                                treeNode_tooltip.close();
-                            });
-                    }
+                if (!node.is_leaf() || node.is_collapsed()) {
+                    table
+                        .append("tr")
+                        .attr("class", "tnt_zmenu_row")
+                        .append("td")
+                        .style("text-align", "center")
+                        .html(function () {
+                            return node.is_collapsed() ? "<a> Uncollapse subtree </a>" : "<a> Collapse subtree </a>"
+                        })
+                        .on("click", function () {
+                            node.toggle();
+                            vis.update();
+                            treeNode_tooltip.close();
+                        });
+                }
 
 
             });
@@ -140,7 +165,7 @@ var hog_theme = function () {
         var node_hover_tooltip;
         var mouse_over_node = function (node) {
             // Update annotation board
-            if (is_node_frozen){
+            if (is_node_frozen) {
                 return;
             }
 
@@ -182,10 +207,10 @@ var hog_theme = function () {
             .layout(tnt.tree.layout.vertical()
                 .width(Math.max(240, ~~(tot_width * 0.4)))
                 .scale(false)
-               )
+            )
             .label(tnt.tree.label.text()
                 .fontsize(12)
-                .height(label_height)
+                .height(settings_theme.label_height)
                 .text(function (node) {
                     var limit = 30;
                     var data = node.data();
@@ -197,7 +222,7 @@ var hog_theme = function () {
                         return "";
                     }
                     if (data.name.length > limit) {
-                        var truncName = data.name.substr(0,limit-3) + "...";
+                        var truncName = data.name.substr(0, limit - 3) + "...";
                         return truncName.replace(/_/g, ' ');
                     }
                     return data.name.replace(/_/g, ' ');
@@ -208,13 +233,13 @@ var hog_theme = function () {
                     }
                     return 'black';
                 })
-                .fontweight(function (node){
-                    if (highlight_condition(node)){
+                .fontweight(function (node) {
+                    if (highlight_condition(node)) {
                         return "bold";
                     }
                     return "normal";
                 })
-               )
+            )
             .on("click", function (d) {
                 treeNode_tooltip.call(this, d);
             })
@@ -224,7 +249,6 @@ var hog_theme = function () {
             .branch_color("black");
 
         curr_taxa = tree.root().node_name();
-
 
 
         /////////////////////////
@@ -241,7 +265,7 @@ var hog_theme = function () {
             obj.rows.push({
                 label: "Information",
                 obj: gene,
-                value: "<a href='"+options.oma_info_url_template + gene.id+"'>"+gene_data[gene.id].omaid+"</a>"
+                value: "<a href='" + options.oma_info_url_template + gene.id + "'>" + gene_data[gene.id].omaid + "</a>"
             });
 
             tnt.tooltip.table()
@@ -268,16 +292,16 @@ var hog_theme = function () {
                     .append("line")
                     .attr("class", "hog_boundary")
                     .attr("x1", function (d) {
-                        var width = d3.min([x_scale(dom1/d.max), height+2*padding]);
-                        var x = width * (d.max_in_hog-1);
+                        var width = d3.min([x_scale(dom1 / d.max), height + 2 * padding]);
+                        var x = width * (d.max_in_hog - 1);
                         var xnext = width * d.max_in_hog;
-                        return x + (xnext - x + width)/2 + ~~(padding/2)-1;
+                        return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
                     })
                     .attr("x2", function (d) {
-                        var width = d3.min([x_scale(dom1/d.max), height+2*padding]);
-                        var x = width * (d.max_in_hog-1);
+                        var width = d3.min([x_scale(dom1 / d.max), height + 2 * padding]);
+                        var x = width * (d.max_in_hog - 1);
                         var xnext = width * d.max_in_hog;
-                        return x + (xnext - x + width)/2 + ~~(padding/2)-1;
+                        return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
                     })
                     .attr("y1", 0)
                     .attr("y2", track.height())
@@ -295,16 +319,16 @@ var hog_theme = function () {
                     .transition()
                     .duration(200)
                     .attr("x1", function (d) {
-                        var width = d3.min([x_scale(dom1/d.max), height+2*padding]);
-                        var x = width * (d.max_in_hog-1);
+                        var width = d3.min([x_scale(dom1 / d.max), height + 2 * padding]);
+                        var x = width * (d.max_in_hog - 1);
                         var xnext = width * d.max_in_hog;
-                        return x + (xnext - x + width)/2 + ~~(padding/2)-1;
+                        return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
                     })
                     .attr("x2", function (d) {
-                        var width = d3.min([x_scale(dom1/d.max), height+2*padding]);
-                        var x = width * (d.max_in_hog-1);
+                        var width = d3.min([x_scale(dom1 / d.max), height + 2 * padding]);
+                        var x = width * (d.max_in_hog - 1);
                         var xnext = width * d.max_in_hog;
-                        return x + (xnext - x + width)/2 + ~~(padding/2)-1;
+                        return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
                     });
             });
 
@@ -325,18 +349,18 @@ var hog_theme = function () {
 
                 new_elems
                     .append("rect")
-                    .attr("class", function(d) {
-                        return "hog_gene" + (query && d.id === query.id ? " ref_gene": "" )
+                    .attr("class", function (d) {
+                        return "hog_gene" + (query_gene && d.id === query_gene.id ? " ref_gene" : "" )
                     })
                     .attr("x", function (d) {
-                        var width = d3.min([x_scale(dom1 / d.max), height+2*padding]);
+                        var width = d3.min([x_scale(dom1 / d.max), height + 2 * padding]);
                         var x = width * d.pos;
                         return x + padding;
                     })
                     .attr("y", padding)
-                    .attr("width", function(d){
-                        var width = d3.min([x_scale(dom1 / d.max), height+2*padding]);
-                        return width - 2*padding;
+                    .attr("width", function (d) {
+                        var width = d3.min([x_scale(dom1 / d.max), height + 2 * padding]);
+                        return width - 2 * padding;
                     })
                     .attr("height", height)
                     .attr("fill", gene_color_function);
@@ -353,13 +377,13 @@ var hog_theme = function () {
                     .transition()
                     .duration(200)
                     .attr("x", function (d) {
-                        var width = d3.min([x_scale(dom1 / d.max), height + 2*padding]);
+                        var width = d3.min([x_scale(dom1 / d.max), height + 2 * padding]);
                         var x = width * d.pos;
                         return x + padding;
                     })
-                    .attr("width", function(d){
-                        var width = d3.min([x_scale(dom1 / d.max), height+2*padding]);
-                        return width - 2*padding;
+                    .attr("width", function (d) {
+                        var width = d3.min([x_scale(dom1 / d.max), height + 2 * padding]);
+                        return width - 2 * padding;
                     })
                     .attr("fill", gene_color_function);
 
@@ -391,7 +415,6 @@ var hog_theme = function () {
                         var genes2Xcoords = genes_2_xcoords(per_species3[sp][curr_taxa], maxs[curr_taxa]);
                         return genes2Xcoords;
                     })
-
                 )
                 .display(tnt.board.track.feature.composite()
                     .add("genes", hog_gene_feature)
@@ -409,14 +432,14 @@ var hog_theme = function () {
             var genes = [];
             var hogs_boundaries = [];
             var total_pos = 0;
-            arr.forEach(function(hog_genes, hog){
+            arr.forEach(function (hog_genes, hog) {
                 var hog_gene_names = [];
                 hog_genes.sort();
-                hog_genes.forEach(function(gene, gene_pos){
+                hog_genes.forEach(function (gene, gene_pos) {
                     genes.push({
                         id: gene,
                         hog: hog,
-                        pos: total_pos+gene_pos,
+                        pos: total_pos + gene_pos,
                         max: d3.sum(maxs),
                         max_in_hog: maxs[hog],
                         pos_in_hog: gene_pos
@@ -434,20 +457,20 @@ var hog_theme = function () {
 
             return {
                 genes: genes,
-                hogs: hogs_boundaries.slice(0,-1)
+                hogs: hogs_boundaries.slice(0, -1)
             };
         };
 
         var col_scale;
-        var change_genedata_vis = function(d){
+        var change_genedata_vis = function (d) {
             col_scale = undefined;
-            gene_color_function = function(gene){
-                return (query && gene.id === query.id ? "#27ae60" : "#95a5a6");
+            gene_color_function = function (gene) {
+                return (query_gene && gene.id === query_gene.id ? "#27ae60" : "#95a5a6");
             };
-            if (fam_genedata === undefined){
-                $.getJSON("/oma/hogdata/"+query.id+"/json", function(data){
+            if (fam_genedata === undefined) {
+                $.getJSON("/oma/hogdata/" + query_gene.id + "/json", function (data) {
                     fam_genedata = {};
-                    data.forEach(function(gene) {
+                    data.forEach(function (gene) {
                         fam_genedata[gene.id] = gene;
                     });
                     change_genedata_vis(d);
@@ -459,23 +482,24 @@ var hog_theme = function () {
             if (d.func === "color1d") {
                 col_scale = d3.scale.linear()
                     .domain(d3.extent(d3.values(fam_genedata)
-                        .map(function (gene){
+                        .map(function (gene) {
                             return gene[field];
                         })))
                     .range([d3.rgb("#e74c3c"), d3.rgb('#3498db')]);
                 gene_color_function = function (gene) {
                     return col_scale(fam_genedata[gene.id][field]);
                 };
-            };
+            }
+            ;
             annot.update();
             vis.update();
 
         };
 
-        change_genedata_vis(genedatavis[0]);
+        change_genedata_vis(settings_theme.genedatavis[0]);
 
         var genedata_picker = d3.select(genedata_picker_div).selectAll(".genedata-li")
-            .data(genedatavis);
+            .data(settings_theme.genedatavis);
 
         var colorbar;
         var bar = d3.select("#colorbar");
@@ -484,10 +508,14 @@ var hog_theme = function () {
 
         genedata_picker.enter()
             .append("li")
-            .attr("value", function(d){ return d.name })
-            .html(function(d){ return "<a>" + d.name + "</a>" })
+            .attr("value", function (d) {
+                return d.name
+            })
+            .html(function (d) {
+                return "<a>" + d.name + "</a>"
+            })
             .attr("class", "genedata-li")
-            .on("click", function(d) {
+            .on("click", function (d) {
                 change_genedata_vis(d);
                 if (col_scale) {
                     colorbar = Colorbar()
@@ -508,7 +536,7 @@ var hog_theme = function () {
             .tree(tree)
             .board(annot)
             .track(track);
-        vis(div);
+        vis(hogvis_container);
 
         // open at root level when created
         mouse_over_node(tree.root());
@@ -522,54 +550,54 @@ var hog_theme = function () {
         // make the vis panel resizable
         set_resize_on_drag(tree);
 
-    // function to set up drag to resize tree and board panel
-    // rearranged code from http://stackoverflow.com/questions/26233180/resize-div-on-border-drag-and-drop
-    function set_resize_on_drag(tree_to_resize){
+        // function to set up drag to resize tree and board panel
+        // rearranged code from http://stackoverflow.com/questions/26233180/resize-div-on-border-drag-and-drop
+        function set_resize_on_drag(tree_to_resize) {
 
-    // Add a drag div between tree and board panel
-    var dragDiv = document.createElement("div");
-    var tree_panel = document.getElementById("tnt_tree_container_hog_vis");
-    dragDiv.id = 'drag';
-    dragDiv.style.height = $("#tnt_tree_container_hog_vis").height() + "px";
-    tree_panel.parentNode.insertBefore(dragDiv, tree_panel.nextSibling);
+            // Add a drag div between tree and board panel
+            var dragDiv = document.createElement("div");
+            var tree_panel = document.getElementById("tnt_tree_container_hog_vis");
+            dragDiv.id = 'drag';
+            dragDiv.style.height = $("#tnt_tree_container_hog_vis").height() + "px";
+            tree_panel.parentNode.insertBefore(dragDiv, tree_panel.nextSibling);
 
-    var isResizing = false,
-    lastDownX = 0;
+            var isResizing = false,
+                lastDownX = 0;
 
-    var container = $('#hog_vis'),
-        left = $('#tnt_tree_container_hog_vis'),
-        right = $('#tnt_annot_container_hog_vis'),
-        handle = $('#drag');
+            var container = $('#hog_vis'),
+                left = $('#tnt_tree_container_hog_vis'),
+                right = $('#tnt_annot_container_hog_vis'),
+                handle = $('#drag');
 
-    handle.on('mousedown', function (e) {
-        isResizing = true;
-        lastDownX = e.clientX;
-    });
+            handle.on('mousedown', function (e) {
+                isResizing = true;
+                lastDownX = e.clientX;
+            });
 
-    $(document).on('mousemove', function (e) {
-        // we don't want to do anything if we aren't resizing.
-        if (!isResizing)
-            return;
+            $(document).on('mousemove', function (e) {
+                // we don't want to do anything if we aren't resizing.
+                if (!isResizing)
+                    return;
 
-        // compute the new width of tree panel
-        var nw = e.clientX - container.offset().left;
-        //make sure that we left at least 50 px to the board panel and that at least 50 px large
-        var nwld = Math.min(container.width()-50, nw);
-        nwld = Math.max(50, nwld);
+                // compute the new width of tree panel
+                var nw = e.clientX - container.offset().left;
+                //make sure that we left at least 50 px to the board panel and that at least 50 px large
+                var nwld = Math.min(container.width() - 50, nw);
+                nwld = Math.max(50, nwld);
 
-        // resize tree panel to new width and update board panel
-        left.css('width', nwld);
-        set_scroller_width();
+                // resize tree panel to new width and update board panel
+                left.css('width', nwld);
+                set_scroller_width();
 
-        // update the tree according to the new tree panel size with min 100px width
-        tree_to_resize.layout().width(Math.max(200, nwld - 20));
-        tree_to_resize.update();
-    }).on('mouseup', function (e) {
-        // stop resizing
-        isResizing = false;
+                // update the tree according to the new tree panel size with min 100px width
+                tree_to_resize.layout().width(Math.max(200, nwld - 20));
+                tree_to_resize.update();
+            }).on('mouseup', function (e) {
+                // stop resizing
+                isResizing = false;
 
-});
-    }
+            });
+        }
 
     };
 
@@ -619,7 +647,7 @@ var hog_theme = function () {
     };
 
     // resize the board container to fill space between tree panel and right
-    function set_scroller_width(){
+    function set_scroller_width() {
 
         var viewerC = document.getElementById("hog_vis");
         var viewerS = document.getElementById("tnt_annot_container_hog_vis");
@@ -628,40 +656,40 @@ var hog_theme = function () {
         var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 40;
         viewerS.style.width = scroller_width + "px";
 
-        $('#hogvisheader').width($('#hogs').width()-20); // Because padding of #hogs is 10px
+        $('#hogvisheader').width($('#hogs').width() - 20); // Because padding of #hogs is 10px
 
 
     }
 
     // function to set up automatic board resizing on window resize
-    function set_board_width_on_window_resize(){
+    function set_board_width_on_window_resize() {
 
-    set_scroller_width();
-
-    window.onresize = function() {
         set_scroller_width();
+
+        window.onresize = function () {
+            set_scroller_width();
         }
     }
 
     // function to fixed the hogvis header block to top when scroll
-    function set_fixed_header_on_window_scroll(){
-    var stickyHeaderTop = $('#hogvisheader').offset().top;
+    function set_fixed_header_on_window_scroll() {
+        var stickyHeaderTop = $('#hogvisheader').offset().top;
         $(window).scroll(function () {
-        if ($(window).scrollTop() > stickyHeaderTop) {
-            $('#hogvisheader').css({
-                position: 'fixed',
-                top: '0px'
-            });
-            $('#hog_vis').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
-        } else {
-            $('#hogvisheader').css({
-                position: 'static',
-                top: '0px'
-            });
-            $('#hog_vis').css('margin-top', '0px');
-        }
-    });
+            if ($(window).scrollTop() > stickyHeaderTop) {
+                $('#hogvisheader').css({
+                    position: 'fixed',
+                    top: '0px'
+                });
+                $('#hog_vis').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
+            } else {
+                $('#hogvisheader').css({
+                    position: 'static',
+                    top: '0px'
+                });
+                $('#hog_vis').css('margin-top', '0px');
+            }
+        });
     };
 
-    return theme;
+    return Hogvis;
 };

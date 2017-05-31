@@ -4,113 +4,128 @@
 {% block title %}OMA: Hierarchical Orthologous Groups for {{ fam.id }}{% endblock %}
 {% block meta_description %}Hierarchical orthologous groups (HOGs) provide a set of genes that have all started diverging from a single ancestral gene at the taxonomic range of interest.{% endblock %}
 {% block js_hook %}
-<!-- D3 -->
-<!--<script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>-->
-<script src="https://d3js.org/d3.v3.min.js"></script>
-<script src="http://benschmidt.org/colorbar/colorbar.js" charset="utf-8"></script>
+    <!-- D3 -->
+    <!--<script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="http://benschmidt.org/colorbar/colorbar.js" charset="utf-8"></script>
 
-<!-- Underscore -->
-<script src="{% static "js/underscore-min.js" %}"></script>
+    <!-- Underscore -->
+    <script src="{% static "js/underscore-min.js" %}"></script>
 
-  <!-- TnT -->
-  <link rel="stylesheet" href="{% static "css/tnt.css" %}" type="text/css" />
-  <link rel="stylesheet" href="{% static "css/hog.css" %}" type="text/css" />
-  <link rel="stylesheet" href="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.css" type="text/css" />
-  <script src="http://tntvis.github.io/tnt/build/tnt.min.js" charset="utf-8"></script>
-<script src="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.min.js" charset="UTF-8"></script>
-<script src="{% static "js/hog.js" %}" charset="UTF-8"></script>
+    <!-- TnT -->
+    <link rel="stylesheet" href="{% static "css/tnt.css" %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "css/hog.css" %}" type="text/css" />
+    <link rel="stylesheet" href="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.css" type="text/css" />
+    <script src="http://tntvis.github.io/tnt/build/tnt.min.js" charset="utf-8"></script>
+    <script src="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.min.js" charset="UTF-8"></script>
+    <script src="{% static "js/hog.js" %}" charset="UTF-8"></script>
 
 {% endblock %}
 
 {% block contentTab %}
 
-<div  style="background-color: white; padding:10px;">
+    <div  style="background-color: white; padding:10px;">
 
-<div id="gap_conpenser"> </div>
+        <div id="gap_conpenser"> </div>
 
-<div id="hogvisheader">
+        <div id="hogvisheader">
 
-    {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
-    {% else %}
-        <h3 >Hierarchical group {{ fam.id }} open at level of <span id="current_level_text" style="font-weight:bold;"></span> </h3>
+            {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
+            {% else %}
+                <h3 >Hierarchical group {{ fam.id }} open at level of <span id="current_level_text" style="font-weight:bold;"></span> </h3>
 
-        <div id="hogvis_settings">
+                <div id="hogvis_settings">
 
-        <button class="btn btn-primary btn_display_settings center-block" id="btn_display_settings"type="button" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings">Show Settings</button>
+                    <button class="btn btn-primary btn_display_settings center-block" id="btn_display_settings"type="button" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings">Show Settings</button>
 
-        <div class="collapse" id="collapseSettings">
+                    <div class="collapse" id="collapseSettings">
 
-                <div id="button-settings-div">
+                        <div id="button-settings-div">
 
-                <!-- Small button group -->
-            <div class="btn-group">
-                <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Select Color Scheme <span class="caret"></span>
-                </button>
+                            <!-- Small button group -->
+                            <div class="btn-group">
+                                <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Select Color Scheme <span class="caret"></span>
+                                </button>
 
-                <ul id="genedata-vis" class="dropdown-menu">
-                </ul>
-            </div>
+                                <ul id="genedata-vis" class="dropdown-menu">
+                                </ul>
+                            </div>
 
-            <button type="button" class="btn btn-default btn-sm" disabled="disabled">Remove Low Confidence Columns</button>
+                            <button type="button" class="btn btn-default btn-sm" disabled="disabled">Remove Low Confidence Columns</button>
 
-</div>
+                        </div>
 
-        <div id="scale-settings-div">
-        <div class="scale-item" id="colorbarText" > </div>
-        <div class="scale-item" id="colorbar" > </div>
-        </div>
+                        <div id="scale-settings-div">
+                            <div class="scale-item" id="colorbarText" > </div>
+                            <div class="scale-item" id="colorbar" > </div>
+                        </div>
 
+
+
+                    </div>
+                </div>
 
 
                 </div>
-        </div>
+
+                <div id="hog_vis"> </div>
 
 
-  </div>
+                <script>
 
-  <div id="hog_vis"> </div>
+                    // Init the hogvis
+                    (function () {
 
-
-  <script>
-
-  // Init the hogvis
-    (function () {
-        var tree = {{ species_tree|safe }};
-        var query = {'id': {{ entry.entry_nr }} };
-        var per_species = {{ per_species|safe }};
-        var tooltip_data = {{ xrefs|safe }};
-        var options = {'show_internal_labels': {{ show_internal_labels|yesno:"true,false" }},
-                       'oma_info_url_template': "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1=",
-                       'current_level_div': "current_level_text"}
-
-        var theme = hog_theme();
+                        var tree = {{ species_tree|safe }};
+                        var query = {'id': {{ entry.entry_nr }} };
+                        var per_species = {{ per_species|safe }};
+                        var tooltip_data = {{ xrefs|safe }};
 
 
+                        var genedatavis = [{
+                            name: 'Query Gene',
+                            scale: 'on_off'
+                        },
+                            {
+                                name: "Gene Length",
+                                scale: "linear",
+                                field: "sequence_length",
+                                func: "color1d"
+                            }
+                        ];
 
-        theme(document.getElementById ("hog_vis"), query, per_species,
-                tree, tooltip_data, options, document.getElementById("genedata-vis"));
+                        var default_options = {
+                            label_height: 20,
+                            genedatavis: genedatavis};
 
-    }) ();
+                        var Hogvis = hog_theme(default_options);
 
-(function(){
-
-    document.getElementById("btn_display_settings").addEventListener("click", function(){
-
-        if (this.innerHTML=="Hide Settings") {this.innerHTML = "Show Settings";}
-        else this.innerHTML = "Hide Settings";
-
-    });
+                        var hogvis_container = document.getElementById ("hog_vis");
+                        var hogvis = new Hogvis(hogvis_container, query, per_species,
+                            tree, tooltip_data, {}, document.getElementById("genedata-vis"));
 
 
+                    }) ();
+
+                    (function(){
+
+                        document.getElementById("btn_display_settings").addEventListener("click", function(){
+
+                            if (this.innerHTML=="Hide Settings") {this.innerHTML = "Show Settings";}
+                            else this.innerHTML = "Hide Settings";
+
+                        });
 
 
-}) ();
-
-</script>
 
 
-{% endif %}
+                    }) ();
 
-</div>
+                </script>
+
+
+            {% endif %}
+
+    </div>
 
 {% endblock %}
