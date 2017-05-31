@@ -4,7 +4,7 @@ var hog_theme;
 
 hog_theme = function (settings_theme) {
 
-    // settings_theme is the variable for hog_theme, it can be customize by using the settings_theme parameters
+    // settings_theme is the settings variable for hog_theme, it can be customize by using the settings_theme parameter
     var settings_theme = settings_theme || {};
 
     // label_height defines the text size of the tree labels and indirectly the square sizes.
@@ -34,18 +34,59 @@ hog_theme = function (settings_theme) {
     // Hogvis is the main object to be created, it take a div and others parameters to set up an hogvis instance
     function Hogvis(hogvis_container, query_gene, per_species3, tree_obj, gene_data, options, genedata_picker_div) {
 
+        ////////////////////
+        ///// OPTIONS //////
+        ////////////////////
+
+        // options is the options variable for Hogvis, it can be customize by using the options parameter
         var options = options || {};
+
+        // display or not internal node label
         options.show_internal_labels = options.hasOwnProperty('show_internal_labels') ? options.show_internal_labels : "true";
+
+        // redirection url prefix for tooltip on genes
         options.oma_info_url_template = options.hasOwnProperty('oma_info_url_template') ? options.oma_info_url_template : "/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1=";
+
+        // div id of the open at "xxx" text div
         options.current_level_div = options.hasOwnProperty('current_level_div') ? options.current_level_div : "current_level_text";
 
+        ////////////////////
+        //// VARIABLES /////
+        ////////////////////
 
-        var curr_taxa = '';
-        var annot;
+        // name of the current taxa displayed
+        var current_opened_taxa_name = '';
+
+        // todo
         var is_node_frozen = false;
+
+        // todo
         var fam_genedata;
 
+        // todo
+        var gene_color_function;
 
+        // div that display the name of the currently opened level
+        var div_current_level = document.getElementById(options.current_level_div);
+
+        // total with of the hogvis container
+        var tot_width = parseInt(d3.select(hogvis_container).style("width")) - 30; // todo -30 should be define by margin variables
+
+        // todo
+        var maxs = get_maxs(per_species3);
+
+        //todo
+        var gene_color_data;
+
+        // todo + ADRIAN: What is the use of this
+        var gene_color_scale = d3.scale.category10();
+
+        // todo
+        var col_scale;
+
+        //todo
+        var colorbar;
+        
         /////////////
         // TREE /////
         /////////////
@@ -66,9 +107,6 @@ hog_theme = function (settings_theme) {
         var highlight_condition = function () {
             return false;
         };
-        var gene_color_function;
-        var text_currentLevel = document.getElementById(options.current_level_div);
-
 
         var node_display = tnt.tree.node_display()
             .display(function (node) {
@@ -83,11 +121,7 @@ hog_theme = function (settings_theme) {
                 }
             });
 
-        var tot_width = parseInt(d3.select(hogvis_container).style("width")) - 30;
-
-
         // Node tooltip
-
         var treeNode_tooltip = tnt.tooltip()
             .fill(function (node) {
                 // The DOM element is passed as "this"
@@ -169,8 +203,8 @@ hog_theme = function (settings_theme) {
                 return;
             }
 
-            curr_taxa = node.node_name();
-            text_currentLevel.innerHTML = curr_taxa;
+            current_opened_taxa_name = node.node_name();
+            div_current_level.innerHTML = current_opened_taxa_name;
             annot.update();
 
             // when update the board make sure that the scroll is reset to left
@@ -248,14 +282,12 @@ hog_theme = function (settings_theme) {
             .node_display(node_display)
             .branch_color("black");
 
-        curr_taxa = tree.root().node_name();
-
+        // Once the tree is build update the current level opened with the root by default
+        current_opened_taxa_name = tree.root().node_name();
 
         /////////////////////////
         //// PARSE HOG INFO /////
         /////////////////////////
-        var maxs = get_maxs(per_species3);
-        var gene_color_data;
 
         var gene_tooltip = function (gene) {
             var obj = {};
@@ -333,8 +365,6 @@ hog_theme = function (settings_theme) {
             });
 
         var hog_gene_feature = tnt.board.track.feature();
-        var gene_color_scale = d3.scale.category10(); // ADRIAN: What is the use of this
-
         hog_gene_feature
             .index(function (d) {
                 return d.id;
@@ -390,13 +420,12 @@ hog_theme = function (settings_theme) {
             })
             .on("mouseover", gene_tooltip);
 
-        annot = tnt.board()
+        var annot = tnt.board()
             .from(0)
             .zoom_in(1)
             .allow_drag(false)
             .to(5)
             .width(~~(tot_width * 0.6));
-
 
         var track = function (leaf) {
             var sp = leaf.node_name();
@@ -412,7 +441,7 @@ hog_theme = function (settings_theme) {
                                 hogs: []
                             };
                         }
-                        var genes2Xcoords = genes_2_xcoords(per_species3[sp][curr_taxa], maxs[curr_taxa]);
+                        var genes2Xcoords = genes_2_xcoords(per_species3[sp][current_opened_taxa_name], maxs[current_opened_taxa_name]);
                         return genes2Xcoords;
                     })
                 )
@@ -461,7 +490,6 @@ hog_theme = function (settings_theme) {
             };
         };
 
-        var col_scale;
         var change_genedata_vis = function (d) {
             col_scale = undefined;
             gene_color_function = function (gene) {
@@ -501,7 +529,6 @@ hog_theme = function (settings_theme) {
         var genedata_picker = d3.select(genedata_picker_div).selectAll(".genedata-li")
             .data(settings_theme.genedatavis);
 
-        var colorbar;
         var bar = d3.select("#colorbar");
 
         var barText = d3.select('[id="colorbarText"]')[0][0]; // )0_o(
