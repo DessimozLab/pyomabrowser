@@ -7,7 +7,6 @@ hog_theme = function () {
     // Hogvis is the main object to be created, it take a div and others parameters to set up an hogvis instance
     function Hogvis(hogvis_div_id, query_gene, per_species3, tree_obj, gene_data, options_param, genedata_picker_div) {
 
-
         ////////////////////
         ///// METHODS //////
         ////////////////////
@@ -391,10 +390,9 @@ hog_theme = function () {
                 max_number_square += maxs[current_opened_taxa_name][i];
             }
 
-            return max_number_square* (options.label_height + 15);
+            return max_number_square* (options.label_height + 2);
 
         }
-
         this.init_annot = function() {
 
             var a = tnt.board()
@@ -543,7 +541,7 @@ hog_theme = function () {
                             .scale(col_scale)
                             .orient('horizontal')
                             .thickness(18)
-                            .barlength(~~(tot_width * 0.6));
+                            .barlength(~~(tot_width * 0.8));
                         bar.call(colorbar);
                         barText.innerHTML = d.name;
                     } else {
@@ -588,7 +586,7 @@ hog_theme = function () {
                 $(document).on('pointermove', function (e) {update_drag_move(e)})
                     .on('pointerup', function (e) { update_drag_up(e)});
 
-                }
+            }
             else {
                 //Provide fallback for user agents that do not support Pointer Events
                 handle.on('mousedown', function (e) {
@@ -607,15 +605,15 @@ hog_theme = function () {
 
                 // compute the new width of tree panel
                 var nw = e.clientX - container.offset().left;
-                //make sure that we left at least 50 px to the board panel and that at least 50 px large
-                var nwld = Math.min(container.width() - 100, nw);
-                nwld = Math.max(100, nwld);
+                //make sure that we leave at least 100 px for the annot panel and that at least 100 px large
+                var nwld = Math.min(container.width() - min_width_tree_container, nw);
+                nwld = Math.max(min_width_tree_container, nwld);
 
                 // resize tree panel to new width and update board panel
                 left.css('width', nwld);
                 hogvis.set_scroller_width();
 
-                // update the tree according to the new tree panel size with min 100px width
+                // update the tree according to the new tree panel size with min 250px width
                 tree.layout().width(Math.max(250, nwld - 20));
                 tree.update();
             }
@@ -641,11 +639,16 @@ hog_theme = function () {
             var viewerT = document.getElementById("tnt_tree_container_hogvis_container");
 
             var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 40;
-
-            viewerS.style.width = scroller_width + "px";
-
-            $('#hogvisheader').width($('#hogs').width() - 20); // Because padding of #hogs is 10px
-
+            if (scroller_width > min_width_annot_container) {
+                viewerS.style.width = scroller_width + "px";
+                $('#hogvisheader').width($('#hogs').width() - 20); // Because padding of #hogs is 10px
+            }
+            else {
+                if (viewerT.offsetWidth - scroller_width > min_width_tree_container){
+                    viewerT.style.width = viewerT.offsetWidth - scroller_width + "px";
+                    $('#hogvisheader').width($('#hogs').width() - 20); // Because padding of #hogs is 10px
+                }
+            }
 
         }
         // function to fixed the hogvis header block to top when scroll
@@ -676,10 +679,14 @@ hog_theme = function () {
         var hogvis = this;
         var hogvis_div = document.getElementById(hogvis_div_id);
 
-        // todo add heade`r with function
+        // todo add header with function
 
         var hogvis_container;
         hogvis.add_hogvis_container();
+
+        var min_width_tree_container = 100;
+        var min_width_annot_container = 100;
+
 
         var tot_width = parseInt(d3.select(hogvis_container).style("width")) - 30; // todo -30 should be define by margin variables
         var maxs = get_maxs(per_species3);
