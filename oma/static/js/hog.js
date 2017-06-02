@@ -562,12 +562,28 @@ hog_theme = function () {
                 right = $('#tnt_annot_container_hogvis_container'),
                 handle = $('#drag');
 
-            handle.on('mousedown', function (e) {
-                isResizing = true;
-                lastDownX = e.clientX;
-            });
+            if(window.PointerEvent) {
+                handle.on('pointerdown', function (e) {
+                    isResizing = true;
+                    lastDownX = e.clientX;
+                });
 
-            $(document).on('mousemove', function (e) {
+                $(document).on('pointermove', function (e) {update_drag_move(e)})
+                    .on('pointerup', function (e) { update_drag_up(e)});
+
+                }
+            else {
+                //Provide fallback for user agents that do not support Pointer Events
+                handle.on('mousedown', function (e) {
+                    isResizing = true;
+                    lastDownX = e.clientX;
+                });
+
+                $(document).on('mousemove', function (e) {update_drag_move(e)})
+                    .on('mouseup', function (e) { update_drag_up(e)});
+            }
+
+            function update_drag_move(e) {
                 // we don't want to do anything if we aren't resizing.
                 if (!isResizing)
                     return;
@@ -575,21 +591,23 @@ hog_theme = function () {
                 // compute the new width of tree panel
                 var nw = e.clientX - container.offset().left;
                 //make sure that we left at least 50 px to the board panel and that at least 50 px large
-                var nwld = Math.min(container.width() - 50, nw);
-                nwld = Math.max(50, nwld);
+                var nwld = Math.min(container.width() - 100, nw);
+                nwld = Math.max(100, nwld);
 
                 // resize tree panel to new width and update board panel
                 left.css('width', nwld);
                 hogvis.set_scroller_width();
 
                 // update the tree according to the new tree panel size with min 100px width
-                tree.layout().width(Math.max(200, nwld - 20));
+                tree.layout().width(Math.max(250, nwld - 20));
                 tree.update();
-            }).on('mouseup', function (e) {
+            }
+
+            function update_drag_up() {
                 // stop resizing
                 isResizing = false;
 
-            });
+            };
         }
         // function to set up automatic board resizing on window resize
         this.set_board_width_on_window_resize = function() {
@@ -615,23 +633,23 @@ hog_theme = function () {
         }
         // function to fixed the hogvis header block to top when scroll
         this.set_fixed_header_on_window_scroll = function() {
-        var stickyHeaderTop = $('#hogvisheader').offset().top;
-        $(window).scroll(function () {
-            if ($(window).scrollTop() > stickyHeaderTop) {
-                $('#hogvisheader').css({
-                    position: 'fixed',
-                    top: '0px'
-                });
-                $('#hogvis_container').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
-            } else {
-                $('#hogvisheader').css({
-                    position: 'static',
-                    top: '0px'
-                });
-                $('#hogvis_container').css('margin-top', '0px');
-            }
-        });
-    };
+            var stickyHeaderTop = $('#hogvisheader').offset().top;
+            $(window).scroll(function () {
+                if ($(window).scrollTop() > stickyHeaderTop) {
+                    $('#hogvisheader').css({
+                        position: 'fixed',
+                        top: '0px'
+                    });
+                    $('#hogvis_container').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
+                } else {
+                    $('#hogvisheader').css({
+                        position: 'static',
+                        top: '0px'
+                    });
+                    $('#hogvis_container').css('margin-top', '0px');
+                }
+            });
+        };
 
 
         ////////////////////
@@ -766,7 +784,7 @@ hog_theme = function () {
         })
     }
 
-    // get maximum number of genes per hog accross species
+// get maximum number of genes per hog accross species
     var get_maxs = function (ps2) {
         var maxs = {};
         var i, sp, internal;
