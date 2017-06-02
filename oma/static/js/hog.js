@@ -600,7 +600,7 @@ hog_theme = function () {
         }
         // resize the board container to fill space between tree panel and right
         this.set_scroller_width = function() {
-            
+
             var viewerC = document.getElementById("hogvis_container");
             var viewerS = document.getElementById("tnt_annot_container_hogvis_container");
             var viewerT = document.getElementById("tnt_tree_container_hogvis_container");

@@ -38,11 +38,19 @@
 
                     <div id="hogvisheader">
 
-                        <h3 >Hierarchical group {{ fam.id }} open at level of <span id="current_level_text" style="font-weight:bold;"></span> </h3>
+                        <div>
+
+                            <button id='btn_display_settings' class="btn btn-default" style="float: right; margin: 0 0 10px 10px;" aria-label="Left Align"  data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings" type="button"  >
+                                OPTIONS
+                                <span id="icon_settings" class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                            </button>
+
+                            <h3 >Hierarchical group {{ fam.id }} open at level of <span id="current_level_text" style="font-weight:bold;"></span> </h3>
+
+                        </div>
 
                         <div id="hogvis_settings">
 
-                            <button class="btn btn-primary btn_display_settings center-block" id="btn_display_settings"type="button" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings">Show Settings</button>
 
                             <div class="collapse" id="collapseSettings">
 
@@ -75,8 +83,11 @@
                         (function(){
                             document.getElementById("btn_display_settings").addEventListener("click", function(){
 
-                                if (this.innerHTML=="Hide Settings") {this.innerHTML = "Show Settings";}
-                                else this.innerHTML = "Hide Settings";
+                                var ico = document.getElementById("icon_settings");
+
+
+                                if (ico.getAttribute("class") === "glyphicon glyphicon-triangle-top") {ico.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
+                                else ico.setAttribute("class","glyphicon glyphicon-triangle-top");
                             });
                         }) ();
                     </script>
