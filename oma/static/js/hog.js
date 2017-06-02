@@ -94,6 +94,7 @@ hog_theme = function () {
 
             current_opened_taxa_name = node.node_name();
             div_current_level.innerHTML = current_opened_taxa_name;
+            annot.width(hogvis.compute_size_annot(current_opened_taxa_name));
             annot.update();
 
             // when update the board make sure that the scroll is reset to left
@@ -380,14 +381,28 @@ hog_theme = function () {
                 })
                 .on("mouseover", gene_tooltip);
         }
+        this.compute_size_annot = function(taxa_name){
+
+            if (taxa_name === 'LUCA'){return ~~(tot_width * 0.6)}
+
+            var max_number_square = 0;
+            var arrayLength = maxs[taxa_name].length;
+            for (var i = 0; i < arrayLength; i++) {
+                max_number_square += maxs[current_opened_taxa_name][i];
+            }
+
+            return max_number_square* (options.label_height + 15);
+
+        }
+
         this.init_annot = function() {
+
             var a = tnt.board()
                 .from(0)
                 .zoom_in(1)
                 .allow_drag(false)
                 .to(5)
-                .width(~~(tot_width * 0.6));
-
+                .width(hogvis.compute_size_annot(current_opened_taxa_name));
             return a
         }
         this.init_track = function(){
@@ -406,6 +421,7 @@ hog_theme = function () {
                                 };
                             }
                             var genes2Xcoords = genes_2_xcoords(per_species3[sp][current_opened_taxa_name], maxs[current_opened_taxa_name]);
+
                             return genes2Xcoords;
                         })
                     )
@@ -414,6 +430,7 @@ hog_theme = function () {
                         .add("hogs", hog_feature)
                     );
             };
+
             return track
         }
         this.set_gene_xcoords = function() {
