@@ -26,12 +26,18 @@
 
     <div  style="background-color: white; padding:10px;">
 
-        <div id="gap_conpenser"> </div>
 
-        <div id="hogvisheader">
 
-            {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
-            {% else %}
+        {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
+
+        {% else %}
+
+            <div id="hogvis">
+
+            <div id="gap_conpenser"> </div>
+
+            <div id="hogvisheader">
+
                 <h3 >Hierarchical group {{ fam.id }} open at level of <span id="current_level_text" style="font-weight:bold;"></span> </h3>
 
                 <div id="hogvis_settings">
@@ -66,65 +72,66 @@
                 </div>
 
 
-                </div>
-
-                <div id="hog_vis"> </div>
-
-
-                <script>
-
-                    // Init the hogvis
-                    (function () {
-
-                        var Hogvis = hog_theme();
-
-                        var tree = {{ species_tree|safe }};
-                        var query = {'id': {{ entry.entry_nr }} };
-                        var per_species = {{ per_species|safe }};
-                        var tooltip_data = {{ xrefs|safe }};
-                        var hogvis_container = document.getElementById ("hog_vis");
-
-
-                        var genedatavis = [{
-                            name: 'Query Gene',
-                            scale: 'on_off'
-                        },
-                            {
-                                name: "Gene Length",
-                                scale: "linear",
-                                field: "sequence_length",
-                                func: "color1d"
-                            }
-                        ];
-
-                        var default_options = {
-                            label_height: 20,
-                            genedatavis: genedatavis};
-
-
-                        var hogvis = new Hogvis(hogvis_container, query, per_species,
-                            tree, tooltip_data, default_options , document.getElementById("genedata-vis"));
-
-                    }) ();
-
-                    (function(){
-
-                        document.getElementById("btn_display_settings").addEventListener("click", function(){
-
-                            if (this.innerHTML=="Hide Settings") {this.innerHTML = "Show Settings";}
-                            else this.innerHTML = "Hide Settings";
-
-                        });
+            </div>
 
 
 
 
-                    }) ();
-
-                </script>
 
 
-            {% endif %}
+            </div>
+
+              <script>
+
+                // Init the hogvis
+                (function () {
+
+                    var Hogvis = hog_theme();
+
+                    var tree = {{ species_tree|safe }};
+                    var query = {'id': {{ entry.entry_nr }} };
+                    var per_species = {{ per_species|safe }};
+                    var tooltip_data = {{ xrefs|safe }};
+                    var hogvis_container_id = "hogvis";
+
+                    var genedatavis = [{
+                        name: 'Query Gene',
+                        scale: 'on_off'
+                    },
+                        {
+                            name: "Gene Length",
+                            scale: "linear",
+                            field: "sequence_length",
+                            func: "color1d"
+                        }
+                    ];
+
+                    var default_options = {
+                        label_height: 20,
+                        genedatavis: genedatavis};
+
+                    var hogvis = new Hogvis(hogvis_container_id, query, per_species,
+                        tree, tooltip_data, default_options , document.getElementById("genedata-vis"));
+
+                }) ();
+
+                (function(){
+
+                    document.getElementById("btn_display_settings").addEventListener("click", function(){
+
+                        if (this.innerHTML=="Hide Settings") {this.innerHTML = "Show Settings";}
+                        else this.innerHTML = "Hide Settings";
+
+                    });
+
+
+
+
+                }) ();
+
+            </script>
+
+        {% endif %}
 
     </div>
 

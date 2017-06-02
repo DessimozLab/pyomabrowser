@@ -5,7 +5,7 @@ var hog_theme;
 hog_theme = function () {
 
     // Hogvis is the main object to be created, it take a div and others parameters to set up an hogvis instance
-    function Hogvis(hogvis_container, query_gene, per_species3, tree_obj, gene_data, options, genedata_picker_div) {
+    function Hogvis(hogvis_div_id, query_gene, per_species3, tree_obj, gene_data, options, genedata_picker_div) {
 
 
         ////////////////////
@@ -544,17 +544,17 @@ hog_theme = function () {
 
             // Add a drag div between tree and board panel
             var dragDiv = document.createElement("div");
-            var tree_panel = document.getElementById("tnt_tree_container_hog_vis");
+            var tree_panel = document.getElementById("tnt_tree_container_hogvis_container");
             dragDiv.id = 'drag';
-            dragDiv.style.height = $("#tnt_tree_container_hog_vis").height() + "px";
+            dragDiv.style.height = $("#tnt_tree_container_hogvis_container").height() + "px";
             tree_panel.parentNode.insertBefore(dragDiv, tree_panel.nextSibling);
 
             var isResizing = false,
                 lastDownX = 0;
 
-            var container = $('#hog_vis'),
-                left = $('#tnt_tree_container_hog_vis'),
-                right = $('#tnt_annot_container_hog_vis'),
+            var container = $('#hogvis_container'),
+                left = $('#tnt_tree_container_hogvis_container'),
+                right = $('#tnt_annot_container_hogvis_container'),
                 handle = $('#drag');
 
             handle.on('mousedown', function (e) {
@@ -575,7 +575,7 @@ hog_theme = function () {
 
                 // resize tree panel to new width and update board panel
                 left.css('width', nwld);
-                set_scroller_width();
+                hogvis.set_scroller_width();
 
                 // update the tree according to the new tree panel size with min 100px width
                 tree.layout().width(Math.max(200, nwld - 20));
@@ -596,9 +596,10 @@ hog_theme = function () {
         // resize the board container to fill space between tree panel and right
         this.set_scroller_width = function() {
 
-            var viewerC = document.getElementById("hog_vis");
-            var viewerS = document.getElementById("tnt_annot_container_hog_vis");
-            var viewerT = document.getElementById("tnt_tree_container_hog_vis");
+            var viewerC = document.getElementById("hogvis_container");
+            var viewerS = document.getElementById("tnt_annot_container_hogvis_container");
+            var viewerT = document.getElementById("tnt_tree_container_hogvis_container");
+
 
             var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 40;
             viewerS.style.width = scroller_width + "px";
@@ -616,13 +617,13 @@ hog_theme = function () {
                     position: 'fixed',
                     top: '0px'
                 });
-                $('#hog_vis').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
+                $('#hogvis_container').css('margin-top', $('#hogvisheader').outerHeight(true) + parseInt($('#gap_conpenser').css('marginBottom')));
             } else {
                 $('#hogvisheader').css({
                     position: 'static',
                     top: '0px'
                 });
-                $('#hog_vis').css('margin-top', '0px');
+                $('#hogvis_container').css('margin-top', '0px');
             }
         });
     };
@@ -633,6 +634,13 @@ hog_theme = function () {
         ////////////////////
 
         var hogvis = this;
+        var hogvis_div = document.getElementById(hogvis_div_id);
+
+        var hogvis_container = document.createElement("div");
+        hogvis_container.id = hogvis_div_id + "_container";
+        hogvis_div.appendChild(hogvis_container);
+
+
         var tot_width = parseInt(d3.select(hogvis_container).style("width")) - 30; // todo -30 should be define by margin variables
         var maxs = get_maxs(per_species3);
 
@@ -653,7 +661,7 @@ hog_theme = function () {
         var col_scale;
         var colorbar;
 
-        
+
         /////////////
         // TREE /////
         /////////////
@@ -731,7 +739,6 @@ hog_theme = function () {
 
         // make the vis panel resizable
         hogvis.set_resize_on_drag(tree);
-
 
     }
 
