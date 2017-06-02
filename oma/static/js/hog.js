@@ -97,7 +97,7 @@ hog_theme = function () {
             annot.update();
 
             // when update the board make sure that the scroll is reset to left
-            var annot_scroller = $('#tnt_annot_container_hog_vis');
+            var annot_scroller = $("#tnt_annot_container_hogvis_container");
             annot_scroller.scrollLeft(0);
 
             hogvis.highlight_condition = function (n) {
@@ -538,7 +538,7 @@ hog_theme = function () {
         }
         this.add_hogvis_container = function (){
             hogvis_container = document.createElement("div");
-            hogvis_container.id = hogvis_div_id + "_container";
+            hogvis_container.id = "hogvis_container";
             hogvis_div.appendChild(hogvis_container);
         };
 
@@ -659,7 +659,7 @@ hog_theme = function () {
         var hogvis = this;
         var hogvis_div = document.getElementById(hogvis_div_id);
 
-        // todo add header with function
+        // todo add heade`r with function
 
         var hogvis_container;
         hogvis.add_hogvis_container();
