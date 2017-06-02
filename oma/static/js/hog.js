@@ -5,7 +5,7 @@ var hog_theme;
 hog_theme = function () {
 
     // Hogvis is the main object to be created, it take a div and others parameters to set up an hogvis instance
-    function Hogvis(hogvis_div_id, query_gene, per_species3, tree_obj, gene_data, options, genedata_picker_div) {
+    function Hogvis(hogvis_div_id, query_gene, per_species3, tree_obj, gene_data, options_param, genedata_picker_div) {
 
 
         ////////////////////
@@ -536,6 +536,11 @@ hog_theme = function () {
                 });
 
         }
+        this.add_hogvis_container = function (){
+            hogvis_container = document.createElement("div");
+            hogvis_container.id = hogvis_div_id + "_container";
+            hogvis_div.appendChild(hogvis_container);
+        };
 
         // UI related methods
         // function to set up drag to resize tree and board panel
@@ -595,13 +600,13 @@ hog_theme = function () {
         }
         // resize the board container to fill space between tree panel and right
         this.set_scroller_width = function() {
-
+            
             var viewerC = document.getElementById("hogvis_container");
             var viewerS = document.getElementById("tnt_annot_container_hogvis_container");
             var viewerT = document.getElementById("tnt_tree_container_hogvis_container");
 
-
             var scroller_width = viewerC.offsetWidth - viewerT.offsetWidth - 40;
+
             viewerS.style.width = scroller_width + "px";
 
             $('#hogvisheader').width($('#hogs').width() - 20); // Because padding of #hogs is 10px
@@ -636,16 +641,16 @@ hog_theme = function () {
         var hogvis = this;
         var hogvis_div = document.getElementById(hogvis_div_id);
 
-        var hogvis_container = document.createElement("div");
-        hogvis_container.id = hogvis_div_id + "_container";
-        hogvis_div.appendChild(hogvis_container);
+        // todo add header with function
 
+        var hogvis_container;
+        hogvis.add_hogvis_container();
 
         var tot_width = parseInt(d3.select(hogvis_container).style("width")) - 30; // todo -30 should be define by margin variables
         var maxs = get_maxs(per_species3);
 
         // options is the options variable for Hogvis, it can be customize by using the options parameter
-        var options = options || {};
+        var options = options_param || {};
         hogvis.set_options(options);
 
         // tree related variable

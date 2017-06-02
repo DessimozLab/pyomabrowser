@@ -26,64 +26,67 @@
 
     <div  style="background-color: white; padding:10px;">
 
-
-
         {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
 
         {% else %}
 
             <div id="hogvis">
 
-            <div id="gap_conpenser"> </div>
+                <div id="header">
 
-            <div id="hogvisheader">
+                    <div id="gap_conpenser"> </div>
 
-                <h3 >Hierarchical group {{ fam.id }} open at level of <span id="current_level_text" style="font-weight:bold;"></span> </h3>
+                    <div id="hogvisheader">
 
-                <div id="hogvis_settings">
+                        <h3 >Hierarchical group {{ fam.id }} open at level of <span id="current_level_text" style="font-weight:bold;"></span> </h3>
 
-                    <button class="btn btn-primary btn_display_settings center-block" id="btn_display_settings"type="button" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings">Show Settings</button>
+                        <div id="hogvis_settings">
 
-                    <div class="collapse" id="collapseSettings">
+                            <button class="btn btn-primary btn_display_settings center-block" id="btn_display_settings"type="button" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings">Show Settings</button>
 
-                        <div id="button-settings-div">
+                            <div class="collapse" id="collapseSettings">
 
-                            <!-- Small button group -->
-                            <div class="btn-group">
-                                <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Select Color Scheme <span class="caret"></span>
-                                </button>
+                                <div id="button-settings-div">
 
-                                <ul id="genedata-vis" class="dropdown-menu">
-                                </ul>
+                                    <!-- Small button group -->
+                                    <div class="btn-group">
+                                        <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Select Color Scheme <span class="caret"></span>
+                                        </button>
+
+                                        <ul id="genedata-vis" class="dropdown-menu">
+                                        </ul>
+                                    </div>
+
+                                    <button type="button" class="btn btn-default btn-sm" disabled="disabled">Remove Low Confidence Columns</button>
+
+                                </div>
+
+                                <div id="scale-settings-div">
+                                    <div class="scale-item" id="colorbarText" > </div>
+                                    <div class="scale-item" id="colorbar" > </div>
+                                </div>
+
                             </div>
-
-                            <button type="button" class="btn btn-default btn-sm" disabled="disabled">Remove Low Confidence Columns</button>
-
                         </div>
-
-                        <div id="scale-settings-div">
-                            <div class="scale-item" id="colorbarText" > </div>
-                            <div class="scale-item" id="colorbar" > </div>
-                        </div>
-
-
-
                     </div>
+
+                    <script>
+
+                        (function(){
+                            document.getElementById("btn_display_settings").addEventListener("click", function(){
+
+                                if (this.innerHTML=="Hide Settings") {this.innerHTML = "Show Settings";}
+                                else this.innerHTML = "Hide Settings";
+                            });
+                        }) ();
+                    </script>
+
                 </div>
 
-
             </div>
 
+            <script>
 
-
-
-
-
-            </div>
-
-              <script>
-
-                // Init the hogvis
                 (function () {
 
                     var Hogvis = hog_theme();
@@ -111,21 +114,7 @@
                         genedatavis: genedatavis};
 
                     var hogvis = new Hogvis(hogvis_container_id, query, per_species,
-                        tree, tooltip_data, default_options , document.getElementById("genedata-vis"));
-
-                }) ();
-
-                (function(){
-
-                    document.getElementById("btn_display_settings").addEventListener("click", function(){
-
-                        if (this.innerHTML=="Hide Settings") {this.innerHTML = "Show Settings";}
-                        else this.innerHTML = "Hide Settings";
-
-                    });
-
-
-
+                        tree, tooltip_data, default_options , document.getElementById("genedata-vis")  );
 
                 }) ();
 
