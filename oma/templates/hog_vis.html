@@ -76,10 +76,13 @@
                     // Init the hogvis
                     (function () {
 
+                        var Hogvis = hog_theme();
+
                         var tree = {{ species_tree|safe }};
                         var query = {'id': {{ entry.entry_nr }} };
                         var per_species = {{ per_species|safe }};
                         var tooltip_data = {{ xrefs|safe }};
+                        var hogvis_container = document.getElementById ("hog_vis");
 
 
                         var genedatavis = [{
@@ -98,12 +101,9 @@
                             label_height: 20,
                             genedatavis: genedatavis};
 
-                        var Hogvis = hog_theme(default_options);
 
-                        var hogvis_container = document.getElementById ("hog_vis");
                         var hogvis = new Hogvis(hogvis_container, query, per_species,
-                            tree, tooltip_data, {}, document.getElementById("genedata-vis"));
-
+                            tree, tooltip_data, default_options , document.getElementById("genedata-vis"));
 
                     }) ();
 
