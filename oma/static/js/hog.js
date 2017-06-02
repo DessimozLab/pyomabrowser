@@ -86,7 +86,7 @@ hog_theme = function (settings_theme) {
 
         //todo
         var colorbar;
-        
+
         /////////////
         // TREE /////
         /////////////
@@ -95,15 +95,19 @@ hog_theme = function (settings_theme) {
         var collapsed_node = tnt.tree.node_display.triangle()
             .fill("grey")
             .size(4);
+
         var leaf_node = tnt.tree.node_display.circle()
             .fill("#2c3e50")
             .size(4);
+
         var int_node = tnt.tree.node_display.circle()
             .fill("#34495e")
             .size(4);
+
         var highlight_node = tnt.tree.node_display.circle()
             .fill("#e74c3c")
             .size(6);
+
         var highlight_condition = function () {
             return false;
         };
@@ -236,57 +240,62 @@ hog_theme = function (settings_theme) {
             }
         };
 
-        var tree = tnt.tree()
-            .data(tree_obj)
-            .layout(tnt.tree.layout.vertical()
-                .width(Math.max(240, ~~(tot_width * 0.4)))
-                .scale(false)
-            )
-            .label(tnt.tree.label.text()
-                .fontsize(12)
-                .height(settings_theme.label_height)
-                .text(function (node) {
-                    var limit = 30;
-                    var data = node.data();
-                    if (node.is_collapsed()) {
-                        return "[" + node.n_hidden() + " hidden taxa]";
-                    }
-                    if ((!options.show_internal_labels || !highlight_condition(node)) &&
-                        data.children && data.children.length > 0) {
-                        return "";
-                    }
-                    if (data.name.length > limit) {
-                        var truncName = data.name.substr(0, limit - 3) + "...";
-                        return truncName.replace(/_/g, ' ');
-                    }
-                    return data.name.replace(/_/g, ' ');
+        var init_tree = function(){
+            var t = tnt.tree()
+                .data(tree_obj)
+                .layout(tnt.tree.layout.vertical()
+                    .width(Math.max(240, ~~(tot_width * 0.4)))
+                    .scale(false)
+                )
+                .label(tnt.tree.label.text()
+                    .fontsize(12)
+                    .height(settings_theme.label_height)
+                    .text(function (node) {
+                        var limit = 30;
+                        var data = node.data();
+                        if (node.is_collapsed()) {
+                            return "[" + node.n_hidden() + " hidden taxa]";
+                        }
+                        if ((!options.show_internal_labels || !highlight_condition(node)) &&
+                            data.children && data.children.length > 0) {
+                            return "";
+                        }
+                        if (data.name.length > limit) {
+                            var truncName = data.name.substr(0, limit - 3) + "...";
+                            return truncName.replace(/_/g, ' ');
+                        }
+                        return data.name.replace(/_/g, ' ');
+                    })
+                    .color(function (node) {
+                        if (node.is_collapsed()) {
+                            return 'grey';
+                        }
+                        return 'black';
+                    })
+                    .fontweight(function (node) {
+                        if (highlight_condition(node)) {
+                            return "bold";
+                        }
+                        return "normal";
+                    })
+                )
+                .on("click", function (d) {
+                    treeNode_tooltip.call(this, d);
                 })
-                .color(function (node) {
-                    if (node.is_collapsed()) {
-                        return 'grey';
-                    }
-                    return 'black';
-                })
-                .fontweight(function (node) {
-                    if (highlight_condition(node)) {
-                        return "bold";
-                    }
-                    return "normal";
-                })
-            )
-            .on("click", function (d) {
-                treeNode_tooltip.call(this, d);
-            })
-            .on("mouseover", mouse_over_node)
-            .on("mouseout", mouse_out_node)
-            .node_display(node_display)
-            .branch_color("black");
+                .on("mouseover", mouse_over_node)
+                .on("mouseout", mouse_out_node)
+                .node_display(node_display)
+                .branch_color("black");
+            return t;
+        };
+
+        var tree = init_tree();
 
         // Once the tree is build update the current level opened with the root by default
         current_opened_taxa_name = tree.root().node_name();
 
         /////////////////////////
-        //// PARSE HOG INFO /////
+        ///// GENES PANEL ///////
         /////////////////////////
 
         var gene_tooltip = function (gene) {
@@ -558,6 +567,10 @@ hog_theme = function (settings_theme) {
                     barText.innerHTML = null;
                 }
             });
+
+        ///////////////////
+        ///// HOGVIS //////
+        ///////////////////
 
         var vis = tnt()
             .tree(tree)
