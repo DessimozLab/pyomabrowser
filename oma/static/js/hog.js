@@ -49,6 +49,20 @@ hog_theme = function () {
             // label_height defines the text size of the tree labels and indirectly the square sizes.
             options.label_height = options.hasOwnProperty('label_height') ? options.label_height : 20;
 
+
+            // this was hardcoded with oma data (just thinking for possible embedded)
+            var get_fam_gene_data_default = function(d){
+                $.getJSON("/oma/hogdata/" + query_gene.id + "/json", function (data) {
+                    fam_genedata = {};
+                    data.forEach(function (gene) {
+                        fam_genedata[gene.id] = gene;
+                    });
+                    hogvis.change_genedata_vis(d);
+                });
+            }
+
+            options.get_fam_gene_data = options.hasOwnProperty('get_fam_gene_data') ? options.get_fam_gene_data : get_fam_gene_data_default;
+
         }
 
         // Tree related methods
@@ -175,15 +189,18 @@ hog_theme = function () {
             return false;
         }
         this.set_node_tooltip = function () {
+
             treeNode_tooltip = tnt.tooltip()
                 .fill(function (node) {
                     // The DOM element is passed as "this"
                     var container = d3.select(this);
 
+
                     var table = container
                         .append("table")
                         .attr("class", "tnt_zmenu")
                         .attr("border", "solid")
+
 
                     table
                         .append("tr")
@@ -246,7 +263,9 @@ hog_theme = function () {
                     }
 
 
-                });
+
+
+                })
         }
 
         // Gene panel related methods
@@ -490,13 +509,7 @@ hog_theme = function () {
                 return (query_gene && gene.id === query_gene.id ? "#27ae60" : "#95a5a6");
             };
             if (fam_genedata === undefined) {
-                $.getJSON("/oma/hogdata/" + query_gene.id + "/json", function (data) {
-                    fam_genedata = {};
-                    data.forEach(function (gene) {
-                        fam_genedata[gene.id] = gene;
-                    });
-                    hogvis.change_genedata_vis(d);
-                });
+                options.get_fam_gene_data(d);
                 return;
             }
 

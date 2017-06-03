@@ -1,19 +1,7 @@
-.grey {
-    fill : #95a5a6;
-}
-
-.brown {
-    fill : brown;
-}
-
-.green {
-    fill : darkgreen;
-}
-
 .axis path, .axis line {
     fill: none;
     stroke: black;
-    shape-rendering: crispEdges;
+    shape-rendering: geometricPrecision;
 }
 
 .axis text {
@@ -32,7 +20,7 @@
     z-index:1000000 !important;
 }
 
-#hog_vis{
+#hog_vis_container{
     display: inline-block;
     padding: 10px;
     width: 100%;
@@ -74,7 +62,6 @@ div[id^="tnt_annot_container_"] {
 #gap_conpenser {
     margin-bottom: 15px;
 }
-
 
 #drag {
     display: inherit;
