@@ -313,7 +313,7 @@ hog_theme = function () {
                     //else {this.setAttribute("class","glyphicon glyphicon-triangle-top")}
 
                     var hog = current_hog_state.hogs[parseInt(this.id.split('_')[2])]
-                    console.log(hog.number_species*100/current_hog_state.number_species);
+                    console.log(hog.coverage);
                     console.log(hog.genes);
 
                 });
@@ -957,35 +957,41 @@ hog_theme = function () {
 
                 }
 
-        }
+            }
+
+            for (var i = 0; i < that.hogs.length; i++) {
+                that.hogs[i].coverage =  that.hogs[i].number_species*100/that.number_species;
+            }
+
 
         };
 
         this.add_genes = function(array_hogs_with_genes){
 
-                if (that.hogs === undefined){
-                    that.hogs = [];
-                    for (var i = 0; i < array_hogs_with_genes.length; i++) {
-                        var h = {
-                            genes:[],
-                            name:'hog_' + i,
-                            number_species:0,
-                            max_in_hog: 0
-                        };
-
-                        that.hogs.push(h);
-                    }
-                }
-
+            if (that.hogs === undefined){
+                that.hogs = [];
                 for (var i = 0; i < array_hogs_with_genes.length; i++) {
-                    if (array_hogs_with_genes[i].length > 0) {
-                        that.hogs[i].genes = that.hogs[i].genes.concat(array_hogs_with_genes[i]);
-                        that.hogs[i].number_species += 1;
-                        if (that.hogs[i].max_in_hog < array_hogs_with_genes[i].length){
-                            that.hogs[i].max_in_hog = array_hogs_with_genes[i].length
-                        }
+                    var h = {
+                        genes:[],
+                        name:'hog_' + i,
+                        number_species:0,
+                        max_in_hog: 0,
+                        coverage: 0
+                    };
+
+                    that.hogs.push(h);
+                }
+            }
+
+            for (var i = 0; i < array_hogs_with_genes.length; i++) {
+                if (array_hogs_with_genes[i].length > 0) {
+                    that.hogs[i].genes = that.hogs[i].genes.concat(array_hogs_with_genes[i]);
+                    that.hogs[i].number_species += 1;
+                    if (that.hogs[i].max_in_hog < array_hogs_with_genes[i].length){
+                        that.hogs[i].max_in_hog = array_hogs_with_genes[i].length
                     }
                 }
+            }
 
         }
     }
