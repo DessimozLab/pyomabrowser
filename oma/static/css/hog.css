@@ -103,3 +103,16 @@ div[id^="tnt_annot_container_"] {
     margin-top: 8px;
 }
 
+
+/* HOG HEADER PART */
+
+.header_div{
+    position: absolute;
+    font-size: 1em;
+}
+
+span[id^="head_button_"]{
+    cursor: pointer ;
+}
+
+

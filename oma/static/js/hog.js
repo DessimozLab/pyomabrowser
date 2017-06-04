@@ -109,54 +109,10 @@ hog_theme = function () {
             current_hog_state.reset_on(current_opened_taxa_name);
             div_current_level.innerHTML = current_opened_taxa_name;
             annot.width(hogvis.compute_size_annot(current_opened_taxa_name));
-            d3.selectAll('.anchor_hog_header').remove();
+
             annot.update();
 
-            hogvis.add_hog_header_anchor();
-
-
-            /////// DEV AREA ///////
-
-
-
-            /*
-            if (current_opened_taxa_name != 'LUCA'){
-
-                console.log(current_opened_taxa_name);
-
-                var se = d3.select('.hog_gene');
-                var g = se.select(function(){ return this.parentNode});
-                var gg = g.select(function(){ return this.parentNode});
-
-                var gene_stack = 0
-
-                for (var i = 0; i < current_hog_state.hogs.length; i++) {
-                    console.log(current_hog_state.hogs[i].name, current_hog_state.hogs[i].number_species*100/current_hog_state.number_species, current_hog_state.hogs[i].max_in_hog);
-                    gg.append('circle')
-                        .attr("cx", function(){
-                            return (options.label_height * gene_stack) + (options.label_height * current_hog_state.hogs[i].max_in_hog/2 )  ;
-                        }  )
-                        .attr("cy", -2)
-                        .attr("r", 2)
-                        .attr("class", "anchor_hog_header")
-                        .style("fill", "red");
-                    gene_stack += current_hog_state.hogs[i].max_in_hog;
-                }
-            }
-
-
-
-             var vl = d3.selectAll('.hog_boundary').each(function(d){console.log(d)});
-             var g = vl.select(function() {
-             return this.parentNode;
-             });
-             console.log(vl,g);
-             g.append('circle').attr("cx", 5).attr("cy", 0).attr("r", 2).style("fill", "red");
-
-             */
-
-            ///// END DEV AREA /////
-
+            hogvis.add_hog_header();
 
             // when update the board make sure that the scroll is reset to left
             var annot_scroller = $("#tnt_annot_container_hogvis_container");
@@ -317,6 +273,56 @@ hog_theme = function () {
         }
 
         // Gene panel related methods
+
+
+
+        this.add_hog_header = function(){
+
+            d3.selectAll('.anchor_hog_header').remove();
+            d3.selectAll('.header_div').remove();
+            d3.selectAll('.tt').remove();
+
+            this.add_hog_header_anchor();
+
+
+            ///// DEV AREA /////
+
+            var hog_headers = document.getElementsByClassName("anchor_hog_header");
+            var svg = document.getElementsByClassName("tnt_svg")[0];
+            var container = svg.parentNode;
+            var parentPos = container.getBoundingClientRect(), relativePos = {};
+
+            for (var i = 0; i < hog_headers.length; i++) {
+                var hog_head  = hog_headers[i];
+                var childrenPos = hog_head.getBoundingClientRect();
+
+                relativePos.top = childrenPos.top - parentPos.top,
+                relativePos.right = childrenPos.right - parentPos.right,
+                relativePos.bottom = childrenPos.bottom - parentPos.bottom,
+                relativePos.left = childrenPos.left - parentPos.left;
+
+                var header_div = document.createElement("div");
+
+                header_div.innerHTML = '<span id="head_button_'+ i +'" class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>';
+                header_div.setAttribute("class", "header_div");
+                header_div.style.top = relativePos.top - 13 + "px";
+                header_div.style.left = relativePos.left - 5 + "px";
+
+                container.appendChild(header_div);
+
+                document.getElementById('head_button_'+ i).addEventListener("click", function(){
+                    if (this.getAttribute("class") === "glyphicon glyphicon-triangle-top") {this.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
+                    else this.setAttribute("class","glyphicon glyphicon-triangle-top");
+                });
+
+            }
+
+            //// END DEV AREA ////
+
+
+        };
+
+
         this.add_hog_header_anchor = function(){
 
             if (current_opened_taxa_name != 'LUCA'){
