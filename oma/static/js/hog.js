@@ -106,7 +106,7 @@ hog_theme = function () {
             }
 
             current_opened_taxa_name = node.node_name();
-            current_hog_state.reset_on(current_opened_taxa_name);
+            current_hog_state.reset_on(tree, per_species3, current_opened_taxa_name);
             div_current_level.innerHTML = current_opened_taxa_name;
             annot.width(hogvis.compute_size_annot(current_opened_taxa_name));
 
@@ -314,6 +314,7 @@ hog_theme = function () {
 
                     var hog = current_hog_state.hogs[parseInt(this.id.split('_')[2])]
                     console.log(hog.number_species*100/current_hog_state.number_species);
+                    console.log(hog.genes);
 
                 });
 
@@ -470,7 +471,7 @@ hog_theme = function () {
                         })
                         .attr("height", height)
                         .attr("fill", gene_color_function)
-                    .style("cursor", function(){ return gene_tooltip_mode === 'click' ? "pointer" : "default"})
+                        .style("cursor", function(){ return gene_tooltip_mode === 'click' ? "pointer" : "default"})
 
                 })
                 .distribute(function (elems, x_scale) {
@@ -495,7 +496,7 @@ hog_theme = function () {
                             return width - 2 * padding;
                         })
                         .attr("fill", gene_color_function)
-                    .style("cursor", function(){ return gene_tooltip_mode === 'click' ? "pointer" : "default"})
+                        .style("cursor", function(){ return gene_tooltip_mode === 'click' ? "pointer" : "default"})
 
                 })
                 .on('click', function(d){ return (gene_tooltip_mode === 'click' ? gene_tooltip(d) : '')})
@@ -542,10 +543,10 @@ hog_theme = function () {
                             }
                             var genes2Xcoords = genes_2_xcoords(per_species3[sp][current_opened_taxa_name], maxs[current_opened_taxa_name]);
 
-                            if (genes2Xcoords.genes.length > 0){
-                                current_hog_state.number_species += 1;
-                                current_hog_state.add_genes(per_species3[sp][current_opened_taxa_name])
-                            }
+                            /*if (genes2Xcoords.genes.length > 0){
+                             current_hog_state.number_species += 1;
+                             current_hog_state.add_genes(per_species3[sp][current_opened_taxa_name])
+                             }*/
 
                             return genes2Xcoords;
                         })
@@ -822,7 +823,6 @@ hog_theme = function () {
         var min_width_tree_container = 100;
         var min_width_annot_container = 100;
 
-
         var tot_width = parseInt(d3.select(hogvis_container).style("width")) - 30; // todo -30 should be define by margin variables
         var maxs = get_maxs(per_species3);
 
@@ -866,8 +866,7 @@ hog_theme = function () {
 
         // Once the tree is build update the current level opened with the root by default
         current_opened_taxa_name = tree.root().node_name();
-        current_hog_state.reset_on(current_opened_taxa_name);
-
+        current_hog_state.reset_on(tree, per_species3, current_opened_taxa_name);
 
         /////////////////////////
         ///// GENES PANEL ///////
@@ -940,37 +939,53 @@ hog_theme = function () {
         this.hogs = undefined;
         this.number_species = 0;
 
-        this.reset_on= function(tax_name) {
+        this.reset_on= function(tree,per_species3,tax_name) {
             that.current_level = tax_name;
             that.hogs = undefined;
             that.number_species = 0;
+
+            var leaves = tree.root().get_all_leaves();
+
+            for (var i = 0; i < leaves.length; i++) {
+
+                var slice = per_species3[leaves[i].property('name')][tax_name];
+
+                if (slice && slice.length > 0){
+
+                    that.number_species += 1;
+                    that.add_genes(slice)
+
+                }
+
+        }
+
         };
 
         this.add_genes = function(array_hogs_with_genes){
 
-            if (that.hogs === undefined){
-                that.hogs = [];
-                for (var i = 0; i < array_hogs_with_genes.length; i++) {
-                    var h = {
-                        genes:[],
-                        name:'hog_' + i,
-                        number_species:0,
-                        max_in_hog: 0
-                    };
+                if (that.hogs === undefined){
+                    that.hogs = [];
+                    for (var i = 0; i < array_hogs_with_genes.length; i++) {
+                        var h = {
+                            genes:[],
+                            name:'hog_' + i,
+                            number_species:0,
+                            max_in_hog: 0
+                        };
 
-                    that.hogs.push(h);
-                }
-            }
-
-            for (var i = 0; i < array_hogs_with_genes.length; i++) {
-                if (array_hogs_with_genes[i].length > 0) {
-                    that.hogs[i].genes = that.hogs[i].genes.concat(array_hogs_with_genes[i]);
-                    that.hogs[i].number_species += 1;
-                    if (that.hogs[i].max_in_hog < array_hogs_with_genes[i].length){
-                        that.hogs[i].max_in_hog = array_hogs_with_genes[i].length
+                        that.hogs.push(h);
                     }
                 }
-            }
+
+                for (var i = 0; i < array_hogs_with_genes.length; i++) {
+                    if (array_hogs_with_genes[i].length > 0) {
+                        that.hogs[i].genes = that.hogs[i].genes.concat(array_hogs_with_genes[i]);
+                        that.hogs[i].number_species += 1;
+                        if (that.hogs[i].max_in_hog < array_hogs_with_genes[i].length){
+                            that.hogs[i].max_in_hog = array_hogs_with_genes[i].length
+                        }
+                    }
+                }
 
         }
     }

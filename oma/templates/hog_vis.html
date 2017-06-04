@@ -57,7 +57,7 @@
                                 <div id="button-settings-div">
 
                                     <div class="btn-group">
-                                        <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Select Color Scheme <span class="caret"></span>
+                                        <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <b>Select Color Scheme </b> <span class="caret"></span>
                                         </button>
 
                                         <ul id="genedata-vis" class="dropdown-menu">
@@ -66,7 +66,7 @@
                                     </div>
 
                                     <div class="btn-group">
-                                        <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Show gene tooltips on <span class="caret"></span>
+                                        <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <b>Show gene tooltips on</b> <span class="caret"></span>
                                         </button>
 
                                         <ul id="tooltip_dropdown" class="dropdown-menu">
@@ -75,7 +75,10 @@
                                         </ul>
                                     </div>
 
-                                    <button type="button" class="btn btn-default btn-sm" disabled="disabled">Remove Low Confidence Columns</button>
+                                    <div class="fakebutton"> <b>Remove columns under
+                                        <input class='min_column_setting'type="number" step="10" value="100" min="0" max="100"> % of species coverage</b> </div>
+
+
 
                                 </div>
 
