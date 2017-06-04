@@ -469,7 +469,9 @@ hog_theme = function () {
                             return width - 2 * padding;
                         })
                         .attr("height", height)
-                        .attr("fill", gene_color_function);
+                        .attr("fill", gene_color_function)
+                    .style("cursor", function(){ return gene_tooltip_mode === 'click' ? "pointer" : "default"})
+
                 })
                 .distribute(function (elems, x_scale) {
                     var track = this;
@@ -492,7 +494,8 @@ hog_theme = function () {
 
                             return width - 2 * padding;
                         })
-                        .attr("fill", gene_color_function);
+                        .attr("fill", gene_color_function)
+                    .style("cursor", function(){ return gene_tooltip_mode === 'click' ? "pointer" : "default"})
 
                 })
                 .on('click', function(d){ return (gene_tooltip_mode === 'click' ? gene_tooltip(d) : '')})
@@ -640,8 +643,8 @@ hog_theme = function () {
         this.set_up_gene_tooltip_setting = function () {
             genedata_picker = d3.select("#tooltip_dropdown").selectAll(".tooltip_dropdown-li").on('click', function () {
 
-                if (this.id === 'gt-click') {gene_tooltip_mode = 'click'}
-                else {gene_tooltip_mode = 'mouseover'}
+                if (this.id === 'gt-click') {gene_tooltip_mode = 'click'; d3.selectAll('rect.hog_gene').style("cursor", "pointer");}
+                else {gene_tooltip_mode = 'mouseover';d3.selectAll('rect.hog_gene').style("cursor", "none");}
 
                 annot.update();
                 vis.update();
