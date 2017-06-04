@@ -109,13 +109,54 @@ hog_theme = function () {
             current_hog_state.reset_on(current_opened_taxa_name);
             div_current_level.innerHTML = current_opened_taxa_name;
             annot.width(hogvis.compute_size_annot(current_opened_taxa_name));
+            d3.selectAll('.anchor_hog_header').remove();
             annot.update();
 
+            hogvis.add_hog_header_anchor();
+
+
+            /////// DEV AREA ///////
+
+
+
+            /*
             if (current_opened_taxa_name != 'LUCA'){
+
+                console.log(current_opened_taxa_name);
+
+                var se = d3.select('.hog_gene');
+                var g = se.select(function(){ return this.parentNode});
+                var gg = g.select(function(){ return this.parentNode});
+
+                var gene_stack = 0
+
                 for (var i = 0; i < current_hog_state.hogs.length; i++) {
-                    console.log(current_hog_state.hogs[i].name, current_hog_state.hogs[i].number_species*100/current_hog_state.number_species);
+                    console.log(current_hog_state.hogs[i].name, current_hog_state.hogs[i].number_species*100/current_hog_state.number_species, current_hog_state.hogs[i].max_in_hog);
+                    gg.append('circle')
+                        .attr("cx", function(){
+                            return (options.label_height * gene_stack) + (options.label_height * current_hog_state.hogs[i].max_in_hog/2 )  ;
+                        }  )
+                        .attr("cy", -2)
+                        .attr("r", 2)
+                        .attr("class", "anchor_hog_header")
+                        .style("fill", "red");
+                    gene_stack += current_hog_state.hogs[i].max_in_hog;
                 }
             }
+
+
+
+             var vl = d3.selectAll('.hog_boundary').each(function(d){console.log(d)});
+             var g = vl.select(function() {
+             return this.parentNode;
+             });
+             console.log(vl,g);
+             g.append('circle').attr("cx", 5).attr("cy", 0).attr("r", 2).style("fill", "red");
+
+             */
+
+            ///// END DEV AREA /////
+
 
             // when update the board make sure that the scroll is reset to left
             var annot_scroller = $("#tnt_annot_container_hogvis_container");
@@ -276,6 +317,38 @@ hog_theme = function () {
         }
 
         // Gene panel related methods
+        this.add_hog_header_anchor = function(){
+
+            if (current_opened_taxa_name != 'LUCA'){
+
+                var first_square = d3.select('.hog_gene');
+                var g_first_square = first_square.select(function(){ return this.parentNode});
+                var g_first_displayed_track = g_first_square.select(function(){ return this.parentNode});
+
+                // keep track of the number of genes already displayed
+                var gene_stack = 0
+
+                // for each hog
+                for (var i = 0; i < current_hog_state.hogs.length; i++) {
+
+                    //current_hog_state.hogs[i].number_species*100/current_hog_state.number_species
+
+                    g_first_displayed_track.append('circle')
+                        .attr("cx", function(){
+                            return (options.label_height * gene_stack) + (options.label_height * current_hog_state.hogs[i].max_in_hog/2 )  ;
+                        }  )
+                        .attr("cy", -2)
+                        .attr("r", 2)
+                        .attr("class", "anchor_hog_header")
+                        .style("fill", "red");
+
+                    gene_stack += current_hog_state.hogs[i].max_in_hog;
+                }
+            }
+
+
+
+        }
         this.set_gene_tooltip = function(){
             gene_tooltip = function (gene) {
                 var obj = {};
@@ -842,7 +915,14 @@ hog_theme = function () {
             if (that.hogs === undefined){
                 that.hogs = [];
                 for (var i = 0; i < array_hogs_with_genes.length; i++) {
-                    that.hogs.push({genes:[], name:'hog_' + i, number_species:0});
+                    var h = {
+                        genes:[],
+                        name:'hog_' + i,
+                        number_species:0,
+                        max_in_hog: 0
+                    };
+
+                    that.hogs.push(h);
                 }
             }
 
@@ -850,13 +930,14 @@ hog_theme = function () {
                 if (array_hogs_with_genes[i].length > 0) {
                     that.hogs[i].genes = that.hogs[i].genes.concat(array_hogs_with_genes[i]);
                     that.hogs[i].number_species += 1;
+                    if (that.hogs[i].max_in_hog < array_hogs_with_genes[i].length){
+                       that.hogs[i].max_in_hog = array_hogs_with_genes[i].length
+                    }
                 }
             }
 
         }
     }
-
-
 
     var truncate = function (text, width) {
         text.each(function () {
