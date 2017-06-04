@@ -273,56 +273,67 @@ hog_theme = function () {
         }
 
         // Gene panel related methods
+        this.add_hog_header_icons = function(){
 
-
-
-        this.add_hog_header = function(){
-
-            d3.selectAll('.anchor_hog_header').remove();
-            d3.selectAll('.header_div').remove();
-            d3.selectAll('.tt').remove();
-
-            this.add_hog_header_anchor();
-
-
-            ///// DEV AREA /////
-
-            var hog_headers = document.getElementsByClassName("anchor_hog_header");
+            // select the svg parent container where to add the icons with it position
             var svg = document.getElementsByClassName("tnt_svg")[0];
             var container = svg.parentNode;
             var parentPos = container.getBoundingClientRect(), relativePos = {};
 
-            for (var i = 0; i < hog_headers.length; i++) {
-                var hog_head  = hog_headers[i];
+            // select all the anchors
+            var header_anchor = document.getElementsByClassName("anchor_hog_header");
+
+            for (var i = 0; i < header_anchor.length; i++) {
+
+                // get the individual anchor
+                var hog_head  = header_anchor[i];
                 var childrenPos = hog_head.getBoundingClientRect();
 
+                // compute the relative position of anchor
                 relativePos.top = childrenPos.top - parentPos.top,
-                relativePos.right = childrenPos.right - parentPos.right,
-                relativePos.bottom = childrenPos.bottom - parentPos.bottom,
-                relativePos.left = childrenPos.left - parentPos.left;
+                    relativePos.right = childrenPos.right - parentPos.right,
+                    relativePos.bottom = childrenPos.bottom - parentPos.bottom,
+                    relativePos.left = childrenPos.left - parentPos.left;
 
+                // create div for icons
                 var header_div = document.createElement("div");
-
                 header_div.innerHTML = '<span id="head_button_'+ i +'" class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>';
                 header_div.setAttribute("class", "header_div");
+                header_div.setAttribute("id", "header_div_" + i);
                 header_div.style.top = relativePos.top - 13 + "px";
                 header_div.style.left = relativePos.left - 5 + "px";
 
+                // add div to container
                 container.appendChild(header_div);
 
+                // bind click event to icon/button
                 document.getElementById('head_button_'+ i).addEventListener("click", function(){
-                    if (this.getAttribute("class") === "glyphicon glyphicon-triangle-top") {this.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
-                    else this.setAttribute("class","glyphicon glyphicon-triangle-top");
+                    if (this.getAttribute("class") === "glyphicon glyphicon-triangle-top")
+                    {this.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
+                    else {this.setAttribute("class","glyphicon glyphicon-triangle-top")}
+
+                    var hog = current_hog_state.hogs[parseInt(this.id.split('_')[2])]
+                    console.log(hog.number_species*100/current_hog_state.number_species);
+
                 });
 
             }
 
-            //// END DEV AREA ////
+        };
+        this.add_hog_header = function(){
 
+            // clean old header elements
+            d3.selectAll('.anchor_hog_header').remove();
+            d3.selectAll('.header_div').remove();
+            d3.selectAll('.tt').remove();
+
+            // add the invisible anchor
+            hogvis.add_hog_header_anchor();
+
+            // add the setting icons
+            hogvis.add_hog_header_icons();
 
         };
-
-
         this.add_hog_header_anchor = function(){
 
             if (current_opened_taxa_name != 'LUCA'){
@@ -345,8 +356,9 @@ hog_theme = function () {
                         }  )
                         .attr("cy", -2)
                         .attr("r", 2)
+                        .attr("id", function(){return "anchor_hog_header_" + i })
                         .attr("class", "anchor_hog_header")
-                        .style("fill", "red");
+                        .style("fill", "white");
 
                     gene_stack += current_hog_state.hogs[i].max_in_hog;
                 }
@@ -937,7 +949,7 @@ hog_theme = function () {
                     that.hogs[i].genes = that.hogs[i].genes.concat(array_hogs_with_genes[i]);
                     that.hogs[i].number_species += 1;
                     if (that.hogs[i].max_in_hog < array_hogs_with_genes[i].length){
-                       that.hogs[i].max_in_hog = array_hogs_with_genes[i].length
+                        that.hogs[i].max_in_hog = array_hogs_with_genes[i].length
                     }
                 }
             }
