@@ -106,9 +106,16 @@ hog_theme = function () {
             }
 
             current_opened_taxa_name = node.node_name();
+            current_hog_state.reset_on(current_opened_taxa_name);
             div_current_level.innerHTML = current_opened_taxa_name;
             annot.width(hogvis.compute_size_annot(current_opened_taxa_name));
             annot.update();
+
+            if (current_opened_taxa_name != 'LUCA'){
+                for (var i = 0; i < current_hog_state.hogs.length; i++) {
+                    console.log(current_hog_state.hogs[i].name, current_hog_state.hogs[i].number_species*100/current_hog_state.number_species);
+                }
+            }
 
             // when update the board make sure that the scroll is reset to left
             var annot_scroller = $("#tnt_annot_container_hogvis_container");
@@ -299,6 +306,7 @@ hog_theme = function () {
                     var height = track.height() - ~~(padding * 2);
                     var dom1 = x_scale.domain()[1];
 
+                    // set x1,x2 attr = code duplication
                     new_hog
                         .append("line")
                         .attr("class", "hog_boundary")
@@ -392,6 +400,7 @@ hog_theme = function () {
                         })
                         .attr("width", function (d) {
                             var width = d3.min([x_scale(dom1 / d.max), height + 2 * padding]);
+
                             return width - 2 * padding;
                         })
                         .attr("fill", gene_color_function);
@@ -423,6 +432,7 @@ hog_theme = function () {
             return a
         }
         this.init_track = function(){
+
             var track = function (leaf) {
                 var sp = leaf.node_name();
                 return tnt.board.track()
@@ -439,13 +449,19 @@ hog_theme = function () {
                             }
                             var genes2Xcoords = genes_2_xcoords(per_species3[sp][current_opened_taxa_name], maxs[current_opened_taxa_name]);
 
+                            if (genes2Xcoords.genes.length > 0){
+                                current_hog_state.number_species += 1;
+                                current_hog_state.add_genes(per_species3[sp][current_opened_taxa_name])
+                            }
+
                             return genes2Xcoords;
                         })
                     )
                     .display(tnt.board.track.feature.composite()
-                        .add("genes", hog_gene_feature)
-                        .add("hogs", hog_feature)
-                    );
+                            .add("genes", hog_gene_feature)
+                            .add("hogs", hog_feature)
+                        //.add("lines",  tnt.board.track.feature.vline().color("red").index(function (d) {return d.pos;}))
+                    )
             };
 
             return track
@@ -483,11 +499,12 @@ hog_theme = function () {
                         hog: hog,
                         id: hog_gene_names.length ? hog_gene_names.join('_') : ("hog_" + hog)
                     });
-                });
+                });2
 
                 return {
                     genes: genes,
-                    hogs: hogs_boundaries.slice(0, -1)
+                    hogs: hogs_boundaries.slice(0, -1),
+                    //lines: [{pos : 0.7 }, {pos : 3}, {pos : 4}]
                 };
             };
 
@@ -495,6 +512,7 @@ hog_theme = function () {
 
         // hogvis panel related methods
         this.init_hogvis = function(){
+
             var h = tnt()
                 .tree(tree)
                 .board(annot)
@@ -721,6 +739,7 @@ hog_theme = function () {
         var col_scale;
         var colorbar;
 
+        var current_hog_state= new Hog_state();
 
         /////////////
         // TREE /////
@@ -740,6 +759,7 @@ hog_theme = function () {
 
         // Once the tree is build update the current level opened with the root by default
         current_opened_taxa_name = tree.root().node_name();
+        current_hog_state.reset_on(current_opened_taxa_name);
 
 
         /////////////////////////
@@ -800,7 +820,43 @@ hog_theme = function () {
         // make the vis panel resizable
         hogvis.set_resize_on_drag(tree);
 
+
     }
+
+    function Hog_state() {
+
+        var that= this;
+
+        this.current_level = '';
+        this.hogs = undefined;
+        this.number_species = 0;
+
+        this.reset_on= function(tax_name) {
+            that.current_level = tax_name;
+            that.hogs = undefined;
+            that.number_species = 0;
+        };
+
+        this.add_genes = function(array_hogs_with_genes){
+
+            if (that.hogs === undefined){
+                that.hogs = [];
+                for (var i = 0; i < array_hogs_with_genes.length; i++) {
+                    that.hogs.push({genes:[], name:'hog_' + i, number_species:0});
+                }
+            }
+
+            for (var i = 0; i < array_hogs_with_genes.length; i++) {
+                if (array_hogs_with_genes[i].length > 0) {
+                    that.hogs[i].genes = that.hogs[i].genes.concat(array_hogs_with_genes[i]);
+                    that.hogs[i].number_species += 1;
+                }
+            }
+
+        }
+    }
+
+
 
     var truncate = function (text, width) {
         text.each(function () {
