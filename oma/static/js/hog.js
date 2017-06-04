@@ -297,10 +297,10 @@ hog_theme = function () {
 
                 // create div for icons
                 var header_div = document.createElement("div");
-                header_div.innerHTML = '<span id="head_button_'+ i +'" class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>';
+                header_div.innerHTML = '<span id="head_button_'+ i +'" class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>';
                 header_div.setAttribute("class", "header_div");
                 header_div.setAttribute("id", "header_div_" + i);
-                header_div.style.top = relativePos.top - 13 + "px";
+                header_div.style.top = relativePos.top - 16 + "px";
                 header_div.style.left = relativePos.left - 5 + "px";
 
                 // add div to container
@@ -308,9 +308,9 @@ hog_theme = function () {
 
                 // bind click event to icon/button
                 document.getElementById('head_button_'+ i).addEventListener("click", function(){
-                    if (this.getAttribute("class") === "glyphicon glyphicon-triangle-top")
-                    {this.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
-                    else {this.setAttribute("class","glyphicon glyphicon-triangle-top")}
+                    //if (this.getAttribute("class") === "glyphicon glyphicon-triangle-top")
+                    //{this.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
+                    //else {this.setAttribute("class","glyphicon glyphicon-triangle-top")}
 
                     var hog = current_hog_state.hogs[parseInt(this.id.split('_')[2])]
                     console.log(hog.number_species*100/current_hog_state.number_species);
@@ -363,8 +363,6 @@ hog_theme = function () {
                     gene_stack += current_hog_state.hogs[i].max_in_hog;
                 }
             }
-
-
 
         }
         this.set_gene_tooltip = function(){
@@ -497,7 +495,8 @@ hog_theme = function () {
                         .attr("fill", gene_color_function);
 
                 })
-                .on("mouseover", gene_tooltip);
+                .on('click', function(d){ return (gene_tooltip_mode === 'click' ? gene_tooltip(d) : '')})
+                .on('mouseover', function(d){return (gene_tooltip_mode === 'mouseover' ? gene_tooltip(d) : '')});
         }
         this.compute_size_annot = function(taxa_name){
 
@@ -638,6 +637,17 @@ hog_theme = function () {
             vis.update();
 
         };
+        this.set_up_gene_tooltip_setting = function () {
+            genedata_picker = d3.select("#tooltip_dropdown").selectAll(".tooltip_dropdown-li").on('click', function () {
+
+                if (this.id === 'gt-click') {gene_tooltip_mode = 'click'}
+                else {gene_tooltip_mode = 'mouseover'}
+
+                annot.update();
+                vis.update();
+
+            });
+        }
         this.set_up_genedata_vis = function() {
 
             genedata_picker = d3.select(genedata_picker_div).selectAll(".genedata-li")
@@ -830,6 +840,9 @@ hog_theme = function () {
         var col_scale;
         var colorbar;
 
+        // settings related variable
+        var gene_tooltip_mode = 'click';
+
         var current_hog_state= new Hog_state();
 
         /////////////
@@ -885,6 +898,8 @@ hog_theme = function () {
 
         var genedata_picker, bar, barText;
         hogvis.set_up_genedata_vis();
+
+        hogvis.set_up_gene_tooltip_setting();
 
 
         ///////////////////
