@@ -179,6 +179,20 @@ hog_theme = function () {
                         }
                         return "normal";
                     })
+                    /*
+                    .transform(function (node) {
+                        if (!node.is_leaf()){
+                            return {
+                                "translate" : [-6, -10],
+                                "rotate" : -90
+                            };
+                        }
+                        return {
+                                "translate" : [10, 5],
+                                "rotate" : 0
+                            };
+                    })
+                    */
                 )
                 .on("click", function (d) {
                     treeNode_tooltip.call(this, d);
@@ -187,6 +201,7 @@ hog_theme = function () {
                 .on("mouseout", hogvis.mouse_out_node)
                 .node_display(node_display)
                 .branch_color("black");
+
             return t;
         };
         this.highlight_condition = function () {
@@ -312,9 +327,19 @@ hog_theme = function () {
                     //{this.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
                     //else {this.setAttribute("class","glyphicon glyphicon-triangle-top")}
 
-                    var hog = current_hog_state.hogs[parseInt(this.id.split('_')[2])]
-                    console.log(hog.coverage);
-                    console.log(hog.genes);
+                    var hog = current_hog_state.hogs[parseInt(this.id.split('_')[2])];
+                    var first_gene =  gene_data[hog.genes[0]].omaid;
+
+                    console.log("Name:", hog.name);
+
+                    console.log("Coverage:", hog.coverage);
+
+                    console.log("Genes:", hog.genes);
+
+                    console.log("Sequences (fasta):", 'http://localhost:8000/oma/hogs/' + first_gene +'/' +current_opened_taxa_name.replace(" ", "%20") +'/fasta');
+
+                    console.log("URL view as tables: ", 'http://localhost:8000/oma/hogs/' + first_gene +'/' +current_opened_taxa_name.replace(" ", "%20") +'/');
+
 
                 });
 
@@ -545,8 +570,8 @@ hog_theme = function () {
                         })
                     )
                     .display(tnt.board.track.feature.composite()
-                            .add("genes", hog_gene_feature)
-                            .add("hogs", hog_feature)
+                        .add("genes", hog_gene_feature)
+                        .add("hogs", hog_feature)
                     )
             };
 
