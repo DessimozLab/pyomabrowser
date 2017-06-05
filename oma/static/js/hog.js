@@ -149,50 +149,50 @@ hog_theme = function () {
                     .scale(false)
                 )
                 .label(tnt.tree.label.text()
-                    .fontsize(12)
-                    .height(options.label_height)
-                    .text(function (node) {
-                        var limit = 30;
-                        var data = node.data();
-                        if (node.is_collapsed()) {
-                            return "[" + node.n_hidden() + " hidden taxa]";
-                        }
-                        if ((!options.show_internal_labels || !hogvis.highlight_condition(node)) &&
-                            data.children && data.children.length > 0) {
-                            return "";
-                        }
-                        if (data.name.length > limit) {
-                            var truncName = data.name.substr(0, limit - 3) + "...";
-                            return truncName.replace(/_/g, ' ');
-                        }
-                        return data.name.replace(/_/g, ' ');
-                    })
-                    .color(function (node) {
-                        if (node.is_collapsed()) {
-                            return 'grey';
-                        }
-                        return 'black';
-                    })
-                    .fontweight(function (node) {
-                        if (hogvis.highlight_condition(node)) {
-                            return "bold";
-                        }
-                        return "normal";
-                    })
+                        .fontsize(12)
+                        .height(options.label_height)
+                        .text(function (node) {
+                            var limit = 30;
+                            var data = node.data();
+                            if (node.is_collapsed()) {
+                                return "[" + node.n_hidden() + " hidden taxa]";
+                            }
+                            if ((!options.show_internal_labels || !hogvis.highlight_condition(node)) &&
+                                data.children && data.children.length > 0) {
+                                return "";
+                            }
+                            if (data.name.length > limit) {
+                                var truncName = data.name.substr(0, limit - 3) + "...";
+                                return truncName.replace(/_/g, ' ');
+                            }
+                            return data.name.replace(/_/g, ' ');
+                        })
+                        .color(function (node) {
+                            if (node.is_collapsed()) {
+                                return 'grey';
+                            }
+                            return 'black';
+                        })
+                        .fontweight(function (node) {
+                            if (hogvis.highlight_condition(node)) {
+                                return "bold";
+                            }
+                            return "normal";
+                        })
                     /*
-                    .transform(function (node) {
-                        if (!node.is_leaf()){
-                            return {
-                                "translate" : [-6, -10],
-                                "rotate" : -90
-                            };
-                        }
-                        return {
-                                "translate" : [10, 5],
-                                "rotate" : 0
-                            };
-                    })
-                    */
+                     .transform(function (node) {
+                     if (!node.is_leaf()){
+                     return {
+                     "translate" : [-6, -10],
+                     "rotate" : -90
+                     };
+                     }
+                     return {
+                     "translate" : [10, 5],
+                     "rotate" : 0
+                     };
+                     })
+                     */
                 )
                 .on("click", function (d) {
                     treeNode_tooltip.call(this, d);
@@ -327,19 +327,25 @@ hog_theme = function () {
                     //{this.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
                     //else {this.setAttribute("class","glyphicon glyphicon-triangle-top")}
 
-                    var hog = current_hog_state.hogs[parseInt(this.id.split('_')[2])];
-                    var first_gene =  gene_data[hog.genes[0]].omaid;
+                     var hog = current_hog_state.hogs[parseInt(this.id.split('_')[2])];
+                     var first_gene =  gene_data[hog.genes[0]].omaid;
 
-                    console.log("Name:", hog.name);
+                     console.log("Name:", hog.name);
 
-                    console.log("Coverage:", hog.coverage);
+                     console.log("Coverage:", hog.coverage);
 
-                    console.log("Genes:", hog.genes);
+                     console.log("Genes:", hog.genes);
 
-                    console.log("Sequences (fasta):", 'http://localhost:8000/oma/hogs/' + first_gene +'/' +current_opened_taxa_name.replace(" ", "%20") +'/fasta');
+                     console.log("Sequences (fasta):", 'http://localhost:8000/oma/hogs/' + first_gene +'/' +current_opened_taxa_name.replace(" ", "%20") +'/fasta');
 
-                    console.log("URL view as tables: ", 'http://localhost:8000/oma/hogs/' + first_gene +'/' +current_opened_taxa_name.replace(" ", "%20") +'/');
+                     console.log("URL view as tables: ", 'http://localhost:8000/oma/hogs/' + first_gene +'/' +current_opened_taxa_name.replace(" ", "%20") +'/');
 
+                     console.log(hog_head);
+
+
+                    //var event = document.createEvent("SVGEvents");
+                    //event.initEvent("click",true,true);
+                    //hog_head.dispatchEvent(event);
 
                 });
 
@@ -360,34 +366,69 @@ hog_theme = function () {
             hogvis.add_hog_header_icons();
 
         };
-        this.add_hog_header_anchor = function(){
+        this.add_hog_header_anchor = function() {
 
-            if (current_opened_taxa_name != 'LUCA'){
+            if (current_opened_taxa_name != 'LUCA') {
 
                 var first_square = d3.select('.hog_gene');
-                var g_first_square = first_square.select(function(){ return this.parentNode});
-                var g_first_displayed_track = g_first_square.select(function(){ return this.parentNode});
+                var g_first_square = first_square.select(function () {
+                    return this.parentNode
+                });
+                var g_first_displayed_track = g_first_square.select(function () {
+                    return this.parentNode
+                });
 
                 // keep track of the number of genes already displayed
-                var gene_stack = 0
+                var gene_stack = 0;
 
                 // for each hog
                 for (var i = 0; i < current_hog_state.hogs.length; i++) {
 
                     g_first_displayed_track.append('circle')
-                        .attr("cx", function(){
-                            return (options.label_height * gene_stack) + (options.label_height * current_hog_state.hogs[i].max_in_hog/2 )  ;
-                        }  )
+                        .attr("cx", function () {
+                            return (options.label_height * gene_stack) + (options.label_height * current_hog_state.hogs[i].max_in_hog / 2 );
+                        })
                         .attr("cy", -2)
                         .attr("r", 2)
-                        .attr("id", function(){return "anchor_hog_header_" + i })
+                        .attr("id", function () {
+                            return "anchor_hog_header_" + i
+                        })
                         .attr("class", "anchor_hog_header")
-                        .style("fill", "white");
+                        .style("fill", "white")
 
                     gene_stack += current_hog_state.hogs[i].max_in_hog;
                 }
             }
+        }
+        this.set_hog_header_tooltip = function(){
+            hog_header_tooltip = function(cv, hog) {
 
+                var hog__ = current_hog_state.hogs[hog];
+                var first_gene =  gene_data[hog__.genes[0]].omaid;
+
+                var obj = {};
+                obj.header = hog__.name;
+                obj.rows = [];
+
+                obj.rows.push({label: "Coverage", value: ~~(hog__.coverage) + "%"});
+
+                obj.rows.push({
+                    label: "Sequences (fasta):",
+                    value: "<a href='http://localhost:8000/oma/hogs/" + first_gene + "/" + current_opened_taxa_name.replace(" ", "%20") + "/fasta'> Download <span class='glyphicon glyphicon-download-alt' aria-hidden='true'></span> </a>"
+                });
+
+                obj.rows.push({
+                    label: "View as tables:",
+                    value: "<a href='" + 'http://localhost:8000/oma/hogs/' + first_gene +'/' +current_opened_taxa_name.replace(" ", "%20") +'/' +"'> Open <span class='glyphicon glyphicon-new-window' aria-hidden='true'></span> </a>"
+                });
+
+                tnt.tooltip.table()
+                    .container(document.getElementsByClassName("tnt_groupDiv")[0])
+                    .call(cv, obj);
+
+                //console.log("Genes:", hog.genes);
+
+            };
         }
         this.set_gene_tooltip = function(){
             gene_tooltip = function (gene) {
@@ -623,7 +664,7 @@ hog_theme = function () {
 
         }
 
-        // hogvis panel related methods
+// hogvis panel related methods
         this.init_hogvis = function(){
 
             var h = tnt()
@@ -633,7 +674,7 @@ hog_theme = function () {
             return h;
         }
 
-        // settings related methods
+// settings related methods
         this.change_genedata_vis = function (d) {
             col_scale = undefined;
             gene_color_function = function (gene) {
@@ -725,8 +766,8 @@ hog_theme = function () {
             hogvis_div.appendChild(hogvis_container);
         };
 
-        // UI related methods
-        // function to set up drag to resize tree and board panel
+// UI related methods
+// function to set up drag to resize tree and board panel
         this.set_resize_on_drag = function() {
             // rearranged code from http://stackoverflow.com/questions/26233180/resize-div-on-border-drag-and-drop
 
@@ -792,14 +833,14 @@ hog_theme = function () {
 
             };
         }
-        // function to set up automatic board resizing on window resize
+// function to set up automatic board resizing on window resize
         this.set_board_width_on_window_resize = function() {
             hogvis.set_scroller_width();
             window.onresize = function () {
                 hogvis.set_scroller_width();
             }
         }
-        // resize the board container to fill space between tree panel and right
+// resize the board container to fill space between tree panel and right
         this.set_scroller_width = function() {
 
             var viewerC = document.getElementById("hogvis_container");
@@ -819,7 +860,7 @@ hog_theme = function () {
             }
 
         }
-        // function to fixed the hogvis header block to top when scroll
+// function to fixed the hogvis header block to top when scroll
         this.set_fixed_header_on_window_scroll = function() {
             var stickyHeaderTop = $('#hogvisheader').offset().top;
             $(window).scroll(function () {
@@ -840,14 +881,14 @@ hog_theme = function () {
         };
 
 
-        ////////////////////
-        //// VARIABLES /////
-        ////////////////////
+////////////////////
+//// VARIABLES /////
+////////////////////
 
         var hogvis = this;
         var hogvis_div = document.getElementById(hogvis_div_id);
 
-        // todo add header with function
+// todo add header with function
 
         var hogvis_container;
         hogvis.add_hogvis_container();
@@ -858,16 +899,16 @@ hog_theme = function () {
         var tot_width = parseInt(d3.select(hogvis_container).style("width")) - 30; // todo -30 should be define by margin variables
         var maxs = get_maxs(per_species3);
 
-        // options is the options variable for Hogvis, it can be customize by using the options parameter
+// options is the options variable for Hogvis, it can be customize by using the options parameter
         var options = options_param || {};
         hogvis.set_options(options);
 
-        // tree related variable
+// tree related variable
         var current_opened_taxa_name = '';
         var is_node_frozen = false;
         var div_current_level = document.getElementById(options.current_level_div);
 
-        // coloring related variable
+// coloring related variable
         var fam_genedata;
         var gene_color_function;
         var gene_color_data;
@@ -875,41 +916,44 @@ hog_theme = function () {
         var col_scale;
         var colorbar;
 
-        // settings related variable
+// settings related variable
         var gene_tooltip_mode = 'click';
         var column_coverage_threshold = 0;
 
         var current_hog_state= new Hog_state();
 
-        /////////////
-        // TREE /////
-        /////////////
+/////////////
+// TREE /////
+/////////////
 
         var collapsed_node, leaf_node, int_node, highlight_node, node_display;
         var node_hover_tooltip, treeNode_tooltip;
 
-        // set up the node appearance
+// set up the node appearance
         hogvis.set_node_display();
 
-        // set up tooltips on nodes
+// set up tooltips on nodes
         hogvis.set_node_tooltip();
 
-        // set up the tree object
+// set up the tree object
         var tree = hogvis.init_tree();
 
-        // Once the tree is build update the current level opened with the root by default
+// Once the tree is build update the current level opened with the root by default
         current_opened_taxa_name = tree.root().node_name();
         current_hog_state.reset_on(tree, per_species3, current_opened_taxa_name, column_coverage_threshold);
 
-        /////////////////////////
-        ///// GENES PANEL ///////
-        /////////////////////////
+/////////////////////////
+///// GENES PANEL ///////
+/////////////////////////
 
         var gene_tooltip;
         hogvis.set_gene_tooltip();
 
-        // TnT doesn't have the features we need, so create our own
-        // This one if for the lines defining hogs
+        //var hog_header_tooltip;
+        //hogvis.set_hog_header_tooltip();
+
+// TnT doesn't have the features we need, so create our own
+// This one if for the lines defining hogs
 
         var hog_feature = tnt.board.track.feature();
         hogvis.set_up_hog_feature();
@@ -925,9 +969,9 @@ hog_theme = function () {
         hogvis.set_gene_xcoords();
 
 
-        ///////////////////
-        ///// HEADER  /////
-        ///////////////////
+///////////////////
+///// HEADER  /////
+///////////////////
 
         hogvis.change_genedata_vis(options.genedatavis[0]);
 
@@ -938,28 +982,28 @@ hog_theme = function () {
         hogvis.set_remove_column_setting();
 
 
-        ///////////////////
-        ///// HOGVIS //////
-        ///////////////////
+///////////////////
+///// HOGVIS //////
+///////////////////
 
         var vis = hogvis.init_hogvis();
         vis(hogvis_container);
 
-        // open at root level when created
+// open at root level when created
         hogvis.mouse_over_node(tree.root());
 
 
-        ///////////////
-        ////  UI  /////
-        ///////////////
+///////////////
+////  UI  /////
+///////////////
 
-        // make board panel sticky to tree panel and right
+// make board panel sticky to tree panel and right
         hogvis.set_board_width_on_window_resize();
 
-        // make hogvis header block (scale, hogid, etc..) fixed to top when scroll
+// make hogvis header block (scale, hogid, etc..) fixed to top when scroll
         hogvis.set_fixed_header_on_window_scroll();
 
-        // make the vis panel resizable
+// make the vis panel resizable
         hogvis.set_resize_on_drag(tree);
 
 
