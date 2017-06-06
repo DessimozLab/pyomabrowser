@@ -748,7 +748,33 @@ class ArchiveView(CurrentView):
     def download_root(self, context):
         return "/" + context['release'].get('id', '')
 
+# synteny viewer
+
+def landDP(request):
+    return render(request, 'land_syntenyDP.html')
+
 
 def DPviewer(request, g1, g2, chr1, chr2):
     return render(request, 'DPviewer.html', {'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2 })
+
+class ChromosomeJson(JsonModelMixin, View):
+    json_fields = {'sciname': None}
+
+    def get(self, request, genome, *args, **kwargs):
+
+        genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(genome))
+
+        genomerange = utils.db.id_mapper['OMA'].genome_range(genome)
+
+        data = {'entryoff':genome_obj.EntryOff,'number_entry':genome_obj.totEntries}
+
+        chr_with_genes = {}
+
+        for entry_number in range(genomerange[0], genomerange[1]):
+            entry = models.ProteinEntry(utils.db,utils.db.entry_by_entry_nr(entry_number))
+            chr_with_genes.setdefault(entry.chromosome, []).append(entry_number)
+
+        data['list_chr'] = chr_with_genes.keys()
+
+        return JsonResponse(data, safe=False)
 

@@ -60,8 +60,9 @@ urlpatterns = [
     url(r'^archives/$', views.ArchiveView.as_view(), name='archives'),
     url(r'^archives/(?P<release>[A-Za-z0-9.]+)/$', views.ArchiveView.as_view(), name='archives'),
 
-    url(r'^syntenyDP/$', TemplateView.as_view(template_name='land_syntenyDP.html'), name='land_syntenyDP'),
-    url(r'^syntenyDP/(?P<g1>[A-Za-z0-9 -]+)/(?P<g2>[A-Za-z0-9 -]+)/(?P<chr1>\w+)/(?P<chr2>\w+)$', views.DPviewer, name='syntenyDP')
+    url(r'^syntenyDP/$', views.landDP, name='land_syntenyDP'),
+    url(r'^syntenyDP/(?P<g1>[A-Za-z0-9 -]+)/(?P<g2>[A-Za-z0-9 -]+)/(?P<chr1>[A-Za-z0-9 -_%]+)/(?P<chr2>[A-Za-z0-9 -_%]+)$', views.DPviewer, name='syntenyDP'),
+    url(r'^syntenyDP/json/(?P<genome>[A-Za-z0-9 -]+)/$', views.ChromosomeJson.as_view(), name="chromosome_json"),
 ]
 
 if settings.DEBUG:
