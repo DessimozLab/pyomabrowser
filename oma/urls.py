@@ -61,8 +61,10 @@ urlpatterns = [
     url(r'^archives/(?P<release>[A-Za-z0-9.]+)/$', views.ArchiveView.as_view(), name='archives'),
 
     url(r'^syntenyDP/$', views.landDP, name='land_syntenyDP'),
-    url(r'^syntenyDP/(?P<g1>[A-Za-z0-9 -]+)/(?P<g2>[A-Za-z0-9 -]+)/(?P<chr1>[A-Za-z0-9 -_%]+)/(?P<chr2>[A-Za-z0-9 -_%]+)$', views.DPviewer, name='syntenyDP'),
-    url(r'^syntenyDP/json/(?P<genome>[A-Za-z0-9 -]+)/$', views.ChromosomeJson.as_view(), name="chromosome_json"),
+    url(r'^syntenyDP/(?P<g1>[^/]+)/(?P<g2>[^/]+)/(?P<chr1>[^/]+)/(?P<chr2>[^/]+)/$', views.DPviewer, name='syntenyDP'),
+    url(r'^syntenyDP/(?P<genome>[A-Za-z0-9 -]+)/json/$', views.ChromosomeJson.as_view(), name="chromosome_json"),
+    url(r'^syntenyDP/(?P<g1>[^/]+)/(?P<g2>[^/]+)/(?P<chr1>[^/]+)/(?P<chr2>[^/]+)/json/$',
+        views.syntenyChromosomePairJson.as_view(), name='synteny_chr_pair_json')
 ]
 
 if settings.DEBUG:

@@ -753,7 +753,6 @@ class ArchiveView(CurrentView):
 def landDP(request):
     return render(request, 'land_syntenyDP.html')
 
-
 def DPviewer(request, g1, g2, chr1, chr2):
     return render(request, 'DPviewer.html', {'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2 })
 
@@ -775,6 +774,35 @@ class ChromosomeJson(JsonModelMixin, View):
             chr_with_genes.setdefault(entry.chromosome, []).append(entry_number)
 
         data['list_chr'] = chr_with_genes.keys()
+
+        return JsonResponse(data, safe=False)
+
+class syntenyChromosomePairJson(JsonModelMixin, View):
+
+    def get(self, request, g1, g2, chr1, chr2, *args, **kwargs):
+
+        genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g1))
+        genomerange1 = utils.db.id_mapper['OMA'].genome_range(g1)
+        genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g2))
+        genomerange2 = utils.db.id_mapper['OMA'].genome_range(g2)
+
+        vps_tab = utils.db.db.get_node('/PairwiseRelation/{}/{}'.format(genome1.uniprot_species_code, 'VPairs'))
+
+        data = []
+
+        cpt = 0
+
+        for entry_number in range(genomerange1[0], genomerange1[0]+1000):
+
+            cpt += 1
+
+            if cpt%10 == 0 :
+
+                print(cpt, genomerange1[1] - genomerange1[0])
+
+            for e in vps_tab.read_where('(EntryNr1=={:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'.format(entry_number, genomerange2[0], genomerange2[1])):
+
+                data.append({"Calories": int(e[0]),"Protein": int(e[1])})
 
         return JsonResponse(data, safe=False)
 

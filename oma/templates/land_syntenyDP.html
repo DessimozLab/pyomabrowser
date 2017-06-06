@@ -146,7 +146,7 @@
 
             var select = document.getElementById(id_select);
 
-            $.getJSON( "/oma/syntenyDP/json/" + genome_name + "/", function( jsonData ) {
+            $.getJSON( "/oma/syntenyDP/" + genome_name + "/json/", function( jsonData ) {
                 console.log(jsonData.list_chr);
                 $.each( jsonData.list_chr, function ( index ) {
                     var el = document.createElement("option");
