@@ -19,10 +19,59 @@ dotplot_theme = function () {
             ldiv.style.width = "100%";
             container.appendChild(ldiv);
         }
+        this.add_color_legend = function (color_threshold, svg_legend){
+
+            var formatNumber = d3.format(".0f");
+
+            var x_legend = d3.scale.linear()
+                .domain(color_threshold.domain())
+                .range([0, 120]);
+
+            var xAxis_legend = d3.svg.axis().scale(x_legend).orient("bottom")
+                .tickSize(13)
+                .tickValues(color_threshold.domain())
+                .tickFormat(function (d) {
+                    return formatNumber(d)
+                });
+
+            var g = svg_legend.append("g");
+
+            g.call(xAxis_legend);
+
+            g.select(".domain")
+                .remove();
+
+            g.selectAll("rect")
+                .data(color_threshold.range().map(function (color) {
+                    var d = color_threshold.invertExtent(color);
+                    if (d[0] == null) d[0] = x_legend.domain()[0];
+                    if (d[1] == null) d[1] = x_legend.domain()[1];
+                    return d;
+                }))
+                .enter().insert("rect", ".tick")
+                .attr("height", 8)
+                .attr("x", function (d) {
+                    return x_legend(d[0]);
+                })
+                .attr("width", function (d) {
+                    return x_legend(d[1]) - x_legend(d[0]);
+                })
+                .attr("fill", function (d) {
+                    return color_threshold(d[0]);
+                });
+
+            g.append("text")
+                .attr("fill", "#000")
+                .attr("font-weight", "bold")
+                .attr("text-anchor", "start")
+                .attr("y", -6)
+                .text("Phylogenetic distance");
+        }
 
         // VARIABLES
         var dotplot = this;
 
+        // big container with everything
         var cviewer = document.getElementById(container_id), cdotplot, clegend;
         this.create_containers(cviewer);
 
@@ -57,9 +106,6 @@ dotplot_theme = function () {
 
         var color_domain, color_range, color_threshold;
 
-
-        // Let'start the dot plot
-
         var svg_dotplot = d3.select("#plot_div").append("svg")
             .attr("width", size_plot.width + margin.left + margin.right)
             .attr("height", size_plot.height + margin.top + margin.bottom)
@@ -71,6 +117,8 @@ dotplot_theme = function () {
             .attr("height", size_legend.height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+         // Let'start the dot plot with data
 
         d3.json(url_json, function(error, data) {
 
@@ -125,54 +173,17 @@ dotplot_theme = function () {
                 .data(data)
                 .enter().append("circle")
                 .attr("class", "dot")
-                .attr("r", 3.5)
+                .attr("r", 2.5)
                 .style("fill", function(d) { return color_threshold(d.score);})
+                .style('opacity', 0.3)
                 .attr("cx", xMap)
                 .attr("cy", yMap);
 
             // LEGEND
-
-            var formatNumber = d3.format(".0f");
-
-            var x_legend = d3.scale.linear()
-                .domain([min_distance, max_distance])
-                .range([0, 120]);
-
-            var xAxis_legend = d3.svg.axis().scale(x_legend).orient("bottom")
-                .tickSize(13)
-                .tickValues(color_threshold.domain())
-                .tickFormat(function(d) { return formatNumber(d)});
-
-            var g = svg_legend.append("g");
-
-            g.call(xAxis_legend);
-
-            g.select(".domain")
-                .remove();
-
-            g.selectAll("rect")
-                .data(color_threshold.range().map(function(color) {
-                    var d = color_threshold.invertExtent(color);
-                    if (d[0] == null) d[0] = x_legend.domain()[0];
-                    if (d[1] == null) d[1] = x_legend.domain()[1];
-                    return d;
-                }))
-                .enter().insert("rect", ".tick")
-                .attr("height", 8)
-                .attr("x", function(d) { return x_legend(d[0]); })
-                .attr("width", function(d) { return x_legend(d[1]) - x_legend(d[0]); })
-                .attr("fill", function(d) { return color_threshold(d[0]); });
-
-            g.append("text")
-                .attr("fill", "#000")
-                .attr("font-weight", "bold")
-                .attr("text-anchor", "start")
-                .attr("y", -6)
-                .text("Phylogenetic distance");
-
-
+            dotplot.add_color_legend(color_threshold, svg_legend);
 
         });
+
 
     }
 

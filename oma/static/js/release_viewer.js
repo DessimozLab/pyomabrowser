@@ -156,7 +156,6 @@ function update_genome_viewer(bid) {
     }
 
 }
-
 // add the boostrap table in the viewer container
 function init_table(div_id) {
 

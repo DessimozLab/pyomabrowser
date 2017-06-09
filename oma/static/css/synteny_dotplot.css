@@ -10,8 +10,8 @@ body {
 }
 
 .dot {
-    stroke: rgba(123,123, 123, 0.3);
     fill: rgba(234,0, 0, 0.3);
+    opacity: 0.3;
 }
 
 #dotplot_container{
