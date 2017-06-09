@@ -1,137 +1,180 @@
-// Based on http://bl.ocks.org/weiglemc/6185069
+var dotplot_theme;
 
-/*
- genome1/chr1/gene1 are the X data
- genome2/chr2/gene2 are the Y data
- */
+dotplot_theme = function () {
 
-var margin = {top: 20, right: 0, bottom: 30, left: 100},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    function DotPlot(container_id, url_json, genome1,genome2,chromosome1,chromosome2) {
 
-/*
- * value accessor - returns the value to encode for a given data object.
- * scale - maps value to a visual display encoding, such as a pixel position.
- * map function - maps from data value to display value
- * axis - sets up axis
- */
+        // METHODS UI
+        this.create_containers = function (container) {
 
+            // create plot div
+            var plot = document.createElement('div');
+            plot.id = "plot_div";
+            plot.style.width = "100%";
+            container.appendChild(plot);
 
-// setup x
-var xValue = function(d) { return d.gene1;}, // data -> value
-    xScale = d3.scale.linear().range([0, width]), // value -> display
-    xMap = function(d) { return xScale(xValue(d));}, // data -> display
-    xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+            // create legend div
+            var ldiv = document.createElement('div');
+            ldiv.id = "plot_legend";
+            ldiv.style.width = "100%";
+            container.appendChild(ldiv);
+        }
 
-// setup y
-var yValue = function(d) { return d["gene2"];}, // data -> value
-    yScale = d3.scale.linear().range([height, 0]), // value -> display
-    yMap = function(d) { return yScale(yValue(d));}, // data -> display
-    yAxis = d3.svg.axis().scale(yScale).orient("left");
+        // VARIABLES
+        var dotplot = this;
 
+        var cviewer = document.getElementById(container_id), cdotplot, clegend;
+        this.create_containers(cviewer);
 
+        var margin = {top: 20, right: 50, bottom: 30, left: 50}
+        var size_plot = {
+            width: cviewer.offsetWidth - margin.left - margin.right,
+            height: 500 - margin.top - margin.bottom
+        };
+        var size_legend = {width: size_plot.width, height: 50};
 
-// add the graph canvas to the body of the webpage
-var svg = d3.select("#dotplot_container").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        // setup x
+        var xValue = function (d) {
+                return d.gene1;
+            }, // data -> value
+            xScale = d3.scale.linear().range([0, size_plot.width]), // value -> display
+            xMap = function (d) {
+                return xScale(xValue(d));
+            }, // data -> display
+            xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
-// add the tooltip area to the webpage
-var tooltip = d3.select("dotplot_container").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
+        // setup y
+        var yValue = function (d) {
+                return d["gene2"];
+            }, // data -> value
+            yScale = d3.scale.linear().range([size_plot.height, 0]), // value -> display
+            yMap = function (d) {
+                return yScale(yValue(d));
+            }, // data -> display
+            yAxis = d3.svg.axis().scale(yScale).orient("left");
 
-// load data
+        var min_distance, max_distance;
 
-//var url = "/oma/syntenyDP/" + genome1 +"/" + genome2 +"/" + chromosome1.replace(/\s/g,"%20") + "/" + chromosome2.replace(/\s/g,"%20") + "/json/" ;
-
-d3.json("/All/dotplot_example.json", function(error, data) {
-
-
-    var min_distance = d3.min(data, function(d) { return d.score; });
-    var max_distance = d3.max(data, function(d) { return d.score; });
-
-
-    var color = d3.scale.linear().range([min_distance,max_distance]);
-    color.domain([d3.rgb("#007AFF"), d3.rgb('#FFF500')]);
-
-    var color = d3.scale.linear().domain([min_distance,max_distance])
-      //.interpolate(d3.interpolateHcl)
-      .range([d3.rgb("#007AFF"), d3.rgb('#FFF500')]);
+        var color_domain, color_range, color_threshold;
 
 
+        // Let'start the dot plot
 
-    //d3.json(url, function(error, data) {
+        var svg_dotplot = d3.select("#plot_div").append("svg")
+            .attr("width", size_plot.width + margin.left + margin.right)
+            .attr("height", size_plot.height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // change string (from JSON) into number format
-    data.forEach(function(d) {
-        d.gene2 = +d.gene2;
-        d["gene1"] = +d["gene1"];
-    });
+        var svg_legend = d3.select("#plot_legend").append("svg")
+            .attr("width", size_legend.width + margin.left + margin.right)
+            .attr("height", size_legend.height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // don't want dots overlapping axis, so add in buffer to data domain
-    xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-    yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+        d3.json(url_json, function(error, data) {
 
-    // x-axis
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(
-            xAxis.ticks(20)
-                .tickFormat(function(d) { return d3.format("s")(d) + 'b';}))
-        .append("text")
-        .attr("class", "label")
-        .attr("x", width)
-        .attr("y", -6)
-        .style("text-anchor", "end")
-        .text(function(){return genome1 +"."+ chromosome1});
+            // change string (from JSON) into number format
+            data.forEach(function(d) {
+                d.gene2 = +d.gene2;
+                d["gene1"] = +d["gene1"];
+            });
 
-    // y-axis
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis.ticks(20)
-            .tickFormat(function(d) { return d3.format("s")(d) + 'b';}))
-        .append("text")
-        .attr("class", "label")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text(function(){return genome2 +"."+ chromosome2});
+            min_distance = d3.min(data, function(d) { return d.score; });
+            max_distance = d3.max(data, function(d) { return d.score; });
 
-    // draw dots
-    svg.selectAll(".dot")
-        .data(data)
-        .enter().append("circle")
-        .attr("class", "dot")
-        .attr("r", 3.5)
-        .style("fill", function(d) { return color(d.score);})
-        .attr("cx", xMap)
-        .attr("cy", yMap);
+            color_domain = [min_distance, max_distance/3, max_distance*2/3,  max_distance];
+            color_range = ["#6e7c5a", "#a0b28f", "#d8b8b3", "#b45554", "#760000"]
+            color_threshold = d3.scale.threshold().domain(color_domain).range(color_range);
 
-    // draw legend
-    var legend = svg.selectAll(".legend")
-        .data(color.domain())
-        .enter().append("g")
-        .attr("class", "legend")
-        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+            // PLOT
 
-    // draw legend colored rectangles
-    legend.append("rect")
-        .attr("x", width - 18)
-        .attr("width", 18)
-        .attr("height", 18)
-        .style("fill", color);
+            // don't want dots overlapping axis, so add in buffer to data domain
+            xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
+            yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
 
-    // draw legend text
-    legend.append("text")
-        .attr("x", width - 24)
-        .attr("y", 9)
-        .attr("dy", ".35em")
-        .style("text-anchor", "end")
-        .text(function(d) { return d;})
-});
+            // x-axis
+            svg_dotplot.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + size_plot.height + ")")
+                .call(
+                    xAxis.ticks(20)
+                        .tickFormat(function(d) { return d3.format("s")(d) + 'b';}))
+                .append("text")
+                .attr("class", "label")
+                .attr("x", size_plot.width)
+                .attr("y", -6)
+                .style("text-anchor", "end")
+                .text(function(){return genome1 +"."+ chromosome1});
 
+            // y-axis
+            svg_dotplot.append("g")
+                .attr("class", "y axis")
+                .call(yAxis.ticks(20)
+                    .tickFormat(function(d) { return d3.format("s")(d) + 'b';}))
+                .append("text")
+                .attr("class", "label")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text(function(){return genome2 +"."+ chromosome2});
+
+            // draw dots
+            svg_dotplot.selectAll(".dot")
+                .data(data)
+                .enter().append("circle")
+                .attr("class", "dot")
+                .attr("r", 3.5)
+                .style("fill", function(d) { return color_threshold(d.score);})
+                .attr("cx", xMap)
+                .attr("cy", yMap);
+
+            // LEGEND
+
+            var formatNumber = d3.format(".0f");
+
+            var x_legend = d3.scale.linear()
+                .domain([min_distance, max_distance])
+                .range([0, 120]);
+
+            var xAxis_legend = d3.svg.axis().scale(x_legend).orient("bottom")
+                .tickSize(13)
+                .tickValues(color_threshold.domain())
+                .tickFormat(function(d) { return formatNumber(d)});
+
+            var g = svg_legend.append("g");
+
+            g.call(xAxis_legend);
+
+            g.select(".domain")
+                .remove();
+
+            g.selectAll("rect")
+                .data(color_threshold.range().map(function(color) {
+                    var d = color_threshold.invertExtent(color);
+                    if (d[0] == null) d[0] = x_legend.domain()[0];
+                    if (d[1] == null) d[1] = x_legend.domain()[1];
+                    return d;
+                }))
+                .enter().insert("rect", ".tick")
+                .attr("height", 8)
+                .attr("x", function(d) { return x_legend(d[0]); })
+                .attr("width", function(d) { return x_legend(d[1]) - x_legend(d[0]); })
+                .attr("fill", function(d) { return color_threshold(d[0]); });
+
+            g.append("text")
+                .attr("fill", "#000")
+                .attr("font-weight", "bold")
+                .attr("text-anchor", "start")
+                .attr("y", -6)
+                .text("Phylogenetic distance");
+
+
+
+        });
+
+    }
+
+    return DotPlot;
+};
