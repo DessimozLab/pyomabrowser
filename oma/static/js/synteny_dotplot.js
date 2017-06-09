@@ -28,11 +28,11 @@ dotplot_theme = function () {
         var cviewer = document.getElementById(container_id), cdotplot, clegend;
         this.create_containers(cviewer);
 
-        var margin = {top: 20, right: 50, bottom: 30, left: 50}
+        var margin = {top: 50, right: 20, bottom: 20, left: 50}
 
         var size_plot = {
             width: cviewer.offsetWidth - margin.left - margin.right,
-            height: 500 - margin.top - margin.bottom
+            height: 600 - margin.top - margin.bottom
         };
 
         d3.json(url_json, function(error, data) {
@@ -47,22 +47,23 @@ dotplot_theme = function () {
             max_position_y = d3.max(data, function(d) { return d.gene2; });
 
             var svg_dotplot = d3.select("#plot_div").append("svg")
-            .attr("width", size_plot.width + margin.left + margin.right)
-            .attr("height", size_plot.height + margin.top + margin.bottom)
+            .attr("width", size_plot.width)
+            .attr("height", size_plot.height)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            var width = size_plot.width + margin.left + margin.right, height = size_plot.height + margin.top + margin.bottom;
+            var width = size_plot.width  - margin.left - margin.right,
+                height = size_plot.height - margin.top - margin.bottom;
 
-            var k = height / width,
-                x0 = [min_position_x, max_position_x],
+            var x0 = [min_position_x, max_position_x],
                 y0 = [min_position_y, max_position_y],
                 x = d3.scaleLinear().domain(x0).range([0, width]),
                 y = d3.scaleLinear().domain(y0).range([height, 0]);
-            var xAxis = d3.axisTop(x)
+
+            var xAxis = d3.axisBottom(x)
                     .ticks(12)
                     .tickFormat(function(d) {return d3.formatPrefix(".1", 1e6)(d) + 'b'}),
-                yAxis = d3.axisRight(y)
+                yAxis = d3.axisLeft(y)
                     .ticks(12 * height / width)
                     .tickFormat(function(d) {return d3.formatPrefix(".1", 1e6)(d) + 'b'});
 
@@ -80,13 +81,29 @@ dotplot_theme = function () {
 
             svg_dotplot.append("g")
                 .attr("class", "axis axis--x")
-                .attr("transform", "translate(0," + (height - 10) + ")")
-                .call(xAxis);
+                .attr("transform", "translate(0," + (height) + ")")
+                .call(xAxis)
+                .append("text")
+                .attr("class", "label")
+                .attr("x", size_plot.width - 50)
+                .attr("fill", "#000")
+                .attr("y", -6)
+                .style("text-anchor", "end")
+                .text(function(){return genome1 +"."+ chromosome1});
+
+
 
             svg_dotplot.append("g")
                 .attr("class", "axis axis--y")
-                .attr("transform", "translate(10,0)")
-                .call(yAxis);
+                .call(yAxis).append("text")
+                .attr("class", "label")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                                .attr("fill", "#000")
+
+                .style("text-anchor", "end")
+                .text(function(){return genome2 +"."+ chromosome2});
 
             svg_dotplot.selectAll(".domain")
                 .style("display", "none");
