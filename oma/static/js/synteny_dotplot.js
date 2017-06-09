@@ -113,10 +113,24 @@ dotplot_theme = function () {
             min_position_y = d3.min(data, function(d) { return d.gene2; });
             max_position_y = d3.max(data, function(d) { return d.gene2; });
 
+            function linspace(start, end, n) {
+        var out = [];
+        var delta = (end - start) / (n - 1);
+
+        var i = 0;
+        while(i < (n - 1)) {
+            out.push(start + (i * delta));
+            i++;
+        }
+
+        out.push(end);
+        return out;
+    }
+
             // color scale
-            color_domain = [min_distance, max_distance/3, max_distance*2/3,  max_distance];
-            color_range = ["#6e7c5a", "#a0b28f", "#d8b8b3", "#b45554", "#760000"]
-            color_threshold = d3.scaleThreshold().domain(color_domain).range(color_range);
+            color_domain = [0, 10];
+            color_range = ["#6e7c5a", "#760000"];
+            color_threshold = d3.scaleLinear().domain(color_domain).range(color_range);
 
 
             // scaling of data on axis
@@ -210,7 +224,7 @@ dotplot_theme = function () {
                     .attr("cx", function(d) { return x(d['gene1']); })
                     .attr("cy", function(d) { return y(d['gene2']); });
             }
-            
+
         });
 
     }

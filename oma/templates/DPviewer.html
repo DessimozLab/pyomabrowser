@@ -12,20 +12,57 @@
         <div class="row">
 
             <div class="col-sm-12 col-md-10 col-md-offset-1">
-                <div class="text-center">
 
-                    <h1> Le dotplot</h1>
 
-                    <div>
-                        Genome of <b>{{ genome1 }} chromosome {{ chromosome1 }}</b>
-                        versus
-                        Genome of  <b>{{ genome2 }} chromosome {{ chromosome2 }} </b>
+                <div id="dotplot_container" >
+
+                    <div class="text-center">
+
+
+
+                        <div>
+
+                            <button id='btn_display_settings' class="btn btn-xs" style="float: right; margin: 0 0 10px 10px;" aria-label="Left Align"  data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings" type="button"  >
+                                OPTIONS
+                                <span id="icon_settings" class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                            </button>
+
+                            Genome of <b>{{ genome1 }} chromosome {{ chromosome1 }}</b>
+                            versus
+                            Genome of  <b>{{ genome2 }} chromosome {{ chromosome2 }} </b>
+
+                        </div>
+
+
+                        <div>
+
+                            <div id="hogvis_settings">
+
+
+                                <div class="collapse" id="collapseSettings">
+                                    salut toi
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <script>
+
+                            (function(){
+                                document.getElementById("btn_display_settings").addEventListener("click", function(){
+                                    var ico = document.getElementById("icon_settings");
+                                    if (ico.getAttribute("class") === "glyphicon glyphicon-triangle-top") {ico.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
+                                    else ico.setAttribute("class","glyphicon glyphicon-triangle-top");
+                                });
+                            }) ();
+                        </script>
+
 
                     </div>
 
-                </div>
+                    <hr>
 
-                <div id="dotplot_container" ></div>
+                </div>
 
 
             </div>
@@ -44,7 +81,10 @@
         (function () {
 
 
-            var url_json = "/All/dotplot_example.json";
+            //var url_json = "/All/dotplot_example.json";
+            //var url_json = "/All/mouse10_vs_human10.json";
+            //var url_json = "/All/mouse2_vs_human2.json";
+            var url_json = "/All/arath1_vs_araly1.json";
             var container = "dotplot_container";
 
             var genome1 = "{{ genome1 }}";
