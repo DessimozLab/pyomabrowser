@@ -1,0 +1,26 @@
+body {
+  font: 11px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.dot {
+    stroke: rgba(123,123, 123, 0.3);
+    fill: rgba(234,0, 0, 0.3);
+}
+
+.tooltip {
+  position: absolute;
+  width: 200px;
+  height: 28px;
+  pointer-events: none;
+}
+
+#dotplot_container{
+    border:2px red solid;
+}

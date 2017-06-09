@@ -1,157 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
 
-    {{ genome1 }}
-    {{ genome2 }}
-    {{ chromosome1 }}
-    {{ chromosome2 }}
+{% block title %}Synteny dot plot viewer{% endblock %}
 
-</head>
+{% block content %}
 
-<!-- Example based on http://bl.ocks.org/mbostock/3887118 -->
-<!-- Tooltip example from http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html -->
-<!-- Coding style based on http://gist.github.com/mbostock/5977197 -->
+    <link href="{% static "css/synteny_dotplot.css" %}" rel="stylesheet" type="text/css"/>
 
-<style>
-body {
-  font: 11px sans-serif;
-}
+    <div class="container-fluid" >
 
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
+        <div class="row">
 
-.dot {
-    stroke: rgba(123,123, 123, 0.3);
-    fill: rgba(234,0, 0, 0.3);
-}
+            <div class="col-sm-12 col-md-10 col-md-offset-1">
+                <div class="text-center">
 
-.tooltip {
-  position: absolute;
-  width: 200px;
-  height: 28px;
-  pointer-events: none;
-}
-</style>
-<body>
-<script src="http://d3js.org/d3.v3.min.js"></script>
+                    <h1> Le dotplot</h1>
 
-<script>
-var margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+                    <div>
+                        Genome of {{ genome1 }} chromosome {{ chromosome1 }}
+                        versus
+                        Genome of {{ genome2 }} chromosome {{ chromosome2 }}
 
-/*
- * value accessor - returns the value to encode for a given data object.
- * scale - maps value to a visual display encoding, such as a pixel position.
- * map function - maps from data value to display value
- * axis - sets up axis
- */
+                    </div>
 
-// setup x
-var xValue = function(d) { return d.Calories;}, // data -> value
-    xScale = d3.scale.linear().range([0, width]), // value -> display
-    xMap = function(d) { return xScale(xValue(d));}, // data -> display
-    xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+                </div>
 
-// setup y
-var yValue = function(d) { return d["Protein"];}, // data -> value
-    yScale = d3.scale.linear().range([height, 0]), // value -> display
-    yMap = function(d) { return yScale(yValue(d));}, // data -> display
-    yAxis = d3.svg.axis().scale(yScale).orient("left");
 
-// setup fill color
-var cValue = function(d) { return d.Manufacturer;},
-    color = d3.scale.category10();
+                <div id="dotplot_container"></div>
 
-// add the graph canvas to the body of the webpage
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-// add the tooltip area to the webpage
-var tooltip = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
+            </div>
 
-// load data
-d3.json("/All/cereal.json", function(error, data) {
+        </div>
 
-  // change string (from CSV) into number format
-  data.forEach(function(d) {
-    d.Calories = +d.Calories;
-    d["Protein"] = +d["Protein"];
-//    console.log(d);
-  });
+    </div>
 
-  // don't want dots overlapping axis, so add in buffer to data domain
-  xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-  yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+    <!-- D3 and D3 Tooltip -->
+    <script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+    <script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
 
-  // x-axis
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis)
-    .append("text")
-      .attr("class", "label")
-      .attr("x", width)
-      .attr("y", -6)
-      .style("text-anchor", "end")
-      .text("Calories");
+    <script>
 
-  // y-axis
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("class", "label")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Protein");
+    var genome1 = "{{ genome1 }}";
+    var genome2 = "{{ genome2 }}";
 
-  // draw dots
-  svg.selectAll(".dot")
-      .data(data)
-    .enter().append("circle")
-      .attr("class", "dot")
-      .attr("r", 3.5)
-      .attr("cx", xMap)
-      .attr("cy", yMap);
+    var chromosome1 = "{{ chromosome1 }}";
+    var chromosome2 = "{{ chromosome2 }}";
 
-  // draw legend
-  var legend = svg.selectAll(".legend")
-      .data(color.domain())
-    .enter().append("g")
-      .attr("class", "legend")
-      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
-  // draw legend colored rectangles
-  legend.append("rect")
-      .attr("x", width - 18)
-      .attr("width", 18)
-      .attr("height", 18)
-      .style("fill", color);
+    </script>
 
-  // draw legend text
-  legend.append("text")
-      .attr("x", width - 24)
-      .attr("y", 9)
-      .attr("dy", ".35em")
-      .style("text-anchor", "end")
-      .text(function(d) { return d;})
-});
 
-</script>
-</body>
-</html>
+    <script src="{% static "js/synteny_dotplot.js" %}" type="text/javascript"></script>
+
+{% endblock content %}
+
+
+
+
+
+
+

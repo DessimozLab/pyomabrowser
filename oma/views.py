@@ -757,15 +757,20 @@ def DPviewer(request, g1, g2, chr1, chr2):
     return render(request, 'DPviewer.html', {'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2 })
 
 class ChromosomeJson(JsonModelMixin, View):
+    '''
+    This json aim to get from a genome the list of chromosome associated to him with their genes
+    '''
     json_fields = {'sciname': None}
 
     def get(self, request, genome, *args, **kwargs):
+
+
 
         genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(genome))
 
         genomerange = utils.db.id_mapper['OMA'].genome_range(genome)
 
-        data = {'entryoff':genome_obj.EntryOff,'number_entry':genome_obj.totEntries}
+        data = {'entryoff':genome_obj.EntryOff,'number_entry':genome_obj.totEntries, 'range_start': int(genomerange[0]),'range_end': int(genomerange[1])}
 
         chr_with_genes = {}
 
@@ -773,17 +778,23 @@ class ChromosomeJson(JsonModelMixin, View):
             entry = models.ProteinEntry(utils.db,utils.db.entry_by_entry_nr(entry_number))
             chr_with_genes.setdefault(entry.chromosome, []).append(entry_number)
 
-        data['list_chr'] = chr_with_genes.keys()
+
+        # if all gnes from a same chromosome are make a continuous range we can just store for each chr the range index !
+        data['list_chr'] = chr_with_genes
 
         return JsonResponse(data, safe=False)
 
 class syntenyChromosomePairJson(JsonModelMixin, View):
+    '''
+    This json aim to contain the list of orthologous pairs between two genomes 
+    '''
 
     def get(self, request, g1, g2, chr1, chr2, *args, **kwargs):
 
+        response1 = ChromosomeJson.as_view()(request, g1)
+        data_chr1 = json.loads(response1.content)
+
         genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g1))
-        genomerange1 = utils.db.id_mapper['OMA'].genome_range(g1)
-        genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g2))
         genomerange2 = utils.db.id_mapper['OMA'].genome_range(g2)
 
         vps_tab = utils.db.db.get_node('/PairwiseRelation/{}/{}'.format(genome1.uniprot_species_code, 'VPairs'))
@@ -792,17 +803,28 @@ class syntenyChromosomePairJson(JsonModelMixin, View):
 
         cpt = 0
 
-        for entry_number in range(genomerange1[0], genomerange1[0]+1000):
+        ## this is too slow and need to be rewrite/optimize
+
+        #get all entry id
+
+        for entry_number1 in data_chr1["list_chr"][chr1]:
 
             cpt += 1
 
-            if cpt%10 == 0 :
+            if cpt % 100 == 0:
+                print(cpt, len(data_chr1["list_chr"][chr1]))
 
-                print(cpt, genomerange1[1] - genomerange1[0])
+            for e in vps_tab.read_where(
+                    '(EntryNr1=={:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'.format(entry_number1, genomerange2[0],
+                                                                                        genomerange2[1])):
+                g1 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[0]))
+                g2 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[1]))
 
-            for e in vps_tab.read_where('(EntryNr1=={:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'.format(entry_number, genomerange2[0], genomerange2[1])):
+                if g2.chromosome == chr2:
 
-                data.append({"Calories": int(e[0]),"Protein": int(e[1])})
+                    data.append({"gene1": int(g1.locus_start), "gene2": int(g2.locus_start), "distance": int(e[4])})
+
+        ## this is too slow and need to be rewrite/optimize
 
         return JsonResponse(data, safe=False)
 
