@@ -27,3 +27,51 @@ circle {
 
 #dotplot_container{
 }
+
+
+.header_div{
+    position: absolute;
+    font-size: 1em;
+}
+
+span[id^="head_button_"]{
+    cursor: pointer ;
+}
+
+
+.header_div{
+    position: absolute;
+    font-size: 1em;
+}
+
+span[id^="head_button_"]{
+    cursor: pointer ;
+}
+
+.fakebutton{
+    padding: 5px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.min_column_setting{
+    margin: 0;
+    padding-bottom: 0;
+    padding-top: 0;
+    border:none;
+}
+
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+   opacity: 1;
+}
+

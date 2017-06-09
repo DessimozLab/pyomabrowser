@@ -68,13 +68,29 @@ dotplot_theme = function () {
                 .attr("y", -6)
                 .text("Phylogenetic distance");
         }
+        this.set_up_brush_action_setting = function () {
+            genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
+                if (this.id === 'ba-export') {
+                    brush_action = 'export';
+                     console.log(brush_action);
+                }
+                else  {
+                    brush_action = 'zoom';
+                     console.log(brush_action);
+                }
+
+            });
+        }
 
         // VARIABLES
         var dotplot = this;
 
         // container with dotplot div and legend color div
         var cviewer = document.getElementById(container_id), cdotplot, clegend;
-        this.create_containers(cviewer);
+        dotplot.create_containers(cviewer);
+
+        var brush_action;
+        dotplot.set_up_brush_action_setting()
 
         // margin to apply on the dotplot svg
         var margin = {top: 50, right: 20, bottom: 20, left: 50}
@@ -88,7 +104,7 @@ dotplot_theme = function () {
         var size_legend = {width: size_plot.width, height: 50};
 
         var width = size_plot.width  - margin.left - margin.right,
-                height = size_plot.height - margin.top - margin.bottom;
+            height = size_plot.height - margin.top - margin.bottom;
 
         var svg_dotplot = d3.select("#plot_div").append("svg")
             .attr("width", size_plot.width)
@@ -104,7 +120,6 @@ dotplot_theme = function () {
 
         d3.json(url_json, function(error, data) {
 
-
             // data boundaries
             min_distance = d3.min(data, function(d) { return d.score; });
             max_distance = d3.max(data, function(d) { return d.score; });
@@ -114,18 +129,18 @@ dotplot_theme = function () {
             max_position_y = d3.max(data, function(d) { return d.gene2; });
 
             function linspace(start, end, n) {
-        var out = [];
-        var delta = (end - start) / (n - 1);
+                var out = [];
+                var delta = (end - start) / (n - 1);
 
-        var i = 0;
-        while(i < (n - 1)) {
-            out.push(start + (i * delta));
-            i++;
-        }
+                var i = 0;
+                while(i < (n - 1)) {
+                    out.push(start + (i * delta));
+                    i++;
+                }
 
-        out.push(end);
-        return out;
-    }
+                out.push(end);
+                return out;
+            }
 
             // color scale
             color_domain = [0, 10];
@@ -142,13 +157,13 @@ dotplot_theme = function () {
 
             // x axis
             var xAxis = d3.axisBottom(x)
-                    .ticks(12)
-                    .tickFormat(function(d) {return d3.formatPrefix(".1", 1e6)(d) + 'b'})
+                .ticks(12)
+                .tickFormat(function(d) {return d3.formatPrefix(".1", 1e6)(d) + 'b'})
 
             // y axis
             var yAxis = d3.axisLeft(y)
-                    .ticks(12 * height / width)
-                    .tickFormat(function(d) {return d3.formatPrefix(".1", 1e6)(d) + 'b'});
+                .ticks(12 * height / width)
+                .tickFormat(function(d) {return d3.formatPrefix(".1", 1e6)(d) + 'b'});
 
             // brush object
             var brush = d3.brush().on("end", brushended),
@@ -198,6 +213,7 @@ dotplot_theme = function () {
                 .attr("class", "brush")
                 .call(brush);
 
+
             function brushended() {
                 var s = d3.event.selection;
                 if (!s) {
@@ -209,7 +225,11 @@ dotplot_theme = function () {
                     y.domain([s[1][1], s[0][1]].map(y.invert, y));
                     svg_dotplot.select(".brush").call(brush.move, null);
                 }
-                zoom_brush();
+                if (brush_action === 'export'){
+                    console.log(s[0][0], s[1][0])}
+                else{
+                    zoom_brush();
+                }
             }
 
             function idled() {
