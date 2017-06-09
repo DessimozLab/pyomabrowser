@@ -1,10 +1,5 @@
-
-circle {
-    fill: rgba(234,0, 0, 0.3);
-    opacity: 0.3;
-}
-
-#dotplot_container{
+svg {
+  shape-rendering: precision;
 }
 
 .axis path,
@@ -17,5 +12,19 @@ circle {
 
 .axis text {
   font: 10px sans-serif;
+    font-weight: bold;
+}
+
+.tick text {
+  font: 10px sans-serif;
+    font-weight: lighter;
+}
+
+
+circle {
+    opacity: 0.3;
+}
+
+#dotplot_container{
 }
 
