@@ -9,7 +9,7 @@ body {
   shape-rendering: crispEdges;
 }
 
-.dot {
+circle {
     fill: rgba(234,0, 0, 0.3);
     opacity: 0.3;
 }

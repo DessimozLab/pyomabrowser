@@ -822,7 +822,7 @@ class syntenyChromosomePairJson(JsonModelMixin, View):
 
                 if g2.chromosome == chr2:
 
-                    data.append({"gene1": int(g1.locus_start), "gene2": int(g2.locus_start), "distance": int(e[4])})
+                    data.append({"gene1": int(g1.locus_start), "gene2": int(g2.locus_start), "distance": str(e[4])})
 
         ## this is too slow and need to be rewrite/optimize
 
