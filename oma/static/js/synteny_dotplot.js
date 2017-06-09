@@ -23,11 +23,11 @@ dotplot_theme = function () {
 
             var formatNumber = d3.format(".0f");
 
-            var x_legend = d3.scale.linear()
+            var x_legend = d3.scaleLinear()
                 .domain(color_threshold.domain())
                 .range([0, 120]);
 
-            var xAxis_legend = d3.svg.axis().scale(x_legend).orient("bottom")
+            var xAxis_legend = d3.axisBottom(x_legend)
                 .tickSize(13)
                 .tickValues(color_threshold.domain())
                 .tickFormat(function (d) {
@@ -86,21 +86,21 @@ dotplot_theme = function () {
         var xValue = function (d) {
                 return d.gene1;
             }, // data -> value
-            xScale = d3.scale.linear().range([0, size_plot.width]), // value -> display
+            xScale = d3.scaleLinear().range([0, size_plot.width]), // value -> display
             xMap = function (d) {
                 return xScale(xValue(d));
             }, // data -> display
-            xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+            xAxis = d3.axisBottom(xScale);
 
         // setup y
         var yValue = function (d) {
                 return d["gene2"];
             }, // data -> value
-            yScale = d3.scale.linear().range([size_plot.height, 0]), // value -> display
+            yScale = d3.scaleLinear().range([size_plot.height, 0]), // value -> display
             yMap = function (d) {
                 return yScale(yValue(d));
             }, // data -> display
-            yAxis = d3.svg.axis().scale(yScale).orient("left");
+            yAxis = d3.axisLeft(yScale);
 
         var min_distance, max_distance;
 
@@ -112,13 +112,14 @@ dotplot_theme = function () {
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+
         var svg_legend = d3.select("#plot_legend").append("svg")
             .attr("width", size_legend.width + margin.left + margin.right)
             .attr("height", size_legend.height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-         // Let'start the dot plot with data
+        // Let'start the dot plot with data
 
         d3.json(url_json, function(error, data) {
 
@@ -133,7 +134,7 @@ dotplot_theme = function () {
 
             color_domain = [min_distance, max_distance/3, max_distance*2/3,  max_distance];
             color_range = ["#6e7c5a", "#a0b28f", "#d8b8b3", "#b45554", "#760000"]
-            color_threshold = d3.scale.threshold().domain(color_domain).range(color_range);
+            color_threshold = d3.scaleThreshold().domain(color_domain).range(color_range);
 
             // PLOT
 
@@ -147,7 +148,7 @@ dotplot_theme = function () {
                 .attr("transform", "translate(0," + size_plot.height + ")")
                 .call(
                     xAxis.ticks(20)
-                        .tickFormat(function(d) { return d3.format("s")(d) + 'b';}))
+                    .tickFormat(function(d) {return d3.formatPrefix(".1", 1e6)(d) + 'b'}))
                 .append("text")
                 .attr("class", "label")
                 .attr("x", size_plot.width)
@@ -159,7 +160,7 @@ dotplot_theme = function () {
             svg_dotplot.append("g")
                 .attr("class", "y axis")
                 .call(yAxis.ticks(20)
-                    .tickFormat(function(d) { return d3.format("s")(d) + 'b';}))
+                    .tickFormat(function(d) {return d3.formatPrefix(".1", 1e6)(d) + 'b'}))
                 .append("text")
                 .attr("class", "label")
                 .attr("transform", "rotate(-90)")
