@@ -62,7 +62,7 @@ span[id^="head_button_"]{
     display: inline-block;
 }
 
-.min_column_setting{
+#min_distance_setting_id{
     margin: 0;
     padding-bottom: 0;
     padding-top: 0;
@@ -73,5 +73,10 @@ span[id^="head_button_"]{
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
    opacity: 1;
+}
+
+.area {
+  fill: steelblue;
+
 }
 

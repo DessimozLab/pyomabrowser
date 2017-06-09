@@ -72,11 +72,11 @@ dotplot_theme = function () {
             genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
                 if (this.id === 'ba-export') {
                     brush_action = 'export';
-                     console.log(brush_action);
+                    console.log(brush_action);
                 }
                 else  {
                     brush_action = 'zoom';
-                     console.log(brush_action);
+                    console.log(brush_action);
                 }
 
             });
@@ -86,12 +86,56 @@ dotplot_theme = function () {
             genedata_picker.attr('max', max_distance);
             genedata_picker.on('change', function () {
 
-                filter_max_distance = parseFloat(this.value);
+                //filter_max_distance = parseFloat(this.value);
                 // dots
                 svg_dotplot.selectAll("circle")
-                .attr("visibility", function(d) {
+                    .attr("visibility", function(d) {
                         return parseFloat(d.distance) < filter_max_distance ? "visible" : "hidden";})
             });
+
+        };
+        this.calculate_frequencies = function(arr){
+
+            function sortNumber(a,b) {
+                return a - b;
+            }
+            var a = [], b = [], prev;
+
+            arr.sort(sortNumber);
+            for ( var i = 0; i < arr.length; i++ ) {
+                if ( arr[i] !== prev ) {
+                    a.push(arr[i]);
+                    b.push(1);
+                } else {
+                    b[b.length-1]++;
+                }
+                prev = arr[i];
+            }
+
+            return [a, b];
+        }
+        this.update_visibility_dot = function(){
+
+            function between(x, min, max) {
+  return x >= min && x <= max;
+}
+
+
+            console.log("max", filter_max_distance, "min",filter_min_distance );
+
+            svg_dotplot.selectAll("circle")
+                    .attr("visibility", function(d) {
+
+                        var dist = parseInt(d.distance);
+
+
+                        if (between(dist, filter_min_distance, filter_max_distance)){
+                                return "visible";
+
+                        }
+                        return "hidden";
+
+                    })
 
         };
 
@@ -105,7 +149,7 @@ dotplot_theme = function () {
         var brush_action;
         dotplot.set_up_brush_action_setting();
 
-        var filter_max_distance;
+        var filter_max_distance, filter_min_distance;
         var genedata_picker = d3.select("#min_distance_setting_id");
 
         // margin to apply on the dotplot svg
@@ -114,10 +158,10 @@ dotplot_theme = function () {
         // size of the svg
         var size_plot = {
             width: cviewer.offsetWidth,
-            height: 550
+            height: 300
         };
 
-        var size_legend = {width: size_plot.width, height: 50};
+        var size_legend = {width: size_plot.width, height: 200};
 
         var width = size_plot.width  - margin.left - margin.right,
             height = size_plot.height - margin.top - margin.bottom;
@@ -136,6 +180,22 @@ dotplot_theme = function () {
 
         d3.json(url_json, function(error, data) {
 
+            var data_slice_distance = [];
+
+            data.forEach(function(d) {
+                data_slice_distance.push(parseInt(d.distance));
+            });
+
+            var hist_color_split =  dotplot.calculate_frequencies(data_slice_distance);
+
+            var hist_color = [];
+
+            for ( var i = 0; i < hist_color_split[0].length; i++ ) {
+                hist_color.push({'distance':hist_color_split[0][i], 'freq':hist_color_split[1][i]})
+                console.log(hist_color_split[0][i],hist_color_split[1][i] )
+
+            }
+
             // data boundaries
             min_distance = d3.min(data, function(d) { return parseFloat(d.distance); });
             max_distance = d3.max(data, function(d) { return parseFloat(d.distance); });
@@ -151,7 +211,7 @@ dotplot_theme = function () {
             color_range = ["#6e7c5a", "#760000"];
             color_threshold = d3.scaleLinear().domain(color_domain).range(color_range);
 
-            
+
             // scaling of data on axis
             var x0 = [min_position_x, max_position_x],
                 y0 = [min_position_y, max_position_y],
@@ -181,8 +241,8 @@ dotplot_theme = function () {
                 .attr("cx", function(d) { return x(d['gene1']); })
                 .attr("cy", function(d) { return y(d['gene2']); })
                 .attr("r", 2.5)
-                .attr("visibility", function(d) {
-                        return parseFloat(d.distance) <= filter_max_distance ? "visible" : "hidden";})
+                //.attr("visibility", function(d) {
+                //    return parseFloat(d.distance) <= filter_max_distance ? "visible" : "hidden";})
                 .attr("fill", function(d){return color_threshold(d.distance)});
 
             // svg x axis
@@ -220,6 +280,59 @@ dotplot_theme = function () {
 
             dotplot.set_up_filter_setting();
 
+            // color legend
+
+            var height2 = 50;
+
+            var brush = d3.brushX()
+                .extent([[0, 0], [width, height2]])
+                .on("brush end", brushed);
+
+            var x2 = d3.scaleLinear().range([0, width]),
+                y2 = d3.scaleLinear().range([height2, 0]);
+
+            var xAxis2 = d3.axisBottom(x2).ticks(10)
+                .tickFormat(function(d) {return d3.formatPrefix(".1", 1e1)(d)});
+
+            var area2 = d3.area()
+                .curve(d3.curveBasis)
+                .x(function(d) { return x2(d.distance); })
+                .y0(height2)
+                .y1(function(d) { return y2(d.freq); });
+
+            x2.domain(d3.extent(hist_color, function(d) { return d.distance; }));
+            y2.domain([0, d3.max(hist_color, function(d) { return d.freq; })]);
+
+            var context = svg_legend.append("g")
+                .attr("class", "context")
+                .attr("transform", "translate(" + 0 + "," + 0 + ")");
+
+            context.append("path")
+                .datum(hist_color)
+                .attr("class", "area")
+                .attr("d", area2);
+
+            context.append("g")
+                .attr("class", "axis axis--x")
+                .attr("transform", "translate(0," + height2 + ")")
+                .call(xAxis2);
+
+            context.append("g")
+                .attr("class", "brush")
+                .call(brush)
+                .call(brush.move, x.range());
+
+            function brushed() {
+                if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+                var s = d3.event.selection || x2.range();
+
+                filter_max_distance = x2.invert(s[1]);
+                filter_min_distance = x2.invert(s[0]);
+
+                dotplot.update_visibility_dot();
+
+                console.log( x2.invert(s[0]), x2.invert(s[1]));
+            }
 
 
             function brushended() {
