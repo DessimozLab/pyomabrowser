@@ -147,11 +147,11 @@
             var select = document.getElementById(id_select);
 
             $.getJSON( "/oma/syntenyDP/" + genome_name + "/json/", function( jsonData ) {
-                console.log(jsonData.list_chr);
-                $.each( jsonData.list_chr, function ( index ) {
+
+                $.each( jsonData.list_chr, function (index ) {
                     var el = document.createElement("option");
-                    el.textContent = jsonData.list_chr[index];
-                    el.value = jsonData.list_chr[index];
+                    el.textContent = index;
+                    el.value = index;
                     select.appendChild(el);
                 });
             });
