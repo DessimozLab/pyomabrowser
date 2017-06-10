@@ -117,25 +117,22 @@ dotplot_theme = function () {
         this.update_visibility_dot = function(){
 
             function between(x, min, max) {
-  return x >= min && x <= max;
-}
-
-
-            console.log("max", filter_max_distance, "min",filter_min_distance );
+                return x >= min && x <= max;
+            }
 
             svg_dotplot.selectAll("circle")
-                    .attr("visibility", function(d) {
+                .attr("visibility", function(d) {
 
-                        var dist = parseInt(d.distance);
+                    var dist = parseInt(d.distance);
 
 
-                        if (between(dist, filter_min_distance, filter_max_distance)){
-                                return "visible";
+                    if (between(dist, filter_min_distance, filter_max_distance)){
+                        return "visible";
 
-                        }
-                        return "hidden";
+                    }
+                    return "hidden";
 
-                    })
+                })
 
         };
 
@@ -192,8 +189,6 @@ dotplot_theme = function () {
 
             for ( var i = 0; i < hist_color_split[0].length; i++ ) {
                 hist_color.push({'distance':hist_color_split[0][i], 'freq':hist_color_split[1][i]})
-                console.log(hist_color_split[0][i],hist_color_split[1][i] )
-
             }
 
             // data boundaries
@@ -207,7 +202,7 @@ dotplot_theme = function () {
             filter_max_distance = max_distance;
 
             // color scale
-            color_domain = [0, 10];
+            color_domain = [min_distance, max_distance];
             color_range = ["#6e7c5a", "#760000"];
             color_threshold = d3.scaleLinear().domain(color_domain).range(color_range);
 
@@ -280,6 +275,35 @@ dotplot_theme = function () {
 
             dotplot.set_up_filter_setting();
 
+            // Add a legend for the color values.
+            var legend = svg_dotplot.selectAll(".legend")
+                .data(color_threshold.ticks(10).slice(1).reverse())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("visibility", "visible")
+                .attr("transform", function(d, i) { return "translate(" + (width - 30) + "," + (20 + i * 10) + ")"; });
+
+            legend.append("rect")
+                .attr("width", 10)
+                .attr("height", 10)
+                .style("fill", color_threshold);
+
+            legend.append("text")
+                .attr("x", 15)
+                .attr("y", 6)
+                .attr("dy", ".35em")
+                .style("font-size","8px")
+                .style("text-anchor", "start")
+                .text(function(d){console.log(d); return d});
+
+            svg_dotplot.append("text")
+                .attr("class", "label")
+                .attr("x", width - 20)
+                .attr("y", 10)
+                .attr("dy", ".35em")
+                .style("text-anchor", "middle")
+                .text("Distance");
+
             // color legend
 
             var height2 = 50;
@@ -292,7 +316,7 @@ dotplot_theme = function () {
                 y2 = d3.scaleLinear().range([height2, 0]);
 
             var xAxis2 = d3.axisBottom(x2).ticks(10)
-                .tickFormat(function(d) {return d3.formatPrefix(".1", 1e1)(d)});
+                .tickFormat(function(d) {return d3.formatPrefix(".1", 1e1)(d)})
 
             var area2 = d3.area()
                 .curve(d3.curveBasis)
@@ -315,12 +339,26 @@ dotplot_theme = function () {
             context.append("g")
                 .attr("class", "axis axis--x")
                 .attr("transform", "translate(0," + height2 + ")")
-                .call(xAxis2);
+                .call(xAxis2)
+                .append("text")
+                .attr("transform", "translate(-10," +  0 + ")")
+                .attr("class", "label")
+                .attr("x", width)
+                .attr("fill", "#000")
+                .attr("y", -6)
+                .style("text-anchor", "end")
+                .text("Phylogenetic distance");
 
             context.append("g")
                 .attr("class", "brush")
                 .call(brush)
                 .call(brush.move, x.range());
+
+            context.selectAll('g.tick')
+                .select('text') //grab the tick line
+                .attr('fill', function(d){ return color_threshold(d);})
+                .attr('font-weight', "bold");
+
 
             function brushed() {
                 if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
