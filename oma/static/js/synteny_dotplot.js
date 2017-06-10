@@ -5,6 +5,10 @@ dotplot_theme = function () {
     function DotPlot(container_id, url_json, genome1,genome2,chromosome1,chromosome2) {
 
         // METHODS
+
+        this.between  = function(x, min, max) {
+            return x >= min && x <= max;
+        }
         this.create_containers = function (container) {
 
             // create plot div
@@ -69,9 +73,16 @@ dotplot_theme = function () {
                 .text("Phylogenetic distance");
         }
         this.set_up_brush_action_setting = function () {
+
+            // to remove
+            brush_action = 'select';
+
+
+
+
             genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
-                if (this.id === 'ba-export') {
-                    brush_action = 'export';
+                if (this.id === 'ba-select') {
+                    brush_action = 'select';
                     console.log(brush_action);
                 }
                 else  {
@@ -116,17 +127,13 @@ dotplot_theme = function () {
         }
         this.update_visibility_dot = function(){
 
-            function between(x, min, max) {
-                return x >= min && x <= max;
-            }
-
             svg_dotplot.selectAll("circle")
                 .attr("visibility", function(d) {
 
                     var dist = parseInt(d.distance);
 
 
-                    if (between(dist, filter_min_distance, filter_max_distance)){
+                    if (dotplot.between(dist, filter_min_distance, filter_max_distance)){
                         return "visible";
 
                     }
@@ -157,6 +164,8 @@ dotplot_theme = function () {
             width: cviewer.offsetWidth,
             height: 300
         };
+
+        var selected_pairs = [];
 
         var size_legend = {width: size_plot.width, height: 200};
 
@@ -294,7 +303,7 @@ dotplot_theme = function () {
                 .attr("dy", ".35em")
                 .style("font-size","8px")
                 .style("text-anchor", "start")
-                .text(function(d){console.log(d); return d});
+                .text(function(d){return d});
 
             svg_dotplot.append("text")
                 .attr("class", "label")
@@ -308,7 +317,7 @@ dotplot_theme = function () {
 
             var height2 = 50;
 
-            var brush = d3.brushX()
+            var brush2 = d3.brushX()
                 .extent([[0, 0], [width, height2]])
                 .on("brush end", brushed);
 
@@ -351,8 +360,8 @@ dotplot_theme = function () {
 
             context.append("g")
                 .attr("class", "brush")
-                .call(brush)
-                .call(brush.move, x.range());
+                .call(brush2)
+                .call(brush2.move, x.range());
 
             context.selectAll('g.tick')
                 .select('text') //grab the tick line
@@ -368,7 +377,6 @@ dotplot_theme = function () {
                 filter_min_distance = x2.invert(s[0]);
 
                 dotplot.update_visibility_dot();
-
                 console.log( x2.invert(s[0]), x2.invert(s[1]));
             }
 
@@ -379,15 +387,24 @@ dotplot_theme = function () {
                     if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
                     x.domain(x0);
                     y.domain(y0);
-                } else {
-                    x.domain([s[0][0], s[1][0]].map(x.invert, x));
-                    y.domain([s[1][1], s[0][1]].map(y.invert, y));
-                    svg_dotplot.select(".brush").call(brush.move, null);
-                }
-                if (brush_action === 'export'){
-                    console.log(s[0][0], s[1][0])}
-                else{
                     zoom_brush();
+                } else {
+                    if (brush_action === 'select'){
+
+                        console.log(s[0][0], s[1][0]);
+                        console.log(s[0][1], s[1][1]);
+                        selected_pairs = [];
+                        select_brush(s);
+                        svg_dotplot.select(".brush").call(brush.move, null);
+                        console.log(selected_pairs)
+
+                    }
+                    else{
+                        x.domain([s[0][0], s[1][0]].map(x.invert, x));
+                        y.domain([s[1][1], s[0][1]].map(y.invert, y));
+                        svg_dotplot.select(".brush").call(brush.move, null);
+                        zoom_brush();
+                    }
                 }
             }
 
@@ -402,6 +419,33 @@ dotplot_theme = function () {
                 svg_dotplot.selectAll("circle").transition(t)
                     .attr("cx", function(d) { return x(d['gene1']); })
                     .attr("cy", function(d) { return y(d['gene2']); });
+            }
+
+            function select_brush(s) {
+
+                if (s == null) {
+                    //handle.attr("display", "none");
+                    circle.classed("active", false);
+                } else {
+                    var bxmin = x.invert(s[0][0]);
+                    var bxmax = x.invert(s[1][0]);
+
+                    var bymin = y.invert(s[1][1]);
+                    var bymax = y.invert(s[0][1]);
+
+                    var circle = svg_dotplot.selectAll('circle')
+                    circle.classed("active", function(d) {
+                        if (dotplot.between(d['gene1'], bxmin, bxmax)){
+                            if (dotplot.between(d['gene2'], bymin, bymax)){
+                                selected_pairs.push(d);
+                                return 1===1;
+                            }
+                        }
+                        return 1===2;
+                        //return sx[0] <= d && d <= sx[1];
+                    });
+                }
+
             }
 
         });

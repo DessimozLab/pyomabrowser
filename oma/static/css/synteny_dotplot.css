@@ -23,7 +23,14 @@ svg {
 
 circle {
     opacity: 0.3;
+    transition: fill-opacity 250ms linear;
 }
+
+circle.active {
+    fill: rgb(65,193,194);
+    opacity: 0.6;
+}
+
 
 #dotplot_container{
 }
@@ -76,7 +83,9 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .area {
-  fill: steelblue;
+  fill: rgba(65,193,194,0.4);
 
 }
+
+
 
