@@ -158,6 +158,7 @@ dotplot_theme = function () {
             svg_dotplot.selectAll(".legend").remove();
             svg_dotplot.selectAll(".legend rect").remove();
             svg_dotplot.selectAll(".legend text").remove();
+            svg_dotplot.selectAll(".color_legend_text").remove();
 
             // Add a legend for the color values.
             var legend = svg_dotplot.selectAll(".legend")
@@ -181,7 +182,7 @@ dotplot_theme = function () {
                 .text(function(d){return d});
 
             svg_dotplot.append("text")
-                .attr("class", "label")
+                .attr("class", "label color_legend_text")
                 .attr("x", width - 20)
                 .attr("y", 10)
                 .attr("dy", ".35em")
@@ -382,20 +383,22 @@ dotplot_theme = function () {
             gBrush.attr("class", "brush")
                 .call(brush2);
 
+            // style brush resize handle
+// https://github.com/crossfilter/crossfilter/blob/gh-pages/index.html#L466
+            var brushResizePath = function(d) {
+                var e = +(d.type == "e"),
+                    x = e ? 1 : -1,
+                    y = height2 / 2;
+                return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
+            }
+
             var handle = gBrush.selectAll(".handle--custom")
                 .data([{type: "w"}, {type: "e"}])
                 .enter().append("path")
                 .attr("class", "handle--custom")
-                .attr("fill", "#666")
-                .attr("fill-opacity", 0.8)
                 .attr("stroke", "#000")
-                .attr("stroke-width", 1.5)
                 .attr("cursor", "ew-resize")
-                .attr("d", d3.arc()
-                    .innerRadius(0)
-                    .outerRadius(height2 / 2)
-                    .startAngle(0)
-                    .endAngle(function(d, i) { return i ? Math.PI : -Math.PI; }));
+                .attr("d", brushResizePath);
 
             gBrush.call(brush2.move, x2.range());
 
@@ -416,11 +419,11 @@ dotplot_theme = function () {
                 } else {
 
                     filter_max_distance = x2.invert(s[1]);
-                filter_min_distance = x2.invert(s[0]);
+                    filter_min_distance = x2.invert(s[0]);
 
-                dotplot.update_visibility_dot();
-                console.log( x2.invert(s[0]), x2.invert(s[1]));
-                    handle.attr("display", null).attr("transform", function(d, i) { return "translate(" + s[i] + "," + height2 / 2 + ")"; });
+                    dotplot.update_visibility_dot();
+                    console.log( x2.invert(s[0]), x2.invert(s[1]));
+                    handle.attr("display", null).attr("transform", function(d, i) { return "translate(" + s[i] + "," + -height2/4  + ")"; });
                 }
 
 

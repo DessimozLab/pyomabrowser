@@ -22,12 +22,15 @@ svg {
 
 
 circle {
-    opacity: 0.9;
+    opacity: 0.3;
     transition: fill-opacity 250ms linear;
 }
 
 circle.active {
-    fill: rgb(65,193,194);
+    /*fill: rgb(65,193,194);
+    stroke: red;
+    stroke-width: 1px;*/
+    fill: #FFB6C1;
     opacity: 0.6;
 }
 
@@ -85,6 +88,10 @@ input[type=number]::-webkit-outer-spin-button {
 .area {
   fill: rgba(65,193,194,0.4);
 
+}
+
+.brush {
+	opacity: 0.2;
 }
 
 
