@@ -70,7 +70,8 @@ function update_genome_viewer(bid) {
         cviewer.appendChild(tbl);
 
         // feed it !
-        init_table('genomeTable');
+        selected_pairs.push(d);
+                                return ('genomeTable');
     }
 
     // build hist view

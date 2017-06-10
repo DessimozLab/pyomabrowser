@@ -387,6 +387,9 @@ dotplot_theme = function () {
                     if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
                     x.domain(x0);
                     y.domain(y0);
+                    svg_dotplot.selectAll('circle').classed("active", function(){return 1===2});
+                    selected_pairs = []
+                     $('#container_table_selection').hide()
                     zoom_brush();
                 } else {
                     if (brush_action === 'select'){
@@ -397,6 +400,13 @@ dotplot_theme = function () {
                         select_brush(s);
                         svg_dotplot.select(".brush").call(brush.move, null);
                         console.log(selected_pairs)
+
+                        $('#table_selection').bootstrapTable('removeAll');
+
+                        $('#table_selection').bootstrapTable('load', selected_pairs);
+
+                        $('#container_table_selection').show()
+
 
                     }
                     else{
@@ -437,8 +447,12 @@ dotplot_theme = function () {
                     circle.classed("active", function(d) {
                         if (dotplot.between(d['gene1'], bxmin, bxmax)){
                             if (dotplot.between(d['gene2'], bymin, bymax)){
-                                selected_pairs.push(d);
-                                return 1===1;
+                                if (d3.select(this).attr('visibility') === 'visible'){
+                                    selected_pairs.push(d);
+                                    return 1===1
+
+                                }
+
                             }
                         }
                         return 1===2;
