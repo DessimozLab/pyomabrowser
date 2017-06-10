@@ -12,16 +12,18 @@ dotplot_theme = function () {
         this.create_containers = function (container) {
 
             // create plot div
-            var plot = document.createElement('div');
-            plot.id = "plot_div";
-            plot.style.width = "100%";
-            container.appendChild(plot);
+            cdotplot = document.createElement('div');
+            cdotplot.id = "plot_div";
+            cdotplot.style.width = "100%";
+            container.appendChild(cdotplot);
 
             // create legend div
-            var ldiv = document.createElement('div');
-            ldiv.id = "plot_legend";
-            ldiv.style.width = "100%";
-            container.appendChild(ldiv);
+            clegend = document.createElement('div');
+            clegend.id = "plot_legend";
+            clegend.style.width = "100%";
+            container.appendChild(clegend);
+
+
         }
         this.add_color_legend = function(color_threshold, svg_legend){
 
@@ -92,19 +94,6 @@ dotplot_theme = function () {
 
             });
         }
-        this.set_up_filter_setting = function () {
-            genedata_picker.attr('min', min_distance);
-            genedata_picker.attr('max', max_distance);
-            genedata_picker.on('change', function () {
-
-                //filter_max_distance = parseFloat(this.value);
-                // dots
-                svg_dotplot.selectAll("circle")
-                    .attr("visibility", function(d) {
-                        return parseFloat(d.distance) < filter_max_distance ? "visible" : "hidden";})
-            });
-
-        };
         this.calculate_frequencies = function(arr){
 
             function sortNumber(a,b) {
@@ -160,13 +149,17 @@ dotplot_theme = function () {
             svg_dotplot.selectAll(".legend text").remove();
             svg_dotplot.selectAll(".color_legend_text").remove();
 
+
+
+
+
             // Add a legend for the color values.
             var legend = svg_dotplot.selectAll(".legend")
                 .data(color_threshold.ticks(10).slice(1).reverse())
                 .enter().append("g")
                 .attr("class", "legend")
                 .attr("visibility", "visible")
-                .attr("transform", function(d, i) { return "translate(" + (width - 30) + "," + (20 + i * 10) + ")"; });
+                .attr("transform", function(d, i) { return "translate(" + (width - 30) + "," + (50  + i * 10) + ")"; });
 
             legend.append("rect")
                 .attr("width", 10)
@@ -184,19 +177,20 @@ dotplot_theme = function () {
             svg_dotplot.append("text")
                 .attr("class", "label color_legend_text")
                 .attr("x", width - 20)
-                .attr("y", 10)
+                .attr("y", 40)
                 .attr("dy", ".35em")
                 .style("text-anchor", "middle")
                 .text("Distance");
 
         }
 
+
         // VARIABLES
         var dotplot = this;
 
         // container with dotplot div and legend color div
         var cviewer = document.getElementById(container_id), cdotplot, clegend;
-        dotplot.create_containers(cviewer);
+        //dotplot.create_containers(cviewer);
 
         var brush_action;
         dotplot.set_up_brush_action_setting();
@@ -205,17 +199,17 @@ dotplot_theme = function () {
         var genedata_picker = d3.select("#min_distance_setting_id");
 
         // margin to apply on the dotplot svg
-        var margin = {top: 50, right: 50, bottom: 20, left: 50}
+        var margin = {top: 20, right: 50, bottom: 20, left: 50}
 
         // size of the svg
         var size_plot = {
             width: cviewer.offsetWidth,
-            height: 300
+            height: 450
         };
 
         var selected_pairs = [];
 
-        var size_legend = {width: size_plot.width, height: 200};
+        var size_legend = {width: size_plot.width, height: 80};
 
         var width = size_plot.width  - margin.left - margin.right,
             height = size_plot.height - margin.top - margin.bottom;
@@ -230,7 +224,7 @@ dotplot_theme = function () {
             .attr("width", size_legend.width)
             .attr("height", size_legend.height)
             .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform", "translate(" + margin.left + "," + 0 + ")");
 
         d3.json(url_json, function(error, data) {
 
@@ -330,7 +324,6 @@ dotplot_theme = function () {
                 .attr("class", "brush")
                 .call(brush);
 
-            dotplot.set_up_filter_setting();
 
             dotplot.add_legend_color();
 
@@ -406,7 +399,6 @@ dotplot_theme = function () {
                 .select('text') //grab the tick line
                 //.attr('fill', function(d){ return color_threshold(d);})
                 .attr('font-weight', "bold");
-
 
             function brushed() {
 
