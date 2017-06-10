@@ -127,7 +127,14 @@ dotplot_theme = function () {
         }
         this.update_visibility_dot = function(){
 
+            // color scale
+            color_domain = [filter_min_distance, filter_max_distance];
+            color_range = ["#ffffe0", "#000080"];
+            color_threshold = d3.scaleLinear().domain(color_domain).range(['#90ee90','#000080']);
+            //color_threshold = d3.scaleLinear().domain(color_domain).range(color_range);
+
             svg_dotplot.selectAll("circle")
+                .attr('fill', function(d){return color_threshold(d.distance)})
                 .attr("visibility", function(d) {
 
                     var dist = parseInt(d.distance);
@@ -141,7 +148,47 @@ dotplot_theme = function () {
 
                 })
 
+
+            dotplot.add_legend_color()
+
+
         };
+        this.add_legend_color = function (){
+
+            svg_dotplot.selectAll(".legend").remove();
+            svg_dotplot.selectAll(".legend rect").remove();
+            svg_dotplot.selectAll(".legend text").remove();
+
+            // Add a legend for the color values.
+            var legend = svg_dotplot.selectAll(".legend")
+                .data(color_threshold.ticks(10).slice(1).reverse())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("visibility", "visible")
+                .attr("transform", function(d, i) { return "translate(" + (width - 30) + "," + (20 + i * 10) + ")"; });
+
+            legend.append("rect")
+                .attr("width", 10)
+                .attr("height", 10)
+                .style("fill", color_threshold);
+
+            legend.append("text")
+                .attr("x", 15)
+                .attr("y", 6)
+                .attr("dy", ".35em")
+                .style("font-size","8px")
+                .style("text-anchor", "start")
+                .text(function(d){return d});
+
+            svg_dotplot.append("text")
+                .attr("class", "label")
+                .attr("x", width - 20)
+                .attr("y", 10)
+                .attr("dy", ".35em")
+                .style("text-anchor", "middle")
+                .text("Distance");
+
+        }
 
         // VARIABLES
         var dotplot = this;
@@ -157,7 +204,7 @@ dotplot_theme = function () {
         var genedata_picker = d3.select("#min_distance_setting_id");
 
         // margin to apply on the dotplot svg
-        var margin = {top: 50, right: 20, bottom: 20, left: 50}
+        var margin = {top: 50, right: 50, bottom: 20, left: 50}
 
         // size of the svg
         var size_plot = {
@@ -284,34 +331,7 @@ dotplot_theme = function () {
 
             dotplot.set_up_filter_setting();
 
-            // Add a legend for the color values.
-            var legend = svg_dotplot.selectAll(".legend")
-                .data(color_threshold.ticks(10).slice(1).reverse())
-                .enter().append("g")
-                .attr("class", "legend")
-                .attr("visibility", "visible")
-                .attr("transform", function(d, i) { return "translate(" + (width - 30) + "," + (20 + i * 10) + ")"; });
-
-            legend.append("rect")
-                .attr("width", 10)
-                .attr("height", 10)
-                .style("fill", color_threshold);
-
-            legend.append("text")
-                .attr("x", 15)
-                .attr("y", 6)
-                .attr("dy", ".35em")
-                .style("font-size","8px")
-                .style("text-anchor", "start")
-                .text(function(d){return d});
-
-            svg_dotplot.append("text")
-                .attr("class", "label")
-                .attr("x", width - 20)
-                .attr("y", 10)
-                .attr("dy", ".35em")
-                .style("text-anchor", "middle")
-                .text("Distance");
+            dotplot.add_legend_color();
 
             // color legend
 
@@ -358,28 +378,55 @@ dotplot_theme = function () {
                 .style("text-anchor", "end")
                 .text("Phylogenetic distance");
 
-            context.append("g")
-                .attr("class", "brush")
-                .call(brush2)
-                .call(brush2.move, x.range());
+            var gBrush  = context.append("g");
+            gBrush.attr("class", "brush")
+                .call(brush2);
+
+            var handle = gBrush.selectAll(".handle--custom")
+                .data([{type: "w"}, {type: "e"}])
+                .enter().append("path")
+                .attr("class", "handle--custom")
+                .attr("fill", "#666")
+                .attr("fill-opacity", 0.8)
+                .attr("stroke", "#000")
+                .attr("stroke-width", 1.5)
+                .attr("cursor", "ew-resize")
+                .attr("d", d3.arc()
+                    .innerRadius(0)
+                    .outerRadius(height2 / 2)
+                    .startAngle(0)
+                    .endAngle(function(d, i) { return i ? Math.PI : -Math.PI; }));
+
+            gBrush.call(brush2.move, x2.range());
 
             context.selectAll('g.tick')
                 .select('text') //grab the tick line
-                .attr('fill', function(d){ return color_threshold(d);})
+                //.attr('fill', function(d){ return color_threshold(d);})
                 .attr('font-weight', "bold");
 
 
             function brushed() {
-                if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-                var s = d3.event.selection || x2.range();
 
-                filter_max_distance = x2.invert(s[1]);
+                if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+                var s = d3.event.selection;
+
+                if (s == null) {
+                    s =  x2.range();
+                    handle.attr("display", "none");
+                } else {
+
+                    filter_max_distance = x2.invert(s[1]);
                 filter_min_distance = x2.invert(s[0]);
 
                 dotplot.update_visibility_dot();
                 console.log( x2.invert(s[0]), x2.invert(s[1]));
-            }
+                    handle.attr("display", null).attr("transform", function(d, i) { return "translate(" + s[i] + "," + height2 / 2 + ")"; });
+                }
 
+
+
+
+            }
 
             function brushended() {
                 var s = d3.event.selection;
@@ -389,7 +436,7 @@ dotplot_theme = function () {
                     y.domain(y0);
                     svg_dotplot.selectAll('circle').classed("active", function(){return 1===2});
                     selected_pairs = []
-                     $('#container_table_selection').hide()
+                    $('#container_table_selection').hide()
                     zoom_brush();
                 } else {
                     if (brush_action === 'select'){

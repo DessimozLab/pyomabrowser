@@ -22,7 +22,7 @@ svg {
 
 
 circle {
-    opacity: 0.3;
+    opacity: 0.9;
     transition: fill-opacity 250ms linear;
 }
 

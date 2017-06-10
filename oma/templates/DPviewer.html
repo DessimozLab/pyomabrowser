@@ -18,8 +18,6 @@
 
                     <div class="text-center">
 
-
-
                         <div >
 
                             <button id='btn_display_settings' class="btn btn-xs" style="float: right; margin: 0 0 10px 10px;" aria-label="Left Align"  data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings" type="button"  >
@@ -90,13 +88,12 @@
                 </div>
 
 
-                <br>
-                <br>
-
-
             </div>
 
+
         </div>
+
+    </div>
 
     </div>
 
@@ -145,28 +142,28 @@
 
 
             $('#table_selection').bootstrapTable({
-                            reorderableColumns: true,
-                            pagination: true,
-                            pageSize: 10,
-                            showColumns: true,
-                            search: true,
-                            showExport: true,
-                            pageList: [10, 25, 50, 100, "All"],
-                            mobileResponsive: true,
-                            checkOnInit: true,
-                            undefinedText: "",
-                            showToggle: 'true',
-                            columns: [{
-                                field: 'distance',
-                                title: 'Distance'
-                            }, {
-                                field: 'gene1',
-                                title: genome1 + ' gene'
-                            }, {
-                                field: 'gene2',
-                                title: genome2 + ' gene'
-                            }]
-    });
+                reorderableColumns: true,
+                pagination: true,
+                pageSize: 10,
+                showColumns: true,
+                search: true,
+                showExport: true,
+                pageList: [10, 25, 50, 100, "All"],
+                mobileResponsive: true,
+                checkOnInit: true,
+                undefinedText: "",
+                showToggle: 'true',
+                columns: [{
+                    field: 'distance',
+                    title: 'Distance'
+                }, {
+                    field: 'gene1',
+                    title: genome1 + ' gene'
+                }, {
+                    field: 'gene2',
+                    title: genome2 + ' gene'
+                }]
+            });
 
             $('#container_table_selection').hide()
 
