@@ -87,8 +87,13 @@ dotplot_theme = function () {
                 .attr("y", 40)
                 .attr("dy", ".35em")
                 .style("text-anchor", "middle")
-                .text("Distance");
+                .text(metric_option.short_name);
 
+        }
+        this.update_color_scales = function(){
+            color_domain = [filter_min_distance, filter_max_distance];
+            color_range = ["#6e7c5a", "#760000"];
+            color_threshold = d3.scaleLinear().domain(color_domain).range(color_range);
         }
         this.update_visibility_dot = function () {
 
@@ -192,28 +197,27 @@ dotplot_theme = function () {
 
             return [a, b];
         }
-
         this.compute_histogram_metric = function(data){
 
 
-            var data_slice_distance = [];
+            var data_slice_metric = [];
 
             data.forEach(function (d) {
-                data_slice_distance.push(parseInt(d[metric_option.accessor]));
+                data_slice_metric.push(parseInt(d[metric_option.accessor]));
             });
 
             // make the histogram data
             var val = [], freq = [], prev;
 
-            data_slice_distance.sort(dotplot.sortNumber);
-            for (var i = 0; i < data_slice_distance.length; i++) {
-                if (data_slice_distance[i] !== prev) {
-                    val.push(data_slice_distance[i]);
+            data_slice_metric.sort(dotplot.sortNumber);
+            for (var i = 0; i < data_slice_metric.length; i++) {
+                if (data_slice_metric[i] !== prev) {
+                    val.push(data_slice_metric[i]);
                     freq.push(1);
                 } else {
                     freq[freq.length - 1]++;
                 }
-                prev = data_slice_distance[i];
+                prev = data_slice_metric[i];
             }
 
             // end make the histogram data
@@ -221,7 +225,7 @@ dotplot_theme = function () {
             var hist_color = [];
 
             for (var i = 0; i < val.length; i++) {
-                hist_color.push({'distance': val[i], 'freq': freq[i]})
+                hist_color.push({'value': val[i], 'freq': freq[i]})
             }
 
             return hist_color
@@ -273,38 +277,38 @@ dotplot_theme = function () {
 
         var metric_option = {long_name: 'Phylogenetic Distance', short_name: 'Distance',  accessor: 'distance'};
 
+        // data accession should be  done with function for the metrix, the x and y value!
+
 
         d3.json(url_json, function (error, data) {
-            
+
             var hist_color = dotplot.compute_histogram_metric(data);
 
             // data boundaries
-            min_distance = d3.min(data, function (d) {
-                return parseFloat(d.distance);
+            var min_distance = d3.min(data, function (d) {
+                return parseFloat(d[metric_option.accessor]);
             });
-            max_distance = d3.max(data, function (d) {
-                return parseFloat(d.distance);
+            var max_distance = d3.max(data, function (d) {
+                return parseFloat(d[metric_option.accessor]);
             });
-            min_position_x = d3.min(data, function (d) {
+            var min_position_x = d3.min(data, function (d) {
                 return d.gene1;
             });
-            max_position_x = d3.max(data, function (d) {
+            var max_position_x = d3.max(data, function (d) {
                 return d.gene1;
             });
-            min_position_y = d3.min(data, function (d) {
+            var min_position_y = d3.min(data, function (d) {
                 return d.gene2;
             });
-            max_position_y = d3.max(data, function (d) {
+            var max_position_y = d3.max(data, function (d) {
                 return d.gene2;
             });
 
+            // set the inital filtering boundaries to extremum values
             filter_max_distance = max_distance;
+            filter_min_distance = min_distance;
 
-            // color scale
-            color_domain = [min_distance, max_distance];
-            color_range = ["#6e7c5a", "#760000"];
-            color_threshold = d3.scaleLinear().domain(color_domain).range(color_range);
-
+            dotplot.update_color_scales();
 
             // scaling of data on axis
             var x0 = [min_position_x, max_position_x],
@@ -327,7 +331,7 @@ dotplot_theme = function () {
                 });
 
             // brush object
-            var brush = d3.brush().on("end", brushended),
+            var brush_plot = d3.brush().on("end", brushended_plot),
                 idleTimeout,
                 idleDelay = 350;
 
@@ -343,10 +347,8 @@ dotplot_theme = function () {
                     return y(d['gene2']);
                 })
                 .attr("r", 1.5)
-                //.attr("visibility", function(d) {
-                //    return parseFloat(d.distance) <= filter_max_distance ? "visible" : "hidden";})
                 .attr("fill", function (d) {
-                    return color_threshold(d.distance)
+                    return color_threshold(d[metric_option.accessor])
                 });
 
             // svg x axis
@@ -384,41 +386,42 @@ dotplot_theme = function () {
 
             svg_dotplot.append("g")
                 .attr("class", "brush")
-                .call(brush);
-
+                .call(brush_plot);
 
             dotplot.add_legend_color();
 
-            // color legend
+            // // // // // // // // 
+            // metric histogram  //
+            // // // // // // // // 
 
-            var height2 = 50;
+            var height_hist = 50;
 
-            var brush2 = d3.brushX()
-                .extent([[0, 0], [width, height2]])
-                .on("brush end", brushed);
+            var brush_hist = d3.brushX()
+                .extent([[0, 0], [width, height_hist]])
+                .on("brush end", brushed_hist);
 
-            var x2 = d3.scaleLinear().range([0, width]),
-                y2 = d3.scaleLinear().range([height2, 0]);
+            var x_hist = d3.scaleLinear().range([0, width]),
+                y_hist = d3.scaleLinear().range([height_hist, 0]);
 
-            var xAxis2 = d3.axisBottom(x2).ticks(10)
+            var xAxis_hist = d3.axisBottom(x_hist).ticks(10)
                 .tickFormat(function (d) {
                     return d3.formatPrefix(".1", 1e1)(d)
                 })
 
-            var area2 = d3.area()
+            var area = d3.area()
                 .curve(d3.curveBasis)
                 .x(function (d) {
-                    return x2(d.distance);
+                    return x_hist(d.value);
                 })
-                .y0(height2)
+                .y0(height_hist)
                 .y1(function (d) {
-                    return y2(d.freq);
+                    return y_hist(d.freq);
                 });
 
-            x2.domain(d3.extent(hist_color, function (d) {
-                return d.distance;
+            x_hist.domain(d3.extent(hist_color, function (d) {
+                return d.value;
             }));
-            y2.domain([0, d3.max(hist_color, function (d) {
+            y_hist.domain([0, d3.max(hist_color, function (d) {
                 return d.freq;
             })]);
 
@@ -429,12 +432,12 @@ dotplot_theme = function () {
             context.append("path")
                 .datum(hist_color)
                 .attr("class", "area")
-                .attr("d", area2);
+                .attr("d", area);
 
             context.append("g")
                 .attr("class", "axis axis--x")
-                .attr("transform", "translate(0," + height2 + ")")
-                .call(xAxis2)
+                .attr("transform", "translate(0," + height_hist + ")")
+                .call(xAxis_hist)
                 .append("text")
                 .attr("transform", "translate(-10," + 0 + ")")
                 .attr("class", "label")
@@ -442,18 +445,18 @@ dotplot_theme = function () {
                 .attr("fill", "#000")
                 .attr("y", -6)
                 .style("text-anchor", "end")
-                .text("Phylogenetic distance");
+                .text(metric_option.long_name);
 
             var gBrush = context.append("g");
             gBrush.attr("class", "brush")
-                .call(brush2);
+                .call(brush_hist);
 
             // style brush resize handle
-// https://github.com/crossfilter/crossfilter/blob/gh-pages/index.html#L466
+            // https://github.com/crossfilter/crossfilter/blob/gh-pages/index.html#L466
             var brushResizePath = function (d) {
                 var e = +(d.type == "e"),
                     x = e ? 1 : -1,
-                    y = height2 / 2;
+                    y = height_hist / 2;
                 return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
             }
 
@@ -465,36 +468,34 @@ dotplot_theme = function () {
                 .attr("cursor", "ew-resize")
                 .attr("d", brushResizePath);
 
-            gBrush.call(brush2.move, x2.range());
+            gBrush.call(brush_hist.move, x_hist.range());
 
             context.selectAll('g.tick')
                 .select('text') //grab the tick line
-                //.attr('fill', function(d){ return color_threshold(d);})
                 .attr('font-weight', "bold");
 
-            function brushed() {
+            function brushed_hist() {
 
                 if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
                 var s = d3.event.selection;
 
                 if (s == null) {
-                    s = x2.range();
+                    s = x_hist.range();
                     handle.attr("display", "none");
                 } else {
 
-                    filter_max_distance = x2.invert(s[1]);
-                    filter_min_distance = x2.invert(s[0]);
+                    filter_max_distance = x_hist.invert(s[1]);
+                    filter_min_distance = x_hist.invert(s[0]);
 
                     dotplot.update_visibility_dot();
-                    console.log(x2.invert(s[0]), x2.invert(s[1]));
                     handle.attr("display", null).attr("transform", function (d, i) {
-                        return "translate(" + s[i] + "," + -height2 / 4 + ")";
+                        return "translate(" + s[i] + "," + - height_hist / 4 + ")";
                     });
                 }
 
             }
 
-            function brushended() {
+            function brushended_plot() {
                 var s = d3.event.selection;
                 if (!s) {
                     if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
@@ -504,8 +505,8 @@ dotplot_theme = function () {
                         return 1 === 2
                     });
                     selected_pairs = []
-                    $('#container_table_selection').hide()
-                    zoom_brush();
+                    $('#container_table_selection').hide();
+                    zoom_brush_plot();
                 } else {
                     if (brush_action === 'select') {
 
@@ -513,8 +514,7 @@ dotplot_theme = function () {
                         console.log(s[0][1], s[1][1]);
                         selected_pairs = [];
                         select_brush(s);
-                        svg_dotplot.select(".brush").call(brush.move, null);
-                        console.log(selected_pairs)
+                        svg_dotplot.select(".brush").call(brush_plot.move, null);
 
                         $('#table_selection').bootstrapTable('removeAll');
 
@@ -527,8 +527,8 @@ dotplot_theme = function () {
                     else {
                         x.domain([s[0][0], s[1][0]].map(x.invert, x));
                         y.domain([s[1][1], s[0][1]].map(y.invert, y));
-                        svg_dotplot.select(".brush").call(brush.move, null);
-                        zoom_brush();
+                        svg_dotplot.select(".brush").call(brush_plot.move, null);
+                        zoom_brush_plot();
                     }
                 }
             }
@@ -537,7 +537,7 @@ dotplot_theme = function () {
                 idleTimeout = null;
             }
 
-            function zoom_brush() {
+            function zoom_brush_plot() {
                 var t = svg_dotplot.transition().duration(750);
                 svg_dotplot.select(".axis--x").transition(t).call(xAxis);
                 svg_dotplot.select(".axis--y").transition(t).call(yAxis);
@@ -575,7 +575,6 @@ dotplot_theme = function () {
                             }
                         }
                         return 1 === 2;
-                        //return sx[0] <= d && d <= sx[1];
                     });
                 }
 
