@@ -748,7 +748,7 @@ class ArchiveView(CurrentView):
     def download_root(self, context):
         return "/" + context['release'].get('id', '')
 
-# synteny viewer
+# synteny viewer DotPlot
 
 def landDP(request):
     return render(request, 'land_syntenyDP.html')
@@ -757,14 +757,13 @@ def DPviewer(request, g1, g2, chr1, chr2):
     return render(request, 'DPviewer.html', {'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2 })
 
 class ChromosomeJson(JsonModelMixin, View):
+
     '''
     This json aim to get from a genome the list of chromosome associated to him with their genes
     '''
     json_fields = {'sciname': None}
 
     def get(self, request, genome, *args, **kwargs):
-
-
 
         genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(genome))
 
@@ -778,8 +777,7 @@ class ChromosomeJson(JsonModelMixin, View):
             entry = models.ProteinEntry(utils.db,utils.db.entry_by_entry_nr(entry_number))
             chr_with_genes.setdefault(entry.chromosome, []).append(entry_number)
 
-
-        # if all gnes from a same chromosome are make a continuous range we can just store for each chr the range index !
+        # if all genes from a same chromosome make a continuous range of entry number we could just store for each chr the range index !
         data['list_chr'] = chr_with_genes
 
         return JsonResponse(data, safe=False)

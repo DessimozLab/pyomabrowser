@@ -11,7 +11,7 @@
 
         <div class="row">
 
-            <div class="col-sm-12 col-md-10 col-md-offset-1 cvb ">
+            <div class="col-sm-12 col-md-10 col-md-offset-1" style="background-color: #f8f9fa">
 
                 <div id="dotplot_container" class="tile"  >
 
@@ -23,11 +23,9 @@
 
                     </div>
 
-
                     <div>
 
                         <div>
-
 
                             <div class="btn-group pull-right" style="margin: 6px;">
                                 <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -41,36 +39,30 @@
                                 </ul>
                             </div>
 
-
                             <div class="btn-group pull-right" style="margin: 6px;">
-                                <button type="button" class="btn btn-default btn-sm" aria-label="Left Align"  data-toggle="collapse" data-target="#plot_legend">
+                                <button type="button" class="btn btn-default btn-sm" aria-label="Left Align"  data-toggle="collapse" data-target="#hist_metric">
                                     <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
                                 </button>
                             </div>
-
 
                         </div>
 
                     </div>
 
+                    <hr>
 
+                    <div  id="plot_div"  style="width: 100%">
 
-                <hr>
-
-                <div  id="plot_div"  style="width: 100%">
-
-                </div>
+                    </div>
 
                     <br>
 
+                    <div class="collapse" id="hist_metric" style="width: 100%">
 
 
-                <div class="collapse" id="plot_legend" style="width: 100%">
-
+                    </div>
 
                 </div>
-
-                     </div>
 
                 <div id="container_table_selection" class="tile">
 
@@ -78,9 +70,7 @@
 
                 </div>
 
-
             </div>
-
 
         </div>
 
@@ -100,7 +90,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/extensions/mobile/bootstrap-table-mobile.min.js"></script>
     <script src="{% static "js/tableExport.min.js" %}"></script>
 
-
+    <!-- dot plot import -->
     <link href="{% static "css/synteny_dotplot.css" %}" rel="stylesheet" type="text/css"/>
     <script src="{% static "js/synteny_dotplot.js" %}" type="text/javascript"></script>
 
@@ -124,12 +114,11 @@
 
             var DotPlot = dotplot_theme();
 
-
             var correct_url = "/oma/syntenyDP/" + genome1 +"/" + genome2 +"/" + chromosome1.replace(/\s/g,"%20") + "/" + chromosome2.replace(/\s/g,"%20") + "/json/" ;
 
             console.log(correct_url);
 
-            var dotplot = new DotPlot(container,url_json, genome1,genome2,chromosome1,chromosome2);
+            var dotplot = new DotPlot(container, url_json, genome1,genome2,chromosome1,chromosome2);
 
 
             $('#table_selection').bootstrapTable({

@@ -2,8 +2,7 @@ svg {
   shape-rendering: precision;
 }
 
-.axis path,
-.axis line {
+.axis path, .axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
@@ -20,49 +19,14 @@ svg {
     font-weight: lighter;
 }
 
-
 circle {
     opacity: 0.3;
     transition: fill-opacity 250ms linear;
 }
 
 circle.active {
-    /*fill: rgb(65,193,194);
-    stroke: red;
-    stroke-width: 1px;*/
     fill: #FFB6C1;
     opacity: 0.6;
-}
-
-
-#dotplot_container{
-}
-
-
-.header_div{
-    position: absolute;
-    font-size: 1em;
-}
-
-span[id^="head_button_"]{
-    cursor: pointer ;
-}
-
-
-.header_div{
-    position: absolute;
-    font-size: 1em;
-}
-
-span[id^="head_button_"]{
-    cursor: pointer ;
-}
-
-
-
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-   opacity: 1;
 }
 
 .area {
@@ -74,7 +38,6 @@ input[type=number]::-webkit-outer-spin-button {
 	opacity: 0.2;
 }
 
-
 .tile{
     background-color: #fff;
     padding: 16px;
@@ -82,15 +45,3 @@ input[type=number]::-webkit-outer-spin-button {
     border-radius: 4px;
     margin:8px;
 }
-
-.cvb{background-color: #f8f9fa}
-
-
-
-
-
-
-
-
-
-
