@@ -254,3 +254,22 @@ a.uncurated{
 .autocomplete-group { padding: 3px 20px; text-align: right; border-bottom: 1px solid #ddd}
 .autocomplete-group strong {display: block;; color: #777; }
 
+.left_hog_tab{
+	position: relative;
+	padding-right: 8px !important;
+	margin-right: 0 !important;
+	border-radius: 4px 0 0 0 !important;
+	cursor: pointer !important;
+	border-right: none !important;
+}
+
+.right_hog_tab{
+	padding-left:8px !important;
+	padding-right: 8px !important;
+	margin-left: 0 !important;
+	border-radius: 0 4px 0 0 !important;
+	cursor: pointer !important;
+	border: 1px #ddd solid !important ;
+
+
+}
