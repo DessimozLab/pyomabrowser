@@ -12,8 +12,8 @@ dotplot_theme = function () {
             return x >= min && x <= max;
         }
         this.sortNumber = function(a, b) {
-                return a - b;
-            }
+            return a - b;
+        }
 
         // UI
         this.create_containers = function (container) {
@@ -333,6 +333,15 @@ dotplot_theme = function () {
                 idleTimeout,
                 idleDelay = 350;
 
+            // Define the div for the tooltip
+            var tooltip_div = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            svg_dotplot.append("g")
+                .attr("class", "brush")
+                .call(brush_plot);
+
             // dots
             svg_dotplot.selectAll("circle")
                 .attr("class", "circle")
@@ -347,6 +356,23 @@ dotplot_theme = function () {
                 .attr("r", 1.5)
                 .attr("fill", function (d) {
                     return color_threshold(d[metric_option.accessor])
+                })
+                .on("mouseover", function(d) {
+                    tooltip_div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip_div.html(
+                        genome1 + ": "+d.gene1 + "<br/>" +
+                        genome2 + ": "+d.gene2 + "<br/>" +
+                        metric_option.short_name + ": "+ d[metric_option.accessor]
+                    )
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 50) + "px");
+                })
+                .on("mouseout", function(d) {
+                    tooltip_div.transition()
+                        .duration(500)
+                        .style("opacity", 0);
                 });
 
             // svg x axis
@@ -382,9 +408,7 @@ dotplot_theme = function () {
             svg_dotplot.selectAll(".domain")
                 .style("display", "none");
 
-            svg_dotplot.append("g")
-                .attr("class", "brush")
-                .call(brush_plot);
+
 
             dotplot.add_legend_color();
 

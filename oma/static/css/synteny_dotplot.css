@@ -45,3 +45,15 @@ circle.active {
     border-radius: 4px;
     margin:8px;
 }
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: auto;
+    height: auto;
+    padding: 2px;
+    font: 12px sans-serif;
+    border: 1px;
+    border-radius: 2px;
+    pointer-events: none;
+}
