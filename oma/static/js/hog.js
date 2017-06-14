@@ -728,10 +728,18 @@ hog_theme = function () {
             });
         }
         this.set_remove_column_setting = function () {
+
             genedata_picker = d3.select("#min_column_setting_id").on('change', function () {
 
                 column_coverage_threshold = this.value;
                 console.log(column_coverage_threshold);
+
+                if (column_coverage_threshold > 0) {
+                    $('.alert_remove').show();}
+                else {
+                    $('.alert_remove').hide();}
+
+
 
                 current_hog_state.reset_on(tree, per_species3, current_opened_taxa_name, column_coverage_threshold);
                 annot.update();
