@@ -92,16 +92,14 @@ dotplot_theme = function () {
         }
         this.update_color_scales = function(){
             color_domain = [filter_min_distance, filter_max_distance];
-            color_range = ["#6e7c5a", "#760000"];
+            color_range = ['#90ee90', '#000080'];
+            //color_range = ['#ffbdbd', '#e1f7d5'];
             color_threshold = d3.scaleLinear().domain(color_domain).range(color_range);
         }
         this.update_visibility_dot = function () {
 
-            // color scale
-            color_domain = [filter_min_distance, filter_max_distance];
-            color_range = ["#ffffe0", "#000080"];
-            color_threshold = d3.scaleLinear().domain(color_domain).range(['#90ee90', '#000080']);
-            //color_threshold = d3.scaleLinear().domain(color_domain).range(color_range);
+
+            dotplot.update_color_scales();
 
             svg_dotplot.selectAll("circle")
                 .attr('fill', function (d) {
