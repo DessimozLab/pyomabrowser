@@ -353,7 +353,7 @@ dotplot_theme = function () {
                 .attr("cy", function (d) {
                     return y(d['gene2']);
                 })
-                .attr("r", 1.5)
+                .attr("r", 2.5)
                 .attr("fill", function (d) {
                     return color_threshold(d[metric_option.accessor])
                 })

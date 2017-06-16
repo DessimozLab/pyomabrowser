@@ -111,6 +111,11 @@ div[id^="tnt_annot_container_"] {
     font-size: 1em;
 }
 
+.header_menu{
+    position: absolute;
+    font-size: 1em;
+}
+
 span[id^="head_button_"]{
     cursor: pointer ;
 }
@@ -136,11 +141,18 @@ span[id^="head_button_"]{
     border:none;
 }
 
-
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
    opacity: 1;
 }
+
+.menu_hog_li {
+    padding: 4px 8px !important;
+    text-align: center;
+}
+
+
+
 
 
 

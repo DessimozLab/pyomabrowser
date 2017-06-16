@@ -20,13 +20,13 @@ svg {
 }
 
 circle {
-    opacity: 0.3;
+    opacity: 0.5;
     transition: fill-opacity 250ms linear;
 }
 
 circle.active {
     fill: #FFB6C1;
-    opacity: 0.6;
+    opacity: 0.8;
 }
 
 .area {

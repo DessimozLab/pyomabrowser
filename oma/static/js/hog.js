@@ -286,7 +286,7 @@ hog_theme = function () {
         }
 
         // Gene panel related methods
-        this.add_hog_header_icons = function () {
+        this.add_hog_header_icons_with_menu = function () {
 
             // select the svg parent container where to add the icons with it position
             var svg = document.getElementsByClassName("tnt_svg")[0];
@@ -319,28 +319,96 @@ hog_theme = function () {
                 // add div to container
                 container.appendChild(header_div);
 
+
+                //  contextual menu
+
+                var parent_menu = document.getElementsByClassName("tnt_groupDiv")[0]
+                var parent_menuPos = parent_menu.getBoundingClientRect(), relative_menuPos = {};
+
+                // compute the relative position of menu
+                relative_menuPos.top = childrenPos.top - parent_menuPos.top,
+                    relative_menuPos.right = childrenPos.right - parent_menuPos.right,
+                    relative_menuPos.bottom = childrenPos.bottom - parent_menuPos.bottom,
+                    relative_menuPos.left = childrenPos.left - parent_menuPos.left;
+
+                var hog = current_hog_state.hogs[i];
+                var first_gene = gene_data[hog.genes[0]].omaid;
+                var fasta_url = 'http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/fasta';
+                var table_url = 'http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/';
+
+                // create div for menu
+                var toolt_div = document.createElement("div");
+                toolt_div.setAttribute("class", "header_menu");
+                toolt_div.setAttribute("id", "header_menu_" + i);
+                toolt_div.style.top = relative_menuPos.top  + "px";
+                toolt_div.style.left = relative_menuPos.left  + "px";
+
+                // add menu table
+                toolt_div.innerHTML += '<ul class="list-group ">';
+
+                toolt_div.innerHTML += '<li class="list-group-item menu_hog_li "> <b>'+ hog.name + '</b> '
+                + '<span id="closer_menu_' + i + '" class="glyphicon glyphicon-remove pull-right" aria-hidden="true" style="margin-top: 2px;cursor:pointer;"></span> </li>';
+
+                toolt_div.innerHTML += '<li class="list-group-item menu_hog_li" > Number genes: '+ hog.genes.length + '</li>';
+
+                toolt_div.innerHTML += '<li class="list-group-item menu_hog_li"> Coverage: '+ parseInt(hog.coverage) + '%</li>';
+
+                toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + fasta_url+ '"> Sequences (Fasta) <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
+
+                toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + table_url+ '"> HOGs tables <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
+
+                toolt_div.innerHTML += '</ul>';
+
+                // add div to container
+                parent_menu.appendChild(toolt_div);
+
+                $(toolt_div).hide();
+
+                // bind hide on menu button close
+                document.getElementById('closer_menu_' + i).addEventListener("click", function () {
+                    $(toolt_div).hide();
+                });
+
                 // bind click event to icon/button
                 document.getElementById('head_button_' + i).addEventListener("click", function () {
                     //if (this.getAttribute("class") === "glyphicon glyphicon-triangle-top")
                     //{this.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
                     //else {this.setAttribute("class","glyphicon glyphicon-triangle-top")}
 
-                    var hog = current_hog_state.hogs[parseInt(this.id.split('_')[2])];
-                    var first_gene = gene_data[hog.genes[0]].omaid;
 
-                    alert('http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/');
+                    var id_click = parseInt(this.id.split('_')[2]);
 
-                    console.log("Name:", hog.name);
+                    // little workaround to make the toggle of hide/show on click
 
-                    console.log("Coverage:", hog.coverage);
+                    $('div[id^="header_menu_"]').filter(
+                        function(){
+                            var id_number = this.id.match(/\d+$/)[0];
+                            return (id_number && id_number != id_click );
+                        }).hide();
 
-                    console.log("Genes:", hog.genes);
+                    $("#header_menu_" + id_click).toggle();
 
-                    console.log("Sequences (fasta):", 'http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/fasta');
 
-                    console.log("URL view as tables: ", 'http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/');
+                    /* INFORMATION THAT YOU CAN GET FOR THIS HOG - here in case of later uses
 
-                    console.log(hog_head);
+                     var hog = current_hog_state.hogs[id_click];
+                     var first_gene = gene_data[hog.genes[0]].omaid;
+
+                     //alert('http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/');
+
+                     console.log("Name:", hog.name);
+
+                     console.log("Coverage:", hog.coverage);
+
+                     console.log("Genes:", hog.genes);
+
+                     console.log("Sequences (fasta):", 'http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/fasta');
+
+                     console.log("URL view as tables: ", 'http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/');
+
+                     console.log(hog_head);
+
+                     */
 
                     //var event = document.createEvent("SVGEvents");
                     //event.initEvent("click",true,true);
@@ -357,12 +425,13 @@ hog_theme = function () {
             d3.selectAll('.anchor_hog_header').remove();
             d3.selectAll('.header_div').remove();
             d3.selectAll('.tt').remove();
+            d3.selectAll('.header_menu').remove();
 
             // add the invisible anchor
             hogvis.add_hog_header_anchor();
 
             // add the setting icons
-            hogvis.add_hog_header_icons();
+            hogvis.add_hog_header_icons_with_menu();
 
         };
         this.add_hog_header_anchor = function () {
