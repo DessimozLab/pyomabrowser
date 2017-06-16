@@ -366,7 +366,9 @@ hog_theme = function () {
 
                 // bind hide on menu button close
                 document.getElementById('closer_menu_' + i).addEventListener("click", function () {
-                    $(toolt_div).hide();
+
+                    var id_click = parseInt(this.id.split('_')[2]);
+                    $("#header_menu_" + id_click).hide();
                 });
 
                 // bind click event to icon/button
