@@ -784,13 +784,20 @@ hog_theme = function () {
         this.set_up_gene_tooltip_setting = function () {
             genedata_picker = d3.select("#tooltip_dropdown").selectAll(".tooltip_dropdown-li").on('click', function () {
 
+
                 if (this.id === 'gt-click') {
                     gene_tooltip_mode = 'click';
                     d3.selectAll('rect.hog_gene').style("cursor", "pointer");
+                    d3.select('#setting_ok_click').classed('hidden', false)
+                    d3.select('#setting_ok_mouseover').classed('hidden', true)
+
+
                 }
                 else {
                     gene_tooltip_mode = 'mouseover';
                     d3.selectAll('rect.hog_gene').style("cursor", "none");
+                    d3.select('#setting_ok_mouseover').classed('hidden', false)
+                    d3.select('#setting_ok_click').classed('hidden', true)
                 }
 
                 annot.update();
@@ -833,10 +840,14 @@ hog_theme = function () {
                     return d.name
                 })
                 .html(function (d) {
-                    return "<a>" + d.name + "</a>"
+                    return "<a>" + d.name + '<span id="ok_icon_colorscale_' + d.name.replace(/\s/g, "") + '" class="glyphicon glyphicon-ok pull-right ok_icon_colorscale hidden" aria-hidden="true"></span> </a>'
                 })
                 .attr("class", "genedata-li")
                 .on("click", function (d) {
+
+                    d3.selectAll('.ok_icon_colorscale').classed('hidden', true)
+                    d3.select('#ok_icon_colorscale_' + d.name.replace(/\s/g, "") ).classed('hidden', false)
+
                     hogvis.change_genedata_vis(d);
                     if (col_scale) {
                         colorbar = Colorbar()
@@ -852,6 +863,9 @@ hog_theme = function () {
                         barText.innerHTML = null;
                     }
                 });
+
+
+            d3.select('#ok_icon_colorscale_QueryGene').classed('hidden', false)
 
         }
         this.add_hogvis_container = function () {
