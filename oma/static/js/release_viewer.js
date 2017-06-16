@@ -106,7 +106,7 @@ function update_genome_viewer(bid) {
         setting_div.appendChild(setting_div_col);
         cviewer.appendChild(setting_div);
 
-0
+
         // create plot div
         var plot = document.createElement('div');
         plot.id = "hist_div";

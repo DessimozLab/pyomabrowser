@@ -39,9 +39,13 @@ dotplot_theme = function () {
             genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
                 if (this.id === 'ba-select') {
                     brush_action = 'select';
+                    d3.select('#brush_ok_zoom').classed('hidden', true)
+                    d3.select('#brush_ok_select').classed('hidden', false)
                 }
                 else {
                     brush_action = 'zoom';
+                    d3.select('#brush_ok_zoom').classed('hidden', false)
+                    d3.select('#brush_ok_select').classed('hidden', true)
                 }
 
             });
@@ -243,6 +247,7 @@ dotplot_theme = function () {
 
         // variable for the dotplot brush action
         var brush_action = 'select';
+        d3.select('#brush_ok_select').classed('hidden', false)
         dotplot.set_up_brush_action_setting();
 
         // selection variable
