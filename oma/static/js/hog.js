@@ -807,22 +807,34 @@ hog_theme = function () {
         }
         this.set_remove_column_setting = function () {
 
+            var update_after_reset = function(){
+
+
+
+                current_hog_state.reset_on(tree, per_species3, current_opened_taxa_name, column_coverage_threshold);
+
+                annot.update();
+                hogvis.add_hog_header();
+                vis.update();
+
+            }
+
+            var reset_filter = d3.select("#reset_column_filter").on('click', function (){
+
+                $('#min_column_setting_id').val(0).change();
+
+                column_coverage_threshold = 0;
+
+                update_after_reset()
+
+            })
+
             genedata_picker = d3.select("#min_column_setting_id").on('change', function () {
 
                 column_coverage_threshold = this.value;
                 console.log(column_coverage_threshold);
 
-                if (column_coverage_threshold > 0) {
-                    $('.alert_remove').show();}
-                else {
-                    $('.alert_remove').hide();}
-
-
-
-                current_hog_state.reset_on(tree, per_species3, current_opened_taxa_name, column_coverage_threshold);
-                annot.update();
-                hogvis.add_hog_header();
-                vis.update();
+                update_after_reset()
 
             });
         }
@@ -1140,9 +1152,8 @@ hog_theme = function () {
             that.number_species = 0;
             that.removed_hogs = [];
 
+
             var leaves = tree.root().get_all_leaves();
-
-
 
             for (var i = 0; i < leaves.length; i++) {
 
@@ -1179,6 +1190,11 @@ hog_theme = function () {
                     that.hogs.splice(that.removed_hogs[i], 1);
                 }
             }
+
+             if (that.removed_hogs.length > 0) {
+                    $('.alert_remove').show();}
+                else {
+                    $('.alert_remove').hide();}
 
         };
 
