@@ -870,7 +870,10 @@ hog_theme = function () {
                             .barlength(~~(tot_width * 0.8));
                         bar.call(colorbar);
                         barText.innerHTML = d.name;
+                       d3.select('#scale-settings-div').classed('hidden',false)
+
                     } else {
+                        d3.select('#scale-settings-div').classed('hidden', true)
                         bar.selectAll("svg").remove();
                         barText.innerHTML = null;
                     }
