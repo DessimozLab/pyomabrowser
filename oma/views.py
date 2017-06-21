@@ -771,11 +771,14 @@ class ChromosomeJson(JsonModelMixin, View):
 
         data = {'entryoff':genome_obj.EntryOff,'number_entry':genome_obj.totEntries, 'range_start': int(genomerange[0]),'range_end': int(genomerange[1])}
 
-        chr_with_genes = {}
+        chr_with_genes = collections.defaultdict(list)
+
+        #for e in utils.db.get_hdf5_handle().get_node('/Protein/Entires').where(
+        #        '(EntryNr >= {:d}) & (EntryNr <= {:d})'.format(*genomerange)):
 
         for entry_number in range(genomerange[0], genomerange[1]):
-            entry = models.ProteinEntry(utils.db,utils.db.entry_by_entry_nr(entry_number))
-            chr_with_genes.setdefault(entry.chromosome, []).append(entry_number)
+            entry = utils.db.entry_by_entry_nr(entry_number)
+            chr_with_genes[entry["Chromosome"].decode()].append(entry_number)
 
         # if all genes from a same chromosome make a continuous range of entry number we could just store for each chr the range index !
         data['list_chr'] = chr_with_genes
@@ -791,6 +794,8 @@ class syntenyChromosomePairJson(JsonModelMixin, View):
 
         response1 = ChromosomeJson.as_view()(request, g1)
         data_chr1 = json.loads(response1.content)
+        response2 = ChromosomeJson.as_view()(request, g2)
+        data_chr2 = json.loads(response2.content)
 
         genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g1))
         genomerange2 = utils.db.id_mapper['OMA'].genome_range(g2)
@@ -805,23 +810,27 @@ class syntenyChromosomePairJson(JsonModelMixin, View):
 
         #get all entry id
 
-        for entry_number1 in data_chr1["list_chr"][chr1]:
+        e1, e2 = data_chr1["list_chr"][chr1][0], data_chr1["list_chr"][chr1][-1]
+        t1, t2 = data_chr2["list_chr"][chr2][0], data_chr2["list_chr"][chr2][-1]
 
-            cpt += 1
+        print(e1, e2, t1, t2)
+        for e in vps_tab.where(
+                    '(EntryNr1 >= {:d}) & (EntryNr1 <= {:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'
+                            .format(e1, e2, t1,t2)):
 
-            if cpt % 100 == 0:
-                print(cpt, len(data_chr1["list_chr"][chr1]))
 
-            for e in vps_tab.read_where(
-                    '(EntryNr1=={:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'.format(entry_number1, genomerange2[0],
-                                                                                        genomerange2[1])):
-                g1 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[0]))
-                g2 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[1]))
+                    print(e)
 
-                if g2.chromosome == chr2:
+                    ge1 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[0]))
+                    ge2 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[1]))
 
-                    data.append({"gene1": int(g1.locus_start), "gene2": int(g2.locus_start), "distance": str(e[4])})
+                    if ge1.chromosome == chr1 and ge2.chromosome == chr2:
+                        data.append({"gene1": int(ge1.locus_start), "gene2": int(ge2.locus_start), "gene1id": str(ge1.chromosome), "gene2id": str(ge2.chromosome), "distance": str(e[4])})
+                        cpt += 1
+                        if cpt % 100 == 0:
+                            print(cpt)
 
+        print(cpt)
         ## this is too slow and need to be rewrite/optimize
 
         return JsonResponse(data, safe=False)

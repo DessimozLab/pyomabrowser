@@ -369,6 +369,8 @@ dotplot_theme = function () {
                     tooltip_div.html(
                         genome1 + ": "+d.gene1 + "<br/>" +
                         genome2 + ": "+d.gene2 + "<br/>" +
+                            "g1 name  : "+d.gene1id + "<br/>" +
+                            "g2 name  : "+d.gene2id + "<br/>" +
                         metric_option.short_name + ": "+ d[metric_option.accessor]
                     )
                         .style("left", (d3.event.pageX) + "px")
