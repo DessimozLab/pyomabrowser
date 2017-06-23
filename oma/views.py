@@ -262,8 +262,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
                         if st_name in stripe:
                             stripe = stripe
                         else:
-                            stripe = stripe + (
-                                colors[int(i)] + ' ' + str(x) + 'px,' + colors[int(i)] + ' ' + str(x + 15) + 'px,')
+                            stripe += colors[int(i)] + ' ' + str(x) + 'px,' + colors[int(i)] + ' ' + str(x + 15) + 'px,'
                         x += 15
 
                     stripes[st_name] = stripe[:-1]
@@ -525,7 +524,6 @@ class HOGsVis(EntryCentricMixin, TemplateView):
         try:
             fam_nr = entry.hog_family_nr
             context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
-                            'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
                             'show_internal_labels': self.show_internal_labels,
                             })
         except db.Singleton:
@@ -604,8 +602,8 @@ def release(request):
 
 class GenomesJson(JsonModelMixin, View):
     json_fields = {'uniprot_species_code': None,
-                   'sciname': None, 'ncbi_taxon_id':"ncbi","totEntries":"prots", "kingdom":"kingdom"
-                   }
+                   'sciname': None, 'ncbi_taxon_id': "ncbi",
+                   "nr_entries": "prots", "kingdom": None}
 
     def get(self, request, *args, **kwargs):
         genome_key = utils.id_mapper['OMA']._genome_keys
@@ -730,15 +728,12 @@ class ChromosomeJson(JsonModelMixin, View):
     def get(self, request, genome, *args, **kwargs):
 
         genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(genome))
-
         genomerange = utils.db.id_mapper['OMA'].genome_range(genome)
 
-        data = {'entryoff':genome_obj.EntryOff,'number_entry':genome_obj.totEntries, 'range_start': int(genomerange[0]),'range_end': int(genomerange[1])}
+        data = {'entryoff': genome_obj.entry_nr_offset, 'number_entry': genome_obj.nr_entries,
+                'range_start': int(genomerange[0]), 'range_end': int(genomerange[1])}
 
         chr_with_genes = collections.defaultdict(list)
-
-        #for e in utils.db.get_hdf5_handle().get_node('/Protein/Entires').where(
-        #        '(EntryNr >= {:d}) & (EntryNr <= {:d})'.format(*genomerange)):
 
         for entry_number in range(genomerange[0], genomerange[1]):
             entry = utils.db.entry_by_entry_nr(entry_number)
@@ -769,10 +764,6 @@ class syntenyChromosomePairJson(JsonModelMixin, View):
         data = []
 
         cpt = 0
-
-        ## this is too slow and need to be rewrite/optimize
-
-        #get all entry id
 
         e1, e2 = data_chr1["list_chr"][chr1][0], data_chr1["list_chr"][chr1][-1]
         t1, t2 = data_chr2["list_chr"][chr2][0], data_chr2["list_chr"][chr2][-1]
