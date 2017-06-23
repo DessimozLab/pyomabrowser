@@ -18,7 +18,7 @@ if settings.DEPLOYMENT != "PRODUCTION":
         url(r'^$', RedirectView.as_view(url="/oma/home/", permanent=True))
     ]
 
-    dwnld_folder = os.path.normpath(os.path.join(os.getenv('DARWIN_BROWSERDATA_PATH', default="./"), '..', 'downloads'))
+    dwnld_folder = os.path.normpath(os.path.join(os.getenv('DARWIN_BROWSERDATA_PATH', default="./oma"), '..', 'downloads'))
     urlpatterns += static(r'All/', document_root=dwnld_folder)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
