@@ -19,6 +19,7 @@
     <script src="http://tntvis.github.io/tnt/build/tnt.min.js" charset="utf-8"></script>
     <script src="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.min.js" charset="UTF-8"></script>
     <script src="{% static "js/hog.js" %}" charset="UTF-8"></script>
+    <script src="{% static "js/orthoxml-hogvis.min.js" %}" charset="UTF-8"></script>
 
 {% endblock %}
 
@@ -45,7 +46,7 @@
                                 <span id="icon_settings" class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
                             </button>
 
-                            <h3 >Hierarchical group {{ fam.id }} open at level of <span id="current_level_text" style="font-weight:bold;"></span> </h3>
+                            <h3 >Hierarchical group {{ fam.id }} <span id="open_txt">open at level of </span><span id="current_level_text" style="font-weight:bold;"></span></h3>
 
                         </div>
 
@@ -92,7 +93,6 @@
                             </div>
                         </div>
 
-
                         <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display: none">Lowly supported hogs have been removed as per settings. <a  class="alert-link" id='reset_column_filter' > Click here to reset.</a></div>
 
                     </div>
@@ -111,41 +111,50 @@
 
                 </div>
 
+                <div id="loader"><img src="{% static "image/loading.gif"%}"></div>
+
             </div>
 
             <script>
 
                 (function () {
-
+                    $('#open_txt').hide();
                     var Hogvis = hog_theme();
 
-                    var tree = {{ species_tree|safe }};
                     var query = {'id': {{ entry.entry_nr }} };
-                    var per_species = {{ per_species|safe }};
-                    var tooltip_data = {{ xrefs|safe }};
+                    var tooltip_data = undefined
                     var hogvis_container_id = "hogvis";
-
-                    var genedatavis = [{
-                        name: 'Query Gene',
-                        scale: 'on_off'
-                    },
+                    var genedatavis = [
                         {
+                            name: 'Query Gene',
+                            scale: 'on_off'
+                        }, {
                             name: "Gene Length",
                             scale: "linear",
                             field: "sequence_length",
                             func: "color1d"
-                        }
-                    ];
+                        }];
 
                     var default_options = {
                         label_height: 20,
-                        genedatavis: genedatavis};
+                        genedatavis: genedatavis,
+                        show_internal_labels: {{ show_internal_labels|yesno:"true,false" }},
+                        post_init: function(){
+                            $("#open_txt").show();
+                            $("#loader").hide();
+                        }
+                    };
 
-                    var hogvis = new Hogvis(hogvis_container_id, query, per_species,
-                        tree, tooltip_data, default_options , document.getElementById("genedata-vis")  );
-
+                    $.when(
+                        $.ajax({url: "/oma/hogs/{{ entry.entry_nr }}/orthoxml",
+                                dataType: "text"}),
+                        $.ajax({url: "/All/speciestree.nwk"})
+                    ).then(function(orthoxml, speciestree) {
+                        var hog_data = hogvis.parse_orthoxml(speciestree[0], orthoxml[0]);
+                        var hogvis_obj = new Hogvis(hogvis_container_id, query, hog_data.per_species,
+                            hog_data.tree, tooltip_data, default_options, document.getElementById("genedata-vis"));
+                    });
                 }) ();
-
             </script>
 
         {% endif %}

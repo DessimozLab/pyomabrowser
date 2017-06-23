@@ -5,7 +5,7 @@ var hog_theme;
 hog_theme = function () {
 
     // Hogvis is the main object to be created, it take a div and others parameters to set up an hogvis instance
-    function Hogvis(hogvis_div_id, query_gene, per_species3, tree_obj, gene_data, options_param, genedata_picker_div) {
+    function Hogvis(hogvis_div_id, query_gene, per_species3, tree_obj, gene_data_obj, options_param, genedata_picker_div) {
 
         ////////////////////
         ///// METHODS //////
@@ -23,6 +23,7 @@ hog_theme = function () {
 
             // div id of the open at "xxx" text div
             options.current_level_div = options.hasOwnProperty('current_level_div') ? options.current_level_div : "current_level_text";
+            options.post_init = options.hasOwnProperty('post_init') ? options.post_init : function(){};
 
             var genedatavis_default = [
                 {
@@ -51,18 +52,17 @@ hog_theme = function () {
 
 
             // this was hardcoded with oma data (just thinking for possible embedded)
-            var get_fam_gene_data_default = function (d) {
+            var get_fam_gene_data_default = function (target) {
+                //console.log('loading gene data...');
                 $.getJSON("/oma/hogdata/" + query_gene.id + "/json", function (data) {
-                    fam_genedata = {};
                     data.forEach(function (gene) {
-                        fam_genedata[gene.id] = gene;
+                        target[gene.id] = gene;
                     });
-                    hogvis.change_genedata_vis(d);
+                    //console.log('gene data loaded');
                 });
-            }
+            };
 
             options.get_fam_gene_data = options.hasOwnProperty('get_fam_gene_data') ? options.get_fam_gene_data : get_fam_gene_data_default;
-
         }
 
         // Tree related methods
@@ -98,7 +98,8 @@ hog_theme = function () {
                     }
                 });
 
-        }
+        };
+
         this.mouse_over_node = function (node) {
             // Update annotation board
             if (is_node_frozen) {
@@ -134,12 +135,14 @@ hog_theme = function () {
                     .position("left")
                     .call(this, obj);
             }
-        }
+        };
+
         this.mouse_out_node = function (node) {
             if (!options.show_internal_labels) {
                 node_hover_tooltip.close();
             }
-        }
+        };
+
         this.init_tree = function () {
 
             var t = tnt.tree()
@@ -206,7 +209,7 @@ hog_theme = function () {
         };
         this.highlight_condition = function () {
             return false;
-        }
+        };
         this.set_node_tooltip = function () {
 
             treeNode_tooltip = tnt.tooltip()
@@ -283,7 +286,7 @@ hog_theme = function () {
 
 
                 })
-        }
+        };
 
         // Gene panel related methods
         this.add_hog_header_icons_with_menu = function () {
@@ -332,9 +335,6 @@ hog_theme = function () {
                     relative_menuPos.left = childrenPos.left - parent_menuPos.left;
 
                 var hog = current_hog_state.hogs[i];
-                var first_gene = gene_data[hog.genes[0]].omaid;
-                var fasta_url = 'http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/fasta';
-                var table_url = 'http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/';
 
                 // create div for menu
                 var toolt_div = document.createElement("div");
@@ -353,10 +353,13 @@ hog_theme = function () {
 
                 toolt_div.innerHTML += '<li class="list-group-item menu_hog_li"> Coverage: '+ parseInt(hog.coverage) + '%</li>';
 
-                toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + fasta_url+ '"> Sequences (Fasta) <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
-
-                toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + table_url+ '"> HOGs tables <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
-
+                var first_gene = fam_genedata[hog.genes[0]];
+                if (first_gene !== undefined) {
+                    var fasta_url = '/oma/hogs/' + first_gene.protid + '/' + current_opened_taxa_name.replace(" ", "%20") + '/fasta';
+                    var table_url = '/oma/hogs/' + first_gene.protid + '/' + current_opened_taxa_name.replace(" ", "%20") + '/';
+                    toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + fasta_url + '"> Sequences (Fasta) <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
+                    toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + table_url + '"> HOGs tables <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
+                }
                 toolt_div.innerHTML += '</ul>';
 
                 // add div to container
@@ -394,7 +397,7 @@ hog_theme = function () {
                     /* INFORMATION THAT YOU CAN GET FOR THIS HOG - here in case of later uses
 
                      var hog = current_hog_state.hogs[id_click];
-                     var first_gene = gene_data[hog.genes[0]].omaid;
+                     var first_gene = fam_genedata[hog.genes[0]].omaid;
 
                      //alert('http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/');
 
@@ -474,23 +477,24 @@ hog_theme = function () {
             hog_header_tooltip = function (cv, hog) {
 
                 var hog__ = current_hog_state.hogs[hog];
-                var first_gene = gene_data[hog__.genes[0]].omaid;
-
                 var obj = {};
                 obj.header = hog__.name;
                 obj.rows = [];
 
                 obj.rows.push({label: "Coverage", value: ~~(hog__.coverage) + "%"});
+                var first_gene = fam_genedata[hog__.genes[0]];
+                if (first_gene !== undefined) {
 
-                obj.rows.push({
-                    label: "Sequences (fasta):",
-                    value: "<a href='http://localhost:8000/oma/hogs/" + first_gene + "/" + current_opened_taxa_name.replace(" ", "%20") + "/fasta'> Download <span class='glyphicon glyphicon-download-alt' aria-hidden='true'></span> </a>"
-                });
+                    obj.rows.push({
+                        label: "Sequences (fasta):",
+                        value: "<a href='/oma/hogs/" + first_gene.protid + "/" + current_opened_taxa_name.replace(" ", "%20") + "/fasta'> Download <span class='glyphicon glyphicon-download-alt' aria-hidden='true'></span> </a>"
+                    });
 
-                obj.rows.push({
-                    label: "View as tables:",
-                    value: "<a href='" + 'http://localhost:8000/oma/hogs/' + first_gene + '/' + current_opened_taxa_name.replace(" ", "%20") + '/' + "'> Open <span class='glyphicon glyphicon-new-window' aria-hidden='true'></span> </a>"
-                });
+                    obj.rows.push({
+                        label: "View as tables:",
+                        value: "<a href='" + '/oma/hogs/' + first_gene.protid + '/' + current_opened_taxa_name.replace(" ", "%20") + '/' + "'> Open <span class='glyphicon glyphicon-new-window' aria-hidden='true'></span> </a>"
+                    });
+                }
 
                 tnt.tooltip.table()
                     .container(document.getElementsByClassName("tnt_groupDiv")[0])
@@ -503,13 +507,16 @@ hog_theme = function () {
         this.set_gene_tooltip = function () {
             gene_tooltip = function (gene) {
                 var obj = {};
-                obj.header = gene_data[gene.id].omaid;
+                var gene_data = fam_genedata[gene.id];
+                if (gene_data === undefined){return};
+
+                obj.header = fam_genedata[gene.id].protid;
                 obj.rows = [];
-                obj.rows.push({label: "Name", value: gene_data[gene.id].id});
+                obj.rows.push({label: "Name", value: fam_genedata[gene.id].xrefid});
                 obj.rows.push({
                     label: "Information",
                     obj: gene,
-                    value: "<a href='" + options.oma_info_url_template + gene.id + "'>" + gene_data[gene.id].omaid + "</a>"
+                    value: "<a href='" + options.oma_info_url_template + gene.id + "'>" + fam_genedata[gene.id].protid + "</a>"
                 });
 
                 tnt.tooltip.table()
@@ -760,8 +767,8 @@ hog_theme = function () {
             gene_color_function = function (gene) {
                 return (query_gene && gene.id === query_gene.id ? "#27ae60" : "#95a5a6");
             };
-            if (fam_genedata === undefined) {
-                options.get_fam_gene_data(d);
+            if (Object.keys(fam_genedata).length === 0) {
+                //options.get_fam_gene_data(d);
                 return;
             }
 
@@ -1040,7 +1047,7 @@ hog_theme = function () {
         var div_current_level = document.getElementById(options.current_level_div);
 
 // coloring related variable
-        var fam_genedata;
+        var fam_genedata = {};
         var gene_color_function;
         var gene_color_data;
         var gene_color_scale = d3.scale.category10();
@@ -1060,7 +1067,10 @@ hog_theme = function () {
         var collapsed_node, leaf_node, int_node, highlight_node, node_display;
         var node_hover_tooltip, treeNode_tooltip;
 
-// set up the node appearance
+        // set/load the gene_data of the family
+        options.get_fam_gene_data(fam_genedata);
+
+        // set up the node appearance
         hogvis.set_node_display();
 
 // set up tooltips on nodes
@@ -1068,6 +1078,8 @@ hog_theme = function () {
 
 // set up the tree object
         var tree = hogvis.init_tree();
+        // call callback after initialization is done
+        options.post_init();
 
 // Once the tree is build update the current level opened with the root by default
         current_opened_taxa_name = tree.root().node_name();
