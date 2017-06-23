@@ -55,8 +55,9 @@ This entry is not part of any hierarchical orthologous group.
         <a href="http://mbe.oxfordjournals.org/content/30/4/772">Mafft</a> Multiple Sequence Alignment
         <div class="pull-right">
             Download:
-            <a href="{% url 'hogs_orthoxml' entry.omaid %}"><span class="glyphicon glyphicon-download">OrthoXML</span></a>
-            <a href="{% url 'hogs_fasta' entry.omaid level %}"><span class="glyphicon glyphicon-download">Fasta</span></a>
+            <a href="{% url 'hogs_orthoxml' entry.omaid %}"><span class="glyphicon glyphicon-download"></span> OrthoXML</a> /
+            <a href="{% url 'hogs_fasta' entry.omaid level %}"><span class="glyphicon glyphicon-download"></span> Sequences (fasta)</a> /
+            <a href="{% url 'hogs_msa' entry.omaid level %}"><span class="glyphicon glyphicon-download"></span> MSA (fasta)</a>
         </div>
     </div>
     <div class="panel-body">

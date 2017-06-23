@@ -53,9 +53,18 @@ urlpatterns = [
     url(r'^fellowship/$', views.fellowship, name="fellowship"),
     url(r'^thanks/', TemplateView.as_view(template_name='thanks.html'), name='thanks'),
 
+    url(r'^release/$', views.release, name='release'),
+    url(r'^release/json/$', views.GenomesJson.as_view(), name="genomes_json"),
+
     url(r'^current/$', views.CurrentView.as_view(), name='current'),
     url(r'^archives/$', views.ArchiveView.as_view(), name='archives'),
     url(r'^archives/(?P<release>[A-Za-z0-9.]+)/$', views.ArchiveView.as_view(), name='archives'),
+
+    url(r'^syntenyDP/$', views.landDP, name='land_syntenyDP'),
+    url(r'^syntenyDP/(?P<g1>[^/]+)/(?P<g2>[^/]+)/(?P<chr1>[^/]+)/(?P<chr2>[^/]+)/$', views.DPviewer, name='syntenyDP'),
+    url(r'^syntenyDP/(?P<genome>[A-Za-z0-9 -]+)/json/$', views.ChromosomeJson.as_view(), name="chromosome_json"),
+    url(r'^syntenyDP/(?P<g1>[^/]+)/(?P<g2>[^/]+)/(?P<chr1>[^/]+)/(?P<chr2>[^/]+)/json/$',
+        views.syntenyChromosomePairJson.as_view(), name='synteny_chr_pair_json')
 ]
 
 if settings.DEBUG:

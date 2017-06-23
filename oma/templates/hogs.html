@@ -49,8 +49,9 @@ This entry is not part of any hierarchical orthologous group.
     <div class="panel-heading clearfix">
         <div class="pull-right">
             Download:
-            <a href="{% url 'hogs_orthoxml' entry.omaid %}"><span class="glyphicon glyphicon-download">OrthoXML</span></a>
-            <a href="{% url 'hogs_fasta' entry.omaid level %}"><span class="glyphicon glyphicon-download">Fasta</span></a>
+            <a href="{% url 'hogs_orthoxml' entry.omaid %}"><span class="glyphicon glyphicon-download"></span> OrthoXML</a> /
+            <a href="{% url 'hogs_fasta' entry.omaid level %}"><span class="glyphicon glyphicon-download"></span> Sequences (fasta)</a> /
+            <a href="{% url 'hogs_msa' entry.omaid level %}"><span class="glyphicon glyphicon-download"></span> MSA (fasta)</a>
         </div>
     </div>
     <div class="panel-body">
@@ -74,6 +75,8 @@ This entry is not part of any hierarchical orthologous group.
         </table>
     </div>
 </div>
+
+
 <!-- D3 and D3 Tooltip -->
 <script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
 <script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>

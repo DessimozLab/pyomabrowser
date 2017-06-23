@@ -1,0 +1,269 @@
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}OMA orthology database: Syntheny between chromosome{% endblock %}
+{% block meta_description %}Select chromosome pair for synteny dot plot.{% endblock %}
+{% block css_hook %}
+    <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
+{% endblock css_hook %}
+{% block js_hook %}
+    <script src="{% static "js/typeahead.bundle.js" %}"></script>
+{% endblock js_hook %}
+
+{% block content %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class=" col-sm-12 col-md-10 col-md-offset-1">
+                <div class="jumbotron">
+                    <div class="container">
+
+                        <div class="page-header ">
+
+                            <h1 class="text-center">Synteny Dot Plot <br>
+                                <small> Visualise syntheny between chromosomes</small>
+                            </h1>
+
+                            <div class="well well-sm entete"></div>
+
+                        </div>
+
+                        <div class="col-sm-12 col-md-10 col-md-offset-1">
+
+                            <p>Use the following form to select two chromosomes and click on "launch dot plot" to visualise synteny.
+                            </p>
+                            <br>
+
+                            <form class="form-horizontal" id="form_DP">
+
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
+
+                                        <h4>Select the first chromosome:</h4>
+
+                                        <br>
+
+                                        <div class="form-group">
+
+                                            <label for="g1_name" class="col-sm-2 control-label">Genome 1:</label>
+
+                                            <div class="col-sm-8">
+                                                <input  id="g1_name" type="text"  class="form-control typeahead" name="g1_name">
+                                            </div>
+
+                                        </div>
+
+                                        <div class="form-group hidden" id="fg_first_chr">
+
+                                            <label for="selectchr1" class="col-md-offset-2 col-sm-2 control-label">Chromosome:</label>
+                                            <div class="  col-sm-6">
+
+                                                <select id="selectchr1"></select>
+
+                                            </div>
+                                            <br>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
+
+                                        <h4>Select the second chromosome:</h4>
+
+                                        <br>
+
+                                        <div class="form-group">
+
+                                            <label for="g2_name" class="col-sm-2 control-label">Genome 2:</label>
+
+                                            <div class="col-sm-8">
+                                                <input  id="g2_name" type="text"  class="form-control typeahead" name="g2_name">
+                                            </div>
+
+                                        </div>
+
+                                        <div class="form-group hidden" id="fg_second_chr">
+
+                                            <label for="selectchr2" class="col-md-offset-2 col-sm-2 control-label">Chromosome:</label>
+                                            <div class="col-sm-6">
+                                                <select id="selectchr2"></select>
+                                            </div>
+                                            <br>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class=" pull-right ">
+                                        <button class="btn btn-success greenb" type="submit" id="launch_PP">Launch DotPlot</button>
+                                    </div>
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        var genomeNames = [];
+        var genomeIDs = {};
+
+        $.getJSON( "/All/flatgenomes.json", function( jsonData ) {
+            $.each( jsonData, function ( id, genome ) {
+                var tmp = genome.name+ ' (' + genome.id + ')';
+                genomeNames.push ( tmp );
+                genomeIDs[tmp] = genome.id;
+            });
+        });
+
+        function remove_chromosome_select(id_select){
+
+            var select = document.getElementById(id_select);
+
+            var i;
+            for(i = select.options.length - 1 ; i >= 0 ; i--)
+            {
+                select.remove(i);
+            }
+
+            var el = document.createElement("option");
+            el.textContent = 'Choose a chromosome';
+            el.value = 'Choose a chromosome';
+            select.appendChild(el);
+        }
+
+        function set_chromosome_select(genome_name, id_select){
+
+            var select = document.getElementById(id_select);
+
+            $.getJSON( "/oma/syntenyDP/" + genome_name + "/json/", function( jsonData ) {
+
+                $.each( jsonData.list_chr, function (index ) {
+                    var el = document.createElement("option");
+                    el.textContent = index;
+                    el.value = index;
+                    select.appendChild(el);
+                });
+            });
+
+        }
+
+        var substringMatcher = function(strs) {
+            return function findMatches(q, cb) {
+                var matches, substrRegex;
+
+                // an array that will be populated with substring matches
+                matches = [];
+                if (q.length < 2) {
+                    return(cb(matches));
+                }
+
+                // regex used to determine if a string contains the substring `q`
+                substrRegex = new RegExp(q, 'i');
+
+                // iterate through the pool of strings and for any string that
+                // contains the substring `q`, add it to the `matches` array
+                $.each(strs, function(i, str) {
+                    if (substrRegex.test(str)) {
+                        // the typeahead jQuery plugin expects suggestions to a
+                        // JavaScript object, refer to typeahead docs for more info
+                        matches.push({ value: str });
+                    }
+                });
+
+                cb(matches);
+            };
+        };
+
+        $('#g1_name').typeahead({
+                hint: true
+            },
+            {
+                name: 'genomes',
+                minLength: 4,
+                source: substringMatcher(genomeNames)
+            })
+            .blur(function(){
+                if(genomeIDs[$(this).val()] == null) {
+                    $(this).val('');
+                    document.getElementById('fg_first_chr').setAttribute('class','form-group hidden' );
+
+                }
+                else {
+                    document.getElementById('fg_first_chr').setAttribute('class','form-group' );
+                    remove_chromosome_select('selectchr1');
+                    set_chromosome_select(genomeIDs[$(this).val()],'selectchr1');
+                }
+            });
+        $('#g2_name')
+            .typeahead({
+                    hint: true
+                },
+                {
+                    name: 'genomes',
+                    minLength: 4,
+                    source: substringMatcher(genomeNames)
+                })
+            .on('blur', function() {
+                if(genomeIDs[$(this).val()] == null) {
+                    $(this).val('');
+                    document.getElementById('fg_second_chr').setAttribute('class','form-group hidden' )
+                }
+                else {
+                    document.getElementById('fg_second_chr').setAttribute('class','form-group' )
+                    remove_chromosome_select('selectchr2');
+                    set_chromosome_select(genomeIDs[$(this).val()],'selectchr2');
+                }
+            });
+
+        $(window).keydown(function(event){
+            if(event.keyCode == 13) {
+                event.preventDefault();
+                return false;
+            }
+        });
+
+
+        $("form").on('submit', function (e) {
+
+            //stop form submission
+            e.preventDefault();
+
+            var genome_1 = genomeIDs[$('#g1_name').val()];
+            var genome_2 = genomeIDs[$('#g2_name').val()];
+
+            if (genome_1 === genome_2) {
+                alert('You select twice the same genome.')
+                return false;
+            }
+
+            var select1 = document.getElementById( "selectchr1");
+            var chr1 = select1.options[select1.selectedIndex].value;
+            if (chr1 === 'Choose a chromosome'){alert('Invalid chromosome 1.'); return false}
+
+            var select2 = document.getElementById( "selectchr2");
+            var chr2 = select2.options[select2.selectedIndex].value;
+            if (chr2 === 'Choose a chromosome'){alert('Invalid chromosome 2.'); return false}
+
+            var newUrl="/oma/syntenyDP/"+ genome_1 + "/" + genome_2+ "/" + chr1.replace(/\s/g,"%20") + "/" + chr2.replace(/\s/g,"%20") ;
+
+            window.location = newUrl;
+            return false;
+
+
+        });
+
+    </script>
+
+
+{% endblock content %}

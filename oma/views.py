@@ -375,7 +375,7 @@ class FamBase(ContextMixin, EntryCentricMixin):
 class FamGeneDataJson(FamBase, JsonModelMixin, View):
     json_fields = {'entry_nr': 'id', 'omaid': 'protid', 'sequence_length': None,
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'ec_content': None}
+                   'canonicalid': 'xrefid'} # ,'ec_content': None
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -593,6 +593,27 @@ def fellowship(request):
     return render(request, 'fellowship.html', {'form': form})
 
 
+def release(request):
+    release_name = utils.db.get_release_name()
+    genome_key = utils.id_mapper['OMA']._genome_keys
+    number_genome = len(genome_key)
+    number_proteins = utils.id_resolver.max_entry_nr
+
+    return render(request, 'release.html', {'rel_name': release_name, 'nb_genome': number_genome, 'nb_prot': number_proteins })
+
+
+class GenomesJson(JsonModelMixin, View):
+    json_fields = {'uniprot_species_code': None,
+                   'sciname': None, 'ncbi_taxon_id':"ncbi","totEntries":"prots", "kingdom":"kingdom"
+                   }
+
+    def get(self, request, *args, **kwargs):
+        genome_key = utils.id_mapper['OMA']._genome_keys
+        lg = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_table[utils.db.id_mapper['OMA']._entry_off_keys[e - 1]]) for e in genome_key]
+        data = list(self.to_json_dict(lg))
+        return JsonResponse(data, safe=False)
+
+
 def export_marker_genes(request):
     if request.method == 'GET' and 'genomes' in request.GET:
         genomes = request.GET.getlist('genomes')
@@ -690,3 +711,91 @@ class ArchiveView(CurrentView):
 
     def download_root(self, context):
         return "/" + context['release'].get('id', '')
+
+# synteny viewer DotPlot
+
+def landDP(request):
+    return render(request, 'land_syntenyDP.html')
+
+def DPviewer(request, g1, g2, chr1, chr2):
+    return render(request, 'DPviewer.html', {'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2 })
+
+class ChromosomeJson(JsonModelMixin, View):
+
+    '''
+    This json aim to get from a genome the list of chromosome associated to him with their genes
+    '''
+    json_fields = {'sciname': None}
+
+    def get(self, request, genome, *args, **kwargs):
+
+        genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(genome))
+
+        genomerange = utils.db.id_mapper['OMA'].genome_range(genome)
+
+        data = {'entryoff':genome_obj.EntryOff,'number_entry':genome_obj.totEntries, 'range_start': int(genomerange[0]),'range_end': int(genomerange[1])}
+
+        chr_with_genes = collections.defaultdict(list)
+
+        #for e in utils.db.get_hdf5_handle().get_node('/Protein/Entires').where(
+        #        '(EntryNr >= {:d}) & (EntryNr <= {:d})'.format(*genomerange)):
+
+        for entry_number in range(genomerange[0], genomerange[1]):
+            entry = utils.db.entry_by_entry_nr(entry_number)
+            chr_with_genes[entry["Chromosome"].decode()].append(entry_number)
+
+        # if all genes from a same chromosome make a continuous range of entry number we could just store for each chr the range index !
+        data['list_chr'] = chr_with_genes
+
+        return JsonResponse(data, safe=False)
+
+class syntenyChromosomePairJson(JsonModelMixin, View):
+    '''
+    This json aim to contain the list of orthologous pairs between two genomes 
+    '''
+
+    def get(self, request, g1, g2, chr1, chr2, *args, **kwargs):
+
+        response1 = ChromosomeJson.as_view()(request, g1)
+        data_chr1 = json.loads(response1.content)
+        response2 = ChromosomeJson.as_view()(request, g2)
+        data_chr2 = json.loads(response2.content)
+
+        genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g1))
+        genomerange2 = utils.db.id_mapper['OMA'].genome_range(g2)
+
+        vps_tab = utils.db.db.get_node('/PairwiseRelation/{}/{}'.format(genome1.uniprot_species_code, 'VPairs'))
+
+        data = []
+
+        cpt = 0
+
+        ## this is too slow and need to be rewrite/optimize
+
+        #get all entry id
+
+        e1, e2 = data_chr1["list_chr"][chr1][0], data_chr1["list_chr"][chr1][-1]
+        t1, t2 = data_chr2["list_chr"][chr2][0], data_chr2["list_chr"][chr2][-1]
+
+        print(e1, e2, t1, t2)
+        for e in vps_tab.where(
+                    '(EntryNr1 >= {:d}) & (EntryNr1 <= {:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'
+                            .format(e1, e2, t1,t2)):
+
+
+                    print(e)
+
+                    ge1 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[0]))
+                    ge2 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[1]))
+
+                    if ge1.chromosome == chr1 and ge2.chromosome == chr2:
+                        data.append({"gene1": int(ge1.locus_start), "gene2": int(ge2.locus_start), "gene1id": str(ge1.chromosome), "gene2id": str(ge2.chromosome), "distance": str(e[4])})
+                        cpt += 1
+                        if cpt % 100 == 0:
+                            print(cpt)
+
+        print(cpt)
+        ## this is too slow and need to be rewrite/optimize
+
+        return JsonResponse(data, safe=False)
+

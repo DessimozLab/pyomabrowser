@@ -1,0 +1,107 @@
+/* architecture */
+.master-tile{
+    background-color: #f8f9fa;
+    padding: 30px
+}
+.section-title{
+    color:#bbb;
+    font-weight: bold;
+    font-size: 1.2em !important;
+
+}
+.section-tile{
+    margin-bottom:24px;
+}
+.section-box{
+    background-color: #fff;
+    padding: 16px;
+    box-shadow: 2px 2px 1px #eee;
+    border-radius: 4px;
+    margin:8px;
+}
+
+/* viewer selection */
+.icon_selector{
+    margin-right:8px;
+    color:#555;
+}
+.text_selector{
+    margin-right:8px;
+    color:#555;
+}
+.number-span{margin-left:1em;}
+
+/* histogram  */
+.axis path, .axis line {
+    fill: none;
+    stroke: #fff;
+}
+.axis text {
+    font-size: 8px;
+    font-weight: lighter;
+    cursor:default
+  }
+.x.axis text{
+    font-weight: lighter;
+    font-family: monospace;
+}
+.y.axis text{
+    font-weight: bolder;
+}
+.x.axis text:hover  {
+    font-size: 8px;
+    font-weight: bold;
+}
+.bar:hover {
+    opacity: 0.8;
+    /* fill: rgba(65,193,194,0.4); */
+  }
+svg text.label {
+  fill:black;
+  font-weight: 400;
+  text-anchor: middle;
+}
+
+.tooltip {
+    background-color: rgba(255,255,255,0.9);
+  position: absolute;
+  width: auto;
+  height: auto;
+  pointer-events: none;
+    padding:4px;
+    margin:4px;
+}
+.settings_hist{
+    position: absolute;
+    top: 40px;
+    right: 0px;
+    width: auto;
+    height: auto;
+    background-color: white;
+}
+#settings_hist_collapse.collapse.in{
+    margin:4px;
+    padding:8px;
+    border:1px #ccc solid !important;
+    border-radius: 2px;
+
+}
+.hide_setting {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: auto;
+    height: auto;
+    background-color: white;
+    padding:8px;
+}
+.grid .tick {
+stroke: lightgrey;
+opacity: 0.7;
+}
+.grid path {
+  stroke-width: 0;
+}
+
+
+

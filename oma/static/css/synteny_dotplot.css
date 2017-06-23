@@ -1,0 +1,59 @@
+svg {
+  shape-rendering: precision;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+    display:inherit !important;
+}
+
+.axis text {
+  font: 10px sans-serif;
+    font-weight: bold;
+}
+
+.tick text {
+  font: 10px sans-serif;
+    font-weight: lighter;
+}
+
+circle {
+    opacity: 0.5;
+    transition: fill-opacity 250ms linear;
+}
+
+circle.active {
+    fill: #FFB6C1;
+    opacity: 0.8;
+}
+
+.area {
+  fill: rgba(65,193,194,0.4);
+
+}
+
+.brush {
+	opacity: 0.2;
+}
+
+.tile{
+    background-color: #fff;
+    padding: 16px;
+    box-shadow: 2px 2px 1px #eee;
+    border-radius: 4px;
+    margin:8px;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: auto;
+    height: auto;
+    padding: 2px;
+    font: 12px sans-serif;
+    border: 1px;
+    border-radius: 2px;
+    pointer-events: none;
+}
