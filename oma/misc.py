@@ -60,3 +60,30 @@ def encode_domains_to_dict(entry, domains, domain_mapper):
             logger.info('ignoring domain annotation: {}'.format(e))
 
     return {'length': seqlen, 'seq_id': seqid, 'regions': regions}
+
+
+def retrieve_from_uniprot_rest(endpoint):
+    import json, requests
+    url = "https://www.ebi.ac.uk/proteins/api/taxonomy/" + endpoint
+    r = requests.get(url, headers={"Accept": "application/json"})
+    if not r.ok:
+        r.raise_for_status()
+    return json.loads(r.text)
+
+
+def genome_info_from_uniprot_rest(taxid):
+    """retrieve some basic information about a genome given a
+    taxonomy id. returns a dict with 'scientific_name',
+    'mnemonic_code' and the lineage """
+    os_data = retrieve_from_uniprot_rest("id/{:d}".format(taxid))
+    lineage = retrieve_from_uniprot_rest("lineage/{:d}".format(taxid))
+    header = {'scientific_name': os_data['scientificName'],
+              'mnemonic_code': os_data['mnemonic']}
+    if 'commonName' in os_data:
+        header['common_name'] = os_data['commonName']
+    lin = [z['scientificName'] for z in lineage['taxonomies']]
+    while lin[-1] not in ('Eukaryota', 'Bacteria', 'Archaea'):
+        lin.pop()
+    lin.reverse()
+    header['lineage'] = lin
+    return header

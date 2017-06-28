@@ -1,9 +1,8 @@
-from __future__ import print_function
-
-import hashlib
+from __future__ import print_function, division
 from builtins import map
 from builtins import str
 from builtins import range
+import hashlib
 import collections
 import json
 from django.shortcuts import render
@@ -14,10 +13,11 @@ from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
 from django.views.generic.base import ContextMixin
 from django.core.urlresolvers import reverse
-from django.utils import timezone
+from django.core.mail import EmailMessage
+from django.template import Context
+from django.template.loader import render_to_string, get_template
 
 from collections import OrderedDict
-import numpy
 import tweepy
 import logging
 import itertools
@@ -25,7 +25,6 @@ import os
 import re
 import time
 import glob
-from io import BytesIO
 
 from . import tasks
 from . import utils
@@ -589,6 +588,30 @@ def fellowship(request):
     else:
         form = forms.FellowshipApplicationForm()
     return render(request, 'fellowship.html', {'form': form})
+
+
+def genome_suggestion(request):
+    if request.method == 'POST':
+        form = forms.GenomeSuggestionFrom(request.POST)
+        if form.is_valid():
+            logger.info("recieved valid genome suggestion form")
+            data = form.cleaned_data
+            subj = "Genome Suggestion {taxon_id} ({name})".format(**data)
+            try:
+                data.update(misc.genome_info_from_uniprot_rest(data['taxon_id']))
+            except Exception:
+                logger.warning('Cannot find information about {} at uniprot'.format(data['taxon_id']))
+            message = get_template('email_genome_suggestion.html').render(form.cleaned_data)
+            for recepient in (data['suggested_from_email'], "contact@omabrowser.org",
+                              "alpae+gqwmhtm2ep3kmeqmmrlp@boards.trello.com"):
+                sender = data['suggested_from_email'] if recepient != data['suggested_from_email'] else "contact@omabrowser.org"
+                msg = EmailMessage(subj, message, to=[recepient], from_email=sender)
+                msg.content_subtype = "html"
+                msg.send()
+            return HttpResponseRedirect(reverse('genome_suggestion_thanks'))
+    else:
+        form = forms.GenomeSuggestionFrom()
+    return render(request, "genome_suggestion.html", {'form': form})
 
 
 def release(request):

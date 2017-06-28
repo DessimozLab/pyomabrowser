@@ -1,6 +1,5 @@
 {% extends  "core.html" %}
 {% load staticfiles %}
-{% load bootstrap3 %}
 
 {% block title %}OMA orthology database: FAQ{% endblock %}
 {% block meta_description %}Our answers to questions we often get asked.{% endblock %}
@@ -45,7 +44,7 @@
 							</div>
 							<div id="collapseFive" class="panel-collapse collapse">
 								<div class="panel-body">
-									We strive to include as many complete genomes as possible, provided they are released publicly and meet reasonable quality standards. We are open for suggestions and are willing to adapt our priority queue based on user requests. Drop us an email or mention this on Twitter including our handle <a href="http://twitter.com/OMABrowser/">@OMABrowser</a>.<br/>
+                                    We strive to include as many complete genomes as possible, provided they are released publicly and meet reasonable quality standards. We are open for suggestions and are willing to adapt our priority queue based on user requests. The best way is to fill a request for a <a href="{% url "genome_suggestion" %}">new or updated genome</a>. For more informal information or batch suggestions drop us an <a href="mailto:contact@omabrowser.org">email</a>.<br/>
 If you want to analyze your "own" genomes, you can use the <a href="http://omabrowser.org/standalone/">OMA standalone pipeline</a> to do so and even make use of already analyzed genomes using the export function. OMA standalone is licenced under the Mozilla Public License Version 2.0. In a nutshell, OMA standalone is open source and free for commercial and non-commercial use.
 								</div>
 							</div>
