@@ -37,9 +37,9 @@ hog_theme = function () {
                     func: "color1d"
                 },
                 {
-                    name: "EC Content",
+                    name: "GC Content",
                     scale: "linear",
-                    field: "ec_content",
+                    field: "gc_content",
                     func: "color1d"
                 }
             ];
