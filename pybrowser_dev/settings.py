@@ -174,6 +174,12 @@ HDF5DB = {
     'PATH': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'OmaServer.h5')
 }
 
+EMAIL_HOST = "whippee.com"
+EMAIL_PORT = 8025
+EMAIL_HOST_USER = "labfaq@dessimoz.org"
+EMAIL_HOST_PASSWORD = "yZ4J4nsiVwim"
+EMAIL_USE_TLS = True
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 

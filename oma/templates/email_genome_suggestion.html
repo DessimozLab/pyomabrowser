@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Suggested Genome {{ taxon_id }} ({{ name }}</title>
+</head>
+<body>
+<h1>Suggested Genome {{ taxon_id }} ({{ name }}) for the OMA Browser</h1>
+<p>We recieved the following suggestion for a <b>{{ new_or_update }}</b> genome by {{ suggested_from_name }}:</p>
+<h3>Genome Key Data</h3>
+<ul>
+    <li>Taxonomy Id: {{ taxon_id }}</li>
+    <li>Name: {{ name }}</li>
+    <li>Lineage: {{ lineage }}</li>
+    <li>UniProt mnemonic code: {{ mnemonic_code }}</li>
+    <li>Source: {{ source }}</li>
+    <li>Informations: {{ info }}</li>
+    <li>Available Formats: {{ format }}</li>
+    <li>Contact: {{ suggested_from_name }} <{{ suggested_from_email }}></li>
+</ul>
+
+<h3>Reason for inclusion according to {{ suggested_from_name }}</h3>
+<p>{{ reason }}</p>
+
+<h3>Quality of Genome</h3>
+<p>{{ quality }}</p>
+</body>
+</html>
