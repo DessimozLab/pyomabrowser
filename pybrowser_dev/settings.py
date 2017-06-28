@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'captcha',
     #'debug_toolbar_line_profiler',
     'rest_framework',
     'oma',
@@ -179,6 +180,10 @@ EMAIL_PORT = 8025
 EMAIL_HOST_USER = "labfaq@dessimoz.org"
 EMAIL_HOST_PASSWORD = "yZ4J4nsiVwim"
 EMAIL_USE_TLS = True
+
+RECAPTCHA_PUBLIC_KEY = "6Lc9PScUAAAAAIi2tZFDxzpBKtNoe3X0GxpgRi_t"
+RECAPTCHA_PRIVATE_KEY = "6Lc9PScUAAAAAJzqJ5z5sfJuJJkqxY5EHCB-fmcd"
+NOCAPTCHA = True  # using No Captcha reCaptcha
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/

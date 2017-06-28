@@ -51,9 +51,9 @@ urlpatterns = [
     url(r'^genomePW/$', TemplateView.as_view(template_name='genomePW.html'), name='genomePW'),
     url(r'^landOMA/$', TemplateView.as_view(template_name='landOMA.html'), name='landOMA'),
     url(r'^fellowship/$', views.fellowship, name="fellowship"),
-    url(r'^thanks/', TemplateView.as_view(template_name='thanks.html'), name='thanks'),
+    url(r'^fellowship/thanks/', TemplateView.as_view(template_name='fellowship_thanks.html'), name='fellowship_thanks'),
     url(r'^suggestion/genome/$', views.genome_suggestion, name="genome_suggestion"),
-    url(r'^suggestion/genome/thanks$', TemplateView.as_view(template_name="thanks.html"), name="genome_suggestion_thanks"),
+    url(r'^suggestion/genome/thanks$', TemplateView.as_view(template_name="genome_suggestion_thanks.html"), name="genome_suggestion_thanks"),
 
     url(r'^release/$', views.release, name='release'),
     url(r'^release/json/$', views.GenomesJson.as_view(), name="genomes_json"),

@@ -1,4 +1,5 @@
 from django import forms
+from captcha.fields import ReCaptchaField
 
 
 class FellowshipApplicationForm(forms.Form):
@@ -12,18 +13,20 @@ class FellowshipApplicationForm(forms.Form):
 
 class GenomeSuggestionFrom(forms.Form):
     taxon_id = forms.IntegerField(label="NCBI Taxonomy Identifier", required=True)
-    name = forms.CharField(label="Genome Name")
+    name = forms.CharField(label="Species Name", required=False)
     new_or_update = forms.ChoiceField(label="Update or New Genome?",
                                       choices=[('new', "New Genome"), ('update', "Update of existing Genome")])
-    info = forms.URLField(label="Genome Information page")
+    info = forms.URLField(label="Genome Information page", required=False)
     source = forms.URLField(label="Genome Source URL", required=True)
     formats = forms.MultipleChoiceField(label="Available Formats",
                                         choices=[('EMBL', 'EMBL'), ('GenBank', 'Genbank'),
                                                  ('fasta', 'Fasta & GFF'), ('other', "Other Format")])
     quality = forms.CharField(widget=forms.Textarea(attrs={'rows': "3", }),
-                              label="Genome Quality Measures")
+                              label="Genome Quality Measures", required=False)
     reason = forms.CharField(widget=forms.Textarea(attrs={'rows': "5", }),
                              label="Reason / Interest for Inclusion")
 
     suggested_from_name = forms.CharField(label="Your Name", required=True)
     suggested_from_email = forms.EmailField(label="Your Email", required=True)
+    captcha = ReCaptchaField()
+
