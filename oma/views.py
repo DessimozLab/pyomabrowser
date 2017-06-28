@@ -374,7 +374,7 @@ class FamBase(ContextMixin, EntryCentricMixin):
 class FamGeneDataJson(FamBase, JsonModelMixin, View):
     json_fields = {'entry_nr': 'id', 'omaid': 'protid', 'sequence_length': None,
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid'} # ,'ec_content': None
+                   'canonicalid': 'xrefid', 'gc_content': None}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
