@@ -752,9 +752,9 @@ class syntenyChromosomePairJson(JsonModelMixin, View):
     def get(self, request, g1, g2, chr1, chr2, *args, **kwargs):
 
         response1 = ChromosomeJson.as_view()(request, g1)
-        data_chr1 = json.loads(response1.content)
+        data_chr1 = json.loads(response1.content.decode())
         response2 = ChromosomeJson.as_view()(request, g2)
-        data_chr2 = json.loads(response2.content)
+        data_chr2 = json.loads(response2.content.decode())
 
         genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g1))
         genomerange2 = utils.db.id_mapper['OMA'].genome_range(g2)
