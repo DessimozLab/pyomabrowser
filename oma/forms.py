@@ -12,6 +12,7 @@ class FellowshipApplicationForm(forms.Form):
 
 
 class GenomeSuggestionFrom(forms.Form):
+    required_css_class = 'required'
     taxon_id = forms.IntegerField(label="NCBI Taxonomy Identifier", required=True)
     name = forms.CharField(label="Species Name", required=False)
     new_or_update = forms.ChoiceField(label="Update or New Genome?",
@@ -21,9 +22,14 @@ class GenomeSuggestionFrom(forms.Form):
     formats = forms.MultipleChoiceField(label="Available Formats",
                                         choices=[('EMBL', 'EMBL'), ('GenBank', 'Genbank'),
                                                  ('fasta', 'Fasta & GFF'), ('other', "Other Format")])
-    quality = forms.CharField(widget=forms.Textarea(attrs={'rows': "3", }),
+    quality = forms.CharField(widget=forms.Textarea(
+                                attrs={"rows": "3",
+                                       "placeholder": "Any known quality measure, e.g. N50 length, BUSCO score, ..."}),
                               label="Genome Quality Measures", required=False)
-    reason = forms.CharField(widget=forms.Textarea(attrs={'rows': "5", }),
+    reason = forms.CharField(widget=forms.Textarea(
+                                attrs={'rows': "5",
+                                       'placeholder': "Briefly explain why this genome is important, "
+                                                      "e.g. underrepresented clade, model organism, ..."}),
                              label="Reason / Interest for Inclusion")
 
     suggested_from_name = forms.CharField(label="Your Name", required=True)

@@ -4,6 +4,12 @@
 
 {% block title %}Suggesting Genome for OMA{% endblock %}
 
+{% block css_hook %}
+<style type="text/css">
+    div.required label:after { content: '*'; }
+</style>
+{% endblock css_hook %}
+
 {% block content %}
 
 <div class="container-fluid">
@@ -20,7 +26,7 @@
                         Keep in mind that computational efforts are quite demanding and that it might be
                         that we cannot include your suggestion straight away.</p>
                     <p>We prioritise the suggestions based on genome quality, importance and easiness to
-                        include. We therefore urge you to complete the form to the best of your knowledge
+                        include. We therefore recommend to complete the form to the best of your knowledge
                         and to be available for further clarifications if needed later on.</p>
 
                     <div class="row">
