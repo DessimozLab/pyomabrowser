@@ -35,11 +35,46 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
 
 
+class ChromosomeInfoSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    entry_ranges = serializers.ListSerializer(
+        child=serializers.ListSerializer(child=serializers.IntegerField()))
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+
 class GenomeInfoSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=5, source='uniprot_species_code')
     taxon_id = serializers.IntegerField(source='ncbi_taxon_id')
     species = serializers.CharField(source='sciname')
     common = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+
+class GenomeDetailSerializer(GenomeInfoSerializer):
+    nr_entries = serializers.IntegerField()
+    lineage = serializers.ListSerializer(child=serializers.CharField())
+    chromosomes = serializers.SerializerMethodField(method_name=None)
+
+    def get_chromosomes(self, obj):
+        chrs = []
+        for chr_id in obj.chromosomes:
+            entries = obj.chromosomes[chr_id]
+            ranges = []
+            for k, g in groupby(enumerate(entries), lambda x: x[0] - x[1]):
+                group = [z[1] for z in g]
+                ranges.append((group[0], group[-1]))
+            chrs.append({'id': chr_id, 'entry_ranges': ranges})
+        return chrs
 
 
 class XRefSerializer(serializers.Serializer):

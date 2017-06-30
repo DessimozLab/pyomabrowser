@@ -9,6 +9,7 @@ router.register(r'domain', views.ProteinDomains, base_name='domain')
 router.register(r'group', views.OmaGroupViewSet, base_name='group')
 router.register(r'version', views.APIVersion, base_name='version')
 router.register(r'xref', views.XRefsViewSet, base_name='xref')
+router.register(r'genome', views.GenomeViewSet, base_name='genome')
 
 urlpatterns = [
     url(r'^', include(router.urls)),

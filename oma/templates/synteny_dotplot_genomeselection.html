@@ -159,7 +159,7 @@
         }
 
         function set_chromosome_select(genome_name, id_select){
-
+            var MIN_NR_PROTEINS_PER_CHR = 10;
             var select = document.getElementById(id_select);
 
             $.getJSON( "/api/genome/" + genome_name, function( jsonData ) {
@@ -264,11 +264,6 @@
             var genome_1 = genomeIDs[$('#g1_name').val()];
             var genome_2 = genomeIDs[$('#g2_name').val()];
 
-            if (genome_1 === genome_2) {
-                alert('You select twice the same genome.')
-                return false;
-            }
-
             var select1 = document.getElementById( "selectchr1");
             var chr1 = select1.options[select1.selectedIndex].value;
             if (chr1 === 'Choose a chromosome'){alert('Invalid chromosome 1.'); return false}
@@ -277,7 +272,12 @@
             var chr2 = select2.options[select2.selectedIndex].value;
             if (chr2 === 'Choose a chromosome'){alert('Invalid chromosome 2.'); return false}
 
-            var newUrl="/oma/syntenyDP/"+ genome_1 + "/" + genome_2+ "/" + chr1.replace(/\s/g,"%20") + "/" + chr2.replace(/\s/g,"%20") ;
+            if (genome_1 === genome_2 && chr1 === chr2){
+                alert("You cannot select twice the same chromosome and genome.");
+                return false;
+            }
+
+            var newUrl = encodeURI("/oma/dotplot/"+ genome_1 + "/" + genome_2+ "/" + chr1 + "/" + chr2);
 
             window.location = newUrl;
             return false;
