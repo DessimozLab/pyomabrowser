@@ -765,43 +765,36 @@ class ChromosomeJson(JsonModelMixin, View):
 
         return JsonResponse(data, safe=False)
 
-class syntenyChromosomePairJson(JsonModelMixin, View):
+
+class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
     '''
     This json aim to contain the list of orthologous pairs between two genomes 
     '''
 
-    def get(self, request, g1, g2, chr1, chr2, *args, **kwargs):
+    def get(self, request, org1, org2, chr1, chr2, *args, **kwargs):
 
-        response1 = ChromosomeJson.as_view()(request, g1)
-        data_chr1 = json.loads(response1.content.decode())
-        response2 = ChromosomeJson.as_view()(request, g2)
-        data_chr2 = json.loads(response2.content.decode())
-
-        genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g1))
-        genomerange2 = utils.db.id_mapper['OMA'].genome_range(g2)
-
-        vps_tab = utils.db.db.get_node('/PairwiseRelation/{}/{}'.format(genome1.uniprot_species_code, 'VPairs'))
+        genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(org1))
+        genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(org2))
+        tab_name = 'VPairs' if genome1.uniprot_species_code != genome2.uniprot_species_code else 'within'
+        rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/{}'.format(
+            genome1.uniprot_species_code, tab_name))
 
         data = []
-
         cpt = 0
 
-        e1, e2 = data_chr1["list_chr"][chr1][0], data_chr1["list_chr"][chr1][-1]
-        t1, t2 = data_chr2["list_chr"][chr2][0], data_chr2["list_chr"][chr2][-1]
+        e1, e2 = genome1.chromosomes[chr1][0], genome1.chromosomes[chr1][-1]
+        t1, t2 = genome2.chromosomes[chr2][0], genome2.chromosomes[chr2][-1]
 
-        print(e1, e2, t1, t2)
-        for e in vps_tab.where(
+        logger.debug("EntryRanges: ({},{}), ({},{})".format(e1, e2, t1, t2))
+        for e in rel_tab.where(
                     '(EntryNr1 >= {:d}) & (EntryNr1 <= {:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'
-                            .format(e1, e2, t1,t2)):
-
-
-                    print(e)
+                            .format(e1, e2, t1, t2)):
 
                     ge1 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[0]))
                     ge2 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[1]))
 
                     if ge1.chromosome == chr1 and ge2.chromosome == chr2:
-                        data.append({"gene1": int(ge1.locus_start), "gene2": int(ge2.locus_start), "gene1id": str(ge1.chromosome), "gene2id": str(ge2.chromosome), "distance": str(e[4])})
+                        data.append({"gene1": ge1, "gene2": ge2, "distance": str(e[4]), "type": rel_tab.get_enum('RelType')(e['RelType'])})
                         cpt += 1
                         if cpt % 100 == 0:
                             print(cpt)
