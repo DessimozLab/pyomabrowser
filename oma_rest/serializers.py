@@ -114,3 +114,17 @@ class ProteinDomainsSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         pass
+
+
+class PairwiseRelationSerializer(serializers.Serializer):
+    entry_1 = ProteinEntrySerializer()
+    entry_2 = ProteinEntrySerializer()
+    rel_type = serializers.CharField()
+    distance = serializers.FloatField()
+    score = serializers.FloatField()
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass

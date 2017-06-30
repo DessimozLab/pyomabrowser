@@ -789,18 +789,13 @@ class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
         for e in rel_tab.where(
                     '(EntryNr1 >= {:d}) & (EntryNr1 <= {:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'
                             .format(e1, e2, t1, t2)):
+                    rel = models.PairwiseRelation(utils.db, e.fetch_all_fields())
 
-                    ge1 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[0]))
-                    ge2 = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(e[1]))
-
-                    if ge1.chromosome == chr1 and ge2.chromosome == chr2:
-                        data.append({"gene1": ge1, "gene2": ge2, "distance": str(e[4]), "type": rel_tab.get_enum('RelType')(e['RelType'])})
+                    if rel.entry_1.chromosome == chr1 and rel.entry_2.chromosome == chr2:
+                        data.append(rel)
                         cpt += 1
                         if cpt % 100 == 0:
-                            print(cpt)
-
-        print(cpt)
-        ## this is too slow and need to be rewrite/optimize
+                            logger.debug('processed {} relations'.format(cpt))
 
         return JsonResponse(data, safe=False)
 
