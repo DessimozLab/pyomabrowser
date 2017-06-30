@@ -1,9 +1,8 @@
 {% extends  "core.html" %}
 {% load staticfiles %}
-{% load bootstrap3 %}
 
 {% block title %}OMA orthology database: Syntheny between chromosome{% endblock %}
-{% block meta_description %}Select chromosome pair for synteny dot plot.{% endblock %}
+{% block meta_description %}Select a chromosome pair for a synteny dot plot.{% endblock %}
 {% block css_hook %}
     <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
 {% endblock css_hook %}
@@ -146,12 +145,18 @@
 
             var select = document.getElementById(id_select);
 
-            $.getJSON( "/oma/syntenyDP/" + genome_name + "/json/", function( jsonData ) {
+            $.getJSON( "/api/genome/" + genome_name, function( jsonData ) {
 
-                $.each( jsonData.list_chr, function (index ) {
+                $.each( jsonData.chromosomes, function (index ) {
+                    var nr_prot_on_chr = this.entry_ranges.reduce(function(acc, cur){return acc + cur[1]-cur[0]+1}, 0);
+                    if (nr_prot_on_chr < MIN_NR_PROTEINS_PER_CHR){
+                        // skip scaffolds with only very few proteins
+                        console.log('skipping ' + genome_name + ' chromosome/scaffold ' + index);
+                        return;
+                    }
                     var el = document.createElement("option");
-                    el.textContent = index;
-                    el.value = index;
+                    el.textContent = this.id;
+                    el.value = this.id;
                     select.appendChild(el);
                 });
             });

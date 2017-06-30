@@ -1,3 +1,6 @@
+from itertools import groupby
+from operator import itemgetter
+
 from rest_framework import serializers
 from oma.utils import db
 from pyoma.browser.models import ProteinEntry, Genome
@@ -12,12 +15,17 @@ class ProteinEntrySerializer(serializers.Serializer):
     oma_hog = serializers.CharField()
     sequence_length = serializers.IntegerField()
     sequence_md5 = serializers.CharField()
+    chromosome = serializers.CharField()
+    locus = serializers.SerializerMethodField(method_name=None)
 
     def create(self, validated_data):
         return ProteinEntry.from_entry_nr(db, validated_data['entry_nr'])
 
     def update(self, instance, validated_data):
         return instance
+
+    def get_locus(self, obj):
+        return [obj.locus_start, obj.locus_end, obj.strand]
 
 
 class ProteinEntryDetailSerializer(ProteinEntrySerializer):

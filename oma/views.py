@@ -733,13 +733,11 @@ class ArchiveView(CurrentView):
     def download_root(self, context):
         return "/" + context['release'].get('id', '')
 
+
 # synteny viewer DotPlot
+def DotplotViewer(request, g1, g2, chr1, chr2):
+    return render(request, 'dotplot_viewer.html', {'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2})
 
-def landDP(request):
-    return render(request, 'land_syntenyDP.html')
-
-def DPviewer(request, g1, g2, chr1, chr2):
-    return render(request, 'DPviewer.html', {'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2 })
 
 class ChromosomeJson(JsonModelMixin, View):
 

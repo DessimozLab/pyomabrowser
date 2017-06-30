@@ -114,7 +114,7 @@
 
             var DotPlot = dotplot_theme();
 
-            var correct_url = "/oma/syntenyDP/" + genome1 +"/" + genome2 +"/" + chromosome1.replace(/\s/g,"%20") + "/" + chromosome2.replace(/\s/g,"%20") + "/json/" ;
+            var correct_url = encodeURI("/oma/dotplot/" + genome1 +"/" + genome2 +"/" + chromosome1 + "/" + chromosome2 + "/json/");
 
             console.log(correct_url);
 

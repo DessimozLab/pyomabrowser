@@ -4,9 +4,10 @@ import operator
 import itertools
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 from oma import utils, misc
 from . import serializers
-from pyoma.browser import models
+from pyoma.browser import models, db
 
 
 # Create your views here.
@@ -99,6 +100,24 @@ class XRefsViewSet(ViewSet):
             ref['entry_nr'] = entry_nr
             ref['omaid'] = utils.id_mapper['OMA'].map_entry_nr(entry_nr)
         serializer = serializers.XRefSerializer(instance=xrefs, many=True)
+        return Response(serializer.data)
+
+
+class GenomeViewSet(ViewSet):
+    lookup_field = 'genome_id'
+
+    def list(self, request, format=None):
+        make_genome = functools.partial(models.Genome, utils.db)
+        genomes = [make_genome(g) for g in utils.id_mapper['OMA'].genome_table]
+        serializer = serializers.GenomeInfoSerializer(instance=genomes, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, genome_id, format=None):
+        try:
+            g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
+        except db.UnknownSpecies as e:
+            raise NotFound(e)
+        serializer = serializers.GenomeDetailSerializer(instance=g)
         return Response(serializer.data)
 
 
