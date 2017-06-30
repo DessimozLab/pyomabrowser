@@ -1,9 +1,8 @@
 {% extends  "core.html" %}
 {% load staticfiles %}
-{% load bootstrap3 %}
 
 {% block title %}OMA orthology database: Syntheny between chromosome{% endblock %}
-{% block meta_description %}Select chromosome pair for synteny dot plot.{% endblock %}
+{% block meta_description %}Select a chromosome pair for a synteny dot plot.{% endblock %}
 {% block css_hook %}
     <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
 {% endblock css_hook %}
@@ -118,12 +117,29 @@
         var genomeNames = [];
         var genomeIDs = {};
 
-        $.getJSON( "/All/flatgenomes.json", function( jsonData ) {
-            $.each( jsonData, function ( id, genome ) {
-                var tmp = genome.name+ ' (' + genome.id + ')';
-                genomeNames.push ( tmp );
-                genomeIDs[tmp] = genome.id;
-            });
+        $.ajax({
+            url: "/All/flatgenomes.json",
+            method: "GET",
+            dataType: 'json',
+            success: function (jsonData) {
+                $.each(jsonData, function (id, genome) {
+                    var tmp = genome.name + ' (' + genome.id + ')';
+                    genomeNames.push(tmp);
+                    genomeIDs[tmp] = genome.id;
+                })
+            },
+            statusCode: {
+                404: function() {}
+            },
+            error: function () {
+                $.getJSON("/api/genome", function (jsonData) {
+                    jsonData.forEach(function (genome) {
+                        var tmp = genome.species + " (" + genome.code + ")";
+                        genomeNames.push(tmp);
+                        genomeIDs[tmp] = genome.code
+                    })
+                })
+            }
         });
 
         function remove_chromosome_select(id_select){
@@ -143,15 +159,21 @@
         }
 
         function set_chromosome_select(genome_name, id_select){
-
+            var MIN_NR_PROTEINS_PER_CHR = 10;
             var select = document.getElementById(id_select);
 
-            $.getJSON( "/oma/syntenyDP/" + genome_name + "/json/", function( jsonData ) {
+            $.getJSON( "/api/genome/" + genome_name, function( jsonData ) {
 
-                $.each( jsonData.list_chr, function (index ) {
+                $.each( jsonData.chromosomes, function (index ) {
+                    var nr_prot_on_chr = this.entry_ranges.reduce(function(acc, cur){return acc + cur[1]-cur[0]+1}, 0);
+                    if (nr_prot_on_chr < MIN_NR_PROTEINS_PER_CHR){
+                        // skip scaffolds with only very few proteins
+                        console.log('skipping ' + genome_name + ' chromosome/scaffold ' + index);
+                        return;
+                    }
                     var el = document.createElement("option");
-                    el.textContent = index;
-                    el.value = index;
+                    el.textContent = this.id;
+                    el.value = this.id;
                     select.appendChild(el);
                 });
             });
@@ -242,11 +264,6 @@
             var genome_1 = genomeIDs[$('#g1_name').val()];
             var genome_2 = genomeIDs[$('#g2_name').val()];
 
-            if (genome_1 === genome_2) {
-                alert('You select twice the same genome.')
-                return false;
-            }
-
             var select1 = document.getElementById( "selectchr1");
             var chr1 = select1.options[select1.selectedIndex].value;
             if (chr1 === 'Choose a chromosome'){alert('Invalid chromosome 1.'); return false}
@@ -255,7 +272,12 @@
             var chr2 = select2.options[select2.selectedIndex].value;
             if (chr2 === 'Choose a chromosome'){alert('Invalid chromosome 2.'); return false}
 
-            var newUrl="/oma/syntenyDP/"+ genome_1 + "/" + genome_2+ "/" + chr1.replace(/\s/g,"%20") + "/" + chr2.replace(/\s/g,"%20") ;
+            if (genome_1 === genome_2 && chr1 === chr2){
+                alert("You cannot select twice the same chromosome and genome.");
+                return false;
+            }
+
+            var newUrl = encodeURI("/oma/dotplot/"+ genome_1 + "/" + genome_2+ "/" + chr1 + "/" + chr2);
 
             window.location = newUrl;
             return false;

@@ -1,12 +1,17 @@
 import functools
 import operator
-
 import itertools
+
+from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 from oma import utils, misc
 from . import serializers
-from pyoma.browser import models
+from pyoma.browser import models, db
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -102,3 +107,73 @@ class XRefsViewSet(ViewSet):
         return Response(serializer.data)
 
 
+class GenomeViewSet(ViewSet):
+    lookup_field = 'genome_id'
+
+    def list(self, request, format=None):
+        make_genome = functools.partial(models.Genome, utils.db)
+        genomes = [make_genome(g) for g in utils.id_mapper['OMA'].genome_table]
+        serializer = serializers.GenomeInfoSerializer(instance=genomes, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, genome_id, format=None):
+        try:
+            g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
+        except db.UnknownSpecies as e:
+            raise NotFound(e)
+        serializer = serializers.GenomeDetailSerializer(instance=g)
+        return Response(serializer.data)
+
+
+class PairwiseRelationAPIView(APIView):
+
+    def _get_entry_range(self, genome, chr):
+        if chr is None:
+            return genome.entry_nr_offset + 1, genome.entry_nr_offset + len(genome)
+        else:
+            try:
+                low = genome.chromosomes[chr][0]
+                high = genome.chromosomes[chr][-1]
+                return low, high
+            except IndexError:
+                # this means the chr does not exist
+                return 0, 0
+
+    def get(self, request, genome_id1, genome_id2):
+        """List the pairwise relations among two genomes
+
+        The relations are orthologs in case the genomes are
+        different and close paralogs and homeologs in case
+        they are the same.
+
+        using the query_params 'chr1' and 'chr2', one can limit
+        the relations to a certain chromosome for one or both
+        genomes."""
+        try:
+            genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id1))
+            genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id2))
+        except db.UnknownSpecies as e:
+            raise NotFound(e)
+
+        tab_name = 'VPairs' if genome1.uniprot_species_code != genome2.uniprot_species_code else 'within'
+        rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/{}'.format(
+            genome1.uniprot_species_code, tab_name))
+
+        chr1 = request.query_params.get('chr1', None)
+        chr2 = request.query_params.get('chr2', None)
+        range1 = self._get_entry_range(genome1, chr1)
+        range2 = self._get_entry_range(genome2, chr2)
+        res = []
+
+        logger.debug("EntryRanges: ({0[0]},{0[1]}), ({1[0]},{1[1]})".format(range1, range2))
+        for cnt, row in enumerate(rel_tab.where('(EntryNr1 >= {0[0]}) & (EntryNr1 <= {0[1]}) & '
+                                                '(EntryNr2 >= {1[0]}) & (EntryNr2 <= {1[1]})'
+                                                .format(range1, range2))):
+            rel = models.PairwiseRelation(utils.db, row.fetch_all_fields())
+            if ((chr1 is None or chr1 == rel.entry_1.chromosome) and
+                    (chr2 is None or chr2 == rel.entry_2.chromosome)):
+                res.append(rel)
+                if cnt+1 % 100 == 0:
+                    logger.debug("Processed {} rows".format(cnt))
+        serializer = serializers.PairwiseRelationSerializer(instance=res, many=True)
+        return Response(serializer.data)
