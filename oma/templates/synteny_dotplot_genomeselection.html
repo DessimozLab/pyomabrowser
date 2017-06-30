@@ -117,12 +117,29 @@
         var genomeNames = [];
         var genomeIDs = {};
 
-        $.getJSON( "/All/flatgenomes.json", function( jsonData ) {
-            $.each( jsonData, function ( id, genome ) {
-                var tmp = genome.name+ ' (' + genome.id + ')';
-                genomeNames.push ( tmp );
-                genomeIDs[tmp] = genome.id;
-            });
+        $.ajax({
+            url: "/All/flatgenomes.json",
+            method: "GET",
+            dataType: 'json',
+            success: function (jsonData) {
+                $.each(jsonData, function (id, genome) {
+                    var tmp = genome.name + ' (' + genome.id + ')';
+                    genomeNames.push(tmp);
+                    genomeIDs[tmp] = genome.id;
+                })
+            },
+            statusCode: {
+                404: function() {}
+            },
+            error: function () {
+                $.getJSON("/api/genome", function (jsonData) {
+                    jsonData.forEach(function (genome) {
+                        var tmp = genome.species + " (" + genome.code + ")";
+                        genomeNames.push(tmp);
+                        genomeIDs[tmp] = genome.code
+                    })
+                })
+            }
         });
 
         function remove_chromosome_select(id_select){
