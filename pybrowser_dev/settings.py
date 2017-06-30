@@ -132,6 +132,11 @@ LOGGING = {
             'handlers': ['file'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True
+        },
+        'oma_rest': {
+            'handlers': ['file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True
         }
     }
 }
