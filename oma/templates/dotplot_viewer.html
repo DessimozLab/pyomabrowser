@@ -100,10 +100,6 @@
         (function () {
 
 
-            //var url_json = "/All/dotplot_example.json";
-            //var url_json = "/All/mouse10_vs_human10.json";
-            //var url_json = "/All/mouse2_vs_human2.json";
-            var url_json = "/All/arath1_vs_araly1.json";
             var container = "dotplot_container";
 
             var genome1 = "{{ genome1 }}";
@@ -114,7 +110,7 @@
 
             var DotPlot = dotplot_theme();
 
-            var correct_url = encodeURI("/oma/dotplot/" + genome1 +"/" + genome2 +"/" + chromosome1 + "/" + chromosome2 + "/json/");
+            var correct_url = encodeURI("/api/pairs/" + genome1 +"/" + genome2 +"/?chr1=" + chromosome1 + "&chr2=" + chromosome2);
 
             console.log(correct_url);
 
@@ -134,18 +130,23 @@
                 undefinedText: "",
                 showToggle: 'true',
                 columns: [{
-                    field: 'distance',
-                    title: 'Distance'
-                }, {
-                    field: 'gene1',
+                    field: 'entry_1.omaid',
                     title: genome1 + ' gene'
                 }, {
-                    field: 'gene2',
+                    field: 'entry_1.locus.0',
+                    title: genome1 + ' position'
+                }, {
+                    field: 'entry_2.omaid',
                     title: genome2 + ' gene'
-                }
-                , {
-                    field: 'gene2id',
-                    title: ' gene2id'
+                }, {
+                    field: 'entry_2.locus.0',
+                    title: genome1 + ' position'
+                }, {
+                    field: 'rel_type',
+                    title: 'Relation'
+                }, {
+                    field: 'distance',
+                    title: 'Distance [PAM]'
                 }
                 , {
                     field: 'gene1id',

@@ -295,16 +295,16 @@ dotplot_theme = function () {
                 return parseFloat(d[metric_option.accessor]);
             });
             var min_position_x = d3.min(data, function (d) {
-                return d.gene1;
+                return d.entry_1.locus[0];
             });
             var max_position_x = d3.max(data, function (d) {
-                return d.gene1;
+                return d.entry_1.locus[0];
             });
             var min_position_y = d3.min(data, function (d) {
-                return d.gene2;
+                return d.entry_2.locus[0];
             });
             var max_position_y = d3.max(data, function (d) {
-                return d.gene2;
+                return d.entry_2.locus[0];
             });
 
             // set the inital filtering boundaries to extremum values
@@ -353,10 +353,10 @@ dotplot_theme = function () {
                 .data(data)
                 .enter().append("circle")
                 .attr("cx", function (d) {
-                    return x(d['gene1']);
+                    return x(d.entry_1.locus[0]);
                 })
                 .attr("cy", function (d) {
-                    return y(d['gene2']);
+                    return y(d.entry_2.locus[0]);
                 })
                 .attr("r", 2.5)
                 .attr("fill", function (d) {
@@ -367,10 +367,10 @@ dotplot_theme = function () {
                         .duration(200)
                         .style("opacity", .9);
                     tooltip_div.html(
-                        genome1 + ": "+d.gene1 + "<br/>" +
-                        genome2 + ": "+d.gene2 + "<br/>" +
-                            "g1 name  : "+d.gene1id + "<br/>" +
-                            "g2 name  : "+d.gene2id + "<br/>" +
+                        genome1 + ": "+d.entry_1.omaid + "<br/>" +
+                        genome2 + ": "+d.entry_2.omaid + "<br/>" +
+                            "g1 name  : "+d.entry_1.canonicalid + "<br/>" +
+                            "g2 name  : "+d.entry_2.canonicalid + "<br/>" +
                         metric_option.short_name + ": "+ d[metric_option.accessor]
                     )
                         .style("left", (d3.event.pageX) + "px")
@@ -572,10 +572,10 @@ dotplot_theme = function () {
                 svg_dotplot.select(".axis--y").transition(t).call(yAxis);
                 svg_dotplot.selectAll("circle").transition(t)
                     .attr("cx", function (d) {
-                        return x(d['gene1']);
+                        return x(d.entry_1.locus[0]);
                     })
                     .attr("cy", function (d) {
-                        return y(d['gene2']);
+                        return y(d.entry_2.locus[0]);
                     });
             }
 
@@ -593,8 +593,8 @@ dotplot_theme = function () {
 
                     var circle = svg_dotplot.selectAll('circle')
                     circle.classed("active", function (d) {
-                        if (dotplot.between(d['gene1'], bxmin, bxmax)) {
-                            if (dotplot.between(d['gene2'], bymin, bymax)) {
+                        if (dotplot.between(d.entry_1.locus[0], bxmin, bxmax)) {
+                            if (dotplot.between(d.entry_2.locus[0], bymin, bymax)) {
                                 if (d3.select(this).attr('visibility') === 'visible') {
                                     selected_pairs.push(d);
                                     return 1 === 1
