@@ -53,6 +53,7 @@ class GenomeInfoSerializer(serializers.Serializer):
     species = serializers.CharField(source='sciname')
     common = serializers.CharField(required=False)
 
+
     def create(self, validated_data):
         pass
 
@@ -64,6 +65,7 @@ class GenomeDetailSerializer(GenomeInfoSerializer):
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
     chromosomes = serializers.SerializerMethodField(method_name=None)
+    proteins = serializers.SerializerMethodField(method_name= None)
 
     def get_chromosomes(self, obj):
         chrs = []
@@ -75,6 +77,16 @@ class GenomeDetailSerializer(GenomeInfoSerializer):
                 ranges.append((group[0], group[-1]))
             chrs.append({'id': chr_id, 'entry_ranges': ranges})
         return chrs
+
+    def get_proteins (self, obj):
+        prot = []
+        range1 = obj.entry_nr_offset + 1
+        range2 = range1 + obj.nr_entries
+        for entry_nr in range(range1, range2):
+            prot.append(ProteinEntry.from_entry_nr(db, entry_nr))
+        serializer = ProteinEntrySerializer(prot, many= True)
+        return serializer.data
+
 
 
 class XRefSerializer(serializers.Serializer):
