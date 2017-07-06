@@ -64,8 +64,9 @@ class GenomeInfoSerializer(serializers.Serializer):
 class GenomeDetailSerializer(GenomeInfoSerializer):
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
+    '''proteins = serializers.HyperlinkedIdentityField(view_name='proteins-detail', read_only=True,
+                                                    lookup_field='genome_id')'''
     chromosomes = serializers.SerializerMethodField(method_name=None)
-    proteins = serializers.SerializerMethodField(method_name= None)
 
     def get_chromosomes(self, obj):
         chrs = []
@@ -78,15 +79,20 @@ class GenomeDetailSerializer(GenomeInfoSerializer):
             chrs.append({'id': chr_id, 'entry_ranges': ranges})
         return chrs
 
-    def get_proteins (self, obj):
+    '''def get_proteins (self, obj):
         prot = []
         range1 = obj.entry_nr_offset + 1
         range2 = range1 + obj.nr_entries
         for entry_nr in range(range1, range2):
             prot.append(ProteinEntry.from_entry_nr(db, entry_nr))
         serializer = ProteinEntrySerializer(prot, many= True)
-        return serializer.data
+        return serializer.data'''
 
+
+class OmaGroupSerializer(serializers.Serializer):
+    GroupNr = serializers.IntegerField()
+    FingerPrint = serializers.CharField()
+    proteins = serializers.SerializerMethodField(method_name=None)
 
 
 class XRefSerializer(serializers.Serializer):

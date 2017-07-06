@@ -57,6 +57,22 @@ class OmaGroupViewSet(ViewSet):
             many=True, context={'request': request})
         return Response(serializer.data)
 
+class ProteinsViewSet(ViewSet):
+    lookup_field = 'genome_id'
+
+    def retrieve(self, request, genome_id= None, format=None):
+        try:
+            g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
+            prot = []
+            range1 = g.entry_nr_offset + 1
+            range2 = range1 + g.nr_entries
+            for entry_nr in range(range1, range2):
+                prot.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
+        except db.UnknownSpecies as e:
+            raise NotFound(e)
+        serializer = serializers.ProteinEntrySerializer(prot, many= True)
+        return Response(serializer.data)
+
 
 class APIVersion(ViewSet):
     def list(self, request, format=None):
@@ -121,7 +137,7 @@ class GenomeViewSet(ViewSet):
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
         except db.UnknownSpecies as e:
             raise NotFound(e)
-        serializer = serializers.GenomeDetailSerializer(instance=g)
+        serializer = serializers.GenomeDetailSerializer(instance=g,context={'request': request})
         return Response(serializer.data)
 
 

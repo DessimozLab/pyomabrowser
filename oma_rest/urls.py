@@ -12,6 +12,7 @@ router.register(r'group', views.OmaGroupViewSet, base_name='group')
 router.register(r'version', views.APIVersion, base_name='version')
 router.register(r'xref', views.XRefsViewSet, base_name='xref')
 router.register(r'genome', views.GenomeViewSet, base_name='genome')
+router.register(r'proteins', views.ProteinsViewSet, base_name='proteins')
 
 
 urlpatterns = [

@@ -3549,3 +3549,1384 @@ NameError: name 'HyperlinkedRelatedField' is not defined
 [06/Jul/2017 15:10:11] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
 [06/Jul/2017 15:10:11] INFO [pyoma.browser.db:53] database version: 3.0
 [06/Jul/2017 15:10:11] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 18:45:25] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 18:45:25] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 18:45:25] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 18:46:02] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+TypeError: retrieve() got an unexpected keyword argument 'genome_id'
+[06/Jul/2017 18:46:02] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+TypeError: retrieve() got an unexpected keyword argument 'genome_id'
+[06/Jul/2017 18:46:15] WARNING [django.request:182] Not Found: /api/proteins/
+[06/Jul/2017 18:46:15] WARNING [django.request:182] Not Found: /api/proteins/
+[06/Jul/2017 18:46:18] WARNING [django.request:182] Not Found: /api/proteins/1.
+[06/Jul/2017 18:46:18] WARNING [django.request:182] Not Found: /api/proteins/1.
+[06/Jul/2017 18:46:21] ERROR [django.request:284] Internal Server Error: /api/proteins/1/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+TypeError: retrieve() got an unexpected keyword argument 'genome_id'
+[06/Jul/2017 18:46:21] ERROR [django.request:284] Internal Server Error: /api/proteins/1/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+TypeError: retrieve() got an unexpected keyword argument 'genome_id'
+[06/Jul/2017 18:46:55] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 18:46:55] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 18:46:56] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 18:46:59] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 71, in retrieve
+    prot.append(models.ProteinEntry.from_entry_nr(db, entry_nr))
+  File "/Users/Klara/.pyenv/versions/3.5.1/envs/myenv/src/pyoma/pyoma/browser/models.py", line 69, in from_entry_nr
+    e = db.entry_by_entry_nr(eNr)
+AttributeError: module 'pyoma.browser.db' has no attribute 'entry_by_entry_nr'
+[06/Jul/2017 18:46:59] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 71, in retrieve
+    prot.append(models.ProteinEntry.from_entry_nr(db, entry_nr))
+  File "/Users/Klara/.pyenv/versions/3.5.1/envs/myenv/src/pyoma/pyoma/browser/models.py", line 69, in from_entry_nr
+    e = db.entry_by_entry_nr(eNr)
+AttributeError: module 'pyoma.browser.db' has no attribute 'entry_by_entry_nr'
+[06/Jul/2017 18:47:09] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 71, in retrieve
+    prot.append(models.ProteinEntry.from_entry_nr(db, entry_nr))
+  File "/Users/Klara/.pyenv/versions/3.5.1/envs/myenv/src/pyoma/pyoma/browser/models.py", line 69, in from_entry_nr
+    e = db.entry_by_entry_nr(eNr)
+AttributeError: module 'pyoma.browser.db' has no attribute 'entry_by_entry_nr'
+[06/Jul/2017 18:47:09] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 71, in retrieve
+    prot.append(models.ProteinEntry.from_entry_nr(db, entry_nr))
+  File "/Users/Klara/.pyenv/versions/3.5.1/envs/myenv/src/pyoma/pyoma/browser/models.py", line 69, in from_entry_nr
+    e = db.entry_by_entry_nr(eNr)
+AttributeError: module 'pyoma.browser.db' has no attribute 'entry_by_entry_nr'
+[06/Jul/2017 18:50:16] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 18:50:16] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 18:50:16] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 18:50:34] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 18:50:34] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 18:50:34] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 18:52:30] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 70, in retrieve
+    prot.append(models.ProteinEntry.from_entry_nr(db, entry_nr))
+  File "/Users/Klara/.pyenv/versions/3.5.1/envs/myenv/src/pyoma/pyoma/browser/models.py", line 69, in from_entry_nr
+    e = db.entry_by_entry_nr(eNr)
+AttributeError: module 'pyoma.browser.db' has no attribute 'entry_by_entry_nr'
+[06/Jul/2017 18:52:30] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 70, in retrieve
+    prot.append(models.ProteinEntry.from_entry_nr(db, entry_nr))
+  File "/Users/Klara/.pyenv/versions/3.5.1/envs/myenv/src/pyoma/pyoma/browser/models.py", line 69, in from_entry_nr
+    e = db.entry_by_entry_nr(eNr)
+AttributeError: module 'pyoma.browser.db' has no attribute 'entry_by_entry_nr'
+[06/Jul/2017 18:54:12] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 18:54:12] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 18:54:12] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 18:56:36] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 18:56:36] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 18:56:36] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 18:57:13] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 18:57:13] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 18:57:13] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:04:48] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:04:48] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:04:48] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:15:10] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:15:10] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:15:10] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:15:20] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 74, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 739, in data
+    ret = super(ListSerializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 657, in to_representation
+    self.child.to_representation(item) for item in iterable
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 657, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:15:20] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 74, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 739, in data
+    ret = super(ListSerializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 657, in to_representation
+    self.child.to_representation(item) for item in iterable
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 657, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:18:42] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:18:42] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:18:42] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:18:50] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 74, in retrieve
+    'request': Request(request),
+NameError: name 'Request' is not defined
+[06/Jul/2017 19:18:50] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 74, in retrieve
+    'request': Request(request),
+NameError: name 'Request' is not defined
+[06/Jul/2017 19:19:31] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:19:31] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:19:31] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:19:44] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:19:44] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:19:44] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:21:45] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:21:45] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:21:45] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:22:16] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:22:16] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:24:47] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:24:47] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:24:47] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:24:56] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:24:56] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:25:00] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:25:00] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:25:24] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:25:24] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:25:25] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:25:31] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:25:31] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:25:52] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:25:52] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:25:52] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:26:03] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:26:03] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:26:07] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:26:07] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:27:24] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:27:24] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 355, in to_representation
+    "the serializer." % self.__class__.__name__
+AssertionError: `HyperlinkedIdentityField` requires the request in the serializer context. Add `context={'request': request}` when instantiating the serializer.
+[06/Jul/2017 19:28:38] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:28:38] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:28:38] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:29:45] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:29:45] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:29:45] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:29:48] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:29:48] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:30:29] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:30:29] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:31:13] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:31:13] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:31:13] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:31:19] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:31:19] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:32:04] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:32:04] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:32:05] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:32:07] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'UniProtSpeciesCode'
+[06/Jul/2017 19:32:07] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'UniProtSpeciesCode'
+[06/Jul/2017 19:32:23] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:32:23] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:32:23] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:33:19] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:33:19] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:33:19] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:33:27] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'NCBITaxonId'
+[06/Jul/2017 19:33:27] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'NCBITaxonId'
+[06/Jul/2017 19:34:59] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:34:59] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:34:59] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:39:57] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:39:57] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:39:57] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:41:44] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:41:44] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:41:45] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:41:47] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 313, in get_url
+    return self.reverse(view_name, kwargs=kwargs, request=request, format=format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/reverse.py", line 50, in reverse
+    url = _reverse(viewname, args, kwargs, request, format, **extra)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/reverse.py", line 63, in _reverse
+    url = django_reverse(viewname, args=args, kwargs=kwargs, **extra)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/urlresolvers.py", line 600, in reverse
+    return force_text(iri_to_uri(resolver._reverse_with_prefix(view, prefix, *args, **kwargs)))
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/urlresolvers.py", line 508, in _reverse_with_prefix
+    (lookup_view_s, args, kwargs, len(patterns), patterns))
+django.core.urlresolvers.NoReverseMatch: Reverse for 'proteins-detail' with arguments '()' and keyword arguments '{'entry_nr': 1}' not found. 2 pattern(s) tried: ['api/proteins/(?P<genome_id>[^/.]+)\\.(?P<format>[a-z0-9]+)/?$', 'api/proteins/(?P<genome_id>[^/.]+)/$']
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 74, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 739, in data
+    ret = super(ListSerializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 657, in to_representation
+    self.child.to_representation(item) for item in iterable
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 657, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 390, in to_representation
+    raise ImproperlyConfigured(msg % self.view_name)
+django.core.exceptions.ImproperlyConfigured: Could not resolve URL for hyperlinked relationship using view name "proteins-detail". You may have failed to include the related model in your API, or incorrectly configured the `lookup_field` attribute on this field.
+[06/Jul/2017 19:41:47] ERROR [django.request:284] Internal Server Error: /api/proteins/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 313, in get_url
+    return self.reverse(view_name, kwargs=kwargs, request=request, format=format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/reverse.py", line 50, in reverse
+    url = _reverse(viewname, args, kwargs, request, format, **extra)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/reverse.py", line 63, in _reverse
+    url = django_reverse(viewname, args=args, kwargs=kwargs, **extra)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/urlresolvers.py", line 600, in reverse
+    return force_text(iri_to_uri(resolver._reverse_with_prefix(view, prefix, *args, **kwargs)))
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/urlresolvers.py", line 508, in _reverse_with_prefix
+    (lookup_view_s, args, kwargs, len(patterns), patterns))
+django.core.urlresolvers.NoReverseMatch: Reverse for 'proteins-detail' with arguments '()' and keyword arguments '{'entry_nr': 1}' not found. 2 pattern(s) tried: ['api/proteins/(?P<genome_id>[^/.]+)\\.(?P<format>[a-z0-9]+)/?$', 'api/proteins/(?P<genome_id>[^/.]+)/$']
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 74, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 739, in data
+    ret = super(ListSerializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 657, in to_representation
+    self.child.to_representation(item) for item in iterable
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 657, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 390, in to_representation
+    raise ImproperlyConfigured(msg % self.view_name)
+django.core.exceptions.ImproperlyConfigured: Could not resolve URL for hyperlinked relationship using view name "proteins-detail". You may have failed to include the related model in your API, or incorrectly configured the `lookup_field` attribute on this field.
+[06/Jul/2017 19:43:08] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:43:08] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:43:08] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:48:27] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:48:27] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:48:50] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:48:50] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:48:50] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:48:57] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:48:57] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:49:00] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:49:00] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:50:04] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:50:04] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:50:05] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
+[06/Jul/2017 19:50:49] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:50:49] ERROR [django.request:284] Internal Server Error: /api/genome/YEAST/
+Traceback (most recent call last):
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/viewsets.py", line 86, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 489, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 449, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/views.py", line 486, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/Klara/Desktop/dessimoz_lab/pyomabrowser/oma_rest/views.py", line 141, in retrieve
+    return Response(serializer.data)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 534, in data
+    ret = super(Serializer, self).data
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 263, in data
+    self._data = self.to_representation(self.instance)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/serializers.py", line 501, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 375, in to_representation
+    url = self.get_url(value, self.view_name, request, format)
+  File "/Users/Klara/.pyenv/versions/myenv/lib/python3.5/site-packages/rest_framework/relations.py", line 311, in get_url
+    lookup_value = getattr(obj, self.lookup_field)
+AttributeError: 'Genome' object has no attribute 'genome_id'
+[06/Jul/2017 19:55:04] INFO [pyoma.browser.db:41] opening /Users/Klara/desktop/2017_KlaraKaleb_OMA_interface/TestDB/OmaServer.h5 for read-only
+[06/Jul/2017 19:55:04] INFO [pyoma.browser.db:53] database version: 3.0
+[06/Jul/2017 19:55:04] INFO [pyoma.browser.db:141] setting HOG ID schema: re_fam: re.compile(b'HOG:(?P<fam>\\d{7,})'), hog_fmt: HOG:{:07d}
