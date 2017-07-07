@@ -11,6 +11,9 @@ from . import serializers
 from pyoma.browser import models, db
 import logging
 
+from rest_framework.pagination import PageNumberPagination
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,15 +54,17 @@ class OmaGroupViewSet(ViewSet):
     serializer_class = serializers.ProteinEntrySerializer
 
     def retrieve(self, request, id=None, format=None):
+        #fingerprint = utils.db.get_hdf5_handle().root.OmaGroups.MetaData.read_where('GroupNr'==id, field='Fingerprint').decode("utf-8")
         data = {'members': [models.ProteinEntry(utils.db, memb) for memb in utils.db.oma_group_members(int(id))],
-                'FingerPrint': '', 'GroupNr': int(id)}
+                'FingerPrint': '',
+                'GroupNr': int(id)}
         serializer = serializers.OmaGroupSerializer(
-            instance=data, #(models.ProteinEntry(utils.db, memb) for memb in group),
-            context={'request': request})
+            instance=data, context={'request': request})
         return Response(serializer.data)
 
 class ProteinsViewSet(ViewSet):
     lookup_field = 'genome_id'
+
 
     def retrieve(self, request, genome_id= None, format=None):
         try:
@@ -71,8 +76,10 @@ class ProteinsViewSet(ViewSet):
                 prot.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
         except db.UnknownSpecies as e:
             raise NotFound(e)
-        serializer = serializers.ProteinEntrySerializer(prot, many= True)
-        return Response(serializer.data)
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(prot, request)
+        serializer = serializers.ProteinEntrySerializer(page, many= True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
 
 class APIVersion(ViewSet):

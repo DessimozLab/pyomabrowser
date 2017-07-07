@@ -5,7 +5,6 @@ from rest_framework import serializers
 from oma.utils import db
 from pyoma.browser.models import ProteinEntry, Genome
 
-
 class ProteinEntrySerializer(serializers.Serializer):
     entry_nr = serializers.IntegerField(required=True)
     omaid = serializers.CharField()
@@ -80,19 +79,9 @@ class GenomeDetailSerializer(GenomeInfoSerializer):
             chrs.append({'id': chr_id, 'entry_ranges': ranges})
         return chrs
 
-    '''def get_proteins (self, obj):
-        prot = []
-        range1 = obj.entry_nr_offset + 1
-        range2 = range1 + obj.nr_entries
-        for entry_nr in range(range1, range2):
-            prot.append(ProteinEntry.from_entry_nr(db, entry_nr))
-        serializer = ProteinEntrySerializer(prot, many= True)
-        return serializer.data'''
-
-
 class OmaGroupSerializer(serializers.Serializer):
     GroupNr = serializers.IntegerField()
-    FingerPrint = serializers.CharField()
+    FingerPrint = serializers.CharField(required=False)
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
 
 
