@@ -4,6 +4,7 @@ from operator import itemgetter
 from rest_framework import serializers
 from oma.utils import db
 from pyoma.browser.models import ProteinEntry, Genome
+from pyoma.browser.db import XrefIdMapper
 
 class ProteinEntrySerializer(serializers.Serializer):
     entry_nr = serializers.IntegerField(required=True)
@@ -32,7 +33,7 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     cdna = serializers.CharField()
     domains = serializers.HyperlinkedIdentityField(view_name='domain-detail', read_only=True,
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-
+    xref = serializers.HyperlinkedIdentityField(view_name='xref-detail', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
 
 class ChromosomeInfoSerializer(serializers.Serializer):
     id = serializers.CharField()
