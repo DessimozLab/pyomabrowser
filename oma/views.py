@@ -799,3 +799,16 @@ class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
 
         return JsonResponse(data, safe=False)
 
+
+class OMAGroup(TemplateView):
+    template_name = "omagroup.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup, self).get_context_data(**kwargs)
+        try:
+            context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
+            context.update(utils.db.oma_group_metadata(context['members'][0].oma_group))
+        except db.InvalidId as e:
+            raise Http404(e)
+        return context
+
