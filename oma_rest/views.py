@@ -51,10 +51,11 @@ class OmaGroupViewSet(ViewSet):
     serializer_class = serializers.ProteinEntrySerializer
 
     def retrieve(self, request, id=None, format=None):
-        group = utils.db.oma_group_members(int(id))
-        serializer = serializers.ProteinEntrySerializer(
-            instance=(models.ProteinEntry(utils.db, memb) for memb in group),
-            many=True, context={'request': request})
+        data = {'members': [models.ProteinEntry(utils.db, memb) for memb in utils.db.oma_group_members(int(id))],
+                'FingerPrint': '', 'GroupNr': int(id)}
+        serializer = serializers.OmaGroupSerializer(
+            instance=data, #(models.ProteinEntry(utils.db, memb) for memb in group),
+            context={'request': request})
         return Response(serializer.data)
 
 class ProteinsViewSet(ViewSet):

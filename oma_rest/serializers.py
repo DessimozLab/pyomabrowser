@@ -64,8 +64,9 @@ class GenomeInfoSerializer(serializers.Serializer):
 class GenomeDetailSerializer(GenomeInfoSerializer):
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
-    '''proteins = serializers.HyperlinkedIdentityField(view_name='proteins-detail', read_only=True,
-                                                    lookup_field='genome_id')'''
+    proteins = serializers.HyperlinkedIdentityField(view_name='proteins-detail', read_only=True,
+                                                    lookup_field='uniprot_species_code',
+                                                    lookup_url_kwarg='genome_id')
     chromosomes = serializers.SerializerMethodField(method_name=None)
 
     def get_chromosomes(self, obj):
@@ -92,7 +93,7 @@ class GenomeDetailSerializer(GenomeInfoSerializer):
 class OmaGroupSerializer(serializers.Serializer):
     GroupNr = serializers.IntegerField()
     FingerPrint = serializers.CharField()
-    proteins = serializers.SerializerMethodField(method_name=None)
+    members = serializers.ListSerializer(child=ProteinEntrySerializer())
 
 
 class XRefSerializer(serializers.Serializer):
