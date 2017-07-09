@@ -62,9 +62,19 @@ class OmaGroupViewSet(ViewSet):
             instance=data, context={'request': request})
         return Response(serializer.data)
 
+class HOGsViewSet(ViewSet):
+    lookup_field = 'hog_id'
+    serializer_class = serializers.ProteinEntrySerializer
+
+    def retrieve(self, request, hog_id):
+        level = self.request.query_params.get('level', None)
+        members = db.Database.member_of_hog_id(utils.db,hog_id = 'hog_id',level='level')
+        serializer = serializers.ProteinEntrySerializer(instance = [models.ProteinEntry(utils.db, memb) for memb in members], many=True)
+        return Response(serializer.data)
+
+
 class ProteinsViewSet(ViewSet):
     lookup_field = 'genome_id'
-
 
     def retrieve(self, request, genome_id= None, format=None):
         try:
@@ -80,6 +90,21 @@ class ProteinsViewSet(ViewSet):
         page = paginator.paginate_queryset(prot, request)
         serializer = serializers.ProteinEntrySerializer(page, many= True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
+
+
+class OrthologsViewSet (ViewSet):
+    serializer_class = serializers.ProteinEntrySerializer
+    lookup_field = 'entry_id'
+
+    def retrieve(self, request, entry_id = None, format = None):
+        data = utils.db.get_vpairs(int(entry_id))
+        content = []
+        for row in data:
+            entry_nr = row[1]
+            ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
+            content.append({'ortholog': ortholog, 'RelType': row[4] , 'Distance': row[3], 'Score': row[2] })
+        serializer = serializers.OrthologuesListSerializer(instance = content, many=True)
+        return Response(serializer.data)
 
 
 class APIVersion(ViewSet):

@@ -13,6 +13,8 @@ router.register(r'version', views.APIVersion, base_name='version')
 router.register(r'xref', views.XRefsViewSet, base_name='xref')
 router.register(r'genome', views.GenomeViewSet, base_name='genome')
 router.register(r'proteins', views.ProteinsViewSet, base_name='proteins')
+router.register(r'hogs', views.HOGsViewSet, base_name='hogs')
+router.register(r'ortho', views.OrthologsViewSet, base_name='ortho')
 
 
 urlpatterns = [
@@ -20,5 +22,9 @@ urlpatterns = [
     url(r'^pairs/(?P<genome_id1>\w+)/(?P<genome_id2>\w+)/$',
         views.PairwiseRelationAPIView.as_view(), name='pairs'),
     url(r'^schema/$', get_schema_view(title="OMA REST API")),
-    url(r'^docs', include_docs_urls(title='REST API for the OMA Browser'))
+    url(r'^docs', include_docs_urls(title='REST API for the OMA Browser')),
 ]
+
+'''url(r'^HOGs/(?P<hog_id>\w+)/(?P<level>\w+)/$',
+        views.HOGsAPIView.as_view(), name='HOGs'),'''
+

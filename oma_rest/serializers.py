@@ -34,6 +34,20 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     domains = serializers.HyperlinkedIdentityField(view_name='domain-detail', read_only=True,
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     xref = serializers.HyperlinkedIdentityField(view_name='xref-detail', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    orthologues = serializers.HyperlinkedIdentityField(view_name = 'ortho-detail', read_only = True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+
+class OrthologuesListSerializer(serializers.Serializer):
+    ortholog = ProteinEntrySerializer()
+    RelType = serializers.CharField()
+    Distance = serializers.FloatField()
+    Score = serializers.FloatField()
+
+    '''def get_ortholog(self,obj):
+        entry_nr=obj[1]
+        ortholog = ProteinEntry.from_entry_nr(db, entry_nr)
+        serializer = ProteinEntrySerializer(ortholog)
+        return serializer.data'''
+
 
 class ChromosomeInfoSerializer(serializers.Serializer):
     id = serializers.CharField()
@@ -84,7 +98,6 @@ class OmaGroupSerializer(serializers.Serializer):
     GroupNr = serializers.IntegerField()
     FingerPrint = serializers.CharField(required=False)
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
-
 
 class XRefSerializer(serializers.Serializer):
     xref = serializers.CharField()
