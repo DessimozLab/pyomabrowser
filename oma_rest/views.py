@@ -62,13 +62,14 @@ class OmaGroupViewSet(ViewSet):
             instance=data, context={'request': request})
         return Response(serializer.data)
 
+
 class HOGsViewSet(ViewSet):
     lookup_field = 'hog_id'
     serializer_class = serializers.ProteinEntrySerializer
 
     def retrieve(self, request, hog_id):
         level = self.request.query_params.get('level', None)
-        members = db.Database.member_of_hog_id(utils.db,hog_id = 'hog_id',level='level')
+        members = utils.db.member_of_hog_id(hog_id, level)
         serializer = serializers.ProteinEntrySerializer(instance = [models.ProteinEntry(utils.db, memb) for memb in members], many=True)
         return Response(serializer.data)
 
