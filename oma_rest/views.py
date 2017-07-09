@@ -91,6 +91,19 @@ class ProteinsViewSet(ViewSet):
         serializer = serializers.ProteinEntrySerializer(page, many= True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
+class ParalogsViewSet (ViewSet):
+    serializer_class = serializers.ProteinEntrySerializer
+    lookup_field = 'entry_id'
+
+    def retrieve(self, request, entry_id = None, format = None):
+        data = utils.db.get_within_species_paralogs(int(entry_id))
+        content = []
+        for row in data:
+            entry_nr = row[1]
+            ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
+            content.append({'ortholog': ortholog, 'RelType': row[4] , 'Distance': row[3], 'Score': row[2] })
+        serializer = serializers.ParalogsListSerializer(instance = content, many=True)
+        return Response(serializer.data)
 
 class OrthologsViewSet (ViewSet):
     serializer_class = serializers.ProteinEntrySerializer
@@ -103,7 +116,7 @@ class OrthologsViewSet (ViewSet):
             entry_nr = row[1]
             ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
             content.append({'ortholog': ortholog, 'RelType': row[4] , 'Distance': row[3], 'Score': row[2] })
-        serializer = serializers.OrthologuesListSerializer(instance = content, many=True)
+        serializer = serializers.OrthologsListSerializer(instance = content, many=True)
         return Response(serializer.data)
 
 

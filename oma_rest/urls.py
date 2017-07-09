@@ -14,7 +14,8 @@ router.register(r'xref', views.XRefsViewSet, base_name='xref')
 router.register(r'genome', views.GenomeViewSet, base_name='genome')
 router.register(r'proteins', views.ProteinsViewSet, base_name='proteins')
 router.register(r'hogs', views.HOGsViewSet, base_name='hogs')
-router.register(r'ortho', views.OrthologsViewSet, base_name='ortho')
+router.register(r'orthologs', views.OrthologsViewSet, base_name='orthologs')
+router.register(r'paralogs', views.ParalogsViewSet, base_name='paralogs')
 
 
 urlpatterns = [

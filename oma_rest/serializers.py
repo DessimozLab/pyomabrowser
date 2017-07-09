@@ -34,20 +34,21 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     domains = serializers.HyperlinkedIdentityField(view_name='domain-detail', read_only=True,
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     xref = serializers.HyperlinkedIdentityField(view_name='xref-detail', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    orthologues = serializers.HyperlinkedIdentityField(view_name = 'ortho-detail', read_only = True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    orthologs = serializers.HyperlinkedIdentityField(view_name = 'orthologs-detail', read_only = True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    paralogs = serializers.HyperlinkedIdentityField(view_name='paralogs-detail', read_only=True,
+                                                       lookup_field='entry_nr', lookup_url_kwarg='entry_id')
 
-class OrthologuesListSerializer(serializers.Serializer):
+class OrthologsListSerializer(serializers.Serializer):
     ortholog = ProteinEntrySerializer()
     RelType = serializers.CharField()
     Distance = serializers.FloatField()
     Score = serializers.FloatField()
 
-    '''def get_ortholog(self,obj):
-        entry_nr=obj[1]
-        ortholog = ProteinEntry.from_entry_nr(db, entry_nr)
-        serializer = ProteinEntrySerializer(ortholog)
-        return serializer.data'''
-
+class ParalogsListSerializer(serializers.Serializer):
+    paralog = ProteinEntrySerializer()
+    RelType = serializers.CharField()
+    Distance = serializers.FloatField()
+    Score = serializers.FloatField()
 
 class ChromosomeInfoSerializer(serializers.Serializer):
     id = serializers.CharField()
