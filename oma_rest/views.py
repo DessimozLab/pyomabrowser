@@ -70,7 +70,8 @@ class HOGsViewSet(ViewSet):
     def retrieve(self, request, hog_id):
         level = self.request.query_params.get('level', None)
         members = utils.db.member_of_hog_id(hog_id, level)
-        serializer = serializers.ProteinEntrySerializer(instance = [models.ProteinEntry(utils.db, memb) for memb in members], many=True)
+        data = {'hog_id': hog_id, 'level': level, 'members': [models.ProteinEntry(utils.db, memb) for memb in members] }
+        serializer = serializers.HOGserializer(instance = data, context={'request': request})
         return Response(serializer.data)
 
 
@@ -91,6 +92,7 @@ class ProteinsViewSet(ViewSet):
         page = paginator.paginate_queryset(prot, request)
         serializer = serializers.ProteinEntrySerializer(page, many= True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
+
 
 class ParalogsViewSet (ViewSet):
     serializer_class = serializers.ProteinEntrySerializer

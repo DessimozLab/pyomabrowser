@@ -50,6 +50,11 @@ class ParalogsListSerializer(serializers.Serializer):
     Distance = serializers.FloatField()
     Score = serializers.FloatField()
 
+class HOGserializer(serializers.Serializer):
+    hog_id = serializers.CharField()
+    level = serializers.CharField()
+    members = serializers.ListSerializer(child=ProteinEntrySerializer())
+
 class ChromosomeInfoSerializer(serializers.Serializer):
     id = serializers.CharField()
     entry_ranges = serializers.ListSerializer(
