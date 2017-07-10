@@ -822,7 +822,7 @@ class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
             context = super(EntryCentricOMAGroup, self).get_context_data(entry.oma_group, **kwargs)
         else:
             context = {}
-        context.update({'entry': entry, 'tab': 'og',
+        context.update({'entry': entry, 'tab': 'og', 'sub_tab': 'member_list',
                         'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
         return context
 
@@ -836,3 +836,17 @@ class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
         context.update(self.get_msa_results('og', context['group_nr']))
         return context
 
+
+@method_decorator(never_cache, name='dispatch')
+class EntryCentryOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
+    template_name = "omagroup_entry_msa.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        entry = self.get_entry(entry_id)
+        if entry.oma_group != 0:
+            context = super(EntryCentryOMAGroupMSA, self).get_context_data(entry.oma_group)
+        else:
+            context = {}
+        context.update({'entry': entry, 'tab': 'og', 'sub_tab': 'msa',
+                        'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
+        return context
