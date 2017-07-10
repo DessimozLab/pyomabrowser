@@ -812,3 +812,27 @@ class OMAGroup(TemplateView):
             raise Http404(e)
         return context
 
+
+class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
+    template_name = "omagroup_entry.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        entry = self.get_entry(entry_id)
+        if entry.oma_group != 0:
+            context = super(EntryCentricOMAGroup, self).get_context_data(entry.oma_group, **kwargs)
+        else:
+            context = {}
+        context.update({'entry': entry, 'tab': 'og',
+                        'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
+        return context
+
+
+@method_decorator(never_cache, name='dispatch')
+class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
+    template_name = "omagroup_msa.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroupMSA, self).get_context_data(group_id)
+        context.update(self.get_msa_results('og', context['group_nr']))
+        return context
+
