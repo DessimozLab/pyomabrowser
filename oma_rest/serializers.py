@@ -131,6 +131,8 @@ class GeneOntologySerializer(serializers.Serializer):
     def get_GO_term(self,obj):
         return str(obj.term)
 
+class LevelsSerializer(serializers.Serializer):
+    levels = serializers.ListSerializer(child = serializers.CharField())
 
 class DomainSerializer(serializers.Serializer):
     source = serializers.CharField()

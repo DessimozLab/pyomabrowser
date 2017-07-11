@@ -90,10 +90,21 @@ class HOGsViewSet(ViewSet):
 
     def retrieve(self, request, hog_id):
         level = self.request.query_params.get('level', None)
-        members = utils.db.member_of_hog_id(hog_id, level)
-        data = {'hog_id': hog_id, 'level': level, 'members': [models.ProteinEntry(utils.db, memb) for memb in members] }
-        serializer = serializers.HOGserializer(instance = data, context={'request': request})
-        return Response(serializer.data)
+        if level != None:
+            members = utils.db.member_of_hog_id(hog_id, level)
+            data = {'hog_id': hog_id, 'level': level, 'members': [models.ProteinEntry(utils.db, memb) for memb in members] }
+            serializer = serializers.HOGserializer(instance = data, context={'request': request})
+            return Response(serializer.data)
+        else:
+            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
+            fam_nr = members[0].hog_family_nr
+            levels = utils.db.hog_levels_of_fam(fam_nr)
+            levels_2 = []
+            for i in levels:
+                levels_2.append(i.decode("utf-8"))
+            data = {'levels' : levels_2}
+            serializer = serializers.LevelsSerializer(instance = data)
+            return Response(serializer.data)
 
 
 class ProteinsViewSet(ViewSet):
