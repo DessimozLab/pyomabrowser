@@ -93,10 +93,21 @@ class GenomeDetailSerializer(GenomeInfoSerializer):
             chrs.append({'id': chr_id, 'entry_ranges': ranges})
         return chrs
 
+class RelatedGroupsSerializer(serializers.Serializer):
+    GroupNr = serializers.SerializerMethodField(method_name = None)
+    Hits = serializers.SerializerMethodField(method_name=None)
+
+    def get_GroupNr(self, obj):
+        return (obj[0])
+
+    def get_Hits(self,obj):
+        return (obj[1])
+
 class OmaGroupSerializer(serializers.Serializer):
     GroupNr = serializers.IntegerField()
     fingerprint = serializers.CharField()
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
+    related_groups = serializers.ListSerializer (child = RelatedGroupsSerializer())
 
 class XRefSerializer(serializers.Serializer):
     xref = serializers.CharField()

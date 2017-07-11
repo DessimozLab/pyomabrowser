@@ -12,7 +12,7 @@ from pyoma.browser import models, db
 import logging
 
 from rest_framework.pagination import PageNumberPagination
-
+from collections import Counter
 
 logger = logging.getLogger(__name__)
 
@@ -55,10 +55,30 @@ class OmaGroupViewSet(ViewSet):
     def retrieve(self, request, id=None, format=None):
         members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
         data = utils.db.oma_group_metadata(members[0].oma_group)
+        content = []
+        for m in members:
+            #get all the verified pairs
+            vpairs = utils.db.get_vpairs(m.entry_nr)
+            # vpairs into instances of the ProteinEntry model
+            for row in vpairs:
+                entry_nr = row[1]
+                ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
+                content.append(ortholog)
+        groups = []
+        #extract groups for vpairs but ignore vpairs with the same oma_group as the query id
+        for row in content:
+            if row.oma_group == int(id):
+                pass
+            else:
+                groups.append(row.oma_group)
+        #count the groups' hits and return in form of a list instead of a dictionary
+        r_groups = Counter(groups).most_common()
+
         fingerprint = data['fingerprint']
         data['members'] = members
         data['GroupNr'] = id
         data['fingerprint'] = fingerprint
+        data['related_groups'] = r_groups
         serializer = serializers.OmaGroupSerializer(
             instance=data, context={'request': request})
         return Response(serializer.data)
