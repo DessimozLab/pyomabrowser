@@ -45,7 +45,6 @@ class ProteinDomains(ViewSet):
         entry = utils.db.entry_by_entry_nr(entry_nr)
         domains = utils.db.get_domains(entry['EntryNr'])
         response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
-        #serializer = serializer.
         return Response(response)
 
 
@@ -54,10 +53,12 @@ class OmaGroupViewSet(ViewSet):
     serializer_class = serializers.ProteinEntrySerializer
 
     def retrieve(self, request, id=None, format=None):
-        #fingerprint = utils.db.get_hdf5_handle().root.OmaGroups.MetaData.read_where('GroupNr'==id, field='Fingerprint').decode("utf-8")
-        data = {'members': [models.ProteinEntry(utils.db, memb) for memb in utils.db.oma_group_members(int(id))],
-                'FingerPrint': '',
-                'GroupNr': int(id)}
+        members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
+        data = utils.db.oma_group_metadata(members[0].oma_group)
+        fingerprint = data['fingerprint']
+        data['members'] = members
+        data['GroupNr'] = id
+        data['fingerprint'] = fingerprint
         serializer = serializers.OmaGroupSerializer(
             instance=data, context={'request': request})
         return Response(serializer.data)
@@ -93,21 +94,6 @@ class ProteinsViewSet(ViewSet):
         serializer = serializers.ProteinEntrySerializer(page, many= True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
-
-class ParalogsViewSet (ViewSet):
-    serializer_class = serializers.ProteinEntrySerializer
-    lookup_field = 'entry_id'
-
-    def retrieve(self, request, entry_id = None, format = None):
-        data = utils.db.get_within_species_paralogs(int(entry_id))
-        content = []
-        for row in data:
-            entry_nr = row[1]
-            ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
-            content.append({'ortholog': ortholog, 'RelType': row[4] , 'Distance': row[3], 'Score': row[2] })
-        serializer = serializers.ParalogsListSerializer(instance = content, many=True)
-        return Response(serializer.data)
-
 class OrthologsViewSet (ViewSet):
     serializer_class = serializers.ProteinEntrySerializer
     lookup_field = 'entry_id'
@@ -120,6 +106,16 @@ class OrthologsViewSet (ViewSet):
             ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
             content.append({'ortholog': ortholog, 'RelType': row[4] , 'Distance': row[3], 'Score': row[2] })
         serializer = serializers.OrthologsListSerializer(instance = content, many=True)
+        return Response(serializer.data)
+
+class GeneOntologyViewSet (ViewSet):
+    serializer_class = serializers.GeneOntologySerializer
+    lookup_field = 'entry_id'
+
+    def retrieve(self, request, entry_id = None, format= None):
+        data = db.Database.get_gene_ontology_annotations(utils.db, int(entry_id))
+        ontologies = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
+        serializer = serializers.GeneOntologySerializer(instance = ontologies, many = True)
         return Response(serializer.data)
 
 

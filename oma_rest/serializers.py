@@ -12,7 +12,7 @@ class ProteinEntrySerializer(serializers.Serializer):
     canonicalid = serializers.CharField()
     oma_group = serializers.IntegerField()
     roothog_id = serializers.IntegerField(source='hog_family_nr')
-    oma_hog = serializers.CharField()
+    oma_hog_id = serializers.CharField(source ='oma_hog')
     sequence_length = serializers.IntegerField()
     sequence_md5 = serializers.CharField()
     chromosome = serializers.CharField()
@@ -35,17 +35,10 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     xref = serializers.HyperlinkedIdentityField(view_name='xref-detail', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     orthologs = serializers.HyperlinkedIdentityField(view_name = 'orthologs-detail', read_only = True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    paralogs = serializers.HyperlinkedIdentityField(view_name='paralogs-detail', read_only=True,
-                                                       lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    ontology = serializers.HyperlinkedIdentityField(view_name='ontology-detail', read_only = True, lookup_field = 'entry_nr', lookup_url_kwarg= 'entry_id')
 
 class OrthologsListSerializer(serializers.Serializer):
     ortholog = ProteinEntrySerializer()
-    RelType = serializers.CharField()
-    Distance = serializers.FloatField()
-    Score = serializers.FloatField()
-
-class ParalogsListSerializer(serializers.Serializer):
-    paralog = ProteinEntrySerializer()
     RelType = serializers.CharField()
     Distance = serializers.FloatField()
     Score = serializers.FloatField()
@@ -102,7 +95,7 @@ class GenomeDetailSerializer(GenomeInfoSerializer):
 
 class OmaGroupSerializer(serializers.Serializer):
     GroupNr = serializers.IntegerField()
-    FingerPrint = serializers.CharField(required=False)
+    fingerprint = serializers.CharField()
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
 
 class XRefSerializer(serializers.Serializer):
@@ -117,6 +110,15 @@ class XRefSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         pass
+
+class GeneOntologySerializer(serializers.Serializer):
+    entry_nr = serializers.IntegerField()
+    GO_term = serializers.SerializerMethodField(method_name=None)
+    evidence = serializers.CharField()
+    reference = serializers.CharField()
+
+    def get_GO_term(self,obj):
+        return str(obj.term)
 
 
 class DomainSerializer(serializers.Serializer):

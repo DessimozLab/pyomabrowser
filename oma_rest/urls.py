@@ -15,8 +15,7 @@ router.register(r'genome', views.GenomeViewSet, base_name='genome')
 router.register(r'proteins', views.ProteinsViewSet, base_name='proteins')
 router.register(r'hogs', views.HOGsViewSet, base_name='hogs')
 router.register(r'orthologs', views.OrthologsViewSet, base_name='orthologs')
-router.register(r'paralogs', views.ParalogsViewSet, base_name='paralogs')
-
+router.register(r'ontology', views.GeneOntologyViewSet, base_name='ontology')
 
 urlpatterns = [
     url(r'^', include(router.urls)),
@@ -26,6 +25,5 @@ urlpatterns = [
     url(r'^docs', include_docs_urls(title='REST API for the OMA Browser')),
 ]
 
-'''url(r'^HOGs/(?P<hog_id>\w+)/(?P<level>\w+)/$',
-        views.HOGsAPIView.as_view(), name='HOGs'),'''
+
 
