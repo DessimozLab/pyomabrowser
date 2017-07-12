@@ -19,6 +19,7 @@ class FileResult(models.Model):
         return False
 
 class HOGroup(models.Model):
-    hog_id = models.CharField(max_length=32)
+    hog_id =models.CharField(max_length=32)
+    roothog_id = models.CharField(max_length=32,primary_key=True)
     size = models.IntegerField()
 

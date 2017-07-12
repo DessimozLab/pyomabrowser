@@ -112,13 +112,16 @@ class HOGsViewSet(ViewSet):
         for row in hog_tab:
             hogs.append(row[1].decode("utf-8"))
         hogs = sorted(set(hogs))
-        data = []
+        data=[]
         for row in hogs:
-            data.append(m.HOGroup(hog_id=row))
+            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(row)]
+            fam_nr = members[0].hog_family_nr
+            data.append(m.HOGroup(roothog_id=fam_nr, hog_id=row))
+        data = list(set(data))
         paginator = PageNumberPagination()
         page = paginator.paginate_queryset(data, request)
-        serializer = serializers.HOGsListSerializer(instance = data,many=True,context={'request': request})
-        return Response(serializer.data)
+        serializer = serializers.HOGsListSerializer(page,many=True,context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
 
     def retrieve(self, request, hog_id):

@@ -143,10 +143,8 @@ class HOGsLevelsSerializer(serializers.Serializer):
 
 
 class HOGsListSerializer(serializers.Serializer):
-    hog_id = serializers.CharField()
-    hog_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True, lookup_field='hog_id', lookup_url_kwarg='hog_id')
-
-
+    roothog_id = serializers.CharField()
+    hog_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True, lookup_field='hog_id')
 
 class DomainSerializer(serializers.Serializer):
     source = serializers.CharField()
