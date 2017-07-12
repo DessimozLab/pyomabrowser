@@ -143,12 +143,14 @@ class HOGsViewSet(ViewSet):
             levels = utils.db.hog_levels_of_fam(fam_nr)
             levels_2 = []
             for row in levels:
-                row.decode("utf-8")
                 subHOGs = utils.db.get_subhogids_at_level(fam_nr,row)
                 subHOGs_2 = []
                 for i in subHOGs:
-                    subHOGs_2.append(i.decode("utf-8"))
-                levels_2.append({'level': row, 'subHOGs': subHOGs_2})
+                    if i.decode("utf-8") == hog_id:
+                        pass
+                    else:
+                        subHOGs_2.append(i.decode("utf-8"))
+                levels_2.append({'level': row.decode("utf-8"), 'subHOGs': subHOGs_2})
             data = {'hog_id': hog_id, 'levels' : levels_2}
             serializer = serializers.HOGsDetailSerializer(instance = data)
             return Response(serializer.data)
