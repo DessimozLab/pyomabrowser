@@ -137,9 +137,13 @@ class GeneOntologySerializer(serializers.Serializer):
     def get_name(self,obj):
         return obj.term.name
 
-class HOGsLevelsSerializer(serializers.Serializer):
+class HOGsLevelSerializer(serializers.Serializer):
+    level = serializers.CharField()
+    subHOGs = serializers.ListSerializer(child= serializers.CharField(required=False))
+
+class HOGsDetailSerializer(serializers.Serializer):
     hog_id = serializers.CharField()
-    levels = serializers.ListSerializer(child = serializers.CharField())
+    levels = serializers.ListSerializer(child = HOGsLevelSerializer())
 
 
 class HOGsListSerializer(serializers.Serializer):
