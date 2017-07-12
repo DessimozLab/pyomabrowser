@@ -91,7 +91,7 @@ class OmaGroupViewSet(ViewSet):
         data['members'] = members
         data['GroupNr'] = id
         data['fingerprint'] = fingerprint
-        data['related_groups'] = r_groups
+        data['related_groups'] = sorted(r_groups)
         serializer = serializers.OmaGroupSerializer(
             instance=data, context={'request': request})
         return Response(serializer.data)
@@ -103,7 +103,7 @@ class HOGsViewSet(ViewSet):
 
     def list(self, request, format = None):
         """
-               List all the HOGs currently identified
+               List of all the roothog_id's HOGs currently identified and the url to access their details
 
 
                """
@@ -127,6 +127,7 @@ class HOGsViewSet(ViewSet):
     def retrieve(self, request, hog_id):
         """
                List all the levels present for a given Hog_id and by including it in the url as the query parameter, list all the member proteins.
+               Any subHOGs present at each level are also listed.
 
                :param hog_id: an unique identifier for a hog_group
                :param level: an unique name for a level
@@ -138,6 +139,7 @@ class HOGsViewSet(ViewSet):
             serializer = serializers.HOGserializer(instance = data, context={'request': request})
             return Response(serializer.data)
         else:
+            #fastest way to get from hog_id to fam_nr is through the members
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
             fam_nr = members[0].hog_family_nr
             levels = utils.db.hog_levels_of_fam(fam_nr)

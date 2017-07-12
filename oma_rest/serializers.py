@@ -15,6 +15,7 @@ class ProteinEntrySerializer(serializers.Serializer):
     oma_group = serializers.IntegerField()
     roothog_id = serializers.IntegerField(source='hog_family_nr')
     oma_hog_id = serializers.CharField(source ='oma_hog')
+    hog_levels = serializers.SerializerMethodField(method_name = None)
     sequence_length = serializers.IntegerField()
     sequence_md5 = serializers.CharField()
     chromosome = serializers.CharField()
@@ -29,6 +30,18 @@ class ProteinEntrySerializer(serializers.Serializer):
     def get_locus(self, obj):
         return [obj.locus_start, obj.locus_end, obj.strand]
 
+    def get_hog_levels(self,obj):
+        levels = db.hog_levels_of_fam(obj.hog_family_nr)
+        protein_levels = []
+        for level in levels:
+            level = level.decode("utf-8")
+            members_at_level = [ProteinEntry(db, memb) for memb in db.member_of_hog_id(obj.oma_hog, level)]
+            for member in members_at_level:
+                if str(member) == str(obj):
+                    protein_levels.append(level)
+                else:
+                    pass
+        return protein_levels
 
 class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     sequence = serializers.CharField()
