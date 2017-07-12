@@ -14,6 +14,7 @@ import logging
 from rest_framework.pagination import PageNumberPagination
 from collections import Counter
 from rest_framework.decorators import detail_route
+from oma import models as m
 
 logger = logging.getLogger(__name__)
 
@@ -111,10 +112,12 @@ class HOGsViewSet(ViewSet):
         for row in hog_tab:
             hogs.append(row[1].decode("utf-8"))
         hogs = sorted(set(hogs))
+        data = []
+        for row in hogs:
+            data.append(m.HOGroup(hog_id=row))
         paginator = PageNumberPagination()
-        page = paginator.paginate_queryset(hogs, request)
-        hogs_dict = {'hogs':hogs}
-        serializer = serializers.HOGsListSerializer(instance = hogs_dict,context={'request': request})
+        page = paginator.paginate_queryset(data, request)
+        serializer = serializers.HOGsListSerializer(instance = data,many=True,context={'request': request})
         return Response(serializer.data)
 
 
@@ -138,7 +141,7 @@ class HOGsViewSet(ViewSet):
             levels_2 = []
             for i in levels:
                 levels_2.append(i.decode("utf-8"))
-            data = {'levels' : levels_2}
+            data = {'hog_id': hog_id, 'levels' : levels_2}
             serializer = serializers.HOGsLevelsSerializer(instance = data)
             return Response(serializer.data)
 

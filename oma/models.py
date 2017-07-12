@@ -17,3 +17,8 @@ class FileResult(models.Model):
             self.delete()
             return True
         return False
+
+class HOGroup(models.Model):
+    hog_id = models.CharField(max_length=32)
+    size = models.IntegerField()
+

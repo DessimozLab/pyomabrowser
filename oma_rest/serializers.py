@@ -5,6 +5,7 @@ from rest_framework import serializers
 from oma.utils import db
 from pyoma.browser.models import ProteinEntry, Genome
 from pyoma.browser.db import XrefIdMapper
+from django.core.urlresolvers import reverse
 
 
 class ProteinEntrySerializer(serializers.Serializer):
@@ -126,18 +127,26 @@ class XRefSerializer(serializers.Serializer):
 class GeneOntologySerializer(serializers.Serializer):
     entry_nr = serializers.IntegerField()
     GO_term = serializers.SerializerMethodField(method_name=None)
+    name = serializers.SerializerMethodField(method_name=None)
     evidence = serializers.CharField()
     reference = serializers.CharField()
 
     def get_GO_term(self,obj):
         return str(obj.term)
 
+    def get_name(self,obj):
+        return obj.term.name
+
 class HOGsLevelsSerializer(serializers.Serializer):
+    hog_id = serializers.CharField()
     levels = serializers.ListSerializer(child = serializers.CharField())
 
 
 class HOGsListSerializer(serializers.Serializer):
-    hogs = serializers.ListSerializer(child = serializers.CharField())
+    hog_id = serializers.CharField()
+    hog_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True, lookup_field='hog_id', lookup_url_kwarg='hog_id')
+
+
 
 class DomainSerializer(serializers.Serializer):
     source = serializers.CharField()
