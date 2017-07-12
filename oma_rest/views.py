@@ -13,6 +13,7 @@ import logging
 
 from rest_framework.pagination import PageNumberPagination
 from collections import Counter
+from rest_framework.decorators import detail_route
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +24,11 @@ class ProteinEntryViewSet(ViewSet):
     lookup_field = 'entry_id'
 
     def retrieve(self, request, entry_id=None, format=None):
-        """Retrieve the basic information on a protein
+        """
+        Retrieve the basic information on a protein
 
-        :param entry_id: an unique identifier for a protein"""
+        :param entry_id: an unique identifier for a protein
+        """
         # Load the entry and its domains, before forming the JSON to draw client-side.
         entry_nr = utils.id_resolver.resolve(entry_id)
         serializer = serializers.ProteinEntryDetailSerializer(
@@ -38,9 +41,13 @@ class ProteinDomains(ViewSet):
     lookup_field='entry_id'
 
     def retrieve(self, request, entry_id=None, format=None):
-        """retrieve the domains of a protein if available
+        """
 
-        :param entry_id: a unique identifier for the protein"""
+        Retrieve all the domains of a protein if available
+
+        :param entry_id: a unique identifier for the protein
+
+        """
         entry_nr = utils.id_resolver.resolve(entry_id)
         entry = utils.db.entry_by_entry_nr(entry_nr)
         domains = utils.db.get_domains(entry['EntryNr'])
@@ -53,6 +60,11 @@ class OmaGroupViewSet(ViewSet):
     serializer_class = serializers.ProteinEntrySerializer
 
     def retrieve(self, request, id=None, format=None):
+        """
+               Retrieve the meta data on the OMA group, its protein members and related groups
+
+               :param group_id: an unique identifier for an OMA group
+               """
         members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
         data = utils.db.oma_group_metadata(members[0].oma_group)
         content = []
@@ -88,7 +100,31 @@ class HOGsViewSet(ViewSet):
     lookup_field = 'hog_id'
     serializer_class = serializers.ProteinEntrySerializer
 
+    def list(self, request, format = None):
+        """
+               List all the HOGs currently identified
+
+
+               """
+        hog_tab = utils.db.get_hdf5_handle().root.HogLevel
+        hogs = []
+        for row in hog_tab:
+            hogs.append(row[1].decode("utf-8"))
+        hogs = sorted(set(hogs))
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(hogs, request)
+        hogs_dict = {'hogs':hogs}
+        serializer = serializers.HOGsListSerializer(instance = hogs_dict,context={'request': request})
+        return Response(serializer.data)
+
+
     def retrieve(self, request, hog_id):
+        """
+               List all the levels present for a given Hog_id and by including it in the url as the query parameter, list all the member proteins.
+
+               :param hog_id: an unique identifier for a hog_group
+               :param level: an unique name for a level
+               """
         level = self.request.query_params.get('level', None)
         if level != None:
             members = utils.db.member_of_hog_id(hog_id, level)
@@ -103,33 +139,19 @@ class HOGsViewSet(ViewSet):
             for i in levels:
                 levels_2.append(i.decode("utf-8"))
             data = {'levels' : levels_2}
-            serializer = serializers.LevelsSerializer(instance = data)
+            serializer = serializers.HOGsLevelsSerializer(instance = data)
             return Response(serializer.data)
-
-
-class ProteinsViewSet(ViewSet):
-    lookup_field = 'genome_id'
-
-    def retrieve(self, request, genome_id= None, format=None):
-        try:
-            g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
-            prot = []
-            range1 = g.entry_nr_offset + 1
-            range2 = range1 + g.nr_entries
-            for entry_nr in range(range1, range2):
-                prot.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
-        except db.UnknownSpecies as e:
-            raise NotFound(e)
-        paginator = PageNumberPagination()
-        page = paginator.paginate_queryset(prot, request)
-        serializer = serializers.ProteinEntrySerializer(page, many= True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
 
 class OrthologsViewSet (ViewSet):
     serializer_class = serializers.ProteinEntrySerializer
     lookup_field = 'entry_id'
 
     def retrieve(self, request, entry_id = None, format = None):
+        """
+               Retrieve the orthologs for a protein entry
+
+               :param entry_id: an unique identifier for a protein
+               """
         data = utils.db.get_vpairs(int(entry_id))
         content = []
         for row in data:
@@ -144,6 +166,11 @@ class GeneOntologyViewSet (ViewSet):
     lookup_field = 'entry_id'
 
     def retrieve(self, request, entry_id = None, format= None):
+        """
+               Retrieve the available ontology data on a protein
+
+               :param entry_id: an unique identifier for a protein
+               """
         data = db.Database.get_gene_ontology_annotations(utils.db, int(entry_id))
         ontologies = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
         serializer = serializers.GeneOntologySerializer(instance = ontologies, many = True)
@@ -190,6 +217,11 @@ class XRefsViewSet(ViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, entry_id, format=None):
+        """
+               Retrieve the cross rederencing for a given protein
+
+               :param entry_id: an unique identifier for a protein
+               """
         entry_nr = utils.id_resolver.resolve(entry_id)
         xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
         for ref in xrefs:
@@ -203,18 +235,51 @@ class GenomeViewSet(ViewSet):
     lookup_field = 'genome_id'
 
     def list(self, request, format=None):
+        """
+               List of all the genomes present in the current release
+
+
+               """
         make_genome = functools.partial(models.Genome, utils.db)
         genomes = [make_genome(g) for g in utils.id_mapper['OMA'].genome_table]
         serializer = serializers.GenomeInfoSerializer(instance=genomes, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, genome_id, format=None):
+        """
+               Retrieve the basic information on a given genome
+
+               :param genome_id: an unique identifier for a genome
+               """
         try:
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
         except db.UnknownSpecies as e:
             raise NotFound(e)
         serializer = serializers.GenomeDetailSerializer(instance=g,context={'request': request})
         return Response(serializer.data)
+
+    @detail_route()
+    def proteins_list(self, request, genome_id=None):
+        """
+                       Retrieve the list of proteins available for a genome
+
+                       :param genome_id: an unique identifier for a genome
+                       """
+
+        try:
+            g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
+            prot = []
+            range1 = g.entry_nr_offset + 1
+            range2 = range1 + g.nr_entries
+            for entry_nr in range(range1, range2):
+                prot.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
+        except db.UnknownSpecies as e:
+            raise NotFound(e)
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(prot, request)
+        serializer = serializers.ProteinEntrySerializer(page, many= True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
+
 
 
 class PairwiseRelationAPIView(APIView):

@@ -6,6 +6,7 @@ from oma.utils import db
 from pyoma.browser.models import ProteinEntry, Genome
 from pyoma.browser.db import XrefIdMapper
 
+
 class ProteinEntrySerializer(serializers.Serializer):
     entry_nr = serializers.IntegerField(required=True)
     omaid = serializers.CharField()
@@ -77,7 +78,7 @@ class GenomeInfoSerializer(serializers.Serializer):
 class GenomeDetailSerializer(GenomeInfoSerializer):
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
-    proteins = serializers.HyperlinkedIdentityField(view_name='proteins-detail', read_only=True,
+    proteins = serializers.HyperlinkedIdentityField(view_name='genome-proteins-list', read_only=True,
                                                     lookup_field='uniprot_species_code',
                                                     lookup_url_kwarg='genome_id')
     chromosomes = serializers.SerializerMethodField(method_name=None)
@@ -131,8 +132,12 @@ class GeneOntologySerializer(serializers.Serializer):
     def get_GO_term(self,obj):
         return str(obj.term)
 
-class LevelsSerializer(serializers.Serializer):
+class HOGsLevelsSerializer(serializers.Serializer):
     levels = serializers.ListSerializer(child = serializers.CharField())
+
+
+class HOGsListSerializer(serializers.Serializer):
+    hogs = serializers.ListSerializer(child = serializers.CharField())
 
 class DomainSerializer(serializers.Serializer):
     source = serializers.CharField()
