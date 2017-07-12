@@ -4,7 +4,7 @@ from operator import itemgetter
 from rest_framework import serializers
 from oma.utils import db
 from pyoma.browser.models import ProteinEntry, Genome
-
+from pyoma.browser.db import XrefIdMapper
 
 class ProteinEntrySerializer(serializers.Serializer):
     entry_nr = serializers.IntegerField(required=True)
@@ -12,7 +12,7 @@ class ProteinEntrySerializer(serializers.Serializer):
     canonicalid = serializers.CharField()
     oma_group = serializers.IntegerField()
     roothog_id = serializers.IntegerField(source='hog_family_nr')
-    oma_hog = serializers.CharField()
+    oma_hog_id = serializers.CharField(source ='oma_hog')
     sequence_length = serializers.IntegerField()
     sequence_md5 = serializers.CharField()
     chromosome = serializers.CharField()
@@ -33,7 +33,20 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     cdna = serializers.CharField()
     domains = serializers.HyperlinkedIdentityField(view_name='domain-detail', read_only=True,
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    xref = serializers.HyperlinkedIdentityField(view_name='xref-detail', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    orthologs = serializers.HyperlinkedIdentityField(view_name = 'orthologs-detail', read_only = True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    ontology = serializers.HyperlinkedIdentityField(view_name='ontology-detail', read_only = True, lookup_field = 'entry_nr', lookup_url_kwarg= 'entry_id')
 
+class OrthologsListSerializer(serializers.Serializer):
+    ortholog = ProteinEntrySerializer()
+    RelType = serializers.CharField()
+    Distance = serializers.FloatField()
+    Score = serializers.FloatField()
+
+class HOGserializer(serializers.Serializer):
+    hog_id = serializers.CharField()
+    level = serializers.CharField()
+    members = serializers.ListSerializer(child=ProteinEntrySerializer())
 
 class ChromosomeInfoSerializer(serializers.Serializer):
     id = serializers.CharField()
@@ -53,6 +66,7 @@ class GenomeInfoSerializer(serializers.Serializer):
     species = serializers.CharField(source='sciname')
     common = serializers.CharField(required=False)
 
+
     def create(self, validated_data):
         pass
 
@@ -63,6 +77,9 @@ class GenomeInfoSerializer(serializers.Serializer):
 class GenomeDetailSerializer(GenomeInfoSerializer):
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
+    proteins = serializers.HyperlinkedIdentityField(view_name='proteins-detail', read_only=True,
+                                                    lookup_field='uniprot_species_code',
+                                                    lookup_url_kwarg='genome_id')
     chromosomes = serializers.SerializerMethodField(method_name=None)
 
     def get_chromosomes(self, obj):
@@ -76,6 +93,21 @@ class GenomeDetailSerializer(GenomeInfoSerializer):
             chrs.append({'id': chr_id, 'entry_ranges': ranges})
         return chrs
 
+class RelatedGroupsSerializer(serializers.Serializer):
+    GroupNr = serializers.SerializerMethodField(method_name = None)
+    Hits = serializers.SerializerMethodField(method_name=None)
+
+    def get_GroupNr(self, obj):
+        return (obj[0])
+
+    def get_Hits(self,obj):
+        return (obj[1])
+
+class OmaGroupSerializer(serializers.Serializer):
+    GroupNr = serializers.IntegerField()
+    fingerprint = serializers.CharField()
+    members = serializers.ListSerializer(child=ProteinEntrySerializer())
+    related_groups = serializers.ListSerializer (child = RelatedGroupsSerializer())
 
 class XRefSerializer(serializers.Serializer):
     xref = serializers.CharField()
@@ -90,6 +122,17 @@ class XRefSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         pass
 
+class GeneOntologySerializer(serializers.Serializer):
+    entry_nr = serializers.IntegerField()
+    GO_term = serializers.SerializerMethodField(method_name=None)
+    evidence = serializers.CharField()
+    reference = serializers.CharField()
+
+    def get_GO_term(self,obj):
+        return str(obj.term)
+
+class LevelsSerializer(serializers.Serializer):
+    levels = serializers.ListSerializer(child = serializers.CharField())
 
 class DomainSerializer(serializers.Serializer):
     source = serializers.CharField()

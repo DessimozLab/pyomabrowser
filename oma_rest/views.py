@@ -11,6 +11,9 @@ from . import serializers
 from pyoma.browser import models, db
 import logging
 
+from rest_framework.pagination import PageNumberPagination
+from collections import Counter
+
 logger = logging.getLogger(__name__)
 
 
@@ -42,7 +45,6 @@ class ProteinDomains(ViewSet):
         entry = utils.db.entry_by_entry_nr(entry_nr)
         domains = utils.db.get_domains(entry['EntryNr'])
         response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
-        #serializer = serializer.
         return Response(response)
 
 
@@ -51,10 +53,100 @@ class OmaGroupViewSet(ViewSet):
     serializer_class = serializers.ProteinEntrySerializer
 
     def retrieve(self, request, id=None, format=None):
-        group = utils.db.oma_group_members(int(id))
-        serializer = serializers.ProteinEntrySerializer(
-            instance=(models.ProteinEntry(utils.db, memb) for memb in group),
-            many=True, context={'request': request})
+        members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
+        data = utils.db.oma_group_metadata(members[0].oma_group)
+        content = []
+        for m in members:
+            #get all the verified pairs
+            vpairs = utils.db.get_vpairs(m.entry_nr)
+            # vpairs into instances of the ProteinEntry model
+            for row in vpairs:
+                entry_nr = row[1]
+                ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
+                content.append(ortholog)
+        groups = []
+        #extract groups for vpairs but ignore vpairs with the same oma_group as the query id
+        for row in content:
+            if row.oma_group == int(id):
+                pass
+            else:
+                groups.append(row.oma_group)
+        #count the groups' hits and return in form of a list instead of a dictionary
+        r_groups = Counter(groups).most_common()
+
+        fingerprint = data['fingerprint']
+        data['members'] = members
+        data['GroupNr'] = id
+        data['fingerprint'] = fingerprint
+        data['related_groups'] = r_groups
+        serializer = serializers.OmaGroupSerializer(
+            instance=data, context={'request': request})
+        return Response(serializer.data)
+
+
+class HOGsViewSet(ViewSet):
+    lookup_field = 'hog_id'
+    serializer_class = serializers.ProteinEntrySerializer
+
+    def retrieve(self, request, hog_id):
+        level = self.request.query_params.get('level', None)
+        if level != None:
+            members = utils.db.member_of_hog_id(hog_id, level)
+            data = {'hog_id': hog_id, 'level': level, 'members': [models.ProteinEntry(utils.db, memb) for memb in members] }
+            serializer = serializers.HOGserializer(instance = data, context={'request': request})
+            return Response(serializer.data)
+        else:
+            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
+            fam_nr = members[0].hog_family_nr
+            levels = utils.db.hog_levels_of_fam(fam_nr)
+            levels_2 = []
+            for i in levels:
+                levels_2.append(i.decode("utf-8"))
+            data = {'levels' : levels_2}
+            serializer = serializers.LevelsSerializer(instance = data)
+            return Response(serializer.data)
+
+
+class ProteinsViewSet(ViewSet):
+    lookup_field = 'genome_id'
+
+    def retrieve(self, request, genome_id= None, format=None):
+        try:
+            g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
+            prot = []
+            range1 = g.entry_nr_offset + 1
+            range2 = range1 + g.nr_entries
+            for entry_nr in range(range1, range2):
+                prot.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
+        except db.UnknownSpecies as e:
+            raise NotFound(e)
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(prot, request)
+        serializer = serializers.ProteinEntrySerializer(page, many= True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
+
+class OrthologsViewSet (ViewSet):
+    serializer_class = serializers.ProteinEntrySerializer
+    lookup_field = 'entry_id'
+
+    def retrieve(self, request, entry_id = None, format = None):
+        data = utils.db.get_vpairs(int(entry_id))
+        content = []
+        for row in data:
+            entry_nr = row[1]
+            ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
+            content.append({'ortholog': ortholog, 'RelType': row[4] , 'Distance': row[3], 'Score': row[2] })
+        serializer = serializers.OrthologsListSerializer(instance = content, many=True)
+        return Response(serializer.data)
+
+class GeneOntologyViewSet (ViewSet):
+    serializer_class = serializers.GeneOntologySerializer
+    lookup_field = 'entry_id'
+
+    def retrieve(self, request, entry_id = None, format= None):
+        data = db.Database.get_gene_ontology_annotations(utils.db, int(entry_id))
+        ontologies = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
+        serializer = serializers.GeneOntologySerializer(instance = ontologies, many = True)
         return Response(serializer.data)
 
 
@@ -121,7 +213,7 @@ class GenomeViewSet(ViewSet):
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
         except db.UnknownSpecies as e:
             raise NotFound(e)
-        serializer = serializers.GenomeDetailSerializer(instance=g)
+        serializer = serializers.GenomeDetailSerializer(instance=g,context={'request': request})
         return Response(serializer.data)
 
 
