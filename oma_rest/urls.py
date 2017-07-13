@@ -15,7 +15,7 @@ router.register(r'genome', views.GenomeViewSet, base_name='genome')
 router.register(r'hogs', views.HOGsViewSet, base_name='hogs')
 router.register(r'orthologs', views.OrthologsViewSet, base_name='orthologs')
 router.register(r'ontology', views.GeneOntologyViewSet, base_name='ontology')
-router.register(r'hogs_levels', views.HOGLevelsListViewSet, base_name='hogs_levels')
+router.register(r'hogslevels', views.HOGLevelsListViewSet, base_name='hogslevels')
 
 urlpatterns = [
     url(r'^', include(router.urls)),

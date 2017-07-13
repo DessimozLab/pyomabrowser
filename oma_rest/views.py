@@ -113,7 +113,7 @@ class HOGLevelsListViewSet(ViewSet):
         data = []
         for level in levels:
             data.append({'level': level.decode("utf-8")})
-        serializer = serializers.HOGsLevelsListSerializer(instance = data, many = True)
+        serializer = serializers.HOGsLevelsListSerializer(instance = data, many = True, context={'request': request})
         return Response(serializer.data)
 
     def retrieve(self,request, level):
@@ -125,9 +125,10 @@ class HOGLevelsListViewSet(ViewSet):
         hogs = []
         for row in hog_tab:
             hogs.append(row[1].decode("utf-8"))
-        hogs = sorted(set(hogs))
+        hog_ids = sorted(set(hogs))
+        hog_ids = [elem[:11] for elem in hog_ids]
         data = []
-        for row in hogs:
+        for row in hog_ids:
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(row)]
             fam_nr = members[0].hog_family_nr
             data.append(m.HOGroup(roothog_id=fam_nr, hog_id=row))
@@ -153,9 +154,9 @@ class HOGsViewSet(ViewSet):
         hogs = []
         for row in hog_tab:
             hogs.append(row[1].decode("utf-8"))
-        hogs = sorted(set(hogs))
+        hog_ids = sorted(set(hogs))
         data=[]
-        for row in hogs:
+        for row in hog_ids:
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(row)]
             fam_nr = members[0].hog_family_nr
             data.append(m.HOGroup(roothog_id=fam_nr, hog_id=row))
