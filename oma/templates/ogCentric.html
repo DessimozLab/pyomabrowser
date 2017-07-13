@@ -29,38 +29,20 @@
     <h2 class="">OMA Group {{ group_nr }}
       <a href="#" class="badge" role="button" data-toggle="modal" data-target="#groupModal" id="groupmodalhelp">?</a>
     </h2>
-    <h4>{{ keyword }}</h4></div><br/>
-    <h4>This group has {{  }}</h4>
-    {% block seqhead_hook %}{% endblock %}
+    <h4>{{ keyword }}</h4><br/>
+    <h4>This group has {{ members|length }} members:
+    {% for king, cnt in kingdom_composition.items %}
+        {% include "includes/kingdom.html" with kingdom=king %} {{ cnt }}
+    {% endfor %}
+    </h4>
+    <h4>Fingerprint: {{ fingerprint }}</h4>
+    {% block grouphead_hook %}{% endblock %}
     <br>
     <ul class="nav nav-tabs" role="tablist">
-        <li {% ifequal tab 'info' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}" >Information</a></li>
-        <li {% ifequal tab 'orthologs' %} class="active" {%endifequal%} ><a href="{% url 'pairs' entry.omaid %}" >Orthologs {% if nr_vps %}<span class="badge">{{nr_vps}}</span>{% endif %}</a></li>
-        {% if entry.genome.is_polyploid %}
-            <li {% ifequal tab 'homeologs' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}&amp;p2=homeologs" >Homeologs {% if nr_hps %}<span class="badge">{{nr_hps}}</span>{% endif %}</a></li>
-        {% endif %}
-        <li {% ifequal tab 'synteny' %} class="active" {%endifequal%} ><a href="{% url 'synteny' entry.omaid 4 4 %}" >Synteny</a></li>
-
-        <!-- <li {% ifequal tab 'hogs' %} class="active" {%endifequal%} ><a href="{% url 'hogs' entry.omaid %}" >Hierarchical Orthologous Groups</a></li> -->
-
-
-        <li {% if tab == 'hogs' %} class="dropdown active " {% else %} class="dropdown" {% endif %} >
-            <a class='left_hog_tab' href="{% url 'hog_vis' entry.omaid %}">Hierarchical Orthologous Groups  </a>
-
-        </li>
-
-    <li {% if tab == 'hogs' %} class="dropdown active " {% else %} class="dropdown" {% endif %} >
-            <a href="" class="dropdown-toggle right_hog_tab" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></a>
-
-        <ul class="dropdown-menu">
-                <li class="dropdown-header">Visualise HOG with:</li>
-                <li class="text-left"><a href="{% url 'hog_vis' entry.omaid %}">hogvis viewer</a> </li>
-                <li class="text-left"><a href="{% url 'hogs' entry.omaid %}">table viewer</a></li>
-            </ul>
-        </li>
-
-
-        <li {% ifequal tab 'groups' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{entry.omaid}}&amp;p2=groups">OMA groups</a></li>
+        <li {% ifequal sub_tab 'member_list' %} class="active" {%endifequal%} ><a href="{% url "omagroup" group_nr %}" >Protein List</a></li>
+        <li {% ifequal sub_tab 'msa' %} class="active" {%endifequal%} ><a href="{% url 'omagroup-msa' group_nr %}" >Alignment</a></li>
+        <li {% ifequal sub_tab 'close_groups' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayGroup&amp;p1={{group_nr}}&amp;p2=Close">Close Groups</a></li>
+        <li {% ifequal sub_tab 'onto_groups' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayGroup&amp;p1={{group_nr}}&amp;p2=Onto">Ontology</a></li>
     </ul>
 
     <div class="tab-content">

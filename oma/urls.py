@@ -32,7 +32,10 @@ urlpatterns = [
     #url(r'^group/(?P<entry_id>\w+)/$', views.OMAGroupForEntry.as_view(), name="omagroup_for_entry"),
     #url(r'^group/(?P<entry_id>\w+)/msa/$', views.OMAGroupForEntryMSA.as_view(), name="omagroup_for_entry-msa"),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/$', views.OMAGroup.as_view(), name='omagroup'),
-    #url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroupMSA.as_view(), name='omagroup-msa'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroupMSA.as_view(), name='omagroup-msa'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/fasta/$', views.OMAGroupFasta.as_view(), name='omagroup-fasta'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
+
     url(r'^export_markers', views.export_marker_genes, name='export_markers'),
     url(r'^markers/(?P<data_id>\w+)/$', views.marker_genes_retrieve_results, name='marker_genes'),
     # hogdata
