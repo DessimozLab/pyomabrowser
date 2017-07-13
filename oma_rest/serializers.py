@@ -150,6 +150,9 @@ class GeneOntologySerializer(serializers.Serializer):
     def get_name(self,obj):
         return obj.term.name
 
+class HOGsLevelsListSerializer(serializers.Serializer):
+    level = serializers.CharField()
+
 class HOGsLevelSerializer(serializers.Serializer):
     level = serializers.CharField()
     subHOGs = serializers.ListSerializer(child= serializers.CharField(required=False))
@@ -161,7 +164,8 @@ class HOGsDetailSerializer(serializers.Serializer):
 
 class HOGsListSerializer(serializers.Serializer):
     roothog_id = serializers.CharField()
-    hog_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True, lookup_field='hog_id')
+    hog_id_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True, lookup_field='hog_id')
+
 
 class DomainSerializer(serializers.Serializer):
     source = serializers.CharField()

@@ -13,7 +13,7 @@ import logging
 
 from rest_framework.pagination import PageNumberPagination
 from collections import Counter
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from oma import models as m
 
 logger = logging.getLogger(__name__)
@@ -96,6 +96,48 @@ class OmaGroupViewSet(ViewSet):
             instance=data, context={'request': request})
         return Response(serializer.data)
 
+class HOGLevelsListViewSet(ViewSet):
+    lookup_field = 'level'
+    serializer_class = serializers.HOGsLevelsListSerializer
+
+    def list(self,request, format=None):
+        """
+            List of all the levels for currently identified HOGs.
+            By passing a level parameter into the url, all the hogs present at that level are listed
+
+           """
+
+        hog_tab = utils.db.get_hdf5_handle().root.HogLevel
+        levels = hog_tab.col('Level')
+        levels = set(levels)
+        data = []
+        for level in levels:
+            data.append({'level': level.decode("utf-8")})
+        serializer = serializers.HOGsLevelsListSerializer(instance = data, many = True)
+        return Response(serializer.data)
+
+    def retrieve(self,request, level):
+        """
+                    List of all the hogs with the relevant level.
+
+                   """
+        hog_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(Level==level)')
+        hogs = []
+        for row in hog_tab:
+            hogs.append(row[1].decode("utf-8"))
+        hogs = sorted(set(hogs))
+        data = []
+        for row in hogs:
+            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(row)]
+            fam_nr = members[0].hog_family_nr
+            data.append(m.HOGroup(roothog_id=fam_nr, hog_id=row))
+        data = list(set(data))
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(data, request)
+        serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
+
+
 
 class HOGsViewSet(ViewSet):
     lookup_field = 'hog_id'
@@ -156,6 +198,8 @@ class HOGsViewSet(ViewSet):
             data = {'hog_id': hog_id, 'levels' : levels_2}
             serializer = serializers.HOGsDetailSerializer(instance = data)
             return Response(serializer.data)
+
+
 
 class OrthologsViewSet (ViewSet):
     serializer_class = serializers.ProteinEntrySerializer
