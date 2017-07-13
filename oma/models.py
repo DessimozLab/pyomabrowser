@@ -23,3 +23,5 @@ class HOGroup(models.Model):
     roothog_id = models.CharField(max_length=32,primary_key=True)
     size = models.IntegerField()
 
+class HOGLevel(models.Model):
+    level=models.CharField(max_length=100)

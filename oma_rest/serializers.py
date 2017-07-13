@@ -7,9 +7,6 @@ from pyoma.browser.models import ProteinEntry, Genome
 from pyoma.browser.db import XrefIdMapper
 
 
-
-
-
 class ProteinEntrySerializer(serializers.Serializer):
     entry_nr = serializers.IntegerField(required=True)
     omaid = serializers.CharField()

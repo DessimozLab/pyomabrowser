@@ -112,7 +112,8 @@ class HOGLevelsListViewSet(ViewSet):
         levels = set(levels)
         data = []
         for level in levels:
-            data.append({'level': level.decode("utf-8")})
+            level = level.decode("utf-8")
+            data.append(m.HOGLevel(level=level))
         serializer = serializers.HOGsLevelsListSerializer(instance = data, many = True, context={'request': request})
         return Response(serializer.data)
 
