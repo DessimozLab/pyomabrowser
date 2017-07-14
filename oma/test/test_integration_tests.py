@@ -103,9 +103,10 @@ class HogVisViewTest(TestCase):
                                                {'name': 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'id': 559292}]},
                                  {'name': 'Plasmodium falciparum (isolate 3D7)', 'id': 36329}]}
         reply = self.client.get(reverse('hog_vis', args=['YEAST12']))
+        self.assertEqual(reply.status_code, 200)
+
         phylo = json.loads(reply.context['species_tree'])
         self.assertDictEqual(exp_tree, phylo)
-
         per_species = json.loads(reply.context['per_species'])
         for spec, lev, cnts in [('Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'Eukaryota', [2]),
                                 ('Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', [1,1]),
