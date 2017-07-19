@@ -1,0 +1,88 @@
+{% extends  "seqCV.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA Group for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}OMA Groups provide a set of genes that are all orthologous to each other, i.e their pairwise orthologous relations form a complete graph. OMA Groups are intended to be used to reconstruct species phylogeny.{% endblock %}
+
+
+{% block contentTab %}
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="myModalLabel">The OMA Browser reports for every entry different types of orthology</h3>
+			</div>
+			<div class="modal-body">
+				{% include "includes/otypes.html" %}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="groupModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h3 class="modal-title" id="groupModalLabel">OMA Groups functionality</h3>
+      </div>
+      <div class="modal-body">
+        {% include "includes/grouphelp.html" %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            OMA Group (Proteins all orthologous to each other)
+            <a href="#" class="badge" role="button" data-toggle="modal" data-target=".bs-example-modal-lg">?</a>
+        </h3>
+    </div>
+    <div class="panel-body">
+    {% if entry.oma_group != 0 %}
+    <h2 class="">OMA Group {{ group_nr }}
+      <a href="#" class="badge" role="button" data-toggle="modal" data-target="#groupModal" id="groupmodalhelp">?</a>
+    </h2>
+    <h4>{{ keyword }}</h4><br/>
+    <h4>This group has {{ members|length }} members:
+    {% for king, cnt in kingdom_composition.items %}
+        {% include "includes/kingdom.html" with kingdom=king %} {{ cnt }}
+    {% endfor %}
+    </h4>
+    <h4>Fingerprint: {{ fingerprint }}</h4>
+    {% block grouphead_hook %}{% endblock %}
+    <br>
+    <ul class="nav nav-tabs" role="tablist">
+        <li {% ifequal sub_tab 'member_list' %} class="active" {%endifequal%} ><a href="{% url "omagroup-entry" entry.omaid %}" >Protein List</a></li>
+        <li {% ifequal sub_tab 'msa' %} class="active" {%endifequal%} ><a href="{% url 'omagroup-entry-msa' entry.omaid %}" >Alignment</a></li>
+        <li {% ifequal sub_tab 'close_groups' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{entry.omaid}}&amp;p2=groups&amp;p3=Close">Close Groups</a></li>
+        <li {% ifequal sub_tab 'onto_groups' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayGroup&amp;p1={{entry.omaid}}&amp;p2=groups&amp;p3=Onto">Ontology</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane active" id="{{sub_tab}}">
+
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <div class="pull-right">
+                        Download:
+                        <a href="{% url 'omagroup-fasta' group_nr %}"><span class="glyphicon glyphicon-download">Fasta</span></a>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    {% include "includes/groupTable.html" %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    This protein is not part of any group or the group does not exist.
+    {% endif %}
+    </div>
+</div>
+
+{% endblock contentTab %}

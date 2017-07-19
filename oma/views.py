@@ -875,14 +875,14 @@ class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
 
 
 @method_decorator(never_cache, name='dispatch')
-class EntryCentryOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
+class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
     template_name = "omagroup_entry_msa.html"
 
     def get_context_data(self, entry_id, **kwargs):
         entry = self.get_entry(entry_id)
         if entry.oma_group != 0:
-            context = super(EntryCentryOMAGroupMSA, self).get_context_data(entry.oma_group)
+            context = super(EntryCentricOMAGroupMSA, self).get_context_data(entry.oma_group)
         else:
             context = {}
-        context['sub_tab'] = 'msa'
+        context.update({'sub_tab': 'msa', 'entry': entry})
         return context

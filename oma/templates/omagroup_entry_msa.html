@@ -1,0 +1,73 @@
+{% extends  "seqCV.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA: MSA of OMA Group containing {{ entry.omaid }}{% endblock %}
+{% block meta_description %}Multiple sequence alignment of the member proteins of the OMA Group {{ group_nr }}.{% endblock %}
+
+{% block meta_hook %}
+{% if msa_file_obj.state == "pending" or msa_file_obj.state == "running" %}
+    <meta http-equiv="refresh" content="5" />
+{% endif %}
+{% endblock %}
+
+{% block js_hook %}
+<script src="{% static "js/msa.js"%}"></script>
+{% endblock %}
+
+{% block contentTab %}
+
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="myModalLabel">The OMA Browser reports for every entry different types of orthology</h3>
+			</div>
+			<div class="modal-body">
+				{% include "includes/otypes.html" %}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="groupModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h3 class="modal-title" id="groupModalLabel">OMA Groups functionality</h3>
+      </div>
+      <div class="modal-body">
+        {% include "includes/grouphelp.html" %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            OMA Group (Proteins all orthologous to each other)
+            <a href="#" class="badge" role="button" data-toggle="modal" data-target=".bs-example-modal-lg">?</a>
+        </h3>
+    </div>
+    <div class="panel-body">
+    {% if entry.oma_group != 0 %}
+
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <div class="pull-right">
+                </div>
+            </div>
+            <div class="panel-body">
+                {% include "includes/msa.html" %}
+            </div>
+        </div>
+    {% else %}
+        This protein is not part of any group or the group does not exist.
+    {% endif %}
+    </div>
+</div>
+
+{% endblock contentTab %}
