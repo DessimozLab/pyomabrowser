@@ -1,6 +1,7 @@
 # sql database models
 from django.db import models
 from django.utils import timezone
+import re
 
 
 class FileResult(models.Model):
@@ -18,10 +19,14 @@ class FileResult(models.Model):
             return True
         return False
 
-class HOGroup(models.Model):
-    hog_id =models.CharField(max_length=32)
-    roothog_id = models.CharField(max_length=32,primary_key=True)
-    size = models.IntegerField()
-
-class HOGLevel(models.Model):
-    level=models.CharField(max_length=100)
+class HOG(object):
+    def __init__(self, hog_id=None, level=None):
+        self.hog_id = hog_id
+        self.level = level
+        if hog_id is not None:
+            start = hog_id.find(':') + 1
+            end = hog_id.find('.')
+            if end >= 0:
+                self.roothog_id = int(hog_id[start:end])
+            else:
+                self.roothog_id = int(hog_id[start:])

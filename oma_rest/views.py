@@ -37,23 +37,41 @@ class ProteinEntryViewSet(ViewSet):
             context={'request': request})
         return Response(serializer.data)
 
+    @detail_route()
+    def  orthologs(self, request, entry_id=None, format=None):
+        data = utils.db.get_vpairs(int(entry_id))
+        content = []
+        for row in data:
+            entry_nr = row[1]
+            ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
+            content.append({'ortholog': ortholog, 'RelType': row[4], 'Distance': row[3], 'Score': row[2]})
+        serializer = serializers.OrthologsListSerializer(instance=content, many=True)
+        return Response(serializer.data)
 
-class ProteinDomains(ViewSet):
-    lookup_field='entry_id'
+    @detail_route()
+    def ontology(self, request, entry_id=None, format=None):
+        data = db.Database.get_gene_ontology_annotations(utils.db, int(entry_id))
+        ontologies = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
+        serializer = serializers.GeneOntologySerializer(instance=ontologies, many=True)
+        return Response(serializer.data)
 
-    def retrieve(self, request, entry_id=None, format=None):
-        """
-
-        Retrieve all the domains of a protein if available
-
-        :param entry_id: a unique identifier for the protein
-
-        """
+    @detail_route()
+    def domains(self,request,entry_id=None, format=None):
         entry_nr = utils.id_resolver.resolve(entry_id)
         entry = utils.db.entry_by_entry_nr(entry_nr)
         domains = utils.db.get_domains(entry['EntryNr'])
         response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
         return Response(response)
+
+    @detail_route()
+    def xref(self, request, entry_id=None, format=None):
+        entry_nr = utils.id_resolver.resolve(entry_id)
+        xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
+        for ref in xrefs:
+            ref['entry_nr'] = entry_nr
+            ref['omaid'] = utils.id_mapper['OMA'].map_entry_nr(entry_nr)
+        serializer = serializers.XRefSerializer(instance=xrefs, many=True)
+        return Response(serializer.data)
 
 
 class OmaGroupViewSet(ViewSet):
@@ -113,7 +131,7 @@ class HOGLevelsListViewSet(ViewSet):
         data = []
         for level in levels:
             level = level.decode("utf-8")
-            data.append(m.HOGLevel(level=level))
+            data.append(m.HOG(level=level))
         serializer = serializers.HOGsLevelsListSerializer(instance = data, many = True, context={'request': request})
         return Response(serializer.data)
 
@@ -126,14 +144,9 @@ class HOGLevelsListViewSet(ViewSet):
         hogs = []
         for row in hog_tab:
             hogs.append(row[1].decode("utf-8"))
-        hog_ids = sorted(set(hogs))
-        hog_ids = [elem[:11] for elem in hog_ids]
         data = []
-        for row in hog_ids:
-            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(row)]
-            fam_nr = members[0].hog_family_nr
-            data.append(m.HOGroup(roothog_id=fam_nr, hog_id=row))
-        data = list(set(data))
+        for row in hogs:
+            data.append(m.HOG(hog_id=row, level = level))
         paginator = PageNumberPagination()
         page = paginator.paginate_queryset(data, request)
         serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
@@ -143,6 +156,7 @@ class HOGLevelsListViewSet(ViewSet):
 
 class HOGsViewSet(ViewSet):
     lookup_field = 'hog_id'
+    lookup_value_regex = r'[^/]+'
     serializer_class = serializers.ProteinEntrySerializer
 
     def list(self, request, format = None):
@@ -151,21 +165,36 @@ class HOGsViewSet(ViewSet):
 
 
                """
-        hog_tab = utils.db.get_hdf5_handle().root.HogLevel
-        hogs = []
-        for row in hog_tab:
-            hogs.append(row[1].decode("utf-8"))
-        hog_ids = sorted(set(hogs))
-        data=[]
-        for row in hog_ids:
-            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(row)]
-            fam_nr = members[0].hog_family_nr
-            data.append(m.HOGroup(roothog_id=fam_nr, hog_id=row))
-        data = list(set(data))
-        paginator = PageNumberPagination()
-        page = paginator.paginate_queryset(data, request)
-        serializer = serializers.HOGsListSerializer(page,many=True,context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
+        level = self.request.query_params.get('level', None)
+        if level != None:
+            hog_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(Level==level)')
+            hogs = []
+            for row in hog_tab:
+                hogs.append(row[1].decode("utf-8"))
+            data = []
+            for row in hogs:
+                data.append(m.HOG(hog_id=row, level=level))
+            paginator = PageNumberPagination()
+            page = paginator.paginate_queryset(data, request)
+            serializer = serializers.HOGsListSerializer_at_level(page, many=True, context={'request': request})
+            return paginator.get_paginated_response(serializer.data)
+
+        else:
+            hog_tab = utils.db.get_hdf5_handle().root.HogLevel
+            hogs = []
+            for row in hog_tab:
+                hogs.append(row[1].decode("utf-8"))
+            hog_ids = sorted(set(hogs))
+            data=[]
+            for row in hog_ids:
+                members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(row)]
+                fam_nr = members[0].hog_family_nr
+                data.append(m.HOG(hog_id=row))
+            data = list(set(data))
+            paginator = PageNumberPagination()
+            page = paginator.paginate_queryset(data, request)
+            serializer = serializers.HOGsListSerializer(page,many=True,context={'request': request})
+            return paginator.get_paginated_response(serializer.data)
 
 
     def retrieve(self, request, hog_id):
@@ -187,55 +216,17 @@ class HOGsViewSet(ViewSet):
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
             fam_nr = members[0].hog_family_nr
             levels = utils.db.hog_levels_of_fam(fam_nr)
+            levels = list(set(levels))
             levels_2 = []
             for row in levels:
                 subHOGs = utils.db.get_subhogids_at_level(fam_nr,row)
                 subHOGs_2 = []
                 for i in subHOGs:
-                    if i.decode("utf-8") == hog_id:
-                        pass
-                    else:
-                        subHOGs_2.append(i.decode("utf-8"))
+                    subHOGs_2.append(m.HOG(hog_id=i.decode("utf-8"), level=row.decode('utf-8')))
                 levels_2.append({'level': row.decode("utf-8"), 'subHOGs': subHOGs_2})
             data = {'hog_id': hog_id, 'levels' : levels_2}
-            serializer = serializers.HOGsDetailSerializer(instance = data)
+            serializer = serializers.HOGsDetailSerializer(instance = data,context={'request': request})
             return Response(serializer.data)
-
-
-
-class OrthologsViewSet (ViewSet):
-    serializer_class = serializers.ProteinEntrySerializer
-    lookup_field = 'entry_id'
-
-    def retrieve(self, request, entry_id = None, format = None):
-        """
-               Retrieve the orthologs for a protein entry
-
-               :param entry_id: an unique identifier for a protein
-               """
-        data = utils.db.get_vpairs(int(entry_id))
-        content = []
-        for row in data:
-            entry_nr = row[1]
-            ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
-            content.append({'ortholog': ortholog, 'RelType': row[4] , 'Distance': row[3], 'Score': row[2] })
-        serializer = serializers.OrthologsListSerializer(instance = content, many=True)
-        return Response(serializer.data)
-
-class GeneOntologyViewSet (ViewSet):
-    serializer_class = serializers.GeneOntologySerializer
-    lookup_field = 'entry_id'
-
-    def retrieve(self, request, entry_id = None, format= None):
-        """
-               Retrieve the available ontology data on a protein
-
-               :param entry_id: an unique identifier for a protein
-               """
-        data = db.Database.get_gene_ontology_annotations(utils.db, int(entry_id))
-        ontologies = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
-        serializer = serializers.GeneOntologySerializer(instance = ontologies, many = True)
-        return Response(serializer.data)
 
 
 class APIVersion(ViewSet):
@@ -357,7 +348,7 @@ class PairwiseRelationAPIView(APIView):
                 # this means the chr does not exist
                 return 0, 0
 
-    def get(self, request, genome_id1, genome_id2):
+    def get(self, request, genome_id1, genome_id2, chr1=None, chr2=None):
         """List the pairwise relations among two genomes
 
         The relations are orthologs in case the genomes are

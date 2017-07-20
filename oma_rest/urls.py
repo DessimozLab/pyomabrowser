@@ -7,14 +7,11 @@ from rest_framework.documentation import include_docs_urls
 
 router = DefaultRouter()
 router.register(r'protein', views.ProteinEntryViewSet, base_name='protein')
-router.register(r'domain', views.ProteinDomains, base_name='domain')
 router.register(r'group', views.OmaGroupViewSet, base_name='group')
 router.register(r'version', views.APIVersion, base_name='version')
 router.register(r'xref', views.XRefsViewSet, base_name='xref')
 router.register(r'genome', views.GenomeViewSet, base_name='genome')
 router.register(r'hogs', views.HOGsViewSet, base_name='hogs')
-router.register(r'orthologs', views.OrthologsViewSet, base_name='orthologs')
-router.register(r'ontology', views.GeneOntologyViewSet, base_name='ontology')
 router.register(r'hogslevels', views.HOGLevelsListViewSet, base_name='hogslevels')
 
 urlpatterns = [

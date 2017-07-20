@@ -5,6 +5,18 @@ from rest_framework import serializers
 from oma.utils import db
 from pyoma.browser.models import ProteinEntry, Genome
 from pyoma.browser.db import XrefIdMapper
+from django.utils.http import urlencode
+
+class QueryParamHyperlinkedIdentiyField(serializers.HyperlinkedIdentityField):
+    def __init__(self, query_params, **kwargs):
+        super(QueryParamHyperlinkedIdentiyField, self).__init__(**kwargs)
+        self.query_params = query_params
+
+    def get_url(self, obj, view_name, request, format):
+        url = super(QueryParamHyperlinkedIdentiyField, self).get_url(obj, view_name, request, format)
+        if len(self.query_params) > 0:
+            url += "?"+urlencode({k: getattr(obj, v) for k,v in self.query_params.items()})
+        return url
 
 
 class ProteinEntrySerializer(serializers.Serializer):
@@ -40,16 +52,16 @@ class ProteinEntrySerializer(serializers.Serializer):
                     protein_levels.append(level)
                 else:
                     pass
-        return protein_levels
+        return list(set(protein_levels))
 
 class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     sequence = serializers.CharField()
     cdna = serializers.CharField()
-    domains = serializers.HyperlinkedIdentityField(view_name='domain-detail', read_only=True,
+    domains = serializers.HyperlinkedIdentityField(view_name='protein-domains', read_only=True,
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    xref = serializers.HyperlinkedIdentityField(view_name='xref-detail', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    orthologs = serializers.HyperlinkedIdentityField(view_name = 'orthologs-detail', read_only = True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    ontology = serializers.HyperlinkedIdentityField(view_name='ontology-detail', read_only = True, lookup_field = 'entry_nr', lookup_url_kwarg= 'entry_id')
+    xref = serializers.HyperlinkedIdentityField(view_name='protein-xref', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    orthologs = serializers.HyperlinkedIdentityField(view_name = 'protein-orthologs', read_only = True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    ontology = serializers.HyperlinkedIdentityField(view_name='protein-ontology', read_only = True, lookup_field = 'entry_nr', lookup_url_kwarg= 'entry_id')
 
 class OrthologsListSerializer(serializers.Serializer):
     ortholog = ProteinEntrySerializer()
@@ -155,7 +167,9 @@ class HOGsLevelsListSerializer(serializers.Serializer):
 
 class HOGsLevelSerializer(serializers.Serializer):
     level = serializers.CharField()
-    subHOGs = serializers.ListSerializer(child= serializers.CharField(required=False))
+    subHOGs = serializers.ListSerializer(child=QueryParamHyperlinkedIdentiyField(view_name='hogs-detail',
+                                                                                 lookup_field='hog_id',
+                                                                                 query_params={'level': 'level'}))
 
 class HOGsDetailSerializer(serializers.Serializer):
     hog_id = serializers.CharField()
@@ -165,6 +179,10 @@ class HOGsDetailSerializer(serializers.Serializer):
 class HOGsListSerializer(serializers.Serializer):
     roothog_id = serializers.CharField()
     hog_id_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True, lookup_field='hog_id')
+
+class HOGsListSerializer_at_level(serializers.Serializer):
+    roothog_id = serializers.CharField()
+    hog_id_url = QueryParamHyperlinkedIdentiyField(view_name='hogs-detail', lookup_field='hog_id', query_params={'level': 'level'})
 
 class DomainSerializer(serializers.Serializer):
     source = serializers.CharField()
