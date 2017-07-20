@@ -7,10 +7,13 @@ import os
 import tarfile
 import io
 import time
+import gzip
+import csv
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
+from Bio.UniProt import GOA
 from zoo.wrappers.aligners import Mafft, DataType, WrapperError
 
 from django.conf import settings
@@ -147,5 +150,36 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
         arglist.extend(args)
         logger.exception('error while computing msa for dataset: {}'.format(
             ', '.join(arglist)))
+        db_entry.state = 'error'
+    db_entry.save()
+
+@shared_task
+def assign_go_function_to_user_sequences(data_id, sequences, tax_limit):
+    t0 = time.time()
+    logger.info('starting projecting GO functions')
+    db_entry = FileResult.objects.get(data_hash=data_id)
+    db_entry.state = "running"
+    db_entry.save()
+
+    name = os.path.join('function_projection', data_id[-2:], data_id[-4:-2], data_id)
+    path = os.path.join(settings.MEDIA_ROOT, name)
+    try:
+        # TODO: proper init of assignment object
+        projector = FunctionProjector(sequences, tax_limit)
+
+        if not os.path.isdir(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
+        with gzip.open(path, 'wt') as fout:
+            fout.write('!gaf-version: 2.1\n')
+            for anno in projector:
+                GOA.writerec(anno, fout, GOA.GAF20FIELDS)
+
+        db_entry.result = name
+        db_entry.state = 'done'
+        tot_time = time.time() - t0
+        logger.info('finished assign_go_function_to_user_sequences task. took {:.3f}sec'.format(tot_time))
+    except (IOError, WrapperError) as e:
+        logger.exception('error while computing assign_go_function_to_user_sequences for dataset: {}'
+            .format(data_id))
         db_entry.state = 'error'
     db_entry.save()
