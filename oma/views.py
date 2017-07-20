@@ -865,7 +865,7 @@ class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
 
 @method_decorator(never_cache, name='dispatch')
 class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
-    template_name = "omagroup_msa.html"
+    template_name = "omagroup_entry_msa.html"
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroupMSA, self).get_context_data(group_id)
