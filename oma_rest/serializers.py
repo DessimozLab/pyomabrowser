@@ -137,6 +137,7 @@ class RelatedGroupsSerializer(serializers.Serializer):
 class OmaGroupSerializer(serializers.Serializer):
     GroupNr = serializers.IntegerField()
     fingerprint = serializers.CharField()
+    related_groups = serializers.HyperlinkedIdentityField(view_name='group-close-groups', lookup_field='GroupNr', lookup_url_kwarg='id')
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
 
 

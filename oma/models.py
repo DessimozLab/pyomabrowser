@@ -30,3 +30,9 @@ class HOG(object):
                 self.roothog_id = int(hog_id[start:end])
             else:
                 self.roothog_id = int(hog_id[start:])
+
+class OMAGroup(object):
+    def __init__(self, GroupNr=None, fingerprint=None, members=None):
+        self.GroupNr = GroupNr
+        self.fingerprint = fingerprint
+        self.members = members

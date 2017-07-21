@@ -90,8 +90,9 @@ class OmaGroupViewSet(ViewSet):
         data['members'] = members
         data['GroupNr'] = id
         data['fingerprint'] = fingerprint
+        group = m.OMAGroup(GroupNr=id, members=members, fingerprint=fingerprint)
         serializer = serializers.OmaGroupSerializer(
-            instance=data, context={'request': request})
+            instance=group, context={'request': request})
         return Response(serializer.data)
 
     @detail_route()
@@ -108,7 +109,7 @@ class OmaGroupViewSet(ViewSet):
                 ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
                 content.append(ortholog)
         groups = []
-        # extract groups for vpairs but ignore vpairs with the same oma_group as the query id
+
         for row in content:
             if row.oma_group == int(id):
                 pass
