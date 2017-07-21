@@ -36,3 +36,13 @@ class GenomeSuggestionFrom(forms.Form):
     suggested_from_email = forms.EmailField(label="Your Email", required=True)
     captcha = ReCaptchaField()
 
+
+class FunctionProjectionUploadForm(forms.Form):
+    required_css_class = 'required'
+    email = forms.EmailField(label='Email')
+    dataset = forms.CharField(label='Description of Dataset', max_length=50)
+    file = forms.FileField(label='Sequence File (fasta format)', required=True)
+    tax_limit = forms.IntegerField(label="Limit Taxonomic Clade", required=False, initial=2,
+                                   help_text="The NCBI Taxonomic ID of the clade from which "
+                                             "functions are propagated.")
+    captcha = ReCaptchaField()

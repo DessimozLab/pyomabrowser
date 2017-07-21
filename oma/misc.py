@@ -1,3 +1,6 @@
+import hashlib
+import os
+import tempfile
 from io import StringIO
 import logging
 import itertools
@@ -87,3 +90,20 @@ def genome_info_from_uniprot_rest(taxid):
     lin.reverse()
     header['lineage'] = lin
     return header
+
+
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+
+def handle_uploaded_file(fh):
+    base, suffix = os.path.splitext(fh.name)
+    with tempfile.NamedTemporaryFile(suffix=suffix, prefix=base, delete=False) as destination:
+        for chunk in fh.chunks():
+            destination.write(chunk)
+    res = {'fname': destination.name, 'md5': md5(destination.name)}
+    return res

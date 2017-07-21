@@ -153,19 +153,36 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
         db_entry.state = 'error'
     db_entry.save()
 
+
+class FunctionProjectorMock(object):
+    def __init__(self, sequences, limit):
+        self.go = utils.db.gene_ontology
+        self.sequences = sequences
+
+    def __iter__(self):
+        for seq in self.sequences:
+            for go, from_ in zip((10844, 6915), ('YEAST05232', 'HUMAN02242')):
+                rec = collections.defaultdict(str)
+                goterm = self.go.ensure_term(go)
+                rec.update({'DB': 'OMA', 'DB_Object_ID': seq.id, 'GO_ID': str(goterm),
+                           'DB:Reference': 'OMAFun:002', 'Evidence': 'IEA', 'With':from_,
+                           'Assigned_by': 'OMA Fun Proj', 'Aspect': 'M'})
+                yield rec
+
 @shared_task
-def assign_go_function_to_user_sequences(data_id, sequences, tax_limit):
+def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit):
     t0 = time.time()
     logger.info('starting projecting GO functions')
     db_entry = FileResult.objects.get(data_hash=data_id)
     db_entry.state = "running"
     db_entry.save()
 
-    name = os.path.join('function_projection', data_id[-2:], data_id[-4:-2], data_id)
+    name = os.path.join('function_projection', data_id[-2:], data_id[-4:-2], data_id+".txt.gz")
     path = os.path.join(settings.MEDIA_ROOT, name)
     try:
+        sequences = SeqIO.parse(sequence_file, 'fasta')
         # TODO: proper init of assignment object
-        projector = FunctionProjector(sequences, tax_limit)
+        projector = FunctionProjectorMock(sequences, tax_limit)
 
         if not os.path.isdir(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
@@ -178,8 +195,10 @@ def assign_go_function_to_user_sequences(data_id, sequences, tax_limit):
         db_entry.state = 'done'
         tot_time = time.time() - t0
         logger.info('finished assign_go_function_to_user_sequences task. took {:.3f}sec'.format(tot_time))
-    except (IOError, WrapperError) as e:
+    except (IOError, ) as e:
         logger.exception('error while computing assign_go_function_to_user_sequences for dataset: {}'
             .format(data_id))
         db_entry.state = 'error'
+    finally:
+        os.remove(sequence_file)
     db_entry.save()

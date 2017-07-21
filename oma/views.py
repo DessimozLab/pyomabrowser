@@ -594,7 +594,7 @@ def genome_suggestion(request):
     if request.method == 'POST':
         form = forms.GenomeSuggestionFrom(request.POST)
         if form.is_valid():
-            logger.info("recieved valid genome suggestion form")
+            logger.info("received valid genome suggestion form")
             data = form.cleaned_data
             subj = "Genome Suggestion {taxon_id} ({name})".format(**data)
             try:
@@ -656,6 +656,36 @@ def export_marker_genes(request):
                 tasks.export_marker_genes.delay(genomes, data_id, min_species_coverage, top_N_genomes)
             return HttpResponseRedirect(reverse('marker_genes', args=(data_id,)))
     return render(request, "export_marker.html")
+
+
+def function_projection(request):
+    if request.method == 'POST':
+        form = forms.FunctionProjectionUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            logger.info("received valid function projection form")
+            user_file_info = misc.handle_uploaded_file(request.FILES['file'])
+            data_id = hashlib.md5(
+                    (str(form.cleaned_data['tax_limit']) + user_file_info['md5']).encode('utf-8')
+                ).hexdigest()
+            try:
+                r = FileResult.objects.get(data_hash=data_id)
+                do_compute = r.remove_erroneous_or_long_pending()
+            except FileResult.DoesNotExist:
+                do_compute = True
+
+            if do_compute:
+                r = FileResult(data_hash=data_id, result_type='function_projection', state="pending")
+                r.save()
+                tasks.assign_go_function_to_user_sequences.delay(
+                    data_id, user_file_info['fname'], form.cleaned_data['tax_limit'])
+            else:
+                os.remove(user_file_info['fname'])
+
+            return HttpResponseRedirect(reverse(''))
+    else:
+        form = forms.FunctionProjectionUploadForm()
+    return render(request, "function_projection_upload.html", {'form': form})
+
 
 
 @never_cache

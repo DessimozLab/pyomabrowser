@@ -54,6 +54,7 @@ urlpatterns = [
     url(r'^fellowship/thanks/', TemplateView.as_view(template_name='fellowship_thanks.html'), name='fellowship_thanks'),
     url(r'^suggestion/genome/$', views.genome_suggestion, name="genome_suggestion"),
     url(r'^suggestion/genome/thanks$', TemplateView.as_view(template_name="genome_suggestion_thanks.html"), name="genome_suggestion_thanks"),
+    url(r'^functions/$', views.function_projection, name='function-projection-input'),
 
     url(r'^release/$', views.release, name='release'),
     url(r'^release/json/$', views.GenomesJson.as_view(), name="genomes_json"),
