@@ -219,20 +219,29 @@ class HOGsViewSet(ViewSet):
             serializer = serializers.HOGserializer(instance = data, context={'request': request})
             return Response(serializer.data)
         else:
-            #fastest way to get from hog_id to fam_nr is through the members
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
+            # get all levels for a hog_id
             fam_nr = members[0].hog_family_nr
             levels = utils.db.hog_levels_of_fam(fam_nr)
-            levels = list(set(levels))
-            levels_2 = []
-            for row in levels:
-                subHOGs = utils.db.get_subhogids_at_level(fam_nr,row)
-                subHOGs_2 = []
-                for i in subHOGs:
-                    subHOGs_2.append(m.HOG(hog_id=i.decode("utf-8"), level=row.decode('utf-8')))
-                levels_2.append({'level': row.decode("utf-8"), 'subHOGs': subHOGs_2})
-            data = {'hog_id': hog_id, 'levels' : levels_2}
-            serializer = serializers.HOGsDetailSerializer(instance = data,context={'request': request})
+            # take first member, get species
+            species = members[0].genome
+            # get lineage of the species
+            lineage = species.lineage
+            # indexing of levels for a hog
+            if 'LUCA' in levels:
+                root_hog_level = 'LUCA'
+            else:
+                indexed_levels = []
+                for level in levels:
+                    level = level.decode("utf-8")
+                    if level in lineage:
+                        level_index = lineage.index(level)
+                        indexed_levels.append([level, int(level_index)])
+                indexed_levels.sort(key=lambda x: x[1])
+                root_hog_level = indexed_levels[-1][0]
+            data = {'hog_id': hog_id, 'root_level': root_hog_level,
+                    'members': members}
+            serializer = serializers.RootHOGserializer(instance=data, context={'request': request})
             return Response(serializer.data)
 
     @detail_route()
