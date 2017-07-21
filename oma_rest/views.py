@@ -86,9 +86,21 @@ class OmaGroupViewSet(ViewSet):
                """
         members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
         data = utils.db.oma_group_metadata(members[0].oma_group)
+        fingerprint = data['fingerprint']
+        data['members'] = members
+        data['GroupNr'] = id
+        data['fingerprint'] = fingerprint
+        serializer = serializers.OmaGroupSerializer(
+            instance=data, context={'request': request})
+        return Response(serializer.data)
+
+    @detail_route()
+    def close_groups(self, request, id=None, format = None):
+        members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
+        data = utils.db.oma_group_metadata(members[0].oma_group)
         content = []
         for m in members:
-            #get all the verified pairs
+            # get all the verified pairs
             vpairs = utils.db.get_vpairs(m.entry_nr)
             # vpairs into instances of the ProteinEntry model
             for row in vpairs:
@@ -96,23 +108,20 @@ class OmaGroupViewSet(ViewSet):
                 ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
                 content.append(ortholog)
         groups = []
-        #extract groups for vpairs but ignore vpairs with the same oma_group as the query id
+        # extract groups for vpairs but ignore vpairs with the same oma_group as the query id
         for row in content:
             if row.oma_group == int(id):
                 pass
             else:
                 groups.append(row.oma_group)
-        #count the groups' hits and return in form of a list instead of a dictionary
+        # count the groups' hits and return in form of a list instead of a dictionary
         r_groups = Counter(groups).most_common()
-
-        fingerprint = data['fingerprint']
-        data['members'] = members
-        data['GroupNr'] = id
-        data['fingerprint'] = fingerprint
         data['related_groups'] = sorted(r_groups)
-        serializer = serializers.OmaGroupSerializer(
-            instance=data, context={'request': request})
+        serializer = serializers.CloseGroupsSerializer(
+            instance=data)
         return Response(serializer.data)
+
+
 
 class HOGLevelsListViewSet(ViewSet):
     lookup_field = 'level'
@@ -187,8 +196,6 @@ class HOGsViewSet(ViewSet):
             hog_ids = sorted(set(hogs))
             data=[]
             for row in hog_ids:
-                members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(row)]
-                fam_nr = members[0].hog_family_nr
                 data.append(m.HOG(hog_id=row))
             data = list(set(data))
             paginator = PageNumberPagination()
@@ -227,6 +234,24 @@ class HOGsViewSet(ViewSet):
             data = {'hog_id': hog_id, 'levels' : levels_2}
             serializer = serializers.HOGsDetailSerializer(instance = data,context={'request': request})
             return Response(serializer.data)
+
+    @detail_route()
+    def levels(self, request, hog_id=None, format=None):
+        members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
+        fam_nr = members[0].hog_family_nr
+        levels = utils.db.hog_levels_of_fam(fam_nr)
+        levels = list(set(levels))
+        levels_2 = []
+        for row in levels:
+            subHOGs = utils.db.get_subhogids_at_level(fam_nr, row)
+            subHOGs_2 = []
+            for i in subHOGs:
+                subHOGs_2.append(m.HOG(hog_id=i.decode("utf-8"), level=row.decode('utf-8')))
+            levels_2.append({'level': row.decode("utf-8"), 'subHOGs': subHOGs_2})
+        data = {'hog_id': hog_id, 'levels': levels_2}
+        serializer = serializers.HOGsDetailSerializer(instance=data, context={'request': request})
+        return Response(serializer.data)
+
 
 
 class APIVersion(ViewSet):

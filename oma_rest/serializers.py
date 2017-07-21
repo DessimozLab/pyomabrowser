@@ -133,7 +133,10 @@ class OmaGroupSerializer(serializers.Serializer):
     GroupNr = serializers.IntegerField()
     fingerprint = serializers.CharField()
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
-    related_groups = serializers.ListSerializer (child = RelatedGroupsSerializer())
+
+
+class CloseGroupsSerializer(serializers.Serializer):
+    related_groups = serializers.ListSerializer(child = RelatedGroupsSerializer())
 
 class XRefSerializer(serializers.Serializer):
     xref = serializers.CharField()
