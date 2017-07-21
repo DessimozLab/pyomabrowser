@@ -681,20 +681,31 @@ def function_projection(request):
             else:
                 os.remove(user_file_info['fname'])
 
-            return HttpResponseRedirect(reverse(''))
+            return HttpResponseRedirect(reverse('function-projection', args=(data_id,) ))
     else:
         form = forms.FunctionProjectionUploadForm()
     return render(request, "function_projection_upload.html", {'form': form})
 
 
+@method_decorator(never_cache, name='dispatch')
+class AbstractFileResultDownloader(TemplateView):
+    def get_context_data(self, data_id, **kwargs):
+        context = super(AbstractFileResultDownloader, self).get_context_data(**kwargs)
+        try:
+            result = FileResult.objects.get(data_hash=data_id)
+        except FileResult.DoesNotExist:
+            raise Http404('Invalid dataset')
+        context['file_result'] = result
+        context['reload_every_x_sec'] = 20
+        return context
 
-@never_cache
-def marker_genes_retrieve_results(request, data_id):
-    try:
-        result = FileResult.objects.get(data_hash=data_id)
-    except FileResult.DoesNotExist:
-        raise Http404('invalid marker gene dataset')
-    return render(request, "marker_download.html", {'file_result': result})
+
+class FunctionProjectionResults(AbstractFileResultDownloader):
+    template_name = "function_projection_download.html"
+
+
+class MarkerGenesResults(AbstractFileResultDownloader):
+    template_name = "marker_download.html"
 
 
 class CurrentView(TemplateView):
