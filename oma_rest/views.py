@@ -237,17 +237,26 @@ class HOGsViewSet(ViewSet):
             # get lineage of the species
             lineage = species.lineage
             # indexing of levels for a hog
-            if 'LUCA' in levels:
-                root_hog_level = 'LUCA'
+            if len(hog_id)>11:
+                for lvl in levels:
+                    subhogs = utils.db.get_subhogids_at_level(fam_nr,lvl)
+                    if subhogs is not None:
+                        for subhog in subhogs:
+                            subhog = subhog.decode("utf-8")
+                            if subhog == hog_id:
+                                root_hog_level = lvl.decode("utf-8")
             else:
-                indexed_levels = []
-                for level in levels:
-                    level = level.decode("utf-8")
-                    if level in lineage:
-                        level_index = lineage.index(level)
-                        indexed_levels.append([level, int(level_index)])
-                indexed_levels.sort(key=lambda x: x[1])
-                root_hog_level = indexed_levels[-1][0]
+                if 'LUCA' in levels:
+                    root_hog_level = 'LUCA'
+                else:
+                    indexed_levels = []
+                    for level in levels:
+                        level = level.decode("utf-8")
+                        if level in lineage:
+                            level_index = lineage.index(level)
+                            indexed_levels.append([level, int(level_index)])
+                    indexed_levels.sort(key=lambda x: x[1])
+                    root_hog_level = indexed_levels[-1][0]
             data = {'hog_id': hog_id, 'root_level': root_hog_level,
                     'members': members}
             serializer = serializers.RootHOGserializer(instance=data, context={'request': request})
