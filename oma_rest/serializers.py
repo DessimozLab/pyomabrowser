@@ -96,7 +96,8 @@ class GenomeInfoSerializer(serializers.Serializer):
     taxon_id = serializers.IntegerField(source='ncbi_taxon_id')
     species = serializers.CharField(source='sciname')
     common = serializers.CharField(required=False)
-
+    genome_url = serializers.HyperlinkedIdentityField(view_name='genome-detail', lookup_field='uniprot_species_code',
+                                                      lookup_url_kwarg='genome_id')
 
     def create(self, validated_data):
         pass
@@ -112,6 +113,7 @@ class GenomeDetailSerializer(GenomeInfoSerializer):
                                                     lookup_field='uniprot_species_code',
                                                     lookup_url_kwarg='genome_id')
     chromosomes = serializers.SerializerMethodField(method_name=None)
+
 
     def get_chromosomes(self, obj):
         chrs = []

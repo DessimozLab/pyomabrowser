@@ -39,6 +39,9 @@ class ProteinEntryViewSet(ViewSet):
 
     @detail_route()
     def  orthologs(self, request, entry_id=None, format=None):
+        """
+            List of all the identified orthologues for a protein
+                       """
         data = utils.db.get_vpairs(int(entry_id))
         content = []
         for row in data:
@@ -50,6 +53,9 @@ class ProteinEntryViewSet(ViewSet):
 
     @detail_route()
     def ontology(self, request, entry_id=None, format=None):
+        """
+                    Ontology information available for a protein
+                               """
         data = db.Database.get_gene_ontology_annotations(utils.db, int(entry_id))
         ontologies = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
         serializer = serializers.GeneOntologySerializer(instance=ontologies, many=True)
@@ -57,6 +63,9 @@ class ProteinEntryViewSet(ViewSet):
 
     @detail_route()
     def domains(self,request,entry_id=None, format=None):
+        """
+                    List of the domains present in a protein
+                               """
         entry_nr = utils.id_resolver.resolve(entry_id)
         entry = utils.db.entry_by_entry_nr(entry_nr)
         domains = utils.db.get_domains(entry['EntryNr'])
@@ -65,6 +74,9 @@ class ProteinEntryViewSet(ViewSet):
 
     @detail_route()
     def xref(self, request, entry_id=None, format=None):
+        """
+                    List of cross-references for a protein
+                               """
         entry_nr = utils.id_resolver.resolve(entry_id)
         xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
         for ref in xrefs:
@@ -87,9 +99,6 @@ class OmaGroupViewSet(ViewSet):
         members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
         data = utils.db.oma_group_metadata(members[0].oma_group)
         fingerprint = data['fingerprint']
-        data['members'] = members
-        data['GroupNr'] = id
-        data['fingerprint'] = fingerprint
         group = m.OMAGroup(GroupNr=id, members=members, fingerprint=fingerprint)
         serializer = serializers.OmaGroupSerializer(
             instance=group, context={'request': request})
@@ -198,7 +207,6 @@ class HOGsViewSet(ViewSet):
             data=[]
             for row in hog_ids:
                 data.append(m.HOG(hog_id=row))
-            data = list(set(data))
             paginator = PageNumberPagination()
             page = paginator.paginate_queryset(data, request)
             serializer = serializers.HOGsListSerializer(page,many=True,context={'request': request})
@@ -247,6 +255,9 @@ class HOGsViewSet(ViewSet):
 
     @detail_route()
     def levels(self, request, hog_id=None, format=None):
+        """
+            List all the levels present for a hog
+                       """
         members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
         fam_nr = members[0].hog_family_nr
         levels = utils.db.hog_levels_of_fam(fam_nr)
@@ -329,7 +340,7 @@ class GenomeViewSet(ViewSet):
                """
         make_genome = functools.partial(models.Genome, utils.db)
         genomes = [make_genome(g) for g in utils.id_mapper['OMA'].genome_table]
-        serializer = serializers.GenomeInfoSerializer(instance=genomes, many=True)
+        serializer = serializers.GenomeInfoSerializer(instance=genomes, many=True,context={'request': request})
         return Response(serializer.data)
 
     def retrieve(self, request, genome_id, format=None):
