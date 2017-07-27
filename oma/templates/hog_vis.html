@@ -151,7 +151,7 @@
                     };
 
                     $.when(
-                        $.ajax({url: "/oma/hogs/{{ entry.entry_nr }}/orthoxml",
+                        $.ajax({url: "/oma/hogs/{{ entry.omaid }}/orthoxml/",
                                 dataType: "text"}),
                         $.ajax({url: "/All/speciestree.nwk"})
                     ).then(function(orthoxml, speciestree) {
