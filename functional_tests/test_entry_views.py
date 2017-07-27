@@ -7,9 +7,9 @@ class EntryViewPageTest(FunctionalTest):
         # Cecile navigates to OMA Browser page
         self.browser.get(self.server_url)
 
-        # she wants to search for her favorite wheat gene - W4ZUH7
+        # she wants to search for her favorite wheat gene - A0A1D5VN70
         # she first finds the search field
-        query = 'W4ZUH7'
+        query = 'A0A1D5VN70'
         inputbox = self.browser.find_element_by_id('inputBrowser')
         # she enters the query gene into it, and presses enter
         inputbox.send_keys('{}\n'.format(query))
