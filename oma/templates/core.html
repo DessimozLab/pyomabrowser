@@ -125,8 +125,12 @@
           </li>
           <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">API  <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
+              <li><a href="{% url 'api-docs:docs-index' %}">REST API</a></li></li>
               <li><a class="" href="{% url 'APISOAP'  %}">SOAP</a></li>
-              <li><a class="" href="{% url 'APIDAS'  %}">DAS</a></li>
+              <li class="divider"></li>
+              <li role="presentation" class="dropdown-header">Semantic web</li>
+              <li><a class="" href="http://sparql.omabrowser.org">SPARQL Endpoint</a></li>
+              <li><a class="" href="/ontology/oma">RDF Schema</a></li>
             </ul>
           </li>
 
