@@ -16,6 +16,7 @@ from collections import Counter
 from rest_framework.decorators import detail_route, list_route
 from oma import models as m
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -37,17 +38,26 @@ class ProteinEntryViewSet(ViewSet):
             context={'request': request})
         return Response(serializer.data)
 
+
     @detail_route()
     def  orthologs(self, request, entry_id=None, format=None):
         """
             List of all the identified orthologues for a protein
                        """
-        data = utils.db.get_vpairs(int(entry_id))
+        rel_type = request.query_params.get('rel_type', None)
+        p_entry_nr = utils.id_resolver.resolve(entry_id)
+        data = utils.db.get_vpairs(int(p_entry_nr))
         content = []
         for row in data:
             entry_nr = row[1]
             ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
-            content.append({'ortholog': ortholog, 'RelType': row[4], 'Distance': row[3], 'Score': row[2]})
+            if rel_type != None:
+                if row[4]==rel_type:
+                    content.append({'ortholog': ortholog, 'RelType': row[4], 'Distance': row[3], 'Score': row[2]})
+                else:
+                    pass
+            else:
+                content.append({'ortholog': ortholog, 'RelType': row[4], 'Distance': row[3], 'Score': row[2]})
         serializer = serializers.OrthologsListSerializer(instance=content, many=True)
         return Response(serializer.data)
 
@@ -56,7 +66,8 @@ class ProteinEntryViewSet(ViewSet):
         """
                     Ontology information available for a protein
                                """
-        data = db.Database.get_gene_ontology_annotations(utils.db, int(entry_id))
+        p_entry_nr = utils.id_resolver.resolve(entry_id)
+        data = db.Database.get_gene_ontology_annotations(utils.db, int(p_entry_nr))
         ontologies = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
         serializer = serializers.GeneOntologySerializer(instance=ontologies, many=True)
         return Response(serializer.data)
@@ -84,6 +95,10 @@ class ProteinEntryViewSet(ViewSet):
             ref['omaid'] = utils.id_mapper['OMA'].map_entry_nr(entry_nr)
         serializer = serializers.XRefSerializer(instance=xrefs, many=True)
         return Response(serializer.data)
+
+
+
+
 
 
 class OmaGroupViewSet(ViewSet):
@@ -132,47 +147,6 @@ class OmaGroupViewSet(ViewSet):
         return Response(serializer.data)
 
 
-
-class HOGLevelsListViewSet(ViewSet):
-    lookup_field = 'level'
-    serializer_class = serializers.HOGsLevelsListSerializer
-
-    def list(self,request, format=None):
-        """
-            List of all the levels for currently identified HOGs.
-            By passing a level parameter into the url, all the hogs present at that level are listed
-
-           """
-
-        hog_tab = utils.db.get_hdf5_handle().root.HogLevel
-        levels = hog_tab.col('Level')
-        levels = set(levels)
-        data = []
-        for level in levels:
-            level = level.decode("utf-8")
-            data.append(m.HOG(level=level))
-        serializer = serializers.HOGsLevelsListSerializer(instance = data, many = True, context={'request': request})
-        return Response(serializer.data)
-
-    def retrieve(self,request, level):
-        """
-                    List of all the hogs with the relevant level.
-
-                   """
-        hog_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(Level==level)')
-        hogs = []
-        for row in hog_tab:
-            hogs.append(row[1].decode("utf-8"))
-        data = []
-        for row in hogs:
-            data.append(m.HOG(hog_id=row, level = level))
-        paginator = PageNumberPagination()
-        page = paginator.paginate_queryset(data, request)
-        serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
-
-
-
 class HOGsViewSet(ViewSet):
     lookup_field = 'hog_id'
     lookup_value_regex = r'[^/]+'
@@ -190,6 +164,7 @@ class HOGsViewSet(ViewSet):
             hogs = []
             for row in hog_tab:
                 hogs.append(row[1].decode("utf-8"))
+            hogs=sorted(hogs)
             data = []
             for row in hogs:
                 data.append(m.HOG(hog_id=row, level=level))
@@ -222,10 +197,66 @@ class HOGsViewSet(ViewSet):
                :param level: an unique name for a level
                """
         level = self.request.query_params.get('level', None)
+        if level == None:
+            hogs_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(ID==hog_id)')
+            levels = []
+            for row in hogs_tab:
+                hog_model = m.HOG(hog_id=row[1].decode("utf-8"), level=row[2].decode("utf-8"))
+                levels.append(hog_model)
+
+            #below is the root level calculation
+            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
+            # get all levels for a hog_id
+            fam_nr = members[0].hog_family_nr
+            levels_for_fam = utils.db.hog_levels_of_fam(fam_nr)
+            # take first member, get species
+            species = members[0].genome
+            # get lineage of the species
+            lineage = species.lineage
+            # indexing of levels for a hog
+            if len(hog_id) > 11:
+                for lvl in levels_for_fam:
+                    subhogs = utils.db.get_subhogids_at_level(fam_nr, lvl)
+                    if subhogs is not None:
+                        for subhog in subhogs:
+                            subhog = subhog.decode("utf-8")
+                            if subhog == hog_id:
+                                root_hog_level = lvl.decode("utf-8")
+            else:
+                if 'LUCA' in levels:
+                    root_hog_level = 'LUCA'
+                else:
+                    indexed_levels = []
+                    for level in levels_for_fam:
+                        level = level.decode("utf-8")
+                        if level in lineage:
+                            level_index = lineage.index(level)
+                            indexed_levels.append([level, int(level_index)])
+                    indexed_levels.sort(key=lambda x: x[1])
+                    root_hog_level = indexed_levels[-1][0]
+            data = {'hog_id': hog_id, 'root_level': root_hog_level,'levels': levels}
+            serializer = serializers.HOGDetailSerializer(instance=data, context={'request': request})
+            return Response(serializer.data)
+        else:
+            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
+            fam_nr = members[0].hog_family_nr
+            subhogs = utils.db.get_subhogids_at_level(fam_nr, level)
+            subHOGs_2 = []
+            for i in subhogs:
+                # create hog model instances
+                subHOGs_2.append(m.HOG(hog_id=i.decode("utf-8"), level=level))
+            data = {'hog_id': hog_id, 'level': level, 'subhogs': subHOGs_2}
+            serializer = serializers.HOGInfoSerializer(instance=data, context={'request': request})
+            return Response(serializer.data)
+
+    @detail_route()
+    def members(self,request,hog_id=None,format=None):
+        level = self.request.query_params.get('level', None)
         if level != None:
-            members = utils.db.member_of_hog_id(hog_id, level)
-            data = {'hog_id': hog_id, 'level': level, 'members': [models.ProteinEntry(utils.db, memb) for memb in members] }
-            serializer = serializers.HOGserializer(instance = data, context={'request': request})
+            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
+            data = {'hog_id': hog_id, 'level': level,
+                    'members': members}
+            serializer = serializers.HOGMembersListSerializer(instance=data, context={'request': request})
             return Response(serializer.data)
         else:
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
@@ -237,9 +268,9 @@ class HOGsViewSet(ViewSet):
             # get lineage of the species
             lineage = species.lineage
             # indexing of levels for a hog
-            if len(hog_id)>11:
+            if len(hog_id) > 11:
                 for lvl in levels:
-                    subhogs = utils.db.get_subhogids_at_level(fam_nr,lvl)
+                    subhogs = utils.db.get_subhogids_at_level(fam_nr, lvl)
                     if subhogs is not None:
                         for subhog in subhogs:
                             subhog = subhog.decode("utf-8")
@@ -262,25 +293,6 @@ class HOGsViewSet(ViewSet):
             serializer = serializers.RootHOGserializer(instance=data, context={'request': request})
             return Response(serializer.data)
 
-    @detail_route()
-    def levels(self, request, hog_id=None, format=None):
-        """
-            List all the levels present for a hog
-                       """
-        members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
-        fam_nr = members[0].hog_family_nr
-        levels = utils.db.hog_levels_of_fam(fam_nr)
-        levels = list(set(levels))
-        levels_2 = []
-        for row in levels:
-            subHOGs = utils.db.get_subhogids_at_level(fam_nr, row)
-            subHOGs_2 = []
-            for i in subHOGs:
-                subHOGs_2.append(m.HOG(hog_id=i.decode("utf-8"), level=row.decode('utf-8')))
-            levels_2.append({'level': row.decode("utf-8"), 'subHOGs': subHOGs_2})
-        data = {'hog_id': hog_id, 'levels': levels_2}
-        serializer = serializers.HOGsDetailSerializer(instance=data, context={'request': request})
-        return Response(serializer.data)
 
 
 
@@ -325,7 +337,7 @@ class XRefsViewSet(ViewSet):
 
     def retrieve(self, request, entry_id, format=None):
         """
-               Retrieve the cross rederencing for a given protein
+               Retrieve the cross references for a given protein
 
                :param entry_id: an unique identifier for a protein
                """

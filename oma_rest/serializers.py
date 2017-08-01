@@ -6,27 +6,33 @@ from oma.utils import db
 from pyoma.browser.models import ProteinEntry, Genome
 from pyoma.browser.db import XrefIdMapper
 from django.utils.http import urlencode
+from oma import models as m
 
-class QueryParamHyperlinkedIdentiyField(serializers.HyperlinkedIdentityField):
+
+class QueryParamHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
     def __init__(self, query_params, **kwargs):
-        super(QueryParamHyperlinkedIdentiyField, self).__init__(**kwargs)
+        super(QueryParamHyperlinkedIdentityField, self).__init__(**kwargs)
         self.query_params = query_params
 
     def get_url(self, obj, view_name, request, format):
-        url = super(QueryParamHyperlinkedIdentiyField, self).get_url(obj, view_name, request, format)
+        url = super(QueryParamHyperlinkedIdentityField, self).get_url(obj, view_name, request, format)
         if len(self.query_params) > 0:
             url += "?"+urlencode({k: getattr(obj, v) for k,v in self.query_params.items()})
         return url
 
-
 class ProteinEntrySerializer(serializers.Serializer):
     entry_nr = serializers.IntegerField(required=True)
+    entry_url = serializers.HyperlinkedIdentityField(view_name = 'protein-detail', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     omaid = serializers.CharField()
     canonicalid = serializers.CharField()
     oma_group = serializers.IntegerField()
+    oma_group_url = serializers.HyperlinkedIdentityField(view_name='group-detail', read_only=True,
+                                                     lookup_field='oma_group', lookup_url_kwarg='id')
     roothog_id = serializers.IntegerField(source='hog_family_nr')
     oma_hog_id = serializers.CharField(source ='oma_hog')
-    hog_levels = serializers.SerializerMethodField(method_name = None)
+    oma_hog_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True,
+                                               lookup_field='oma_hog', lookup_url_kwarg='hog_id')
+    oma_hog_levels = serializers.SerializerMethodField(method_name=None)
     sequence_length = serializers.IntegerField()
     sequence_md5 = serializers.CharField()
     chromosome = serializers.CharField()
@@ -41,18 +47,18 @@ class ProteinEntrySerializer(serializers.Serializer):
     def get_locus(self, obj):
         return [obj.locus_start, obj.locus_end, obj.strand]
 
-    def get_hog_levels(self,obj):
+    def get_oma_hog_levels(self,obj):
         levels = db.hog_levels_of_fam(obj.hog_family_nr)
         protein_levels = []
         for level in levels:
             level = level.decode("utf-8")
             members_at_level = [ProteinEntry(db, memb) for memb in db.member_of_hog_id(obj.oma_hog, level)]
             for member in members_at_level:
-                if str(member) == str(obj):
+                if str(member) == str(obj) and level not in protein_levels:
                     protein_levels.append(level)
                 else:
                     pass
-        return list(set(protein_levels))
+        return protein_levels
 
 class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     sequence = serializers.CharField()
@@ -69,7 +75,16 @@ class OrthologsListSerializer(serializers.Serializer):
     Distance = serializers.FloatField()
     Score = serializers.FloatField()
 
-class HOGserializer(serializers.Serializer):
+class SubHOGSerializer(serializers.Serializer):
+    hog_id = serializers.CharField()
+    members_url = QueryParamHyperlinkedIdentityField(view_name='hogs-members',lookup_field='hog_id',query_params={'level': 'level'})
+
+class HOGInfoSerializer(serializers.Serializer):
+    hog_id = serializers.CharField()
+    level = serializers.CharField()
+    subhogs = serializers.ListSerializer(child=SubHOGSerializer())
+
+class HOGMembersListSerializer(serializers.Serializer):
     hog_id = serializers.CharField()
     level = serializers.CharField()
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
@@ -172,28 +187,23 @@ class GeneOntologySerializer(serializers.Serializer):
     def get_name(self,obj):
         return obj.term.name
 
-class HOGsLevelsListSerializer(serializers.Serializer):
-    level = serializers.CharField()
-    level_url = serializers.HyperlinkedIdentityField(view_name = 'hogslevels-detail', read_only=True, lookup_field='level')
-
 class HOGsLevelSerializer(serializers.Serializer):
     level = serializers.CharField()
-    subHOGs = serializers.ListSerializer(child=QueryParamHyperlinkedIdentiyField(view_name='hogs-detail',
-                                                                                 lookup_field='hog_id',
-                                                                                 query_params={'level': 'level'}))
+    level_url = QueryParamHyperlinkedIdentityField(view_name='hogs-detail',lookup_field='hog_id',query_params={'level': 'level'})
 
-class HOGsDetailSerializer(serializers.Serializer):
+class HOGDetailSerializer(serializers.Serializer):
     hog_id = serializers.CharField()
+    root_level = serializers.CharField()
     levels = serializers.ListSerializer(child = HOGsLevelSerializer())
 
-
+#the below 2 HOGS serializers are to do with the list of hogs found at api/hogs/
 class HOGsListSerializer(serializers.Serializer):
     roothog_id = serializers.CharField()
     hog_id_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True, lookup_field='hog_id')
-
+#api/hogs/?level
 class HOGsListSerializer_at_level(serializers.Serializer):
     roothog_id = serializers.CharField()
-    hog_id_url = QueryParamHyperlinkedIdentiyField(view_name='hogs-detail', lookup_field='hog_id', query_params={'level': 'level'})
+    hog_id_url = QueryParamHyperlinkedIdentityField(view_name='hogs-detail', lookup_field='hog_id', query_params={'level': 'level'})
 
 class DomainSerializer(serializers.Serializer):
     source = serializers.CharField()

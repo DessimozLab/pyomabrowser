@@ -12,7 +12,6 @@ router.register(r'version', views.APIVersion, base_name='version')
 router.register(r'xref', views.XRefsViewSet, base_name='xref')
 router.register(r'genome', views.GenomeViewSet, base_name='genome')
 router.register(r'hogs', views.HOGsViewSet, base_name='hogs')
-router.register(r'hogslevels', views.HOGLevelsListViewSet, base_name='hogslevels')
 
 urlpatterns = [
     url(r'^', include(router.urls)),
