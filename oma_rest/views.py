@@ -13,7 +13,7 @@ import logging
 
 from rest_framework.pagination import PageNumberPagination
 from collections import Counter
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import detail_route
 from oma import models as m
 
 
@@ -38,6 +38,23 @@ class ProteinEntryViewSet(ViewSet):
             context={'request': request})
         return Response(serializer.data)
 
+    @detail_route()
+    def hog_levels(self,request,entry_id=None,format=None):
+        entry_nr = utils.id_resolver.resolve(entry_id)
+        protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
+        levels = utils.db.hog_levels_of_fam(protein.hog_family_nr)
+        protein_levels = []
+        for level in levels:
+            level = level.decode("utf-8")
+            members_at_level = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(protein.oma_hog, level)]
+            for member in members_at_level:
+                if str(member) == str(protein) and level not in protein_levels:
+                    protein_levels.append(level)
+        data = []
+        for level in protein_levels:
+            data.append(m.HOG(hog_id=protein.oma_hog,level=level))
+        serializer = serializers.HOGsLevelSerializer(instance = data, many= True, context={'request': request} )
+        return Response(serializer.data)
 
     @detail_route()
     def  orthologs(self, request, entry_id=None, format=None):
