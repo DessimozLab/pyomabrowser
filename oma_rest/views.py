@@ -27,7 +27,7 @@ class ProteinEntryViewSet(ViewSet):
 
     def retrieve(self, request, entry_id=None, format=None):
         """
-        Retrieve the basic information on a protein
+        Retrieve the detailed information on a protein
 
         :param entry_id: an unique identifier for a protein
         """
@@ -40,6 +40,11 @@ class ProteinEntryViewSet(ViewSet):
 
     @detail_route()
     def hog_levels(self,request,entry_id=None,format=None):
+        """
+                Retrieve the levels of the hog that the protein entry is present in
+
+                :param entry_id: an unique identifier for a protein
+                """
         entry_nr = utils.id_resolver.resolve(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
         levels = utils.db.hog_levels_of_fam(protein.hog_family_nr)
@@ -59,7 +64,7 @@ class ProteinEntryViewSet(ViewSet):
     @detail_route()
     def  orthologs(self, request, entry_id=None, format=None):
         """
-            List of all the identified orthologues for a protein
+            List of all the identified orthologues for a protein. Possible to filter out orthologs by ?rel_type.
                        """
         rel_type = request.query_params.get('rel_type', None)
         p_entry_nr = utils.id_resolver.resolve(entry_id)
@@ -113,18 +118,13 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.XRefSerializer(instance=xrefs, many=True)
         return Response(serializer.data)
 
-
-
-
-
-
 class OmaGroupViewSet(ViewSet):
     lookup_field = 'id'
     serializer_class = serializers.ProteinEntrySerializer
 
     def retrieve(self, request, id=None, format=None):
         """
-               Retrieve the meta data on the OMA group, its protein members and related groups
+               Retrieve the meta data on the OMA group and its protein members
 
                :param group_id: an unique identifier for an OMA group
                """
@@ -138,6 +138,12 @@ class OmaGroupViewSet(ViewSet):
 
     @detail_route()
     def close_groups(self, request, id=None, format = None):
+        """
+                       Retrieve the closely related oma groups for a given group
+
+                       :param group_id: an unique identifier for an OMA group
+                       """
+
         members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
         data = utils.db.oma_group_metadata(members[0].oma_group)
         content = []
@@ -171,12 +177,14 @@ class HOGsViewSet(ViewSet):
 
     def list(self, request, format = None):
         """
-               List of all the roothog_id's HOGs currently identified and the url to access their details
+               List of all the hog_id's HOGs currently identified and the url to access their details.
+               It is possible to filter the list to hog_ids containing a certain level by specifying the ?level query parameter.
 
 
                """
         level = self.request.query_params.get('level', None)
         if level != None:
+            #filtering by level
             hog_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(Level==level)')
             hogs = []
             for row in hog_tab:
@@ -191,6 +199,7 @@ class HOGsViewSet(ViewSet):
             return paginator.get_paginated_response(serializer.data)
 
         else:
+            #list of all the hogs
             hog_tab = utils.db.get_hdf5_handle().root.HogLevel
             hogs = []
             for row in hog_tab:
@@ -207,8 +216,9 @@ class HOGsViewSet(ViewSet):
 
     def retrieve(self, request, hog_id):
         """
-               List all the levels present for a given Hog_id and by including it in the url as the query parameter, list all the member proteins.
-               Any subHOGs present at each level are also listed.
+               Retrieve the detail available for a given hog_id, along with its deepest level(root hog) and all the levels with links.
+               Possible to specify the ?level query parameter in which case the list of all the subhogs present at that level and the links to their members are supplied.
+
 
                :param hog_id: an unique identifier for a hog_group
                :param level: an unique name for a level
@@ -232,6 +242,7 @@ class HOGsViewSet(ViewSet):
             lineage = species.lineage
             # indexing of levels for a hog
             if len(hog_id) > 11:
+                #root level for subhogs is the level at which they appear i.e. when the duplication occured
                 for lvl in levels_for_fam:
                     subhogs = utils.db.get_subhogids_at_level(fam_nr, lvl)
                     if subhogs is not None:
@@ -241,6 +252,7 @@ class HOGsViewSet(ViewSet):
                                 root_hog_level = lvl.decode("utf-8")
             else:
                 if 'LUCA' in levels:
+                    #last universal common ancestor is the deepest level by default
                     root_hog_level = 'LUCA'
                 else:
                     indexed_levels = []
@@ -255,6 +267,7 @@ class HOGsViewSet(ViewSet):
             serializer = serializers.HOGDetailSerializer(instance=data, context={'request': request})
             return Response(serializer.data)
         else:
+            #level specified, returns a list of all the subhogs at a level
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
             fam_nr = members[0].hog_family_nr
             subhogs = utils.db.get_subhogids_at_level(fam_nr, level)
@@ -268,6 +281,14 @@ class HOGsViewSet(ViewSet):
 
     @detail_route()
     def members(self,request,hog_id=None,format=None):
+        """
+                       Retrieve a list of all the protein members for a given hog_id (basic info plus links to more detailed view).
+                       Optional ?level parameter, if left blank level is root by default.
+
+
+                       :param hog_id: an unique identifier for a hog_group
+                       :param level: an unique name for a level
+                       """
         level = self.request.query_params.get('level', None)
         if level != None:
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
@@ -309,9 +330,6 @@ class HOGsViewSet(ViewSet):
                     'members': members}
             serializer = serializers.RootHOGserializer(instance=data, context={'request': request})
             return Response(serializer.data)
-
-
-
 
 class APIVersion(ViewSet):
     def list(self, request, format=None):

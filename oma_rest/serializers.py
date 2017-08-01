@@ -188,10 +188,13 @@ class HOGDetailSerializer(serializers.Serializer):
 #the below 2 HOGS serializers are to do with the list of hogs found at api/hogs/
 class HOGsListSerializer(serializers.Serializer):
     roothog_id = serializers.CharField()
+    hog_id = serializers.CharField()
     hog_id_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True, lookup_field='hog_id')
+
 #api/hogs/?level
 class HOGsListSerializer_at_level(serializers.Serializer):
     roothog_id = serializers.CharField()
+    hog_id = serializers.CharField()
     hog_id_url = QueryParamHyperlinkedIdentityField(view_name='hogs-detail', lookup_field='hog_id', query_params={'level': 'level'})
 
 class DomainSerializer(serializers.Serializer):

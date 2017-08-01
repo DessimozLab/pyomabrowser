@@ -25,6 +25,9 @@ REST API ARCHITECTURE
 |/api/protein/<entry_id>/domains/           | domain information for   |
 |                                           | a protein                |
 +-------------------------------------------+--------------------------+
+|/api/protein/<entry_id>/hog_levels/        | hog levels that a protein|
+|                                           | is present in            |
++-------------------------------------------+--------------------------+
 |/api/protein/<entry_id>/orthologs/         | orthologs list for       |
 | - ?rel_type                               | a protein                |
 +-------------------------------------------+--------------------------+
@@ -48,7 +51,8 @@ REST API ARCHITECTURE
 |/api/hogs/<hog_id>/                        | hog information          |
 | - ?level                                  |                          |
 +-------------------------------------------+--------------------------+
-|/api/hogs/<hog_id>/levels                  | list of levels for a hog |
+|/api/hogs/<hog_id>/members/                | list of members for a hog|
+| - ?level                                  |                          |
 +-------------------------------------------+--------------------------+
 
 ACCESING THE API
