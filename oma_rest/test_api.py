@@ -34,13 +34,15 @@ class ProteinTest(APITestCase):
     def test_ontologies(self):
         client = APIClient()
         response = client.get(path + '/api/protein/78/ontology/',format = 'json')
-        self.assertIn('GO:0005770',response.data[0]['GO_term'])
+        self.assertEqual('GO:0005770',response.data[0]['GO_term'])
 
     #check that orthologues belong to the same hog
     def test_orthologues(self):
         client = APIClient()
         response = client.get(path + '/api/protein/23/orthologs/',format = 'json')
-        self.assertEqual('HOG:0000008',response.data[0]['ortholog']['oma_hog_id'])
+        protein_url = response.data[0]['ortholog']['entry_url']
+        response_2 = client.get(protein_url, format = 'json')
+        self.assertEqual('HOG:0000008',response_2.data['oma_hog_id'])
 
     def test_xref(self):
         client = APIClient()
@@ -55,15 +57,19 @@ class HOGsTest(APITestCase):
 
     def test_hog_members(self):
         client = APIClient()
-        response = client.get(path + '/api/hogs/HOG:0000365/', format='json')
-        self.assertEqual('HOG:0000365', response.data['members'][0]['oma_hog_id'])
+        response = client.get(path + '/api/hogs/HOG:0000365/members/', format='json')
+        protein_url = response.data['members'][0]['entry_url']
+        response_2 = client.get(protein_url, format='json')
+        self.assertIn('HOG:0000365', response_2.data['oma_hog_id'])
 
 class GroupTest(APITestCase):
     #test group member is in the correct group
     def test_group_members(self):
         client = APIClient()
         response = client.get(path + '/api/group/500/', format='json')
-        self.assertEqual(int(500), response.data['members'][0]['oma_group'])
+        protein_url = response.data['members'][0]['entry_url']
+        response_2 = client.get(protein_url, format='json')
+        self.assertEqual(int(500), response_2.data['oma_group'])
 
 class GenomeTest(APITestCase):
     def test_member_proteins(self):

@@ -33,9 +33,18 @@ class ProteinEntryViewSet(ViewSet):
         """
         # Load the entry and its domains, before forming the JSON to draw client-side.
         entry_nr = utils.id_resolver.resolve(entry_id)
+        protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
         serializer = serializers.ProteinEntryDetailSerializer(
-            instance=models.ProteinEntry.from_entry_nr(utils.db, entry_nr),
-            context={'request': request})
+                instance=protein, context={'request': request})
+        return Response(serializer.data)
+
+
+    @detail_route()
+    def links(self,request,entry_id=None, format=None):
+        entry_nr = utils.id_resolver.resolve(entry_id)
+        protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
+        serializer = serializers.ProteinLinksSerializer(
+            instance=protein, context={'request': request})
         return Response(serializer.data)
 
     @detail_route()
@@ -80,7 +89,7 @@ class ProteinEntryViewSet(ViewSet):
                     pass
             else:
                 content.append({'ortholog': ortholog, 'RelType': row[4], 'Distance': row[3], 'Score': row[2]})
-        serializer = serializers.OrthologsListSerializer(instance=content, many=True)
+        serializer = serializers.OrthologsListSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 
     @detail_route()
