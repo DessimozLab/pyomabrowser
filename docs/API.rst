@@ -58,12 +58,5 @@ REST API ARCHITECTURE
 ACCESING THE API
 ---------------------
 
-The data from the REST API can be easily accessed via packages such as httpie/coreapi.
-
-.. code-block:: sh
-
-    http <path>
-
-Python+R bindings
 
 

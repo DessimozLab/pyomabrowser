@@ -40,7 +40,7 @@ class ProteinEntryViewSet(ViewSet):
 
 
     @detail_route()
-    def links(self,request,entry_id=None, format=None):
+    def hyperlinks(self,request,entry_id=None, format=None):
         entry_nr = utils.id_resolver.resolve(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
         serializer = serializers.ProteinLinksSerializer(
