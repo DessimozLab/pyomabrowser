@@ -8,4 +8,6 @@ db.sqlite3
 .DS_Store
 .idea
 .ropeproject
-pyoma.log
+*.log
+docs/_build
+
