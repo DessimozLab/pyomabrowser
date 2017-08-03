@@ -67,7 +67,8 @@ class ProteinEntryViewSet(ViewSet):
         data = []
         for level in protein_levels:
             data.append(m.HOG(hog_id=protein.oma_hog,level=level))
-        serializer = serializers.HOGsLevelSerializer(instance = data, many= True, context={'request': request} )
+        content = {'hog_id': protein.oma_hog, 'levels': data}
+        serializer = serializers.ProteinHOGSerializer(instance = content, context={'request': request} )
         return Response(serializer.data)
 
     @detail_route()

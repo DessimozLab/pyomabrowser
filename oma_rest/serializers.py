@@ -218,6 +218,10 @@ class HOGsLevelSerializer(serializers.Serializer):
     level = serializers.CharField()
     level_url = QueryParamHyperlinkedIdentityField(view_name='hogs-detail',lookup_field='hog_id',query_params={'level': 'level'})
 
+class ProteinHOGSerializer(serializers.Serializer):
+    hog_id = serializers.CharField()
+    levels = serializers.ListSerializer(child = HOGsLevelSerializer())
+
 class HOGDetailSerializer(serializers.Serializer):
     hog_id = serializers.CharField()
     root_level = serializers.CharField()
