@@ -110,12 +110,6 @@ class HogVisViewTest(TestCase):
         self.assertEqual(orthoxml.status_code, 200)
         self.assertIn('protId="{}"'.format(query).encode('utf-8'), orthoxml.content)
 
-        # test that species tree gets loaded and contains the query species
-        spectree = self.client.get(expected_species_url)
-        self.assertEqual(spectree.status_code, 200)
-        for lev in (b'Eukaryota', b'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', b'Fungi'):
-            self.assertIn(lev, spectree.content, '{} not in species tree'.format(lev))
-
 
 class SyntenyViewTester(TestCase):
     def verify_colors(self, query, window):
