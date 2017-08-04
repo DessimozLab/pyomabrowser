@@ -26,7 +26,7 @@ python manage.py syncdb --> this creates the necessary databases. This, you only
   have to do once. Note: This does not create any pytables database. This is 
   created outside this project.
 
-python manage.py runserver 8000
+python manage.py runserver 8000 --nothreading
 
 --> you can access the omabrowser on http://localhost:8000/
 
