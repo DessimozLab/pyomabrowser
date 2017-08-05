@@ -213,3 +213,13 @@ if DEPLOYMENT == "PRODUCTION":
     MEDIA_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "media")
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# some jenkins specific modifications
+if DEPLOYMENT == "CI-JENKINS":
+    INSTALLED_APPS = INSTALLED_APPS + 'django_jenkins'
+    JENKINS_TASKS = (
+        'django_jenkins.tasks.run_pep8',
+        'django_jenkins.tasks.run_pyflakes',
+        'django_jenkins.tasks.run_jslint',
+    )
