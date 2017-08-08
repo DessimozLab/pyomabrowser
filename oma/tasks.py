@@ -19,6 +19,7 @@ from zoo.wrappers.aligners import Mafft, DataType, WrapperError
 from django.conf import settings
 from celery import shared_task
 import pyoma.browser.models
+from pyoma.browser.db import FastMapper
 from . import utils, misc
 from .models import FileResult
 
@@ -181,21 +182,18 @@ def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit):
     path = os.path.join(settings.MEDIA_ROOT, name)
     try:
         sequences = SeqIO.parse(sequence_file, 'fasta')
-        # TODO: proper init of assignment object
-        projector = FunctionProjectorMock(sequences, tax_limit)
+        projector = FastMapper(utils.db)
 
         if not os.path.isdir(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
         with gzip.open(path, 'wt') as fout:
-            fout.write('!gaf-version: 2.1\n')
-            for anno in projector:
-                GOA.writerec(anno, fout, GOA.GAF20FIELDS)
+            projector.write_annotations(fout, sequences)
 
         db_entry.result = name
         db_entry.state = 'done'
         tot_time = time.time() - t0
         logger.info('finished assign_go_function_to_user_sequences task. took {:.3f}sec'.format(tot_time))
-    except (IOError, ) as e:
+    except (IOError, TypeError) as e:
         logger.exception('error while computing assign_go_function_to_user_sequences for dataset: {}'
             .format(data_id))
         db_entry.state = 'error'
