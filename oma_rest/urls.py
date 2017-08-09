@@ -7,7 +7,7 @@ from rest_framework.documentation import include_docs_urls
 
 router = DefaultRouter()
 router.register(r'protein', views.ProteinEntryViewSet, base_name='protein')
-router.register(r'group', views.OmaGroupViewSet, base_name='group')
+router.register(r'groups', views.OmaGroupViewSet, base_name='groups')
 router.register(r'version', views.APIVersion, base_name='version')
 router.register(r'xref', views.XRefsViewSet, base_name='xref')
 router.register(r'genome', views.GenomeViewSet, base_name='genome')

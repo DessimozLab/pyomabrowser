@@ -40,7 +40,7 @@ class ProteinEntryViewSet(ViewSet):
 
 
     @detail_route()
-    def hyperlinks(self,request,entry_id=None, format=None):
+    def info_links(self,request,entry_id=None, format=None):
         entry_nr = utils.id_resolver.resolve(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
         serializer = serializers.ProteinLinksSerializer(
@@ -132,6 +132,25 @@ class OmaGroupViewSet(ViewSet):
     lookup_field = 'id'
     serializer_class = serializers.ProteinEntrySerializer
 
+    def list(self, request, format = None):
+        """
+               List of all the OMA Groups currently identified and the url to access their details.
+
+
+               """
+        groups_tab = utils.db.get_hdf5_handle().root.OmaGroups.MetaData
+        groups = []
+        for row in groups_tab:
+            groups.append(row[0])
+        group_numbers = sorted(set(groups))
+        data = []
+        for row in group_numbers:
+            data.append(m.OMAGroup(GroupNr=row))
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(data, request)
+        serializer = serializers.GroupListSerializer(page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
+
     def retrieve(self, request, id=None, format=None):
         """
                Retrieve the meta data on the OMA group and its protein members
@@ -176,7 +195,7 @@ class OmaGroupViewSet(ViewSet):
         r_groups = Counter(groups).most_common()
         data['related_groups'] = sorted(r_groups)
         serializer = serializers.CloseGroupsSerializer(
-            instance=data)
+            instance=data,context={'request': request})
         return Response(serializer.data)
 
 
@@ -273,7 +292,7 @@ class HOGsViewSet(ViewSet):
                             indexed_levels.append([level, int(level_index)])
                     indexed_levels.sort(key=lambda x: x[1])
                     root_hog_level = indexed_levels[-1][0]
-            data = {'hog_id': hog_id, 'root_level': root_hog_level,'levels': levels}
+            data = {'hog_id': hog_id, 'root_level': root_hog_level, 'levels': levels}
             serializer = serializers.HOGDetailSerializer(instance=data, context={'request': request})
             return Response(serializer.data)
         else:
@@ -496,5 +515,5 @@ class PairwiseRelationAPIView(APIView):
                 res.append(rel)
                 if cnt+1 % 100 == 0:
                     logger.debug("Processed {} rows".format(cnt))
-        serializer = serializers.PairwiseRelationSerializer(instance=res, many=True)
+        serializer = serializers.PairwiseRelationSerializer(instance=res, many=True, context={'request': request})
         return Response(serializer.data)

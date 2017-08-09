@@ -38,17 +38,23 @@ class ProteinEntrySerializer(serializers.Serializer):
         return instance
 
 
-class ProteinEntryDetailSerializer(ProteinEntrySerializer):
+class ProteinEntryDetailSerializer(serializers.Serializer):
+    entry_nr = serializers.IntegerField(required=True)
+    entry_url = serializers.HyperlinkedIdentityField(view_name='protein-detail', read_only=True,
+                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    omaid = serializers.CharField()
+    canonicalid = serializers.CharField()
+    sequence_md5 = serializers.CharField()
+    oma_group = serializers.IntegerField()
+    roothog_id = serializers.IntegerField(source='hog_family_nr')
+    oma_hog_id = serializers.CharField(source='oma_hog')
     hog_levels = serializers.SerializerMethodField(method_name=None)
     chromosome = serializers.CharField()
     locus = serializers.SerializerMethodField(method_name=None)
     sequence_length = serializers.IntegerField()
     sequence = serializers.CharField()
     cdna = serializers.CharField()
-    oma_group = serializers.IntegerField()
-    roothog_id = serializers.IntegerField(source='hog_family_nr')
-    oma_hog_id = serializers.CharField(source='oma_hog')
-    further_links = serializers.HyperlinkedIdentityField(view_name='protein-links',read_only=True,lookup_field='entry_nr',lookup_url_kwarg='entry_id')
+    further_links = serializers.HyperlinkedIdentityField(view_name='protein-info-links',read_only=True,lookup_field='entry_nr',lookup_url_kwarg='entry_id')
 
     def get_locus(self, obj):
         return [obj.locus_start, obj.locus_end, obj.strand]
@@ -91,7 +97,7 @@ class ProteinLinksSerializer(serializers.Serializer):
     def get_oma_hog_url(self,obj):
         protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)
         if protein.oma_hog != '':
-            return 'http://127.0.0.1:8000/api/group/'+ str(protein.oma_hog) + "/"
+            return 'http://127.0.0.1:8000/api/hogs/'+ str(protein.oma_hog) + "/"
         else:
             return ''
 
@@ -148,7 +154,11 @@ class GenomeInfoSerializer(serializers.Serializer):
         pass
 
 
-class GenomeDetailSerializer(GenomeInfoSerializer):
+class GenomeDetailSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=5, source='uniprot_species_code')
+    taxon_id = serializers.IntegerField(source='ncbi_taxon_id')
+    species = serializers.CharField(source='sciname')
+    common = serializers.CharField(required=False)
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
     proteins = serializers.HyperlinkedIdentityField(view_name='genome-proteins-list', read_only=True,
@@ -181,7 +191,7 @@ class RelatedGroupsSerializer(serializers.Serializer):
 class OmaGroupSerializer(serializers.Serializer):
     GroupNr = serializers.IntegerField()
     fingerprint = serializers.CharField()
-    related_groups = serializers.HyperlinkedIdentityField(view_name='group-close-groups', lookup_field='GroupNr', lookup_url_kwarg='id')
+    related_groups = serializers.HyperlinkedIdentityField(view_name='groups-close-groups', lookup_field='GroupNr', lookup_url_kwarg='id')
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
 
 
@@ -226,6 +236,11 @@ class HOGDetailSerializer(serializers.Serializer):
     hog_id = serializers.CharField()
     root_level = serializers.CharField()
     levels = serializers.ListSerializer(child = HOGsLevelSerializer())
+
+class GroupListSerializer(serializers.Serializer):
+    GroupNr = serializers.CharField()
+    group_url = serializers.HyperlinkedIdentityField(view_name='groups-detail', read_only=True, lookup_field='GroupNr', lookup_url_kwarg='id')
+
 
 #the below 2 HOGS serializers are to do with the list of hogs found at api/hogs/
 class HOGsListSerializer(serializers.Serializer):
