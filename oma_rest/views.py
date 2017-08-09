@@ -157,6 +157,17 @@ class OmaGroupViewSet(ViewSet):
 
                :param group_id: an unique identifier for an OMA group
                """
+        if id[0].isalpha():
+            if id[-1].isalpha():
+                # id == fingerprint
+                group_row = utils.db.get_hdf5_handle().root.OmaGroups.MetaData.read_where('(Fingerprint==id)')
+                id = group_row[0]
+            else:
+                # id == group member
+                entry_nr = utils.id_resolver.resolve(id)
+                protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
+                id = protein.oma_group
+        # id == hog_id
         members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
         data = utils.db.oma_group_metadata(members[0].oma_group)
         fingerprint = data['fingerprint']
@@ -253,6 +264,11 @@ class HOGsViewSet(ViewSet):
                :param level: an unique name for a level
                """
         level = self.request.query_params.get('level', None)
+        if hog_id[:3] != "HOG":
+            # hog_id == member
+            entry_nr = utils.id_resolver.resolve(hog_id)
+            protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
+            hog_id = protein.oma_hog
         if level == None:
             hogs_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(ID==hog_id)')
             levels = []
