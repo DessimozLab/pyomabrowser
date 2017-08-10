@@ -114,12 +114,12 @@ class FastaView(FastaResponseMixin, ContextMixin, View):
 
 
 def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
-    """loads data to visualize the synteny around a query 
+    """loads data to visualize the synteny around a query
     gene and its orthologs.
     the parameter 'mod' is used to keep the color between
     calls on different entries compatible, i.e. they selected
     gene should keep its color.
-    the window paramter is used to select the size of the 
+    the window paramter is used to select the size of the
     neighborhood."""
 
     try:
@@ -534,6 +534,68 @@ class HogVisWithoutInternalLabels(HOGsVis):
     show_internal_labels = False
 
 
+class HOGDomainsBase(ContextMixin, EntryCentricMixin):
+    def get_context_data(self, entry_id, idtype='OMA', **kwargs):
+        # TODO: move some of this to misc / a model.
+        context = super(HOGsBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+        try:
+            fam = utils.db.hog_family(entry)
+        except db.Singleton:
+            # Singleton!!
+            raise Http404("Entry not member of family ({})".format(entry_id))
+            pass
+
+        (fam_row, sim_fams) = utils.db.get_prevalent_domains(fam)
+
+        if fam_row is None:
+            raise Http404("No prevalent domains for family. ({} / {})"
+                          .format(entry_id, fam))
+
+        # Get family sizes
+        fam_size = len(utils.db.member_of_fam(fam))
+        if sim_fams is not None:
+            sim_fams['size'] = sim_fams['Fam'].apply(
+                lambda i: len(utils.db.member_of_fam(i)))
+
+        # Get highest level for each family
+        fam_toplevel = utils.db.hog_levels_of_fam(fam)[0]
+        if sim_fams is not None:
+            sim_fams['toplevel'] = sim_fams['Fam'].apply(
+                lambda i: utils.db.hog_levels_of_fam(i)[0])
+
+        # Get the longest representative sequence
+        repr_entries = map(utils.db.entry_by_entry_nr,
+                           list(sim_fams['ReprEntryNr']) +
+                           [fam_row['ReprEntryNr']])
+
+        longest_seq = 0
+        if len(repr_entries) > 0:
+            longest_seq = max(e['SeqBufferLength'] for e in repr_entries)
+
+        context.update(
+            {'entry': entry,
+             'hog': fam,
+             'hog_row': fam_row,
+             'hog_size': fam_size,
+             'hog_toplevel': fam_toplevel,
+             'sim_hogs': sim_fams,
+             'longest_seq': longest_seq})
+
+        return context
+
+
+class HOGDomainsView(HOGDomainsBase, TemplateView):
+    template_name = "hog-domains.html"
+
+
+class HOGDomainsJson(HOGDomainsBase, JsonModelMixin, View):
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['sim_hogs']))
+        return JsonResponse(data, safe=False)
+
+
 def domains_json(request, entry_id):
     # Load the entry and its domains, before forming the JSON to draw client-side.
     entry_nr = utils.id_resolver.resolve(entry_id)
@@ -768,7 +830,7 @@ class ChromosomeJson(JsonModelMixin, View):
 
 class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
     '''
-    This json aim to contain the list of orthologous pairs between two genomes 
+    This json aim to contain the list of orthologous pairs between two genomes
     '''
 
     def get(self, request, org1, org2, chr1, chr2, *args, **kwargs):
