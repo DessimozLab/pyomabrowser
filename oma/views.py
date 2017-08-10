@@ -675,7 +675,7 @@ def function_projection(request):
                 r = FileResult(data_hash=data_id, result_type='function_projection', state="pending")
                 r.save()
                 tasks.assign_go_function_to_user_sequences.delay(
-                    data_id, user_file_info['fname'], form.cleaned_data['tax_limit'])
+                    data_id, user_file_info['fname'], None)  #form.cleaned_data['tax_limit'])
             else:
                 os.remove(user_file_info['fname'])
 
