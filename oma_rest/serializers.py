@@ -90,7 +90,7 @@ class ProteinLinksSerializer(serializers.Serializer):
     def get_oma_group_url(self,obj):
         protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)
         if protein.oma_group != 0:
-            return 'http://127.0.0.1:8000/api/group/' + str(protein.oma_group) + "/"
+            return 'http://127.0.0.1:8000/api/groups/' + str(protein.oma_group) + "/"
         else:
             return ''
 
@@ -161,7 +161,7 @@ class GenomeDetailSerializer(serializers.Serializer):
     common = serializers.CharField(required=False)
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
-    proteins = serializers.HyperlinkedIdentityField(view_name='genome-proteins-list', read_only=True,
+    proteins_url = serializers.HyperlinkedIdentityField(view_name='genome-proteins-list', read_only=True,
                                                     lookup_field='uniprot_species_code',
                                                     lookup_url_kwarg='genome_id')
     chromosomes = serializers.SerializerMethodField(method_name=None)
@@ -291,3 +291,14 @@ class PairwiseRelationSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         pass
+
+class TaxonSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    taxon_id = serializers.CharField()
+
+class TaxonomyNewickSerializer(serializers.Serializer):
+    root_taxon = TaxonSerializer()
+    newick = serializers.CharField()
+
+
+

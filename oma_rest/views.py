@@ -505,6 +505,7 @@ class PairwiseRelationAPIView(APIView):
         using the query_params 'chr1' and 'chr2', one can limit
         the relations to a certain chromosome for one or both
         genomes."""
+        rel_type = request.query_params.get('rel_type', None)
         try:
             genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id1))
             genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id2))
@@ -528,8 +529,57 @@ class PairwiseRelationAPIView(APIView):
             rel = models.PairwiseRelation(utils.db, row.fetch_all_fields())
             if ((chr1 is None or chr1 == rel.entry_1.chromosome) and
                     (chr2 is None or chr2 == rel.entry_2.chromosome)):
-                res.append(rel)
-                if cnt+1 % 100 == 0:
-                    logger.debug("Processed {} rows".format(cnt))
+                if rel_type == None:
+                    res.append(rel)
+                else:
+                    if rel_type == rel.rel_type:
+                        res.appen(rel)
+                if cnt + 1 % 100 == 0:
+                            logger.debug("Processed {} rows".format(cnt))
+
         serializer = serializers.PairwiseRelationSerializer(instance=res, many=True, context={'request': request})
         return Response(serializer.data)
+
+class TaxonomyViewSet(ViewSet):
+
+    def list(self, request, format=None):
+        """
+
+               """
+        members = request.query_params.get('members', None)
+        taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
+        tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
+        if members != None:
+            members = members.split(', ')
+            members_array = []
+            for level in members:
+                if level[0] == "[":
+                    updated_level = level.replace("[", "")
+                    members_array.append(updated_level)
+                else:
+                    if level[-1] == "]":
+                        updated_level_2 = level.replace("]", "")
+                        members_array.append(updated_level_2)
+                    else:
+                        members_array.append(level)
+            decoded_members_array = []
+            for i in range(len(members_array)):
+                decoded_members_array.append(members_array[i][1:-1])
+            members_list = []
+            for i in range(len(decoded_members_array)):
+                for lvl in taxonomy_tab.read(field='Name'):
+                    if str(lvl.decode("utf-8")) == decoded_members_array[i]:
+                        members_list.append(lvl)
+            tx = tax_obj.get_induced_taxonomy(members=members_list)
+            root = tx._get_root_taxon()
+            root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[1]}
+            data = {'root_taxon': root_data, 'newick': tx.newick()}
+            serializer = serializers.TaxonomyNewickSerializer(instance=data)
+            return Response(serializer.data)
+        else:
+            root = tax_obj._get_root_taxon()
+            root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[1]}
+            data = {'root_taxon': root_data, 'newick': tax_obj.newick()}
+            serializer = serializers.TaxonomyNewickSerializer(instance=data)
+            return Response(serializer.data)
+

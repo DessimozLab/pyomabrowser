@@ -12,6 +12,9 @@ router.register(r'version', views.APIVersion, base_name='version')
 router.register(r'xref', views.XRefsViewSet, base_name='xref')
 router.register(r'genome', views.GenomeViewSet, base_name='genome')
 router.register(r'hogs', views.HOGsViewSet, base_name='hogs')
+router.register(r'taxonomy', views.TaxonomyViewSet, base_name='taxonomy')
+
+
 
 urlpatterns = [
     url(r'^', include(router.urls)),
