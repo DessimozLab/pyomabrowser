@@ -594,7 +594,7 @@ def genome_suggestion(request):
     if request.method == 'POST':
         form = forms.GenomeSuggestionFrom(request.POST)
         if form.is_valid():
-            logger.info("recieved valid genome suggestion form")
+            logger.info("received valid genome suggestion form")
             data = form.cleaned_data
             subj = "Genome Suggestion {taxon_id} ({name})".format(**data)
             try:
@@ -658,13 +658,52 @@ def export_marker_genes(request):
     return render(request, "export_marker.html")
 
 
-@never_cache
-def marker_genes_retrieve_results(request, data_id):
-    try:
-        result = FileResult.objects.get(data_hash=data_id)
-    except FileResult.DoesNotExist:
-        raise Http404('invalid marker gene dataset')
-    return render(request, "marker_download.html", {'file_result': result})
+def function_projection(request):
+    if request.method == 'POST':
+        form = forms.FunctionProjectionUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            logger.info("received valid function projection form")
+            user_file_info = misc.handle_uploaded_file(request.FILES['file'])
+            data_id = hashlib.md5(user_file_info['md5'].encode('utf-8')).hexdigest()
+            try:
+                r = FileResult.objects.get(data_hash=data_id)
+                do_compute = r.remove_erroneous_or_long_pending()
+            except FileResult.DoesNotExist:
+                do_compute = True
+
+            if do_compute:
+                r = FileResult(data_hash=data_id, result_type='function_projection', state="pending")
+                r.save()
+                tasks.assign_go_function_to_user_sequences.delay(
+                    data_id, user_file_info['fname'], form.cleaned_data['tax_limit'])
+            else:
+                os.remove(user_file_info['fname'])
+
+            return HttpResponseRedirect(reverse('function-projection', args=(data_id,) ))
+    else:
+        form = forms.FunctionProjectionUploadForm()
+    return render(request, "function_projection_upload.html", {'form': form})
+
+
+@method_decorator(never_cache, name='dispatch')
+class AbstractFileResultDownloader(TemplateView):
+    def get_context_data(self, data_id, **kwargs):
+        context = super(AbstractFileResultDownloader, self).get_context_data(**kwargs)
+        try:
+            result = FileResult.objects.get(data_hash=data_id)
+        except FileResult.DoesNotExist:
+            raise Http404('Invalid dataset')
+        context['file_result'] = result
+        context['reload_every_x_sec'] = 20
+        return context
+
+
+class FunctionProjectionResults(AbstractFileResultDownloader):
+    template_name = "function_projection_download.html"
+
+
+class MarkerGenesResults(AbstractFileResultDownloader):
+    template_name = "marker_download.html"
 
 
 class CurrentView(TemplateView):

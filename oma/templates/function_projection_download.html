@@ -1,0 +1,51 @@
+{% extends "core.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA: GO Function Projection{% endblock %}
+{% block meta_description %}Annotated your proteome with Gene Ontology terms based on OMA{% endblock %}
+
+{% block meta_hook %}
+    {% if file_result.state == "pending" or file_result.state == "running" %}
+    <meta http-equiv="refresh" content="{{ reload_every_x_sec }}">
+    {% endif %}
+{% endblock meta_hook %}
+
+{% block content %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<h1 class="text-center">Projecting Gene Ontology function to your sequences</h1>
+					<div class="well well-sm entete"></div>
+					<br>
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<p>The service identifies the closest sequence in a very quick manner
+                                and assigns the known GO annotations to it. We return a gaf2.1 formatted file to you
+                                that contain all the annotations and as well the source protein from which the function
+                                has been projected from.</p>
+
+                            {% if file_result.state == "done" %}
+                                <p>Your dataset is now ready. You can download it from <a href="{{ file_result.result.url }} ">here</a>.</p>
+                            {% else %}
+                                <p>Your dataset is currently being prepared. Its status is "{{ file_result.state }}".
+                                    Depending on the size of the uploaded dataset, this may take another couple
+                                    of minutes. Once the file is ready, we will store it
+                                    for 7 days. You can come back to this page using this link:
+                                    <a href="">{{ request.get_host }}{% url 'function-projection' file_result.data_hash %}</a>
+                                </p>
+
+                            <p>This page gets automatically reloaded every {{ reload_every_x_sec }} secs or after pressing the refresh button</p>
+                            <form action="{% url 'function-projection' file_result.data_hash %}">
+                              <input type="submit" value="Refresh" />
+                            </form></p>
+                            {% endif %}
+                        </div>
+			        </div>
+		        </div>
+	        </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

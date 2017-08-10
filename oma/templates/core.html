@@ -54,7 +54,7 @@
         <ul class="nav navbar-nav">
           <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Explore<span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-              <li><a class="" href="{% url 'release' %}"">Release information</a></li>
+              <li><a class="" href="{% url 'release' %}">Release information</a></li>
               <li class="divider"></li>
 
               {% if entry.omaid %}
@@ -108,6 +108,12 @@
               <li><a class="" href="{% url 'license'  %}">License</a></li>
               <li class="divider"></li>
               <li><a class="" href="mailto:contact@omabrowser.org"><span class="glyphicon glyphicon-envelope"></span> Contact</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Analyses <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a class="" href="{% url 'function-projection-input' %}">GO Function projection</a></li>
             </ul>
           </li>
 
