@@ -664,9 +664,7 @@ def function_projection(request):
         if form.is_valid():
             logger.info("received valid function projection form")
             user_file_info = misc.handle_uploaded_file(request.FILES['file'])
-            data_id = hashlib.md5(
-                    (str(form.cleaned_data['tax_limit']) + user_file_info['md5']).encode('utf-8')
-                ).hexdigest()
+            data_id = hashlib.md5(user_file_info['md5'].encode('utf-8')).hexdigest()
             try:
                 r = FileResult.objects.get(data_hash=data_id)
                 do_compute = r.remove_erroneous_or_long_pending()
