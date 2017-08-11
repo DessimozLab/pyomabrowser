@@ -544,7 +544,8 @@ class TaxonomyViewSet(ViewSet):
 
     def list(self, request, format=None):
         """
-
+            Get the taxonomy as either a dictionary (default) or newick (?type=newick).
+            It is possible to get induced taxonomy as well by specifying the ?members paramater to a list of ncbi taxon_ids or member names
                """
         members = request.query_params.get('members', None)
         type = request.query_params.get('type', None)
@@ -563,19 +564,31 @@ class TaxonomyViewSet(ViewSet):
                         members_array.append(updated_level_2)
                     else:
                         members_array.append(level)
-            decoded_members_array = []
-            for i in range(len(members_array)):
-                decoded_members_array.append(members_array[i][1:-1])
             members_list = []
-            for i in range(len(decoded_members_array)):
-                for lvl in taxonomy_tab.read(field='Name'):
-                    if str(lvl.decode("utf-8")) == decoded_members_array[i]:
-                        members_list.append(lvl)
+            for member in members_array:
+                try:
+                    int(member)
+                    isListOfNames = False
+                except:
+                    isListOfNames = True
+            if isListOfNames:
+                decoded_members_array = []
+                for i in range(len(members_array)):
+                    decoded_members_array.append(members_array[i][1:-1])
+                #members = list of names
+                for i in range(len(decoded_members_array)):
+                    for lvl in taxonomy_tab.read(field='Name'):
+                        if str(lvl.decode("utf-8")) == decoded_members_array[i]:
+                            members_list.append(lvl)
+            else:
+                # handling the case user gave a list of NCBI taxon ids
+                for i in range(len(members_array)):
+                    members_list.append(tax_obj._taxon_from_numeric(tid=int(members_array[i]))[2])
             tx = tax_obj.get_induced_taxonomy(members=members_list)
             root = tx._get_root_taxon()
             root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[1]}
             if type == 'newick':
-                data = {'root_taxon': root_data, 'newick': tx.newick()}
+                data = {'root_taxon': root_data, 'newick': tx.newick()+";"} #adding the semi-colon as sometime phylo.io fails without it
                 serializer = serializers.TaxonomyNewickSerializer(instance=data)
                 return Response(serializer.data)
             else:
@@ -586,7 +599,7 @@ class TaxonomyViewSet(ViewSet):
             root = tax_obj._get_root_taxon()
             root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[1]}
             if type == 'newick':
-                data = {'root_taxon': root_data, 'newick': tax_obj.newick()}
+                data = {'root_taxon': root_data, 'newick': tax_obj.newick()+";"} #adding the semi-colon as sometime phylo.io fails without it
                 serializer = serializers.TaxonomyNewickSerializer(instance=data)
                 return Response(serializer.data)
             else:
