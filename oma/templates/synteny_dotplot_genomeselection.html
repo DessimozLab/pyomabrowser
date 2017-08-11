@@ -163,7 +163,9 @@
             var select = document.getElementById(id_select);
 
             $.getJSON( "/api/genome/" + genome_name, function( jsonData ) {
-
+                jsonData.chromosomes.sort(function (a,b){
+                    return (a.id > b.id) ? 1 : ((b.id > a.id) ? -1 : 0);
+                });
                 $.each( jsonData.chromosomes, function (index ) {
                     var nr_prot_on_chr = this.entry_ranges.reduce(function(acc, cur){return acc + cur[1]-cur[0]+1}, 0);
                     if (nr_prot_on_chr < MIN_NR_PROTEINS_PER_CHR){
