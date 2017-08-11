@@ -547,6 +547,7 @@ class TaxonomyViewSet(ViewSet):
 
                """
         members = request.query_params.get('members', None)
+        type = request.query_params.get('type', None)
         taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
         tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
         if members != None:
@@ -573,13 +574,24 @@ class TaxonomyViewSet(ViewSet):
             tx = tax_obj.get_induced_taxonomy(members=members_list)
             root = tx._get_root_taxon()
             root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[1]}
-            data = {'root_taxon': root_data, 'newick': tx.newick()}
-            serializer = serializers.TaxonomyNewickSerializer(instance=data)
-            return Response(serializer.data)
+            if type == 'newick':
+                data = {'root_taxon': root_data, 'newick': tx.newick()}
+                serializer = serializers.TaxonomyNewickSerializer(instance=data)
+                return Response(serializer.data)
+            else:
+                data = tx.as_dict()
+                return Response(data)
+
         else:
             root = tax_obj._get_root_taxon()
             root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[1]}
-            data = {'root_taxon': root_data, 'newick': tax_obj.newick()}
-            serializer = serializers.TaxonomyNewickSerializer(instance=data)
-            return Response(serializer.data)
+            if type == 'newick':
+                data = {'root_taxon': root_data, 'newick': tax_obj.newick()}
+                serializer = serializers.TaxonomyNewickSerializer(instance=data)
+                return Response(serializer.data)
+            else:
+                data = tax_obj.as_dict()
+                return Response(data)
+
+
 
