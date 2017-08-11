@@ -111,9 +111,23 @@
             </ul>
           </li>
 
-          <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Analyses <span class="caret"></span></a>
+          <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Compute <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
+              <li role="presentation" class="dropdown-header">Web services</li>
               <li><a class="" href="{% url 'function-projection-input' %}">GO Function projection</a></li>
+              <li class="divider"></li>
+              <li role="presentation" class="dropdown-header">API</li>
+              <li><a href="{% url 'api-docs:docs-index' %}">REST API</a></li></li>
+              <li><a class="" href="{% url 'APISOAP'  %}">SOAP</a></li>
+              <li class="divider"></li>
+              <li role="presentation" class="dropdown-header">Semantic web</li>
+              <li><a class="" href="http://sparql.omabrowser.org">SPARQL Endpoint</a></li>
+              <li><a class="" href="/ontology/oma">RDF Schema</a></li>
+              <li class="divider"></li>
+              <li role="presentation" class="dropdown-header">User-side computations</li>
+              <li><a class="" href="/standalone/">OMA standalone</a></li>
+              <li><a class="" href="{% url 'export' %}">Export All/All</a></li>
+              <li><a class="" href="{% url 'export_markers' %}">Export marker genes</a></li>
             </ul>
           </li>
 
@@ -122,21 +136,6 @@
               <li role="presentation" class="dropdown-header">OMA database files</li>
               <li><a class="" href="{% url 'current'  %}">Current release</a></li>
               <li><a class="" href="{% url 'archives'  %}">Archives</a></li>
-              <li class="divider"></li>
-              <li role="presentation" class="dropdown-header">User-side computations</li>
-              <li><a class="" href="/standalone/">OMA standalone</a></li>
-              <li><a class="" href="{% url 'export' %}">Export All/All</a></li>
-              <li><a class="" href="{% url 'export_markers' %}">Export marker genes</a></li>
-            </ul>
-          </li>
-          <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">API  <span class="caret"></span></a>
-            <ul class="dropdown-menu" role="menu">
-              <li><a href="{% url 'api-docs:docs-index' %}">REST API</a></li></li>
-              <li><a class="" href="{% url 'APISOAP'  %}">SOAP</a></li>
-              <li class="divider"></li>
-              <li role="presentation" class="dropdown-header">Semantic web</li>
-              <li><a class="" href="http://sparql.omabrowser.org">SPARQL Endpoint</a></li>
-              <li><a class="" href="/ontology/oma">RDF Schema</a></li>
             </ul>
           </li>
 
