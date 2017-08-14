@@ -85,11 +85,14 @@ class ProteinEntryViewSet(ViewSet):
             ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
             if rel_type != None:
                 if row[4]==rel_type:
-                    content.append({'ortholog': ortholog, 'RelType': row[4], 'Distance': row[3], 'Score': row[2]})
+                    content.append({'entry_nr': ortholog.entry_nr, 'omaid': ortholog.omaid, 'canonicalid': ortholog.canonicalid, 'sequence_md5': ortholog.sequence_md5,'RelType': row[4], 'Distance': row[3], 'Score': row[2]})
                 else:
                     pass
             else:
-                content.append({'ortholog': ortholog, 'RelType': row[4], 'Distance': row[3], 'Score': row[2]})
+                content.append(
+                    {'entry_nr': ortholog.entry_nr, 'omaid': ortholog.omaid, 'canonicalid': ortholog.canonicalid,
+                     'sequence_md5': ortholog.sequence_md5,'RelType': row[4],
+                     'Distance': row[3], 'Score': row[2]})
         serializer = serializers.OrthologsListSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 

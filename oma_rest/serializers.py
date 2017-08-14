@@ -103,10 +103,18 @@ class ProteinLinksSerializer(serializers.Serializer):
 
 
 class OrthologsListSerializer(serializers.Serializer):
-    ortholog = ProteinEntrySerializer()
+    entry_nr = serializers.IntegerField(required=True)
+    entry_url = serializers.SerializerMethodField(method_name=None)
+    omaid = serializers.CharField()
+    canonicalid = serializers.CharField()
+    sequence_md5 = serializers.CharField()
     RelType = serializers.CharField()
     Distance = serializers.FloatField()
     Score = serializers.FloatField()
+
+    def get_entry_url(self, obj):
+        return 'http://127.0.0.1:8000/api/protein/' + str(obj['entry_nr']) + "/"
+
 
 class SubHOGSerializer(serializers.Serializer):
     hog_id = serializers.CharField()
