@@ -7,9 +7,11 @@
 <body>
 <h1>Gene Ontology Function Predictions {% if e.name %} for {{ e.name }} {% endif %}ready</h1>
 <p>Your submitted job to the OMA Browser to predict GO functions for your uploaded dataset
-{% if e.name %}"{{ e.name }}" {% endif %} are now ready. You can retrieve the predictions from the follwoing URL:
-    {% url 'function-projection' e.data_hash %}</p>
-
+    {% if e.name %}"{{ e.name }}" {% endif %} are now ready. </p>
+{% if result_url %}
+    <p> You can retrieve the predictions from the following URL:
+        {{ result_url | urlize}}</p>
+{% endif %}
 
 </body>
 </html>

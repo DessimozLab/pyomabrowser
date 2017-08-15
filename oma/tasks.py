@@ -171,7 +171,7 @@ class FunctionProjectorMock(object):
                 yield rec
 
 @shared_task
-def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit):
+def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit=None, result_url=None):
     t0 = time.time()
     logger.info('starting projecting GO functions')
     db_entry = FileResult.objects.get(data_hash=data_id)
@@ -191,7 +191,8 @@ def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit):
 
         if db_entry.email != '':
             logger.info('sending ready mail to {}'.format(db_entry.email))
-            message = get_template('email_function_projection_ready.html').render({'e': db_entry})
+            context = {'e': db_entry, 'result_url': result_url}
+            message = get_template('email_function_projection_ready.html').render(context)
             sender = "noreply@omabrowser.org"
             msg = EmailMessage("GO Function Predictions ready", message, to=[db_entry.email], from_email=sender)
             msg.content_subtype = "html"
