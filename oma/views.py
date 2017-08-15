@@ -540,27 +540,26 @@ class HOGDomainsBase(ContextMixin, EntryCentricMixin):
         context = super(HOGDomainsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
         fam = entry.hog_family_nr
+
         if fam == 0:
             # Singleton!! TODO: work out what to do.
             raise Http404("Entry not member of family ({})".format(entry_id))
-            pass
 
         (fam_row, sim_fams) = utils.db.get_prevalent_domains(fam)
         if fam_row is None:
             # TODO: work out what to do.
-            raise Http404("No prevalent domains for family. ({} / {})"
+            raise Http404("Nothing found for family. ({} / {})"
                           .format(entry_id, fam))
 
         longest_seq = fam_row['ReprEntryLength']
         if sim_fams is not None:
             longest_seq = max(longest_seq, max(sim_fams['ReprEntryLength']))
 
-        context.update(
-            {'entry': entry,
-             'hog': fam,
-             'hog_row': fam_row,
-             'sim_hogs': sim_fams,
-             'longest_seq': longest_seq})
+        context.update({'entry': entry,
+                        'hog': fam,
+                        'hog_row': fam_row,
+                        'sim_hogs': sim_fams,
+                        'longest_seq': longest_seq})
 
         return context
 
