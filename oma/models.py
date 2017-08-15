@@ -9,7 +9,8 @@ class FileResult(models.Model):
     state = models.CharField(max_length=8)
     result = models.FileField(blank=True)
     create_time = models.DateTimeField(auto_now=True)
-    purged = models.BooleanField(default=False)
+    email = models.EmailField(blank=True)
+    name = models.CharField(max_length=64, blank=True)
 
     def remove_erroneous_or_long_pending(self):
         if self.state == "error" or (self.state == "pending" and

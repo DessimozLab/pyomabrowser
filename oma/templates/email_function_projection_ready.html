@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GO Function Predictions {{ e.name }} ready</title>
+</head>
+<body>
+<h1>Gene Ontology Function Predictions {% if e.name %} for {{ e.name }} {% endif %}ready</h1>
+<p>Your submitted job to the OMA Browser to predict GO functions for your uploaded dataset
+{% if e.name %}"{{ e.name }}" {% endif %} are now ready. You can retrieve the predictions from the follwoing URL:
+    {% url 'function-projection' e.data_hash %}</p>
+
+
+</body>
+</html>
