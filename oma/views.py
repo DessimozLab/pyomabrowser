@@ -537,48 +537,28 @@ class HogVisWithoutInternalLabels(HOGsVis):
 class HOGDomainsBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, idtype='OMA', **kwargs):
         # TODO: move some of this to misc / a model.
-        context = super(HOGsBase, self).get_context_data(**kwargs)
+        context = super(HOGDomainsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
-        try:
-            fam = utils.db.hog_family(entry)
-        except db.Singleton:
-            # Singleton!!
+        fam = entry.hog_family_nr
+        if fam == 0:
+            # Singleton!! TODO: work out what to do.
             raise Http404("Entry not member of family ({})".format(entry_id))
             pass
 
         (fam_row, sim_fams) = utils.db.get_prevalent_domains(fam)
-
         if fam_row is None:
+            # TODO: work out what to do.
             raise Http404("No prevalent domains for family. ({} / {})"
                           .format(entry_id, fam))
 
-        # Get family sizes
-        fam_size = len(utils.db.member_of_fam(fam))
+        longest_seq = fam_row['ReprEntryLength']
         if sim_fams is not None:
-            sim_fams['size'] = sim_fams['Fam'].apply(
-                lambda i: len(utils.db.member_of_fam(i)))
-
-        # Get highest level for each family
-        fam_toplevel = utils.db.hog_levels_of_fam(fam)[0]
-        if sim_fams is not None:
-            sim_fams['toplevel'] = sim_fams['Fam'].apply(
-                lambda i: utils.db.hog_levels_of_fam(i)[0])
-
-        # Get the longest representative sequence
-        repr_entries = map(utils.db.entry_by_entry_nr,
-                           list(sim_fams['ReprEntryNr']) +
-                           [fam_row['ReprEntryNr']])
-
-        longest_seq = 0
-        if len(repr_entries) > 0:
-            longest_seq = max(e['SeqBufferLength'] for e in repr_entries)
+            longest_seq = max(longest_seq, max(sim_fams['ReprEntryLength']))
 
         context.update(
             {'entry': entry,
              'hog': fam,
              'hog_row': fam_row,
-             'hog_size': fam_size,
-             'hog_toplevel': fam_toplevel,
              'sim_hogs': sim_fams,
              'longest_seq': longest_seq})
 
@@ -589,11 +569,20 @@ class HOGDomainsView(HOGDomainsBase, TemplateView):
     template_name = "hog-domains.html"
 
 
-class HOGDomainsJson(HOGDomainsBase, JsonModelMixin, View):
+class HOGDomainsJson(HOGDomainsBase, View):
+    json_fields = {'Fam': 'Family', 'ReprEntryNr': 'Representative_Entry_Nr',
+                   'Prevalence': 'Prevalence', 'sim': 'Similarity',
+                   'size': 'Family_Size', 'toplevel': 'Top_Level'}
+
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        data = list(self.to_json_dict(context['sim_hogs']))
-        return JsonResponse(data, safe=False)
+        # Use the pandas json serialiser instead of django - else issues with
+        # np.uint32, etc. TODO: integrate this with the other json responses.
+        data = context['sim_hogs'][list(self.json_fields.keys())] \
+            .rename(columns=self.json_fields) \
+            .to_json(orient='records')
+
+        return HttpResponse(data, content_type='application/json')
 
 
 def domains_json(request, entry_id):
