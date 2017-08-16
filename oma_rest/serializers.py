@@ -7,6 +7,7 @@ from pyoma.browser.models import ProteinEntry, Genome
 from pyoma.browser.db import XrefIdMapper
 from django.utils.http import urlencode
 from oma import models as m
+from django.core.urlresolvers import reverse
 
 
 class QueryParamHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
@@ -73,8 +74,10 @@ class ProteinEntryDetailSerializer(serializers.Serializer):
         return protein_levels
 
 class ProteinLinksSerializer(serializers.Serializer):
-    oma_group_url = serializers.SerializerMethodField(method_name=None)
-    oma_hog_url = serializers.SerializerMethodField(method_name=None)
+    oma_group_url = serializers.HyperlinkedIdentityField(view_name='groups-detail', read_only=True,
+                                                   lookup_field='omaid', lookup_url_kwarg='id')
+    oma_hog_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True,
+                                                   lookup_field='omaid', lookup_url_kwarg='hog_id')
     hog_levels = serializers.HyperlinkedIdentityField(view_name='protein-hog-levels', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id' )
 
     domains = serializers.HyperlinkedIdentityField(view_name='protein-domains', read_only=True,
@@ -87,19 +90,7 @@ class ProteinLinksSerializer(serializers.Serializer):
     ontology = serializers.HyperlinkedIdentityField(view_name='protein-ontology', read_only=True,
                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
 
-    def get_oma_group_url(self,obj):
-        protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)
-        if protein.oma_group != 0:
-            return 'http://127.0.0.1:8000/api/groups/' + str(protein.oma_group) + "/"
-        else:
-            return ''
 
-    def get_oma_hog_url(self,obj):
-        protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)
-        if protein.oma_hog != '':
-            return 'http://127.0.0.1:8000/api/hogs/'+ str(protein.oma_hog) + "/"
-        else:
-            return ''
 
 
 class OrthologsListSerializer(serializers.Serializer):

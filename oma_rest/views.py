@@ -548,50 +548,47 @@ class TaxonomyViewSet(ViewSet):
     def list(self, request, format=None):
         """
             Get the taxonomy as either a dictionary (default) or newick (?type=newick).
-            It is possible to get induced taxonomy as well by specifying the ?members paramater to a list of ncbi taxon_ids or member names
+            It is possible to get induced taxonomy as well by specifying the ?members paramater to a list of ncbi taxon_ids, member names or UniProt codes.
                """
-        members = request.query_params.get('members', None)
-        type = request.query_params.get('type', None)
+
+        #e.g. members = YEAST,ASHGO
+        members = request.query_params.get('members', None) #read as a string
+        type = request.query_params.get('type', None) #if none, dictionary returned
         taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
         tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
         if members != None:
-            members = members.split(', ')
-            members_array = []
-            for level in members:
-                if level[0] == "[":
-                    updated_level = level.replace("[", "")
-                    members_array.append(updated_level)
-                else:
-                    if level[-1] == "]":
-                        updated_level_2 = level.replace("]", "")
-                        members_array.append(updated_level_2)
-                    else:
-                        members_array.append(level)
+            #whole taxonomy returned
+            members = members.split(',') #as the query param is passed as a string
             members_list = []
-            for member in members_array:
-                try:
-                    int(member)
+            try:
+                    int(members[0])
                     isListOfNames = False
-                except:
+            except:
                     isListOfNames = True
             if isListOfNames:
                 decoded_members_array = []
-                for i in range(len(members_array)):
-                    decoded_members_array.append(members_array[i][1:-1])
-                #members = list of names
-                for i in range(len(decoded_members_array)):
-                    for lvl in taxonomy_tab.read(field='Name'):
-                        if str(lvl.decode("utf-8")) == decoded_members_array[i]:
-                            members_list.append(lvl)
+                for i in range(len(members)):
+                    decoded_members_array.append(members[i])
+                if (len(members[0]))>5: #names provided
+                    for i in range(len(decoded_members_array)):
+                            for lvl in taxonomy_tab.read(field='Name'):
+                                if str(lvl.decode("utf-8")) == decoded_members_array[i]:
+                                    members_list.append(lvl)
+                else: #if user provides a list of oma_ids
+                    for i in range(len(decoded_members_array)):
+                        genome_tab=utils.db.get_hdf5_handle().root.Genome
+                        encoded_id = decoded_members_array[i].encode("utf-8")
+                        txn_id = genome_tab.read_where('UniProtSpeciesCode == encoded_id', field='NCBITaxonId')
+                        members_list.append(str(txn_id)[1:-1])
             else:
                 # handling the case user gave a list of NCBI taxon ids
-                for i in range(len(members_array)):
-                    members_list.append(tax_obj._taxon_from_numeric(tid=int(members_array[i]))[2])
+                for i in range(len(members)):
+                    members_list.append(members[i])
             tx = tax_obj.get_induced_taxonomy(members=members_list)
             root = tx._get_root_taxon()
             root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[1]}
             if type == 'newick':
-                data = {'root_taxon': root_data, 'newick': tx.newick()+";"} #adding the semi-colon as sometime phylo.io fails without it
+                data = {'root_taxon': root_data, 'newick': tx.newick()}
                 serializer = serializers.TaxonomyNewickSerializer(instance=data)
                 return Response(serializer.data)
             else:
