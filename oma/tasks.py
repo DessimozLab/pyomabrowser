@@ -127,7 +127,7 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
         level = args[0]
         memb = utils.db.hog_members(entry_nr_or_grp_nr, level)
     elif group_type == 'og':
-        memb = []
+        memb = utils.db.oma_group_members(entry_nr_or_grp_nr)
     members = [pyoma.browser.models.ProteinEntry(utils.db, e) for e in memb]
     seqs = [SeqRecord(Seq(m.sequence, IUPAC.protein), id=m.omaid) for m in members]
     logger.info(u"msa for {:d} sequences (avg length: {:.1f})"

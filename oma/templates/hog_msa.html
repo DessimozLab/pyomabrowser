@@ -60,64 +60,7 @@ This entry is not part of any hierarchical orthologous group.
             <a href="{% url 'hogs_msa' entry.omaid level %}"><span class="glyphicon glyphicon-download"></span> MSA (fasta)</a>
         </div>
     </div>
-    <div class="panel-body">
-        {% if msa_file_obj.state == "pending" or msa_file_obj.state == "running" %}
-            <p>The MSA you requested is currently being computed in the background.
-            Depending on the length and the number of sequences, the computation
-            will take from a few seconds up to several minutes.</p>
-
-            <input type="button" value="Refresh Page" onClick="window.location.reload()">
-        {% elif msa_file_obj.state == "error" %}
-            An server error occured. The functionality to compute MSAs is
-            currently not available. Please come back later.
-        {% else %}
-            <div id="msa_div">Loading...</div>
-            <script>
-    (function(){
-        var url = "{{ msa_file_obj.result.url }}";
-        msa.io.fasta.read(url, function(err, seqs) {
-
-            var opts = {};
-            opts.el = document.getElementById("msa_div");
-            opts.vis = {
-                conserv: false,
-                overviewbox: true,
-                seqlogo: true,
-                labels: true,
-                labelName: true,
-                labelId: false
-            };
-            opts.conf = {
-                dropImport: true,
-                debug: false
-            };
-            opts.zoomer = {
-                labelIdLength: 20,
-                rowHeight: 20,
-                boxRectWidth: 2,
-                autoResize: true,
-                overviewboxHeight: 200,
-                overviewboxWidth: "auto"
-            };
-            opts.bootstrapMenu = true;
-            opts.menu = {
-                menuFontsize: "11px"
-            };
-            opts.visorder = {'overviewBox': -30};
-
-            // init msa
-            var m = new msa.msa(opts);
-            m.seqs.reset(seqs);
-            // set max height of alignment
-            var h = Math.max(window.innerHeight - opts.zoomer.overviewboxHeight - 160,
-                             10 * m.g.zoomer.get('rowHeight'));
-            m.g.zoomer.autoHeight(h);
-            m.render();
-        });
-    })();
-            </script>
-        {% endif %}
-    </div>
+    {% include "includes/msa.html" %}
 </div>
 
 {% endif %}

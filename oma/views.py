@@ -435,7 +435,9 @@ class HOGsBase(ContextMixin, EntryCentricMixin):
             {'entry': entry,
              'level': level, 'hog_members': hog_members,
              'nr_vps': nr_vps, 'tab': 'hogs', 'levels': levels[::-1],
-             'longest_seq': longest_seq})
+             'longest_seq': longest_seq,
+             'table_data_url': reverse('hog_json', args=(entry.omaid, level)),
+             })
         if hog is not None:
             context['hog'] = hog
         return context
@@ -843,3 +845,88 @@ class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
 
         return JsonResponse(data, safe=False)
 
+
+class OMAGroupBase(ContextMixin):
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroupBase, self).get_context_data(**kwargs)
+        try:
+            context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
+            context.update(utils.db.oma_group_metadata(context['members'][0].oma_group))
+        except db.InvalidId as e:
+            raise Http404(e)
+        return context
+
+
+class OMAGroupFasta(FastaView, OMAGroupBase):
+    def get_fastaheader(self, memb):
+        return ' | '.join([memb.omaid, memb.canonicalid, "OMAGroup:{:05d}".format(memb.oma_group), '[{}]'.format(memb.genome.sciname)])
+
+    def render_to_response(self, context):
+        return self.render_to_fasta_response(context['members'])
+
+
+class OMAGroupJson(OMAGroupBase, JsonModelMixin, View):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'description': None}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['members']))
+        return JsonResponse(data, safe=False)
+
+
+class OMAGroup(OMAGroupBase, TemplateView):
+    template_name = "omagroup.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup, self).get_context_data(group_id, **kwargs)
+        grp_nr = context['members'][0].oma_group
+        king_comp = collections.defaultdict(int)
+        for e in context['members']:
+            king_comp[e.genome.kingdom] += 1
+        context.update({'kingdom_composition': dict(king_comp),
+                        'sub_tab': 'member_list',
+                        'table_data_url': reverse('omagroup-json', args=(grp_nr,)),
+                        'longest_seq': max([len(z.sequence) for z in context['members']])
+                        })
+        return context
+
+
+class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
+    template_name = "omagroup_entry.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        entry = self.get_entry(entry_id)
+        if entry.oma_group != 0:
+            context = super(EntryCentricOMAGroup, self).get_context_data(entry.oma_group, **kwargs)
+        else:
+            context = {}
+        context.update({'entry': entry, 'tab': 'groups',
+                        'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
+        return context
+
+
+@method_decorator(never_cache, name='dispatch')
+class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
+    template_name = "omagroup_entry_msa.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroupMSA, self).get_context_data(group_id)
+        context.update(self.get_msa_results('og', context['group_nr']))
+        context['sub_tab'] = 'msa'
+        return context
+
+
+@method_decorator(never_cache, name='dispatch')
+class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
+    template_name = "omagroup_entry_msa.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        entry = self.get_entry(entry_id)
+        if entry.oma_group != 0:
+            context = super(EntryCentricOMAGroupMSA, self).get_context_data(entry.oma_group)
+        else:
+            context = {}
+        context.update({'sub_tab': 'msa', 'entry': entry})
+        return context
