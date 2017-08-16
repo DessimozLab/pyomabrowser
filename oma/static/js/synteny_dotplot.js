@@ -319,18 +319,19 @@ dotplot_theme = function () {
                 x = d3.scaleLinear().domain(x0).range([0, width]),
                 y = d3.scaleLinear().domain(y0).range([height, 0]);
 
+
             // x axis
             var xAxis = d3.axisBottom(x)
                 .ticks(12)
                 .tickFormat(function (d) {
-                    return d3.formatPrefix(".1", 1e6)(d) + 'b'
+                    return d3.formatPrefix(".1", max_position_x)(d) + 'b'
                 })
 
             // y axis
             var yAxis = d3.axisLeft(y)
                 .ticks(12 * height / width)
                 .tickFormat(function (d) {
-                    return d3.formatPrefix(".1", 1e6)(d) + 'b'
+                    return d3.formatPrefix(".1", max_position_y)(d) + 'b'
                 });
 
             // brush object
