@@ -8,12 +8,12 @@ import tarfile
 import io
 import time
 import gzip
-import csv
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
-from Bio.UniProt import GOA
+from django.core.mail import EmailMessage
+from django.template.loader import get_template
 from zoo.wrappers.aligners import Mafft, DataType, WrapperError
 
 from django.conf import settings
@@ -171,7 +171,7 @@ class FunctionProjectorMock(object):
                 yield rec
 
 @shared_task
-def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit):
+def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit=None, result_url=None):
     t0 = time.time()
     logger.info('starting projecting GO functions')
     db_entry = FileResult.objects.get(data_hash=data_id)
@@ -189,11 +189,20 @@ def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit):
         with gzip.open(path, 'wt') as fout:
             projector.write_annotations(fout, sequences)
 
+        if db_entry.email != '':
+            logger.info('sending ready mail to {}'.format(db_entry.email))
+            context = {'e': db_entry, 'result_url': result_url}
+            message = get_template('email_function_projection_ready.html').render(context)
+            sender = "noreply@omabrowser.org"
+            msg = EmailMessage("GO Function Predictions ready", message, to=[db_entry.email], from_email=sender)
+            msg.content_subtype = "html"
+            msg.send()
+
         db_entry.result = name
         db_entry.state = 'done'
         tot_time = time.time() - t0
         logger.info('finished assign_go_function_to_user_sequences task. took {:.3f}sec'.format(tot_time))
-    except (IOError, TypeError) as e:
+    except:
         logger.exception('error while computing assign_go_function_to_user_sequences for dataset: {}'
             .format(data_id))
         db_entry.state = 'error'

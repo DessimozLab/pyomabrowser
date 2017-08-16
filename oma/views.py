@@ -671,15 +671,18 @@ def function_projection(request):
             except FileResult.DoesNotExist:
                 do_compute = True
 
+            result_page = reverse('function-projection', args=(data_id,))
             if do_compute:
-                r = FileResult(data_hash=data_id, result_type='function_projection', state="pending")
+                r = FileResult(data_hash=data_id, result_type='function_projection', state="pending",
+                               name=form.cleaned_data['name'], email=form.cleaned_data['email'])
                 r.save()
                 tasks.assign_go_function_to_user_sequences.delay(
-                    data_id, user_file_info['fname'], None)  #form.cleaned_data['tax_limit'])
+                    data_id, user_file_info['fname'], tax_limit=None,
+                    result_url=request.build_absolute_uri(result_page))
             else:
                 os.remove(user_file_info['fname'])
 
-            return HttpResponseRedirect(reverse('function-projection', args=(data_id,) ))
+            return HttpResponseRedirect(result_page)
     else:
         form = forms.FunctionProjectionUploadForm()
     return render(request, "function_projection_upload.html", {'form': form})
@@ -687,6 +690,8 @@ def function_projection(request):
 
 @method_decorator(never_cache, name='dispatch')
 class AbstractFileResultDownloader(TemplateView):
+    reload_frequency = 20
+
     def get_context_data(self, data_id, **kwargs):
         context = super(AbstractFileResultDownloader, self).get_context_data(**kwargs)
         try:
@@ -694,7 +699,7 @@ class AbstractFileResultDownloader(TemplateView):
         except FileResult.DoesNotExist:
             raise Http404('Invalid dataset')
         context['file_result'] = result
-        context['reload_every_x_sec'] = 20
+        context['reload_every_x_sec'] = self.reload_frequency
         return context
 
 
