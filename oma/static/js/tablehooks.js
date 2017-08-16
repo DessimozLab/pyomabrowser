@@ -27,6 +27,10 @@
         return "";
     }
 
+    exports.format_float_value = function(value, row){
+        return parseFloat(value).toPrecision(3)
+    }
+
     exports.format_info_link = function (value, row) {
         return '<a href="/cgi-bin/gateway.pl?f=DisplayEntry&p1=' + value + '">' + value + '</a>';
     }

@@ -371,7 +371,7 @@ dotplot_theme = function () {
                         genome2 + ": "+d.entry_2.omaid + "<br/>" +
                             "g1 name  : "+d.entry_1.canonicalid + "<br/>" +
                             "g2 name  : "+d.entry_2.canonicalid + "<br/>" +
-                        metric_option.short_name + ": "+ d[metric_option.accessor]
+                        metric_option.short_name + ": "+ d[metric_option.accessor].toPrecision(3)
                     )
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY - 50) + "px");

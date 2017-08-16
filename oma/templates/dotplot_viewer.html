@@ -131,26 +131,38 @@
                 showToggle: 'true',
                 columns: [{
                     field: 'entry_1.omaid',
-                    title: genome1 + ' gene'
+                    title: genome1 + ' gene',
+                    formatter: tablehooks.format_info_link
+                }, {
+                    field: 'entry_1.canonicalid',
+                    title: 'Cross Ref ' + genome1,
+                    formatter: tablehooks.format_xref
                 }, {
                     field: 'entry_1.locus.0',
                     title: genome1 + ' position'
                 }, {
                     field: 'entry_2.omaid',
-                    title: genome2 + ' gene'
+                    title: genome2 + ' gene',
+                    formatter: tablehooks.format_info_link
+                }, {
+                    field: 'entry_2.canonicalid',
+                    title: 'Cross Ref ' + genome2,
+                    formatter: tablehooks.format_xref
                 }, {
                     field: 'entry_2.locus.0',
-                    title: genome1 + ' position'
+                    title: genome2 + ' position'
                 }, {
                     field: 'rel_type',
                     title: 'Relation'
                 }, {
                     field: 'distance',
-                    title: 'Distance [PAM]'
+                    title: 'Distance [PAM]',
+                    formatter: tablehooks.format_float_value
                 }
                 , {
-                    field: 'gene1id',
-                    title: ' gene1id'
+                    field: 'score',
+                    title: 'Alignment Score',
+                    formatter: tablehooks.format_float_value
                 }]
             });
 
