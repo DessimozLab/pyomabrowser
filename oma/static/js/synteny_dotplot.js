@@ -229,6 +229,14 @@ dotplot_theme = function () {
             return hist_color;
 
         };
+        this.update_picked_datapoint = function(datapoint){
+            picked_datapoint = datapoint;
+            svg_dotplot.selectAll("circle")
+                .classed("picked", function(d){
+                    return (d.entry_1.omaid === picked_datapoint.entry_1.omaid &&
+                            d.entry_2.omaid === picked_datapoint.entry_2.omaid);
+                });
+        };
 
         ///////////////
         // VARIABLES //
@@ -249,6 +257,7 @@ dotplot_theme = function () {
         // selection variable
         var filter_max_distance, filter_min_distance;
         var selected_pairs = [];
+        var picked_datapoint = null;  // picked from table
 
         // margin to apply on the dotplot svg
         var margin_plot = {top: 20, right: 50, bottom: 20, left: 50};
@@ -355,7 +364,6 @@ dotplot_theme = function () {
                 .attr("cy", function (d) {
                     return y(d.entry_2.locus[0]);
                 })
-                .attr("r", 2.5)
                 .attr("fill", function (d) {
                     return color_threshold(d[metric_option.accessor])
                 })
@@ -594,13 +602,14 @@ dotplot_theme = function () {
                                 if (d3.select(this).attr('visibility') === 'visible') {
                                     selected_pairs.push(d);
                                     return true;
-
                                 }
 
                             }
                         }
                         return false;
                     });
+                    circle.classed("picked", false);
+                    picked_datapoint = null;
                 }
 
             }
