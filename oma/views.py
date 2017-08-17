@@ -616,13 +616,23 @@ def genome_suggestion(request):
     return render(request, "genome_suggestion.html", {'form': form})
 
 
-def release(request):
-    release_name = utils.db.get_release_name()
-    genome_key = utils.id_mapper['OMA']._genome_keys
-    number_genome = len(genome_key)
-    number_proteins = utils.id_resolver.max_entry_nr
+class Release(TemplateView):
+    template_name = 'release.html'
 
-    return render(request, 'release.html', {'rel_name': release_name, 'nb_genome': number_genome, 'nb_prot': number_proteins })
+    def get_context_data(self, **kwargs):
+        ctx = super(Release, self).get_context_data(**kwargs)
+        ctx.update({'rel_name': utils.db.get_release_name(),
+                    'nr_genome': len(utils.id_mapper['OMA']._genome_keys),
+                    'nr_proteins': utils.id_resolver.max_entry_nr,
+                    'nr_oma_groups': utils.db.get_nr_oma_groups(),
+                    'nr_roothogs': utils.db.get_nr_toplevel_hogs(),
+                    })
+        for grp in ('oma', 'hog'):
+            hist = utils.db.group_size_histogram(grp)
+            proteins = (hist['Count'] * hist['Size']).sum()
+            ctx['nr_protein_in_{}'.format(grp)] = proteins
+            ctx['percent_in_{}'.format(grp)] = 100*proteins / ctx['nr_proteins']
+        return ctx
 
 
 class GenomesJson(JsonModelMixin, View):

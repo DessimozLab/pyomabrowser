@@ -164,7 +164,7 @@ function init_table(div_id) {
         url: json_genome_url,
         reorderableColumns: true,
         pagination: true,
-        pageSize: 10,
+        pageSize: 25,
         showColumns: true,
         search: true,
         showExport: true,
@@ -177,21 +177,26 @@ function init_table(div_id) {
 
         columns: [{
             field: 'uniprot_species_code',
-            title: 'Code'
+            title: 'Code',
+            sortable: true
         }, {
             field: 'sciname',
-            title: 'Scientific Name'
+            title: 'Scientific Name',
+            sortable: true
         }, {
             field: 'prots',
-            title: '# of Sequences'
+            title: '# of Sequences',
+            sortable: true
         },
             {
                 field: 'ncbi',
-                title: 'NCBI TaxonId'
+                title: 'NCBI TaxonId',
+                sortable: true
             },
             {
                 field: 'kingdom',
-                title: 'Kingdom'
+                title: 'Kingdom',
+                sortable: true
             }]
     });
 
