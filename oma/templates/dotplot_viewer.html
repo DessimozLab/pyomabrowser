@@ -129,6 +129,9 @@
                 checkOnInit: true,
                 undefinedText: "",
                 showToggle: 'true',
+                onClickRow: function(row) {
+                    dotplot.update_picked_datapoint(row);
+                },
                 columns: [{
                     field: 'entry_1.omaid',
                     title: genome1 + ' gene',

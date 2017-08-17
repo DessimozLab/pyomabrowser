@@ -10,10 +10,10 @@ dotplot_theme = function () {
 
         this.between = function (x, min, max) {
             return x >= min && x <= max;
-        }
+        };
         this.sortNumber = function(a, b) {
             return a - b;
-        }
+        };
 
         // UI
         this.create_containers = function (container) {
@@ -33,23 +33,23 @@ dotplot_theme = function () {
             container.appendChild(chist_metric);
 
 
-        }
+        };
         this.set_up_brush_action_setting = function () {
 
             genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
                 if (this.id === 'ba-select') {
                     brush_action = 'select';
-                    d3.select('#brush_ok_zoom').classed('hidden', true)
+                    d3.select('#brush_ok_zoom').classed('hidden', true);
                     d3.select('#brush_ok_select').classed('hidden', false)
                 }
                 else {
                     brush_action = 'zoom';
-                    d3.select('#brush_ok_zoom').classed('hidden', false)
+                    d3.select('#brush_ok_zoom').classed('hidden', false);
                     d3.select('#brush_ok_select').classed('hidden', true)
                 }
 
             });
-        }
+        };
 
         //dotplot
         this.add_legend_color = function () {
@@ -93,13 +93,13 @@ dotplot_theme = function () {
                 .style("text-anchor", "middle")
                 .text(metric_option.short_name);
 
-        }
+        };
         this.update_color_scales = function(){
-            color_domain = [filter_min_distance, filter_max_distance];
-            color_range = ['#90ee90', '#000080'];
+            var color_domain = [filter_min_distance, filter_max_distance];
+            var color_range = ['#90ee90', '#000080'];
             //color_range = ['#ffbdbd', '#e1f7d5'];
             color_threshold = d3.scaleLinear().domain(color_domain).range(color_range);
-        }
+        };
         this.update_visibility_dot = function () {
 
 
@@ -120,7 +120,7 @@ dotplot_theme = function () {
                     }
                     return "hidden";
 
-                })
+                });
 
 
             dotplot.add_legend_color()
@@ -155,8 +155,8 @@ dotplot_theme = function () {
             g.selectAll("rect")
                 .data(color_threshold.range().map(function (color) {
                     var d = color_threshold.invertExtent(color);
-                    if (d[0] == null) d[0] = x_legend.domain()[0];
-                    if (d[1] == null) d[1] = x_legend.domain()[1];
+                    if (d[0] === null) d[0] = x_legend.domain()[0];
+                    if (d[1] === null) d[1] = x_legend.domain()[1];
                     return d;
                 }))
                 .enter().insert("rect", ".tick")
@@ -177,16 +177,12 @@ dotplot_theme = function () {
                 .attr("text-anchor", "start")
                 .attr("y", -6)
                 .text("Phylogenetic distance");
-        }
+        };
         this.calculate_frequencies = function (arr) {
 
-            function sortNumber(a, b) {
-                return a - b;
-            }
+            var a = [], b = [], prev = null;
 
-            var a = [], b = [], prev;
-
-            arr.sort(sortNumber);
+            arr.sort(dotplot.sortNumber);
             for (var i = 0; i < arr.length; i++) {
                 if (arr[i] !== prev) {
                     a.push(arr[i]);
@@ -198,7 +194,7 @@ dotplot_theme = function () {
             }
 
             return [a, b];
-        }
+        };
         this.compute_histogram_metric = function(data){
 
 
@@ -209,7 +205,7 @@ dotplot_theme = function () {
             });
 
             // make the histogram data
-            var val = [], freq = [], prev;
+            var val = [], freq = [], prev = null;
 
             data_slice_metric.sort(dotplot.sortNumber);
             for (var i = 0; i < data_slice_metric.length; i++) {
@@ -230,9 +226,17 @@ dotplot_theme = function () {
                 hist_color.push({'value': val[i], 'freq': freq[i]})
             }
 
-            return hist_color
+            return hist_color;
 
-        }
+        };
+        this.update_picked_datapoint = function(datapoint){
+            picked_datapoint = datapoint;
+            svg_dotplot.selectAll("circle")
+                .classed("picked", function(d){
+                    return (d.entry_1.omaid === picked_datapoint.entry_1.omaid &&
+                            d.entry_2.omaid === picked_datapoint.entry_2.omaid);
+                });
+        };
 
         ///////////////
         // VARIABLES //
@@ -247,12 +251,13 @@ dotplot_theme = function () {
 
         // variable for the dotplot brush action
         var brush_action = 'select';
-        d3.select('#brush_ok_select').classed('hidden', false)
+        d3.select('#brush_ok_select').classed('hidden', false);
         dotplot.set_up_brush_action_setting();
 
         // selection variable
         var filter_max_distance, filter_min_distance;
         var selected_pairs = [];
+        var picked_datapoint = null;  // picked from table
 
         // margin to apply on the dotplot svg
         var margin_plot = {top: 20, right: 50, bottom: 20, left: 50};
@@ -324,14 +329,14 @@ dotplot_theme = function () {
             var xAxis = d3.axisBottom(x)
                 .ticks(12)
                 .tickFormat(function (d) {
-                    return d3.formatPrefix(".1", max_position_x)(d) + 'b'
-                })
+                    return d3.formatPrefix(".1", max_position_x)(d) + 'b';
+                });
 
             // y axis
             var yAxis = d3.axisLeft(y)
                 .ticks(12 * height / width)
                 .tickFormat(function (d) {
-                    return d3.formatPrefix(".1", max_position_y)(d) + 'b'
+                    return d3.formatPrefix(".1", max_position_y)(d) + 'b';
                 });
 
             // brush object
@@ -359,7 +364,6 @@ dotplot_theme = function () {
                 .attr("cy", function (d) {
                     return y(d.entry_2.locus[0]);
                 })
-                .attr("r", 2.5)
                 .attr("fill", function (d) {
                     return color_threshold(d[metric_option.accessor])
                 })
@@ -436,7 +440,7 @@ dotplot_theme = function () {
             var xAxis_hist = d3.axisBottom(x_hist).ticks(10)
                 .tickFormat(function (d) {
                     return d3.formatPrefix(".1", 1e1)(d)
-                })
+                });
 
             var area = d3.area()
                 .curve(d3.curveBasis)
@@ -484,11 +488,11 @@ dotplot_theme = function () {
             // style brush resize handle
             // https://github.com/crossfilter/crossfilter/blob/gh-pages/index.html#L466
             var brushResizePath = function (d) {
-                var e = +(d.type == "e"),
+                var e = +(d.type === "e"),
                     x = e ? 1 : -1,
                     y = height_hist / 2;
                 return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
-            }
+            };
 
             var handle = gBrush.selectAll(".handle--custom")
                 .data([{type: "w"}, {type: "e"}])
@@ -509,7 +513,7 @@ dotplot_theme = function () {
                 if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
                 var s = d3.event.selection;
 
-                if (s == null) {
+                if (s === null) {
                     s = x_hist.range();
                     handle.attr("display", "none");
                 } else {
@@ -522,7 +526,6 @@ dotplot_theme = function () {
                         return "translate(" + s[i] + "," + - height_hist / 4 + ")";
                     });
                 }
-
             }
 
             function brushended_plot() {
@@ -534,7 +537,7 @@ dotplot_theme = function () {
                     svg_dotplot.selectAll('circle').classed("active", function () {
                         return 1 === 2
                     });
-                    selected_pairs = []
+                    selected_pairs = [];
                     $('#container_table_selection').hide();
                     zoom_brush_plot();
                 } else {
@@ -582,7 +585,7 @@ dotplot_theme = function () {
 
             function select_brush(s) {
 
-                if (s == null) {
+                if (s === null) {
                     //handle.attr("display", "none");
                     circle.classed("active", false);
                 } else {
@@ -592,20 +595,21 @@ dotplot_theme = function () {
                     var bymin = y.invert(s[1][1]);
                     var bymax = y.invert(s[0][1]);
 
-                    var circle = svg_dotplot.selectAll('circle')
+                    var circle = svg_dotplot.selectAll('circle');
                     circle.classed("active", function (d) {
                         if (dotplot.between(d.entry_1.locus[0], bxmin, bxmax)) {
                             if (dotplot.between(d.entry_2.locus[0], bymin, bymax)) {
                                 if (d3.select(this).attr('visibility') === 'visible') {
                                     selected_pairs.push(d);
-                                    return 1 === 1
-
+                                    return true;
                                 }
 
                             }
                         }
-                        return 1 === 2;
+                        return false;
                     });
+                    circle.classed("picked", false);
+                    picked_datapoint = null;
                 }
 
             }
