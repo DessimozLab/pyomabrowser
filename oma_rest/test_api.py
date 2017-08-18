@@ -16,20 +16,21 @@ class ProteinTest(APITestCase):
         response = client.get(path + '/api/protein/300/')
         self.assertEqual(response.data['omaid'], 'YEAST00300')
 
-    def test_domain_url(self):
+    def test_further_links(self):
         client = APIClient()
-        response = client.get(path + '/api/protein/909/')
+        response = client.get(path + '/api/protein/909/info_links/')
         self.assertEqual(response.data['domains'], 'http://testserver/api/protein/909/domains/')
+        self.assertEqual(response.data['orthologs'], 'http://testserver/api/protein/909/orthologs/')
+        self.assertEqual(response.data['ontology'], 'http://testserver/api/protein/909/ontology/')
+        self.assertEqual(response.data['xref'], 'http://testserver/api/protein/909/xref/')
+        self.assertEqual(response.data['oma_group_url'], 'http://testserver/api/groups/YEAST00909/')
+
 
     def test_domains(self):
         client = APIClient()
         response = client.get(path + '/api/protein/77/domains/')
         self.assertEqual(response.data['seq_id'], '3581baa88a30fe9640d9315247c5e081')
 
-    def test_ontology_url(self):
-        client = APIClient()
-        response = client.get(path + '/api/protein/105/')
-        self.assertEqual(response.data['ontology'], 'http://testserver/api/protein/105/ontology/')
 
     def test_ontologies(self):
         client = APIClient()
@@ -40,7 +41,7 @@ class ProteinTest(APITestCase):
     def test_orthologues(self):
         client = APIClient()
         response = client.get(path + '/api/protein/23/orthologs/',format = 'json')
-        protein_url = response.data[0]['ortholog']['entry_url']
+        protein_url = response.data[0]['entry_url']
         response_2 = client.get(protein_url, format = 'json')
         self.assertEqual('HOG:0000008',response_2.data['oma_hog_id'])
 
@@ -66,7 +67,7 @@ class GroupTest(APITestCase):
     #test group member is in the correct group
     def test_group_members(self):
         client = APIClient()
-        response = client.get(path + '/api/group/500/', format='json')
+        response = client.get(path + '/api/groups/500/', format='json')
         protein_url = response.data['members'][0]['entry_url']
         response_2 = client.get(protein_url, format='json')
         self.assertEqual(int(500), response_2.data['oma_group'])
@@ -80,6 +81,21 @@ class GenomeTest(APITestCase):
         client = APIClient()
         response = client.get(path + '/api/genome/ASHGO/proteins_list/')
         self.assertEqual(int(4757), response.data['count'])
+
+class TaxonomyTest(APITestCase):
+    def test_root(self):
+        client = APIClient()
+        response = client.get(path + '/api/taxonomy/Opisthokonta/?type=newick',format = 'json')
+        self.assertEqual('Opisthokonta', response.data['root_taxon']['name'])
+
+    def test_members(self):
+        client = APIClient()
+        url = path + '/api/taxonomy/?members=284811,559292,4893,4892,4891,147537,284812,716545,451866,4890,451864&type=newick'
+        response = client.get(url,format = 'json')
+        self.assertNotIn('Alveolata',response.data['newick'])
+
+
+
 
 
 

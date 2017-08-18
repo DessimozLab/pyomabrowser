@@ -544,11 +544,12 @@ class PairwiseRelationAPIView(APIView):
         return Response(serializer.data)
 
 class TaxonomyViewSet(ViewSet):
+    lookup_field= 'root_id'
 
     def list(self, request, format=None):
         """
             Get the taxonomy as either a dictionary (default) or newick (?type=newick).
-            It is possible to get induced taxonomy as well by specifying the ?members paramater to a list of ncbi taxon_ids, member names or UniProt codes.
+            It is possible to get induced taxonomy as well by specifying the ?members parameter to a list of ncbi taxon_ids, member names or UniProt codes.
                """
 
         #e.g. members = YEAST,ASHGO
@@ -557,7 +558,6 @@ class TaxonomyViewSet(ViewSet):
         taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
         tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
         if members != None:
-            #whole taxonomy returned
             members = members.split(',') #as the query param is passed as a string
             members_list = []
             try:
@@ -596,15 +596,62 @@ class TaxonomyViewSet(ViewSet):
                 return Response(data)
 
         else:
+            #whole taxonomy returned
             root = tax_obj._get_root_taxon()
             root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[1]}
             if type == 'newick':
-                data = {'root_taxon': root_data, 'newick': tax_obj.newick()+";"} #adding the semi-colon as sometime phylo.io fails without it
+                data = {'root_taxon': root_data, 'newick': tax_obj.newick()}
                 serializer = serializers.TaxonomyNewickSerializer(instance=data)
                 return Response(serializer.data)
             else:
                 data = tax_obj.as_dict()
                 return Response(data)
+
+
+    def retrieve(self, request, root_id, format=None):
+        """
+                    A user is able to specify a root taxonomic level of the branch of interest and this will return only that subtree.
+                    The root taxonomic level id can be either ncbi taxon_id, member name or UniProt code.
+                       """
+        type = request.query_params.get('type', None)
+        subtree=[]
+        taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
+        tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
+
+        try:
+            taxon_id=int(root_id)
+        except:
+            if root_id.istitle():
+                taxon_id= taxonomy_tab.read_where('Name==root_id',field='NCBITaxonId')
+                taxon_id=int(taxon_id)
+            else:
+                genome_tab = utils.db.get_hdf5_handle().root.Genome
+                encoded_id = root_id.encode("utf-8")
+                taxon_id = genome_tab.read_where('UniProtSpeciesCode == encoded_id', field='NCBITaxonId')
+                taxon_id = int(taxon_id)
+
+        def get_children(id):
+            children = db.Taxonomy._direct_children_taxa(tax_obj, id)
+            if len(children) > 0:
+                for child in children:
+                    child_id = child['NCBITaxonId']
+                    subtree.append(child_id)
+                    get_children(child_id)
+            return subtree
+
+        subtree.append(taxon_id)
+        branch = get_children(taxon_id)
+        induced_tax = tax_obj.get_induced_taxonomy(members=branch)
+
+        if type == 'newick':
+            root_taxon= tax_obj._taxon_from_numeric(taxon_id)
+            root_data = {'name': root_taxon[2].decode("utf-8"), 'taxon_id': root_taxon[0]}
+            data = {'root_taxon': root_data, 'newick': induced_tax.newick()}
+            serializer = serializers.TaxonomyNewickSerializer(instance=data)
+            return Response(serializer.data)
+        else:
+            data = induced_tax.as_dict()
+            return Response(data)
 
 
 
