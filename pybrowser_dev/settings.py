@@ -59,6 +59,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'google_analytics',
     'debug_toolbar',
     'captcha',
     #'debug_toolbar_line_profiler',
@@ -75,6 +76,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'google_analytics.middleware.GoogleAnalyticsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
@@ -189,6 +191,11 @@ EMAIL_USE_TLS = True
 RECAPTCHA_PUBLIC_KEY = "6Lc9PScUAAAAAIi2tZFDxzpBKtNoe3X0GxpgRi_t"
 RECAPTCHA_PRIVATE_KEY = "6Lc9PScUAAAAAJzqJ5z5sfJuJJkqxY5EHCB-fmcd"
 NOCAPTCHA = True  # using No Captcha reCaptcha
+
+GOOGLE_ANALYTICS = {
+    'google_analytics_id': 'UA-1093824-1',
+}
+GOOGLE_ANALYTICS_IGNORE_PATH = ['/oma/', ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
