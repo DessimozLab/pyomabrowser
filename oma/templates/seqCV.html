@@ -35,13 +35,13 @@
 
                             <ul class="dropdown-menu">
                                     <li class="dropdown-header">Visualise HOG with:</li>
-                                    <li class="text-left"><a href="{% url 'hog_vis' entry.omaid %}">hogvis viewer</a> </li>
+                                    <li class="text-left"><a href="{% url 'hog_vis' entry.omaid %}">graphical viewer</a> </li>
                                     <li class="text-left"><a href="{% url 'hogs' entry.omaid %}">table viewer</a></li>
                                 </ul>
                             </li>
 
 
-                            <li {% ifequal tab 'groups' %} class="active" {%endifequal%} ><a href="{% url 'omagroup-entry' entry.omaid %}">OMA groups</a></li>
+                            <li {% ifequal tab 'groups' %} class="active" {%endifequal%} ><a href="{% url 'omagroup-entry' entry.omaid %}">OMA Groups</a></li>
                         </ul>
 
                         <div class="tab-content">
