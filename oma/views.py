@@ -5,6 +5,7 @@ from builtins import range
 import hashlib
 import collections
 import json
+import pandas as pd
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
@@ -541,22 +542,23 @@ class HOGDomainsBase(ContextMixin, EntryCentricMixin):
         entry = self.get_entry(entry_id)
         fam = entry.hog_family_nr
 
-        if fam == 0:
-            # Singleton!! TODO: work out what to do.
-            raise Http404("Entry not member of family ({})".format(entry_id))
-
         (fam_row, sim_fams) = utils.db.get_prevalent_domains(fam)
-        if fam_row is None:
-            # TODO: work out what to do.
-            raise Http404("Nothing found for family. ({} / {})"
-                          .format(entry_id, fam))
 
-        longest_seq = fam_row['ReprEntryLength']
+        longest_seq = fam_row['ReprEntryLength'] if fam_row is not None else -1
+        if fam_row is not None:
+            fam_row = dict(zip(fam_row.dtype.names, fam_row))
+            fam_row['ReprEntryNr'] = utils.db.id_mapper['Oma'] \
+                                             .map_entry_nr(fam_row['ReprEntryNr'])
+
         if sim_fams is not None:
             longest_seq = max(longest_seq, max(sim_fams['ReprEntryLength']))
 
+            # Map entry numbers
+            sim_fams['ReprEntryNr'] = sim_fams['ReprEntryNr'].apply(
+                utils.db.id_mapper['Oma'].map_entry_nr)
+
         context.update({'entry': entry,
-                        'hog': fam,
+                        'hog': 'HOG:{:07d}'.format(fam),
                         'hog_row': fam_row,
                         'sim_hogs': sim_fams,
                         'longest_seq': longest_seq})
@@ -569,17 +571,27 @@ class HOGDomainsView(HOGDomainsBase, TemplateView):
 
 
 class HOGDomainsJson(HOGDomainsBase, View):
-    json_fields = {'Fam': 'Family', 'ReprEntryNr': 'Representative_Entry_Nr',
-                   'Prevalence': 'Prevalence', 'sim': 'Similarity',
-                   'size': 'Family_Size', 'toplevel': 'Top_Level'}
+    json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
+                   'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
+                   'sim': 'Similarity', 'TopLevel': 'TopLevel'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        # Use the pandas json serialiser instead of django - else issues with
-        # np.uint32, etc. TODO: integrate this with the other json responses.
-        data = context['sim_hogs'][list(self.json_fields.keys())] \
-            .rename(columns=self.json_fields) \
-            .to_json(orient='records')
+        # Current: hack to include this group in the table at top.
+        context['hog_row']['sim'] = 'n/a'
+        df = pd.concat([pd.DataFrame.from_records([context['hog_row']]),
+                        context['sim_hogs']])
+        if len(df) == 0:  #len(context['sim_hogs']) == 0:
+            data = ''
+        else:
+            data = df[list(self.json_fields.keys())] \
+                .rename(columns=self.json_fields) \
+                .to_json(orient='records')
+        # # Use the pandas json serialiser instead of django - else issues with
+        # # np.uint32, etc. TODO: integrate this with the other json responses.
+        # data = context['sim_hogs'][list(self.json_fields.keys())] \
+        #     .rename(columns=self.json_fields) \
+        #     .to_json(orient='records')
 
         return HttpResponse(data, content_type='application/json')
 

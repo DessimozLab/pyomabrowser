@@ -23,6 +23,21 @@
         return {id: rowdata.protid, 'class': "protein"};
     }
 
+    exports.add_hogrow_attrs = function(rowdata, index) {
+        return {id: rowdata.Fam, repr: rowdata.ReprEntryNr, 'class': "hog"};
+    }
+
+    exports.format_hogid = function(value, row) {
+        return '<a href="/oma/hogs/' + row.ReprEntryNr 
+                                      + '/">HOG:'
+                                      + ('0000000' + value).slice(-7) // Format with leading 0s
+                                      + '</a>';
+    }
+
+    exports.format_domainprevalence = function(value, row) {
+        return row.PrevCount + ' / ' + row.FamSize;
+    }
+
     exports.format_empty = function(value, row) {
         return "";
     }
