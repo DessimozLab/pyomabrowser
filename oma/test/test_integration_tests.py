@@ -110,6 +110,12 @@ class HogVisViewTest(TestCase):
         self.assertEqual(orthoxml.status_code, 200)
         self.assertIn('protId="{}"'.format(query).encode('utf-8'), orthoxml.content)
 
+    def test_access_singleton_protein(self):
+        query = 'YEAST11'  # this protein is not part of any HOG
+        reply = self.client.get(reverse('hog_vis', args=[query]))
+        self.assertEqual(200, reply.status_code)
+        self.assertIn('is not part of any hierarchical', decode_replycontent(reply))
+
 
 class SyntenyViewTester(TestCase):
     def verify_colors(self, query, window):

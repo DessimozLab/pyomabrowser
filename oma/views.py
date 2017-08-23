@@ -527,6 +527,8 @@ class HOGsVis(EntryCentricMixin, TemplateView):
             context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
                             'show_internal_labels': self.show_internal_labels,
                             })
+            if fam_nr == 0:
+                context['isSingleton'] = True
         except db.Singleton:
             context['isSingleton'] = True
         return context
