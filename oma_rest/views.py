@@ -38,15 +38,6 @@ class ProteinEntryViewSet(ViewSet):
                 instance=protein, context={'request': request})
         return Response(serializer.data)
 
-
-    @detail_route()
-    def info_links(self,request,entry_id=None, format=None):
-        entry_nr = utils.id_resolver.resolve(entry_id)
-        protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
-        serializer = serializers.ProteinLinksSerializer(
-            instance=protein, context={'request': request})
-        return Response(serializer.data)
-
     @detail_route()
     def hog_levels(self,request,entry_id=None,format=None):
         """
@@ -83,16 +74,10 @@ class ProteinEntryViewSet(ViewSet):
         for row in data:
             entry_nr = row[1]
             ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
-            if rel_type != None:
-                if row[4]==rel_type:
-                    content.append({'entry_nr': ortholog.entry_nr, 'omaid': ortholog.omaid, 'canonicalid': ortholog.canonicalid, 'sequence_md5': ortholog.sequence_md5,'RelType': row[4], 'Distance': row[3], 'Score': row[2]})
-                else:
-                    pass
-            else:
-                content.append(
-                    {'entry_nr': ortholog.entry_nr, 'omaid': ortholog.omaid, 'canonicalid': ortholog.canonicalid,
-                     'sequence_md5': ortholog.sequence_md5,'RelType': row[4],
-                     'Distance': row[3], 'Score': row[2]})
+            ortholog.RelType = row[4]
+            ortholog.Distance = row[3]
+            ortholog.Score = row[2]
+            content.append(ortholog)
         serializer = serializers.OrthologsListSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -207,9 +192,12 @@ class OmaGroupViewSet(ViewSet):
                 groups.append(row.oma_group)
         # count the groups' hits and return in form of a list instead of a dictionary
         r_groups = Counter(groups).most_common()
-        data['related_groups'] = sorted(r_groups)
-        serializer = serializers.CloseGroupsSerializer(
-            instance=data,context={'request': request})
+        data = sorted(r_groups)
+        close_groups=[]
+        for row in data:
+            close_groups.append({'GroupNr': row[0], 'Hits': row[1]})
+        serializer = serializers.RelatedGroupsSerializer(
+            instance=close_groups, many=True,context={'request': request})
         return Response(serializer.data)
 
 
@@ -444,8 +432,10 @@ class GenomeViewSet(ViewSet):
                """
         make_genome = functools.partial(models.Genome, utils.db)
         genomes = [make_genome(g) for g in utils.id_mapper['OMA'].genome_table]
-        serializer = serializers.GenomeInfoSerializer(instance=genomes, many=True,context={'request': request})
-        return Response(serializer.data)
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(genomes, request)
+        serializer = serializers.GenomeInfoSerializer(instance=page, many=True,context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, genome_id, format=None):
         """
@@ -610,9 +600,9 @@ class TaxonomyViewSet(ViewSet):
 
     def retrieve(self, request, root_id, format=None):
         """
-                    A user is able to specify a root taxonomic level of the branch of interest and this will return only that subtree.
-                    The root taxonomic level id can be either ncbi taxon_id, member name or UniProt code.
-                       """
+         A user is able to specify a root taxonomic level of the branch of interest and this will return only that subtree.
+         The root taxonomic level id can be either ncbi taxon_id, member name or UniProt code.
+         """
         type = request.query_params.get('type', None)
         subtree=[]
         taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy

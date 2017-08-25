@@ -6,8 +6,8 @@ from oma.utils import db
 from pyoma.browser.models import ProteinEntry, Genome
 from pyoma.browser.db import XrefIdMapper
 from django.utils.http import urlencode
-from oma import models as m
-from django.core.urlresolvers import reverse
+
+
 
 
 class QueryParamHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
@@ -23,26 +23,14 @@ class QueryParamHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
 
 class ProteinEntrySerializer(serializers.Serializer):
     entry_nr = serializers.IntegerField(required=True)
-    entry_url = serializers.HyperlinkedIdentityField(view_name = 'protein-detail', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    entry_url = serializers.HyperlinkedIdentityField(view_name='protein-detail', read_only=True,
+                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     omaid = serializers.CharField()
     canonicalid = serializers.CharField()
     sequence_md5 = serializers.CharField()
-    oma_group = serializers.IntegerField()
-    roothog_id = serializers.IntegerField(source='hog_family_nr')
-    oma_hog_id = serializers.CharField(source='oma_hog')
-
-
-    def create(self, validated_data):
-        return ProteinEntry.from_entry_nr(db, validated_data['entry_nr'])
-
-    def update(self, instance, validated_data):
-        return instance
-
 
 class ProteinEntryDetailSerializer(serializers.Serializer):
     entry_nr = serializers.IntegerField(required=True)
-    entry_url = serializers.HyperlinkedIdentityField(view_name='protein-detail', read_only=True,
-                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     omaid = serializers.CharField()
     canonicalid = serializers.CharField()
     sequence_md5 = serializers.CharField()
@@ -55,7 +43,24 @@ class ProteinEntryDetailSerializer(serializers.Serializer):
     sequence_length = serializers.IntegerField()
     sequence = serializers.CharField()
     cdna = serializers.CharField()
-    further_links = serializers.HyperlinkedIdentityField(view_name='protein-info-links',read_only=True,lookup_field='entry_nr',lookup_url_kwarg='entry_id')
+    '''oma_group_url = serializers.HyperlinkedIdentityField(view_name='groups-detail', read_only=True,
+                                                         lookup_field='omaid', lookup_url_kwarg='id')
+    oma_hog_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True,
+                                                       lookup_field='omaid', lookup_url_kwarg='hog_id')
+    hog_levels = serializers.HyperlinkedIdentityField(view_name='protein-hog-levels', read_only=True,
+                                                      lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+'''
+
+    domains = serializers.HyperlinkedIdentityField(view_name='protein-domains', read_only=True,
+                                                   lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    xref = serializers.HyperlinkedIdentityField(view_name='protein-xref', read_only=True, lookup_field='entry_nr',
+                                                lookup_url_kwarg='entry_id')
+
+    orthologs = serializers.HyperlinkedIdentityField(view_name='protein-orthologs', read_only=True,
+                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    ontology = serializers.HyperlinkedIdentityField(view_name='protein-ontology', read_only=True,
+                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+
 
     def get_locus(self, obj):
         return [obj.locus_start, obj.locus_end, obj.strand]
@@ -73,38 +78,11 @@ class ProteinEntryDetailSerializer(serializers.Serializer):
                     protein_levels.append(level)
         return protein_levels
 
-class ProteinLinksSerializer(serializers.Serializer):
-    oma_group_url = serializers.HyperlinkedIdentityField(view_name='groups-detail', read_only=True,
-                                                   lookup_field='omaid', lookup_url_kwarg='id')
-    oma_hog_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True,
-                                                   lookup_field='omaid', lookup_url_kwarg='hog_id')
-    hog_levels = serializers.HyperlinkedIdentityField(view_name='protein-hog-levels', read_only=True, lookup_field='entry_nr', lookup_url_kwarg='entry_id' )
-
-    domains = serializers.HyperlinkedIdentityField(view_name='protein-domains', read_only=True,
-                                                   lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    xref = serializers.HyperlinkedIdentityField(view_name='protein-xref', read_only=True, lookup_field='entry_nr',
-                                                lookup_url_kwarg='entry_id')
-
-    orthologs = serializers.HyperlinkedIdentityField(view_name='protein-orthologs', read_only=True,
-                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    ontology = serializers.HyperlinkedIdentityField(view_name='protein-ontology', read_only=True,
-                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-
-
-
-
-class OrthologsListSerializer(serializers.Serializer):
-    entry_nr = serializers.IntegerField(required=True)
-    entry_url = serializers.SerializerMethodField(method_name=None)
-    omaid = serializers.CharField()
-    canonicalid = serializers.CharField()
-    sequence_md5 = serializers.CharField()
+class OrthologsListSerializer(ProteinEntrySerializer):
     RelType = serializers.CharField()
     Distance = serializers.FloatField()
     Score = serializers.FloatField()
 
-    def get_entry_url(self, obj):
-        return 'http://127.0.0.1:8000/api/protein/' + str(obj['entry_nr']) + "/"
 
 
 class SubHOGSerializer(serializers.Serializer):
@@ -160,7 +138,7 @@ class GenomeDetailSerializer(serializers.Serializer):
     common = serializers.CharField(required=False)
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
-    proteins_url = serializers.HyperlinkedIdentityField(view_name='genome-proteins-list', read_only=True,
+    proteins_list = serializers.HyperlinkedIdentityField(view_name='genome-proteins-list', read_only=True,
                                                     lookup_field='uniprot_species_code',
                                                     lookup_url_kwarg='genome_id')
     chromosomes = serializers.SerializerMethodField(method_name=None)
@@ -178,24 +156,14 @@ class GenomeDetailSerializer(serializers.Serializer):
         return chrs
 
 class RelatedGroupsSerializer(serializers.Serializer):
-    GroupNr = serializers.SerializerMethodField(method_name = None)
-    Hits = serializers.SerializerMethodField(method_name=None)
-
-    def get_GroupNr(self, obj):
-        return (obj[0])
-
-    def get_Hits(self,obj):
-        return (obj[1])
+    GroupNr = serializers.CharField()
+    Hits = serializers.IntegerField()
 
 class OmaGroupSerializer(serializers.Serializer):
     GroupNr = serializers.IntegerField()
     fingerprint = serializers.CharField()
     related_groups = serializers.HyperlinkedIdentityField(view_name='groups-close-groups', lookup_field='GroupNr', lookup_url_kwarg='id')
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
-
-
-class CloseGroupsSerializer(serializers.Serializer):
-    related_groups = serializers.ListSerializer(child = RelatedGroupsSerializer())
 
 class XRefSerializer(serializers.Serializer):
     xref = serializers.CharField()
