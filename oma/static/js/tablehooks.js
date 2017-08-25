@@ -23,10 +23,6 @@
         return {id: rowdata.protid, 'class': "protein"};
     }
 
-    exports.add_hogrow_attrs = function(rowdata, index) {
-        return {id: rowdata.Fam, repr: rowdata.ReprEntryNr, 'class': "hog"};
-    }
-
     exports.format_hogid = function(value, row) {
         return '<a href="/oma/hogs/' + row.ReprEntryNr 
                                       + '/">HOG:'

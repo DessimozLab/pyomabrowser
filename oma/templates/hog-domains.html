@@ -42,7 +42,7 @@ This entry is not part of any hierarchical orthologous group.
                data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
-               data-id-field="Fam" data-row-attributes="tablehooks.add_hogrow_attrs"
+               data-id-field="Fam"
                data-url="{% url 'hog_domains_json' entry.omaid %}">
             <thead><tr>
                 <th data-field="Fam" data-sortable="true" data-formatter="tablehooks.format_hogid">HOG ID</th>
@@ -83,6 +83,11 @@ tab.bootstrapTable({
     },
     onLoadSuccess: function(data){
         tab.bootstrapTable('hideLoading');
+    },
+    rowAttributes: function(rowdata, index) {
+        var classes = "hog"
+        if (rowdata.Fam === {{ hog_row.Fam }} ){ classes += " query";}
+        return {id: rowdata.Fam, repr: rowdata.ReprEntryNr, 'class': classes};
     }
 });
 var icons = tab.bootstrapTable('getOptions').icons;

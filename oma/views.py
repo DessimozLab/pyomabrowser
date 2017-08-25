@@ -577,10 +577,7 @@ class HOGDomainsJson(HOGDomainsBase, View):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        # Current: hack to include this group in the table at top.
-        context['hog_row']['sim'] = 'n/a'
-        df = pd.concat([pd.DataFrame.from_records([context['hog_row']]),
-                        context['sim_hogs']])
+        df = context['sim_hogs']
         if len(df) == 0:  #len(context['sim_hogs']) == 0:
             data = ''
         else:

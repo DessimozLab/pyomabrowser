@@ -270,6 +270,8 @@ a.uncurated{
 	border-radius: 0 4px 0 0 !important;
 	cursor: pointer !important;
 	border: 1px #ddd solid !important ;
+}
 
-
+tbody tr.query{
+	background-color: #33CCCC;
 }
