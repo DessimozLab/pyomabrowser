@@ -52,10 +52,11 @@
         return oDeferred.promise();
     }
 
-    exports.visualize_all = function (class_of_entries, longest_seq) {
+    exports.visualize_all = function (class_of_entries, longest_seq, attr_name) {
+        if(attr_name == undefined){ attr_name = 'id'; }
         $.each($(class_of_entries), function (each, value) {
             // Retreive the entry ID
-            var entry_id = $(this).attr('id'),
+            var entry_id = $(this).attr(attr_name),
                 container = $(this).find('.domain_vis')[0];
             exports.load_and_visualize_domain(container, entry_id, longest_seq);
         });

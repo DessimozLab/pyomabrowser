@@ -5,6 +5,7 @@ from builtins import range
 import hashlib
 import collections
 import json
+import pandas as pd
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
@@ -114,12 +115,12 @@ class FastaView(FastaResponseMixin, ContextMixin, View):
 
 
 def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
-    """loads data to visualize the synteny around a query 
+    """loads data to visualize the synteny around a query
     gene and its orthologs.
     the parameter 'mod' is used to keep the color between
     calls on different entries compatible, i.e. they selected
     gene should keep its color.
-    the window paramter is used to select the size of the 
+    the window paramter is used to select the size of the
     neighborhood."""
 
     try:
@@ -538,6 +539,64 @@ class HogVisWithoutInternalLabels(HOGsVis):
     show_internal_labels = False
 
 
+class HOGDomainsBase(ContextMixin, EntryCentricMixin):
+    def get_context_data(self, entry_id, idtype='OMA', **kwargs):
+        # TODO: move some of this to misc / a model.
+        context = super(HOGDomainsBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+        fam = entry.hog_family_nr
+
+        (fam_row, sim_fams) = utils.db.get_prevalent_domains(fam)
+
+        longest_seq = fam_row['ReprEntryLength'] if fam_row is not None else -1
+        if fam_row is not None:
+            fam_row = dict(zip(fam_row.dtype.names, fam_row))
+            fam_row['ReprEntryNr'] = utils.db.id_mapper['Oma'] \
+                                             .map_entry_nr(fam_row['ReprEntryNr'])
+
+        if sim_fams is not None:
+            longest_seq = max(longest_seq, max(sim_fams['ReprEntryLength']))
+
+            # Map entry numbers
+            sim_fams['ReprEntryNr'] = sim_fams['ReprEntryNr'].apply(
+                utils.db.id_mapper['Oma'].map_entry_nr)
+
+        context.update({'entry': entry,
+                        'hog': 'HOG:{:07d}'.format(fam),
+                        'hog_row': fam_row,
+                        'sim_hogs': sim_fams,
+                        'longest_seq': longest_seq})
+
+        return context
+
+
+class HOGDomainsView(HOGDomainsBase, TemplateView):
+    template_name = "hog-domains.html"
+
+
+class HOGDomainsJson(HOGDomainsBase, View):
+    json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
+                   'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
+                   'sim': 'Similarity', 'TopLevel': 'TopLevel'}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        df = context['sim_hogs']
+        if len(df) == 0:  #len(context['sim_hogs']) == 0:
+            data = ''
+        else:
+            data = df[list(self.json_fields.keys())] \
+                .rename(columns=self.json_fields) \
+                .to_json(orient='records')
+        # # Use the pandas json serialiser instead of django - else issues with
+        # # np.uint32, etc. TODO: integrate this with the other json responses.
+        # data = context['sim_hogs'][list(self.json_fields.keys())] \
+        #     .rename(columns=self.json_fields) \
+        #     .to_json(orient='records')
+
+        return HttpResponse(data, content_type='application/json')
+
+
 def domains_json(request, entry_id):
     # Load the entry and its domains, before forming the JSON to draw client-side.
     entry_nr = utils.id_resolver.resolve(entry_id)
@@ -826,7 +885,7 @@ class ChromosomeJson(JsonModelMixin, View):
 
 class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
     '''
-    This json aim to contain the list of orthologous pairs between two genomes 
+    This json aim to contain the list of orthologous pairs between two genomes
     '''
 
     def get(self, request, org1, org2, chr1, chr2, *args, **kwargs):
