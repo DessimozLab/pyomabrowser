@@ -37,6 +37,9 @@
                                     <li class="dropdown-header">Visualise HOG with:</li>
                                     <li class="text-left"><a href="{% url 'hog_vis' entry.omaid %}">hogvis viewer</a> </li>
                                     <li class="text-left"><a href="{% url 'hogs' entry.omaid %}">table viewer</a></li>
+                                    <li class="divider"></li>
+                                    <li class="dropdown-header">List similar hogs based on:</li>
+                                    <li class="text-left"><a href="{% url 'hog_domains' entry.omaid %}">Domain architectures</a></li>
                                 </ul>
                             </li>
 
