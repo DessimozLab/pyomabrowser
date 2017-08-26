@@ -576,7 +576,7 @@ class TaxonomyViewSet(ViewSet):
                     members_list.append(members[i])
             tx = tax_obj.get_induced_taxonomy(members=members_list)
             root = tx._get_root_taxon()
-            root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[1]}
+            root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[0]}
             if type == 'newick':
                 data = {'root_taxon': root_data, 'newick': tx.newick()}
                 serializer = serializers.TaxonomyNewickSerializer(instance=data)
@@ -588,7 +588,7 @@ class TaxonomyViewSet(ViewSet):
         else:
             #whole taxonomy returned
             root = tax_obj._get_root_taxon()
-            root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[1]}
+            root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[0]}
             if type == 'newick':
                 data = {'root_taxon': root_data, 'newick': tax_obj.newick()}
                 serializer = serializers.TaxonomyNewickSerializer(instance=data)

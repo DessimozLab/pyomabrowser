@@ -16,15 +16,13 @@ class ProteinTest(APITestCase):
         response = client.get(path + '/api/protein/300/')
         self.assertEqual(response.data['omaid'], 'YEAST00300')
 
-    def test_further_links(self):
+    def test_protein_links(self):
         client = APIClient()
-        response = client.get(path + '/api/protein/909/info_links/')
+        response = client.get(path + '/api/protein/909/')
         self.assertEqual(response.data['domains'], 'http://testserver/api/protein/909/domains/')
         self.assertEqual(response.data['orthologs'], 'http://testserver/api/protein/909/orthologs/')
         self.assertEqual(response.data['ontology'], 'http://testserver/api/protein/909/ontology/')
         self.assertEqual(response.data['xref'], 'http://testserver/api/protein/909/xref/')
-        self.assertEqual(response.data['oma_group_url'], 'http://testserver/api/groups/YEAST00909/')
-
 
     def test_domains(self):
         client = APIClient()
@@ -94,6 +92,13 @@ class TaxonomyTest(APITestCase):
         response = client.get(url,format = 'json')
         self.assertNotIn('Alveolata',response.data['newick'])
 
+    def cross_check_taxon_ids(self):
+        client = APIClient()
+        url1 = path + '/api/taxonomy/?type=newick'
+        response1 = client.get(url1,format = 'json')
+        url2 = path + '/api/taxonomy/Eukaryota/?type=newick'
+        response2 = client.get(url2, format='json')
+        self.assertEqual(response1.data['root_taxon']['taxon_id'],response2.data['root_taxon']['taxon_id'])
 
 
 
