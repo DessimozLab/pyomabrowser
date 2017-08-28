@@ -277,7 +277,7 @@ class HOGsViewSet(ViewSet):
             # get lineage of the species
             lineage = species.lineage
             # indexing of levels for a hog
-            if len(hog_id) > 11:
+            if len(hog_id) > 11: #i.e. it is a subhog
                 #root level for subhogs is the level at which they appear i.e. when the duplication occured
                 for lvl in levels_for_fam:
                     subhogs = utils.db.get_subhogids_at_level(fam_nr, lvl)
@@ -286,7 +286,7 @@ class HOGsViewSet(ViewSet):
                             subhog = subhog.decode("utf-8")
                             if subhog == hog_id:
                                 root_hog_level = lvl.decode("utf-8")
-            else:
+            else: # not a subhog
                 if 'LUCA' in levels:
                     #last universal common ancestor is the deepest level by default
                     root_hog_level = 'LUCA'
@@ -299,6 +299,10 @@ class HOGsViewSet(ViewSet):
                             indexed_levels.append([level, int(level_index)])
                     indexed_levels.sort(key=lambda x: x[1])
                     root_hog_level = indexed_levels[-1][0]
+                    levels=[] # the spanning levels for the whole hog i.e the family number
+                    for level in levels_for_fam:
+                        hog_model = m.HOG(hog_id=hog_id, level=level.decode("utf-8"))
+                        levels.append(hog_model)
             data = {'hog_id': hog_id, 'root_level': root_hog_level, 'levels': levels}
             serializer = serializers.HOGDetailSerializer(instance=data, context={'request': request})
             return Response(serializer.data)

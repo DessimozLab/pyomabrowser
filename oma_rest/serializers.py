@@ -43,14 +43,14 @@ class ProteinEntryDetailSerializer(serializers.Serializer):
     sequence_length = serializers.IntegerField()
     sequence = serializers.CharField()
     cdna = serializers.CharField()
-    '''oma_group_url = serializers.HyperlinkedIdentityField(view_name='groups-detail', read_only=True,
+    '''oma_group_url = serializers.HyperlinkedIdentityField(view_name='group-detail', read_only=True,
                                                          lookup_field='omaid', lookup_url_kwarg='id')
-    oma_hog_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True,
+    oma_hog_url = serializers.HyperlinkedIdentityField(view_name='hog-detail', read_only=True,
                                                        lookup_field='omaid', lookup_url_kwarg='hog_id')
     hog_levels = serializers.HyperlinkedIdentityField(view_name='protein-hog-levels', read_only=True,
                                                       lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-'''
 
+'''
     domains = serializers.HyperlinkedIdentityField(view_name='protein-domains', read_only=True,
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     xref = serializers.HyperlinkedIdentityField(view_name='protein-xref', read_only=True, lookup_field='entry_nr',
@@ -87,7 +87,7 @@ class OrthologsListSerializer(ProteinEntrySerializer):
 
 class SubHOGSerializer(serializers.Serializer):
     hog_id = serializers.CharField()
-    members_url = QueryParamHyperlinkedIdentityField(view_name='hogs-members',lookup_field='hog_id',query_params={'level': 'level'})
+    members_url = QueryParamHyperlinkedIdentityField(view_name='hog-members',lookup_field='hog_id',query_params={'level': 'level'})
 
 class HOGInfoSerializer(serializers.Serializer):
     hog_id = serializers.CharField()
@@ -162,7 +162,7 @@ class RelatedGroupsSerializer(serializers.Serializer):
 class OmaGroupSerializer(serializers.Serializer):
     GroupNr = serializers.IntegerField()
     fingerprint = serializers.CharField()
-    related_groups = serializers.HyperlinkedIdentityField(view_name='groups-close-groups', lookup_field='GroupNr', lookup_url_kwarg='id')
+    related_groups = serializers.HyperlinkedIdentityField(view_name='group-close-groups', lookup_field='GroupNr', lookup_url_kwarg='id')
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
 
 class XRefSerializer(serializers.Serializer):
@@ -193,7 +193,7 @@ class GeneOntologySerializer(serializers.Serializer):
 
 class HOGsLevelSerializer(serializers.Serializer):
     level = serializers.CharField()
-    level_url = QueryParamHyperlinkedIdentityField(view_name='hogs-detail',lookup_field='hog_id',query_params={'level': 'level'})
+    level_url = QueryParamHyperlinkedIdentityField(view_name='hog-detail',lookup_field='hog_id',query_params={'level': 'level'})
 
 class ProteinHOGSerializer(serializers.Serializer):
     hog_id = serializers.CharField()
@@ -206,20 +206,20 @@ class HOGDetailSerializer(serializers.Serializer):
 
 class GroupListSerializer(serializers.Serializer):
     GroupNr = serializers.CharField()
-    group_url = serializers.HyperlinkedIdentityField(view_name='groups-detail', read_only=True, lookup_field='GroupNr', lookup_url_kwarg='id')
+    group_url = serializers.HyperlinkedIdentityField(view_name='group-detail', read_only=True, lookup_field='GroupNr', lookup_url_kwarg='id')
 
 
 #the below 2 HOGS serializers are to do with the list of hogs found at api/hogs/
 class HOGsListSerializer(serializers.Serializer):
     roothog_id = serializers.CharField()
     hog_id = serializers.CharField()
-    hog_id_url = serializers.HyperlinkedIdentityField(view_name='hogs-detail', read_only=True, lookup_field='hog_id')
+    hog_id_url = serializers.HyperlinkedIdentityField(view_name='hog-detail', read_only=True, lookup_field='hog_id')
 
 #api/hogs/?level
 class HOGsListSerializer_at_level(serializers.Serializer):
     roothog_id = serializers.CharField()
     hog_id = serializers.CharField()
-    hog_id_url = QueryParamHyperlinkedIdentityField(view_name='hogs-detail', lookup_field='hog_id', query_params={'level': 'level'})
+    hog_id_url = QueryParamHyperlinkedIdentityField(view_name='hog-detail', lookup_field='hog_id', query_params={'level': 'level'})
 
 class DomainSerializer(serializers.Serializer):
     source = serializers.CharField()
