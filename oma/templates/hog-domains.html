@@ -30,6 +30,17 @@ This entry is not part of any hierarchical orthologous group.
 {% else %}
 
 <h3>Hierarchical group {{ hog }}</h3>
+<dl class="dl-horizontal">
+    <dt>Representative Domain Architecture:</dt>
+    <dd>
+        <table><tr class="hog_domain" id="{{ hog }}" repr="{{ hog_row.ReprEntryNr }}"><td class="domain_vis"></td></tr></table>
+    </dd>
+    <dt>Prevalence of Architecture in HOG:</dt>
+    <dd>{% widthratio hog_row.PrevCount hog_row.FamSize 100 %}%</dd>
+    <dt>Number of proteins in query HOG:</dt>
+    <dd>{{ hog_row.FamSize }}</dd>
+
+</dl>
 <h4>This group has {{ sim_hogs|length }} similar groups.</h4>
 
 <div class="panel panel-default">
@@ -46,9 +57,12 @@ This entry is not part of any hierarchical orthologous group.
                data-url="{% url 'hog_domains_json' entry.omaid %}">
             <thead><tr>
                 <th data-field="Fam" data-sortable="true" data-formatter="tablehooks.format_hogid">HOG ID</th>
-                <th data-field="TopLevel" data-sortable="true">Top Level</th>
+                <th data-field="TopLevel" data-sortable="true">Deepest level</th>
                 <th data-field="Similarity" data-sortable="true" data-title-tooltip="Number of shared domains">Similarity</th>
-                <th data-field="PrevCount" data-sortable="false" data-title-tooltip="Prevalence of shared domains among proteins in the similar HOG" data-formatter="tablehooks.format_domainprevalence">Prevalence</th>
+                <th data-field="PrevFrac" data-sortable="true"
+                    data-title-tooltip="Prevalence of shared domains among proteins in the similar HOG"
+                    data-formatter="tablehooks.format_domainprevalence">Prevalence</th>
+                <th data-field="FamSize" data-sortable="true" data-title-tooltip="Number of proteins in the simliar HOG">HOG size</th>
                 <th data-sortable="false" class="domain_vis">Representative Domain Architecture</th>
             </tr></thead>
         </table>
@@ -72,6 +86,7 @@ This entry is not part of any hierarchical orthologous group.
 <script src="{% static "js/tableExport.min.js" %}"></script>
 <script>
 
+domains.visualize_all(".hog_domain", {{ longest_seq }}, 'repr');
 var tab = $("#grpTable");
 tab.bootstrapTable({
     reorderableColumns: true,

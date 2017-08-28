@@ -560,6 +560,7 @@ class HOGDomainsBase(ContextMixin, EntryCentricMixin):
             # Map entry numbers
             sim_fams['ReprEntryNr'] = sim_fams['ReprEntryNr'].apply(
                 utils.db.id_mapper['Oma'].map_entry_nr)
+            sim_fams['PrevFrac'] = 100.0 * sim_fams['PrevCount'] / sim_fams['FamSize']
 
         context.update({'entry': entry,
                         'hog': 'HOG:{:07d}'.format(fam),
@@ -577,14 +578,17 @@ class HOGDomainsView(HOGDomainsBase, TemplateView):
 class HOGDomainsJson(HOGDomainsBase, View):
     json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
                    'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
-                   'sim': 'Similarity', 'TopLevel': 'TopLevel'}
+                   'sim': 'Similarity', 'TopLevel': 'TopLevel',
+                   'PrevFrac': 'PrevFrac'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         df = context['sim_hogs']
+        df = df[df.Fam != context['hog_row']['Fam']]
         if len(df) == 0:  #len(context['sim_hogs']) == 0:
             data = ''
         else:
+            df.sort_values(['sim', 'FamSize'], inplace=True, ascending=False)
             data = df[list(self.json_fields.keys())] \
                 .rename(columns=self.json_fields) \
                 .to_json(orient='records')

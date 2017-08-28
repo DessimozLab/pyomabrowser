@@ -271,7 +271,3 @@ a.uncurated{
 	cursor: pointer !important;
 	border: 1px #ddd solid !important ;
 }
-
-tbody tr.query{
-	background-color: #33CCCC;
-}
