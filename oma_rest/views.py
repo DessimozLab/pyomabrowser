@@ -31,6 +31,7 @@ class ProteinEntryViewSet(ViewSet):
 
         :param entry_id: an unique identifier for a protein
         """
+
         # Load the entry and its domains, before forming the JSON to draw client-side.
         entry_nr = utils.id_resolver.resolve(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
