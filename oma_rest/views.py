@@ -29,7 +29,7 @@ class ProteinEntryViewSet(ViewSet):
         """
         Retrieve the detailed information on a protein
 
-        :param entry_id: an unique identifier for a protein
+        :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
         """
 
         # Load the entry and its domains, before forming the JSON to draw client-side.
@@ -44,7 +44,7 @@ class ProteinEntryViewSet(ViewSet):
         """
                 Retrieve the levels of the hog that the protein entry is present in
 
-                :param entry_id: an unique identifier for a protein
+                :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
                 """
         entry_nr = utils.id_resolver.resolve(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
@@ -67,6 +67,8 @@ class ProteinEntryViewSet(ViewSet):
     def  orthologs(self, request, entry_id=None, format=None):
         """
             List of all the identified orthologues for a protein. Possible to filter out orthologs by ?rel_type.
+
+            :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
                        """
         rel_type = request.query_params.get('rel_type', None)
         p_entry_nr = utils.id_resolver.resolve(entry_id)
@@ -86,6 +88,8 @@ class ProteinEntryViewSet(ViewSet):
     def ontology(self, request, entry_id=None, format=None):
         """
                     Ontology information available for a protein
+
+                    :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
                                """
         p_entry_nr = utils.id_resolver.resolve(entry_id)
         data = db.Database.get_gene_ontology_annotations(utils.db, int(p_entry_nr))
@@ -97,6 +101,8 @@ class ProteinEntryViewSet(ViewSet):
     def domains(self,request,entry_id=None, format=None):
         """
                     List of the domains present in a protein
+
+                    :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
                                """
         entry_nr = utils.id_resolver.resolve(entry_id)
         entry = utils.db.entry_by_entry_nr(entry_nr)
@@ -108,6 +114,8 @@ class ProteinEntryViewSet(ViewSet):
     def xref(self, request, entry_id=None, format=None):
         """
                     List of cross-references for a protein
+
+                    :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
                                """
         entry_nr = utils.id_resolver.resolve(entry_id)
         xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
@@ -144,7 +152,7 @@ class OmaGroupViewSet(ViewSet):
         """
                Retrieve the meta data on the OMA group and its protein members
 
-               :param group_id: an unique identifier for an OMA group
+               :param group_id: an unique identifier for an OMA group - either its group number, its fingerprint or an entry id of one of its members
                """
         if id[0].isalpha():
             if id[-1].isalpha():
@@ -170,7 +178,7 @@ class OmaGroupViewSet(ViewSet):
         """
                        Retrieve the closely related oma groups for a given group
 
-                       :param group_id: an unique identifier for an OMA group
+                       :param group_id: an unique identifier for an OMA group - either its group number, its fingerprint or an entry id of one of its members
                        """
 
         members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
@@ -252,8 +260,7 @@ class HOGsViewSet(ViewSet):
                Possible to specify the ?level query parameter in which case the list of all the subhogs present at that level and the links to their members are supplied.
 
 
-               :param hog_id: an unique identifier for a hog_group
-               :param level: an unique name for a level
+               :param hog_id: an unique identifier for a hog_group - either its hog id or one of its member proteins
                """
         level = self.request.query_params.get('level', None)
         if hog_id[:3] != "HOG":
@@ -327,8 +334,7 @@ class HOGsViewSet(ViewSet):
                        Optional ?level parameter, if left blank level is root by default.
 
 
-                       :param hog_id: an unique identifier for a hog_group
-                       :param level: an unique name for a level
+                       :param hog_id: an unique identifier for a hog_group - either its hog id starting with "HOG:" or one of its member proteins
                        """
         level = self.request.query_params.get('level', None)
         if level != None:
@@ -415,7 +421,7 @@ class XRefsViewSet(ViewSet):
         """
                Retrieve the cross references for a given protein
 
-               :param entry_id: an unique identifier for a protein
+               :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
                """
         entry_nr = utils.id_resolver.resolve(entry_id)
         xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
@@ -446,7 +452,7 @@ class GenomeViewSet(ViewSet):
         """
                Retrieve the basic information on a given genome
 
-               :param genome_id: an unique identifier for a genome
+               :param genome_id: an unique identifier for a genome - either its ncbi taxon id or the 5 letter UniProt Species code
                """
         try:
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
@@ -460,7 +466,7 @@ class GenomeViewSet(ViewSet):
         """
                        Retrieve the list of proteins available for a genome
 
-                       :param genome_id: an unique identifier for a genome
+                       :param genome_id: an unique identifier for a genome - either its ncbi taxon id or the 5 letter UniProt Species code
                        """
 
         try:
@@ -502,7 +508,11 @@ class PairwiseRelationAPIView(APIView):
 
         using the query_params 'chr1' and 'chr2', one can limit
         the relations to a certain chromosome for one or both
-        genomes."""
+        genomes.
+
+        :param genome_id1: an unique identifier for the first genome - either its ncbi taxon id or the 5 letter UniProt Species code
+        :param genome_id2: an unique identifier for the second genome - either its ncbi taxon id or the 5 letter UniProt Species code
+        """
         rel_type = request.query_params.get('rel_type', None)
         try:
             genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id1))
@@ -607,6 +617,8 @@ class TaxonomyViewSet(ViewSet):
         """
          A user is able to specify a root taxonomic level of the branch of interest and this will return only that subtree.
          The root taxonomic level id can be either ncbi taxon_id, member name or UniProt code.
+
+         :param root: either the taxon id, species name or the 5 letter UniProt species code for a root taxonomic level
          """
         type = request.query_params.get('type', None)
         subtree=[]

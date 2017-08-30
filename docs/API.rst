@@ -4,7 +4,7 @@
 The OMA Browser REST API
 ============================
 
-The OMA REST API serves as a remote window into the OMA database. This abstraction of OMA browser’s data and functions through an API allows it to be more accessible via other programming languages. Requests can be sent to:
+The OMA REST API serves as a remote window into the OMA database and so allows the users to access the data they need easily through HTTP requests sent to the server . This abstraction of OMA browser’s data and functions also allows it to be more accessible via programming languages other than Python. Requests can be sent to:
 
 http://omabrowser.org/api
 

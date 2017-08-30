@@ -8,8 +8,6 @@ from pyoma.browser.db import XrefIdMapper
 from django.utils.http import urlencode
 
 
-
-
 class QueryParamHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
     def __init__(self, query_params, **kwargs):
         super(QueryParamHyperlinkedIdentityField, self).__init__(**kwargs)
