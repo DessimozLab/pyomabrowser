@@ -143,10 +143,12 @@
                                 + region.source + "</p>");
 
                         // Draw the domain
+                        var myHashVal = (Math.abs(region.domainid.hashCode()) % 19)/38 + 0.5;
                         var dom = svg_container.append("rect")
                             .classed(class_name, true)
                             .classed("cath_domain", true)
                             .attr("x", start)
+                            .attr("opacity",myHashVal)
                             .attr("y", (svg_height / 2) - height / 2)
                             .attr("width", length)
                             .attr("height", height)
@@ -175,4 +177,13 @@
 
     };
 })(this.domains={});
-
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
