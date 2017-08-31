@@ -557,12 +557,12 @@ class HOGDomainsBase(ContextMixin, EntryCentricMixin):
             # Map entry numbers
             sim_fams['ReprEntryNr'] = sim_fams['ReprEntryNr'].apply(
                 utils.db.id_mapper['Oma'].map_entry_nr)
-            sim_fams['PrevFrac'] = 100.0 * sim_fams['PrevCount'] / sim_fams['FamSize']
 
         context.update({'entry': entry,
                         'hog': 'HOG:{:07d}'.format(fam),
                         'hog_row': fam_row,
                         'sim_hogs': sim_fams,
+                        'tab': 'hogs',
                         'longest_seq': longest_seq})
 
         return context
