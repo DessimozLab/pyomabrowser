@@ -53,7 +53,7 @@
     }
 
     exports.visualize_all = function (class_of_entries, longest_seq, attr_name) {
-        if(attr_name == undefined){ attr_name = 'id'; }
+        if(attr_name === undefined){ attr_name = 'id'; }
         $.each($(class_of_entries), function (each, value) {
             // Retreive the entry ID
             var entry_id = $(this).attr(attr_name),
@@ -87,7 +87,7 @@
 
                 var hashval = function(s) {
                     var hash = 0, i, chr;
-                    if (s.length === 0) return hash;
+                    if (s === undefined || s.length === 0) return hash;
                     for (i = 0; i < s.length; i++) {
                         chr = s.charCodeAt(i);
                         hash = ((hash << 5) - hash) + chr;
