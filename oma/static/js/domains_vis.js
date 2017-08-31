@@ -85,6 +85,17 @@
                     .attr("rx", 1) // Rounded corners
                     .attr("ry", 1);
 
+                var hashval = function(s) {
+                    var hash = 0, i, chr;
+                    if (s.length === 0) return hash;
+                    for (i = 0; i < s.length; i++) {
+                        chr = s.charCodeAt(i);
+                        hash = ((hash << 5) - hash) + chr;
+                        hash |= 0; // Convert to 32bit integer
+                    }
+                    return hash;
+                };
+
                 // Draw each of the regions
                 $.each(data.regions, function (i, region) {
                     var locs = region.location.split(':');
@@ -120,8 +131,8 @@
                         var base_url;
                         var gene3d_base_url = "http://gene3d.biochem.ucl.ac.uk/search?sterm="
                         if (region.source === "Pfam") {
-                            class_name = "_pfam"
-                            base_url = "http://pfam.xfam.org/family/"
+                            class_name = "_pfam";
+                            base_url = "http://pfam.xfam.org/family/";
 
                         } else if (region.source === "CATH/Gene3D") {
                             var cathid = region.domainid.split('.');
@@ -143,17 +154,17 @@
                                 + region.source + "</p>");
 
                         // Draw the domain
-                        var myHashVal = (Math.abs(region.domainid.hashCode()) % 19)/38 + 0.5;
+                        var opacity = (Math.abs(hashval(region.domainid)) %19) / 38 + 0.5;
                         var dom = svg_container.append("rect")
                             .classed(class_name, true)
                             .classed("cath_domain", true)
                             .attr("x", start)
-                            .attr("opacity",myHashVal)
+                            .attr("opacity", opacity)
                             .attr("y", (svg_height / 2) - height / 2)
                             .attr("width", length)
                             .attr("height", height)
                             .attr("rx", 2.5) // Rounded corners
-                            .attr("ry", 2.5)
+                            .attr("ry", 2.5);
 
                         if (region.source === "n/a") {
                             svg_container.append("text")
@@ -177,13 +188,3 @@
 
     };
 })(this.domains={});
-String.prototype.hashCode = function() {
-  var hash = 0, i, chr;
-  if (this.length === 0) return hash;
-  for (i = 0; i < this.length; i++) {
-    chr   = this.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-};
