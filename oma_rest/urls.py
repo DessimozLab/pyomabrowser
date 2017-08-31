@@ -11,7 +11,7 @@ router.register(r'group', views.OmaGroupViewSet, base_name='group')
 router.register(r'version', views.APIVersion, base_name='version')
 router.register(r'xref', views.XRefsViewSet, base_name='xref')
 router.register(r'genome', views.GenomeViewSet, base_name='genome')
-router.register(r'hog', views.HOGsViewSet, base_name='hog')
+router.register(r'hog', views.HOGViewSet, base_name='hog')
 router.register(r'taxonomy', views.TaxonomyViewSet, base_name='taxonomy')
 
 

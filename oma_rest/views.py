@@ -27,9 +27,10 @@ class ProteinEntryViewSet(ViewSet):
 
     def retrieve(self, request, entry_id=None, format=None):
         """
-        Retrieve the detailed information on a protein
+        Retrieve the information available for a protein entry.
 
         :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
+
         """
 
         # Load the entry and its domains, before forming the JSON to draw client-side.
@@ -40,35 +41,14 @@ class ProteinEntryViewSet(ViewSet):
         return Response(serializer.data)
 
     @detail_route()
-    def hog_levels(self,request,entry_id=None,format=None):
-        """
-                Retrieve the levels of the hog that the protein entry is present in
-
-                :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
-                """
-        entry_nr = utils.id_resolver.resolve(entry_id)
-        protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
-        levels = utils.db.hog_levels_of_fam(protein.hog_family_nr)
-        protein_levels = []
-        for level in levels:
-            level = level.decode("utf-8")
-            members_at_level = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(protein.oma_hog, level)]
-            for member in members_at_level:
-                if str(member) == str(protein) and level not in protein_levels:
-                    protein_levels.append(level)
-        data = []
-        for level in protein_levels:
-            data.append(m.HOG(hog_id=protein.oma_hog,level=level))
-        content = {'hog_id': protein.oma_hog, 'levels': data}
-        serializer = serializers.ProteinHOGSerializer(instance = content, context={'request': request} )
-        return Response(serializer.data)
-
-    @detail_route()
     def  orthologs(self, request, entry_id=None, format=None):
         """
-            List of all the identified orthologues for a protein. Possible to filter out orthologs by ?rel_type.
+            List of all the identified orthologues for a protein.
+
+            Possible to filter out orthologs by specifying the ?rel_type query parameter.
 
             :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
+            :queryparam rel_type: allows the user to filter the orthologs for a specific relationship type only
                        """
         rel_type = request.query_params.get('rel_type', None)
         p_entry_nr = utils.id_resolver.resolve(entry_id)
@@ -80,14 +60,18 @@ class ProteinEntryViewSet(ViewSet):
             ortholog.RelType = row[4]
             ortholog.Distance = row[3]
             ortholog.Score = row[2]
-            content.append(ortholog)
+            if rel_type!=None:
+                if rel_type==ortholog.RelType:
+                    content.append(ortholog)
+            else:
+                content.append(ortholog)
         serializer = serializers.OrthologsListSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 
     @detail_route()
     def ontology(self, request, entry_id=None, format=None):
         """
-                    Ontology information available for a protein
+                    Ontology information available for a protein.
 
                     :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
                                """
@@ -100,7 +84,7 @@ class ProteinEntryViewSet(ViewSet):
     @detail_route()
     def domains(self,request,entry_id=None, format=None):
         """
-                    List of the domains present in a protein
+                    List of the domains present in a protein.
 
                     :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
                                """
@@ -113,7 +97,7 @@ class ProteinEntryViewSet(ViewSet):
     @detail_route()
     def xref(self, request, entry_id=None, format=None):
         """
-                    List of cross-references for a protein
+                    List of cross-references for a protein.
 
                     :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
                                """
@@ -131,9 +115,9 @@ class OmaGroupViewSet(ViewSet):
 
     def list(self, request, format = None):
         """
-               List of all the OMA Groups currently identified and the url to access their details.
+            List of all the OMA Groups in the current release.
 
-
+            :queryparam page: the page number of the response json
                """
         groups_tab = utils.db.get_hdf5_handle().root.OmaGroups.MetaData
         groups = []
@@ -150,7 +134,7 @@ class OmaGroupViewSet(ViewSet):
 
     def retrieve(self, request, id=None, format=None):
         """
-               Retrieve the meta data on the OMA group and its protein members
+               Retrieve the information available for a given OMA group.
 
                :param group_id: an unique identifier for an OMA group - either its group number, its fingerprint or an entry id of one of its members
                """
@@ -176,13 +160,12 @@ class OmaGroupViewSet(ViewSet):
     @detail_route()
     def close_groups(self, request, id=None, format = None):
         """
-                       Retrieve the closely related oma groups for a given group
+                       Retrieve the sorted list of closely related groups for a given OMA group.
 
                        :param group_id: an unique identifier for an OMA group - either its group number, its fingerprint or an entry id of one of its members
                        """
 
         members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
-        data = utils.db.oma_group_metadata(members[0].oma_group)
         content = []
         for m in members:
             # get all the verified pairs
@@ -210,15 +193,17 @@ class OmaGroupViewSet(ViewSet):
         return Response(serializer.data)
 
 
-class HOGsViewSet(ViewSet):
+class HOGViewSet(ViewSet):
     lookup_field = 'hog_id'
     lookup_value_regex = r'[^/]+'
     serializer_class = serializers.ProteinEntrySerializer
 
     def list(self, request, format = None):
         """
-               List of all the hog_id's HOGs currently identified and the url to access their details.
-               It is possible to filter the list to hog_ids containing a certain level by specifying the ?level query parameter.
+               List of all the HOGs currently identified.
+
+               :queryparam level: allows filtering of the list of HOGs by a specific taxonomic level
+               :queryparam page: the page number of the response json
 
 
                """
@@ -256,11 +241,10 @@ class HOGsViewSet(ViewSet):
 
     def retrieve(self, request, hog_id):
         """
-               Retrieve the detail available for a given hog_id, along with its deepest level(root hog) and all the levels with links.
-               Possible to specify the ?level query parameter in which case the list of all the subhogs present at that level and the links to their members are supplied.
-
+               Retrieve the detail available for a given HOG, along with its deepest i.e. root level as well as the list of all the taxonomic levels that the HOG spans through.
 
                :param hog_id: an unique identifier for a hog_group - either its hog id or one of its member proteins
+               :queryparam level: taxonomic level of restriction for a HOG. If indicated returns a list of any subghogs at that level.
                """
         level = self.request.query_params.get('level', None)
         if hog_id[:3] != "HOG":
@@ -330,11 +314,10 @@ class HOGsViewSet(ViewSet):
     @detail_route()
     def members(self,request,hog_id=None,format=None):
         """
-                       Retrieve a list of all the protein members for a given hog_id (basic info plus links to more detailed view).
-                       Optional ?level parameter, if left blank level is root by default.
-
+                       Retrieve a list of all the protein members for a given hog_id.
 
                        :param hog_id: an unique identifier for a hog_group - either its hog id starting with "HOG:" or one of its member proteins
+                       :queryparam level: taxonomic level of restriction for a HOG - default is its deepest most i.e. root level.
                        """
         level = self.request.query_params.get('level', None)
         if level != None:
@@ -417,27 +400,13 @@ class XRefsViewSet(ViewSet):
         serializer = serializers.XRefSerializer(instance=res, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request, entry_id, format=None):
-        """
-               Retrieve the cross references for a given protein
-
-               :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
-               """
-        entry_nr = utils.id_resolver.resolve(entry_id)
-        xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
-        for ref in xrefs:
-            ref['entry_nr'] = entry_nr
-            ref['omaid'] = utils.id_mapper['OMA'].map_entry_nr(entry_nr)
-        serializer = serializers.XRefSerializer(instance=xrefs, many=True)
-        return Response(serializer.data)
-
-
 class GenomeViewSet(ViewSet):
     lookup_field = 'genome_id'
 
     def list(self, request, format=None):
         """
-               List of all the genomes present in the current release
+               List of all the genomes present in the current release.
+               :queryparam page: the page number of the response json
 
 
                """
@@ -450,7 +419,7 @@ class GenomeViewSet(ViewSet):
 
     def retrieve(self, request, genome_id, format=None):
         """
-               Retrieve the basic information on a given genome
+               Retrieve the information available for a given genome.
 
                :param genome_id: an unique identifier for a genome - either its ncbi taxon id or the 5 letter UniProt Species code
                """
@@ -464,9 +433,10 @@ class GenomeViewSet(ViewSet):
     @detail_route()
     def proteins_list(self, request, genome_id=None):
         """
-                       Retrieve the list of proteins available for a genome
+                       Retrieve the list of all the protein entries available for a genome.
 
                        :param genome_id: an unique identifier for a genome - either its ncbi taxon id or the 5 letter UniProt Species code
+                       :queryparam page: the page number of the response json
                        """
 
         try:
@@ -512,6 +482,9 @@ class PairwiseRelationAPIView(APIView):
 
         :param genome_id1: an unique identifier for the first genome - either its ncbi taxon id or the 5 letter UniProt Species code
         :param genome_id2: an unique identifier for the second genome - either its ncbi taxon id or the 5 letter UniProt Species code
+        :queryparam chr1: the number of the chromosome of interest in the first genome
+        :queryparam chr2: the number of the chromosome of interest in the second genome
+        :queryparam page: the page number of the response json
         """
         rel_type = request.query_params.get('rel_type', None)
         try:
@@ -545,16 +518,20 @@ class PairwiseRelationAPIView(APIView):
                 if cnt + 1 % 100 == 0:
                             logger.debug("Processed {} rows".format(cnt))
 
-        serializer = serializers.PairwiseRelationSerializer(instance=res, many=True, context={'request': request})
-        return Response(serializer.data)
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(res, request)
+        serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
 class TaxonomyViewSet(ViewSet):
     lookup_field= 'root_id'
 
     def list(self, request, format=None):
         """
-            Get the taxonomy as either a dictionary (default) or newick (?type=newick).
-            It is possible to get induced taxonomy as well by specifying the ?members parameter to a list of ncbi taxon_ids, member names or UniProt codes.
+            Retrieve the taxonomic tree that is available in the current release.
+
+            :queryparam type: the type of the returned data - either dictionary (default) or newick.
+            :queryparam members: list of members to get the induced the taxonomy from. Member id's can be either their ncbi taxon ids or their UniProt 5 letter species codes - they just have to be consistent.
                """
 
         #e.g. members = YEAST,ASHGO
@@ -615,10 +592,10 @@ class TaxonomyViewSet(ViewSet):
 
     def retrieve(self, request, root_id, format=None):
         """
-         A user is able to specify a root taxonomic level of the branch of interest and this will return only that subtree.
-         The root taxonomic level id can be either ncbi taxon_id, member name or UniProt code.
+         Retrieve the subtree rooted at the taxonomic level indicated.
 
          :param root: either the taxon id, species name or the 5 letter UniProt species code for a root taxonomic level
+         :queryparam type: the type of the returned data - either dictionary (default) or newick.
          """
         type = request.query_params.get('type', None)
         subtree=[]

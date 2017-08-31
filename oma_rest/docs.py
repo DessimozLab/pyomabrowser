@@ -5,7 +5,6 @@ This file serves as an extension to the DRF docs. It removes the model dependanc
 '''
 
 
-
 import re
 
 from django.conf.urls import include, url
@@ -17,6 +16,7 @@ from rest_framework.compat import (
 )
 from django.utils.encoding import smart_text
 
+
 header_regex = re.compile('^[a-zA-Z][0-9A-Za-z_]*:')
 
 
@@ -27,7 +27,10 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
         method_docstring = getattr(view, method_name, None).__doc__
         if method_docstring:
             # An explicit docstring on the method or action.
-            method_docstring = method_docstring.split(':param')[0]
+            try:
+                method_docstring = method_docstring.split(':')[0]
+            except:
+                pass
             return formatting.dedent(smart_text(method_docstring))
 
         description = view.get_view_description()
@@ -53,14 +56,15 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
     def get_path_fields(self, path, method, view):
         method_name = getattr(view, 'action', method.lower())
         method_docstring = getattr(view, method_name, None).__doc__
+
+        fields = []
+
         if method_docstring:
             # An explicit docstring on the method or action.
             try:
                 param_docstrings = method_docstring.split(':param')
             except:
                 param_docstrings = ''
-
-        fields = []
 
         for variable in uritemplate.variables(path):
             title = ''
@@ -71,10 +75,8 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
                         if variable in param_docstrings[i]:
                             description = formatting.dedent(smart_text(param_docstrings[i].split(":")[1]))
                 else:
-                    try:
-                        description=formatting.dedent(smart_text(param_docstrings[1].split(":")[1]))
-                    except:
-                        pass
+                    description=formatting.dedent(smart_text(param_docstrings[1].split(":")[1]))
+
             schema_cls = coreschema.String
 
             field = coreapi.Field(
@@ -84,6 +86,22 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
                 schema=schema_cls(title=title, description=description)
             )
             fields.append(field)
+
+        if method_docstring:
+            try:
+                qparam_docstrings = method_docstring.split(':queryparam')
+                schema_cls = coreschema.String
+                for i in range(1, len(qparam_docstrings)):
+                    field = coreapi.Field(
+                        name=qparam_docstrings[i].split(":")[0].strip(),
+                        location='query',
+                        required=False,
+                        schema=schema_cls(title='',
+                                          description=qparam_docstrings[i].split(":")[1])
+                    )
+                    fields.append(field)
+            except:
+                pass
 
         return fields
 
