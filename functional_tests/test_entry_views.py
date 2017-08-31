@@ -1,5 +1,4 @@
 from .base import FunctionalTest
-import logging
 
 
 class EntryViewPageTest(FunctionalTest):
@@ -45,11 +44,10 @@ class EntryViewPageTest(FunctionalTest):
         species_column = [g.text for g in self.browser.find_elements_by_xpath("//div[@class='twotables']//table/tbody/tr/td[1]")]
         self.assertLess(5, len(species_column), 'Too few genomes containing P53 orthologs')
         row_nr_of_species = []
-        for g in ('PANTR', 'PONAB', 'MACMU', 'MOUSE', 'BOVIN', 'MONDO'):
+        for g in ('PANTR', 'PONAB', 'MACMU', 'MOUSE', 'BOVIN', 'LOXAF'):
             try:
                 pos = species_column.index(g)
             except ValueError:
-                pos = -1
-                logging.error('{} not in list of species of syntenic genes'.format(g))
+                self.assertTrue(False, '{} not in list of species of syntenic genes'.format(g))
             row_nr_of_species.append(pos)
         self.assertTrue(all(row_nr_of_species[i] < row_nr_of_species[i + 1] for i in range(len(row_nr_of_species) - 1)))
