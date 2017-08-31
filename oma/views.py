@@ -722,7 +722,7 @@ def export_marker_genes(request):
                 r.save()
                 tasks.export_marker_genes.delay(genomes, data_id, min_species_coverage, top_N_genomes)
             return HttpResponseRedirect(reverse('marker_genes', args=(data_id,)))
-    return render(request, "export_marker.html")
+    return render(request, "export_marker.html", context={'max_nr_genomes': 200})
 
 
 def function_projection(request):

@@ -2,7 +2,7 @@ $(document).ready(function() {
     var numberOfSelectedGenome=0;
     var arrayGenome=[];
     var hashGenome=[];
-    var maxGenome = 50; //number max of selected genomes
+    var maxGenome = window.MAX_NR_GENOMES || 50; //number max of selected genomes
     var needUpdate=false;//Toolbox need to be update ?
     var dblclick_timer = false;
     var viewerWidth = $(document).width()*0.9;
