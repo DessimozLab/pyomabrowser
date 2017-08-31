@@ -185,24 +185,23 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
               6: '#66C2A5', 7: '#5E4FA2', 8: '#F46D43', 9: '#FFFFBF', 10: '#ABDDA4'}
     stripes = {}
 
-    o_sorting = {}
+    # select the closest NR_GENOMES_TO_KEEP genomes
+    NR_GENOMES_TO_KEEP = 50
+    nr_shared_lins_per_genome = collections.Counter()
     for ortholog in orthologs:
-        o_genome = utils.id_mapper['OMA'].genome_of_entry_nr(ortholog)
-        if not o_genome['UniProtSpeciesCode'] in o_sorting:
-            try:
-                o_lin = utils.tax.get_parent_taxa(o_genome['NCBITaxonId'])
-            except Exception:
-                logger.warning("cannot get NCBI Taxonomy for {} ({})".format(
-                    o_genome['UniProtSpeciesCode'],
-                    o_genome['NCBITaxonId']))
-                o_lin = []
+        o_genome = utils.Genome(utils.id_mapper['OMA'].genome_of_entry_nr(ortholog))
+        if not o_genome.uniprot_species_code in nr_shared_lins_per_genome:
             num_match = 0
-            for i in range(1, min(len(o_lin), len(taxa))):
-                if taxa[-i] == o_lin[-i]["Name"]:
-                    num_match += 1
-            o_sorting[o_genome['UniProtSpeciesCode']] = num_match
-    o_sorting = OrderedDict(sorted(list(o_sorting.items()), key=lambda t: t[1], reverse=True))
-    o_sorting = [g.decode() for g in o_sorting.keys()][0:50]
+            try:
+                for i in range(1, min(len(o_genome.lineage), len(taxa))):
+                    if taxa[-i] == o_genome.lineage[-i]:
+                        num_match += 1
+            except db.InvalidTaxonId:
+                logger.exception("cannot get NCBI Taxonomy for {} ({})"
+                                 .format(o_genome.uniprot_species_code, o_genome.ncbi_taxon_id))
+            nr_shared_lins_per_genome[o_genome.uniprot_species_code] = num_match
+    o_sorting = [g[0] for g in nr_shared_lins_per_genome.most_common(NR_GENOMES_TO_KEEP)]
+
     osd = {}  # ortholog sorting dictionary
     for row, each in enumerate(o_sorting):
         osd[each] = row

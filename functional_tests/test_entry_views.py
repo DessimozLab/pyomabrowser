@@ -1,4 +1,5 @@
 from .base import FunctionalTest
+import logging
 
 
 class EntryViewPageTest(FunctionalTest):
@@ -32,3 +33,23 @@ class EntryViewPageTest(FunctionalTest):
         self.browser.get(self.server_url+'/oma/hogs/P53_HUMAN')
         tab_lnks = self.browser.find_elements_by_css_selector('.nav-tabs>li>a')
         self.assertNotIn('Homeologs', "".join([tab.text for tab in tab_lnks]))
+
+    def test_synteny_page(self):
+        # Tom navigates via the info page of the P53_HUMAN info page to the synteny page
+        self.browser.get(self.server_url + '/oma/synteny/P53_HUMAN')
+        # we make sure the second title row (thead) belongs to HUMAN
+        tds_of_first_row = self.browser.find_elements_by_xpath("//div[@class='twotables']//table/thead/tr[2]/td")
+        self.assertEqual('HUMAN', tds_of_first_row[0].text)
+        # let's check that the rows are in a reasonable taxonomic order. they shoudl be
+        # ordered according to the distance on the lineagetree from HUMAN
+        species_column = [g.text for g in self.browser.find_elements_by_xpath("//div[@class='twotables']//table/tbody/tr/td[1]")]
+        self.assertLess(5, len(species_column), 'Too few genomes containing P53 orthologs')
+        row_nr_of_species = []
+        for g in ('PANTR', 'PONAB', 'MACMU', 'MOUSE', 'BOVIN', 'MONDO'):
+            try:
+                pos = species_column.index(g)
+            except ValueError:
+                pos = -1
+                logging.error('{} not in list of species of syntenic genes'.format(g))
+            row_nr_of_species.append(pos)
+        self.assertTrue(all(row_nr_of_species[i] < row_nr_of_species[i + 1] for i in range(len(row_nr_of_species) - 1)))
