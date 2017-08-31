@@ -547,11 +547,9 @@ class HOGDomainsBase(ContextMixin, EntryCentricMixin):
 
         (fam_row, sim_fams) = utils.db.get_prevalent_domains(fam)
 
-        longest_seq = fam_row['ReprEntryLength'] if fam_row is not None else -1
+        longest_seq = fam_row['repr_entry_length'] if fam_row is not None else -1
         if fam_row is not None:
-            fam_row = dict(zip(fam_row.dtype.names, fam_row))
-            fam_row['ReprEntryNr'] = utils.db.id_mapper['Oma'] \
-                                             .map_entry_nr(fam_row['ReprEntryNr'])
+            fam_row['repr_entry_omaid'] = utils.db.id_mapper['Oma'].map_entry_nr(fam_row['repr_entry_nr'])
 
         if sim_fams is not None:
             longest_seq = max(longest_seq, max(sim_fams['ReprEntryLength']))
@@ -578,25 +576,18 @@ class HOGDomainsJson(HOGDomainsBase, View):
     json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
                    'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
                    'sim': 'Similarity', 'TopLevel': 'TopLevel',
-                   'PrevFrac': 'PrevFrac'}
+                   'Prev': 'PrevFrac'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         df = context['sim_hogs']
-        df = df[df.Fam != context['hog_row']['Fam']]
+        df = df[df.Fam != context['hog_row']['fam']]
         if len(df) == 0:  #len(context['sim_hogs']) == 0:
             data = ''
         else:
-            df.sort_values(['sim', 'FamSize'], inplace=True, ascending=False)
             data = df[list(self.json_fields.keys())] \
                 .rename(columns=self.json_fields) \
                 .to_json(orient='records')
-        # # Use the pandas json serialiser instead of django - else issues with
-        # # np.uint32, etc. TODO: integrate this with the other json responses.
-        # data = context['sim_hogs'][list(self.json_fields.keys())] \
-        #     .rename(columns=self.json_fields) \
-        #     .to_json(orient='records')
-
         return HttpResponse(data, content_type='application/json')
 
 

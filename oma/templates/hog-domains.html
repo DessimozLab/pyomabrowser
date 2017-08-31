@@ -30,17 +30,17 @@ This entry is not part of any hierarchical orthologous group.
 {% else %}
 
 <h3>Hierarchical group {{ hog }}</h3>
-<dl class="dl-horizontal">
-    <dt>Deepest Level</dt>
-    <dd>{{ hog_row.TopLevel }}</dd>
+<dl class="dl-horizontal wide-label">
+    <dt>Deepest level:</dt>
+    <dd>{{ hog_row.top_level }}</dd>
     <dt>Nr. of proteins in HOG at deepest level:</dt>
-    <dd>{{ hog_row.FamSize }}</dd>
+    <dd>{{ hog_row.fam_size }}</dd>
     <dt>Representative domain architecture:</dt>
     <dd>
-        <table><tr class="hog_domain" id="{{ hog }}" repr="{{ hog_row.ReprEntryNr }}"><td class="domain_vis"></td></tr></table>
+        <table><tr class="hog_domain" id="{{ hog }}" repr="{{ hog_row.repr_entry_omaid }}"><td class="domain_vis"></td></tr></table>
     </dd>
-    <dt>Prevalence of repr. domain architecture within HOG</dt>
-    <dd>{% widthratio hog_row.PrevCount hog_row.FamSize 100 %}%</dd>
+    <dt>Prevalence of repr. domain architecture within HOG:</dt>
+    <dd>{{ hog_row.prevalence |floatformat }}%</dd>
 </dl>
 <h4>This HOG has {{ sim_hogs|length }} similar HOGs:</h4>
 
@@ -101,8 +101,8 @@ tab.bootstrapTable({
         tab.bootstrapTable('hideLoading');
     },
     rowAttributes: function(rowdata, index) {
-        var classes = "hog"
-        if (rowdata.Fam === {{ hog_row.Fam }} ){ classes += " query";}
+        var classes = "hog";
+        if (rowdata.Fam === {{ hog_row.fam }} ){ classes += " query";}
         return {id: rowdata.Fam, repr: rowdata.ReprEntryNr, 'class': classes};
     }
 });
