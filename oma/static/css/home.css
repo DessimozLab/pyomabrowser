@@ -24,8 +24,14 @@
 /* overwrite classes  */
 .btn{text-align:center;}
 .navbar-nav{text-align:center;font-weight:bold;}
-.dl-horizontal dt{white-space: normal !important; }
-.dl-horizontal dd{width:60% !important;}
+dl.dl-horizontal dt{white-space: normal; }
+dl.dl-horizontal dd{width: auto;}
+dl.wide-label dt{width: 270px;}
+@media (min-width: 768px) {
+	dl.wide-label dd {
+		margin-left: 290px;
+	}
+}
 a{cursor: pointer;}
 
 .thd{
