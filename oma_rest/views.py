@@ -384,6 +384,11 @@ class XRefsViewSet(ViewSet):
         return res
 
     def list(self, request, format=None):
+        """List all the crossreferences that match a certain pattern.
+
+        :queryparam search: the pattern to be searched for. The pattern
+                            must be at least 3 characters long in order to
+                            return a hit."""
         pattern = request.query_params.get('search', None)
         res = []
         if pattern is not None and len(pattern) >= 3:
