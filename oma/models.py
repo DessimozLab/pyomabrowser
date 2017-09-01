@@ -19,6 +19,7 @@ class FileResult(models.Model):
             return True
         return False
 
+
 class HOG(object):
     def __init__(self, hog_id=None, level=None):
         self.hog_id = hog_id
@@ -31,8 +32,11 @@ class HOG(object):
             else:
                 self.roothog_id = int(hog_id[start:])
 
+
 class OMAGroup(object):
-    def __init__(self, GroupNr=None, fingerprint=None, members=None):
+    def __init__(self, GroupNr=None, fingerprint=None, members=None, **kwargs):
         self.GroupNr = GroupNr
         self.fingerprint = fingerprint
         self.members = members
+        for k, v in kwargs.items():
+            setattr(self, k, v)

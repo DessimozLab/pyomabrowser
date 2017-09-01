@@ -1,3 +1,5 @@
+import json
+
 from rest_framework.test import APIClient, APITestCase
 
 
@@ -68,15 +70,53 @@ class GroupTest(APITestCase):
         response_2 = client.get(protein_url, format='json')
         self.assertEqual(500, response_2.data['oma_group'])
 
+    def test_invalid_group_raises_error(self):
+        client = APIClient()
+        response = client.get('/api/group/ADRIANADRIAN/')
+        self.assertEqual(404, response.status_code)
+
+    def test_group_by_groupnr(self):
+        client = APIClient()
+        response = client.get('/api/group/30/')
+        self.assertEqual(200, response.status_code)
+        data = json.loads(response.content.decode())
+        self.assertEqual(30, data['group_nr'])
+
+    def test_group_by_entry_id(self):
+        client = APIClient()
+        response = client.get('/api/group/YEAST00055/')
+        self.assertEqual(200, response.status_code)
+        members = [z['omaid'] for z in response.data['members']]
+        self.assertIn('YEAST00055', members)
+
+    def test_group_by_inexisting_entry_id(self):
+        response = APIClient().get('/api/group/YEAST09999/')
+        self.assertEqual(404, response.status_code)
+
+    def test_group_edge_cases(self):
+        response = APIClient().get('/api/group/0/')
+        self.assertEqual(404, response.status_code)
+
+    def test_protein_without_group(self):
+        response = APIClient().get('/api/group/YEAST00001/')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual({}, response.data)
+
+    def test_close_group_exists(self):
+        client = APIClient()
+        response = client.get('/api/group/YEAST00012/close_groups/')
+        self.assertEqual(200, response.status_code)
+        self.assertIsInstance(response.data, list)
+
 
 class GenomeTest(APITestCase):
     def test_member_proteins(self):
         client = APIClient()
-        response = client.get('/api/genome/YEAST/proteins_list/')
+        response = client.get('/api/genome/YEAST/proteins/')
         self.assertEqual(int(6352), response.data['count'])
 
         client = APIClient()
-        response = client.get('/api/genome/ASHGO/proteins_list/')
+        response = client.get('/api/genome/ASHGO/proteins/')
         self.assertEqual(int(4757), response.data['count'])
 
 

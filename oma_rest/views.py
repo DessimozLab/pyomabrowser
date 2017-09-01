@@ -16,7 +16,6 @@ from collections import Counter
 from rest_framework.decorators import detail_route
 from oma import models as m
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -37,7 +36,7 @@ class ProteinEntryViewSet(ViewSet):
         entry_nr = utils.id_resolver.resolve(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
         serializer = serializers.ProteinEntryDetailSerializer(
-                instance=protein, context={'request': request})
+            instance=protein, context={'request': request})
         return Response(serializer.data)
 
     @detail_route()
@@ -62,8 +61,8 @@ class ProteinEntryViewSet(ViewSet):
             ortholog.RelType = row[4]
             ortholog.Distance = row[3]
             ortholog.Score = row[2]
-            if rel_type!=None:
-                if rel_type==ortholog.RelType:
+            if rel_type is not None:
+                if rel_type == ortholog.RelType:
                     content.append(ortholog)
             else:
                 content.append(ortholog)
@@ -84,7 +83,7 @@ class ProteinEntryViewSet(ViewSet):
         return Response(serializer.data)
 
     @detail_route()
-    def domains(self,request,entry_id=None, format=None):
+    def domains(self, request, entry_id=None, format=None):
         """List of the domains present in a protein.
 
         :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
@@ -110,57 +109,58 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.XRefSerializer(instance=xrefs, many=True)
         return Response(serializer.data)
 
+
 class OmaGroupViewSet(ViewSet):
-    lookup_field = 'id'
+    lookup_field = 'group_id'
     serializer_class = serializers.ProteinEntrySerializer
 
-    def list(self, request, format = None):
-        """
-            List of all the OMA Groups in the current release.
+    def list(self, request, format=None):
+        """List of all the OMA Groups in the current release.
 
-            :queryparam page: the page number of the response json
-               """
-        groups_tab = utils.db.get_hdf5_handle().root.OmaGroups.MetaData
-        groups = []
-        for row in groups_tab:
-            groups.append(row[0])
-        group_numbers = sorted(set(groups))
-        data = []
-        for row in group_numbers:
-            data.append(m.OMAGroup(GroupNr=row))
+        :queryparam page: the page number of the response json
+        """
+        nr_groups = utils.db.get_nr_oma_groups()
+        data = [m.OMAGroup(GroupNr=i) for i in range(1, nr_groups+1)]
         paginator = PageNumberPagination()
         page = paginator.paginate_queryset(data, request)
         serializer = serializers.GroupListSerializer(page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
-    def retrieve(self, request, id=None, format=None):
+    def retrieve(self, request, group_id=None, format=None):
         """Retrieve the information available for a given OMA group.
 
         :param group_id: an unique identifier for an OMA group - either its
                          group number, its fingerprint or an entry id of one
                          of its members
         """
-        if id[0].isalpha():
-            if id[-1].isalpha():
-                # id == fingerprint
-                group_row = utils.db.get_hdf5_handle().root.OmaGroups.MetaData.read_where('(Fingerprint==id)')
-                id = group_row[0]
-            else:
-                # id == group member
-                entry_nr = utils.id_resolver.resolve(id)
-                protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
-                id = protein.oma_group
-        # id == hog_id
-        members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
-        data = utils.db.oma_group_metadata(members[0].oma_group)
-        fingerprint = data['fingerprint']
-        group = m.OMAGroup(GroupNr=id, members=members, fingerprint=fingerprint)
+        try:
+            # get members in case its a group id or fingerprint
+            memb = utils.db.oma_group_members(group_id)
+        except db.InvalidId:
+            try:
+                # let's try if group_id is a member protein id
+                entry_nr = utils.id_resolver.resolve(group_id)
+                prot = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
+                if prot.oma_group == 0:
+                    return Response({})
+                return self.retrieve(request, prot.oma_group)
+            except db.InvalidId:
+                raise NotFound(group_id)
+
+        if len(memb) == 0:
+            group = []
+        else:
+            members = [models.ProteinEntry(utils.db, m) for m in memb]
+            data = utils.db.oma_group_metadata(members[0].oma_group)
+            fingerprint = data['fingerprint']
+            group = m.OMAGroup(GroupNr=data['group_nr'], members=members, fingerprint=fingerprint)
+
         serializer = serializers.OmaGroupSerializer(
             instance=group, context={'request': request})
         return Response(serializer.data)
 
     @detail_route()
-    def close_groups(self, request, id=None, format = None):
+    def close_groups(self, request, group_id=None, format=None):
         """Retrieve the sorted list of closely related groups for a given OMA group.
 
         :param group_id: an unique identifier for an OMA group - either its
@@ -168,31 +168,42 @@ class OmaGroupViewSet(ViewSet):
                          of its members
         """
 
-        members = [models.ProteinEntry(utils.db, m) for m in utils.db.oma_group_members(id)]
-        content = []
-        for m in members:
+        try:
+            # get members in case its a group id or fingerprint
+            group_member = utils.db.oma_group_members(group_id)
+        except db.InvalidId:
+            try:
+                # let's try if group_id is a member protein id
+                entry_nr = utils.id_resolver.resolve(group_id)
+                prot = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
+                if prot.oma_group == 0:
+                    return Response([])
+                return self.close_groups(request, prot.oma_group)
+            except db.InvalidId:
+                raise NotFound(group_id)
+
+        members = [models.ProteinEntry(utils.db, e) for e in group_member]
+        if len(members) == 0:
+            return Response([])
+        group_nr = members[0].oma_group
+
+        # count the groups' hits and return in form of a list instead of a dictionary
+        group_cnts = Counter()
+        for group_member in members:
             # get all the verified pairs
-            vpairs = utils.db.get_vpairs(m.entry_nr)
+            vpairs = utils.db.get_vpairs(group_member.entry_nr)
             # vpairs into instances of the ProteinEntry model
             for row in vpairs:
                 entry_nr = row[1]
                 ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
-                content.append(ortholog)
-        groups = []
+                if ortholog.oma_group != 0 and ortholog.oma_group != group_nr:
+                    group_cnts[ortholog.oma_group] += 1
 
-        for row in content:
-            if row.oma_group == int(id):
-                pass
-            else:
-                groups.append(row.oma_group)
-        # count the groups' hits and return in form of a list instead of a dictionary
-        r_groups = Counter(groups).most_common()
-        data = sorted(r_groups)
         close_groups = []
-        for row in data:
-            close_groups.append({'GroupNr': row[0], 'Hits': row[1]})
+        for grp, hits in group_cnts.most_common():
+            close_groups.append(m.OMAGroup(GroupNr=grp, hits=hits))
         serializer = serializers.RelatedGroupsSerializer(
-            instance=close_groups, many=True,context={'request': request})
+            instance=close_groups, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -201,7 +212,7 @@ class HOGViewSet(ViewSet):
     lookup_value_regex = r'[^/]+'
     serializer_class = serializers.ProteinEntrySerializer
 
-    def list(self, request, format = None):
+    def list(self, request, format=None):
         """List of all the HOGs identified by OMA.
 
         :queryparam level: allows filtering of the list of HOGs by a specific taxonomic level
@@ -209,12 +220,12 @@ class HOGViewSet(ViewSet):
         """
         level = self.request.query_params.get('level', None)
         if level != None:
-            #filtering by level
+            # filtering by level
             hog_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(Level==level)')
             hogs = []
             for row in hog_tab:
                 hogs.append(row[1].decode("utf-8"))
-            hogs=sorted(hogs)
+            hogs = sorted(hogs)
             data = []
             for row in hogs:
                 data.append(m.HOG(hog_id=row, level=level))
@@ -224,18 +235,18 @@ class HOGViewSet(ViewSet):
             return paginator.get_paginated_response(serializer.data)
 
         else:
-            #list of all the hogs
+            # list of all the hogs
             hog_tab = utils.db.get_hdf5_handle().root.HogLevel
             hogs = []
             for row in hog_tab:
                 hogs.append(row['ID'].decode("utf-8"))
             hog_ids = sorted(set(hogs))
-            data=[]
+            data = []
             for row in hog_ids:
                 data.append(m.HOG(hog_id=row))
             paginator = PageNumberPagination()
             page = paginator.paginate_queryset(data, request)
-            serializer = serializers.HOGsListSerializer(page,many=True,context={'request': request})
+            serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
             return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, hog_id):
@@ -261,7 +272,7 @@ class HOGViewSet(ViewSet):
                 hog_model = m.HOG(hog_id=row[1].decode("utf-8"), level=row[2].decode("utf-8"))
                 levels.append(hog_model)
 
-            #below is the root level calculation
+            # below is the root level calculation
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
             # get all levels for a hog_id
             fam_nr = members[0].hog_family_nr
@@ -271,8 +282,8 @@ class HOGViewSet(ViewSet):
             # get lineage of the species
             lineage = species.lineage
             # indexing of levels for a hog
-            if len(hog_id) > 11: #i.e. it is a subhog
-                #root level for subhogs is the level at which they appear i.e. when the duplication occured
+            if len(hog_id) > 11:  # i.e. it is a subhog
+                # root level for subhogs is the level at which they appear i.e. when the duplication occured
                 for lvl in levels_for_fam:
                     subhogs = utils.db.get_subhogids_at_level(fam_nr, lvl)
                     if subhogs is not None:
@@ -280,9 +291,9 @@ class HOGViewSet(ViewSet):
                             subhog = subhog.decode("utf-8")
                             if subhog == hog_id:
                                 root_hog_level = lvl.decode("utf-8")
-            else: # not a subhog
+            else:  # not a subhog
                 if 'LUCA' in levels:
-                    #last universal common ancestor is the deepest level by default
+                    # last universal common ancestor is the deepest level by default
                     root_hog_level = 'LUCA'
                 else:
                     indexed_levels = []
@@ -293,7 +304,7 @@ class HOGViewSet(ViewSet):
                             indexed_levels.append([level, int(level_index)])
                     indexed_levels.sort(key=lambda x: x[1])
                     root_hog_level = indexed_levels[-1][0]
-                    levels=[] # the spanning levels for the whole hog i.e the family number
+                    levels = []  # the spanning levels for the whole hog i.e the family number
                     for level in levels_for_fam:
                         hog_model = m.HOG(hog_id=hog_id, level=level.decode("utf-8"))
                         levels.append(hog_model)
@@ -301,7 +312,7 @@ class HOGViewSet(ViewSet):
             serializer = serializers.HOGDetailSerializer(instance=data, context={'request': request})
             return Response(serializer.data)
         else:
-            #level specified, returns a list of all the subhogs at a level
+            # level specified, returns a list of all the subhogs at a level
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
             fam_nr = members[0].hog_family_nr
             subhogs = utils.db.get_subhogids_at_level(fam_nr, level)
@@ -314,7 +325,7 @@ class HOGViewSet(ViewSet):
             return Response(serializer.data)
 
     @detail_route()
-    def members(self,request,hog_id=None,format=None):
+    def members(self, request, hog_id=None, format=None):
         """Retrieve a list of all the protein members for a given hog_id.
 
         :param hog_id: an unique identifier for a hog_group - either
@@ -423,7 +434,7 @@ class GenomeViewSet(ViewSet):
         genomes = [make_genome(g) for g in utils.id_mapper['OMA'].genome_table]
         paginator = PageNumberPagination()
         page = paginator.paginate_queryset(genomes, request)
-        serializer = serializers.GenomeInfoSerializer(instance=page, many=True,context={'request': request})
+        serializer = serializers.GenomeInfoSerializer(instance=page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, genome_id, format=None):
@@ -436,11 +447,11 @@ class GenomeViewSet(ViewSet):
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
         except db.UnknownSpecies as e:
             raise NotFound(e)
-        serializer = serializers.GenomeDetailSerializer(instance=g,context={'request': request})
+        serializer = serializers.GenomeDetailSerializer(instance=g, context={'request': request})
         return Response(serializer.data)
 
     @detail_route()
-    def proteins_list(self, request, genome_id=None):
+    def proteins(self, request, genome_id=None):
         """Retrieve the list of all the protein entries available for a genome.
 
         :param genome_id: an unique identifier for a genome
@@ -459,13 +470,11 @@ class GenomeViewSet(ViewSet):
             raise NotFound(e)
         paginator = PageNumberPagination()
         page = paginator.paginate_queryset(prot, request)
-        serializer = serializers.ProteinEntrySerializer(page, many= True, context={'request': request})
+        serializer = serializers.ProteinEntrySerializer(page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
 
-
 class PairwiseRelationAPIView(APIView):
-
     def _get_entry_range(self, genome, chr):
         if chr is None:
             return genome.entry_nr_offset + 1, genome.entry_nr_offset + len(genome)
@@ -520,7 +529,7 @@ class PairwiseRelationAPIView(APIView):
         logger.debug("EntryRanges: ({0[0]},{0[1]}), ({1[0]},{1[1]})".format(range1, range2))
         for cnt, row in enumerate(rel_tab.where('(EntryNr1 >= {0[0]}) & (EntryNr1 <= {0[1]}) & '
                                                 '(EntryNr2 >= {1[0]}) & (EntryNr2 <= {1[1]})'
-                                                .format(range1, range2))):
+                                                        .format(range1, range2))):
             rel = models.PairwiseRelation(utils.db, row.fetch_all_fields())
             if ((chr1 is None or chr1 == rel.entry_1.chromosome) and
                     (chr2 is None or chr2 == rel.entry_2.chromosome)):
@@ -530,7 +539,7 @@ class PairwiseRelationAPIView(APIView):
                     if rel_type == rel.rel_type:
                         res.append(rel)
                 if cnt + 1 % 100 == 0:
-                            logger.debug("Processed {} rows".format(cnt))
+                    logger.debug("Processed {} rows".format(cnt))
 
         paginator = PageNumberPagination()
         page = paginator.paginate_queryset(res, request)
@@ -539,7 +548,7 @@ class PairwiseRelationAPIView(APIView):
 
 
 class TaxonomyViewSet(ViewSet):
-    lookup_field= 'root_id'
+    lookup_field = 'root_id'
 
     def list(self, request, format=None):
         """Retrieve the taxonomic tree that is available in the current release.
@@ -550,31 +559,31 @@ class TaxonomyViewSet(ViewSet):
                species codes - they just have to be consistent.
         """
 
-        #e.g. members = YEAST,ASHGO
-        members = request.query_params.get('members', None) #read as a string
-        type = request.query_params.get('type', None) #if none, dictionary returned
+        # e.g. members = YEAST,ASHGO
+        members = request.query_params.get('members', None)  # read as a string
+        type = request.query_params.get('type', None)  # if none, dictionary returned
         taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
         tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
         if members != None:
-            members = members.split(',') #as the query param is passed as a string
+            members = members.split(',')  # as the query param is passed as a string
             members_list = []
             try:
-                    int(members[0])
-                    isListOfNames = False
+                int(members[0])
+                isListOfNames = False
             except:
-                    isListOfNames = True
+                isListOfNames = True
             if isListOfNames:
                 decoded_members_array = []
                 for i in range(len(members)):
                     decoded_members_array.append(members[i])
-                if (len(members[0]))>5: #names provided
+                if (len(members[0])) > 5:  # names provided
                     for i in range(len(decoded_members_array)):
-                            for lvl in taxonomy_tab.read(field='Name'):
-                                if str(lvl.decode("utf-8")) == decoded_members_array[i]:
-                                    members_list.append(lvl)
-                else: #if user provides a list of oma_ids
+                        for lvl in taxonomy_tab.read(field='Name'):
+                            if str(lvl.decode("utf-8")) == decoded_members_array[i]:
+                                members_list.append(lvl)
+                else:  # if user provides a list of oma_ids
                     for i in range(len(decoded_members_array)):
-                        genome_tab=utils.db.get_hdf5_handle().root.Genome
+                        genome_tab = utils.db.get_hdf5_handle().root.Genome
                         encoded_id = decoded_members_array[i].encode("utf-8")
                         txn_id = genome_tab.read_where('UniProtSpeciesCode == encoded_id', field='NCBITaxonId')
                         members_list.append(str(txn_id)[1:-1])
@@ -594,7 +603,7 @@ class TaxonomyViewSet(ViewSet):
                 return Response(data)
 
         else:
-            #whole taxonomy returned
+            # whole taxonomy returned
             root = tax_obj._get_root_taxon()
             root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[0]}
             if type == 'newick':
@@ -605,7 +614,6 @@ class TaxonomyViewSet(ViewSet):
                 data = tax_obj.as_dict()
                 return Response(data)
 
-
     def retrieve(self, request, root_id, format=None):
         """
          Retrieve the subtree rooted at the taxonomic level indicated.
@@ -614,12 +622,12 @@ class TaxonomyViewSet(ViewSet):
          :queryparam type: the type of the returned data - either dictionary (default) or newick.
          """
         type = request.query_params.get('type', None)
-        subtree=[]
+        subtree = []
         taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
         tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
 
         try:
-            taxon_id=int(root_id)
+            taxon_id = int(root_id)
         except:
             if root_id.isupper():
                 genome_tab = utils.db.get_hdf5_handle().root.Genome
@@ -644,7 +652,7 @@ class TaxonomyViewSet(ViewSet):
         induced_tax = tax_obj.get_induced_taxonomy(members=branch)
 
         if type == 'newick':
-            root_taxon= tax_obj._taxon_from_numeric(taxon_id)
+            root_taxon = tax_obj._taxon_from_numeric(taxon_id)
             root_data = {'name': root_taxon[2].decode("utf-8"), 'taxon_id': root_taxon[0]}
             data = {'root_taxon': root_data, 'newick': induced_tax.newick()}
             serializer = serializers.TaxonomyNewickSerializer(instance=data)
@@ -652,6 +660,3 @@ class TaxonomyViewSet(ViewSet):
         else:
             data = induced_tax.as_dict()
             return Response(data)
-
-
-
