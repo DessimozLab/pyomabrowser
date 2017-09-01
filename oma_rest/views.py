@@ -528,7 +528,7 @@ class PairwiseRelationAPIView(APIView):
                     res.append(rel)
                 else:
                     if rel_type == rel.rel_type:
-                        res.appen(rel)
+                        res.append(rel)
                 if cnt + 1 % 100 == 0:
                             logger.debug("Processed {} rows".format(cnt))
 
@@ -608,7 +608,7 @@ class TaxonomyViewSet(ViewSet):
         """
          Retrieve the subtree rooted at the taxonomic level indicated.
 
-         :param root: either the taxon id, species name or the 5 letter UniProt species code for a root taxonomic level
+         :param root_id: either the taxon id, species name or the 5 letter UniProt species code for a root taxonomic level
          :queryparam type: the type of the returned data - either dictionary (default) or newick.
          """
         type = request.query_params.get('type', None)
@@ -619,13 +619,13 @@ class TaxonomyViewSet(ViewSet):
         try:
             taxon_id=int(root_id)
         except:
-            if root_id.istitle():
-                taxon_id= taxonomy_tab.read_where('Name==root_id',field='NCBITaxonId')
-                taxon_id=int(taxon_id)
-            else:
+            if root_id.isupper():
                 genome_tab = utils.db.get_hdf5_handle().root.Genome
                 encoded_id = root_id.encode("utf-8")
                 taxon_id = genome_tab.read_where('UniProtSpeciesCode == encoded_id', field='NCBITaxonId')
+                taxon_id = int(taxon_id)
+            else:
+                taxon_id = taxonomy_tab.read_where('Name==root_id', field='NCBITaxonId')
                 taxon_id = int(taxon_id)
 
         def get_children(id):
