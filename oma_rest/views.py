@@ -41,7 +41,7 @@ class ProteinEntryViewSet(ViewSet):
         return Response(serializer.data)
 
     @detail_route()
-    def  orthologs(self, request, entry_id=None, format=None):
+    def orthologs(self, request, entry_id=None, format=None):
         """List of all the identified orthologues for a protein.
 
         Possible to filter out orthologs by specifying the ?rel_type
@@ -537,16 +537,18 @@ class PairwiseRelationAPIView(APIView):
         serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
+
 class TaxonomyViewSet(ViewSet):
     lookup_field= 'root_id'
 
     def list(self, request, format=None):
-        """
-            Retrieve the taxonomic tree that is available in the current release.
+        """Retrieve the taxonomic tree that is available in the current release.
 
-            :queryparam type: the type of the returned data - either dictionary (default) or newick.
-            :queryparam members: list of members to get the induced the taxonomy from. Member id's can be either their ncbi taxon ids or their UniProt 5 letter species codes - they just have to be consistent.
-               """
+        :queryparam type: the type of the returned data - either dictionary (default) or newick.
+        :queryparam members: list of members to get the induced the taxonomy from.
+               Member id's can be either their ncbi taxon ids or their UniProt
+               species codes - they just have to be consistent.
+        """
 
         #e.g. members = YEAST,ASHGO
         members = request.query_params.get('members', None) #read as a string
