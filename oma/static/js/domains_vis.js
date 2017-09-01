@@ -86,7 +86,7 @@
                     .attr("ry", 1);
 
                 var hashval = function(s) {
-                    var hash = 0, i, chr;
+                    var hash = 18, i, chr;
                     if (s === undefined || s.length === 0) return hash;
                     for (i = 0; i < s.length; i++) {
                         chr = s.charCodeAt(i);
@@ -109,8 +109,8 @@
                     } else {
                         // Same annotation in multiple regions
                         var new_locs = [];
-                        for (var i = 0; i < locs.length; i += 2) {
-                            new_locs.push(locs.slice(i, i + 2));
+                        for (var j = 0; j < locs.length; j += 2) {
+                            new_locs.push(locs.slice(j, j + 2));
                         }
                         // Call draw function on each of these locations
                         $.each(new_locs, function (i, loc) {
@@ -128,8 +128,7 @@
 
                         // Get the class
                         var class_name = "_n_a";
-                        var base_url;
-                        var gene3d_base_url = "http://gene3d.biochem.ucl.ac.uk/search?sterm="
+                        var base_url = "";
                         if (region.source === "Pfam") {
                             class_name = "_pfam";
                             base_url = "http://pfam.xfam.org/family/";
@@ -176,12 +175,12 @@
                                 .on('mouseover', tip.show)
                                 .on('mouseout', tip.hide)
                                 .on('click', function () {
-                                    var url = gene3d_base_url + data.seq_id;
+                                    var url = base_url + region.domainid;
                                     window.open(url, '_blank')
                                         .focus();
                                 });
                         }
-                    };
+                    }
                 })
             });
 
