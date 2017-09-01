@@ -88,7 +88,8 @@ API Summary
 Genome
 ^^^^^^
 .. http:get:: /api/genome/
-The list of all the genomes in the database, paginated at 100 per page.
+
+   The list of all the genomes in the database, paginated at 100 per page.
 
    **Example request**:
 
