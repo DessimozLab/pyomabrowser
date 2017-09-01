@@ -397,7 +397,7 @@ class XRefsViewSet(ViewSet):
                             'xref': ref['XRefId'].decode(),
                             'genome': make_genome(enr_to_genome(ref['EntryNr']))})
             res = self._remove_redundant_xrefs(res)
-        serializer = serializers.XRefSerializer(instance=res, many=True)
+        serializer = serializers.XRefSerializer(instance=res, many=True, context={'request': request})
         return Response(serializer.data)
 
 class GenomeViewSet(ViewSet):
