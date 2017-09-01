@@ -3,6 +3,7 @@ from django.conf.urls import url, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from rest_framework.schemas import get_schema_view
+from rest_framework.documentation import include_docs_urls
 from django.template.loader import render_to_string
 
 router = DefaultRouter()
@@ -22,7 +23,9 @@ urlpatterns = [
     url(r'^pairs/(?P<genome_id1>\w+)/(?P<genome_id2>\w+)/$',
         views.PairwiseRelationAPIView.as_view(), name='pairs'),
     url(r'^schema/$', get_schema_view(title="OMA REST API")),
-    url(r'^docs', docs.include_docs_urls(title='REST API for the OMA Browser', description=desc)),
+    url(r'^docs', include_docs_urls(title='REST API for the OMA Browser',
+                                    description=desc,
+                                    generator_class=docs.ModifiedSchemaGenerator)),
 ]
 
 

@@ -7,14 +7,12 @@ This file serves as an extension to the DRF docs. It removes the model dependanc
 
 import re
 
-from django.conf.urls import include, url
-from rest_framework.documentation import get_docs_view,get_schemajs_view
 from rest_framework import  schemas
 from rest_framework.utils import formatting
-from rest_framework.compat import (
-    coreapi, coreschema, uritemplate,
-)
+from rest_framework.compat import coreapi, coreschema, uritemplate
 from django.utils.encoding import smart_text
+import logging
+logger = logging.getLogger(__name__)
 
 
 header_regex = re.compile('^[a-zA-Z][0-9A-Za-z_]*:')
@@ -28,7 +26,7 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
         if method_docstring:
             # An explicit docstring on the method or action.
             try:
-                method_docstring = method_docstring.split(':')[0]
+                method_docstring = method_docstring.split(':', 1)[0]
             except:
                 pass
             return formatting.dedent(smart_text(method_docstring))
@@ -64,19 +62,20 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
             try:
                 param_docstrings = method_docstring.split(':param')
             except:
-                param_docstrings = ''
+                param_docstrings = None
 
         for variable in uritemplate.variables(path):
             title = ''
             description = ''
-            if param_docstrings:
-                if len(param_docstrings)>2:
-                    for i in range(1,len(param_docstrings)):
-                        if variable in param_docstrings[i]:
-                            description = formatting.dedent(smart_text(param_docstrings[i].split(":")[1]))
-                else:
-                    description=formatting.dedent(smart_text(param_docstrings[1].split(":")[1]))
-
+            if param_docstrings is not None:
+                for i in range(1, len(param_docstrings)):
+                    if variable in param_docstrings[i]:
+                        try:
+                            desc_part = param_docstrings[i].split(":")[1]
+                        except KeyError:
+                            desc_part = param_docstrings[i].split(variable)[1]
+                        description = formatting.dedent(smart_text(desc_part))
+                        break
             schema_cls = coreschema.String
 
             field = coreapi.Field(
@@ -92,42 +91,19 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
                 qparam_docstrings = method_docstring.split(':queryparam')
                 schema_cls = coreschema.String
                 for i in range(1, len(qparam_docstrings)):
+                    try:
+                        qname, desc = qparam_docstrings[i].split(':', 1)
+                    except ValueError:
+                        logger.error('cannot determine queryparam name/desc from "{}"'
+                                     .format(qparam_docstrings[i]))
+                        continue
                     field = coreapi.Field(
-                        name=qparam_docstrings[i].split(":")[0].strip(),
+                        name=qname.strip(),
                         location='query',
                         required=False,
-                        schema=schema_cls(title='',
-                                          description=qparam_docstrings[i].split(":")[1])
-                    )
+                        schema=schema_cls(title='', description=desc))
                     fields.append(field)
             except:
                 pass
 
         return fields
-
-
-def include_docs_urls(
-        title=None, description=None, schema_url=None, public=True,
-        patterns=None, generator_class=ModifiedSchemaGenerator):
-    docs_view = get_docs_view(
-        title=title,
-        description=description,
-        schema_url=schema_url,
-        public=public,
-        patterns=patterns,
-        generator_class=generator_class,
-    )
-    schema_js_view = get_schemajs_view(
-        title=title,
-        description=description,
-        schema_url=schema_url,
-        public=public,
-        patterns=patterns,
-        generator_class=generator_class,
-    )
-    urls = [
-        url(r'^$', docs_view, name='docs-index'),
-        url(r'^schema.js$', schema_js_view, name='schema-js')
-    ]
-    return include(urls, namespace='api-docs')
-
