@@ -238,14 +238,14 @@ class HOGViewSet(ViewSet):
             serializer = serializers.HOGsListSerializer(page,many=True,context={'request': request})
             return paginator.get_paginated_response(serializer.data)
 
-
     def retrieve(self, request, hog_id):
-        """
-               Retrieve the detail available for a given HOG, along with its deepest i.e. root level as well as the list of all the taxonomic levels that the HOG spans through.
+        """Retrieve the detail available for a given HOG, along with its deepest level
+        (i.e. root level) as well as the list of all the taxonomic levels that the HOG
+        spans through.
 
-               :param hog_id: an unique identifier for a hog_group - either its hog id or one of its member proteins
-               :queryparam level: taxonomic level of restriction for a HOG. If indicated returns a list of any subghogs at that level.
-               """
+        :param hog_id: an unique identifier for a hog_group - either its hog id or one of its member proteins
+        :queryparam level: taxonomic level of restriction for a HOG. If indicated returns a list of any subghogs at that level.
+        """
         level = self.request.query_params.get('level', None)
         if hog_id[:3] != "HOG":
             # hog_id == member
@@ -313,12 +313,11 @@ class HOGViewSet(ViewSet):
 
     @detail_route()
     def members(self,request,hog_id=None,format=None):
-        """
-                       Retrieve a list of all the protein members for a given hog_id.
+        """Retrieve a list of all the protein members for a given hog_id.
 
-                       :param hog_id: an unique identifier for a hog_group - either its hog id starting with "HOG:" or one of its member proteins
-                       :queryparam level: taxonomic level of restriction for a HOG - default is its deepest most i.e. root level.
-                       """
+        :param hog_id: an unique identifier for a hog_group - either its hog id starting with "HOG:" or one of its member proteins
+        :queryparam level: taxonomic level of restriction for a HOG - default is its deepest most i.e. root level.
+        """
         level = self.request.query_params.get('level', None)
         if level != None:
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
@@ -361,8 +360,10 @@ class HOGViewSet(ViewSet):
             serializer = serializers.RootHOGserializer(instance=data, context={'request': request})
             return Response(serializer.data)
 
+
 class APIVersion(ViewSet):
     def list(self, request, format=None):
+        """Returns the version of the underlying oma browser database release."""
         return Response({'oma-version': utils.db.get_release_name()})
 
 

@@ -7,6 +7,7 @@ This file serves as an extension to the DRF docs. It removes the model dependanc
 
 import re
 
+import collections
 from rest_framework import  schemas
 from rest_framework.utils import formatting
 from rest_framework.compat import coreapi, coreschema, uritemplate
@@ -26,7 +27,7 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
         if method_docstring:
             # An explicit docstring on the method or action.
             try:
-                method_docstring = method_docstring.split(':', 1)[0]
+                method_docstring = re.split(r':(?:query)?param', method_docstring, 1)[0]
             except:
                 pass
             return formatting.dedent(smart_text(method_docstring))
@@ -55,25 +56,28 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
         method_name = getattr(view, 'action', method.lower())
         method_docstring = getattr(view, method_name, None).__doc__
 
-        fields = []
+        # split docstring in "general part" - "params" - "queryparams"
+        params = collections.defaultdict(list)
+        cur_pos = 0
+        cur_typ = 'general'
+        for mo in re.finditer(r':(?P<typ>(?:query)?param)', method_docstring):
+            params[cur_typ].append(method_docstring[cur_pos:mo.start()])
+            cur_pos = mo.end()+1
+            cur_typ = mo.group('typ')
+        params[cur_typ].append(method_docstring[cur_pos:])
 
-        if method_docstring:
-            # An explicit docstring on the method or action.
-            try:
-                param_docstrings = method_docstring.split(':param')
-            except:
-                param_docstrings = None
+        fields = []
 
         for variable in uritemplate.variables(path):
             title = ''
             description = ''
-            if param_docstrings is not None:
-                for i in range(1, len(param_docstrings)):
-                    if variable in param_docstrings[i]:
+            if 'param' in params:
+                for param_doc in params['param']:
+                    if variable in param_doc:
                         try:
-                            desc_part = param_docstrings[i].split(":")[1]
+                            desc_part = param_doc.split(":", 1)[1]
                         except KeyError:
-                            desc_part = param_docstrings[i].split(variable)[1]
+                            desc_part = param_doc.split(variable)[1]
                         description = formatting.dedent(smart_text(desc_part))
                         break
             schema_cls = coreschema.String
@@ -82,28 +86,23 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
                 name=variable,
                 location='path',
                 required=True,
-                schema=schema_cls(title=title, description=description)
-            )
+                schema=schema_cls(title=title, description=description))
             fields.append(field)
 
-        if method_docstring:
-            try:
-                qparam_docstrings = method_docstring.split(':queryparam')
-                schema_cls = coreschema.String
-                for i in range(1, len(qparam_docstrings)):
-                    try:
-                        qname, desc = qparam_docstrings[i].split(':', 1)
-                    except ValueError:
-                        logger.error('cannot determine queryparam name/desc from "{}"'
-                                     .format(qparam_docstrings[i]))
-                        continue
-                    field = coreapi.Field(
-                        name=qname.strip(),
-                        location='query',
-                        required=False,
-                        schema=schema_cls(title='', description=desc))
-                    fields.append(field)
-            except:
-                pass
+        if 'queryparam' in params:
+            schema_cls = coreschema.String
+            for qparam_doc in params['queryparam']:
+                try:
+                    qname, desc = qparam_doc.split(':', 1)
+                except ValueError:
+                    logger.error('cannot determine queryparam name/desc from "{}"'
+                                 .format(qparam_doc))
+                    continue
+                field = coreapi.Field(
+                    name=qname.strip(),
+                    location='query',
+                    required=False,
+                    schema=schema_cls(title='', description=desc))
+                fields.append(field)
 
         return fields
