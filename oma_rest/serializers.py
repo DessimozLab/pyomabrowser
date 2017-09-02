@@ -177,6 +177,7 @@ class GeneOntologySerializer(ReadOnlySerializer):
     entry_nr = serializers.IntegerField()
     GO_term = serializers.SerializerMethodField(method_name=None)
     name = serializers.SerializerMethodField(method_name=None)
+    aspect = serializers.SerializerMethodField(method_name=None)
     evidence = serializers.CharField()
     reference = serializers.CharField()
 
@@ -185,6 +186,9 @@ class GeneOntologySerializer(ReadOnlySerializer):
 
     def get_name(self, obj):
         return obj.term.name
+
+    def get_aspect(self, obj):
+        return obj.aspect
 
 
 class HOGsLevelSerializer(ReadOnlySerializer):
