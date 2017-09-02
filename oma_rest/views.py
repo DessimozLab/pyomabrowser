@@ -6,15 +6,17 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from oma import utils, misc
+
+from . import models as rest_models
 from . import serializers
+from oma import utils, misc
 from pyoma.browser import models, db
 import logging
 
 from rest_framework.pagination import PageNumberPagination
 from collections import Counter
 from rest_framework.decorators import detail_route
-from oma import models as m
+
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +122,7 @@ class OmaGroupViewSet(ViewSet):
         :queryparam page: the page number of the response json
         """
         nr_groups = utils.db.get_nr_oma_groups()
-        data = [m.OMAGroup(GroupNr=i) for i in range(1, nr_groups+1)]
+        data = [rest_models.OMAGroup(GroupNr=i) for i in range(1, nr_groups + 1)]
         paginator = PageNumberPagination()
         page = paginator.paginate_queryset(data, request)
         serializer = serializers.GroupListSerializer(page, many=True, context={'request': request})
@@ -153,7 +155,7 @@ class OmaGroupViewSet(ViewSet):
             members = [models.ProteinEntry(utils.db, m) for m in memb]
             data = utils.db.oma_group_metadata(members[0].oma_group)
             fingerprint = data['fingerprint']
-            group = m.OMAGroup(GroupNr=data['group_nr'], members=members, fingerprint=fingerprint)
+            group = rest_models.OMAGroup(GroupNr=data['group_nr'], members=members, fingerprint=fingerprint)
 
         serializer = serializers.OmaGroupSerializer(
             instance=group, context={'request': request})
@@ -201,7 +203,7 @@ class OmaGroupViewSet(ViewSet):
 
         close_groups = []
         for grp, hits in group_cnts.most_common():
-            close_groups.append(m.OMAGroup(GroupNr=grp, hits=hits))
+            close_groups.append(rest_models.OMAGroup(GroupNr=grp, hits=hits))
         serializer = serializers.RelatedGroupsSerializer(
             instance=close_groups, many=True, context={'request': request})
         return Response(serializer.data)
@@ -228,7 +230,7 @@ class HOGViewSet(ViewSet):
             hogs = sorted(hogs)
             data = []
             for row in hogs:
-                data.append(m.HOG(hog_id=row, level=level))
+                data.append(rest_models.HOG(hog_id=row, level=level))
             paginator = PageNumberPagination()
             page = paginator.paginate_queryset(data, request)
             serializer = serializers.HOGsListSerializer_at_level(page, many=True, context={'request': request})
@@ -243,7 +245,7 @@ class HOGViewSet(ViewSet):
             hog_ids = sorted(set(hogs))
             data = []
             for row in hog_ids:
-                data.append(m.HOG(hog_id=row))
+                data.append(rest_models.HOG(hog_id=row))
             paginator = PageNumberPagination()
             page = paginator.paginate_queryset(data, request)
             serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
@@ -269,7 +271,7 @@ class HOGViewSet(ViewSet):
             hogs_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(ID==hog_id)')
             levels = []
             for row in hogs_tab:
-                hog_model = m.HOG(hog_id=row[1].decode("utf-8"), level=row[2].decode("utf-8"))
+                hog_model = rest_models.HOG(hog_id=row[1].decode("utf-8"), level=row[2].decode("utf-8"))
                 levels.append(hog_model)
 
             # below is the root level calculation
@@ -306,7 +308,7 @@ class HOGViewSet(ViewSet):
                     root_hog_level = indexed_levels[-1][0]
                     levels = []  # the spanning levels for the whole hog i.e the family number
                     for level in levels_for_fam:
-                        hog_model = m.HOG(hog_id=hog_id, level=level.decode("utf-8"))
+                        hog_model = rest_models.HOG(hog_id=hog_id, level=level.decode("utf-8"))
                         levels.append(hog_model)
             data = {'hog_id': hog_id, 'root_level': root_hog_level, 'levels': levels}
             serializer = serializers.HOGDetailSerializer(instance=data, context={'request': request})
@@ -319,7 +321,7 @@ class HOGViewSet(ViewSet):
             subHOGs_2 = []
             for i in subhogs:
                 # create hog model instances
-                subHOGs_2.append(m.HOG(hog_id=i.decode("utf-8"), level=level))
+                subHOGs_2.append(rest_models.HOG(hog_id=i.decode("utf-8"), level=level))
             data = {'hog_id': hog_id, 'level': level, 'subhogs': subHOGs_2}
             serializer = serializers.HOGInfoSerializer(instance=data, context={'request': request})
             return Response(serializer.data)
