@@ -58,13 +58,12 @@ class ProteinEntryViewSet(ViewSet):
         data = utils.db.get_vpairs(int(p_entry_nr))
         content = []
         for row in data:
-            entry_nr = row[1]
-            ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
-            ortholog.RelType = row[4]
-            ortholog.Distance = row[3]
-            ortholog.Score = row[2]
+            ortholog = models.ProteinEntry.from_entry_nr(utils.db, int(row['EntryNr2']))
+            ortholog.rel_type = row['RelType']
+            ortholog.distance = row['Distance']
+            ortholog.score = row['Score']
             if rel_type is not None:
-                if rel_type == ortholog.RelType:
+                if rel_type == ortholog.rel_type:
                     content.append(ortholog)
             else:
                 content.append(ortholog)
@@ -507,8 +506,12 @@ class PairwiseRelationAPIView(APIView):
         :param genome_id2: an unique identifier for the second genome
                            - either its ncbi taxon id or the UniProt
                            species code
-        :queryparam chr1: id of the chromosome of interest in the first genome
-        :queryparam chr2: id of the chromosome of interest in the second genome
+        :queryparam chr1: id of the chromosome of interest in the
+                          first genome
+        :queryparam chr2: id of the chromosome of interest in the
+                          second genome
+        :queryparam rel_type: limit relations to a certain type of
+                          relations, e.g. '1:1'.
         :queryparam page: the page number of the response json
         """
         rel_type = request.query_params.get('rel_type', None)
@@ -535,11 +538,8 @@ class PairwiseRelationAPIView(APIView):
             rel = models.PairwiseRelation(utils.db, row.fetch_all_fields())
             if ((chr1 is None or chr1 == rel.entry_1.chromosome) and
                     (chr2 is None or chr2 == rel.entry_2.chromosome)):
-                if rel_type == None:
+                if rel_type is None or rel_type == rel.rel_type:
                     res.append(rel)
-                else:
-                    if rel_type == rel.rel_type:
-                        res.append(rel)
                 if cnt + 1 % 100 == 0:
                     logger.debug("Processed {} rows".format(cnt))
 

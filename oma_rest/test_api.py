@@ -139,3 +139,47 @@ class TaxonomyTest(APITestCase):
         url2 = '/api/taxonomy/Eukaryota/?type=newick'
         response2 = client.get(url2, format='json')
         self.assertEqual(response1.data['root_taxon']['taxon_id'], response2.data['root_taxon']['taxon_id'])
+
+
+class PairwiseRelationsTest(APITestCase):
+    def test_same_species(self):
+        response = APIClient().get('/api/pairs/YEAST/YEAST/')
+        self.assertEqual(200, response.status_code)
+        self.assertLess(1000, response.data['count'])
+        involved_species = set([p['entry_1']['omaid'][0:5] for p in response.data['results']])
+        self.assertEqual(set(['YEAST']), involved_species)
+
+    def test_pairs_with_and_without_reltype_limits(self):
+        client = APIClient()
+        response = client.get('/api/pairs/YEAST/PLAF7/')
+        self.assertEqual(200, response.status_code)
+        c_unfiltered = response.data['count']
+        response_filt = client.get('/api/pairs/YEAST/PLAF7/?rel_type=1:1')
+        self.assertEqual(200, response_filt.status_code)
+        c_filtered = response_filt.data['count']
+        self.assertLess(c_filtered, c_unfiltered)
+
+    def test_empty_result_if_inexisting_rel_type(self):
+        response = APIClient().get('/api/pairs/YEAST/PLAF7/?rel_type=2:6')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, response.data['count'])
+        self.assertEqual([], response.data['results'])
+
+
+class XRefLookupTest(APITestCase):
+    def test_no_query_param(self):
+        response = APIClient().get('/api/xref/')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual([], response.data)
+
+    def test_prefix_too_short(self):
+        response = APIClient().get('/api/xref/?search=MA')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual([], response.data)
+
+    def test_existing_prefix(self):
+        response = APIClient().get('/api/xref/?search=MAL')
+        self.assertEqual(200, response.status_code)
+        self.assertLess(0, len(response.data))
+        for hit in response.data:
+            self.assertTrue(hit['xref'].lower().startswith('mal'))

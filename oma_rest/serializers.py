@@ -84,9 +84,9 @@ class ProteinEntryDetailSerializer(ReadOnlySerializer):
 
 
 class OrthologsListSerializer(ProteinEntrySerializer):
-    RelType = serializers.CharField()
-    Distance = serializers.FloatField()
-    Score = serializers.FloatField()
+    rel_type = serializers.CharField()
+    distance = serializers.FloatField()
+    score = serializers.FloatField()
 
 
 class SubHOGSerializer(ReadOnlySerializer):
