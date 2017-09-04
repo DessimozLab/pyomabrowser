@@ -110,6 +110,16 @@ class GroupTest(APITestCase):
 
 
 class GenomeTest(APITestCase):
+    def test_genome_list(self):
+        response = APIClient().get('/api/genome/')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(4, response.data['count'])
+
+    def test_genome_info(self):
+        response = APIClient().get('/api/genome/YEAST/')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('YEAST', response.data['code'])
+
     def test_member_proteins(self):
         client = APIClient()
         response = client.get('/api/genome/YEAST/proteins/')
