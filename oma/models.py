@@ -18,3 +18,5 @@ class FileResult(models.Model):
             self.delete()
             return True
         return False
+
+

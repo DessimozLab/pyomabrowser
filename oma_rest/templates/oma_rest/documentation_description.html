@@ -1,0 +1,18 @@
+<p style="text-align:justify">The OMA Brower now supports its own REST API, which serves as a window into its database. It enables the abstraction of OMA browser’s data which also allows it to be more accessible via other programming languages. Furthermore, due to its RESTful architecture, it allows the users to access the data they need easily through HTTP requests sent to the server which can be found at:</p>
+
+<a href="url">http://omabrowser.org/api</a>
+
+<p2 style="text-align:justify">The OMA REST API supports many data formats and its predominant use of the JSON data format makes it very browser-compatible.To further facilitate the ease of access, we have also developed a Python library and R package to serve as user friendly wrappers around the API. The links to their documentation can be found below:  </p2>
+
+<p3>
+    R package: {linktocome}
+</p3>
+
+<p4>
+    Python library: {linktocome}
+</p4>
+
+<p5 style="text-align:justify">Note that some endpoints, such as the list of all Hierarchical Orthologous groups, return a very long list. In order to keep the response size and time manageable the API will take advantage of pagination, which is a mechanism for returning a subset of the results for a request (namely the first 100 objects) and allowing for subsequent requests to “page” through the rest of the results until the end is reached. If an endpoint result is paginated, it will contain a "page" query parameter.</p5>
+
+<h2>HTTP status codes</h2>
+<table style="width:70%;border-collapse:collapse;border-spacing:0"><tr><th style="font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;background-color:#9fbd59;color:#000000;text-align:center;vertical-align:top">Status Code</th><th style="font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;background-color:#9fbd59;color:#000000;text-align:center;vertical-align:top">     Description</th></tr><tr><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     200</td><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">   OK. All is well.</td></tr><tr><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     400</td><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">Malformed request.</td></tr><tr><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     404</td><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     Not found.</td></tr><tr><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     500</td><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     Internal Server Error.</td></tr></table>
