@@ -60,6 +60,13 @@ class HOGsTest(APITestCase):
         response_2 = client.get(protein_url, format='json')
         self.assertIn('HOG:0000365', response_2.data['oma_hog_id'])
 
+    def test_members_at_low_level(self):
+        """check that result does not contain any member outside the requested clade"""
+        response = APIClient().get('/api/hog/HOG:0000002/members/?level=Fungi')
+        self.assertEqual(200, response.status_code)
+        involved_species = [m['omaid'][0:5] for m in response.data['members']]
+        self.assertNotIn('PLAF7', involved_species)
+
 
 class GroupTest(APITestCase):
     # test group member is in the correct group

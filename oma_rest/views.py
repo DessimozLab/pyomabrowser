@@ -336,8 +336,8 @@ class HOGViewSet(ViewSet):
                            default is its deepest most i.e. root level.
         """
         level = self.request.query_params.get('level', None)
-        if level != None:
-            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
+        if level is not None:
+            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id, level=level)]
             data = {'hog_id': hog_id, 'level': level,
                     'members': members}
             serializer = serializers.HOGMembersListSerializer(instance=data, context={'request': request})
