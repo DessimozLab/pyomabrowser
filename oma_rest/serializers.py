@@ -138,7 +138,7 @@ class GenomeInfoSerializer(GenomeBaseSerializer):
 class GenomeDetailSerializer(GenomeBaseSerializer):
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
-    proteins_list = serializers.HyperlinkedIdentityField(view_name='genome-proteins-list', read_only=True,
+    proteins = serializers.HyperlinkedIdentityField(view_name='genome-proteins', read_only=True,
                                                          lookup_field='uniprot_species_code',
                                                          lookup_url_kwarg='genome_id')
     chromosomes = serializers.SerializerMethodField(method_name=None)
