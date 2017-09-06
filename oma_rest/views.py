@@ -543,8 +543,11 @@ class PairwiseRelationAPIView(APIView):
                 if cnt + 1 % 100 == 0:
                     logger.debug("Processed {} rows".format(cnt))
 
-        paginator = PageNumberPagination()
-        page = paginator.paginate_queryset(res, request)
+        if False:
+            paginator = PageNumberPagination()
+            page = paginator.paginate_queryset(res, request)
+        else:
+            page = res
         serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
