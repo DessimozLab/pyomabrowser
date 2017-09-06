@@ -546,10 +546,13 @@ class PairwiseRelationAPIView(APIView):
         if False:
             paginator = PageNumberPagination()
             page = paginator.paginate_queryset(res, request)
+            serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
+            return paginator.get_paginated_response(serializer.data)
         else:
-            page = res
-        serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
+            serializer = serializers.PairwiseRelationSerializer(instance=res, many=True, context={'request': request})
+            return Response(serializer.data)
+
+
 
 
 class TaxonomyViewSet(ViewSet):
