@@ -162,25 +162,21 @@ class PairwiseRelationsTest(APITestCase):
     def test_same_species(self):
         response = APIClient().get('/api/pairs/YEAST/YEAST/')
         self.assertEqual(200, response.status_code)
-        self.assertLess(1000, response.data['count'])
-        involved_species = set([p['entry_1']['omaid'][0:5] for p in response.data['results']])
+        involved_species = set([p['entry_1']['omaid'][0:5] for p in response.data])
         self.assertEqual(set(['YEAST']), involved_species)
 
     def test_pairs_with_and_without_reltype_limits(self):
         client = APIClient()
         response = client.get('/api/pairs/YEAST/PLAF7/')
         self.assertEqual(200, response.status_code)
-        c_unfiltered = response.data['count']
         response_filt = client.get('/api/pairs/YEAST/PLAF7/?rel_type=1:1')
         self.assertEqual(200, response_filt.status_code)
-        c_filtered = response_filt.data['count']
-        self.assertLess(c_filtered, c_unfiltered)
+        self.assertLess(len(response_filt.data), len(response.data))
 
     def test_empty_result_if_inexisting_rel_type(self):
         response = APIClient().get('/api/pairs/YEAST/PLAF7/?rel_type=2:6')
         self.assertEqual(200, response.status_code)
-        self.assertEqual(0, response.data['count'])
-        self.assertEqual([], response.data['results'])
+        self.assertEqual([], response.data)
 
 
 class XRefLookupTest(APITestCase):

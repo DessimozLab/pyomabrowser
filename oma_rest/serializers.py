@@ -40,19 +40,21 @@ class ProteinEntrySerializer(ReadOnlySerializer):
     omaid = serializers.CharField()
     canonicalid = serializers.CharField()
     sequence_md5 = serializers.CharField()
-
-
-class ProteinEntryDetailSerializer(ReadOnlySerializer):
-    entry_nr = serializers.IntegerField(required=True)
-    omaid = serializers.CharField()
-    canonicalid = serializers.CharField()
-    sequence_md5 = serializers.CharField()
     oma_group = serializers.IntegerField()
+
+
+class ProteinEntryExtendedSummarySerializer(ProteinEntrySerializer):
+    locus = serializers.SerializerMethodField(method_name=None)
+
+    def get_locus(self, obj):
+        return [obj.locus_start, obj.locus_end, obj.strand]
+
+
+class ProteinEntryDetailSerializer(ProteinEntryExtendedSummarySerializer):
     roothog_id = serializers.IntegerField(source='hog_family_nr')
     oma_hog_id = serializers.CharField(source='oma_hog')
     hog_levels = serializers.SerializerMethodField(method_name=None)
     chromosome = serializers.CharField()
-    locus = serializers.SerializerMethodField(method_name=None)
     sequence_length = serializers.IntegerField()
     sequence = serializers.CharField()
     cdna = serializers.CharField()
@@ -60,14 +62,10 @@ class ProteinEntryDetailSerializer(ReadOnlySerializer):
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     xref = serializers.HyperlinkedIdentityField(view_name='protein-xref', read_only=True, lookup_field='entry_nr',
                                                 lookup_url_kwarg='entry_id')
-
     orthologs = serializers.HyperlinkedIdentityField(view_name='protein-orthologs', read_only=True,
                                                      lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     ontology = serializers.HyperlinkedIdentityField(view_name='protein-ontology', read_only=True,
                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-
-    def get_locus(self, obj):
-        return [obj.locus_start, obj.locus_end, obj.strand]
 
     def get_hog_levels(self, obj):
         protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)
@@ -247,8 +245,8 @@ class ProteinDomainsSerializer(ReadOnlySerializer):
 
 
 class PairwiseRelationSerializer(ReadOnlySerializer):
-    entry_1 = ProteinEntrySerializer()
-    entry_2 = ProteinEntrySerializer()
+    entry_1 = ProteinEntryExtendedSummarySerializer()
+    entry_2 = ProteinEntryExtendedSummarySerializer()
     rel_type = serializers.CharField()
     distance = serializers.FloatField()
     score = serializers.FloatField()
