@@ -354,7 +354,7 @@ dotplot_theme = function () {
                 .call(brush_plot);
 
             // dots
-            svg_dotplot.selectAll("circle")
+            var gcircles = svg_dotplot.selectAll("circle")
                 .attr("class", "circle")
                 .data(data)
                 .enter().append("circle")
@@ -388,7 +388,7 @@ dotplot_theme = function () {
                 });
 
             // svg x axis
-            svg_dotplot.append("g")
+            var gX = svg_dotplot.append("g")
                 .attr("class", "axis axis--x")
                 .attr("transform", "translate(0," + (height) + ")")
                 .call(xAxis)
@@ -403,7 +403,7 @@ dotplot_theme = function () {
                 });
 
             // svg y axis
-            svg_dotplot.append("g")
+            var gY = svg_dotplot.append("g")
                 .attr("class", "axis axis--y")
                 .attr("transform", "translate(0,0)")
                 .call(yAxis).append("text")
@@ -420,9 +420,94 @@ dotplot_theme = function () {
             svg_dotplot.selectAll(".domain")
                 .style("display", "none");
 
-
-
             dotplot.add_legend_color();
+
+
+            function brushended_plot() {
+                var s = d3.event.selection;
+                if (!s) {
+                    if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
+                    x.domain(x0);
+                    y.domain(y0);
+                    svg_dotplot.selectAll('circle').classed("active", function () {
+                        return 1 === 2
+                    });
+                    selected_pairs = [];
+                    $('#container_table_selection').hide();
+                    zoom_brush_plot();
+                } else {
+                    if (brush_action === 'select') {
+
+                        console.log(s[0][0], s[1][0]);
+                        console.log(s[0][1], s[1][1]);
+                        selected_pairs = [];
+                        select_brush(s);
+                        svg_dotplot.select(".brush").call(brush_plot.move, null);
+
+                        $('#table_selection').bootstrapTable('removeAll');
+
+                        $('#table_selection').bootstrapTable('load', selected_pairs);
+
+                        $('#container_table_selection').show()
+
+
+                    }
+                    else {
+                        x.domain([s[0][0], s[1][0]].map(x.invert, x));
+                        y.domain([s[1][1], s[0][1]].map(y.invert, y));
+                        svg_dotplot.select(".brush").call(brush_plot.move, null);
+                        zoom_brush_plot();
+                    }
+                }
+            }
+
+            function idled() {
+                idleTimeout = null;
+            }
+
+            function zoom_brush_plot() {
+                var t = svg_dotplot.transition().duration(750);
+                svg_dotplot.select(".axis--x").transition(t).call(xAxis);
+                svg_dotplot.select(".axis--y").transition(t).call(yAxis);
+                svg_dotplot.selectAll("circle").transition(t)
+                    .attr("cx", function (d) {
+                        return x(d.entry_1.locus[0]);
+                    })
+                    .attr("cy", function (d) {
+                        return y(d.entry_2.locus[0]);
+                    });
+            }
+
+            function select_brush(s) {
+
+                if (s === null) {
+                    //handle.attr("display", "none");
+                    circle.classed("active", false);
+                } else {
+                    var bxmin = x.invert(s[0][0]);
+                    var bxmax = x.invert(s[1][0]);
+
+                    var bymin = y.invert(s[1][1]);
+                    var bymax = y.invert(s[0][1]);
+
+                    var circle = svg_dotplot.selectAll('circle');
+                    circle.classed("active", function (d) {
+                        if (dotplot.between(d.entry_1.locus[0], bxmin, bxmax)) {
+                            if (dotplot.between(d.entry_2.locus[0], bymin, bymax)) {
+                                if (d3.select(this).attr('visibility') === 'visible') {
+                                    selected_pairs.push(d);
+                                    return true;
+                                }
+
+                            }
+                        }
+                        return false;
+                    });
+                    circle.classed("picked", false);
+                    picked_datapoint = null;
+                }
+
+            }
 
             // // // // // // // // 
             // metric histogram  //
@@ -528,91 +613,6 @@ dotplot_theme = function () {
                 }
             }
 
-            function brushended_plot() {
-                var s = d3.event.selection;
-                if (!s) {
-                    if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
-                    x.domain(x0);
-                    y.domain(y0);
-                    svg_dotplot.selectAll('circle').classed("active", function () {
-                        return 1 === 2
-                    });
-                    selected_pairs = [];
-                    $('#container_table_selection').hide();
-                    zoom_brush_plot();
-                } else {
-                    if (brush_action === 'select') {
-
-                        console.log(s[0][0], s[1][0]);
-                        console.log(s[0][1], s[1][1]);
-                        selected_pairs = [];
-                        select_brush(s);
-                        svg_dotplot.select(".brush").call(brush_plot.move, null);
-
-                        $('#table_selection').bootstrapTable('removeAll');
-
-                        $('#table_selection').bootstrapTable('load', selected_pairs);
-
-                        $('#container_table_selection').show()
-
-
-                    }
-                    else {
-                        x.domain([s[0][0], s[1][0]].map(x.invert, x));
-                        y.domain([s[1][1], s[0][1]].map(y.invert, y));
-                        svg_dotplot.select(".brush").call(brush_plot.move, null);
-                        zoom_brush_plot();
-                    }
-                }
-            }
-
-            function idled() {
-                idleTimeout = null;
-            }
-
-            function zoom_brush_plot() {
-                var t = svg_dotplot.transition().duration(750);
-                svg_dotplot.select(".axis--x").transition(t).call(xAxis);
-                svg_dotplot.select(".axis--y").transition(t).call(yAxis);
-                svg_dotplot.selectAll("circle").transition(t)
-                    .attr("cx", function (d) {
-                        return x(d.entry_1.locus[0]);
-                    })
-                    .attr("cy", function (d) {
-                        return y(d.entry_2.locus[0]);
-                    });
-            }
-
-            function select_brush(s) {
-
-                if (s === null) {
-                    //handle.attr("display", "none");
-                    circle.classed("active", false);
-                } else {
-                    var bxmin = x.invert(s[0][0]);
-                    var bxmax = x.invert(s[1][0]);
-
-                    var bymin = y.invert(s[1][1]);
-                    var bymax = y.invert(s[0][1]);
-
-                    var circle = svg_dotplot.selectAll('circle');
-                    circle.classed("active", function (d) {
-                        if (dotplot.between(d.entry_1.locus[0], bxmin, bxmax)) {
-                            if (dotplot.between(d.entry_2.locus[0], bymin, bymax)) {
-                                if (d3.select(this).attr('visibility') === 'visible') {
-                                    selected_pairs.push(d);
-                                    return true;
-                                }
-
-                            }
-                        }
-                        return false;
-                    });
-                    circle.classed("picked", false);
-                    picked_datapoint = null;
-                }
-
-            }
 
         });
 
