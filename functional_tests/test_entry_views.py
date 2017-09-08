@@ -1,3 +1,4 @@
+import time
 from .base import FunctionalTest
 
 
@@ -51,3 +52,58 @@ class EntryViewPageTest(FunctionalTest):
                 self.assertTrue(False, '{} not in list of species of syntenic genes'.format(g))
             row_nr_of_species.append(pos)
         self.assertTrue(all(row_nr_of_species[i] < row_nr_of_species[i + 1] for i in range(len(row_nr_of_species) - 1)))
+
+
+class ExploreMenuTest(FunctionalTest):
+
+    def input_in_autocomplete_and_select(self, field, typed, expected):
+        field.click()
+        field.clear()
+        field.send_keys(typed)
+        self.wait_for(
+            lambda: self.assertIsNotNone(self.browser.find_element_by_css_selector('.tt-dataset-genomes .tt-suggestion'))
+        )
+        suggestions = self.browser.find_elements_by_css_selector('.tt-dataset-genomes .tt-suggestion')
+        fnd = False
+        for sug in suggestions:
+            if expected in sug.text:
+                fnd = True
+                sug.click()
+                time.sleep(0.1)
+                break
+        self.assertTrue(fnd, 'could not find "{}" in proposed auto-complete values'.format(expected))
+
+    def test_synteny_dotplot(self):
+        # we navigate to the synteny dotplot genome selection page
+        self.browser.get(self.server_url + "/oma/home/")
+        self.browser.find_element_by_link_text("Explore").click()
+        self.browser.find_element_by_link_text("Synteny dotplot").click()
+        # here, we type as genome 1 "Homo" and select Homo sapiens from the autocomplete dropdown
+        time.sleep(1)  # wait until genomes have been loaded, nothing we could wait for...
+        g1_input = self.browser.find_element_by_id("g1_name")
+        self.input_in_autocomplete_and_select(g1_input, 'Homo', 'Homo sapiens')
+
+        # we select chromosome 2
+        self.wait_for(
+            lambda: self.assertIsNotNone(
+                self.browser.find_element_by_css_selector('#selectchr1 option'))
+        )
+        self.browser.find_element_by_xpath("//select[@id='selectchr1']//option[text()='2']").click()
+
+        # as second genome we select Mus musculus by typing Mus and selecting from dropdown
+        g2_input = self.browser.find_element_by_id("g2_name")
+        self.input_in_autocomplete_and_select(g2_input, 'Mus', 'Mus musculus')
+
+        # we select chromosome 2
+        self.wait_for(
+            lambda: self.assertIsNotNone(
+                self.browser.find_element_by_css_selector('#selectchr2 option'))
+        )
+        self.browser.find_element_by_xpath("//select[@id='selectchr2']//option[text()='2']").click()
+        # let's submit this pair (HUMAN/2 vs MOUSE/2) and see the dotplot
+        self.browser.find_element_by_id('launch_PP').click()
+        self.wait_for_element_with_id('dotplot_container')
+        time.sleep(1)
+        # between these two choromosomes we expect at least 200 pairs.
+        circles = self.browser.find_elements_by_css_selector('svg circle')
+        self.assertLess(200, len(circles))
