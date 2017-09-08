@@ -1,10 +1,9 @@
 from itertools import groupby
-from operator import itemgetter
 
+import itertools
 from rest_framework import serializers
 from oma.utils import db
-from pyoma.browser.models import ProteinEntry, Genome
-from pyoma.browser.db import XrefIdMapper
+from pyoma.browser.models import ProteinEntry
 from django.utils.http import urlencode
 
 
@@ -66,19 +65,19 @@ class ProteinEntryDetailSerializer(ProteinEntryExtendedSummarySerializer):
                                                      lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     ontology = serializers.HyperlinkedIdentityField(view_name='protein-ontology', read_only=True,
                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    oma_group_url = serializers.HyperlinkedIdentityField(view_name='group-detail', lookup_field='oma_group',
+                                                         lookup_url_kwarg='group_id')
+    oma_hog_members = serializers.HyperlinkedIdentityField(view_name='hog-members', lookup_field='oma_hog',
+                                                           lookup_url_kwarg='hog_id')
 
     def get_hog_levels(self, obj):
         protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)
-        levels = db.hog_levels_of_fam(protein.hog_family_nr)
-        protein_levels = []
-        for level in levels:
-            level = level.decode("utf-8")
-            members_at_level = [ProteinEntry(db, memb) for memb in
-                                db.member_of_hog_id(protein.oma_hog, level)]
-            for member in members_at_level:
-                if str(member) == str(protein) and level not in protein_levels:
-                    protein_levels.append(level)
-        return protein_levels
+        levs_of_fam = frozenset([z.decode() for z in db.hog_levels_of_fam(protein.hog_family_nr)])
+        levels = []
+        for lev in itertools.chain(protein.genome.lineage, ('LUCA',)):
+            if lev.encode('ascii') in db.tax.all_hog_levels and lev in levs_of_fam:
+                levels.append(lev)
+        return levels
 
 
 class OrthologsListSerializer(ProteinEntrySerializer):

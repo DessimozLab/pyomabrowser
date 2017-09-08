@@ -553,8 +553,6 @@ class PairwiseRelationAPIView(APIView):
             return Response(serializer.data)
 
 
-
-
 class TaxonomyViewSet(ViewSet):
     lookup_field = 'root_id'
 
@@ -624,11 +622,13 @@ class TaxonomyViewSet(ViewSet):
 
     def retrieve(self, request, root_id, format=None):
         """
-         Retrieve the subtree rooted at the taxonomic level indicated.
+        Retrieve the subtree rooted at the taxonomic level indicated.
 
-         :param root_id: either the taxon id, species name or the 5 letter UniProt species code for a root taxonomic level
-         :queryparam type: the type of the returned data - either dictionary (default) or newick.
-         """
+        :param root_id: either the taxon id, species name or the 5 letter UniProt
+            species code for a root taxonomic level
+        :queryparam type: the type of the returned data - either dictionary
+            (default) or newick.
+        """
         type = request.query_params.get('type', None)
         subtree = []
         taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
