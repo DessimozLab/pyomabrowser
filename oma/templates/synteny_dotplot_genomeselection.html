@@ -113,6 +113,56 @@
     </div>
 
     <script type="text/javascript">
+    (function($) {
+          var oKeyDeferredMap = {};
+
+          function fnReadData(sKey) {
+            var sValue = window.localStorage.getItem(sKey);
+            return sValue ? JSON.parse(sValue) : sValue;
+          }
+
+          function fnWriteData(sKey, oData) {
+            var sValue = JSON.stringify(oData);
+            window.localStorage.setItem(sKey, sValue);
+          }
+
+          $.cachedAjaxPromise = function(sUrl, oAjaxOptions) {
+            var oDeferred = oKeyDeferredMap[sUrl];
+            var sValue;
+
+            if (!oDeferred) {
+              oDeferred = new jQuery.Deferred();
+              oKeyDeferredMap[sUrl] = oDeferred;
+              sValue = fnReadData(sUrl);
+
+              if (sValue) {
+                oDeferred.resolve(sValue);
+              }
+
+              if (!oAjaxOptions) {
+                oAjaxOptions = {};
+              }
+
+              $.extend(oAjaxOptions, {
+                error: function(oXHR, sTextStatus, sErrorThrown) {
+                  console.log('customer info request failed: ' + sErrorThrown);
+                  oDeferred.resolve(null);
+                },
+                success: function(oData) {
+                  // making assumption that data is JSON
+                  fnWriteData(sUrl, oData);
+                  oDeferred.resolve(oData);
+                }
+              });
+
+              $.ajax(sUrl, oAjaxOptions);
+            }
+
+            return oDeferred.promise();
+          };
+        }(jQuery));
+
+
 
         var genomeNames = [];
         var genomeIDs = {};
@@ -133,7 +183,7 @@
             },
             error: function () {
                 $.getJSON("/api/genome", function (jsonData) {
-                    jsonData.forEach(function (genome) {
+                    jsonData['results'].forEach(function (genome) {
                         var tmp = genome.species + " (" + genome.code + ")";
                         genomeNames.push(tmp);
                         genomeIDs[tmp] = genome.code
@@ -162,23 +212,27 @@
             var MIN_NR_PROTEINS_PER_CHR = 10;
             var select = document.getElementById(id_select);
 
-            $.getJSON( "/api/genome/" + genome_name, function( jsonData ) {
-                jsonData.chromosomes.sort(function (a,b){
-                    return (a.id > b.id) ? 1 : ((b.id > a.id) ? -1 : 0);
-                });
-                $.each( jsonData.chromosomes, function (index ) {
-                    var nr_prot_on_chr = this.entry_ranges.reduce(function(acc, cur){return acc + cur[1]-cur[0]+1}, 0);
-                    if (nr_prot_on_chr < MIN_NR_PROTEINS_PER_CHR){
-                        // skip scaffolds with only very few proteins
-                        console.log('skipping ' + genome_name + ' chromosome/scaffold ' + index);
-                        return;
-                    }
-                    var el = document.createElement("option");
-                    el.textContent = this.id;
-                    el.value = this.id;
-                    select.appendChild(el);
-                });
-            });
+            $.cachedAjaxPromise("/api/genome/" + genome_name + "/")
+                .done(function (jsonData) {
+                    jsonData.chromosomes.sort(function (a, b) {
+                        return (a.id > b.id) ? 1 : ((b.id > a.id) ? -1 : 0);
+                    });
+                    $.each(jsonData.chromosomes, function (index) {
+                        var nr_prot_on_chr = this.entry_ranges.reduce(function (acc, cur) {
+                            return acc + cur[1] - cur[0] + 1
+                        }, 0);
+                        if (nr_prot_on_chr < MIN_NR_PROTEINS_PER_CHR) {
+                            // skip scaffolds with only very few proteins
+                            console.log('skipping ' + genome_name + ' chromosome/scaffold ' + index);
+                            return;
+                        }
+                        var el = document.createElement("option");
+                        el.textContent = this.id;
+                        el.value = this.id;
+                        select.appendChild(el);
+                    });
+                }
+            );
 
         }
 
@@ -209,6 +263,20 @@
             };
         };
 
+        function update_chromosome_select(input, nr){
+            var sel='selectchr1', formgroup='fg_first_chr';
+            if (nr === 2){
+                sel='selectchr2'; formgroup='fg_second_chr';
+            }
+            if (genomeIDs[input.val()] === null || genomeIDs[input.val()] === undefined){
+                input.val('');
+                document.getElementById(formgroup).setAttribute('class', 'form-group hidden');
+            } else {
+                document.getElementById(formgroup).setAttribute('class', 'form-group');
+                remove_chromosome_select(sel);
+                set_chromosome_select(genomeIDs[input.val()], sel);
+            }
+        };
         $('#g1_name').typeahead({
                 hint: true
             },
@@ -217,17 +285,9 @@
                 minLength: 4,
                 source: substringMatcher(genomeNames)
             })
-            .blur(function(){
-                if(genomeIDs[$(this).val()] == null) {
-                    $(this).val('');
-                    document.getElementById('fg_first_chr').setAttribute('class','form-group hidden' );
-
-                }
-                else {
-                    document.getElementById('fg_first_chr').setAttribute('class','form-group' );
-                    remove_chromosome_select('selectchr1');
-                    set_chromosome_select(genomeIDs[$(this).val()],'selectchr1');
-                }
+            .on('blur', function(){update_chromosome_select($(this), 1)})
+            .on('typeahead:selected', function(ev, suggestion) {
+                update_chromosome_select($(this), 1);
             });
         $('#g2_name')
             .typeahead({
@@ -238,17 +298,10 @@
                     minLength: 4,
                     source: substringMatcher(genomeNames)
                 })
-            .on('blur', function() {
-                if(genomeIDs[$(this).val()] == null) {
-                    $(this).val('');
-                    document.getElementById('fg_second_chr').setAttribute('class','form-group hidden' )
-                }
-                else {
-                    document.getElementById('fg_second_chr').setAttribute('class','form-group' )
-                    remove_chromosome_select('selectchr2');
-                    set_chromosome_select(genomeIDs[$(this).val()],'selectchr2');
-                }
-            });
+            .on('blur', function(){update_chromosome_select($(this), 2)})
+            .on('typeahead:selected', function(ev, suggestion) {
+                update_chromosome_select($(this), 2);
+            });;
 
         $(window).keydown(function(event){
             if(event.keyCode == 13) {
