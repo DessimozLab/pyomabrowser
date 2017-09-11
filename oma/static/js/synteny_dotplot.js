@@ -367,8 +367,17 @@ dotplot_theme = function () {
                 .attr("class", "brush")
                 .call(brush_plot);
 
+            var clip = gbrush_plot.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("id", "clip-rect")
+        .attr("x", "0")
+        .attr("y", "0")
+        .attr('width', width)
+        .attr('height', height);
+
             // dots
-            var gcircles = svg_dotplot.selectAll("circle")
+            var gcircles = svg_dotplot.append("g").attr("clip-path", "url(#clip)").selectAll("circle")
                 .attr("class", "circle")
                 .data(data)
                 .enter().append("circle")
@@ -459,7 +468,7 @@ dotplot_theme = function () {
 
 
 }
-            
+
 
             function brushended_plot() {
                 var s = d3.event.selection;
