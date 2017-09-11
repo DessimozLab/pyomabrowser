@@ -40,11 +40,20 @@ dotplot_theme = function () {
                 if (this.id === 'ba-select') {
                     brush_action = 'select';
                     d3.select('#brush_ok_zoom').classed('hidden', true);
-                    d3.select('#brush_ok_select').classed('hidden', false)
+                    d3.select('#brush_ok_select').classed('hidden', false);
+                    d3.select('#brush_ok_pan').classed('hidden', true);
+
                 }
-                else {
+                else if (this.id === 'ba-zoom') {
                     brush_action = 'zoom';
                     d3.select('#brush_ok_zoom').classed('hidden', false);
+                    d3.select('#brush_ok_select').classed('hidden', true);
+                    d3.select('#brush_ok_pan').classed('hidden', true);
+                }
+                else if (this.id === 'ba-pan') {
+                    brush_action = 'pan';
+                    d3.select('#brush_ok_pan').classed('hidden', false);
+                    d3.select('#brush_ok_zoom').classed('hidden', true);
                     d3.select('#brush_ok_select').classed('hidden', true)
                 }
 
@@ -250,8 +259,8 @@ dotplot_theme = function () {
         //dotplot.create_containers(cviewer);
 
         // variable for the dotplot brush action
-        var brush_action = 'select';
-        d3.select('#brush_ok_select').classed('hidden', false);
+        var brush_action = 'pan';
+        d3.select('#brush_ok_pan').classed('hidden', false);
         dotplot.set_up_brush_action_setting();
 
         // selection variable
@@ -263,7 +272,8 @@ dotplot_theme = function () {
         var margin_plot = {top: 20, right: 50, bottom: 20, left: 50};
 
         // size of the dotplot svg
-        var size_plot = {  width: cviewer.offsetWidth, height: 450 };
+        var size_plot = {  width: cviewer.offsetWidth - margin_plot.right, height: 450 };
+
 
         var svg_dotplot = d3.select("#plot_div").append("svg")
             .attr("width", size_plot.width)
@@ -340,7 +350,11 @@ dotplot_theme = function () {
                 });
 
             // brush object
-            var brush_plot = d3.brush().on("end", brushended_plot),
+            var brush_plot = d3.brush()
+                    .filter(function() {
+                    //return !(brush_action == 'pan')
+                    return false})
+                    .on("end", brushended_plot),
                 idleTimeout,
                 idleDelay = 350;
 
@@ -349,7 +363,7 @@ dotplot_theme = function () {
                 .attr("class", "tooltip")
                 .style("opacity", 0);
 
-            svg_dotplot.append("g")
+            var gbrush_plot = svg_dotplot.append("g")
                 .attr("class", "brush")
                 .call(brush_plot);
 
@@ -422,9 +436,34 @@ dotplot_theme = function () {
 
             dotplot.add_legend_color();
 
+            var zoom = d3.zoom()
+                .scaleExtent([1, 100])
+                .translateExtent([[0, 0], [size_plot.width , size_plot.height ]])
+                .on("zoom", zoomed);
+
+            gbrush_plot.call(zoom);
+
+            var currentZoom = null;
+
+            function zoomed() {
+
+                currentZoom = d3.event.transform;
+
+                gcircles.attr("transform", currentZoom);
+                gcircles.attr("r", 2.5 / (2 * currentZoom.k) );
+
+                svg_dotplot.select(".axis--x").call(xAxis.scale(currentZoom.rescaleX(x)));
+                svg_dotplot.select(".axis--y").call(yAxis.scale(currentZoom.rescaleY(y)));
+
+                console.log(currentZoom.k);
+
+
+}
+            
 
             function brushended_plot() {
                 var s = d3.event.selection;
+
                 if (!s) {
                     if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
                     x.domain(x0);
@@ -440,6 +479,7 @@ dotplot_theme = function () {
 
                         console.log(s[0][0], s[1][0]);
                         console.log(s[0][1], s[1][1]);
+
                         selected_pairs = [];
                         select_brush(s);
                         svg_dotplot.select(".brush").call(brush_plot.move, null);
@@ -450,9 +490,8 @@ dotplot_theme = function () {
 
                         $('#container_table_selection').show()
 
-
                     }
-                    else {
+                    if (brush_action === 'zoom') {
                         x.domain([s[0][0], s[1][0]].map(x.invert, x));
                         y.domain([s[1][1], s[0][1]].map(y.invert, y));
                         svg_dotplot.select(".brush").call(brush_plot.move, null);
@@ -484,6 +523,7 @@ dotplot_theme = function () {
                     //handle.attr("display", "none");
                     circle.classed("active", false);
                 } else {
+
                     var bxmin = x.invert(s[0][0]);
                     var bxmax = x.invert(s[1][0]);
 
@@ -508,6 +548,11 @@ dotplot_theme = function () {
                 }
 
             }
+
+
+
+
+
 
             // // // // // // // // 
             // metric histogram  //
