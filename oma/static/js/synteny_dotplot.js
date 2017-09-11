@@ -11,7 +11,7 @@ dotplot_theme = function () {
         this.between = function (x, min, max) {
             return x >= min && x <= max;
         };
-        this.sortNumber = function(a, b) {
+        this.sortNumber = function (a, b) {
             return a - b;
         };
 
@@ -103,7 +103,7 @@ dotplot_theme = function () {
                 .text(metric_option.short_name);
 
         };
-        this.update_color_scales = function(){
+        this.update_color_scales = function () {
             var color_domain = [filter_min_distance, filter_max_distance];
             var color_range = ['#90ee90', '#000080'];
             //color_range = ['#ffbdbd', '#e1f7d5'];
@@ -204,7 +204,7 @@ dotplot_theme = function () {
 
             return [a, b];
         };
-        this.compute_histogram_metric = function(data){
+        this.compute_histogram_metric = function (data) {
 
 
             var data_slice_metric = [];
@@ -238,12 +238,12 @@ dotplot_theme = function () {
             return hist_color;
 
         };
-        this.update_picked_datapoint = function(datapoint){
+        this.update_picked_datapoint = function (datapoint) {
             picked_datapoint = datapoint;
             svg_dotplot.selectAll("circle")
-                .classed("picked", function(d){
+                .classed("picked", function (d) {
                     return (d.entry_1.omaid === picked_datapoint.entry_1.omaid &&
-                            d.entry_2.omaid === picked_datapoint.entry_2.omaid);
+                    d.entry_2.omaid === picked_datapoint.entry_2.omaid);
                 });
         };
 
@@ -272,17 +272,19 @@ dotplot_theme = function () {
         var margin_plot = {top: 20, right: 50, bottom: 20, left: 50};
 
         // size of the dotplot svg
-        var size_plot = {  width: cviewer.offsetWidth - margin_plot.right, height: 450 };
+        var size_plot = {width: cviewer.offsetWidth - margin_plot.right, height: 450};
 
-
+        // the svg that countains the dotplot
         var svg_dotplot = d3.select("#plot_div").append("svg")
             .attr("width", size_plot.width)
             .attr("height", size_plot.height)
             .append("g")
             .attr("transform", "translate(" + margin_plot.left + "," + margin_plot.top + ")");
 
+        // size of the legend svg
         var size_legend = {width: size_plot.width, height: 80};
 
+        // the svg that countains the legend
         var svg_hist = d3.select("#hist_metric").append("svg")
             .attr("width", size_legend.width)
             .attr("height", size_legend.height)
@@ -293,7 +295,7 @@ dotplot_theme = function () {
             height = size_plot.height - margin_plot.top - margin_plot.bottom;
 
 
-        var metric_option = {long_name: 'Phylogenetic Distance', short_name: 'Distance',  accessor: 'distance'};
+        var metric_option = {long_name: 'Phylogenetic Distance', short_name: 'Distance', accessor: 'distance'};
 
         // data accession should be  done with function for the metrix, the x and y value!
 
@@ -351,9 +353,10 @@ dotplot_theme = function () {
 
             // brush object
             var brush_plot = d3.brush()
-                    .filter(function() {
-                    //return !(brush_action == 'pan')
-                    return false})
+                    .filter(function () {
+                        return !(brush_action == 'pan')
+                        //return false
+                    })
                     .on("end", brushended_plot),
                 idleTimeout,
                 idleDelay = 350;
@@ -363,21 +366,26 @@ dotplot_theme = function () {
                 .attr("class", "tooltip")
                 .style("opacity", 0);
 
+            // g brush element
             var gbrush_plot = svg_dotplot.append("g")
                 .attr("class", "brush")
                 .call(brush_plot);
 
+            // clip element to restrict drawing circles inside the axis boundary
             var clip = gbrush_plot.append("defs").append("svg:clipPath")
-        .attr("id", "clip")
-        .append("svg:rect")
-        .attr("id", "clip-rect")
-        .attr("x", "0")
-        .attr("y", "0")
-        .attr('width', width)
-        .attr('height', height);
+                .attr("id", "clip")
+                .append("svg:rect")
+                .attr("id", "clip-rect")
+                .attr("x", "0")
+                .attr("y", "0")
+                .attr('width', width)
+                .attr('height', height);
 
-            // dots
-            var gcircles = svg_dotplot.append("g").attr("clip-path", "url(#clip)").selectAll("circle")
+            // dots elements
+            var gcircles = svg_dotplot
+                .append("g")
+                .attr("clip-path", "url(#clip)")
+                .selectAll("circle")
                 .attr("class", "circle")
                 .data(data)
                 .enter().append("circle")
@@ -390,21 +398,21 @@ dotplot_theme = function () {
                 .attr("fill", function (d) {
                     return color_threshold(d[metric_option.accessor])
                 })
-                .on("mouseover", function(d) {
+                .on("mouseover", function (d) {
                     tooltip_div.transition()
                         .duration(200)
                         .style("opacity", .9);
                     tooltip_div.html(
-                        genome1 + ": "+d.entry_1.omaid + "<br/>" +
-                        genome2 + ": "+d.entry_2.omaid + "<br/>" +
-                            "g1 name  : "+d.entry_1.canonicalid + "<br/>" +
-                            "g2 name  : "+d.entry_2.canonicalid + "<br/>" +
-                        metric_option.short_name + ": "+ d[metric_option.accessor].toPrecision(3)
+                        genome1 + ": " + d.entry_1.omaid + "<br/>" +
+                        genome2 + ": " + d.entry_2.omaid + "<br/>" +
+                        "g1 name  : " + d.entry_1.canonicalid + "<br/>" +
+                        "g2 name  : " + d.entry_2.canonicalid + "<br/>" +
+                        metric_option.short_name + ": " + d[metric_option.accessor].toPrecision(3)
                     )
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY - 50) + "px");
                 })
-                .on("mouseout", function(d) {
+                .on("mouseout", function (d) {
                     tooltip_div.transition()
                         .duration(500)
                         .style("opacity", 0);
@@ -445,29 +453,36 @@ dotplot_theme = function () {
 
             dotplot.add_legend_color();
 
+            // create zoom d3 object
             var zoom = d3.zoom()
                 .scaleExtent([1, 100])
-                .translateExtent([[0, 0], [size_plot.width , size_plot.height ]])
+                .translateExtent([[0, 0], [size_plot.width, size_plot.height]])
                 .on("zoom", zoomed);
 
+            // attach zoom to brush element
             gbrush_plot.call(zoom);
 
+            // define variable for d3 zoom state
             var currentZoom = null;
 
+
+            // function called when zoomed
             function zoomed() {
 
+                // update zoom var
                 currentZoom = d3.event.transform;
 
+                // update circles position and size
                 gcircles.attr("transform", currentZoom);
-                gcircles.attr("r", 2.5 / (2 * currentZoom.k) );
+                gcircles.attr("r", 2.5 / (2 * currentZoom.k));
 
+                // update axis
                 svg_dotplot.select(".axis--x").call(xAxis.scale(currentZoom.rescaleX(x)));
                 svg_dotplot.select(".axis--y").call(yAxis.scale(currentZoom.rescaleY(y)));
 
-                console.log(currentZoom.k);
+                //console.log(currentZoom.k);
 
-
-}
+            }
 
 
             function brushended_plot() {
@@ -485,12 +500,11 @@ dotplot_theme = function () {
                     zoom_brush_plot();
                 } else {
                     if (brush_action === 'select') {
-
-                        console.log(s[0][0], s[1][0]);
-                        console.log(s[0][1], s[1][1]);
-
+                        
                         selected_pairs = [];
+
                         select_brush(s);
+
                         svg_dotplot.select(".brush").call(brush_plot.move, null);
 
                         $('#table_selection').bootstrapTable('removeAll');
@@ -528,18 +542,47 @@ dotplot_theme = function () {
 
             function select_brush(s) {
 
+
                 if (s === null) {
                     //handle.attr("display", "none");
                     circle.classed("active", false);
                 } else {
 
-                    var bxmin = x.invert(s[0][0]);
-                    var bxmax = x.invert(s[1][0]);
+                    // selection rectangle
+                    var rect = gbrush_plot.select("rect.selection");
 
-                    var bymin = y.invert(s[1][1]);
-                    var bymax = y.invert(s[0][1]);
+                    // Intersect rectangle with nodes
+                    var lx = parseInt(rect.attr("x"));
+                    var ly = parseInt(rect.attr("y"));
+                    var lw = parseInt(rect.attr("width"));
+                    var lh = parseInt(rect.attr("height"));
+
+                    // get all 4 coordinates
+                    var bxmin = lx;
+                    var bxmax = lx + lw;
+                    var bymin =  ly + lh ;
+                    var bymax =  ly   ;
+
+                     // take the default scales
+                    var scx = x;
+                    var scy = y;
+
+                    // update scale if zoomed
+                    if (!!currentZoom) {
+
+                        scx = currentZoom.rescaleX(x);
+                        scy = currentZoom.rescaleY(y);
+
+                    }
+
+                    // get the position coordinates (reverse from scale)
+                    bxmin = scx.invert(bxmin);
+                    bxmax = scx.invert(bxmax);
+                    bymin = scy.invert(bymin);
+                    bymax = scy.invert(bymax);
 
                     var circle = svg_dotplot.selectAll('circle');
+
                     circle.classed("active", function (d) {
                         if (dotplot.between(d.entry_1.locus[0], bxmin, bxmax)) {
                             if (dotplot.between(d.entry_2.locus[0], bymin, bymax)) {
@@ -552,18 +595,16 @@ dotplot_theme = function () {
                         }
                         return false;
                     });
+
                     circle.classed("picked", false);
                     picked_datapoint = null;
+
                 }
 
             }
 
 
-
-
-
-
-            // // // // // // // // 
+            // // // // // // // //
             // metric histogram  //
             // // // // // // // // 
 
@@ -662,7 +703,7 @@ dotplot_theme = function () {
 
                     dotplot.update_visibility_dot();
                     handle.attr("display", null).attr("transform", function (d, i) {
-                        return "translate(" + s[i] + "," + - height_hist / 4 + ")";
+                        return "translate(" + s[i] + "," + -height_hist / 4 + ")";
                     });
                 }
             }
