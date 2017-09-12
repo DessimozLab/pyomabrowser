@@ -453,7 +453,7 @@ dotplot_theme = function () {
 
             // create zoom d3 object
             var zoom = d3.zoom()
-                .scaleExtent([0, 100])
+                .scaleExtent([1, 100])
                 .translateExtent([[0, 0], [size_plot.width, size_plot.height]])
                 .on("zoom", zoomed);
 
@@ -669,7 +669,7 @@ dotplot_theme = function () {
             var height_hist = 50;
 
             var brush_hist = d3.brushX()
-                .extent([[1, 100], [width, height_hist]])
+                .extent([[0, 0], [width, height_hist]])
                 .on("brush end", brushed_hist);
 
             var x_hist = d3.scaleLinear().range([0, width]),
@@ -745,6 +745,10 @@ dotplot_theme = function () {
             context.selectAll('g.tick')
                 .select('text') //grab the tick line
                 .attr('font-weight', "bold");
+
+            //gBrush.select('rect.selection').attr("transform", function (d, i) {
+            //            return "translate(0 ," + -50 + ")";
+            //        });
 
             function brushed_hist() {
 
