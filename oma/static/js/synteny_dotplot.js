@@ -515,10 +515,11 @@ dotplot_theme = function () {
 
                     }
                     if (brush_action === 'zoom') {
-                        x.domain([s[0][0], s[1][0]].map(x.invert, x));
-                        y.domain([s[1][1], s[0][1]].map(y.invert, y));
+                        //x.domain([s[0][0], s[1][0]].map(x.invert, x));
+                        //y.domain([s[1][1], s[0][1]].map(y.invert, y));
+
+                        zoom_brush_plot(s);
                         svg_dotplot.select(".brush").call(brush_plot.move, null);
-                        zoom_brush_plot();
                     }
                 }
             }
@@ -527,17 +528,22 @@ dotplot_theme = function () {
                 idleTimeout = null;
             }
 
-            function zoom_brush_plot() {
-                var t = svg_dotplot.transition().duration(750);
-                svg_dotplot.select(".axis--x").transition(t).call(xAxis);
-                svg_dotplot.select(".axis--y").transition(t).call(yAxis);
-                svg_dotplot.selectAll("circle").transition(t)
-                    .attr("cx", function (d) {
-                        return x(d.entry_1.locus[0]);
-                    })
-                    .attr("cy", function (d) {
-                        return y(d.entry_2.locus[0]);
-                    });
+            function zoom_brush_plot(s) {
+
+                console.log(s);
+
+                var bounds = s,
+                    dx = bounds[1][0] - bounds[0][0],
+                    dy = bounds[1][1] - bounds[0][1],
+                    xb = (bounds[0][0] + bounds[1][0]) / 2,
+                    yb = (bounds[0][1] + bounds[1][1]) / 2,
+                    scale = Math.max(1, Math.min(100, 0.9 / Math.max(dx / width, dy / height))),
+                    translate = [width / 2 - scale * xb, height / 2 - scale * yb];
+
+                gbrush_plot
+                    .call( zoom.transform, d3.zoomIdentity.translate(translate[0],translate[1]).scale(scale) );
+
+
             }
 
             function select_brush(s) {
@@ -563,7 +569,7 @@ dotplot_theme = function () {
                     var bymin =  ly + lh ;
                     var bymax =  ly   ;
 
-                     // take the default scales
+                    // take the default scales
                     var scx = x;
                     var scy = y;
 
