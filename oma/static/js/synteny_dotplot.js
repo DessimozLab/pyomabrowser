@@ -294,7 +294,6 @@ dotplot_theme = function () {
         var width = size_plot.width - margin_plot.left - margin_plot.right,
             height = size_plot.height - margin_plot.top - margin_plot.bottom;
 
-
         var metric_option = {long_name: 'Phylogenetic Distance', short_name: 'Distance', accessor: 'distance'};
 
         // data accession should be  done with function for the metrix, the x and y value!
@@ -355,7 +354,6 @@ dotplot_theme = function () {
             var brush_plot = d3.brush()
                     .filter(function () {
                         return !(brush_action == 'pan')
-                        //return false
                     })
                     .on("end", brushended_plot),
                 idleTimeout,
@@ -455,16 +453,15 @@ dotplot_theme = function () {
 
             // create zoom d3 object
             var zoom = d3.zoom()
-                .scaleExtent([1, 100])
+                .scaleExtent([0, 100])
                 .translateExtent([[0, 0], [size_plot.width, size_plot.height]])
                 .on("zoom", zoomed);
 
             // attach zoom to brush element
-            gbrush_plot.call(zoom);
+            gbrush_plot.call(zoom).on("dblclick.zoom", null);;
 
             // define variable for d3 zoom state
             var currentZoom = null;
-
 
             // function called when zoomed
             function zoomed() {
@@ -480,8 +477,6 @@ dotplot_theme = function () {
                 svg_dotplot.select(".axis--x").call(xAxis.scale(currentZoom.rescaleX(x)));
                 svg_dotplot.select(".axis--y").call(yAxis.scale(currentZoom.rescaleY(y)));
 
-                //console.log(currentZoom.k);
-
             }
 
 
@@ -490,17 +485,17 @@ dotplot_theme = function () {
 
                 if (!s) {
                     if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
-                    x.domain(x0);
-                    y.domain(y0);
+
                     svg_dotplot.selectAll('circle').classed("active", function () {
                         return 1 === 2
                     });
                     selected_pairs = [];
+
                     $('#container_table_selection').hide();
-                    zoom_brush_plot();
+
                 } else {
                     if (brush_action === 'select') {
-                        
+
                         selected_pairs = [];
 
                         select_brush(s);
@@ -515,10 +510,11 @@ dotplot_theme = function () {
 
                     }
                     if (brush_action === 'zoom') {
-                        //x.domain([s[0][0], s[1][0]].map(x.invert, x));
-                        //y.domain([s[1][1], s[0][1]].map(y.invert, y));
 
-                        zoom_brush_plot(s);
+                        // vestige of box selection
+
+                        //zoom_brush_plot(s);
+
                         svg_dotplot.select(".brush").call(brush_plot.move, null);
                     }
                 }
@@ -530,19 +526,75 @@ dotplot_theme = function () {
 
             function zoom_brush_plot(s) {
 
-                console.log(s);
+                /*  VESTIGE OF BOX ZOOMING
+
+
+                // version test 1
+
+                // take the default scales
+                    var scx = x;
+                    var scy = y;
+
+                    // update scale if zoomed
+                    if (!!currentZoom) {
+
+                        scx = currentZoom.rescaleX(x);
+                        scy = currentZoom.rescaleY(y);
+
+                    }
+
+                x.domain([s[0][0], s[1][0]].map(scx.invert, scx));
+                y.domain([s[1][1], s[0][1]].map(scy.invert, scy));
+
+
+                var t = svg_dotplot.transition().duration(750);
+
+                svg_dotplot.select(".axis--x").transition(t).call(xAxis);
+                svg_dotplot.select(".axis--y").transition(t).call(yAxis);
+
+                    svg_dotplot.selectAll("circle").transition(t)
+                   .attr("cx", function (d) {
+                        return x(d.entry_1.locus[0]);
+                    })
+                    .attr("cy", function (d) {
+                        return y(d.entry_2.locus[0]);
+                    });
+
+
+               // version test 2
+
+                var current_scale;
+                var current_translatex;
+                var current_translatey;
+
+                if (!!currentZoom) {
+                        current_scale = currentZoom.k;
+                        current_translatex = currentZoom.x;
+                        current_translatey = currentZoom.y;
+                    }
+                    else{current_scale = 1;
+                current_translatex = 0;
+                current_translatey = 0;}
+
+                console.log(current_scale,current_translatex, current_translatey );
+
 
                 var bounds = s,
                     dx = bounds[1][0] - bounds[0][0],
                     dy = bounds[1][1] - bounds[0][1],
                     xb = (bounds[0][0] + bounds[1][0]) / 2,
                     yb = (bounds[0][1] + bounds[1][1]) / 2,
-                    scale = Math.max(1, Math.min(100, 0.9 / Math.max(dx / width, dy / height))),
-                    translate = [width / 2 - scale * xb, height / 2 - scale * yb];
+                    scale = Math.max(1, Math.min(100,  0.9/ Math.max(dx / width, dy / height)));
+
+                    var translate = [width / 2 - scale * xb, height / 2 - scale * yb];
+
+
+                    console.log(scale,translate);
 
                 gbrush_plot
                     .call( zoom.transform, d3.zoomIdentity.translate(translate[0],translate[1]).scale(scale) );
 
+                */
 
             }
 
@@ -617,7 +669,7 @@ dotplot_theme = function () {
             var height_hist = 50;
 
             var brush_hist = d3.brushX()
-                .extent([[0, 0], [width, height_hist]])
+                .extent([[1, 100], [width, height_hist]])
                 .on("brush end", brushed_hist);
 
             var x_hist = d3.scaleLinear().range([0, width]),
