@@ -7,13 +7,13 @@
 {% block content %}
 
 
-    <div class="container-fluid " >
+    <div class="container-fluid ">
 
         <div class="row">
 
             <div class="col-sm-12 col-md-10 col-md-offset-1" style="background-color: #f8f9fa">
 
-                <div id="dotplot_container" class="tile"  >
+                <div id="dotplot_container" class="tile">
 
 
                     <div class="text-center">
@@ -28,19 +28,28 @@
                         <div>
 
                             <div class="btn-group pull-right" style="margin: 6px;">
-                                <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button class="btn btn-default btn-sm dropdown-toggle" type="button"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <span class="glyphicon glyphicon-hand-up" aria-hidden="true"></span>
                                     <span class="caret"></span>
                                 </button>
 
                                 <ul id="action_dropdown" class="dropdown-menu">
-                                    <li class="action_dropdown-li" id="ba-zoom"><a> Zoom in <span id='brush_ok_zoom' class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span></a> </li>
-                                    <li class="action_dropdown-li" id="ba-select"><a> Select <span id='brush_ok_select' class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span></a> </li>
+                                    <li class="action_dropdown-li" id="ba-pan"><a> Pan <span id='brush_ok_pan'
+                                                                                             class="glyphicon glyphicon-ok pull-right hidden"
+                                                                                             aria-hidden="true"></span></a>
+                                    </li>
+                                    <!-- <li class="action_dropdown-li" id="ba-zoom"><a> Zoom in <span id='brush_ok_zoom' class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span></a> </li> -->
+                                    <li class="action_dropdown-li" id="ba-select"><a> Select <span id='brush_ok_select'
+                                                                                                   class="glyphicon glyphicon-ok pull-right hidden"
+                                                                                                   aria-hidden="true"></span></a>
+                                    </li>
                                 </ul>
                             </div>
 
                             <div class="btn-group pull-right" style="margin: 6px;">
-                                <button type="button" class="btn btn-default btn-sm" aria-label="Left Align"  data-toggle="collapse" data-target="#hist_metric">
+                                <button type="button" class="btn btn-default btn-sm" aria-label="Left Align"
+                                        data-toggle="collapse" data-target="#hist_metric">
                                     <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
                                 </button>
                             </div>
@@ -51,7 +60,7 @@
 
                     <hr>
 
-                    <div  id="plot_div"  style="width: 100%">
+                    <div id="plot_div" style="width: 100%">
 
                     </div>
 
@@ -99,9 +108,6 @@
 
         (function () {
 
-
-            var container = "dotplot_container";
-
             var genome1 = "{{ genome1 }}";
             var genome2 = "{{ genome2 }}";
 
@@ -110,76 +116,127 @@
 
             var DotPlot = dotplot_theme();
 
-            var correct_url = encodeURI("/api/pairs/" + genome1 +"/" + genome2 +"/?chr1=" + chromosome1 + "&chr2=" + chromosome2);
+            var url_json = encodeURI("/api/pairs/" + genome1 + "/" + genome2 + "/?chr1=" + chromosome1 + "&chr2=" + chromosome2);
 
-            console.log(correct_url);
+            //var tmp_url = '/All/dotplot_dumm.json';
 
-            var dotplot = new DotPlot(container, correct_url, genome1,genome2,chromosome1,chromosome2);
+            var container = "dotplot_container";
+
+            launch_dotplot();
+
+            var t = null;
 
 
-            $('#table_selection').bootstrapTable({
-                reorderableColumns: true,
-                pagination: true,
-                pageSize: 10,
-                showColumns: true,
-                search: true,
-                showExport: true,
-                pageList: [10, 25, 50, 100, "All"],
-                mobileResponsive: true,
-                checkOnInit: true,
-                undefinedText: "",
-                showToggle: 'true',
-                onClickRow: function(row) {
-                    dotplot.update_picked_datapoint(row);
-                },
-                columns: [{
-                    field: 'entry_1.omaid',
-                    title: genome1 + ' gene',
-                    formatter: tablehooks.format_info_link,
-                    sortable: true
-                }, {
-                    field: 'entry_1.canonicalid',
-                    title: 'Cross Ref ' + genome1,
-                    formatter: tablehooks.format_xref,
-                    sortable: true
-                }, {
-                    field: 'entry_1.locus.0',
-                    title: genome1 + ' position',
-                    sortable: true
-                }, {
-                    field: 'entry_2.omaid',
-                    title: genome2 + ' gene',
-                    formatter: tablehooks.format_info_link,
-                    sortable: true
-                }, {
-                    field: 'entry_2.canonicalid',
-                    title: 'Cross Ref ' + genome2,
-                    formatter: tablehooks.format_xref,
-                    sortable: true
-                }, {
-                    field: 'entry_2.locus.0',
-                    title: genome2 + ' position',
-                    sortable: true
-                }, {
-                    field: 'rel_type',
-                    title: 'Relation',
-                    sortable: true
-                }, {
-                    field: 'distance',
-                    title: 'Distance [PAM]',
-                    formatter: tablehooks.format_float_value,
-                    sortable: true
-                }, {
-                    field: 'score',
-                    title: 'Alignment Score',
-                    formatter: tablehooks.format_float_value,
-                    sortable: true
-                }]
-            });
+            window.onresize = resize;
 
-            $('#container_table_selection').hide()
+            function resize() {
 
-        }) ();
+                if (t != null) clearTimeout(t);
+
+                t = setTimeout(function () {
+                    reset_dotplot();
+                    launch_dotplot();
+                }, 100);
+
+            }
+
+            function launch_dotplot() {
+
+
+                d3.json(url_json, function (error, data) {
+
+                    var dotplot = new DotPlot(container, data, genome1, genome2, chromosome1, chromosome2);
+
+
+                    $('#table_selection').bootstrapTable({
+                        reorderableColumns: true,
+                        pagination: true,
+                        pageSize: 10,
+                        showColumns: true,
+                        search: true,
+                        showExport: true,
+                        pageList: [10, 25, 50, 100, "All"],
+                        mobileResponsive: true,
+                        checkOnInit: true,
+                        undefinedText: "",
+                        showToggle: 'true',
+                        onClickRow: function (row) {
+                            dotplot.update_picked_datapoint(row);
+                        },
+                        columns: [{
+                            field: 'entry_1.omaid',
+                            title: genome1 + ' gene',
+                            formatter: tablehooks.format_info_link,
+                            sortable: true
+                        }, {
+                            field: 'entry_1.canonicalid',
+                            title: 'Cross Ref ' + genome1,
+                            formatter: tablehooks.format_xref,
+                            sortable: true
+                        }, {
+                            field: 'entry_1.locus.0',
+                            title: genome1 + ' position',
+                            sortable: true
+                        }, {
+                            field: 'entry_2.omaid',
+                            title: genome2 + ' gene',
+                            formatter: tablehooks.format_info_link,
+                            sortable: true
+                        }, {
+                            field: 'entry_2.canonicalid',
+                            title: 'Cross Ref ' + genome2,
+                            formatter: tablehooks.format_xref,
+                            sortable: true
+                        }, {
+                            field: 'entry_2.locus.0',
+                            title: genome2 + ' position',
+                            sortable: true
+                        }, {
+                            field: 'rel_type',
+                            title: 'Relation',
+                            sortable: true
+                        }, {
+                            field: 'distance',
+                            title: 'Distance [PAM]',
+                            formatter: tablehooks.format_float_value,
+                            sortable: true
+                        }, {
+                            field: 'score',
+                            title: 'Alignment Score',
+                            formatter: tablehooks.format_float_value,
+                            sortable: true
+                        }]
+                    });
+
+                    $('#container_table_selection').hide();
+
+
+                })
+            }
+
+            function reset_dotplot() {
+
+                var dotdiv = document.getElementById("plot_div");
+
+                while (dotdiv.firstChild) {
+                    dotdiv.removeChild(dotdiv.firstChild);
+                }
+
+                var histmetric = document.getElementById("hist_metric");
+
+                while (histmetric.firstChild) {
+                    histmetric.removeChild(histmetric.firstChild);
+                }
+
+                var table_selection = document.getElementById("table_selection");
+
+                while (table_selection.firstChild) {
+                    table_selection.removeChild(table_selection.firstChild);
+                }
+
+            }
+
+        })();
 
     </script>
 

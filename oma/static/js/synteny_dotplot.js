@@ -2,7 +2,7 @@ var dotplot_theme;
 
 dotplot_theme = function () {
 
-    function DotPlot(container_id, url_json, genome1, genome2, chromosome1, chromosome2) {
+    function DotPlot(container_id, data, genome1, genome2, chromosome1, chromosome2) {
 
         /////////////
         // METHODS //
@@ -11,7 +11,7 @@ dotplot_theme = function () {
         this.between = function (x, min, max) {
             return x >= min && x <= max;
         };
-        this.sortNumber = function(a, b) {
+        this.sortNumber = function (a, b) {
             return a - b;
         };
 
@@ -36,19 +36,42 @@ dotplot_theme = function () {
         };
         this.set_up_brush_action_setting = function () {
 
-            genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
-                if (this.id === 'ba-select') {
+            function update_action_dropdown(selected_action){
+                if (selected_action === 'ba-select' || selected_action === 's') {
                     brush_action = 'select';
                     d3.select('#brush_ok_zoom').classed('hidden', true);
-                    d3.select('#brush_ok_select').classed('hidden', false)
+                    d3.select('#brush_ok_select').classed('hidden', false);
+                    d3.select('#brush_ok_pan').classed('hidden', true);
+
                 }
-                else {
+                else if (selected_action === 'ba-zoom') {
                     brush_action = 'zoom';
                     d3.select('#brush_ok_zoom').classed('hidden', false);
+                    d3.select('#brush_ok_select').classed('hidden', true);
+                    d3.select('#brush_ok_pan').classed('hidden', true);
+                }
+                else if (selected_action === 'ba-pan' || selected_action === 'a') {
+                    brush_action = 'pan';
+                    d3.select('#brush_ok_pan').classed('hidden', false);
+                    d3.select('#brush_ok_zoom').classed('hidden', true);
                     d3.select('#brush_ok_select').classed('hidden', true)
                 }
+            }
 
+            genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
+                update_action_dropdown(this.id);
             });
+
+
+            document.onkeypress = function(evt) {
+                evt = evt || window.event;
+                var charCode = evt.keyCode || evt.which;
+                var charStr = String.fromCharCode(charCode);
+                update_action_dropdown(charStr);
+            };
+
+
+
         };
 
         //dotplot
@@ -94,7 +117,7 @@ dotplot_theme = function () {
                 .text(metric_option.short_name);
 
         };
-        this.update_color_scales = function(){
+        this.update_color_scales = function () {
             var color_domain = [filter_min_distance, filter_max_distance];
             var color_range = ['#90ee90', '#000080'];
             //color_range = ['#ffbdbd', '#e1f7d5'];
@@ -195,7 +218,7 @@ dotplot_theme = function () {
 
             return [a, b];
         };
-        this.compute_histogram_metric = function(data){
+        this.compute_histogram_metric = function (data) {
 
 
             var data_slice_metric = [];
@@ -229,12 +252,12 @@ dotplot_theme = function () {
             return hist_color;
 
         };
-        this.update_picked_datapoint = function(datapoint){
+        this.update_picked_datapoint = function (datapoint) {
             picked_datapoint = datapoint;
             svg_dotplot.selectAll("circle")
-                .classed("picked", function(d){
+                .classed("picked", function (d) {
                     return (d.entry_1.omaid === picked_datapoint.entry_1.omaid &&
-                            d.entry_2.omaid === picked_datapoint.entry_2.omaid);
+                    d.entry_2.omaid === picked_datapoint.entry_2.omaid);
                 });
         };
 
@@ -250,8 +273,8 @@ dotplot_theme = function () {
         //dotplot.create_containers(cviewer);
 
         // variable for the dotplot brush action
-        var brush_action = 'select';
-        d3.select('#brush_ok_select').classed('hidden', false);
+        var brush_action = 'pan';
+        d3.select('#brush_ok_pan').classed('hidden', false);
         dotplot.set_up_brush_action_setting();
 
         // selection variable
@@ -263,16 +286,19 @@ dotplot_theme = function () {
         var margin_plot = {top: 20, right: 50, bottom: 20, left: 50};
 
         // size of the dotplot svg
-        var size_plot = {  width: cviewer.offsetWidth, height: 450 };
+        var size_plot = {width: cviewer.offsetWidth - margin_plot.right, height: 450};
 
+        // the svg that countains the dotplot
         var svg_dotplot = d3.select("#plot_div").append("svg")
             .attr("width", size_plot.width)
             .attr("height", size_plot.height)
             .append("g")
             .attr("transform", "translate(" + margin_plot.left + "," + margin_plot.top + ")");
 
+        // size of the legend svg
         var size_legend = {width: size_plot.width, height: 80};
 
+        // the svg that countains the legend
         var svg_hist = d3.select("#hist_metric").append("svg")
             .attr("width", size_legend.width)
             .attr("height", size_legend.height)
@@ -282,13 +308,11 @@ dotplot_theme = function () {
         var width = size_plot.width - margin_plot.left - margin_plot.right,
             height = size_plot.height - margin_plot.top - margin_plot.bottom;
 
-
-        var metric_option = {long_name: 'Phylogenetic Distance', short_name: 'Distance',  accessor: 'distance'};
+        var metric_option = {long_name: 'Phylogenetic Distance', short_name: 'Distance', accessor: 'distance'};
 
         // data accession should be  done with function for the metrix, the x and y value!
 
-
-        d3.json(url_json, function (error, data) {
+        //d3.json(url_json, function (error, data) {
 
             var hist_color = dotplot.compute_histogram_metric(data);
 
@@ -340,21 +364,39 @@ dotplot_theme = function () {
                 });
 
             // brush object
-            var brush_plot = d3.brush().on("end", brushended_plot),
+            var brush_plot = d3.brush()
+                    .filter(function () {
+                        return !(brush_action == 'pan')
+                    })
+                    .on("end", brushended_plot),
                 idleTimeout,
                 idleDelay = 350;
 
             // Define the div for the tooltip
             var tooltip_div = d3.select("body").append("div")
                 .attr("class", "tooltip")
-                .style("opacity", 0);
+                .style("opacity", '0');
 
-            svg_dotplot.append("g")
+            // g brush element
+            var gbrush_plot = svg_dotplot.append("g")
                 .attr("class", "brush")
                 .call(brush_plot);
 
-            // dots
-            svg_dotplot.selectAll("circle")
+            // clip element to restrict drawing circles inside the axis boundary
+            var clip = gbrush_plot.append("defs").append("svg:clipPath")
+                .attr("id", "clip")
+                .append("svg:rect")
+                .attr("id", "clip-rect")
+                .attr("x", "0")
+                .attr("y", "0")
+                .attr('width', width)
+                .attr('height', height);
+
+            // dots elements
+            var gcircles = svg_dotplot
+                .append("g")
+                .attr("clip-path", "url(#clip)")
+                .selectAll("circle")
                 .attr("class", "circle")
                 .data(data)
                 .enter().append("circle")
@@ -367,28 +409,27 @@ dotplot_theme = function () {
                 .attr("fill", function (d) {
                     return color_threshold(d[metric_option.accessor])
                 })
-                .on("mouseover", function(d) {
+                //.attr('r', function(d){ return currentZoom ? 2.5  / currentZoom.k : 2.5})
+                .on("mouseover", function (d) {
                     tooltip_div.transition()
                         .duration(200)
-                        .style("opacity", .9);
+                        .style("opacity", .8);
                     tooltip_div.html(
-                        genome1 + ": "+d.entry_1.omaid + "<br/>" +
-                        genome2 + ": "+d.entry_2.omaid + "<br/>" +
-                            "g1 name  : "+d.entry_1.canonicalid + "<br/>" +
-                            "g2 name  : "+d.entry_2.canonicalid + "<br/>" +
-                        metric_option.short_name + ": "+ d[metric_option.accessor].toPrecision(3)
+                       " <b> " +  genome1 + ": </b> " + d.entry_1.omaid + (d.entry_1.canonicalid ? ' (' +  d.entry_1.canonicalid +')' : '') +"<br/>" +
+                        " <b> " +  genome2 + ": </b> " + d.entry_2.omaid + (d.entry_2.canonicalid ? ' (' +  d.entry_2.canonicalid +') ' : '') +"<br/>" +
+                        " <b> " + metric_option.short_name + ": </b> " + d[metric_option.accessor].toPrecision(3)
                     )
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY - 50) + "px");
                 })
-                .on("mouseout", function(d) {
+                .on("mouseout", function (d) {
                     tooltip_div.transition()
                         .duration(500)
                         .style("opacity", 0);
                 });
 
             // svg x axis
-            svg_dotplot.append("g")
+            var gX = svg_dotplot.append("g")
                 .attr("class", "axis axis--x")
                 .attr("transform", "translate(0," + (height) + ")")
                 .call(xAxis)
@@ -403,7 +444,7 @@ dotplot_theme = function () {
                 });
 
             // svg y axis
-            svg_dotplot.append("g")
+            var gY = svg_dotplot.append("g")
                 .attr("class", "axis axis--y")
                 .attr("transform", "translate(0,0)")
                 .call(yAxis).append("text")
@@ -420,11 +461,228 @@ dotplot_theme = function () {
             svg_dotplot.selectAll(".domain")
                 .style("display", "none");
 
-
-
             dotplot.add_legend_color();
 
-            // // // // // // // // 
+            // create zoom d3 object
+            var zoom = d3.zoom()
+                .scaleExtent([1, 200])
+                .translateExtent([[0, 0], [size_plot.width, size_plot.height]])
+                .on("zoom", zoomed);
+
+            // attach zoom to brush element
+            gbrush_plot.call(zoom).on("dblclick.zoom", null);
+
+            // define variable for d3 zoom state
+            var currentZoom = null;
+
+            // function called when zoomed
+            function zoomed() {
+
+
+
+                // update zoom var
+                currentZoom = d3.event.transform;
+
+                // update circles position and size
+                gcircles.attr("transform", currentZoom);
+                gcircles.style('r', 2.5 /  currentZoom.k);
+
+                // update axis
+                svg_dotplot.select(".axis--x").call(xAxis.scale(currentZoom.rescaleX(x)));
+                svg_dotplot.select(".axis--y").call(yAxis.scale(currentZoom.rescaleY(y)));
+
+            }
+
+
+            function brushended_plot() {
+                var s = d3.event.selection;
+
+                if (!s) {
+                    if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
+
+                    svg_dotplot.selectAll('circle').classed("active", function () {
+                        return 1 === 2
+                    });
+                    selected_pairs = [];
+
+                    $('#container_table_selection').hide();
+
+                } else {
+                    if (brush_action === 'select') {
+
+                        selected_pairs = [];
+
+                        select_brush(s);
+
+                        svg_dotplot.select(".brush").call(brush_plot.move, null);
+
+                        if (selected_pairs.length > 0){
+
+                        $('#table_selection').bootstrapTable('removeAll');
+
+                        $('#table_selection').bootstrapTable('load', selected_pairs);
+
+                        $('#container_table_selection').show()
+
+                            }
+
+                            else{$('#container_table_selection').hide();}
+
+                    }
+                    if (brush_action === 'zoom') {
+
+                        // vestige of box selection
+
+                        //zoom_brush_plot(s);
+
+                        svg_dotplot.select(".brush").call(brush_plot.move, null);
+                    }
+                }
+            }
+
+            function idled() {
+                idleTimeout = null;
+            }
+
+            function zoom_brush_plot(s) {
+
+                /*  VESTIGE OF BOX ZOOMING
+
+
+                // version test 1
+
+                // take the default scales
+                    var scx = x;
+                    var scy = y;
+
+                    // update scale if zoomed
+                    if (!!currentZoom) {
+
+                        scx = currentZoom.rescaleX(x);
+                        scy = currentZoom.rescaleY(y);
+
+                    }
+
+                x.domain([s[0][0], s[1][0]].map(scx.invert, scx));
+                y.domain([s[1][1], s[0][1]].map(scy.invert, scy));
+
+
+                var t = svg_dotplot.transition().duration(750);
+
+                svg_dotplot.select(".axis--x").transition(t).call(xAxis);
+                svg_dotplot.select(".axis--y").transition(t).call(yAxis);
+
+                    svg_dotplot.selectAll("circle").transition(t)
+                   .attr("cx", function (d) {
+                        return x(d.entry_1.locus[0]);
+                    })
+                    .attr("cy", function (d) {
+                        return y(d.entry_2.locus[0]);
+                    });
+
+
+               // version test 2
+
+                var current_scale;
+                var current_translatex;
+                var current_translatey;
+
+                if (!!currentZoom) {
+                        current_scale = currentZoom.k;
+                        current_translatex = currentZoom.x;
+                        current_translatey = currentZoom.y;
+                    }
+                    else{current_scale = 1;
+                current_translatex = 0;
+                current_translatey = 0;}
+
+                console.log(current_scale,current_translatex, current_translatey );
+
+
+                var bounds = s,
+                    dx = bounds[1][0] - bounds[0][0],
+                    dy = bounds[1][1] - bounds[0][1],
+                    xb = (bounds[0][0] + bounds[1][0]) / 2,
+                    yb = (bounds[0][1] + bounds[1][1]) / 2,
+                    scale = Math.max(1, Math.min(100,  0.9/ Math.max(dx / width, dy / height)));
+
+                    var translate = [width / 2 - scale * xb, height / 2 - scale * yb];
+
+
+                    console.log(scale,translate);
+
+                gbrush_plot
+                    .call( zoom.transform, d3.zoomIdentity.translate(translate[0],translate[1]).scale(scale) );
+
+                */
+
+            }
+
+            function select_brush(s) {
+
+
+                if (s === null) {
+                    //handle.attr("display", "none");
+                    circle.classed("active", false);
+                } else {
+
+                    // selection rectangle
+                    var rect = gbrush_plot.select("rect.selection");
+
+                    // Intersect rectangle with nodes
+                    var lx = parseInt(rect.attr("x"));
+                    var ly = parseInt(rect.attr("y"));
+                    var lw = parseInt(rect.attr("width"));
+                    var lh = parseInt(rect.attr("height"));
+
+                    // get all 4 coordinates
+                    var bxmin = lx;
+                    var bxmax = lx + lw;
+                    var bymin =  ly + lh ;
+                    var bymax =  ly   ;
+
+                    // take the default scales
+                    var scx = x;
+                    var scy = y;
+
+                    // update scale if zoomed
+                    if (!!currentZoom) {
+
+                        scx = currentZoom.rescaleX(x);
+                        scy = currentZoom.rescaleY(y);
+
+                    }
+
+                    // get the position coordinates (reverse from scale)
+                    bxmin = scx.invert(bxmin);
+                    bxmax = scx.invert(bxmax);
+                    bymin = scy.invert(bymin);
+                    bymax = scy.invert(bymax);
+
+                    var circle = svg_dotplot.selectAll('circle');
+
+                    circle.classed("active", function (d) {
+                        if (dotplot.between(d.entry_1.locus[0], bxmin, bxmax)) {
+                            if (dotplot.between(d.entry_2.locus[0], bymin, bymax)) {
+                                if (d3.select(this).attr('visibility') === 'visible') {
+                                    selected_pairs.push(d);
+                                    return true;
+                                }
+
+                            }
+                        }
+                        return false;
+                    });
+
+                    circle.classed("picked", false);
+                    picked_datapoint = null;
+
+                }
+
+            }
+
+
+            // // // // // // // //
             // metric histogram  //
             // // // // // // // // 
 
@@ -508,6 +766,10 @@ dotplot_theme = function () {
                 .select('text') //grab the tick line
                 .attr('font-weight', "bold");
 
+            //gBrush.select('rect.selection').attr("transform", function (d, i) {
+            //            return "translate(0 ," + -50 + ")";
+            //        });
+
             function brushed_hist() {
 
                 if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
@@ -516,6 +778,7 @@ dotplot_theme = function () {
                 if (s === null) {
                     s = x_hist.range();
                     handle.attr("display", "none");
+
                 } else {
 
                     filter_max_distance = x_hist.invert(s[1]);
@@ -523,98 +786,13 @@ dotplot_theme = function () {
 
                     dotplot.update_visibility_dot();
                     handle.attr("display", null).attr("transform", function (d, i) {
-                        return "translate(" + s[i] + "," + - height_hist / 4 + ")";
+                        return "translate(" + s[i] + "," + -height_hist / 4 + ")";
                     });
                 }
             }
 
-            function brushended_plot() {
-                var s = d3.event.selection;
-                if (!s) {
-                    if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
-                    x.domain(x0);
-                    y.domain(y0);
-                    svg_dotplot.selectAll('circle').classed("active", function () {
-                        return 1 === 2
-                    });
-                    selected_pairs = [];
-                    $('#container_table_selection').hide();
-                    zoom_brush_plot();
-                } else {
-                    if (brush_action === 'select') {
 
-                        console.log(s[0][0], s[1][0]);
-                        console.log(s[0][1], s[1][1]);
-                        selected_pairs = [];
-                        select_brush(s);
-                        svg_dotplot.select(".brush").call(brush_plot.move, null);
-
-                        $('#table_selection').bootstrapTable('removeAll');
-
-                        $('#table_selection').bootstrapTable('load', selected_pairs);
-
-                        $('#container_table_selection').show()
-
-
-                    }
-                    else {
-                        x.domain([s[0][0], s[1][0]].map(x.invert, x));
-                        y.domain([s[1][1], s[0][1]].map(y.invert, y));
-                        svg_dotplot.select(".brush").call(brush_plot.move, null);
-                        zoom_brush_plot();
-                    }
-                }
-            }
-
-            function idled() {
-                idleTimeout = null;
-            }
-
-            function zoom_brush_plot() {
-                var t = svg_dotplot.transition().duration(750);
-                svg_dotplot.select(".axis--x").transition(t).call(xAxis);
-                svg_dotplot.select(".axis--y").transition(t).call(yAxis);
-                svg_dotplot.selectAll("circle").transition(t)
-                    .attr("cx", function (d) {
-                        return x(d.entry_1.locus[0]);
-                    })
-                    .attr("cy", function (d) {
-                        return y(d.entry_2.locus[0]);
-                    });
-            }
-
-            function select_brush(s) {
-
-                if (s === null) {
-                    //handle.attr("display", "none");
-                    circle.classed("active", false);
-                } else {
-                    var bxmin = x.invert(s[0][0]);
-                    var bxmax = x.invert(s[1][0]);
-
-                    var bymin = y.invert(s[1][1]);
-                    var bymax = y.invert(s[0][1]);
-
-                    var circle = svg_dotplot.selectAll('circle');
-                    circle.classed("active", function (d) {
-                        if (dotplot.between(d.entry_1.locus[0], bxmin, bxmax)) {
-                            if (dotplot.between(d.entry_2.locus[0], bymin, bymax)) {
-                                if (d3.select(this).attr('visibility') === 'visible') {
-                                    selected_pairs.push(d);
-                                    return true;
-                                }
-
-                            }
-                        }
-                        return false;
-                    });
-                    circle.classed("picked", false);
-                    picked_datapoint = null;
-                }
-
-            }
-
-        });
+       // });
 
     }
 

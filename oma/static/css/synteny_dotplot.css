@@ -27,13 +27,12 @@ circle {
 
 circle.active {
     fill: #FFB6C1;
-    opacity: 0.8;
+    opacity: 0.5;
 }
 
 circle.picked {
     r: 5;
-    stroke: #CC6373;
-    stroke-opacity: 1.0;
+    stroke: #000;
     stroke-width: 1.0;
 }
 
@@ -59,9 +58,11 @@ div.tooltip {
     text-align: center;
     width: auto;
     height: auto;
-    padding: 2px;
+    padding: 4px;
     font: 12px sans-serif;
     border: 1px;
     border-radius: 2px;
     pointer-events: none;
+    background-color: #ccc;
+
 }
