@@ -502,11 +502,17 @@ dotplot_theme = function () {
 
                         svg_dotplot.select(".brush").call(brush_plot.move, null);
 
+                        if (selected_pairs.length > 0){
+
                         $('#table_selection').bootstrapTable('removeAll');
 
                         $('#table_selection').bootstrapTable('load', selected_pairs);
 
                         $('#container_table_selection').show()
+
+                            }
+
+                            else{$('#container_table_selection').hide();}
 
                     }
                     if (brush_action === 'zoom') {
@@ -758,6 +764,7 @@ dotplot_theme = function () {
                 if (s === null) {
                     s = x_hist.range();
                     handle.attr("display", "none");
+
                 } else {
 
                     filter_max_distance = x_hist.invert(s[1]);
