@@ -36,28 +36,42 @@ dotplot_theme = function () {
         };
         this.set_up_brush_action_setting = function () {
 
-            genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
-                if (this.id === 'ba-select') {
+            function update_action_dropdown(selected_action){
+                if (selected_action === 'ba-select' || selected_action === 's') {
                     brush_action = 'select';
                     d3.select('#brush_ok_zoom').classed('hidden', true);
                     d3.select('#brush_ok_select').classed('hidden', false);
                     d3.select('#brush_ok_pan').classed('hidden', true);
 
                 }
-                else if (this.id === 'ba-zoom') {
+                else if (selected_action === 'ba-zoom') {
                     brush_action = 'zoom';
                     d3.select('#brush_ok_zoom').classed('hidden', false);
                     d3.select('#brush_ok_select').classed('hidden', true);
                     d3.select('#brush_ok_pan').classed('hidden', true);
                 }
-                else if (this.id === 'ba-pan') {
+                else if (selected_action === 'ba-pan' || selected_action === 'p') {
                     brush_action = 'pan';
                     d3.select('#brush_ok_pan').classed('hidden', false);
                     d3.select('#brush_ok_zoom').classed('hidden', true);
                     d3.select('#brush_ok_select').classed('hidden', true)
                 }
+            }
 
+            genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
+                update_action_dropdown(this.id);
             });
+
+
+            document.onkeypress = function(evt) {
+                evt = evt || window.event;
+                var charCode = evt.keyCode || evt.which;
+                var charStr = String.fromCharCode(charCode);
+                update_action_dropdown(charStr);
+            };
+
+
+
         };
 
         //dotplot
