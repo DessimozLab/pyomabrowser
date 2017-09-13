@@ -2,7 +2,7 @@ var dotplot_theme;
 
 dotplot_theme = function () {
 
-    function DotPlot(container_id, url_json, genome1, genome2, chromosome1, chromosome2) {
+    function DotPlot(container_id, data, genome1, genome2, chromosome1, chromosome2) {
 
         /////////////
         // METHODS //
@@ -312,8 +312,7 @@ dotplot_theme = function () {
 
         // data accession should be  done with function for the metrix, the x and y value!
 
-
-        d3.json(url_json, function (error, data) {
+        //d3.json(url_json, function (error, data) {
 
             var hist_color = dotplot.compute_histogram_metric(data);
 
@@ -468,7 +467,7 @@ dotplot_theme = function () {
 
             // create zoom d3 object
             var zoom = d3.zoom()
-                .scaleExtent([1, 100])
+                .scaleExtent([1, 200])
                 .translateExtent([[0, 0], [size_plot.width, size_plot.height]])
                 .on("zoom", zoomed);
 
@@ -793,7 +792,7 @@ dotplot_theme = function () {
             }
 
 
-        });
+       // });
 
     }
 
