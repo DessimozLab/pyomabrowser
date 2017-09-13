@@ -50,7 +50,7 @@ dotplot_theme = function () {
                     d3.select('#brush_ok_select').classed('hidden', true);
                     d3.select('#brush_ok_pan').classed('hidden', true);
                 }
-                else if (selected_action === 'ba-pan' || selected_action === 'p') {
+                else if (selected_action === 'ba-pan' || selected_action === 'a') {
                     brush_action = 'pan';
                     d3.select('#brush_ok_pan').classed('hidden', false);
                     d3.select('#brush_ok_zoom').classed('hidden', true);
@@ -410,6 +410,7 @@ dotplot_theme = function () {
                 .attr("fill", function (d) {
                     return color_threshold(d[metric_option.accessor])
                 })
+                //.attr('r', function(d){ return currentZoom ? 2.5  / currentZoom.k : 2.5})
                 .on("mouseover", function (d) {
                     tooltip_div.transition()
                         .duration(200)
@@ -472,7 +473,7 @@ dotplot_theme = function () {
                 .on("zoom", zoomed);
 
             // attach zoom to brush element
-            gbrush_plot.call(zoom).on("dblclick.zoom", null);;
+            gbrush_plot.call(zoom).on("dblclick.zoom", null);
 
             // define variable for d3 zoom state
             var currentZoom = null;
@@ -485,7 +486,7 @@ dotplot_theme = function () {
 
                 // update circles position and size
                 gcircles.attr("transform", currentZoom);
-                gcircles.attr("r", 2.5 / (2 * currentZoom.k));
+                gcircles.style('r', 2.5 /  currentZoom.k);
 
                 // update axis
                 svg_dotplot.select(".axis--x").call(xAxis.scale(currentZoom.rescaleX(x)));
