@@ -116,9 +116,9 @@
 
             var DotPlot = dotplot_theme();
 
-            var correct_url = encodeURI("/api/pairs/" + genome1 + "/" + genome2 + "/?chr1=" + chromosome1 + "&chr2=" + chromosome2);
+            var url_json = encodeURI("/api/pairs/" + genome1 + "/" + genome2 + "/?chr1=" + chromosome1 + "&chr2=" + chromosome2);
 
-            var tmp_url = '/All/dotplot_dumm.json';
+            //var tmp_url = '/All/dotplot_dumm.json';
 
             var container = "dotplot_container";
 
@@ -143,7 +143,7 @@
             function launch_dotplot() {
 
 
-                d3.json(tmp_url, function (error, data) {
+                d3.json(url_json, function (error, data) {
 
                     var dotplot = new DotPlot(container, data, genome1, genome2, chromosome1, chromosome2);
 

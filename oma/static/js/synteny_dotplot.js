@@ -375,7 +375,7 @@ dotplot_theme = function () {
             // Define the div for the tooltip
             var tooltip_div = d3.select("body").append("div")
                 .attr("class", "tooltip")
-                .style("opacity", 0);
+                .style("opacity", '0');
 
             // g brush element
             var gbrush_plot = svg_dotplot.append("g")
@@ -413,13 +413,11 @@ dotplot_theme = function () {
                 .on("mouseover", function (d) {
                     tooltip_div.transition()
                         .duration(200)
-                        .style("opacity", .9);
+                        .style("opacity", .8);
                     tooltip_div.html(
-                        genome1 + ": " + d.entry_1.omaid + "<br/>" +
-                        genome2 + ": " + d.entry_2.omaid + "<br/>" +
-                        "g1 name  : " + d.entry_1.canonicalid + "<br/>" +
-                        "g2 name  : " + d.entry_2.canonicalid + "<br/>" +
-                        metric_option.short_name + ": " + d[metric_option.accessor].toPrecision(3)
+                       " <b> " +  genome1 + ": </b> " + d.entry_1.omaid + (d.entry_1.canonicalid ? ' (' +  d.entry_1.canonicalid +')' : '') +"<br/>" +
+                        " <b> " +  genome2 + ": </b> " + d.entry_2.omaid + (d.entry_2.canonicalid ? ' (' +  d.entry_2.canonicalid +') ' : '') +"<br/>" +
+                        " <b> " + metric_option.short_name + ": </b> " + d[metric_option.accessor].toPrecision(3)
                     )
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY - 50) + "px");
@@ -479,6 +477,8 @@ dotplot_theme = function () {
 
             // function called when zoomed
             function zoomed() {
+
+
 
                 // update zoom var
                 currentZoom = d3.event.transform;
