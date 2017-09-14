@@ -1,6 +1,5 @@
 {% extends  "core.html" %}
 {% load staticfiles %}
-{% load bootstrap3 %}
 
 
 {% block title %}OMA Orthology database: orthologs among hundreds of complete genomes across all of life{% endblock %}
@@ -206,10 +205,43 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
     <!--           -->
     <!-- cite    -->
    <div class="row">
-       <div class="col-sm-12 col-md-10 col-md-offset-1">
+       <div class="col-sm-12 col-md-7 col-md-offset-1">
            <div class="alert alert-success thd" role="alert">
             	If you use OMA in your work, please consider citing:<br/>
                 Altenhoff A et al., <em>The OMA orthology database in 2015: function predictions, better plant support, synteny view and other improvements</em>, Nucleic Acids Research, 2015, 43 (D1): D240-D249 (doi:<a href="http://dx.doi.org/10.1093/nar/gku1158">10.1093/nar/gku1158</a>).
+           </div>
+       </div>
+       <div class="col_sm-12 col-md-3">
+           <div class="thd" style="text-align: right;">
+               <b>How to stay in touch:</b>
+               <p>
+                   <a class="fig" href="javascript:show_frame('frame_twitter');" title="Twitter"> <i class="fa fa-2x fa-twitter"></i></a>
+                   &nbsp;
+                   <a class="fig" href="http://omabrowser.blogspot.com" title="Blog"><i class="fa fa-2x fa-pencil-square-o"></i></a>
+                    &nbsp;
+                   <a class="fig" href="http://omabrowser.blogspot.com/feeds/posts/default" title="RSS"><i class="fa fa-2x fa-rss"></i></a>
+                   &nbsp;
+                   <a class="fig" href="javascript:show_frame('frame_mailman');" title="Newsletter">
+                       <i class="fa fa-2x fa-newspaper-o"></i>
+                       <!--<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 32 32" focusable="false"><title>Newsletter</title><path d="M4,14h20v-2H4V14z M15,26h7v-2h-7V26z M15,22h9v-2h-9V22z M15,18h9v-2h-9V18z M4,26h9V16H4V26z M28,10V6H0v22c0,0,0,4,4,4   h25c0,0,3-0.062,3-4V10H28z M4,30c-2,0-2-2-2-2V8h24v20c0,0.921,0.284,1.558,0.676,2H4z"/></svg> -->
+                       </a>
+
+               </p>
+                <span id="frame_twitter" style="display: none;"><a href="https://twitter.com/omabrowser" class="twitter-follow-button" data-show-screen-name="false" data-show-count="true">Follow</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></span>
+                <span id="frame_mailman" style="display: none;">
+                    <form action="https://lists.dessimoz.org/subscribe/oma" method="POST">
+                        Email: <input name="email" size="13"/>
+                        <input type="submit" value="Sign up" /><br/>(max 1-2 emails/month, no spam!)
+                    </form>
+                </span>
+                <script>
+                    function show_frame(frame){
+                        var frames = ["frame_twitter", "frame_mailman"];
+                        frames.forEach(function(frm){
+                            document.getElementById(frm).style.display = (frm === frame ? 'initial' : 'none');
+                        });
+                    }
+                </script>
            </div>
        </div>
     </div>

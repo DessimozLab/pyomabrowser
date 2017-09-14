@@ -197,6 +197,9 @@ a.uncurated{
     color: #FF9933;
     font-size: small;
 }
+a.fig{
+	color: #222;
+}
 
 .kw1 {
     font-weight: bold;
