@@ -245,12 +245,13 @@ hog_theme = function () {
                                 is_node_frozen = false;
                             }
                             else {
-                                is_node_frozen = node.id;
+                                is_node_frozen = node.id();
                             }
                             treeNode_tooltip.close();
                         });
 
-                    if (is_node_frozen && is_node_frozen != node.id) {
+                    if (is_node_frozen && is_node_frozen !== node.id()) {
+
 
                         table
                             .append("tr")
@@ -261,7 +262,7 @@ hog_theme = function () {
                             .on("click", function () {
                                 is_node_frozen = false;
                                 hogvis.mouse_over_node(node);
-                                is_node_frozen = node.id;
+                                is_node_frozen = node.id();
                                 treeNode_tooltip.close();
                             });
 
@@ -815,8 +816,6 @@ hog_theme = function () {
         this.set_remove_column_setting = function () {
 
             var update_after_reset = function(){
-
-
 
                 current_hog_state.reset_on(tree, per_species3, current_opened_taxa_name, column_coverage_threshold);
 
