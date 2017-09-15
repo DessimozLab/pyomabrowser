@@ -118,32 +118,31 @@
 
             var url_json = encodeURI("/api/pairs/" + genome1 + "/" + genome2 + "/?chr1=" + chromosome1 + "&chr2=" + chromosome2);
 
-            //var tmp_url = '/All/dotplot_dumm.json';
+            //var url_json = '/All/dotplot_dumm.json';
 
             var container = "dotplot_container";
 
-            launch_dotplot();
+            d3.json(url_json, function (error, data) {
 
-            var t = null;
+                launch_dotplot();
 
+                var t = null;
 
-            window.onresize = resize;
+                window.onresize = resize;
 
-            function resize() {
+                function resize() {
 
-                if (t != null) clearTimeout(t);
+                    if (t != null) clearTimeout(t);
 
-                t = setTimeout(function () {
-                    reset_dotplot();
-                    launch_dotplot();
-                }, 100);
+                    t = setTimeout(function () {
+                        reset_dotplot();
+                        launch_dotplot();
+                    }, 100);
 
-            }
+                }
 
-            function launch_dotplot() {
+                function launch_dotplot() {
 
-
-                d3.json(url_json, function (error, data) {
 
                     var dotplot = new DotPlot(container, data, genome1, genome2, chromosome1, chromosome2);
 
@@ -211,30 +210,32 @@
                     $('#container_table_selection').hide();
 
 
-                })
-            }
-
-            function reset_dotplot() {
-
-                var dotdiv = document.getElementById("plot_div");
-
-                while (dotdiv.firstChild) {
-                    dotdiv.removeChild(dotdiv.firstChild);
                 }
 
-                var histmetric = document.getElementById("hist_metric");
+                function reset_dotplot() {
 
-                while (histmetric.firstChild) {
-                    histmetric.removeChild(histmetric.firstChild);
+                    var dotdiv = document.getElementById("plot_div");
+
+                    while (dotdiv.firstChild) {
+                        dotdiv.removeChild(dotdiv.firstChild);
+                    }
+
+                    var histmetric = document.getElementById("hist_metric");
+
+                    while (histmetric.firstChild) {
+                        histmetric.removeChild(histmetric.firstChild);
+                    }
+
+                    var table_selection = document.getElementById("table_selection");
+
+                    while (table_selection.firstChild) {
+                        table_selection.removeChild(table_selection.firstChild);
+                    }
+
                 }
 
-                var table_selection = document.getElementById("table_selection");
+            });
 
-                while (table_selection.firstChild) {
-                    table_selection.removeChild(table_selection.firstChild);
-                }
-
-            }
 
         })();
 
