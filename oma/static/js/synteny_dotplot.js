@@ -261,6 +261,87 @@ dotplot_theme = function () {
                 });
         };
 
+        // IMAGE EXPORT
+        this.setup_image_export = function (){
+
+
+            // Below are the functions that handle actual exporting:
+            // getSVGString ( svgNode ) and svgString2Image( svgString, width, height, format, callback )
+            // Function taken from http://bl.ocks.org/Rokotyan/0556f8facbaf344507cdc45dc3622177
+            function getSVGString( svgNode ) {
+
+                svgNode.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+                //var cssStyleText = getCSSStyles( svgNode );
+                // appendCSS( cssStyleText, svgNode );
+
+                var serializer = new XMLSerializer();
+                var svgString = serializer.serializeToString(svgNode);
+                svgString = svgString.replace(/(\w+)?:?xlink=/g, 'xmlns:xlink='); // Fix root xlink without namespace
+                svgString = svgString.replace(/NS\d+:href/g, 'xlink:href'); // Safari NS namespace fix
+
+                return svgString;
+
+            }
+
+            function svgString2Image( svgString, width, height, format, callback ) {
+                var format = format ? format : 'png';
+
+                var imgsrc = 'data:image/svg+xml;base64,'+ btoa( unescape( encodeURIComponent( svgString ) ) ); // Convert SVG string to dataurl
+
+                var canvas = document.createElement("canvas");
+                var context = canvas.getContext("2d");
+
+                canvas.width = width;
+                canvas.height = height;
+
+                var image = new Image;
+                image.onload = function() {
+
+                    context.clearRect ( 0, 0, width, height );
+                    context.fillStyle = "#ffffff";
+                    context.fillRect(0, 0, width, height);
+                    context.drawImage(image, 0, 0, width, height);
+
+                    canvas.toBlob( function(blob) {
+                        var filesize = Math.round( blob.length/1024 ) + ' KB';
+                        if ( callback ) callback( blob, filesize );
+                    });
+                };
+                image.src = imgsrc;
+            }
+
+            d3.select("#export_dropdown").selectAll(".export_dropdown-li").on('click', function () {
+
+                var fname = 'dotplot_' + genome1+'_chromosome' + chromosome1+'_vs_' + genome2+'_chromosome'+ chromosome2;
+                var svg_to_export = d3.select("#plot_div").select('svg');
+                var svghist_to_export = d3.select("#hist_metric").select('svg');
+
+                console.log(svg_to_export);
+                console.log(svghist_to_export);
+
+                if (this.id === 'li_xpng') {
+
+                    var svgString = getSVGString(svg_to_export.node());
+                    
+                    svgString2Image(svgString, 2 * width, 2 * height, 'png', save);
+                    
+                    function save(dataBlob, filesize) {
+                        saveAs(dataBlob, fname + '.png'); // FileSaver.js function
+                    }
+
+                }
+                else if (this.id === 'li_xsvg') {
+
+                    var svgString = getSVGString(svg_to_export.node());
+                    var blob = new Blob([svgString], {"type": "image/svg+xml;base64,"+ btoa(svgString)});
+                    saveAs(blob, fname +".svg");
+                };
+
+
+            });
+
+        }
+
         ///////////////
         // VARIABLES //
         ///////////////
@@ -309,6 +390,9 @@ dotplot_theme = function () {
             height = size_plot.height - margin_plot.top - margin_plot.bottom;
 
         var metric_option = {long_name: 'Phylogenetic Distance', short_name: 'Distance', accessor: 'distance'};
+
+        // Set up image export
+        dotplot.setup_image_export();
 
         // data accession should be  done with function for the metrix, the x and y value!
 
@@ -472,13 +556,14 @@ dotplot_theme = function () {
             // attach zoom to brush element
             gbrush_plot.call(zoom).on("dblclick.zoom", null);
 
+
+            gbrush_plot.call(zoom.transform, d3.zoomIdentity);
+
             // define variable for d3 zoom state
             var currentZoom = null;
 
             // function called when zoomed
             function zoomed() {
-
-
 
                 // update zoom var
                 currentZoom = d3.event.transform;
