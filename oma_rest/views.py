@@ -5,7 +5,8 @@ import itertools
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ParseError
+from distutils.util import strtobool
 
 from . import models as rest_models
 from . import serializers
@@ -668,3 +669,54 @@ class TaxonomyViewSet(ViewSet):
         else:
             data = induced_tax.as_dict()
             return Response(data)
+
+
+class IdentifiySequenceAPIView(APIView):
+
+    def get(self, request, format=None):
+        """Identify a protein sequence
+
+        :queryparam query: the sequence to be searched.
+        :queryparam strategy: argument to choose search strategy. Can be set
+            to 'exact', 'approximate' or 'mixed'. Defaults to 'mixed', meaning
+            first tries to find exact match. If no target can be found, uses
+            apprximate search strategy to identify query sequence in database.
+        :queryparam full_length: a boolean indicating whether or not for
+            exact matches, the query sequence must be matching the full
+            target sequence. By default, a partial exact match is also
+            reported as exact match."""
+        query_seq = request.query_params.get('query', '')
+        strategy = request.query_params.get('search', 'mixed').lower()
+        if strategy not in ('approximate', 'exact', 'mixed'):
+            raise ValueError("search parameter invalid. Must be one of 'approximate', 'exact', 'mixed'.")
+        only_full_length = strtobool(request.query_params.get('full_length', 'False'))
+        map_result = self.identify_sequence(query_seq, strategy=strategy, only_full_length=only_full_length)
+        serializer = serializers.SequenceSearchResultSerializer(instance=map_result, context={'request': request})
+        return Response(serializer.data)
+
+    def identify_sequence(self, seq, strategy, only_full_length):
+        seq_seacher = utils.db.seq_search
+        seq = seq_seacher._sanitise_seq(seq)
+        if len(seq) < 5:
+            raise ParseError('too shot query sequence')
+        res = {'query': seq.decode()}
+
+        if strategy in ('exact', 'mixed'):
+            exact_matches = seq_seacher.exact_search(seq, only_full_length=only_full_length, is_sanitised=True)
+            res.update(
+                {'targets': [models.ProteinEntry.from_entry_nr(utils.db, enr) for enr in exact_matches],
+                 'identified_by': 'exact match'}
+            )
+
+        if strategy == 'approximate' or (strategy == 'mixed' and len(exact_matches) == 0):
+            approx = seq_seacher.approx_search(seq, is_sanitised=True)
+            targets = []
+            for enr, align_results in approx:
+                if align_results['score'] < 70:
+                    break
+                protein = models.ProteinEntry.from_entry_nr(utils.db, enr)
+                protein.alignment_score = align_results['score']
+                protein.alignment = [x[0] for x in align_results['alignment']]
+                targets.append(protein)
+            res.update({'targets': targets, 'identified_by': 'approximate match'})
+        return res

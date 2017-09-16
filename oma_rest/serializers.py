@@ -86,6 +86,17 @@ class OrthologsListSerializer(ProteinEntrySerializer):
     score = serializers.FloatField()
 
 
+class ApproxSearchProteinSerializer(ProteinEntryDetailSerializer):
+    alignment_score = serializers.FloatField(required=False)
+    alignment = serializers.ListSerializer(child=serializers.CharField(), required=False)
+
+
+class SequenceSearchResultSerializer(ReadOnlySerializer):
+    query = serializers.CharField()
+    identified_by = serializers.CharField()
+    targets = serializers.ListSerializer(child=ApproxSearchProteinSerializer())
+
+
 class SubHOGSerializer(ReadOnlySerializer):
     hog_id = serializers.CharField()
     members_url = QueryParamHyperlinkedIdentityField(

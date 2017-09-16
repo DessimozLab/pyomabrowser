@@ -196,3 +196,26 @@ class XRefLookupTest(APITestCase):
         self.assertLess(0, len(response.data))
         for hit in response.data:
             self.assertTrue(hit['xref'].lower().startswith('mal'))
+
+
+class SequenceIdentifyTest(APITestCase):
+    existing_query = 'ALTDVAAIVKDNPD'
+    inexisting_query = 'ALTDVAAVAVKDNPD'
+
+    def test_too_short_query(self):
+        response = APIClient().get('/api/sequence/?query=AA')
+        self.assertEqual(400, response.status_code)
+
+    def test_exact_match(self):
+        query = 'ALTDVAAIVKDNPD'
+        response = APIClient().get('/api/sequence/?query='+self.existing_query)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('exact match', response.data['identified_by'])
+
+    def test_no_hit_if_exact_but_sequence_differ(self):
+        response = APIClient().get('/api/sequence/?search=exact&query='+self.inexisting_query)
+        self.assertEqual(0, len(response.data['targets']))
+
+    def test_no_hit_if_exact_but_not_full_length(self):
+        response = APIClient().get('/api/sequence/?search=exact&full_length=True&query='+self.existing_query)
+        self.assertEqual(0, len(response.data['targets']))
