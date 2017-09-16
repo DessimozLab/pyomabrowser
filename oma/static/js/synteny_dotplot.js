@@ -314,10 +314,6 @@ dotplot_theme = function () {
 
                 var fname = 'dotplot_' + genome1+'_chromosome' + chromosome1+'_vs_' + genome2+'_chromosome'+ chromosome2;
                 var svg_to_export = d3.select("#plot_div").select('svg');
-                var svghist_to_export = d3.select("#hist_metric").select('svg');
-
-                console.log(svg_to_export);
-                console.log(svghist_to_export);
 
                 if (this.id === 'li_xpng') {
 
