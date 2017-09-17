@@ -245,12 +245,13 @@ hog_theme = function () {
                                 is_node_frozen = false;
                             }
                             else {
-                                is_node_frozen = node.id;
+                                is_node_frozen = node.id();
                             }
                             treeNode_tooltip.close();
                         });
 
-                    if (is_node_frozen && is_node_frozen != node.id) {
+                    if (is_node_frozen && is_node_frozen !== node.id()) {
+
 
                         table
                             .append("tr")
@@ -261,7 +262,7 @@ hog_theme = function () {
                             .on("click", function () {
                                 is_node_frozen = false;
                                 hogvis.mouse_over_node(node);
-                                is_node_frozen = node.id;
+                                is_node_frozen = node.id();
                                 treeNode_tooltip.close();
                             });
 
@@ -679,11 +680,28 @@ hog_theme = function () {
         this.init_track = function () {
 
             var track = function (leaf) {
+
                 var sp = leaf.node_name();
+
                 return tnt.board.track()
                     .color("#FFF")
                     .data(tnt.board.track.data.sync()
                         .retriever(function () {
+
+                            // in case the branch is collapse we still draw empty hogs columns
+                            if ( leaf.is_collapsed() ){
+                               var random_collapse_leaf_name = leaf.get_all_leaves(true)[0].node_name();
+
+                               if (per_species3[random_collapse_leaf_name] !== undefined) {
+
+                                   var genes2Xcoords = genes_2_xcoords(per_species3[random_collapse_leaf_name][current_opened_taxa_name], maxs[current_opened_taxa_name]);
+                                   genes2Xcoords.genes = [];
+
+                                   return genes2Xcoords;
+                               }
+
+                            }
+
                             // return _.flatten(per_species2[sp].Vertebrates);
                             // return per_species2[sp].Vertebrates;
                             if (per_species3[sp] === undefined) {
@@ -693,7 +711,6 @@ hog_theme = function () {
                                 };
                             }
                             var genes2Xcoords = genes_2_xcoords(per_species3[sp][current_opened_taxa_name], maxs[current_opened_taxa_name]);
-
                             return genes2Xcoords;
                         })
                     )
@@ -815,8 +832,6 @@ hog_theme = function () {
         this.set_remove_column_setting = function () {
 
             var update_after_reset = function(){
-
-
 
                 current_hog_state.reset_on(tree, per_species3, current_opened_taxa_name, column_coverage_threshold);
 
