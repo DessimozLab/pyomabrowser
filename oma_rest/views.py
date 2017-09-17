@@ -677,10 +677,10 @@ class IdentifiySequenceAPIView(APIView):
         """Identify a protein sequence
 
         :queryparam query: the sequence to be searched.
-        :queryparam strategy: argument to choose search strategy. Can be set
+        :queryparam search: argument to choose search strategy. Can be set
             to 'exact', 'approximate' or 'mixed'. Defaults to 'mixed', meaning
             first tries to find exact match. If no target can be found, uses
-            apprximate search strategy to identify query sequence in database.
+            approximate search strategy to identify query sequence in database.
         :queryparam full_length: a boolean indicating whether or not for
             exact matches, the query sequence must be matching the full
             target sequence. By default, a partial exact match is also
