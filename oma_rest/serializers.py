@@ -23,7 +23,7 @@ class QueryParamHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
 
 class OptionalHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
     def __init__(self, nullvalues=None, **kwargs):
-        super(OptionalHyperlinkedIdentityField, self).__init__(**kwargs, required=False)
+        super(OptionalHyperlinkedIdentityField, self).__init__(required=False, **kwargs)
         self.nullvalues = list(nullvalues)
 
     def get_url(self, obj, view_name, request, format):
