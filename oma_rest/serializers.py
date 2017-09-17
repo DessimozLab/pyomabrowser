@@ -1,6 +1,8 @@
 from itertools import groupby
 
 import itertools
+
+from django.core.urlresolvers import NoReverseMatch
 from rest_framework import serializers
 from oma.utils import db
 from pyoma.browser.models import ProteinEntry
@@ -17,6 +19,17 @@ class QueryParamHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
         if len(self.query_params) > 0:
             url += "?" + urlencode({k: getattr(obj, v) for k, v in self.query_params.items()})
         return url
+
+
+class OptionalHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
+    def __init__(self, nullvalues=None, **kwargs):
+        super(OptionalHyperlinkedIdentityField, self).__init__(**kwargs, required=False)
+        self.nullvalues = list(nullvalues)
+
+    def get_url(self, obj, view_name, request, format):
+        if getattr(obj, self.lookup_field) in self.nullvalues:
+            return None
+        return super(OptionalHyperlinkedIdentityField, self).get_url(obj, view_name, request, format)
 
 
 class ReadOnlySerializer(serializers.Serializer):
@@ -65,10 +78,10 @@ class ProteinEntryDetailSerializer(ProteinEntryExtendedSummarySerializer):
                                                      lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     ontology = serializers.HyperlinkedIdentityField(view_name='protein-ontology', read_only=True,
                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    oma_group_url = serializers.HyperlinkedIdentityField(view_name='group-detail', lookup_field='oma_group',
-                                                         lookup_url_kwarg='group_id')
-    oma_hog_members = serializers.HyperlinkedIdentityField(view_name='hog-members', lookup_field='oma_hog',
-                                                           lookup_url_kwarg='hog_id')
+    oma_group_url = OptionalHyperlinkedIdentityField(view_name='group-detail', lookup_field='oma_group',
+                                                         lookup_url_kwarg='group_id', nullvalues=[0])
+    oma_hog_members = OptionalHyperlinkedIdentityField(view_name='hog-members', lookup_field='oma_hog',
+                                                           lookup_url_kwarg='hog_id', nullvalues=('', b''))
 
     def get_hog_levels(self, obj):
         protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)

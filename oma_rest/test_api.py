@@ -14,6 +14,18 @@ class ProteinTest(APITestCase):
         response = client.get('/api/protein/300/')
         self.assertEqual(response.data['omaid'], 'YEAST00300')
 
+    def test_protein_without_hog_membership(self):
+        response = APIClient().get('/api/protein/2/')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('', response.data['oma_hog_id'])
+        self.assertIsNone(response.data['oma_hog_members'])
+
+    def test_protein_without_oma_group(self):
+        response = APIClient().get('/api/protein/1/')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, response.data['oma_group'])
+        self.assertIsNone(response.data['oma_group_url'])
+
     def test_protein_links(self):
         client = APIClient()
         response = client.get('/api/protein/909/')
@@ -201,13 +213,14 @@ class XRefLookupTest(APITestCase):
 class SequenceIdentifyTest(APITestCase):
     existing_query = 'ALTDVAAIVKDNPD'
     inexisting_query = 'ALTDVAAVAVKDNPD'
+    query_with_mutliple_matches = "ADRIA"
+    multi_match_pattern = "PLRDFVKSHGGHTVISKILIANNGIAAVKEIRSVR"
 
     def test_too_short_query(self):
         response = APIClient().get('/api/sequence/?query=AA')
         self.assertEqual(400, response.status_code)
 
     def test_exact_match(self):
-        query = 'ALTDVAAIVKDNPD'
         response = APIClient().get('/api/sequence/?query='+self.existing_query)
         self.assertEqual(200, response.status_code)
         self.assertEqual('exact match', response.data['identified_by'])
@@ -219,3 +232,13 @@ class SequenceIdentifyTest(APITestCase):
     def test_no_hit_if_exact_but_not_full_length(self):
         response = APIClient().get('/api/sequence/?search=exact&full_length=True&query='+self.existing_query)
         self.assertEqual(0, len(response.data['targets']))
+
+    def test_several_exact_hits(self):
+        response = APIClient().get('/api/sequence/?search=exact&query=' + self.query_with_mutliple_matches)
+        self.assertLess(1, len(response.data['targets']))
+        self.assertEqual('exact match', response.data['identified_by'])
+
+    def test_several_approx_hits(self):
+        response = APIClient().get('/api/sequence/?search=approximate&query='+self.multi_match_pattern)
+        self.assertLess(1, len(response.data['targets']))
+        self.assertEqual('approximate match', response.data['identified_by'])
