@@ -7,9 +7,13 @@
 {% block css_hook %}
 <link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
 <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
+<link type="text/css" rel="stylesheet" href="{% static "css/treecompare.css" %}"/>
 {% endblock css_hook %}
 {% block js_hook %}
 {% if max_nr_genomes %}<script type="text/javascript">MAX_NR_GENOMES = {{ max_nr_genomes }}; </script>{% endif %}
+<script src="https://use.fontawesome.com/28dcb2432d.js"></script>
+<script src="{% static "js/underscore-min.js" %}"></script>
+<script src="{% static "js/treecompare.js" %}"></script>
 <script src="{% static "js/phylotree.js" %}"></script>
 <script src="{% static "js/d3.v3.min.js" %}"></script>
 <script src="{% static "js/typeahead.bundle.js" %}"></script>
@@ -22,18 +26,6 @@
     <div class="row">       
         <div class="col-md-9" id="svgdiv"> <!-- svg -->
             <div class="jumbotron" id="svgg" style="overflow-x:scroll;" >
-                <div class="col-sm-4" style="position:fixed;">
-                    <div class="input-group">
-                        <input class="form-control typeahead" id="tags" type="text" placeholder="Search for a genome or a taxon">
-                        <span class="input-group-btn"><button class='btn btn-success greenb' id='searchGenome'>Highlight</button></span>
-                    </div>
-                </div>
-                <div class="col-sm-4 col-md-offset-4" style="position:fixed;">
-                    <div class="input-group">
-                        <input class="form-control typeahead" id="tagsId" type="text" placeholder="Search for genome with Id (e.g. HUMAN)">
-                        <span class="input-group-btn"><button class='btn btn-success greenb' id='AddId'>Add to selected genomes</button></span>
-                    </div>
-                </div>
                 <button class="btn btn-lg" data-toggle="modal" data-target="#myModal" id="modalhelp">
                     <span class="glyphicon glyphicon-question-sign"></span>
                 </button>
@@ -90,7 +82,6 @@
                 </div>
                 {% block menu_additional_inputs %}{% endblock %}
                 <div class="col-md-12"  id="buttondiv">
-                    <div class="row">
                         <div class="col-sm-6 col-md-6">
                             <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff;" id="buttonUnselect">Unselect all</button>
                         </div>
