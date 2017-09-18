@@ -85,7 +85,8 @@ var TreeCompare = function(){
         enableSearch: true,
         autoCollapse: null,
         linkFunc: undefined,
-        nodeFunc: undefined
+        nodeFunc: undefined,
+        maxNumGenome: 50
     };
 
     //Add a work helper function to the jQuery object
@@ -191,6 +192,7 @@ var TreeCompare = function(){
         settings.internalLabels = getSetting(settingsIn.internalLabels,settings.internalLabels);
         settings.zoomMode = getSetting(settingsIn.zoomMode,settings.zoomMode);
         settings.fitTree = getSetting(settingsIn.fitTree,settings.fitTree);
+        settings.maxNumGenome = getSetting(settingsIn.maxNumGenome,settings.maxNumGenome);
 
         var i;
         if (!(settingsIn.treeWidth === undefined)) {
@@ -4669,14 +4671,14 @@ var TreeCompare = function(){
     }
 
 
-    function selectAllSpecies(d, tree, selectAll) {
+    function selectAllSpecies(d, tree, maxNumGenome, selectAll) {
 
         /* Called on collapse AND uncollapse / expand. */
         var readd = false;
 
-        if ((d.leaves.length > 50 || (d.leaves.length + exportList.length) > 50) && selectAll){
-            alert("Only first 50 genomes will be selected in the moment. If you want to select more contact the system administrator.")
-            for (var leaf = 0; leaf < 50; leaf++){
+        if ((d.leaves.length > maxNumGenome || (d.leaves.length + exportList.length) > maxNumGenome) && selectAll){
+            alert("Only first "+maxNumGenome+ " genomes will be selected in the moment. If you want to select more contact the system administrator.")
+            for (var leaf = 0; leaf < maxNumGenome; leaf++){
                 if (exportList.indexOf(d.leaves[leaf].name) === -1 && selectAll){
                     exportList.push(d.leaves[leaf].name);
                     selectForOMAExport(d.leaves[leaf], false);
@@ -4694,8 +4696,8 @@ var TreeCompare = function(){
                     }
                 }
             }
-        } else if ((exportList.length < 50 && (d.leaves.length + exportList.length) > 50) && selectAll) {
-            var maxToFill = 50 - exportList.length;
+        } else if ((exportList.length < maxNumGenome && (d.leaves.length + exportList.length) > maxNumGenome) && selectAll) {
+            var maxToFill = maxNumGenome - exportList.length;
             // action function
             for (var leaf = 0; leaf < maxToFill; leaf++){
                 if (exportList.indexOf(d.leaves[leaf].name) === -1 && selectAll){
@@ -5319,7 +5321,7 @@ var TreeCompare = function(){
                             selectAll = false;
                         }
                         // var selectedSpecies = selectSpecies(d, tree, selectAll);
-                        selectAllSpecies(d, tree, selectAll);
+                        selectAllSpecies(d, tree, settings.maxNumGenome, selectAll);
                         d3.selectAll(".tooltipElem").remove();
                         if (additionalFunc !== undefined) {
                             Object.keys(additionalFunc).forEach(function (key) {
@@ -5350,7 +5352,7 @@ var TreeCompare = function(){
                         } else {
                             selectAll = false;
                         }
-                        selectAllSpecies(d, tree, selectAll);
+                        selectAllSpecies(d, tree, settings.maxNumGenome, selectAll);
                         d3.selectAll(".tooltipElem").remove();
                         if (additionalFunc !== undefined) {
                             Object.keys(additionalFunc).forEach(function (key) {
