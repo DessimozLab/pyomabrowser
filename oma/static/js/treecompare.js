@@ -4674,6 +4674,10 @@ var TreeCompare = function(){
     function selectAllSpecies(d, tree, maxNumGenome, selectAll) {
 
         /* Called on collapse AND uncollapse / expand. */
+        if(selectAll === undefined){
+
+        }
+
         var readd = false;
 
         if ((d.leaves.length > maxNumGenome || (d.leaves.length + exportList.length) > maxNumGenome) && selectAll){
@@ -5700,6 +5704,24 @@ var TreeCompare = function(){
                     } else {
                         collapseAll(undoData, trees[undoTreeIdx]);
                     }
+                }
+
+                if(undoAction === 'expand_all'){
+                    if (undoTreeIdx.length === 2){
+                        collapseAll(undoData, trees[undoTreeIdx[0]],trees[undoTreeIdx[1]]);
+                    } else {
+                        collapseAll(undoData, trees[undoTreeIdx]);
+                    }
+                }
+
+                if(undoAction === 'select_species'){
+                    selectAllSpecies(undoData, trees[undoTreeIdx[0]], settings.maxNumGenome);
+                    settings.nodeFunc["selectForExport"][0](exportList);
+                }
+
+                if(undoAction === 'select_all_species'){
+                    selectAllSpecies(undoData, trees[undoTreeIdx[0]], settings.maxNumGenome);
+                    settings.nodeFunc["selectForExport"][0](exportList);
                 }
 
                 if(undoAction === 'expand_all'){
