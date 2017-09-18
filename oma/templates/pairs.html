@@ -34,6 +34,7 @@
         {% if entry.omaid == entry.alt_splicing_variant %}
         <table class="table table-hover" id="pairTable"
                data-show-toggle="true"
+               data-advanced-search="true" data-id-table="advancedTable"
                data-show-columns="true" data-search="true" data-show-export="true"
                data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                data-mobile-responsive="true" data-check-on-init="true"
@@ -74,8 +75,13 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/extensions/export/bootstrap-table-export.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/extensions/mobile/bootstrap-table-mobile.min.js"></script>
 <script src="{% static "js/tableExport.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-table-taxon-filter.js" %}"></script>
+
 <script>
+
+
 var tab = $("#pairTable");
+
 tab.bootstrapTable({
     reorderableColumns: true,
     clickToSelect: false,
@@ -87,6 +93,7 @@ tab.bootstrapTable({
     onLoadSuccess: function(data){
         tab.bootstrapTable('hideLoading');
     }
+
 });
 var icons = tab.bootstrapTable('getOptions').icons;
 $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
