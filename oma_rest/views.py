@@ -695,21 +695,23 @@ class IdentifiySequenceAPIView(APIView):
         return Response(serializer.data)
 
     def identify_sequence(self, seq, strategy, only_full_length):
-        seq_seacher = utils.db.seq_search
-        seq = seq_seacher._sanitise_seq(seq)
+        seq_searcher = utils.db.seq_search
+        seq = seq_searcher._sanitise_seq(seq)
         if len(seq) < 5:
             raise ParseError('too shot query sequence')
         res = {'query': seq.decode()}
 
         if strategy in ('exact', 'mixed'):
-            exact_matches = seq_seacher.exact_search(seq, only_full_length=only_full_length, is_sanitised=True)
+            exact_matches = seq_searcher.exact_search(seq,
+                                                      only_full_length=only_full_length,
+                                                      is_sanitised=True)
             res.update(
                 {'targets': [models.ProteinEntry.from_entry_nr(utils.db, enr) for enr in exact_matches],
                  'identified_by': 'exact match'}
             )
 
         if strategy == 'approximate' or (strategy == 'mixed' and len(exact_matches) == 0):
-            approx = seq_seacher.approx_search(seq, is_sanitised=True)
+            approx = seq_searcher.approx_search(seq, is_sanitised=True)
             targets = []
             for enr, align_results in approx:
                 if align_results['score'] < 70:
