@@ -1,15 +1,26 @@
+/**
+ * @author: aperez <aperez@datadec.es>
+ * @version: v2.0.0
+ *
+ * @update Dennis Hernández <http://djhvscf.github.io/Blog>
+ *
+ *
+ * @update Clement Train
+ */
 
-!function($) {
+!function ($) {
     'use strict';
 
     var firstLoad = false;
+    var taxon_mode = false;
+    var sp_list = [] ;
 
     var sprintf = $.fn.bootstrapTable.utils.sprintf;
 
-    var showAvdSearch = function(pColumns, searchTitle, searchText, that) {
+    var showAvdSearch = function (pColumns, searchTitle, searchText, that) {
         if (!$("#avdSearchModal" + "_" + that.options.idTable).hasClass("modal")) {
             var vModal = sprintf("<div id=\"avdSearchModal%s\"  class=\"modal fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"mySmallModalLabel\" aria-hidden=\"true\">", "_" + that.options.idTable);
-            vModal += "<div class=\"modal-dialog modal-xs\">";
+            vModal += "<div class=\"modal-dialog modal-lg\">";
             vModal += " <div class=\"modal-content\">";
             vModal += "  <div class=\"modal-header\">";
             vModal += "   <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\" >&times;</button>";
@@ -25,28 +36,62 @@
 
             $("body").append($(vModal));
 
-            /*
+            var newcolumns = pColumns.filter(function (el) {
+                return el.title == 'Taxon';
+            });
 
-
-
-            var vFormAvd = createFormAvd(pColumns, searchText, that),
-                timeoutId = 0;;
+            var vFormAvd = createFormAvd(newcolumns, searchText, that),
+                timeoutId = 0;
 
             $('#avdSearchModalContent' + "_" + that.options.idTable).append(vFormAvd.join(''));
 
             $('#' + that.options.idForm).off('keyup blur', 'input').on('keyup blur', 'input', function (event) {
+                taxon_mode = false;
                 clearTimeout(timeoutId);
                 timeoutId = setTimeout(function () {
                     that.onColumnAdvancedSearch(event);
                 }, that.options.searchTimeOut);
             });
 
-            $("#btnCloseAvd" + "_" + that.options.idTable).click(function() {
+            $("#sel1").on("change", function (event) {
+
+                taxon_mode = true;
+
+                if (this.value == 'Mammals'){
+                    sp_list = ['Homo Sapiens', 'Rattus norvegicus'];
+                }
+                else if (this.value == 'Fish'){
+                    sp_list = ['Petromyzon marinus', 'Tetraodon nigroviridis']
+                }
+                else {sp_list=[]}
+
+                //var text = $.trim($(event.currentTarget).val());
+                var text = this.value;
+                var $field = 'taxon';
+
+                if ($.isEmptyObject(that.filterColumnsPartial)) {
+                    that.filterColumnsPartial = {};
+                }
+                if (text) {
+                    that.filterColumnsPartial[$field] = text;
+                } else {
+                    delete that.filterColumnsPartial[$field];
+                }
+
+                that.options.pageNumber = 1;
+                that.onSearch(event);
+                that.updatePagination();
+                that.trigger('column-advanced-search', $field, text);
+                
+            });
+
+            $("#btnCloseAvd" + "_" + that.options.idTable).click(function () {
                 $("#avdSearchModal" + "_" + that.options.idTable).modal('hide');
             });
 
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
-            */
+
+
         } else {
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
         }
@@ -54,20 +99,49 @@
 
     };
 
-    var createFormAvd = function(pColumns, searchText, that) {
+    var createFormAvd = function (pColumns, searchText, that) {
         var htmlForm = [];
         htmlForm.push(sprintf('<form class="form-horizontal" id="%s" action="%s" >', that.options.idForm, that.options.actionForm));
+
+
         for (var i in pColumns) {
             var vObjCol = pColumns[i];
             if (!vObjCol.checkbox && vObjCol.visible && vObjCol.searchable) {
                 htmlForm.push('<div class="form-group">');
-                htmlForm.push(sprintf('<label class="col-sm-4 control-label">%s</label>', vObjCol.title));
+                htmlForm.push(sprintf('<label class="col-sm-4 control-label">%s</label>', 'Based on species name'));
                 htmlForm.push('<div class="col-sm-6">');
                 htmlForm.push(sprintf('<input type="text" class="form-control input-md" name="%s" placeholder="%s" id="%s">', vObjCol.field, vObjCol.title, vObjCol.field));
                 htmlForm.push('</div>');
                 htmlForm.push('</div>');
             }
         }
+
+        htmlForm.push('<br>');
+        htmlForm.push('<h4 class="text-center"> OR</h4>');
+        htmlForm.push('<br>');
+
+
+        htmlForm.push('<div class="form-group">');
+        htmlForm.push(sprintf('<label class="col-sm-4 control-label for="sel1">%s</label>', 'Based on taxon'));
+        htmlForm.push('<div class="col-sm-6">');
+        htmlForm.push('<select class="form-control" id="sel1">');
+        htmlForm.push('<option>Choose a taxonomic range</option>');
+        htmlForm.push('<option>Mammals</option>');
+        htmlForm.push('<option>Fish</option>');
+        htmlForm.push('</select>');
+        htmlForm.push('</div>');
+        htmlForm.push('</div>');
+
+
+        htmlForm.push('<br>');
+        htmlForm.push('<h4 class="text-center"> OR</h4>');
+        htmlForm.push('<br>');
+
+
+        htmlForm.push('<div class="col-sm-6 col-sm-offset-3" style="background-color: #ddd; height:200px">');
+        htmlForm.push('<h5 class="text-center"> Using the phylo.io</h5>');
+        htmlForm.push('</div>');
+
 
         htmlForm.push('<div class="form-group">');
         htmlForm.push('<div class="col-sm-offset-9 col-sm-3">');
@@ -98,11 +172,11 @@
     });
 
     $.extend($.fn.bootstrapTable.locales, {
-        formatAdvancedSearch: function() {
-            return 'Advanced search';
+        formatAdvancedSearch: function () {
+            return 'Filter the table using species tree';
         },
-        formatAdvancedCloseButton: function() {
-            return "Close";
+        formatAdvancedCloseButton: function () {
+            return "Return to table";
         }
     });
 
@@ -113,7 +187,7 @@
         _load = BootstrapTable.prototype.load,
         _initSearch = BootstrapTable.prototype.initSearch;
 
-    BootstrapTable.prototype.initToolbar = function() {
+    BootstrapTable.prototype.initToolbar = function () {
         _initToolbar.apply(this, Array.prototype.slice.apply(arguments));
 
         if (!this.options.search) {
@@ -139,12 +213,12 @@
         that.$toolbar.prepend(html.join(''));
 
         that.$toolbar.find('button[name="advancedSearch"]')
-            .off('click').on('click', function() {
-                showAvdSearch(that.columns, that.options.formatAdvancedSearch(), that.options.formatAdvancedCloseButton(), that);
-            });
+            .off('click').on('click', function () {
+            showAvdSearch(that.columns, that.options.formatAdvancedSearch(), that.options.formatAdvancedCloseButton(), that);
+        });
     };
 
-    BootstrapTable.prototype.load = function(data) {
+    BootstrapTable.prototype.load = function (data) {
         _load.apply(this, Array.prototype.slice.apply(arguments));
 
         if (!this.options.advancedSearch) {
@@ -164,6 +238,7 @@
     };
 
     BootstrapTable.prototype.initSearch = function () {
+
         _initSearch.apply(this, Array.prototype.slice.apply(arguments));
 
         if (!this.options.advancedSearch) {
@@ -174,21 +249,24 @@
         var fp = $.isEmptyObject(this.filterColumnsPartial) ? null : this.filterColumnsPartial;
 
         this.data = fp ? $.grep(this.data, function (item, i) {
-            for (var key in fp) {
-                var fval = fp[key].toLowerCase();
-                var value = item[key];
-                value = $.fn.bootstrapTable.utils.calculateObjectValue(that.header,
-                    that.header.formatters[$.inArray(key, that.header.fields)],
-                    [value, item, i], value);
 
-                if (!($.inArray(key, that.header.fields) !== -1 &&
-                    (typeof value === 'string' || typeof value === 'number') &&
-                    (value + '').toLowerCase().indexOf(fval) !== -1)) {
-                    return false;
+                for (var key in fp) {
+                    var fval = fp[key].toLowerCase();
+                    var value = item[key];
+                    value = $.fn.bootstrapTable.utils.calculateObjectValue(that.header,
+                        that.header.formatters[$.inArray(key, that.header.fields)],
+                        [value, item, i], value);
+
+                    if (!($.inArray(key, that.header.fields) !== -1 &&
+                        (typeof value === 'string' || typeof value === 'number') &&
+                        (value + '').toLowerCase().indexOf(fval) !== -1)) {
+                        return false;
+                    }
                 }
-            }
-            return true;
+                return true;
+
         }) : this.data;
+
     };
 
     BootstrapTable.prototype.onColumnAdvancedSearch = function (event) {
@@ -209,4 +287,6 @@
         this.updatePagination();
         this.trigger('column-advanced-search', $field, text);
     };
+
+
 }(jQuery);
