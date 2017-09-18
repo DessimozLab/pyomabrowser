@@ -81,7 +81,7 @@ $(document).ready(function() {
         url: "/All/genomes.json",
         success: function (newick) {
             var additionalNodeFunctions = {
-                selectForExport: [
+                "selectForExport": [
                     function(exportList){
                         arrayIdSelectedGenome = exportList;
                         updateInfo(arrayIdSelectedGenome, tree1.root)

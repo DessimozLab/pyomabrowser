@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="dfc18109-d810-4655-8195-800e35d16fa5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/oma/static/js/phylotree.js" afterPath="$PROJECT_DIR$/oma/static/js/phylotree.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/oma/static/css/treecompare.css" afterPath="$PROJECT_DIR$/oma/static/css/treecompare.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/oma/static/js/treecompare.js" afterPath="$PROJECT_DIR$/oma/static/js/treecompare.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -20,7 +21,7 @@
       <file leaf-file-name="Readme.txt" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Readme.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
+            <state relative-caret-position="0">
               <caret line="10" column="17" lean-forward="false" selection-start-line="10" selection-start-column="17" selection-end-line="10" selection-end-column="17" />
               <folding />
             </state>
@@ -30,11 +31,10 @@
       <file leaf-file-name="phylotree.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/oma/static/js/phylotree.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" column="54" lean-forward="false" selection-start-line="5" selection-start-column="54" selection-end-line="5" selection-end-column="54" />
+            <state relative-caret-position="85">
+              <caret line="83" column="32" lean-forward="false" selection-start-line="83" selection-start-column="17" selection-end-line="83" selection-end-column="32" />
               <folding>
-                <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-                <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+                <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
               </folding>
             </state>
           </provider>
@@ -43,31 +43,9 @@
       <file leaf-file-name="EcmaScript.js" pinned="false" current-in-tab="false">
         <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavaScriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/EcmaScript.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1470">
+            <state relative-caret-position="15">
               <caret line="98" column="17" lean-forward="false" selection-start-line="98" selection-start-column="17" selection-end-line="98" selection-end-column="17" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="treecompare.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/oma/static/js/treecompare.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="4639" column="13" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="5876" selection-end-column="2" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="treecompare.css" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/oma/static/css/treecompare.css">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="8550">
-              <caret line="570" column="13" lean-forward="false" selection-start-line="570" selection-start-column="13" selection-end-line="570" selection-end-column="13" />
-              <folding>
-                <marker date="1505391595000" expanded="true" signature="6431:6507" ph="{...}" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -75,8 +53,28 @@
       <file leaf-file-name="export.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/oma/templates/export.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="16" column="54" lean-forward="true" selection-start-line="16" selection-start-column="54" selection-end-line="16" selection-end-column="54" />
+            <state relative-caret-position="-692">
+              <caret line="15" column="43" lean-forward="false" selection-start-line="15" selection-start-column="43" selection-end-line="15" selection-end-column="43" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="treecompare.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/oma/static/js/treecompare.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="151">
+              <caret line="2965" column="28" lean-forward="false" selection-start-line="2965" selection-start-column="28" selection-end-line="2966" selection-end-column="20" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="treecompare.css" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/oma/static/css/treecompare.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="228">
+              <caret line="837" column="26" lean-forward="false" selection-start-line="837" selection-start-column="26" selection-end-line="837" selection-end-column="26" />
               <folding />
             </state>
           </provider>
@@ -96,9 +94,7 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Unselect all</find>
       <find>select All</find>
-      <find>search</find>
       <find>orange</find>
       <find>list_</find>
       <find>autoCollapse</find>
@@ -126,6 +122,8 @@
       <find>selectForOMAExport</find>
       <find>visit</find>
       <find>50</find>
+      <find>search</find>
+      <find>3642</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -135,11 +133,11 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/oma/static/css/phylotree.css" />
-        <option value="$PROJECT_DIR$/oma/static/css/treecompare.css" />
         <option value="$PROJECT_DIR$/oma/static/js/underscore-observe.js" />
         <option value="$PROJECT_DIR$/oma/templates/export.html" />
-        <option value="$PROJECT_DIR$/oma/static/js/treecompare.js" />
         <option value="$PROJECT_DIR$/oma/static/js/phylotree.js" />
+        <option value="$PROJECT_DIR$/oma/static/js/treecompare.js" />
+        <option value="$PROJECT_DIR$/oma/static/css/treecompare.css" />
       </list>
     </option>
   </component>
@@ -170,7 +168,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -201,12 +198,13 @@
               <item name="pyomabrowser" type="462c0819:PsiDirectoryNode" />
               <item name="oma" type="462c0819:PsiDirectoryNode" />
               <item name="static" type="462c0819:PsiDirectoryNode" />
-              <item name="js" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -258,12 +256,12 @@
       <workItem from="1505201652201" duration="2401000" />
       <workItem from="1505228305193" duration="15998000" />
       <workItem from="1505643591273" duration="12222000" />
-      <workItem from="1505742583714" duration="1215000" />
+      <workItem from="1505742583714" duration="3466000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="72762000" />
+    <option name="totallyTimeSpent" value="75013000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="4" y="23" width="1436" height="877" extended-state="6" />
@@ -273,8 +271,8 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24946997" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2664311" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -317,9 +315,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="7635">
           <caret line="509" column="0" lean-forward="false" selection-start-line="509" selection-start-column="0" selection-end-line="511" selection-end-column="1" />
-          <folding>
-            <marker date="1505391595000" expanded="true" signature="6431:6507" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -343,9 +339,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="7635">
           <caret line="509" column="0" lean-forward="false" selection-start-line="509" selection-start-column="0" selection-end-line="511" selection-end-column="1" />
-          <folding>
-            <marker date="1505391595000" expanded="true" signature="6431:6507" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -370,8 +364,7 @@
         <state relative-caret-position="15210">
           <caret line="1014" column="41" lean-forward="false" selection-start-line="1014" selection-start-column="20" selection-end-line="1014" selection-end-column="41" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
@@ -389,8 +382,7 @@
         <state relative-caret-position="15210">
           <caret line="1014" column="41" lean-forward="false" selection-start-line="1014" selection-start-column="20" selection-end-line="1014" selection-end-column="41" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
@@ -407,9 +399,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="7635">
           <caret line="509" column="0" lean-forward="false" selection-start-line="509" selection-start-column="0" selection-end-line="511" selection-end-column="1" />
-          <folding>
-            <marker date="1505391595000" expanded="true" signature="6431:6507" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -442,8 +432,7 @@
         <state relative-caret-position="1485">
           <caret line="99" column="42" lean-forward="true" selection-start-line="99" selection-start-column="42" selection-end-line="99" selection-end-column="42" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
@@ -493,8 +482,7 @@
         <state relative-caret-position="14835">
           <caret line="989" column="50" lean-forward="false" selection-start-line="989" selection-start-column="43" selection-end-line="989" selection-end-column="50" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
@@ -528,8 +516,7 @@
         <state relative-caret-position="14835">
           <caret line="989" column="50" lean-forward="false" selection-start-line="989" selection-start-column="43" selection-end-line="989" selection-end-column="50" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
@@ -555,8 +542,7 @@
         <state relative-caret-position="11670">
           <caret line="778" column="27" lean-forward="false" selection-start-line="778" selection-start-column="13" selection-end-line="778" selection-end-column="27" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
@@ -574,8 +560,7 @@
         <state relative-caret-position="1485">
           <caret line="99" column="11" lean-forward="false" selection-start-line="99" selection-start-column="4" selection-end-line="99" selection-end-column="11" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
@@ -609,8 +594,7 @@
         <state relative-caret-position="1485">
           <caret line="99" column="11" lean-forward="false" selection-start-line="99" selection-start-column="4" selection-end-line="99" selection-end-column="11" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
@@ -628,8 +612,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
@@ -655,8 +638,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
@@ -678,27 +660,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Readme.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
+        <state relative-caret-position="0">
           <caret line="10" column="17" lean-forward="false" selection-start-line="10" selection-start-column="17" selection-end-line="10" selection-end-column="17" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavaScriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/EcmaScript.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1470">
-          <caret line="98" column="17" lean-forward="false" selection-start-line="98" selection-start-column="17" selection-end-line="98" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/oma/static/css/treecompare.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8550">
-          <caret line="570" column="13" lean-forward="false" selection-start-line="570" selection-start-column="13" selection-end-line="570" selection-end-column="13" />
-          <folding>
-            <marker date="1505391595000" expanded="true" signature="6431:6507" ph="{...}" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -718,29 +682,44 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavaScriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/EcmaScript.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="98" column="17" lean-forward="false" selection-start-line="98" selection-start-column="17" selection-end-line="98" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/oma/templates/export.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="16" column="54" lean-forward="true" selection-start-line="16" selection-start-column="54" selection-end-line="16" selection-end-column="54" />
+        <state relative-caret-position="-692">
+          <caret line="15" column="43" lean-forward="false" selection-start-line="15" selection-start-column="43" selection-end-line="15" selection-end-column="43" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/oma/static/js/phylotree.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="54" lean-forward="false" selection-start-line="5" selection-start-column="54" selection-end-line="5" selection-end-column="54" />
+        <state relative-caret-position="85">
+          <caret line="83" column="32" lean-forward="false" selection-start-line="83" selection-start-column="17" selection-end-line="83" selection-end-column="32" />
           <folding>
-            <marker date="1505744972000" expanded="true" signature="6506:6513" ph="×" />
-            <marker date="1505744972000" expanded="true" signature="9574:9846" ph="..." />
+            <marker date="1505746488000" expanded="true" signature="6508:6515" ph="×" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/oma/static/js/treecompare.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="4639" column="13" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="5876" selection-end-column="2" />
+        <state relative-caret-position="151">
+          <caret line="2965" column="28" lean-forward="false" selection-start-line="2965" selection-start-column="28" selection-end-line="2966" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/oma/static/css/treecompare.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="228">
+          <caret line="837" column="26" lean-forward="false" selection-start-line="837" selection-start-column="26" selection-end-line="837" selection-end-column="26" />
           <folding />
         </state>
       </provider>

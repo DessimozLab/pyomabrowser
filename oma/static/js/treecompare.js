@@ -2937,18 +2937,18 @@ var TreeCompare = function(){
             var searchDiv = d3.select("#" + canvasId).append("div")
                 .attr("class", "searchBox");
 
-            var searchDivA = searchDiv.append("a")
-                .attr("class", "btn btn-sm sharp searchButton")
-                .attr("title", "search by leaf name");
+            // var searchDivA = searchDiv.append("a")
+            //     .attr("class", "btn btn-sm sharp searchButton")
+            //     .attr("title", "search by leaf name");
 
-            searchDivA.append("span")
-                .attr("class", "glyphicon glyphicon-search")
-                .attr("aria-hidden","true");
+            // searchDivA.append("span")
+            //     .attr("class", "glyphicon glyphicon-search")
+            //     .attr("aria-hidden","true");
 
             searchDiv.append("input")
                 .attr("class", "searchInput")
                 .attr("type", "text")
-                .attr("placeholder", "search by species name")
+                .attr("placeholder", "search by species name or oma id")
                 .attr("autofocus");
 
             searchDiv.append("div")
@@ -3021,7 +3021,7 @@ var TreeCompare = function(){
             d3.select("#"+canvasId).select(".searchInput")
                 .style("display", "inline")
                 .transition().duration(600)
-                .style("width", "150px").node().focus();
+                .style("width", "250px").node().focus();
 
         }
 
@@ -3042,17 +3042,17 @@ var TreeCompare = function(){
         }
 
         function hideSearchBar(canvasId) {
-            d3.select("#"+canvasId).select(".searchResultsList")
-                .empty();
-
-            d3.select("#"+canvasId).select(".searchResultsBox")
-                .transition().duration(600)
-                .style("display","none");
-
-            d3.select("#"+canvasId).select(".searchInput")
-                .transition().duration(600)
-                .style("width", "0px")
-                .style("display", "none");
+            // d3.select("#"+canvasId).select(".searchResultsList")
+            //     .empty();
+            //
+            // d3.select("#"+canvasId).select(".searchResultsBox")
+            //     .transition().duration(600)
+            //     .style("display","none");
+            //
+            // d3.select("#"+canvasId).select(".searchInput")
+            //     .transition().duration(600)
+            //     .style("width", "0px")
+            //     .style("display", "none");
 
             $("#"+canvasId+" .searchInput").val("");
         }
@@ -4674,6 +4674,10 @@ var TreeCompare = function(){
     function selectAllSpecies(d, tree, maxNumGenome, selectAll) {
 
         /* Called on collapse AND uncollapse / expand. */
+        if(selectAll === undefined){
+
+        }
+
         var readd = false;
 
         if ((d.leaves.length > maxNumGenome || (d.leaves.length + exportList.length) > maxNumGenome) && selectAll){
@@ -5700,6 +5704,24 @@ var TreeCompare = function(){
                     } else {
                         collapseAll(undoData, trees[undoTreeIdx]);
                     }
+                }
+
+                if(undoAction === 'expand_all'){
+                    if (undoTreeIdx.length === 2){
+                        collapseAll(undoData, trees[undoTreeIdx[0]],trees[undoTreeIdx[1]]);
+                    } else {
+                        collapseAll(undoData, trees[undoTreeIdx]);
+                    }
+                }
+
+                if(undoAction === 'select_species'){
+                    selectAllSpecies(undoData, trees[undoTreeIdx[0]], settings.maxNumGenome);
+                    settings.nodeFunc["selectForExport"][0](exportList);
+                }
+
+                if(undoAction === 'select_all_species'){
+                    selectAllSpecies(undoData, trees[undoTreeIdx[0]], settings.maxNumGenome);
+                    settings.nodeFunc["selectForExport"][0](exportList);
                 }
 
                 if(undoAction === 'expand_all'){
