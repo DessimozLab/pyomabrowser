@@ -2937,18 +2937,18 @@ var TreeCompare = function(){
             var searchDiv = d3.select("#" + canvasId).append("div")
                 .attr("class", "searchBox");
 
-            var searchDivA = searchDiv.append("a")
-                .attr("class", "btn btn-sm sharp searchButton")
-                .attr("title", "search by leaf name");
+            // var searchDivA = searchDiv.append("a")
+            //     .attr("class", "btn btn-sm sharp searchButton")
+            //     .attr("title", "search by leaf name");
 
-            searchDivA.append("span")
-                .attr("class", "glyphicon glyphicon-search")
-                .attr("aria-hidden","true");
+            // searchDivA.append("span")
+            //     .attr("class", "glyphicon glyphicon-search")
+            //     .attr("aria-hidden","true");
 
             searchDiv.append("input")
                 .attr("class", "searchInput")
                 .attr("type", "text")
-                .attr("placeholder", "search by species name")
+                .attr("placeholder", "search by species name or oma id")
                 .attr("autofocus");
 
             searchDiv.append("div")
@@ -3021,7 +3021,7 @@ var TreeCompare = function(){
             d3.select("#"+canvasId).select(".searchInput")
                 .style("display", "inline")
                 .transition().duration(600)
-                .style("width", "150px").node().focus();
+                .style("width", "250px").node().focus();
 
         }
 
@@ -3042,17 +3042,17 @@ var TreeCompare = function(){
         }
 
         function hideSearchBar(canvasId) {
-            d3.select("#"+canvasId).select(".searchResultsList")
-                .empty();
-
-            d3.select("#"+canvasId).select(".searchResultsBox")
-                .transition().duration(600)
-                .style("display","none");
-
-            d3.select("#"+canvasId).select(".searchInput")
-                .transition().duration(600)
-                .style("width", "0px")
-                .style("display", "none");
+            // d3.select("#"+canvasId).select(".searchResultsList")
+            //     .empty();
+            //
+            // d3.select("#"+canvasId).select(".searchResultsBox")
+            //     .transition().duration(600)
+            //     .style("display","none");
+            //
+            // d3.select("#"+canvasId).select(".searchInput")
+            //     .transition().duration(600)
+            //     .style("width", "0px")
+            //     .style("display", "none");
 
             $("#"+canvasId+" .searchInput").val("");
         }
