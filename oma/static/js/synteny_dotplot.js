@@ -39,6 +39,7 @@ dotplot_theme = function () {
             function update_action_dropdown(selected_action){
                 if (selected_action === 'ba-select' || selected_action === 's') {
                     brush_action = 'select';
+                    d3.select('.overlay').attr("cursor", 'crosshair');
                     d3.select('#brush_ok_zoom').classed('hidden', true);
                     d3.select('#brush_ok_select').classed('hidden', false);
                     d3.select('#brush_ok_pan').classed('hidden', true);
@@ -46,16 +47,21 @@ dotplot_theme = function () {
                 }
                 else if (selected_action === 'ba-zoom') {
                     brush_action = 'zoom';
+                    d3.select('.overlay').attr("cursor", 'pointer');
                     d3.select('#brush_ok_zoom').classed('hidden', false);
                     d3.select('#brush_ok_select').classed('hidden', true);
                     d3.select('#brush_ok_pan').classed('hidden', true);
                 }
                 else if (selected_action === 'ba-pan' || selected_action === 'a') {
                     brush_action = 'pan';
+                    d3.select('.overlay').attr("cursor", 'move');
                     d3.select('#brush_ok_pan').classed('hidden', false);
                     d3.select('#brush_ok_zoom').classed('hidden', true);
                     d3.select('#brush_ok_select').classed('hidden', true)
                 }
+
+
+
             }
 
             genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
@@ -554,6 +560,8 @@ dotplot_theme = function () {
 
 
             gbrush_plot.call(zoom.transform, d3.zoomIdentity);
+
+            d3.select('.overlay').attr("cursor", 'move');
 
             // define variable for d3 zoom state
             var currentZoom = null;
