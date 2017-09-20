@@ -2969,7 +2969,7 @@ var TreeCompare = function(){
                     .attr("id", results[i].name)
                     .attr("href", "#")
                     .text(results[i].name)
-                    .attr("title", results[i].omaid)
+                    .attr("title", results[i].id)
                     .on("click", function() {
                         var index = $(this).attr("class");
                         //var index = i;
@@ -3109,7 +3109,7 @@ var TreeCompare = function(){
                 return stringSearch(d.name.toLowerCase(), text.toLowerCase());
             });
             var results_id = _.filter(leafObjs, function(d) {
-                return stringSearch(d.omaid.toLowerCase(), text.toLowerCase());
+                return stringSearch(d.id.toLowerCase(), text.toLowerCase());
             });
             var results = results_name.concat(results_id);
 
@@ -4581,7 +4581,7 @@ var TreeCompare = function(){
             d.target = null;
             d.baseX = null;
             d.baseY = null;
-            d.id = null;
+            // d.id = null;
         });
     }
 
