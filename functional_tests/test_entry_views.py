@@ -22,7 +22,7 @@ class EntryViewPageTest(FunctionalTest):
         self.assertIn('Homeologs', "".join([tab.text for tab in tab_lnks]))
 
         # is this also true if she starts from a django served page?
-        synteny_lnks = [lnk for lnk in tab_lnks if 'Synteny' in lnk.text]
+        synteny_lnks = [lnk for lnk in tab_lnks if 'Local synteny' in lnk.text]
         self.assertEqual(1, len(synteny_lnks))
         synteny_lnks[0].click()
         tab_lnks = self.browser.find_elements_by_css_selector('.nav-tabs>li>a')
