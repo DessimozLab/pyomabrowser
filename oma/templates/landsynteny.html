@@ -1,9 +1,8 @@
 {% extends  "core.html" %}
 {% load staticfiles %}
-{% load bootstrap3 %}
 
 {% block title %}OMA orthology database: Explore conserved neighboring genes across genomes{% endblock %}
-{% block meta_description %}The synteny viewer provides an overview of the genomic context of a particular gene and its orthologs in other species.{% endblock %}
+{% block meta_description %}The local synteny viewer provides an overview of the genomic context of a particular gene and its orthologs in other species.{% endblock %}
 {% block content %}
 <div class="container-fluid">
     <div class="row">
@@ -11,14 +10,14 @@
             <div class="jumbotron">
                 <div class="container">
                     <div class="page-header ">
-                        <h1 class="text-center">Synteny</h1>
+                        <h1 class="text-center">Local synteny</h1>
                         <div class="well well-sm entete"></div>
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-body">
                             <p>The synteny view provides an overview of the genomic context of a particular entry and its orthologs in other species. This enables to see conservation or divergence of syntenic regions across species.
                             </p>
-                            <p>As synteny is computed with respect to a reference entry, please first search for a protein sequence of interest and click on the “Synteny” tab.
+                            <p>As synteny is computed with respect to a reference entry, please first search for a protein sequence of interest and click on the “Local Synteny” tab.
                             </p>
                             <br>
                             <form class="form-horizontal" id="searchForm" onSubmit="goSynteny(); return false;">
