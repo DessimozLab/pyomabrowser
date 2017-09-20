@@ -59,7 +59,7 @@ $(document).ready(function() {
     function build_dicts(root){
         visit(root, function(d){
             if(!(d.children || d._children)){
-                hashGenome[d.name] = d.omaid
+                hashGenome[d.name] = d.id
             }
         },
         function(d) {
@@ -181,15 +181,15 @@ $(document).ready(function() {
                     ID.innerHTML='ID : ';
 
                     var IDA = document.createElement('a');
-                    IDA.innerHTML= d.omaid +'  '+'<img alt="ext logo" src="/static/image/ext.png" ></a>' ;
-                    IDA.href="/cgi-bin/gateway.pl?f=DisplayOS&p1="+d.omaid;
+                    IDA.innerHTML= d.id +'  '+'<img alt="ext logo" src="/static/image/ext.png" ></a>' ;
+                    IDA.href="/cgi-bin/gateway.pl?f=DisplayOS&p1="+d.id;
 
                     var TAXID = document.createElement('em');
                     TAXID.innerHTML='Taxon ID : ';
 
                     var TAXIDA = document.createElement('a');
-                    TAXIDA.innerHTML= d.taxomaid +'  '+'<img alt="ext logo" src="/static/image/ext.png" ></a>' ;
-                    TAXIDA.href="http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id="+d.taxomaid;
+                    TAXIDA.innerHTML= d.taxid +'  '+'<img alt="ext logo" src="/static/image/ext.png" ></a>' ;
+                    TAXIDA.href="http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id="+d.taxid;
 
                     var headerList = document.createElement('div');
                     headerList.appendChild(pName);
