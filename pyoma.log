@@ -16,3 +16,5 @@
 [12/Sep/2017 15:04:33] WARNING [django.request:182] Not Found: /All/genomes_newID.json
 [17/Sep/2017 19:55:57] WARNING [django.request:182] Not Found: /cgi-bin/gateway.pl
 [17/Sep/2017 19:55:57] WARNING [django.request:182] Not Found: /favicon.ico
+[19/Sep/2017 09:15:17] WARNING [django.request:182] Not Found: /cgi-bin/gateway.pl
+[19/Sep/2017 09:15:17] WARNING [django.request:182] Not Found: /favicon.ico
