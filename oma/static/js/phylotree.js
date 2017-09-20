@@ -1,7 +1,6 @@
 $(document).ready(function() {
     var numberOfSelectedGenome=0;
-    var arrayGenome=[];
-    var hashGenome=[];
+    var hashGenome={};
     var maxGenome = 50; //number max of selected genomes
     var needUpdate=false;//Toolbox need to be update ?
     var arrayIdSelectedGenome=[];
@@ -52,19 +51,16 @@ $(document).ready(function() {
         }
     }
 
-    function build_dicts(root){
-        // arrayGenome=[];
-        // hashGenome=[];
-        visit(root, function(d){
-            var genometmp=[];
+    function OpenInNewTab(url) {
+        var win = window.open(url, '_blank');
+        win.focus();
+    }
 
-            genometmp[0] = d.name,
-            genometmp[1]=d ;
-            genometmp[2] = d.id;
-            genometmp[3] = d.taxid;
-            arrayGenome.push(d.name);
-            if(!(d.children || d._children)){arrayGenome.push(d.id);}
-            hashGenome.push(genometmp);
+    function build_dicts(root){
+        visit(root, function(d){
+            if(!(d.children || d._children)){
+                hashGenome[d.name] = d.omaid
+            }
         },
         function(d) {
             if (d.children && d.children.length > 0  ){
@@ -119,18 +115,18 @@ $(document).ready(function() {
                     export_button.onclick = function() {
                         var urlExport= '/cgi-bin/gateway.pl?f=AllAllExport';
                         for (var i in arrayIdSelectedGenome){
-                            urlExport=urlExport+'&p'+i+'='+arrayIdSelectedGenome[i];
+                            urlExport=urlExport+'&p'+i+'='+hashGenome[arrayIdSelectedGenome[i]];
                         }
                         OpenInNewTab(urlExport);
                     };
                 } else {
-                    export_button = document.getElementById('buttonSubmitMarkerGenes')
+                    export_button = document.getElementById('buttonSubmitMarkerGenes');
                     export_button.onclick = function() {
                         var urlExport = "/oma/export_markers/?";
                         urlExport += "min_species_coverage=0.5";
                         urlExport += "&max_nr_markers=1000";
                         for (var i in arrayIdSelectedGenome){
-                            urlExport += "&genomes="+arrayIdSelectedGenome[i];
+                            urlExport += "&genomes="+hashGenome[arrayIdSelectedGenome[i]];
                         }
                         OpenInNewTab(urlExport);
                     };
