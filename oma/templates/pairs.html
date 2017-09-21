@@ -38,7 +38,7 @@
             {% if entry.omaid == entry.alt_splicing_variant %}
                 <table class="table table-hover" id="pairTable"
                        data-show-toggle="true"
-                       data-taxon-filter="true" data-id-table = 'taxonFilter'
+                       data-taxon-filter="true" data-id-table = 'taxonFilter' data-url-specie-tree="/All/genomes.json"
                        data-show-columns="true" data-search="true" data-show-export="true"
                        data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                        data-mobile-responsive="true" data-check-on-init="true"
@@ -95,7 +95,10 @@
 
         <script src="{% static "js/tableExport.min.js" %}"></script>
 
+         <script src="{% static "js/tnt.js" %}"></script>
+
         <script src="{% static "js/bootstrap-table-filtertaxon.js" %}"></script>
+
         <script>
             var tab = $("#pairTable");
 
@@ -108,8 +111,12 @@
                 },
                 onLoadSuccess: function (data) {
                     tab.bootstrapTable('hideLoading');
+                },
+                taxon_to_show: function () {
+                    return ['Mammalia', 'Tetraodontidae', 'Wrong'];
                 }
             });
+
             var icons = tab.bootstrapTable('getOptions').icons;
             $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
             tab.bootstrapTable('refreshOptions', {'icons': icons});

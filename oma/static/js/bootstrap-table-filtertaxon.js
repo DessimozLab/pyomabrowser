@@ -7,6 +7,8 @@
  * @update Clement Train
  */
 
+
+
 !function ($) {
     'use strict';
 
@@ -18,7 +20,55 @@
 
     var test_searchmode = false;
 
+    var build_tax_to_species_converter = function(url_tree, list_taxons){
+
+        var converter = {};
+
+        $.ajaxSetup({
+    async: false
+});
+
+        $.getJSON(url_tree, function(json) {
+            var tree_vis = tnt.tree().data(json);
+
+            var root = tree_vis.root();
+
+            for (var e in list_taxons){
+
+                var node = root.find_node_by_name(list_taxons[e]);
+
+                if (node){
+                    var leaves = node.get_all_leaves();
+
+                    if (leaves) {
+
+                        converter[list_taxons[e]] = [];
+
+                        for (var i in leaves){
+
+                            converter[list_taxons[e]].push(leaves[i].node_name());
+
+                        }
+
+
+                    }
+
+                }
+            }
+
+        });
+
+        $.ajaxSetup({
+    async: true
+});
+
+
+        return converter
+
+    };
+
     var showAvdSearch = function (pColumns, searchTitle, searchText, that) {
+
         if (!$("#avdSearchModal" + "_" + that.options.idTable).hasClass("modal")) {
             var vModal = sprintf("<div id=\"avdSearchModal%s\"  class=\"modal fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"mySmallModalLabel\" aria-hidden=\"true\">", "_" + that.options.idTable);
             vModal += "<div class=\"modal-dialog modal-xs\">";
@@ -74,6 +124,7 @@
     };
 
     var createFormAvd = function (pColumns, searchText, that) {
+
         var htmlForm = [];
 
         htmlForm.push('<button class="btn btn-default center-block" type="button" id="test_button" aria-label="advanced search" title="cc">Filter w/ tet + homo</button> <br>');
@@ -106,6 +157,7 @@
         idForm: 'taxonFilter',
         actionForm: '',
         idTable: undefined,
+        urlSpecieTree: undefined,
         onColumntaxonFilter: function (field, text) {
             return false;
         }
@@ -125,6 +177,9 @@
         },
         formatAdvancedCloseButton: function () {
             return "Close";
+        },
+        taxon_to_show: function () {
+            return [];
         }
     });
 
@@ -150,20 +205,49 @@
             return;
         }
 
+        if (!this.options.urlSpecieTree) {
+            return;
+        }
+
+        this.list_taxon_accepted = this.options.taxon_to_show();
+        this.tax_converter = build_tax_to_species_converter(this.options.urlSpecieTree, this.list_taxon_accepted);
+
         var that = this,
             html = [];
 
-        html.push(sprintf('<div class="columns columns-%s btn-group pull-%s" role="group">', this.options.buttonsAlign, this.options.buttonsAlign));
-        html.push(sprintf('<button class="btn btn-default%s' + '" type="button" name="taxonFilter" aria-label="advanced search" title="%s">', that.options.iconSize === undefined ? '' : ' btn-' + that.options.iconSize, that.options.formattaxonFilter()));
-        html.push(sprintf('<i class="%s %s"></i>', that.options.iconsPrefix, that.options.icons.taxonFilterIcon))
-        html.push('</button></div>');
+        html.push(sprintf('<div class="dropdown columns columns-%s btn-group pull-%s" role="group">', this.options.buttonsAlign, this.options.buttonsAlign));
+        html.push(sprintf('<button class="btn btn-default%s dropdown-toggle' + '" type="button" name="taxonFilter" aria-label="advanced search" title="%s" data-toggle="dropdown">', that.options.iconSize === undefined ? '' : ' btn-' + that.options.iconSize, that.options.formattaxonFilter()));
+        html.push(sprintf('<i class="%s %s"></i>', that.options.iconsPrefix, that.options.icons.taxonFilterIcon));
+        html.push('<span class="caret"></span>');
+        html.push('</button>');
+        html.push('<ul class="dropdown-menu">');
+
+        for (var tax in this.tax_converter) {
+            html.push(' <li><a  class="li_filtertax" id="' + tax +'">' + tax +'</a></li> ');
+        }
+
+        html.push(' <li class="divider"></li> ');
+        html.push(' <li><a  class="li_filtertax"  id="custom">Custom...</a></li> ');
+
+        html.push(' </ul>');
+        html.push('</div>');
 
         that.$toolbar.prepend(html.join(''));
 
-        that.$toolbar.find('button[name="taxonFilter"]')
+        that.$toolbar.find('a[class="li_filtertax"]')
             .off('click').on('click', function () {
-            showAvdSearch(that.columns, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+
+                if (this.id === 'custom') {
+                    console.log('Custom filtering selection is not yet implemented');
+                }
+                else{
+                    console.log(this.id);
+                }
+
+            //showAvdSearch(that.columns, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
         });
+
+
     };
 
     BootstrapTable.prototype.load = function (data) {
@@ -177,6 +261,7 @@
             return;
         } else {
             if (!firstLoad) {
+
                 var height = parseInt($(".bootstrap-table").height());
                 height += 10;
                 $("#" + this.options.idTable).bootstrapTable("resetView", {height: height});
@@ -186,6 +271,7 @@
     };
 
     BootstrapTable.prototype.initSearch = function () {
+
         _initSearch.apply(this, Array.prototype.slice.apply(arguments));
 
         if (!this.options.taxonFilter) {
@@ -194,7 +280,7 @@
 
         if (test_searchmode) {
 
-            console.log('before:',this.data);
+            //console.log('before:',this.data);
 
             var that = this;
 
@@ -220,7 +306,7 @@
                 return false;
             });
 
-            console.log('after:',this.data);
+            //console.log('after:',this.data);
 
         }
 
