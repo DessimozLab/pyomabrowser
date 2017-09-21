@@ -744,5 +744,6 @@ class PropagateFunctionAPIView(APIView):
         for anno in projector.iter_projected_goannotations(seq_list):
             for key in ("DB_Object_Symbol", "DB_Object_ID", "Taxon_ID", "Gene_Product_Form_ID", "Annotation_Extension"):
                 anno.pop(key)
+            anno['GO_name'] = utils.db.gene_ontology.term_by_id(anno['GO_ID']).name
             annotations.append(anno)
         return Response(annotations)

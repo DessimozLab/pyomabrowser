@@ -242,3 +242,32 @@ class SequenceIdentifyTest(APITestCase):
         response = APIClient().get('/api/sequence/?search=approximate&query='+self.multi_match_pattern)
         self.assertLess(1, len(response.data['targets']))
         self.assertEqual('approximate match', response.data['identified_by'])
+
+    def test_invalid_search_param(self):
+        response = APIClient().get('/api/sequence/?search=blabla&query='+self.existing_query)
+        self.assertEqual(400, response.status_code)
+
+
+class FunctionPropagationTest(APITestCase):
+    def test_map_existing_sequence_and_expect_same_annotations(self):
+        client = APIClient()
+        query = 'YEAST00012'
+        protein = json.loads(client.get('/api/protein/'+query+'/').content.decode())
+        gos_pred = client.get('/api/function/?query='+protein['sequence'])
+        self.assertEqual('Exact:'+query, gos_pred.data[0]['With'])
+        onto = client.get('/api/protein/'+query+'/ontology/')
+        gos_pred = sorted([(z['GO_ID'], z['GO_name']) for z in gos_pred.data])
+        onto = sorted(set([(z['GO_term'], z['name']) for z in onto.data]))
+        self.assertEqual(onto, gos_pred)
+
+    def test_with_non_aa_get_400_exit(self):
+        response = APIClient().get('/api/function/?query=BSBBbAop  qs')
+        self.assertEqual(400, response.status_code)
+
+    def test_trim_invalid_aa_and_find_approx_match(self):
+        response = APIClient().get('/api/function/?query=KGPYGGLRF HPSVNLSILK FLGFEIFKN')
+        self.assertEqual(200, response.status_code)
+        annos = json.loads(response.content.decode())
+        self.assertLess(0, len(annos))
+        self.assertTrue(annos[0]['With'].startswith('Approx:YEAST00012'))
+
