@@ -1,6 +1,9 @@
 import functools
 import operator
 import itertools
+import Bio.SeqRecord
+import Bio.Alphabet.IUPAC
+import Bio.Seq
 
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
@@ -722,3 +725,24 @@ class IdentifiySequenceAPIView(APIView):
                 targets.append(protein)
             res.update({'targets': targets, 'identified_by': 'approximate match'})
         return res
+
+
+class PropagateFunctionAPIView(APIView):
+    def get(self, request, format=None):
+        """Annotate a sequence with GO functions based on all
+        annotations in OMA.
+
+        :queryparam query: the sequence to be annotated"""
+        query_seq = request.query_params.get('query', '')
+        query_seq = utils.db.seq_search._sanitise_seq(query_seq)
+        if len(query_seq) < 10:
+            raise ValueError('The query sequence must be at least 10 amino acids long.')
+
+        seq_list = [Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(query_seq.decode(), Bio.Alphabet.IUPAC.protein), id='unknown')]
+        projector = db.FastMapper(utils.db)
+        annotations = []
+        for anno in projector.iter_projected_goannotations(seq_list):
+            for key in ("DB_Object_Symbol", "DB_Object_ID", "Taxon_ID", "Gene_Product_Form_ID", "Annotation_Extension"):
+                anno.pop(key)
+            annotations.append(anno)
+        return Response(annotations)
