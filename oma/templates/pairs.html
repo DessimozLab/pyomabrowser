@@ -74,25 +74,19 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/extensions/export/bootstrap-table-export.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/extensions/mobile/bootstrap-table-mobile.min.js"></script>
 <script src="{% static "js/tableExport.min.js" %}"></script>
-    <script src="{% static "js/bootstrap-table-taxon-filter.js" %}"></script>
-
-
 <script>
-
-
 var tab = $("#pairTable");
 
 tab.bootstrapTable({
     reorderableColumns: true,
     clickToSelect: false,
-    //filterControl: false,
     showMultiSort: true,
     onPostBody: function(){
         domains.visualize_all(".protein", {{ longest_seq }});
     },
     onLoadSuccess: function(data){
         tab.bootstrapTable('hideLoading');
-    },
+    }
 });
 var icons = tab.bootstrapTable('getOptions').icons;
 $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
