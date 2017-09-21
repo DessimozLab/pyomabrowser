@@ -7,14 +7,18 @@
  * @update Clement Train
  */
 
-!function($) {
+!function ($) {
     'use strict';
 
     var firstLoad = false;
 
     var sprintf = $.fn.bootstrapTable.utils.sprintf;
 
-    var showAvdSearch = function(pColumns, searchTitle, searchText, that) {
+    var test_request = ['tet', 'homo'];
+
+    var test_searchmode = false;
+
+    var showAvdSearch = function (pColumns, searchTitle, searchText, that) {
         if (!$("#avdSearchModal" + "_" + that.options.idTable).hasClass("modal")) {
             var vModal = sprintf("<div id=\"avdSearchModal%s\"  class=\"modal fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"mySmallModalLabel\" aria-hidden=\"true\">", "_" + that.options.idTable);
             vModal += "<div class=\"modal-dialog modal-xs\">";
@@ -34,7 +38,8 @@
             $("body").append($(vModal));
 
             var vFormAvd = createFormAvd(pColumns, searchText, that),
-                timeoutId = 0;;
+                timeoutId = 0;
+            ;
 
             $('#avdSearchModalContent' + "_" + that.options.idTable).append(vFormAvd.join(''));
 
@@ -45,7 +50,20 @@
                 }, that.options.searchTimeOut);
             });
 
-            $("#btnCloseAvd" + "_" + that.options.idTable).click(function() {
+            $('#test_button').off('click').on('click', function (event) {
+
+                test_searchmode = true;
+
+                //console.log(test_request);
+                //console.log($(event.currentTarget)[0].id);
+
+                that.onColumntaxonFilter(event);
+
+                test_searchmode = false;
+
+            });
+
+            $("#btnCloseAvd" + "_" + that.options.idTable).click(function () {
                 $("#avdSearchModal" + "_" + that.options.idTable).modal('hide');
             });
 
@@ -55,8 +73,11 @@
         }
     };
 
-    var createFormAvd = function(pColumns, searchText, that) {
+    var createFormAvd = function (pColumns, searchText, that) {
         var htmlForm = [];
+
+        htmlForm.push('<button class="btn btn-default center-block" type="button" id="test_button" aria-label="advanced search" title="cc">Filter w/ tet + homo</button> <br>');
+
         htmlForm.push(sprintf('<form class="form-horizontal" id="%s" action="%s" >', that.options.idForm, that.options.actionForm));
         for (var i in pColumns) {
             var vObjCol = pColumns[i];
@@ -91,7 +112,7 @@
     });
 
     $.extend($.fn.bootstrapTable.defaults.icons, {
-        taxonFilterIcon: 'glyphicon-chevron-down'
+        taxonFilterIcon: 'glyphicon-filter'
     });
 
     $.extend($.fn.bootstrapTable.Constructor.EVENTS, {
@@ -99,10 +120,10 @@
     });
 
     $.extend($.fn.bootstrapTable.locales, {
-        formattaxonFilter: function() {
+        formattaxonFilter: function () {
             return 'Advanced search';
         },
-        formatAdvancedCloseButton: function() {
+        formatAdvancedCloseButton: function () {
             return "Close";
         }
     });
@@ -114,7 +135,7 @@
         _load = BootstrapTable.prototype.load,
         _initSearch = BootstrapTable.prototype.initSearch;
 
-    BootstrapTable.prototype.initToolbar = function() {
+    BootstrapTable.prototype.initToolbar = function () {
         _initToolbar.apply(this, Array.prototype.slice.apply(arguments));
 
         if (!this.options.search) {
@@ -140,12 +161,12 @@
         that.$toolbar.prepend(html.join(''));
 
         that.$toolbar.find('button[name="taxonFilter"]')
-            .off('click').on('click', function() {
-                showAvdSearch(that.columns, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
-            });
+            .off('click').on('click', function () {
+            showAvdSearch(that.columns, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+        });
     };
 
-    BootstrapTable.prototype.load = function(data) {
+    BootstrapTable.prototype.load = function (data) {
         _load.apply(this, Array.prototype.slice.apply(arguments));
 
         if (!this.options.taxonFilter) {
@@ -171,30 +192,70 @@
             return;
         }
 
-        var that = this;
-        var fp = $.isEmptyObject(this.filterColumnsPartial) ? null : this.filterColumnsPartial;
+        if (test_searchmode) {
 
-        this.data = fp ? $.grep(this.data, function (item, i) {
-            for (var key in fp) {
-                var fval = fp[key].toLowerCase();
-                var value = item[key];
-                value = $.fn.bootstrapTable.utils.calculateObjectValue(that.header,
-                    that.header.formatters[$.inArray(key, that.header.fields)],
-                    [value, item, i], value);
+            console.log('before:',this.data);
 
-                if (!($.inArray(key, that.header.fields) !== -1 &&
-                    (typeof value === 'string' || typeof value === 'number') &&
-                    (value + '').toLowerCase().indexOf(fval) !== -1)) {
-                    return false;
+            var that = this;
+
+
+            this.data = $.grep(this.data, function (item, i) {
+                for (var accepted in test_request) {
+
+                    var fval = test_request[accepted].toLowerCase();
+                    var value = item['taxon'];
+
+                    value = $.fn.bootstrapTable.utils.calculateObjectValue(that.header,
+                        that.header.formatters[$.inArray('taxon', that.header.fields)],
+                        [value, item, i], value);
+
+                    if ($.inArray('taxon', that.header.fields) !== -1 &&
+                        (typeof value === 'string' || typeof value === 'number') &&
+                        (value + '').toLowerCase().indexOf(fval) !== -1) {
+                        return true;
+                    }
+
+
                 }
-            }
-            return true;
-        }) : this.data;
+                return false;
+            });
+
+            console.log('after:',this.data);
+
+        }
+
+        else {
+            var that = this;
+            var fp = $.isEmptyObject(this.filterColumnsPartial) ? null : this.filterColumnsPartial;
+
+            this.data = fp ? $.grep(this.data, function (item, i) {
+                for (var key in fp) {
+                    var fval = fp[key].toLowerCase();
+                    var value = item[key];
+                    value = $.fn.bootstrapTable.utils.calculateObjectValue(that.header,
+                        that.header.formatters[$.inArray(key, that.header.fields)],
+                        [value, item, i], value);
+
+                    if (!($.inArray(key, that.header.fields) !== -1 &&
+                        (typeof value === 'string' || typeof value === 'number') &&
+                        (value + '').toLowerCase().indexOf(fval) !== -1)) {
+                        return false;
+                    }
+                }
+                return true;
+            }) : this.data;
+
+        }
     };
 
     BootstrapTable.prototype.onColumntaxonFilter = function (event) {
         var text = $.trim($(event.currentTarget).val());
         var $field = $(event.currentTarget)[0].id;
+
+        if (test_searchmode) {
+            text = 'tet';
+            $field = 'taxon';
+        }
 
         if ($.isEmptyObject(this.filterColumnsPartial)) {
             this.filterColumnsPartial = {};
@@ -208,6 +269,9 @@
         this.options.pageNumber = 1;
         this.onSearch(event);
         this.updatePagination();
+
         this.trigger('column-taxon-filter', $field, text);
     };
+
+
 }(jQuery);
