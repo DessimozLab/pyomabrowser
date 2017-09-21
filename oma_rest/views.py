@@ -691,7 +691,7 @@ class IdentifiySequenceAPIView(APIView):
         query_seq = request.query_params.get('query', '')
         strategy = request.query_params.get('search', 'mixed').lower()
         if strategy not in ('approximate', 'exact', 'mixed'):
-            raise ValueError("search parameter invalid. Must be one of 'approximate', 'exact', 'mixed'.")
+            raise ParseError("search parameter invalid. Must be one of 'approximate', 'exact', 'mixed'.")
         only_full_length = strtobool(request.query_params.get('full_length', 'False'))
         map_result = self.identify_sequence(query_seq, strategy=strategy, only_full_length=only_full_length)
         serializer = serializers.SequenceSearchResultSerializer(instance=map_result, context={'request': request})
@@ -736,7 +736,7 @@ class PropagateFunctionAPIView(APIView):
         query_seq = request.query_params.get('query', '')
         query_seq = utils.db.seq_search._sanitise_seq(query_seq)
         if len(query_seq) < 10:
-            raise ValueError('The query sequence must be at least 10 amino acids long.')
+            raise ParseError('The query sequence must be at least 10 amino acids long.')
 
         seq_list = [Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(query_seq.decode(), Bio.Alphabet.IUPAC.protein), id='unknown')]
         projector = db.FastMapper(utils.db)
