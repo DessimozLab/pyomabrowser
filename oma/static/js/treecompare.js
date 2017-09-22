@@ -1,4 +1,4 @@
-var TreeCompare = function(){
+ var TreeCompare = function(){
 
     var trees = [];
 

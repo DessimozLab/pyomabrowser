@@ -16,10 +16,6 @@
 
     var sprintf = $.fn.bootstrapTable.utils.sprintf;
 
-    var test_request = ['tet', 'homo'];
-
-    var test_searchmode = false;
-
     var build_tax_to_species_converter = function(url_tree, list_taxons){
 
         var converter = {};
@@ -67,6 +63,8 @@
 
     };
 
+    /*
+
     var showAvdSearch = function (pColumns, searchTitle, searchText, that) {
 
         if (!$("#avdSearchModal" + "_" + that.options.idTable).hasClass("modal")) {
@@ -102,14 +100,14 @@
 
             $('#test_button').off('click').on('click', function (event) {
 
-                test_searchmode = true;
+                //test_searchmode = true;
 
                 //console.log(test_request);
                 //console.log($(event.currentTarget)[0].id);
 
                 that.onColumntaxonFilter(event);
 
-                test_searchmode = false;
+                //test_searchmode = false;
 
             });
 
@@ -151,6 +149,8 @@
 
         return htmlForm;
     };
+
+    */
 
     $.extend($.fn.bootstrapTable.defaults, {
         taxonFilter: false,
@@ -210,6 +210,7 @@
         }
 
         this.list_taxon_accepted = this.options.taxon_to_show();
+        this.multi_species_search = false;
         this.tax_converter = build_tax_to_species_converter(this.options.urlSpecieTree, this.list_taxon_accepted);
 
         var that = this,
@@ -221,6 +222,9 @@
         html.push('<span class="caret"></span>');
         html.push('</button>');
         html.push('<ul class="dropdown-menu">');
+
+
+        html.push(' <li><a  class="li_filtertax"  id="all">All</a></li> ');
 
         for (var tax in this.tax_converter) {
             html.push(' <li><a  class="li_filtertax" id="' + tax +'">' + tax +'</a></li> ');
@@ -235,16 +239,18 @@
         that.$toolbar.prepend(html.join(''));
 
         that.$toolbar.find('a[class="li_filtertax"]')
-            .off('click').on('click', function () {
+            .off('click').on('click', function (event) {
 
                 if (this.id === 'custom') {
                     console.log('Custom filtering selection is not yet implemented');
-                }
-                else{
-                    console.log(this.id);
+                    //showAvdSearch(that.columns, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
                 }
 
-            //showAvdSearch(that.columns, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+                else{
+                        //console.log(event);
+                        that.onColumntaxonFilter(event);
+                }
+
         });
 
 
@@ -259,7 +265,10 @@
 
         if (typeof this.options.idTable === 'undefined') {
             return;
-        } else {
+        } else if (typeof this.options.urlSpecieTree === 'undefined') {
+            return;
+        }
+        else {
             if (!firstLoad) {
 
                 var height = parseInt($(".bootstrap-table").height());
@@ -272,91 +281,79 @@
 
     BootstrapTable.prototype.initSearch = function () {
 
+
         _initSearch.apply(this, Array.prototype.slice.apply(arguments));
 
         if (!this.options.taxonFilter) {
             return;
         }
 
-        if (test_searchmode) {
-
-            //console.log('before:',this.data);
+        if (this.multi_species_search && this.multi_species_search !== 'all') {
 
             var that = this;
 
+           this.data = $.grep(this.data, function (item, i) {
 
-            this.data = $.grep(this.data, function (item, i) {
-                for (var accepted in test_request) {
+            var lsp = that.tax_converter[that.multi_species_search];
 
-                    var fval = test_request[accepted].toLowerCase();
+                for (var sp in lsp) {
+
+                    var fval = lsp[sp].toLowerCase();
                     var value = item['taxon'];
 
-                    value = $.fn.bootstrapTable.utils.calculateObjectValue(that.header,
-                        that.header.formatters[$.inArray('taxon', that.header.fields)],
-                        [value, item, i], value);
+                    value = value.species.toLowerCase();
 
                     if ($.inArray('taxon', that.header.fields) !== -1 &&
                         (typeof value === 'string' || typeof value === 'number') &&
-                        (value + '').toLowerCase().indexOf(fval) !== -1) {
+                        (value === fval)) {
                         return true;
                     }
 
-
                 }
                 return false;
-            });
-
-            //console.log('after:',this.data);
-
+            })
         }
 
-        else {
-            var that = this;
-            var fp = $.isEmptyObject(this.filterColumnsPartial) ? null : this.filterColumnsPartial;
+        console.log(this.data);
 
-            this.data = fp ? $.grep(this.data, function (item, i) {
-                for (var key in fp) {
-                    var fval = fp[key].toLowerCase();
-                    var value = item[key];
-                    value = $.fn.bootstrapTable.utils.calculateObjectValue(that.header,
-                        that.header.formatters[$.inArray(key, that.header.fields)],
-                        [value, item, i], value);
-
-                    if (!($.inArray(key, that.header.fields) !== -1 &&
-                        (typeof value === 'string' || typeof value === 'number') &&
-                        (value + '').toLowerCase().indexOf(fval) !== -1)) {
-                        return false;
-                    }
-                }
-                return true;
-            }) : this.data;
-
-        }
     };
 
     BootstrapTable.prototype.onColumntaxonFilter = function (event) {
-        var text = $.trim($(event.currentTarget).val());
-        var $field = $(event.currentTarget)[0].id;
 
-        if (test_searchmode) {
-            text = 'tet';
-            $field = 'taxon';
-        }
+        this.multi_species_search = $(event.currentTarget)[0].id;
 
-        if ($.isEmptyObject(this.filterColumnsPartial)) {
-            this.filterColumnsPartial = {};
-        }
-        if (text) {
-            this.filterColumnsPartial[$field] = text;
-        } else {
-            delete this.filterColumnsPartial[$field];
-        }
+        console.log('onColumntaxonFilter', this.multi_species_search);
 
         this.options.pageNumber = 1;
-        this.onSearch(event);
-        this.updatePagination();
+        this.initSearch();
+        this.updatePagination(event);
 
-        this.trigger('column-taxon-filter', $field, text);
+        this.trigger('column-taxon-filter', 'arg1', 'arg2');
+
+        this.multi_species_search = false;
+    };
+
+    BootstrapTable.prototype.updatePagination = function (event) {
+
+        console.log('hello');
+
+        // Fix #171: IE disabled button can be clicked bug.
+        if (event && $(event.currentTarget).hasClass('disabled')) {
+            return;
+        }
+
+        if (!this.options.maintainSelected) {
+            this.resetRows();
+        }
+
+        this.initPagination();
+        if (this.options.sidePagination === 'server') {
+            this.initServer();
+        } else {
+            this.initBody();
+        }
+
+        this.trigger('page-change', this.options.pageNumber, this.options.pageSize);
     };
 
 
