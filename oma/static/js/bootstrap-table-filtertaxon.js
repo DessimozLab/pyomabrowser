@@ -314,46 +314,34 @@
             })
         }
 
-        console.log(this.data);
-
     };
 
     BootstrapTable.prototype.onColumntaxonFilter = function (event) {
 
         this.multi_species_search = $(event.currentTarget)[0].id;
 
-        console.log('onColumntaxonFilter', this.multi_species_search);
-
         this.options.pageNumber = 1;
         this.initSearch();
-        this.updatePagination(event);
+        this.updatePagination();
 
         this.trigger('column-taxon-filter', 'arg1', 'arg2');
 
         this.multi_species_search = false;
+
+
     };
 
-    BootstrapTable.prototype.updatePagination = function (event) {
-
-        console.log('hello');
-
-        // Fix #171: IE disabled button can be clicked bug.
-        if (event && $(event.currentTarget).hasClass('disabled')) {
-            return;
+    BootstrapTable.prototype.getData = function (useCurrentPage) {
+        var data = this.options.data;
+        if (this.multi_species_search || this.searchText || this.options.sortName || !$.isEmptyObject(this.filterColumns) || !$.isEmptyObject(this.filterColumnsPartial)) {
+            data = this.data;
         }
 
-        if (!this.options.maintainSelected) {
-            this.resetRows();
+        if (useCurrentPage) {
+            return data.slice(this.pageFrom - 1, this.pageTo);
         }
 
-        this.initPagination();
-        if (this.options.sidePagination === 'server') {
-            this.initServer();
-        } else {
-            this.initBody();
-        }
-
-        this.trigger('page-change', this.options.pageNumber, this.options.pageSize);
+        return data;
     };
 
 
