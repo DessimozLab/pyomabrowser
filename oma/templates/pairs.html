@@ -4,6 +4,8 @@
 {% block title %}OMA orthology database: Pairwise Orthologs for {{ entry.omaid }}{% endblock %}
 {% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ vps|length }} pairwise
     orthologs{% endblock %}
+
+
 {% block contentTab %}
 
     <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
@@ -20,7 +22,6 @@
             </div>
         </div>
     </div>
-
 
     <div class="panel panel-default">
         <div class="panel-heading clearfix">
@@ -76,6 +77,7 @@
 
         </div>
     </div>
+
     <!-- D3 and D3 Tooltip -->
     <script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
     <script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
@@ -103,6 +105,15 @@
          <script src="{% static "js/tnt.js" %}"></script>
 
         <script src="{% static "js/bootstrap-table-filtertaxon.js" %}"></script>
+
+        <link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
+        <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
+        <link type="text/css" rel="stylesheet" href="{% static "css/treecompare.css" %}"/>
+
+        <script src="{% static "js/underscore-min.js" %}"></script>
+        <script src="{% static "js/treecompare.js" %}"></script>
+
+        <link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
 
         <script>
             var tab = $("#pairTable");
