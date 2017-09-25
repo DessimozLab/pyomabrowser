@@ -253,6 +253,11 @@
 
         });
 
+        d3.select("#reset_taxon_filter").on('click', function (){
+
+                that.resetSearch();
+
+            })
 
     };
 
@@ -313,6 +318,11 @@
                 return false;
             })
         }
+
+        if (this.multi_species_search && this.multi_species_search !== 'all' || this.options.searchText) {
+            $('.alert_remove').show();}
+        else {
+            $('.alert_remove').hide();}
 
     };
 

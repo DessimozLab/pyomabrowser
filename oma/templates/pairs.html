@@ -36,6 +36,7 @@
         </div>
         <div class="panel-body">
             {% if entry.omaid == entry.alt_splicing_variant %}
+
                 <table class="table table-hover" id="pairTable"
                        data-show-toggle="true"
                        data-taxon-filter="true" data-id-table = 'taxonFilter' data-url-specie-tree="/All/genomes.json"
@@ -46,6 +47,7 @@
                        data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
                        data-url="{% url 'pairs_json' entry.omaid %}">
                     <thead>
+
                     <tr>
                         <th data-field="reltype" data-sortable="true" data-filter-control="select">Relation</th>
                         <th data-field="kingdom" data-sortable="true" data-filter-control="select"
@@ -63,6 +65,9 @@
                         <th data-sortable="false" class="domain_vis">Domain Architectures</th>
                     </tr>
                     </thead>
+
+                    <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">Genes not present in selected taxon have been filtered out as per settings. <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a></div>
+
                 </table>
             {% else %}
                 <div>Orthologs for this gene have been computed for a different splicing variant:
@@ -113,7 +118,7 @@
                     tab.bootstrapTable('hideLoading');
                 },
                 taxon_to_show: function () {
-                    return ['Mammalia', 'Tetraodontidae', 'Wrong'];
+                    return ['Primates', 'Tetraodontidae', 'Wrong'];
                 }
             });
 
