@@ -18,10 +18,7 @@
 
     var build_tax_to_species_converter = function (url_tree, list_taxons) {
 
-        var cus = JSON.parse(localStorage.getItem('custom_taxon_filter'));
-        var custom_set = cus ? cus : [];
-
-        var converter = {'custom': custom_set};
+        var converter = {};
 
         $.ajaxSetup({
             async: false
@@ -86,10 +83,12 @@
 
             $("body").append($(vModal));
 
+            // ADD PHYLO.IO DOM ELEMENT
             var phyloContent = add_phyloioDOM(), jmodal = $('#avdSearchModalContent' + "_" + that.options.idTable);
 
             jmodal.append(phyloContent.join(''));
 
+            // SETUP PHYLO.IO
             init_phyloIo(that);
 
             jmodal.append(sprintf('<button type="button" id="btnCloseAvd%s" class="btn btn-default pull-right" >%s</button>', "_" + that.options.idTable, searchText));
@@ -108,104 +107,56 @@
     var init_phyloIo = function (that) {
 
         var treecomp;
-        var maxGenome = 1000000; //number max of selected genomes
-        var hashGenome = {};
-        var needUpdate = false;//Toolbox need to be update ?
-        var arrayIdSelectedGenome = that.tax_converter['custom'] ;
-        // var insearch=false;
-        var contectMenu = false;
-        var contextNode = null;
-        // var tooManyGenomesInBranch=false;
-
+        var maxGenome = 1000000;
         var mouse = {x: 0, y: 0};
         document.addEventListener('mousemove', function (e) {
             mouse.x = e.clientX || e.pageX;
             mouse.y = e.clientY || e.pageY
         }, false);
-
-        var viewerHeight = 480;  //height of the browser window
         var svg_cont = $('#container_phylo');
-        svg_cont.css('height', viewerHeight); // svgheight = window size - navheight - (some of margin + padding)
-
+        svg_cont.css('height', 480);
         svg_cont.scroll(function () {
                 if ($('.tooltip')) {
                     $('.tooltip').remove();
-                    contectMenu = false;
-                    contextNode = null;
                 }
             });
+        var arrayIdSelectedGenome = that.tax_converter['custom'] ;
 
-        //Recursive tree visit with function for the actual node and for select children
-        function visit(parent, visitFn, childrenFn) {
-            if (!parent) return;
-            visitFn(parent);
-            var children = childrenFn(parent);
-            if (children) {
-                var count = children.length;
-                for (var i = 0; i < count; i++) {
-                    visit(children[i], visitFn, childrenFn);
-                }
-            }
-        }
-
-        function build_dicts(root) {
-            visit(root, function (d) {
-                    if (!(d.children || d._children)) {
-                        hashGenome[d.name] = d.id
-                    }
-                },
-                function (d) {
-                    if (d.children && d.children.length > 0) {
-                        return d.children;
-                    } else if (d._children && d._children.length > 0) {
-                        return d._children;
-                    }
-                });
-        };
-
-        // //load the data from the Json file
+        //load the data from the Json file
         $.ajax({
             url: that.options.urlSpecieTree,
             success: function (newick) {
+                // DEFINED BEHAVIOR ON NODE SELECTION
                 var additionalNodeFunctions = {
                     "selectForExport": [
                         function (exportList) {
                             arrayIdSelectedGenome = exportList;
                             that.tax_converter['custom'] = arrayIdSelectedGenome;
                             localStorage.setItem('custom_taxon_filter', JSON.stringify(arrayIdSelectedGenome));
-
                             that.onColumntaxonFilter('custom');
                         }
                     ]
                 };
-
+                // INIT THE PHYLO.IO
                 treecomp = TreeCompare().init({
                     maxNumGenome: maxGenome,
                     nodeFunc: additionalNodeFunctions
                 });
                 var tree1 = treecomp.addTree(newick, undefined);
+                // SET UP THE PHYLO.IO
                 treecomp.changeCanvasSettings({
                     autoCollapse: tree1.data.autoCollapseDepth,
                     enableScale: false
                 });
+                // RENDER THE PHYLO.IO
                 treecomp.viewTree(tree1.name, "container_phylo");
-                needUpdate = true;
 
-                build_dicts(tree1.root);
-
+                // SELECT NODES IN CUSTOM SELECTION FILTER
                 for (var i = 0; i < tree1.root.leaves.length; i++){
                     if(that.tax_converter['custom'].indexOf(tree1.root.leaves[i].name) !== -1){
                         treecomp.selectAllSpecies(tree1.root.leaves[i], tree1, maxGenome, true);
-
                     }
                 }
-
-                console.log(arrayIdSelectedGenome);
-
-
-
-
-
             },
             dataType: "text"
         });
@@ -213,21 +164,16 @@
     }
 
     var add_phyloioDOM = function () {
-
         var htmlPhylo = [];
-
         htmlPhylo.push('<div class="container-fluid">');
         htmlPhylo.push('<div class="row">');
         htmlPhylo.push('<div class="col-md-12">');
-        htmlPhylo.push('<div class="" id="container_phylo" style="width: 100%; height: 480px">');
+        htmlPhylo.push('<div class="" id="container_phylo" style="width: 100%;">');
         htmlPhylo.push('</div>');
         htmlPhylo.push('</div>');
         htmlPhylo.push('</div>');
         htmlPhylo.push('</div>');
-
-
         return htmlPhylo;
-
     }
 
     $.extend($.fn.bootstrapTable.defaults, {
@@ -296,12 +242,14 @@
         // INPUTTED TAXON NAME WITH THEY SPECIES LIST (CHECK FOR VALIDITY)
         this.tax_converter = build_tax_to_species_converter(this.options.urlSpecieTree, this.list_taxon_accepted);
 
-
-        console.log(this.tax_converter['custom']);
+        // ADD CUSTOM FILTERING FROM LOCAL STORAGE
+        var local_custom = localStorage.getItem('custom_taxon_filter');
+        this.tax_converter['custom']= (local_custom === null) ? [] : JSON.parse(local_custom);
 
         var that = this,
             html = [];
 
+        //  ADD DROPDOWN MENU
         html.push(sprintf('<div class="dropdown columns columns-%s btn-group pull-%s" role="group">', this.options.buttonsAlign, this.options.buttonsAlign));
         html.push(sprintf('<button class="btn btn-default%s dropdown-toggle' + '" type="button" name="taxonFilter" aria-label="advanced search" title="%s" data-toggle="dropdown">', that.options.iconSize === undefined ? '' : ' btn-' + that.options.iconSize, that.options.formattaxonFilter()));
         html.push(sprintf('<i class="%s %s"></i>', that.options.iconsPrefix, that.options.icons.taxonFilterIcon));
@@ -309,9 +257,10 @@
         html.push('</button>');
         html.push('<ul class="dropdown-menu">');
 
-
+        //  ADD LI FOR ALL
         html.push(' <li><a  class="li_filtertax"  id="all">All</a></li> ');
 
+        //  ADD LI FOR EACH DESIRED TAXA
         for (var tax in this.tax_converter) {
             if (tax !== 'custom') {
 
@@ -319,6 +268,7 @@
             }
         }
 
+        // ADD SEPARATOR AND LI FOR CUSTOM
         html.push(' <li class="divider"></li> ');
         html.push(' <li><a  class="li_filtertax"  id="custom">Custom  <span class="glyphicon glyphicon-pencil pull-right"  id="custom_icon" aria-hidden="true"></span> </a> </li> ');
 
@@ -327,6 +277,7 @@
 
         that.$toolbar.prepend(html.join(''));
 
+        //  ADD LI CLICK ACTION
         that.$toolbar.find('a[class="li_filtertax"]')
             .off('click').on('click', function (event) {
 
@@ -338,6 +289,7 @@
             }
         });
 
+        //  ADD RESET BUTTON ACTION
         d3.select("#reset_taxon_filter").on('click', function () {
             //that.resetSearch();
             that.onColumntaxonFilter('all');
