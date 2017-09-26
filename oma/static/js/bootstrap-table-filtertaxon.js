@@ -63,7 +63,6 @@
 
     };
 
-
     var showAvdSearch = function (pColumns, searchTitle, searchText, that) {
 
         if (!$("#avdSearchModal" + "_" + that.options.idTable).hasClass("modal")) {
@@ -92,8 +91,8 @@
 
             jmodal.append(sprintf('<button type="button" id="btnCloseAvd%s" class="btn btn-default pull-right" >%s</button>', "_" + that.options.idTable, searchText));
 
-
             $("#btnCloseAvd" + "_" + that.options.idTable).click(function () {
+                that.onColumntaxonFilter('custom');
                 $("#avdSearchModal" + "_" + that.options.idTable).modal('hide');
             });
 
@@ -105,7 +104,7 @@
 
     var init_phyloIo = function (that) {
 
-        var numberOfSelectedGenome = 0;
+        var treecomp;
         var maxGenome = 1000000; //number max of selected genomes
         var hashGenome = {};
         var needUpdate = false;//Toolbox need to be update ?
@@ -122,7 +121,7 @@
         }, false);
 
         var viewerHeight = 480;  //height of the browser window
-        var svg_cont = $('#svgg');
+        var svg_cont = $('#container_phylo');
         svg_cont.css('height', viewerHeight); // svgheight = window size - navheight - (some of margin + padding)
 
         svg_cont.scroll(function () {
@@ -144,11 +143,6 @@
                     visit(children[i], visitFn, childrenFn);
                 }
             }
-        }
-
-        function OpenInNewTab(url) {
-            var win = window.open(url, '_blank');
-            win.focus();
         }
 
         function build_dicts(root) {
@@ -174,25 +168,26 @@
                     "selectForExport": [
                         function (exportList) {
                             arrayIdSelectedGenome = exportList;
-                            updateInfo(arrayIdSelectedGenome, tree1.root)
+                            that.tax_converter['custom'] = arrayIdSelectedGenome;
+                            that.onColumntaxonFilter('custom');
                         }
                     ]
                 };
 
-                var treecomp = TreeCompare().init({
+                treecomp = TreeCompare().init({
                     maxNumGenome: maxGenome,
                     nodeFunc: additionalNodeFunctions
                 });
                 var tree1 = treecomp.addTree(newick, undefined);
                 treecomp.changeCanvasSettings({
-                    autoCollapse: 0, //tree1.data.autoCollapseDepth,
+                    autoCollapse: tree1.data.autoCollapseDepth,
                     enableScale: false
                 });
                 treecomp.viewTree(tree1.name, "container_phylo");
                 needUpdate = true;
 
                 build_dicts(tree1.root);
-                
+
             },
             dataType: "text"
         });
@@ -204,33 +199,18 @@
         var htmlPhylo = [];
 
         htmlPhylo.push('<div class="container-fluid">');
-
         htmlPhylo.push('<div class="row">');
-
-        htmlPhylo.push('<div class="col-md-9 col-sm-12">');
-
-        htmlPhylo.push('<div class="" id="container_phylo" style="background-color:#edf; width: 100%; height: 480px">');
+        htmlPhylo.push('<div class="col-md-12">');
+        htmlPhylo.push('<div class="" id="container_phylo" style="width: 100%; height: 480px">');
         htmlPhylo.push('</div>');
-
         htmlPhylo.push('</div>');
-
-
-        htmlPhylo.push('<div class="col-md-3 col-sm-12">');
-        htmlPhylo.push('<h4 id="textSel"> Selected genomes</h4>');
-        htmlPhylo.push('<ul class="list-group" id="ul_selection">');
-
-        htmlPhylo.push('</ul>');
         htmlPhylo.push('</div>');
-
-        htmlPhylo.push('</div>');
-
         htmlPhylo.push('</div>');
 
 
         return htmlPhylo;
 
     }
-
 
     $.extend($.fn.bootstrapTable.defaults, {
         taxonFilter: false,
@@ -314,7 +294,7 @@
         }
 
         html.push(' <li class="divider"></li> ');
-        html.push(' <li><a  class="li_filtertax"  id="custom">Custom...</a></li> ');
+        html.push(' <li><a  class="li_filtertax"  id="custom">Custom  <span class="glyphicon glyphicon-pencil pull-right"  id="custom_icon" aria-hidden="true"></span> </a> </li> ');
 
         html.push(' </ul>');
         html.push('</div>');
@@ -328,7 +308,7 @@
                 showAvdSearch(that.columns, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
             }
             else {
-                that.onColumntaxonFilter(event);
+                that.onColumntaxonFilter($(event.currentTarget)[0].id);
             }
         });
 
@@ -405,9 +385,9 @@
 
     };
 
-    BootstrapTable.prototype.onColumntaxonFilter = function (event) {
+    BootstrapTable.prototype.onColumntaxonFilter = function (name_selector) {
 
-        this.multi_species_search = $(event.currentTarget)[0].id;
+        this.multi_species_search = name_selector;
 
         this.options.pageNumber = 1;
         this.initSearch();
