@@ -144,8 +144,9 @@
                 // SET UP THE PHYLO.IO
                 treecomp.changeCanvasSettings({
                     autoCollapse: tree1.data.autoCollapseDepth,
-                    enableScale: false
+                    enableScale: false,
                 });
+
                 // RENDER THE PHYLO.IO
                 treecomp.viewTree(tree1.name, "container_phylo");
 
@@ -172,13 +173,12 @@
 
                     */
 
-
+                    treecomp.exportList = [];
+                    treecomp.update(tree1.root, tree1.data);
                     that.tax_converter['custom'] = [];
                     localStorage.setItem('custom_taxon_filter', JSON.stringify([]));
                     that.onColumntaxonFilter('custom');
                     console.log(that.tax_converter['custom'],treecomp.exportList );
-
-
 
                 });
             },
@@ -283,19 +283,19 @@
         html.push('<ul class="dropdown-menu">');
 
         //  ADD LI FOR ALL
-        html.push(' <li><a  class="li_filtertax"  id="all">All</a></li> ');
+        html.push(' <li><a  class="li_filtertax"  id="all">All <span id="li_ok_all" class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span> </a></li> ');
 
         //  ADD LI FOR EACH DESIRED TAXA
         for (var tax in this.tax_converter) {
             if (tax !== 'custom') {
 
-                html.push(' <li><a  class="li_filtertax" id="' + tax + '">' + tax + '</a></li> ');
+                html.push(' <li><a  class="li_filtertax" id="' + tax + '">' + tax + ' <span id="li_ok_' + tax + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ');
             }
         }
 
         // ADD SEPARATOR AND LI FOR CUSTOM
         html.push(' <li class="divider"></li> ');
-        html.push(' <li><a  class="li_filtertax"  id="custom">Custom  <span class="glyphicon glyphicon-pencil pull-right"  id="custom_icon" aria-hidden="true"></span> </a> </li> ');
+        html.push(' <li><a  class="li_filtertax"  id="custom">Custom <span id="li_ok_custom" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> </li> ');
 
         html.push(' </ul>');
         html.push('</div>');
@@ -306,17 +306,24 @@
         that.$toolbar.find('a[class="li_filtertax"]')
             .off('click').on('click', function (event) {
 
-            if (this.id === 'custom') {
-                showAvdSearch(that.columns, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
-            }
-            else {
-                that.onColumntaxonFilter($(event.currentTarget)[0].id);
+                $('[id^="li_ok_"]').toggleClass('hidden',true);
+
+                if (this.id === 'custom') {
+                    $('[id^="li_ok_custom"]').toggleClass('hidden',false);
+                    showAvdSearch(that.columns, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+                }
+                else {
+                    var id_li = "li_ok_" +  this.id;
+                    $(this).find( "span" ).toggleClass('hidden',false);
+                    that.onColumntaxonFilter($(event.currentTarget)[0].id);
+
             }
         });
 
         //  ADD RESET BUTTON ACTION
         d3.select("#reset_taxon_filter").on('click', function () {
-            //that.resetSearch();
+            $('[id^="li_ok_"]').toggleClass('hidden',true);
+            $('[id^="li_ok_all"]').toggleClass('hidden',false);
             that.onColumntaxonFilter('all');
         })
 
