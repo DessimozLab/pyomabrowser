@@ -5893,6 +5893,7 @@
         getMaxAutoCollapse: getMaxAutoCollapse,
         changeAutoCollapseDepth: changeAutoCollapseDepth,
         unselect: unselect,
+        selectAllSpecies: selectAllSpecies,
         // additionalFunc: additionalFunc,
         exportList: exportList
     }

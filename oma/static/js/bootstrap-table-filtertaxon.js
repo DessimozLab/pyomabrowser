@@ -18,7 +18,10 @@
 
     var build_tax_to_species_converter = function (url_tree, list_taxons) {
 
-        var converter = {'custom': []};
+        var cus = JSON.parse(localStorage.getItem('custom_taxon_filter'));
+        var custom_set = cus ? cus : [];
+
+        var converter = {'custom': custom_set};
 
         $.ajaxSetup({
             async: false
@@ -71,7 +74,7 @@
             vModal += " <div class=\"modal-content\">";
             vModal += "  <div class=\"modal-header\">";
             vModal += "   <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\" >&times;</button>";
-            vModal += sprintf("   <h4 class=\"modal-title\">%s</h4>", searchTitle);
+            vModal += sprintf('   <h4 class=\"modal-title\">%s </h4>  <a class="" id="reset_tree" > Click here to reset tree selection.</a> ', searchTitle);
             vModal += "  </div>";
             vModal += "  <div class=\"modal-body modal-body-custom\">";
             vModal += sprintf("   <div class=\"container-fluid\" id=\"avdSearchModalContent%s\" style=\"padding-right: 0px;padding-left: 0px;\" >", "_" + that.options.idTable);
@@ -108,7 +111,7 @@
         var maxGenome = 1000000; //number max of selected genomes
         var hashGenome = {};
         var needUpdate = false;//Toolbox need to be update ?
-        var arrayIdSelectedGenome = [];
+        var arrayIdSelectedGenome = that.tax_converter['custom'] ;
         // var insearch=false;
         var contectMenu = false;
         var contextNode = null;
@@ -169,6 +172,8 @@
                         function (exportList) {
                             arrayIdSelectedGenome = exportList;
                             that.tax_converter['custom'] = arrayIdSelectedGenome;
+                            localStorage.setItem('custom_taxon_filter', JSON.stringify(arrayIdSelectedGenome));
+
                             that.onColumntaxonFilter('custom');
                         }
                     ]
@@ -187,6 +192,19 @@
                 needUpdate = true;
 
                 build_dicts(tree1.root);
+
+                for (var i = 0; i < tree1.root.leaves.length; i++){
+                    if(that.tax_converter['custom'].indexOf(tree1.root.leaves[i].name) !== -1){
+                        treecomp.selectAllSpecies(tree1.root.leaves[i], tree1, maxGenome, true);
+
+                    }
+                }
+
+                console.log(arrayIdSelectedGenome);
+
+
+
+
 
             },
             dataType: "text"
@@ -269,9 +287,17 @@
             return;
         }
 
+        // List of inputted taxon name (not checked vor validity)
         this.list_taxon_accepted = this.options.taxon_to_show();
+
+        // SEARCH MODE TYPE
         this.multi_species_search = false;
+
+        // INPUTTED TAXON NAME WITH THEY SPECIES LIST (CHECK FOR VALIDITY)
         this.tax_converter = build_tax_to_species_converter(this.options.urlSpecieTree, this.list_taxon_accepted);
+
+
+        console.log(this.tax_converter['custom']);
 
         var that = this,
             html = [];
