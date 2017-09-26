@@ -313,7 +313,8 @@
         });
 
         d3.select("#reset_taxon_filter").on('click', function () {
-            that.resetSearch();
+            //that.resetSearch();
+            that.onColumntaxonFilter('all');
         })
 
     };
@@ -386,6 +387,8 @@
     };
 
     BootstrapTable.prototype.onColumntaxonFilter = function (name_selector) {
+
+        this.resetSearch('');
 
         this.multi_species_search = name_selector;
 
