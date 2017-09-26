@@ -116,11 +116,10 @@
         var svg_cont = $('#container_phylo');
         svg_cont.css('height', 480);
         svg_cont.scroll(function () {
-                if ($('.tooltip')) {
-                    $('.tooltip').remove();
-                }
-            });
-        var arrayIdSelectedGenome = that.tax_converter['custom'] ;
+            if ($('.tooltip')) {
+                $('.tooltip').remove();
+            }
+        });
 
         //load the data from the Json file
         $.ajax({
@@ -130,9 +129,8 @@
                 var additionalNodeFunctions = {
                     "selectForExport": [
                         function (exportList) {
-                            arrayIdSelectedGenome = exportList;
-                            that.tax_converter['custom'] = arrayIdSelectedGenome;
-                            localStorage.setItem('custom_taxon_filter', JSON.stringify(arrayIdSelectedGenome));
+                            that.tax_converter['custom'] = exportList;
+                            localStorage.setItem('custom_taxon_filter', JSON.stringify(exportList));
                             that.onColumntaxonFilter('custom');
                         }
                     ]
@@ -152,14 +150,41 @@
                 treecomp.viewTree(tree1.name, "container_phylo");
 
                 // SELECT NODES IN CUSTOM SELECTION FILTER
-                for (var i = 0; i < tree1.root.leaves.length; i++){
-                    if(that.tax_converter['custom'].indexOf(tree1.root.leaves[i].name) !== -1){
+                for (var i = 0; i < tree1.root.leaves.length; i++) {
+                    if (that.tax_converter['custom'].indexOf(tree1.root.leaves[i].name) !== -1) {
                         treecomp.selectAllSpecies(tree1.root.leaves[i], tree1, maxGenome, true);
                     }
                 }
+
+                // RESET THE FILTERING
+                $("#reset_tree").click(function () {
+
+                    /*
+
+                    for (var i = 0; i < tree1.root.leaves.length; i++) {
+                        if (tree1.root.leaves[i].selectForOMAExport){
+                            treecomp.unselect(tree1.root.leaves[i]);
+                            }
+                    }
+
+                    treecomp.update(tree1.root, tree1.data);
+                    treecomp.exportList = []
+
+                    */
+
+
+                    that.tax_converter['custom'] = [];
+                    localStorage.setItem('custom_taxon_filter', JSON.stringify([]));
+                    that.onColumntaxonFilter('custom');
+                    console.log(that.tax_converter['custom'],treecomp.exportList );
+
+
+
+                });
             },
             dataType: "text"
         });
+
 
     }
 
@@ -244,7 +269,7 @@
 
         // ADD CUSTOM FILTERING FROM LOCAL STORAGE
         var local_custom = localStorage.getItem('custom_taxon_filter');
-        this.tax_converter['custom']= (local_custom === null) ? [] : JSON.parse(local_custom);
+        this.tax_converter['custom'] = (local_custom === null) ? [] : JSON.parse(local_custom);
 
         var that = this,
             html = [];

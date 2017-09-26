@@ -4654,6 +4654,7 @@
     External functions
      */
     function unselect(d){
+
         var tree = trees[0];
         for (var leaf = 0; leaf < d.leaves.length; leaf++){
             selectForOMAExport(d.leaves[leaf], true);
@@ -5894,6 +5895,7 @@
         changeAutoCollapseDepth: changeAutoCollapseDepth,
         unselect: unselect,
         selectAllSpecies: selectAllSpecies,
+        update: update,
         // additionalFunc: additionalFunc,
         exportList: exportList
     }
