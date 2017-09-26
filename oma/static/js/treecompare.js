@@ -1623,7 +1623,7 @@
         var leavesVisible = getVisibleLeaves(treeData.root);
         // console.log(leavesVisible);
         // TODO: this has to be changed according to page (careful)
-        var height = $("#svgg").height();
+        var height = $("#phylo_io").height();
         var renderHeight = height - paddingVertical * 2;
         var leavesHidden = 0;
         var triangles = 0;

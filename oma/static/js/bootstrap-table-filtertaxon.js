@@ -113,7 +113,7 @@
             mouse.x = e.clientX || e.pageX;
             mouse.y = e.clientY || e.pageY
         }, false);
-        var svg_cont = $('#container_phylo');
+        var svg_cont = $('#phylo_io');
         svg_cont.css('height', 480);
         svg_cont.scroll(function () {
             if ($('.tooltip')) {
@@ -148,7 +148,7 @@
                 });
 
                 // RENDER THE PHYLO.IO
-                treecomp.viewTree(tree1.name, "container_phylo");
+                treecomp.viewTree(tree1.name, "phylo_io");
 
                 // SELECT NODES IN CUSTOM SELECTION FILTER
                 for (var i = 0; i < tree1.root.leaves.length; i++) {
@@ -160,21 +160,13 @@
                 // RESET THE FILTERING
                 $("#reset_tree").click(function () {
 
-                    /*
-
-                    for (var i = 0; i < tree1.root.leaves.length; i++) {
-                        if (tree1.root.leaves[i].selectForOMAExport){
-                            treecomp.unselect(tree1.root.leaves[i]);
-                            }
-                    }
-
-                    treecomp.update(tree1.root, tree1.data);
-                    treecomp.exportList = []
-
-                    */
-
                     treecomp.exportList = [];
-                    treecomp.update(tree1.root, tree1.data);
+
+                    tree1 = treecomp.addTree(newick, undefined);
+                    treecomp.viewTree(tree1.name, "phylo_io");
+
+
+                    //treecomp.update(tree1.root, tree1.data);
                     that.tax_converter['custom'] = [];
                     localStorage.setItem('custom_taxon_filter', JSON.stringify([]));
                     that.onColumntaxonFilter('custom');
@@ -193,7 +185,7 @@
         htmlPhylo.push('<div class="container-fluid">');
         htmlPhylo.push('<div class="row">');
         htmlPhylo.push('<div class="col-md-12">');
-        htmlPhylo.push('<div class="" id="container_phylo" style="width: 100%;">');
+        htmlPhylo.push('<div class="" id="phylo_io" style="width: 100%;">');
         htmlPhylo.push('</div>');
         htmlPhylo.push('</div>');
         htmlPhylo.push('</div>');
@@ -283,6 +275,7 @@
         html.push('<ul class="dropdown-menu">');
 
         //  ADD LI FOR ALL
+        html.push('<li role="presentation" class="dropdown-header">DEFAULT</li>');
         html.push(' <li><a  class="li_filtertax"  id="all">All <span id="li_ok_all" class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span> </a></li> ');
 
         //  ADD LI FOR EACH DESIRED TAXA
@@ -295,6 +288,8 @@
 
         // ADD SEPARATOR AND LI FOR CUSTOM
         html.push(' <li class="divider"></li> ');
+                html.push('<li role="presentation" class="dropdown-header">CUSTOM</li>');
+
         html.push(' <li><a  class="li_filtertax"  id="custom">Custom <span id="li_ok_custom" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> </li> ');
 
         html.push(' </ul>');
