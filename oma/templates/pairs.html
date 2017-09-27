@@ -40,7 +40,7 @@
 
                 <table class="table table-hover" id="pairTable"
                        data-show-toggle="true"
-                       data-taxon-filter="true" data-id-table = 'taxonFilter' data-url-specie-tree="/All/genomes.json"
+                       data-taxon-filter="true" data-url-specie-tree="/All/genomes.json"
                        data-show-columns="true" data-search="true" data-show-export="true"
                        data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                        data-mobile-responsive="true" data-check-on-init="true"
@@ -96,24 +96,20 @@
         <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/extensions/filter-control/bootstrap-table-filter-control.min.js"></script> -->
         <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/extensions/export/bootstrap-table-export.min.js"></script> -->
         <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/extensions/mobile/bootstrap-table-mobile.min.js"></script> -->
-
+        <link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
         <script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
         <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
-
         <script src="{% static "js/tableExport.min.js" %}"></script>
 
-         <script src="{% static "js/tnt.js" %}"></script>
-
+        <!-- taxon filter import -->
+        <script src="{% static "js/tnt.js" %}"></script>
         <script src="{% static "js/bootstrap-table-filtertaxon.js" %}"></script>
-
         <link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
         <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
         <link type="text/css" rel="stylesheet" href="{% static "css/treecompare.css" %}"/>
-
         <script src="{% static "js/underscore-min.js" %}"></script>
         <script src="{% static "js/treecompare.js" %}"></script>
 
-        <link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
 
         <script>
             var tab = $("#pairTable");
@@ -127,9 +123,6 @@
                 },
                 onLoadSuccess: function (data) {
                     tab.bootstrapTable('hideLoading');
-                },
-                taxon_to_show: function () {
-                    return ['Primates', 'Tetraodontidae', 'Wrong'];
                 }
             });
 

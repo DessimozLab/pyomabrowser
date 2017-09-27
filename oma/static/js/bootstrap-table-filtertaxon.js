@@ -195,11 +195,9 @@
 
     $.extend($.fn.bootstrapTable.defaults, {
         taxonFilter: false,
-        idForm: 'taxonFilter',
-        actionForm: '',
-        idTable: undefined,
+        idTable: 'taxonFilter',
         urlSpecieTree: undefined,
-        onColumntaxonFilter: function (field, text) {
+        onColumntaxonFilter: function (name_selector) {
             return false;
         }
     });
@@ -220,7 +218,7 @@
             return "Apply";
         },
         taxon_to_show: function () {
-            return [];
+            return ['Vertebrata', 'Mammalia','Neoptera', 'Viridiplantae', 'Fungi'];
         }
     });
 
@@ -239,10 +237,6 @@
         }
 
         if (!this.options.taxonFilter) {
-            return;
-        }
-
-        if (!this.options.idTable) {
             return;
         }
 
@@ -281,14 +275,13 @@
         //  ADD LI FOR EACH DESIRED TAXA
         for (var tax in this.tax_converter) {
             if (tax !== 'custom') {
-
                 html.push(' <li><a  class="li_filtertax" id="' + tax + '">' + tax + ' <span id="li_ok_' + tax + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ');
             }
         }
 
         // ADD SEPARATOR AND LI FOR CUSTOM
         html.push(' <li class="divider"></li> ');
-                html.push('<li role="presentation" class="dropdown-header">CUSTOM</li>');
+        html.push('<li role="presentation" class="dropdown-header">CUSTOM</li>');
 
         html.push(' <li><a  class="li_filtertax"  id="custom">Custom <span id="li_ok_custom" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> </li> ');
 
@@ -331,24 +324,19 @@
             return;
         }
 
-        if (typeof this.options.idTable === 'undefined') {
-            return;
-        } else if (typeof this.options.urlSpecieTree === 'undefined') {
+        if (!this.options.urlSpecieTree) {
             return;
         }
-        else {
-            if (!firstLoad) {
 
-                var height = parseInt($(".bootstrap-table").height());
-                height += 10;
-                $("#" + this.options.idTable).bootstrapTable("resetView", {height: height});
-                firstLoad = true;
-            }
+        if (!firstLoad) {
+            var height = parseInt($(".bootstrap-table").height());
+            height += 10;
+            $("#" + this.options.idTable).bootstrapTable("resetView", {height: height});
+            firstLoad = true;
         }
     };
 
     BootstrapTable.prototype.initSearch = function () {
-
 
         _initSearch.apply(this, Array.prototype.slice.apply(arguments));
 
@@ -357,13 +345,9 @@
         }
 
         if (this.multi_species_search && this.multi_species_search !== 'all') {
-
             var that = this;
-
             this.data = $.grep(this.data, function (item, i) {
-
                 var lsp = that.tax_converter[that.multi_species_search];
-
                 for (var sp in lsp) {
 
                     var fval = lsp[sp].toLowerCase();
@@ -392,24 +376,18 @@
     };
 
     BootstrapTable.prototype.onColumntaxonFilter = function (name_selector) {
-
         this.resetSearch('');
-
         this.multi_species_search = name_selector;
-
         this.options.pageNumber = 1;
         this.initSearch();
         this.updatePagination();
-
         this.trigger('column-taxon-filter', 'arg1', 'arg2');
-
         this.multi_species_search = false;
-
-
     };
 
     BootstrapTable.prototype.getData = function (useCurrentPage) {
         var data = this.options.data;
+
         if (this.multi_species_search || this.searchText || this.options.sortName || !$.isEmptyObject(this.filterColumns) || !$.isEmptyObject(this.filterColumnsPartial)) {
             data = this.data;
         }
