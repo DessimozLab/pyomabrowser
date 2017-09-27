@@ -103,12 +103,6 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(os.getenv('DARWIN_LOG_PATH', default=''), 'pyoma.log'),
-            'formatter': 'verbose'
-        },
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
@@ -116,27 +110,27 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'propagate': True,
             'level': 'WARNING',
         },
         'django.request': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'propagate': True,
             'level': 'INFO'
         },
         'oma': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True
         },
         'pyoma': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True
         },
         'oma_rest': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True
         }
