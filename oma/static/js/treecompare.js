@@ -325,7 +325,7 @@ var TreeCompare = function(){
     function tree2Newick(tree) {
         function nested(nest){
             var subtree = "";
-            if(nest.hasOwnProperty('children')){
+            if(nest.hasOwnProperty('children') && nest.children !== null){
                 var children = [];
                 nest.children.forEach(function(child){
                     var subsubtree = nested(child);
@@ -5343,11 +5343,13 @@ var TreeCompare = function(){
                 add_menu_item(".tooltipElem",
                     function () { // text function
                         if(!d.selectForOMAExport){
-                            return 'select all species >';
                             selectAll = true;
+                            return 'select all species >';
+
                         } else {
-                            return 'unselect all species >';
                             selectAll = false;
+                            return 'unselect all species >';
+
                         }
 
                     },
