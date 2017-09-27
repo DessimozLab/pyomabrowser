@@ -1,8 +1,8 @@
-body,
-html {
-    height: 100%;
-    overflow:hidden;
-}
+/*body,*/
+/*html {*/
+    /*height: 100%;*/
+    /*!*overflow:hidden;*!*/
+/*}*/
 
 
 #colorScale {
@@ -11,7 +11,7 @@ html {
     padding-right: 10px;
 }
 
-.logo {
+#phylo_io .logo {
     display: block;
     text-indent: -9999px;
     width: 100px;
@@ -91,10 +91,10 @@ html {
     height: 100%;
 }
 
-svg {
+#phylo_io svg {
     width: 100%;
 }
-.vis-container {
+#phylo_io .vis-container {
     /*height: calc(100% - 60px);*/
     height: 100%;
     padding: 0px;
@@ -120,17 +120,17 @@ svg {
     /*position: absolute;*/
     /*bottom: 0px;*/
 /*}*/
-.dist li {
+#phylo_io .dist li {
     font-size: x-small;
     list-style-type: none;
 
 }
 
-#vis-scale2 {
+#phylo_io #vis-scale2 {
     margin-left: 50%;
 }
 
-.vis-container-2 {
+#phylo_io .vis-container-2 {
     position: absolute;
     float: right;
     height: 100%;
@@ -145,22 +145,22 @@ svg {
     top: 50px;
 }
 
-#vis-container2 {
+#phylo_io #vis-container2 {
     border-width: 0px;
     margin-left: 50%;
 }
 
-#page-content-wrapper {
+#phylo_io {
     padding: 0px;
     height: 100%;
 }
 
-.sidebar-brand {
+#phylo_io .sidebar-brand {
     font-weight: bold;
     font-size: 26px !important;
 }
 
-.sidebar-version {
+#phylo_io .sidebar-version {
     font-size: 12px;
     margin-top: -30px;
     padding-top: 10px;
@@ -169,66 +169,66 @@ svg {
 }
 
 
-#mode-buttons {
+#phylo_io #mode-buttons {
     width: 200px;
     margin-left: 20px;
     /*display: hidden;*/
 }
 
-input[type=file]{
+#phylo_io input[type=file]{
     color:transparent;
 }
 
-label {
+#phylo_io label {
     padding-top: -40px;
     color: lightgrey;
     font-weight: 500;
 }
 
-#renderButton {
+#phylo_io #renderButton {
     margin-left: 20px;
 }
 
-.icon-flipped {
+#phylo_io .icon-flipped {
     transform: scaleX(-1);
     -moz-transform: scaleX(-1);
     -webkit-transform: scaleX(-1);
     -ms-transform: scaleX(-1);
 }
 
-input[type=file]{
+#phylo_io input[type=file]{
     color:transparent;
 }
 
-.dropdown-menu li a{
+#phylo_io .dropdown-menu li a{
     /*padding: 1px 0px 1px 0px;*/
 }
 
-.alert {
+#phylo_io .alert {
     width: 200px;
     margin-left: 20px;
     line-height: 1.2;
 }
 
-.btn {
+#phylo_io .btn {
     border: 0 none;
 }
 
-.btn.sharp {
+#phylo_io .btn.sharp {
     border-radius:0;
 }
 
 
-.btn:focus, .btn:active:focus, .btn.active:focus {
+#phylo_io .btn:focus, .btn:active:focus, .btn.active:focus {
     outline: 0 none;
 }
 
-.btn-primary {
+#phylo_io .btn-primary {
     background: #0099cc;
     color: #ffffff;
 }
 
-.btn-sm {
+#phylo_io .btn-sm {
     background: #9d9d9d;
     color: #ffffff;
     padding: 5px 8px;
@@ -236,25 +236,25 @@ input[type=file]{
     border-radius: 0px;
 }
 
-.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open > .dropdown-toggle.btn-primary {
+#phylo_io .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open > .dropdown-toggle.btn-primary {
     background: #33a6cc;
 }
 
-.btn-primary:active, .btn-primary.active {
+#phylo_io .btn-primary:active, .btn-primary.active {
     background: #007299;
     box-shadow: none;
 }
 
-.dropbtn{
+#phylo_io .dropbtn{
    background-color: #2b542c;
    border: none;
    cursor: pointer;
 }
-.dropbtn:hover, .dropbtn:focus {
+#phylo_io .dropbtn:hover, .dropbtn:focus {
      background-color: #999;
  }
 
-#settingsPanel {
+#phylo_io #settingsPanel {
     display: none;
 
     background: rgb(79,79,79);
@@ -270,7 +270,7 @@ input[type=file]{
 
 }
 
-.sizeAdjust {
+#phylo_io .sizeAdjust {
     width: 200px !important;
 }
 
@@ -278,19 +278,19 @@ input[type=file]{
     /*margin-left: 20px;*/
 /*}*/
 
-input[type=radio] {
+#phylo_io input[type=radio] {
     margin-right: 5px;
 }
 
-input[type=checkbox] {
+#phylo_io input[type=checkbox] {
     margin-right: 5px;
 }
 
-.noExtraMargin {
+#phylo_io .noExtraMargin {
     margin-left: 0px !important;
 }
 
-.extraMargin {
+#phylo_io .extraMargin {
     margin-left: 20px !important;
 }
 
@@ -299,7 +299,7 @@ input[type=checkbox] {
     height: 70px;
 }
 
-.collapseElem {
+#phylo_io .collapseElem {
     line-height: 30px;
     vertical-align: middle;
     text-align: center;
@@ -311,11 +311,11 @@ input[type=checkbox] {
 
 }
 
-.singleIn {
+#phylo_io .singleIn {
     margin-top: 4px;
 }
 
-.newickIn {
+#phylo_io .newickIn {
     width: 100%;
     margin-top: 4px;
     height: 200px;
@@ -325,38 +325,38 @@ input[type=checkbox] {
 
 }
 
-#newickInputs p {
+#phylo_io #newickInputs p {
     color: white;
     margin-top: 10px;
     margin-bottom: -10px;
 }
 
-#newickInputs b {
+#phylo_io #newickInputs b {
     margin: 0px;
     color: #999;
 }
 
-#newickInputs {
+#phylo_io #newickInputs {
     min-height: 260px;
 }
 
-.exampleBtn {
+#phylo_io .exampleBtn {
     display: block;
 }
 
-.compareIn {
+#phylo_io .compareIn {
     width: 200px;
     margin-top: 4px;
     display: none;
 }
 
-.exampleBtn a {
+#phylo_io .exampleBtn a {
     color: #999;
     font-size: 12px;
     margin: 0px;
 }
 
-.smallText {
+#phylo_io .smallText {
     margin-top: -40px;
     width: 170px;
     margin-left: 40px;
@@ -364,7 +364,7 @@ input[type=checkbox] {
     text-align: left;
 }
 
-.footer {
+#phylo_io .footer {
     position: fixed;
     text-align: center;
     bottom: 0;

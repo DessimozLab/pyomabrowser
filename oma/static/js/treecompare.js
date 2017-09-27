@@ -23,6 +23,7 @@ var TreeCompare = function(){
     var undoFullTreeData = [];
 
     var exportList = [];
+    var phylo_io_container = "";
 
 
     /*
@@ -75,6 +76,7 @@ var TreeCompare = function(){
         loadedCallback: function() {},
         internalLabels: "none", //none, name, length, similarity
         enableDownloadButtons: true,
+        enableSharing: true,
         enableLadderizeTreeButton: true,
         enableOppositeTreeActions: true,
         enableFisheyeZoom: false,
@@ -162,6 +164,7 @@ var TreeCompare = function(){
     function changeCanvasSettings(settingsIn) {
         settings.enableZoomSliders = getSetting(settingsIn.enableZoomSliders,settings.enableZoomSliders);
         settings.enableDownloadButtons = getSetting(settingsIn.enableDownloadButtons,settings.enableDownloadButtons);
+        settings.enableSharing = getSetting(settingsIn.enableSharing,settings.enableSharing)
         settings.enableLadderizeTreeButton = getSetting(settingsIn.enableLadderizeTreeButton,settings.enableLadderizeTreeButton);
         settings.enableFixedButtons = getSetting(settingsIn.enableFixedButtons,settings.enableFixedButtons);
         settings.enableSizeControls = getSetting(settingsIn.enableSizeControls,settings.enableSizeControls);
@@ -322,7 +325,6 @@ var TreeCompare = function(){
     function tree2Newick(tree) {
         function nested(nest){
             var subtree = "";
-
             if(nest.hasOwnProperty('children')){
                 var children = [];
                 nest.children.forEach(function(child){
@@ -1623,7 +1625,7 @@ var TreeCompare = function(){
         var leavesVisible = getVisibleLeaves(treeData.root);
         // console.log(leavesVisible);
         // TODO: this has to be changed according to page (careful)
-        var height = $("#svgg").height();
+        var height = $("#"+phylo_io_container).height();
         var renderHeight = height - paddingVertical * 2;
         var leavesHidden = 0;
         var triangles = 0;
@@ -2556,12 +2558,13 @@ var TreeCompare = function(){
                 .append("div")
                 .attr("class", "export")
                 .text("Export");
-
-            exportMenu.append("li")
-                .attr("class", "exportText")
-                .append("div")
-                .attr("class", "share")
-                .text("Share");
+            if (settings.enableSharing) {
+                exportMenu.append("li")
+                    .attr("class", "exportText")
+                    .append("div")
+                    .attr("class", "share")
+                    .text("Share");
+            }
         }
         buildExportBar(canvasId);
 
@@ -2569,7 +2572,7 @@ var TreeCompare = function(){
             createTreeDownload(canvasId, "export");
         }
 
-        if (settings.enableDownloadButtons) {
+        if (settings.enableSharing) {
             createSharing(canvasId, "share");
         }
 
@@ -4500,7 +4503,7 @@ var TreeCompare = function(){
      /
      ---------------*/
     function viewTree(name, canvasId, scaleId) {
-
+        phylo_io_container = canvasId;
         renderedTrees = [];
         var index = findTreeIndex(name);
         initializeRenderTreeCanvas(name, canvasId, scaleId);

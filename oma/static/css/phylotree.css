@@ -1,118 +1,131 @@
-
 /*.node {*/
-	/*cursor: pointer;*/
+/*cursor: pointer;*/
 /*}*/
 /*.node circle {*/
-	/*fill: #fff ;*/
-	/*stroke: #22780F !important;*/
-	/*stroke-width: 1.5px !important;*/
+/*fill: #fff ;*/
+/*stroke: #22780F !important;*/
+/*stroke-width: 1.5px !important;*/
 /*}*/
 /*.node text {*/
-	/*font: 14px sans-serif !important;*/
+/*font: 14px sans-serif !important;*/
 /*}*/
 /*.link {*/
-	/*fill: none !important;*/
-	/*stroke: #ccc !important;*/
-	/*stroke-width: 1.5px !important;*/
+/*fill: none !important;*/
+/*stroke: #ccc !important;*/
+/*stroke-width: 1.5px !important;*/
 /*}*/
 
-#UISearch{
-		padding-bottom: 0px;
-		padding-top: 0px;
-		padding-left: 0px;
-		margin-bottom: 15px;
-		padding-right: 0px;
+#UISearch {
+    padding-bottom: 0px;
+    padding-top: 0px;
+    padding-left: 0px;
+    margin-bottom: 15px;
+    padding-right: 0px;
 
-	}
+}
 
-	.searchg{font-weight: bold;}
+.searchg {
+    font-weight: bold;
+}
 
-	#UISelected{padding:0px;
-		margin:0px;
-		border: 3px solid #22780F;
-		background: #fff;}
+#UISelected {
+    padding: 0px;
+    margin: 0px;
+    border: 3px solid #22780F;
+    background: #fff;
+}
 
-		.centered
-		{
-			vertical-align: middle;
-		}
+.centered {
+    vertical-align: middle;
+}
 
+div.tooltip {
+    position: absolute;
+    text-align: left;
+    width: auto;
+    height: auto;
+    padding: 2px;
+    font: 12px sans-serif;
+    z-index: 2;
+    border: 0px;
+    border-radius: 0px;
+    /*  pointer-events: none;	This line needs to be removed */
 
-		div.tooltip {
-			position: absolute;	
-			text-align: left;	
-			width: auto;	
-			height: auto;		
-			padding: 2px;	
-			font: 12px sans-serif;	
-			z-index: 2;
-			border: 0px;					
-			border-radius: 0px;
-			/*  pointer-events: none;	This line needs to be removed */
+}
 
-		}
+div.tooltip button {
+    background: #22780F;
+    border: 3px solid #22780F;
+    color: #fff;
+    margin: 2px;
+}
 
+#phylo_io {
+    padding: 0px;
+    background: #fff;
+}
 
+#divList {
+    overflow-y: auto !important;
+}
 
-		div.tooltip button{
-			background:#22780F ;
-			border: 3px solid #22780F;
-			color: #fff;
-			margin:2px;
-		}
+#buttonSubmit, #buttonSubmitMarkerGenes, #buttonUnselect {
+    margin: 5px;
+    border-radius: 0px !important;
+}
 
-		#svgg{padding: 0px;background: #fff;}
-		#divList{overflow-y:auto!important;}
+#tags {
+    opacity: 0.5
+}
 
-		#buttonSubmit, #buttonSubmitMarkerGenes, #buttonUnselect{
-			margin:5px;
-			border-radius:0px !important;
-		}
-
-
-		#tags{opacity: 0.5}
-		#tags:hover{opacity: 1}
+#tags:hover {
+    opacity: 1
+}
 
 /*		.ui-widget{margin: 8px;position :absolute;font-size: 0.8em !important;}
 		.ui-widget input{
                    width:300px;
                 }
-*/		
-
-
-
-
+*/
 
 .buttonGO {
-	position:relative;
-	padding:6px 15px;
-	left:-4px;
-	border:2px solid #22780F;
-	background-color:#22780F;
-	color:#fafafa;
-	height:auto;
+    position: relative;
+    padding: 6px 15px;
+    left: -4px;
+    border: 2px solid #22780F;
+    background-color: #22780F;
+    color: #fafafa;
+    height: auto;
 
-	opacity: 0.5;
+    opacity: 0.5;
 }
 
+.buttonGO:hover {
+    opacity: 1;
+}
 
-.buttonGO:hover{opacity:1;}
-
-#modalhelp{position :absolute;right:0px;}
+#modalhelp {
+    position: absolute;
+    right: 0px;
+}
 
 div.notification {
-	position: fixed;	
-	text-align: center;	
-	width: auto;	
-	height: auto;
-	background: #fff;	
-	padding: 2px;	
-	font: 12px sans-serif;	
-	z-index: 2;
-	border:2px solid #22780F;					
-	border-radius: 0px;
-	/*  pointer-events: none;	This line needs to be removed */
+    position: fixed;
+    text-align: center;
+    width: auto;
+    height: auto;
+    background: #fff;
+    padding: 2px;
+    font: 12px sans-serif;
+    z-index: 2;
+    border: 2px solid #22780F;
+    border-radius: 0px;
+    /*  pointer-events: none;	This line needs to be removed */
 
 }
-.nameGenomes{background: #fff !important;border:0px !important;	}
+
+.nameGenomes {
+    background: #fff !important;
+    border: 0px !important;
+}
 
