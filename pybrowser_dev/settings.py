@@ -133,7 +133,13 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True
+        },
+        'google_analytics': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': True
         }
+
     }
 }
 

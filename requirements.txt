@@ -16,6 +16,6 @@ pygments
 markdown
 
 
--e git+git@github.com:praekelt/django-google-analytics.git@py3#egg=django-google-analytics-app
+-e git+git@github.com:alpae/django-google-analytics.git@py3#egg=django-google-analytics-app
 -e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@master#egg=pyoma
 -e git+ssh://gitolite@lab.dessimoz.org:2222/zoo@master#egg=zoo
