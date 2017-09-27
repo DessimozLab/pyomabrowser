@@ -269,21 +269,23 @@
         html.push('<ul class="dropdown-menu">');
 
         //  ADD LI FOR ALL
-        html.push('<li role="presentation" class="dropdown-header">DEFAULT</li>');
-        html.push(' <li><a  class="li_filtertax"  id="all">All <span id="li_ok_all" class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span> </a></li> ');
+        html.push('<li role="presentation" class="dropdown-header li_filter">DEFAULT</li>');
+        html.push(' <li><a  class="li_filtertax"  id="all">&emsp; All <span id="li_ok_all" class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span> </a></li> ');
 
         //  ADD LI FOR EACH DESIRED TAXA
         for (var tax in this.tax_converter) {
             if (tax !== 'custom') {
-                html.push(' <li><a  class="li_filtertax" id="' + tax + '">' + tax + ' <span id="li_ok_' + tax + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ');
+                html.push(' <li><a  class="li_filtertax" id="' + tax + '"> &emsp; ' + tax + ' <span id="li_ok_' + tax + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ');
             }
         }
 
         // ADD SEPARATOR AND LI FOR CUSTOM
         html.push(' <li class="divider"></li> ');
-        html.push('<li role="presentation" class="dropdown-header">CUSTOM</li>');
+        html.push('<li role="presentation" class="dropdown-header li_filter">CUSTOM</li>');
 
-        html.push(' <li><a  class="li_filtertax"  id="custom">Custom <span id="li_ok_custom" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> </li> ');
+        html.push(' <li><a  class="li_filtertax"  id="custom"> &emsp;Custom <span id="li_ok_custom" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> </li> ');
+
+        html.push(' <li><a  class="li_filtertax"  id="li_add"> <h6 id="li_h6_add">Add custom filter</h6> </a> </li> ');
 
         html.push(' </ul>');
         html.push('</div>');

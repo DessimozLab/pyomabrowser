@@ -1,0 +1,16 @@
+#li_add:hover{
+    background-color: white
+}
+
+#li_h6_add {
+    margin:0px;
+    background-color: #ddd;
+    padding: 4px;
+    text-align: center;
+    border-radius: 4px;
+    opacity: 0.8;
+}
+
+.li_filter{
+    font-weight: bold;
+}

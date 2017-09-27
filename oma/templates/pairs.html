@@ -5,7 +5,6 @@
 {% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ vps|length }} pairwise
     orthologs{% endblock %}
 
-
 {% block contentTab %}
 
     <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
@@ -107,13 +106,13 @@
         <link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
         <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
         <link type="text/css" rel="stylesheet" href="{% static "css/treecompare.css" %}"/>
+        <link type="text/css" rel="stylesheet" href="{% static "css/filtertaxon.css" %}"/>
         <script src="{% static "js/underscore-min.js" %}"></script>
         <script src="{% static "js/treecompare.js" %}"></script>
 
 
         <script>
             var tab = $("#pairTable");
-
             tab.bootstrapTable({
                 reorderableColumns: true,
                 clickToSelect: false,
@@ -125,11 +124,12 @@
                     tab.bootstrapTable('hideLoading');
                 }
             });
-
             var icons = tab.bootstrapTable('getOptions').icons;
             $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
             tab.bootstrapTable('refreshOptions', {'icons': icons});
             tab.bootstrapTable('showLoading');
         </script>
+
     {% endif %}
+
 {% endblock contentTab %}
