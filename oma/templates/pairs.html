@@ -35,6 +35,7 @@
             </div>
         </div>
         <div class="panel-body">
+
             {% if entry.omaid == entry.alt_splicing_variant %}
 
                 <table class="table table-hover" id="pairTable"
@@ -109,7 +110,8 @@
         <link type="text/css" rel="stylesheet" href="{% static "css/filtertaxon.css" %}"/>
         <script src="{% static "js/underscore-min.js" %}"></script>
         <script src="{% static "js/treecompare.js" %}"></script>
-
+        <link type="text/css" rel="stylesheet" href="{% static "css/bootstrap-editable.css" %}"/>
+        <script src="{% static "js/bootstrap-editable.js" %}"></script>
 
         <script>
             var tab = $("#pairTable");
@@ -128,6 +130,12 @@
             $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
             tab.bootstrapTable('refreshOptions', {'icons': icons});
             tab.bootstrapTable('showLoading');
+
+            //turn to inline mode
+$.fn.editable.defaults.mode = 'inline';
+
+
+
         </script>
 
     {% endif %}

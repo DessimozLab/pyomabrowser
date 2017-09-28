@@ -73,7 +73,8 @@
             vModal += " <div class=\"modal-content\">";
             vModal += "  <div class=\"modal-header\">";
             vModal += "   <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\" >&times;</button>";
-            vModal += sprintf('   <h4 class=\"modal-title\">%s </h4>  <a class="" id="reset_tree" > Click here to reset tree selection.</a> ', custom_item.name);
+            vModal += sprintf('  <h4 class=\"modal-title\"><b>Custom filter:</b> <a href="#" id="username" data-type="text" data-url="" data-pk="1"  data-title="Enter username">%s</a> <small>(click on text field to rename filter)</small> </h4>   ', custom_item.name);
+            vModal += '<a class="" id="reset_tree" > Click here to reset tree selection.</a>';
             vModal += "  </div>";
             vModal += "  <div class=\"modal-body modal-body-custom\">";
             vModal += sprintf("   <div class=\"container-fluid\" id=\"avdSearchModalContent%s\" style=\"padding-right: 0px;padding-left: 0px;\" >", "_" + that.options.idTable);
@@ -104,14 +105,27 @@
                 $("#avdSearchModal" + "_" + that.options.idTable).modal('hide');
             });
 
+            $('#username').editable();
+
+
+            $('#username').on('save', function(e, params) {
+                custom_item.name = params.newValue;
+                localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
+
+               var span = $('#li_custom_' + custom_item.Uid).find('span[class="spanli"]')[0];
+                span.textContent = custom_item.name;
+
+            });
+
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
         } else {
-            that.item_to_update = custom_item
+
+            $('#username').text = custom_item.name;
+            that.item_to_update = custom_item;
             update_phyloIO(that);
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
         }
     };
-
 
     var init_phyloIo = function (that) {
 
@@ -311,11 +325,9 @@
         //  ADD LI FOR EACH CUSTOM FILTER
         for (var tax in this.tax_converter['custom']) {
             var custom_item = this.tax_converter['custom'][tax];
-            html.push(' <li><a  class="li_filtertax_custom" id="li_custom_' + custom_item.Uid + '"> &emsp; ' + custom_item.name + ' <span id="li_ok_' + custom_item.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ')
+            html.push(' <li><a  class="li_filtertax_custom" id="li_custom_' + custom_item.Uid + '">&emsp;  <span class="spanli">' + custom_item.name + ' </span> <span id="li_ok_' + custom_item.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ')
         }
-
         html.push(' <li><a  class="li_filtertax"  id="li_add"> <h6 id="li_h6_add">Add custom filter</h6> </a> </li> ');
-
         html.push(' </ul>');
         html.push('</div>');
 
@@ -335,14 +347,14 @@
             .off('click').on('click', function (event) {
 
             $('[id^="li_ok_"]').toggleClass('hidden', true);
-            $(this).find("span").toggleClass('hidden', false);
 
             var a_custom =  $(this)[0];
-
-
+            var e_id = a_custom.id.replace(/^li_custom_/, '');
             var result = that.tax_converter['custom'].filter(function (obj) {
-                return obj.Uid == a_custom.id.replace(/^li_custom_/, '');
+                return obj.Uid == e_id;
             });
+            
+            $(this).find('[id^="li_ok_"]').toggleClass('hidden', false);
 
             showAvdSearch(result[0], that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
         });
