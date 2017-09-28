@@ -119,8 +119,7 @@
 
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
         } else {
-
-            $('#username').text = custom_item.name;
+            $('#username').text(custom_item.name);
             that.item_to_update = custom_item;
             update_phyloIO(that);
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
@@ -353,7 +352,7 @@
             var result = that.tax_converter['custom'].filter(function (obj) {
                 return obj.Uid == e_id;
             });
-            
+
             $(this).find('[id^="li_ok_"]').toggleClass('hidden', false);
 
             showAvdSearch(result[0], that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
