@@ -63,15 +63,17 @@
 
     };
 
-    var showAvdSearch = function (pColumns, searchTitle, searchText, that) {
+    var showAvdSearch = function (custom_item, searchTitle, searchText, that) {
 
         if (!$("#avdSearchModal" + "_" + that.options.idTable).hasClass("modal")) {
+
+
             var vModal = sprintf("<div id=\"avdSearchModal%s\"  class=\"modal fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"mySmallModalLabel\" aria-hidden=\"true\">", "_" + that.options.idTable);
             vModal += "<div class=\"modal-dialog modal-lg\">";
             vModal += " <div class=\"modal-content\">";
             vModal += "  <div class=\"modal-header\">";
             vModal += "   <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\" >&times;</button>";
-            vModal += sprintf('   <h4 class=\"modal-title\">%s </h4>  <a class="" id="reset_tree" > Click here to reset tree selection.</a> ', searchTitle);
+            vModal += sprintf('   <h4 class=\"modal-title\">%s </h4>  <a class="" id="reset_tree" > Click here to reset tree selection.</a> ', custom_item.name);
             vModal += "  </div>";
             vModal += "  <div class=\"modal-body modal-body-custom\">";
             vModal += sprintf("   <div class=\"container-fluid\" id=\"avdSearchModalContent%s\" style=\"padding-right: 0px;padding-left: 0px;\" >", "_" + that.options.idTable);
@@ -170,7 +172,7 @@
                     that.tax_converter['custom'] = [];
                     localStorage.setItem('custom_taxon_filter', JSON.stringify([]));
                     that.onColumntaxonFilter('custom');
-                    console.log(that.tax_converter['custom'],treecomp.exportList );
+                    console.log(that.tax_converter['custom'], treecomp.exportList);
 
                 });
             },
@@ -218,7 +220,7 @@
             return "Apply";
         },
         taxon_to_show: function () {
-            return ['Vertebrata', 'Mammalia','Neoptera', 'Viridiplantae', 'Fungi'];
+            return ['Vertebrata', 'Mammalia', 'Neoptera', 'Viridiplantae', 'Fungi'];
         }
     });
 
@@ -249,13 +251,14 @@
 
         // SEARCH MODE TYPE
         this.multi_species_search = false;
+        this.custom_filter_search = false;
 
         // INPUTTED TAXON NAME WITH THEY SPECIES LIST (CHECK FOR VALIDITY)
         this.tax_converter = build_tax_to_species_converter(this.options.urlSpecieTree, this.list_taxon_accepted);
 
         // ADD CUSTOM FILTERING FROM LOCAL STORAGE
         var local_custom = localStorage.getItem('custom_taxon_filter');
-        this.tax_converter['custom'] = (local_custom === null) ? [] : JSON.parse(local_custom);
+        this.tax_converter['custom'] = (JSON.parse(local_custom) === null) ? [] : JSON.parse(local_custom);
 
         var that = this,
             html = [];
@@ -266,7 +269,7 @@
         html.push(sprintf('<i class="%s %s"></i>', that.options.iconsPrefix, that.options.icons.taxonFilterIcon));
         html.push('<span class="caret"></span>');
         html.push('</button>');
-        html.push('<ul class="dropdown-menu">');
+        html.push('<ul class="dropdown-menu" id="ul_custom" >');
 
         //  ADD LI FOR ALL
         html.push('<li role="presentation" class="dropdown-header li_filter">DEFAULT</li>');
@@ -275,7 +278,7 @@
         //  ADD LI FOR EACH DESIRED TAXA
         for (var tax in this.tax_converter) {
             if (tax !== 'custom') {
-                html.push(' <li><a  class="li_filtertax" id="' + tax + '"> &emsp; ' + tax + ' <span id="li_ok_' + tax + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ');
+                html.push(' <li><a  class="li_filtertax_default" id="' + tax + '"> &emsp; ' + tax + ' <span id="li_ok_' + tax + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ');
             }
         }
 
@@ -283,7 +286,11 @@
         html.push(' <li class="divider"></li> ');
         html.push('<li role="presentation" class="dropdown-header li_filter">CUSTOM</li>');
 
-        html.push(' <li><a  class="li_filtertax"  id="custom"> &emsp;Custom <span id="li_ok_custom" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> </li> ');
+        //  ADD LI FOR EACH CUSTOM FILTER
+        for (var tax in this.tax_converter['custom']) {
+            var custom_item = this.tax_converter['custom'][tax];
+            html.push(' <li><a  class="li_filtertax_custom" id="li_custom_' + custom_item.Uid + '"> &emsp; ' + custom_item.name + ' <span id="li_ok_' + custom_item.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ')
+        }
 
         html.push(' <li><a  class="li_filtertax"  id="li_add"> <h6 id="li_h6_add">Add custom filter</h6> </a> </li> ');
 
@@ -293,29 +300,75 @@
         that.$toolbar.prepend(html.join(''));
 
         //  ADD LI CLICK ACTION
-        that.$toolbar.find('a[class="li_filtertax"]')
+        that.$toolbar.find('a[class="li_filtertax_default"]')
             .off('click').on('click', function (event) {
 
-                $('[id^="li_ok_"]').toggleClass('hidden',true);
+                $('[id^="li_ok_"]').toggleClass('hidden', true);
+                $(this).find("span").toggleClass('hidden', false);
+                that.onColumntaxonFilter($(event.currentTarget)[0].id);
 
-                if (this.id === 'custom') {
-                    $('[id^="li_ok_custom"]').toggleClass('hidden',false);
-                    showAvdSearch(that.columns, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
-                }
-                else {
-                    var id_li = "li_ok_" +  this.id;
-                    $(this).find( "span" ).toggleClass('hidden',false);
-                    that.onColumntaxonFilter($(event.currentTarget)[0].id);
-
-            }
         });
+
+        that.$toolbar.find('a[class="li_filtertax_custom"]')
+            .off('click').on('click', function (event) {
+
+                $('[id^="li_ok_"]').toggleClass('hidden', true);
+                $(this).find("span").toggleClass('hidden', false);
+
+                var result = this.tax_converter['custom'].filter(function( obj ) {
+                    return obj.Uid === this.id.replace(this.id.replace(/^li_custom_/, ''));
+                });
+                //showAvdSearch(result[0], that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+            });
 
         //  ADD RESET BUTTON ACTION
         d3.select("#reset_taxon_filter").on('click', function () {
-            $('[id^="li_ok_"]').toggleClass('hidden',true);
-            $('[id^="li_ok_all"]').toggleClass('hidden',false);
+            $('[id^="li_ok_"]').toggleClass('hidden', true);
+            $('[id^="li_ok_all"]').toggleClass('hidden', false);
             that.onColumntaxonFilter('all');
         })
+
+        //  ADD NEW CUSTOM FILTER
+        d3.select("#li_add").on('click', function () {
+
+            // create new object in the local storage
+            var locSt = JSON.parse(localStorage.getItem('custom_taxon_filter'));
+
+            var idMax = (locSt.length <= 0) ? 0 : locSt.reduce(function(l, e) {
+                return e.Uid > l.Uid ? e : l;
+            }).Uid;
+
+            idMax = idMax+1;
+            
+            var empty_filter = {Uid:idMax, name: 'Unname Item', lsp:[]}
+            locSt.push(empty_filter);
+            localStorage.setItem('custom_taxon_filter', JSON.stringify(locSt));
+
+            // update new object in the taxconverter
+            that.tax_converter['custom'] = locSt
+
+            // add the li in the list after last customfilter li
+            var custom_ul = document.getElementById("ul_custom");
+            var lis = custom_ul.getElementsByTagName("li");
+            var li_add  = lis[lis.length-1];
+
+            var new_item = document.createElement('li');
+            new_item.innerHTML = ' <li><a  class="li_filtertax_custom" id="li_custom_' + empty_filter.Uid + '"> &emsp; ' + empty_filter.name + ' <span id="li_ok_' + empty_filter.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ';
+
+            custom_ul.insertBefore(new_item, li_add);
+
+            console.log(locSt);
+
+            // launch the modal
+            // showAvdSearch(locSt, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+
+
+
+        })
+
+
+
+
 
     };
 
