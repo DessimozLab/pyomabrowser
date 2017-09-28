@@ -91,24 +91,30 @@
             jmodal.append(phyloContent.join(''));
 
             // SETUP PHYLO.IO
+            that.item_to_update = custom_item;
             init_phyloIo(that);
+            that.custom_filter_search = true;
+            that.onColumntaxonFilter(that.item_to_update.Uid);
 
             jmodal.append(sprintf('<button type="button" id="btnCloseAvd%s" class="btn btn-default pull-right" >%s</button>', "_" + that.options.idTable, searchText));
 
             $("#btnCloseAvd" + "_" + that.options.idTable).click(function () {
-                that.onColumntaxonFilter('custom');
+                that.custom_filter_search = true;
+                that.onColumntaxonFilter(that.item_to_update.Uid);
                 $("#avdSearchModal" + "_" + that.options.idTable).modal('hide');
             });
 
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
         } else {
+            that.item_to_update = custom_item
+            update_phyloIO(that);
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
         }
     };
 
+
     var init_phyloIo = function (that) {
 
-        var treecomp;
         var maxGenome = 1000000;
         var mouse = {x: 0, y: 0};
         document.addEventListener('mousemove', function (e) {
@@ -127,52 +133,53 @@
         $.ajax({
             url: that.options.urlSpecieTree,
             success: function (newick) {
+
+                that.newick = newick;
                 // DEFINED BEHAVIOR ON NODE SELECTION
                 var additionalNodeFunctions = {
                     "selectForExport": [
                         function (exportList) {
-                            that.tax_converter['custom'] = exportList;
-                            localStorage.setItem('custom_taxon_filter', JSON.stringify(exportList));
-                            that.onColumntaxonFilter('custom');
+                            that.item_to_update.lsp = exportList;
+                            localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
+                            that.custom_filter_search = true;
+                            that.onColumntaxonFilter(that.item_to_update.Uid);
                         }
                     ]
                 };
                 // INIT THE PHYLO.IO
-                treecomp = TreeCompare().init({
+                that.treecomp = TreeCompare().init({
                     maxNumGenome: maxGenome,
                     nodeFunc: additionalNodeFunctions
                 });
-                var tree1 = treecomp.addTree(newick, undefined);
+                var tree1 = that.treecomp.addTree(that.newick, undefined);
                 // SET UP THE PHYLO.IO
-                treecomp.changeCanvasSettings({
+                that.treecomp.changeCanvasSettings({
                     autoCollapse: tree1.data.autoCollapseDepth,
                     enableScale: false,
                 });
 
                 // RENDER THE PHYLO.IO
-                treecomp.viewTree(tree1.name, "phylo_io");
+                that.treecomp.viewTree(tree1.name, "phylo_io");
 
                 // SELECT NODES IN CUSTOM SELECTION FILTER
                 for (var i = 0; i < tree1.root.leaves.length; i++) {
-                    if (that.tax_converter['custom'].indexOf(tree1.root.leaves[i].name) !== -1) {
-                        treecomp.selectAllSpecies(tree1.root.leaves[i], tree1, maxGenome, true);
+                    if (that.item_to_update.lsp.indexOf(tree1.root.leaves[i].name) !== -1) {
+                        that.treecomp.selectAllSpecies(tree1.root.leaves[i], tree1, maxGenome, true);
                     }
                 }
 
                 // RESET THE FILTERING
                 $("#reset_tree").click(function () {
 
-                    treecomp.exportList = [];
+                    that.treecomp.exportList = [];
 
-                    tree1 = treecomp.addTree(newick, undefined);
-                    treecomp.viewTree(tree1.name, "phylo_io");
+                    tree1 = that.treecomp.addTree(that.newick, undefined);
+                    that.treecomp.viewTree(tree1.name, "phylo_io");
 
-
-                    //treecomp.update(tree1.root, tree1.data);
-                    that.tax_converter['custom'] = [];
-                    localStorage.setItem('custom_taxon_filter', JSON.stringify([]));
-                    that.onColumntaxonFilter('custom');
-                    console.log(that.tax_converter['custom'], treecomp.exportList);
+                    item_to_update.lsp = [];
+                    localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
+                    that.custom_filter_search = true;
+                    that.onColumntaxonFilter(item_to_update.Uid);
 
                 });
             },
@@ -180,7 +187,22 @@
         });
 
 
-    }
+
+    };
+
+    var update_phyloIO = function (that) {
+
+        var tree1 = that.treecomp.addTree(that.newick, undefined);
+
+        // SELECT NODES IN CUSTOM SELECTION FILTER
+        for (var i = 0; i < tree1.root.leaves.length; i++) {
+            if (that.item_to_update.lsp.indexOf(tree1.root.leaves[i].name) !== -1) {
+                that.treecomp.selectAllSpecies(tree1.root.leaves[i], tree1, 10000, true);
+            }
+        }
+        that.treecomp.viewTree(tree1.name, "phylo_io");
+
+    };
 
     var add_phyloioDOM = function () {
         var htmlPhylo = [];
@@ -303,23 +325,27 @@
         that.$toolbar.find('a[class="li_filtertax_default"]')
             .off('click').on('click', function (event) {
 
-                $('[id^="li_ok_"]').toggleClass('hidden', true);
-                $(this).find("span").toggleClass('hidden', false);
-                that.onColumntaxonFilter($(event.currentTarget)[0].id);
+            $('[id^="li_ok_"]').toggleClass('hidden', true);
+            $(this).find("span").toggleClass('hidden', false);
+            that.onColumntaxonFilter($(event.currentTarget)[0].id);
 
         });
 
         that.$toolbar.find('a[class="li_filtertax_custom"]')
             .off('click').on('click', function (event) {
 
-                $('[id^="li_ok_"]').toggleClass('hidden', true);
-                $(this).find("span").toggleClass('hidden', false);
+            $('[id^="li_ok_"]').toggleClass('hidden', true);
+            $(this).find("span").toggleClass('hidden', false);
 
-                var result = this.tax_converter['custom'].filter(function( obj ) {
-                    return obj.Uid === this.id.replace(this.id.replace(/^li_custom_/, ''));
-                });
-                //showAvdSearch(result[0], that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+            var a_custom =  $(this)[0];
+
+
+            var result = that.tax_converter['custom'].filter(function (obj) {
+                return obj.Uid == a_custom.id.replace(/^li_custom_/, '');
             });
+
+            showAvdSearch(result[0], that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+        });
 
         //  ADD RESET BUTTON ACTION
         d3.select("#reset_taxon_filter").on('click', function () {
@@ -334,13 +360,13 @@
             // create new object in the local storage
             var locSt = JSON.parse(localStorage.getItem('custom_taxon_filter'));
 
-            var idMax = (locSt.length <= 0) ? 0 : locSt.reduce(function(l, e) {
+            var idMax = (locSt.length <= 0) ? 0 : locSt.reduce(function (l, e) {
                 return e.Uid > l.Uid ? e : l;
             }).Uid;
 
-            idMax = idMax+1;
-            
-            var empty_filter = {Uid:idMax, name: 'Unname Item', lsp:[]}
+            idMax = idMax + 1;
+
+            var empty_filter = {Uid: idMax, name: 'Unname Item', lsp: []}
             locSt.push(empty_filter);
             localStorage.setItem('custom_taxon_filter', JSON.stringify(locSt));
 
@@ -350,24 +376,17 @@
             // add the li in the list after last customfilter li
             var custom_ul = document.getElementById("ul_custom");
             var lis = custom_ul.getElementsByTagName("li");
-            var li_add  = lis[lis.length-1];
+            var li_add = lis[lis.length - 1];
 
             var new_item = document.createElement('li');
-            new_item.innerHTML = ' <li><a  class="li_filtertax_custom" id="li_custom_' + empty_filter.Uid + '"> &emsp; ' + empty_filter.name + ' <span id="li_ok_' + empty_filter.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ';
+            new_item.innerHTML = ' <a  class="li_filtertax_custom" id="li_custom_' + empty_filter.Uid + '"> &emsp; ' + empty_filter.name + ' <span id="li_ok_' + empty_filter.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> ';
 
             custom_ul.insertBefore(new_item, li_add);
 
-            console.log(locSt);
-
             // launch the modal
-            // showAvdSearch(locSt, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
-
-
+            showAvdSearch(empty_filter, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
 
         })
-
-
-
 
 
     };
@@ -402,7 +421,20 @@
         if (this.multi_species_search && this.multi_species_search !== 'all') {
             var that = this;
             this.data = $.grep(this.data, function (item, i) {
-                var lsp = that.tax_converter[that.multi_species_search];
+
+                var lsp;
+
+                if (that.custom_filter_search) {
+                    var result = that.tax_converter['custom'].filter(function (obj) {
+                        return obj.Uid === that.multi_species_search;
+                    });
+                    lsp = result[0].lsp;
+                }
+                else {
+                    lsp = that.tax_converter[that.multi_species_search];
+                }
+
+
                 for (var sp in lsp) {
 
                     var fval = lsp[sp].toLowerCase();
@@ -432,12 +464,14 @@
 
     BootstrapTable.prototype.onColumntaxonFilter = function (name_selector) {
         this.resetSearch('');
+
         this.multi_species_search = name_selector;
         this.options.pageNumber = 1;
         this.initSearch();
         this.updatePagination();
         this.trigger('column-taxon-filter', 'arg1', 'arg2');
         this.multi_species_search = false;
+        this.custom_filter_search = false;
     };
 
     BootstrapTable.prototype.getData = function (useCurrentPage) {
