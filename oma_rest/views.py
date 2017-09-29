@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.settings import api_settings
 from distutils.util import strtobool
 
 from . import models as rest_models
@@ -381,7 +382,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
 class APIVersion(ViewSet):
     def list(self, request, format=None):
         """Returns the version of the underlying oma browser database release."""
-        return Response({'oma-version': utils.db.get_release_name()})
+        return Response({'oma_version': utils.db.get_release_name(),
+                         'api_version': api_settings.DEFAULT_VERSION})
 
 
 class XRefsViewSet(ViewSet):
