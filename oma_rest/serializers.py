@@ -51,6 +51,7 @@ class ProteinEntrySerializer(ReadOnlySerializer):
     canonicalid = serializers.CharField()
     sequence_md5 = serializers.CharField()
     oma_group = serializers.IntegerField(required=False)
+    oma_hog = serializers.CharField(required=False)
     chromosome = serializers.CharField()
     locus = serializers.SerializerMethodField(method_name=None)
 
