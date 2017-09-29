@@ -5,9 +5,8 @@
 {% block meta_description %}Hierarchical orthologous groups (HOGs) provide a set of genes that have all started diverging from a single ancestral gene at the taxonomic range of interest.{% endblock %}
 {% block js_hook %}
     <!-- D3 -->
-    <!--<script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>-->
-    <script src="https://d3js.org/d3.v3.min.js"></script>
-    <script src="http://benschmidt.org/colorbar/colorbar.js" charset="utf-8"></script>
+    <script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>
+    <script src="{% static "js/colorbar.js" %}" charset="utf-8"></script>
 
     <!-- Underscore -->
     <script src="{% static "js/underscore-min.js" %}"></script>
@@ -15,9 +14,9 @@
     <!-- TnT -->
     <link rel="stylesheet" href="{% static "css/tnt.css" %}" type="text/css" />
     <link rel="stylesheet" href="{% static "css/hog.css" %}" type="text/css" />
-    <link rel="stylesheet" href="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.css" type="text/css" />
-    <script src="http://tntvis.github.io/tnt/build/tnt.min.js" charset="utf-8"></script>
-    <script src="http://tntvis.github.io/tnt.tooltip/build/tnt.tooltip.min.js" charset="UTF-8"></script>
+    <link rel="stylesheet" href="{% static "css/tnt.tooltip.css" %}" type="text/css" />
+    <script src="{% static "js/tnt.min.js" %}" charset="utf-8"></script>
+    <script src="{% static "js/tnt.tooltip.min.js" %}" charset="UTF-8"></script>
     <script src="{% static "js/hog.js" %}" charset="UTF-8"></script>
     <script src="{% static "js/orthoxml-hogvis.min.js" %}" charset="UTF-8"></script>
 
