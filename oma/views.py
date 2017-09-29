@@ -613,7 +613,6 @@ def home(request):
 
         public_tweets = api.user_timeline('@OMABrowser', exclude_replies=True,
                                           trim_user=True, include_rts=False, include_entities=True)
-        # r = re.compile(r"(http://[^ ]+)")
         tweets = []
         for tweet in public_tweets[:n_latest_tweets]:
             text = tweet.text
