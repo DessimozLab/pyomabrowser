@@ -64,6 +64,7 @@ INSTALLED_APPS = (
     'captcha',
     #'debug_toolbar_line_profiler',
     'rest_framework',
+    'drf_link_header_pagination',
     'oma',
     'oma_rest',
     'bootstrap3',
@@ -81,7 +82,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'oma_rest.pagination.LinkHeaderPagination',
     'PAGE_SIZE': 100,
 }
 

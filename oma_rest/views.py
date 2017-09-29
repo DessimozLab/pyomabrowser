@@ -13,15 +13,14 @@ from distutils.util import strtobool
 
 from . import models as rest_models
 from . import serializers
+from .pagination import PaginationMixin
+
 from oma import utils, misc
 from pyoma.browser import models, db
 import logging
 
-from rest_framework.pagination import PageNumberPagination
 from collections import Counter
 from rest_framework.decorators import detail_route
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -115,9 +114,8 @@ class ProteinEntryViewSet(ViewSet):
         return Response(serializer.data)
 
 
-class OmaGroupViewSet(ViewSet):
+class OmaGroupViewSet(PaginationMixin, ViewSet):
     lookup_field = 'group_id'
-    serializer_class = serializers.ProteinEntrySerializer
 
     def list(self, request, format=None):
         """List of all the OMA Groups in the current release.
@@ -126,10 +124,9 @@ class OmaGroupViewSet(ViewSet):
         """
         nr_groups = utils.db.get_nr_oma_groups()
         data = [rest_models.OMAGroup(GroupNr=i) for i in range(1, nr_groups + 1)]
-        paginator = PageNumberPagination()
-        page = paginator.paginate_queryset(data, request)
+        page = self.paginator.paginate_queryset(data, request)
         serializer = serializers.GroupListSerializer(page, many=True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
+        return self.paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, group_id=None, format=None):
         """Retrieve the information available for a given OMA group.
@@ -207,12 +204,13 @@ class OmaGroupViewSet(ViewSet):
         close_groups = []
         for grp, hits in group_cnts.most_common():
             close_groups.append(rest_models.OMAGroup(GroupNr=grp, hits=hits))
+        page = self.paginator.paginate_queryset(close_groups, request)
         serializer = serializers.RelatedGroupsSerializer(
-            instance=close_groups, many=True, context={'request': request})
-        return Response(serializer.data)
+            instance=page, many=True, context={'request': request})
+        return self.paginator.get_paginated_response(serializer.data)
 
 
-class HOGViewSet(ViewSet):
+class HOGViewSet(PaginationMixin, ViewSet):
     lookup_field = 'hog_id'
     lookup_value_regex = r'[^/]+'
     serializer_class = serializers.ProteinEntrySerializer
@@ -234,10 +232,9 @@ class HOGViewSet(ViewSet):
             data = []
             for row in hogs:
                 data.append(rest_models.HOG(hog_id=row, level=level))
-            paginator = PageNumberPagination()
-            page = paginator.paginate_queryset(data, request)
+            page = self.paginator.paginate_queryset(data, request)
             serializer = serializers.HOGsListSerializer_at_level(page, many=True, context={'request': request})
-            return paginator.get_paginated_response(serializer.data)
+            return self.paginator.get_paginated_response(serializer.data)
 
         else:
             # list of all the hogs
@@ -249,10 +246,9 @@ class HOGViewSet(ViewSet):
             data = []
             for row in hog_ids:
                 data.append(rest_models.HOG(hog_id=row))
-            paginator = PageNumberPagination()
-            page = paginator.paginate_queryset(data, request)
+            page = self.paginator.paginate_queryset(data, request)
             serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
-            return paginator.get_paginated_response(serializer.data)
+            return self.paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, hog_id):
         """Retrieve the detail available for a given HOG, along with its deepest level
@@ -428,7 +424,7 @@ class XRefsViewSet(ViewSet):
         return Response(serializer.data)
 
 
-class GenomeViewSet(ViewSet):
+class GenomeViewSet(PaginationMixin, ViewSet):
     lookup_field = 'genome_id'
 
     def list(self, request, format=None):
@@ -437,10 +433,9 @@ class GenomeViewSet(ViewSet):
         :queryparam page: the page number of the response json"""
         make_genome = functools.partial(models.Genome, utils.db)
         genomes = [make_genome(g) for g in utils.id_mapper['OMA'].genome_table]
-        paginator = PageNumberPagination()
-        page = paginator.paginate_queryset(genomes, request)
+        page = self.paginator.paginate_queryset(genomes, request)
         serializer = serializers.GenomeInfoSerializer(instance=page, many=True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
+        return self.paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, genome_id, format=None):
         """Retrieve the information available for a given genome.
@@ -473,13 +468,12 @@ class GenomeViewSet(ViewSet):
                 prot.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
         except db.UnknownSpecies as e:
             raise NotFound(e)
-        paginator = PageNumberPagination()
-        page = paginator.paginate_queryset(prot, request)
+        page = self.paginator.paginate_queryset(prot, request)
         serializer = serializers.ProteinEntrySerializer(page, many=True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
+        return self.paginator.get_paginated_response(serializer.data)
 
 
-class PairwiseRelationAPIView(APIView):
+class PairwiseRelationAPIView(PaginationMixin, APIView):
     def _get_entry_range(self, genome, chr):
         if chr is None:
             return genome.entry_nr_offset + 1, genome.entry_nr_offset + len(genome)
@@ -548,10 +542,9 @@ class PairwiseRelationAPIView(APIView):
                     logger.debug("Processed {} rows".format(cnt))
 
         if False:
-            paginator = PageNumberPagination()
-            page = paginator.paginate_queryset(res, request)
+            page = self.paginator.paginate_queryset(res, request)
             serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
-            return paginator.get_paginated_response(serializer.data)
+            return self.paginator.get_paginated_response(serializer.data)
         else:
             serializer = serializers.PairwiseRelationSerializer(instance=res, many=True, context={'request': request})
             return Response(serializer.data)

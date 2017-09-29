@@ -14,6 +14,7 @@ djangorestframework>=3.6
 coreapi
 pygments
 markdown
+djangorestframework-link-header-pagination
 
 
 -e git+git@github.com:alpae/django-google-analytics.git@py3#egg=django-google-analytics-app
