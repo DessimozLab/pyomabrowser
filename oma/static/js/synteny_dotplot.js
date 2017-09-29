@@ -410,16 +410,16 @@ dotplot_theme = function () {
                 return parseFloat(d[metric_option.accessor]);
             });
             var min_position_x = d3.min(data, function (d) {
-                return d.entry_1.locus[0];
+                return d.entry_1.locus.start;
             });
             var max_position_x = d3.max(data, function (d) {
-                return d.entry_1.locus[0];
+                return d.entry_1.locus.start;
             });
             var min_position_y = d3.min(data, function (d) {
-                return d.entry_2.locus[0];
+                return d.entry_2.locus.start;
             });
             var max_position_y = d3.max(data, function (d) {
-                return d.entry_2.locus[0];
+                return d.entry_2.locus.start;
             });
 
             // set the inital filtering boundaries to extremum values
@@ -487,10 +487,10 @@ dotplot_theme = function () {
                 .data(data)
                 .enter().append("circle")
                 .attr("cx", function (d) {
-                    return x(d.entry_1.locus[0]);
+                    return x(d.entry_1.locus.start);
                 })
                 .attr("cy", function (d) {
-                    return y(d.entry_2.locus[0]);
+                    return y(d.entry_2.locus.start);
                 })
                 .attr("fill", function (d) {
                     return color_threshold(d[metric_option.accessor])
@@ -663,10 +663,10 @@ dotplot_theme = function () {
 
                     svg_dotplot.selectAll("circle").transition(t)
                    .attr("cx", function (d) {
-                        return x(d.entry_1.locus[0]);
+                        return x(d.entry_1.locus.start);
                     })
                     .attr("cy", function (d) {
-                        return y(d.entry_2.locus[0]);
+                        return y(d.entry_2.locus.start);
                     });
 
 
@@ -751,8 +751,8 @@ dotplot_theme = function () {
                     var circle = svg_dotplot.selectAll('circle');
 
                     circle.classed("active", function (d) {
-                        if (dotplot.between(d.entry_1.locus[0], bxmin, bxmax)) {
-                            if (dotplot.between(d.entry_2.locus[0], bymin, bymax)) {
+                        if (dotplot.between(d.entry_1.locus.start, bxmin, bxmax)) {
+                            if (dotplot.between(d.entry_2.locus.start, bymin, bymax)) {
                                 if (d3.select(this).attr('visibility') === 'visible') {
                                     selected_pairs.push(d);
                                     return true;

@@ -1,8 +1,6 @@
-from itertools import groupby
-
 import itertools
+import collections
 
-from django.core.urlresolvers import NoReverseMatch
 from rest_framework import serializers
 from oma.utils import db
 from pyoma.browser.models import ProteinEntry
@@ -52,21 +50,19 @@ class ProteinEntrySerializer(ReadOnlySerializer):
     omaid = serializers.CharField()
     canonicalid = serializers.CharField()
     sequence_md5 = serializers.CharField()
-    oma_group = serializers.IntegerField()
-
-
-class ProteinEntryExtendedSummarySerializer(ProteinEntrySerializer):
+    oma_group = serializers.IntegerField(required=False)
+    chromosome = serializers.CharField()
     locus = serializers.SerializerMethodField(method_name=None)
 
     def get_locus(self, obj):
-        return [obj.locus_start, obj.locus_end, obj.strand]
+        return collections.OrderedDict([('start', obj.locus_start), ('end', obj.locus_end), ('strand', obj.strand)])
 
 
-class ProteinEntryDetailSerializer(ProteinEntryExtendedSummarySerializer):
+class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     roothog_id = serializers.IntegerField(source='hog_family_nr')
     oma_hog_id = serializers.CharField(source='oma_hog')
     hog_levels = serializers.SerializerMethodField(method_name=None)
-    chromosome = serializers.CharField()
+
     sequence_length = serializers.IntegerField()
     sequence = serializers.CharField()
     cdna = serializers.CharField()
@@ -169,7 +165,7 @@ class GenomeDetailSerializer(GenomeBaseSerializer):
         for chr_id in obj.chromosomes:
             entries = obj.chromosomes[chr_id]
             ranges = []
-            for k, g in groupby(enumerate(entries), lambda x: x[0] - x[1]):
+            for k, g in itertools.groupby(enumerate(entries), lambda x: x[0] - x[1]):
                 group = [z[1] for z in g]
                 ranges.append((group[0], group[-1]))
             chrs.append({'id': chr_id, 'entry_ranges': ranges})
@@ -268,8 +264,8 @@ class ProteinDomainsSerializer(ReadOnlySerializer):
 
 
 class PairwiseRelationSerializer(ReadOnlySerializer):
-    entry_1 = ProteinEntryExtendedSummarySerializer()
-    entry_2 = ProteinEntryExtendedSummarySerializer()
+    entry_1 = ProteinEntrySerializer()
+    entry_2 = ProteinEntrySerializer()
     rel_type = serializers.CharField()
     distance = serializers.FloatField()
     score = serializers.FloatField()
