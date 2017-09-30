@@ -19,3 +19,7 @@
     width: 100% !important;
     margin-left: 0px;
 }
+
+.fixed-table-toolbar .dropdown-menu {
+    max-height: 400px
+}

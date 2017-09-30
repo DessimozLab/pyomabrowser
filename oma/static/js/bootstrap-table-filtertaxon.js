@@ -217,26 +217,6 @@
 
     };
 
-    var update_phyloIO = function (that) {
-
-        that.treecomp.exportList = [];
-        that.tree1 = that.treecomp.addTree(that.newick, undefined);
-        that.treecomp.viewTree(that.tree1.name, "phylo_io");
-
-        that.treecomp.exportList = that.item_to_update.lsp;
-
-        // SELECT NODES IN CUSTOM SELECTION FILTER
-        for (var i = 0; i < that.tree1.root.leaves.length; i++) {
-            if (that.item_to_update.lsp.indexOf(that.tree1.root.leaves[i].name) !== -1) {
-                that.treecomp.selectAllSpecies(that.tree1.root.leaves[i], that.tree1, 10000, true);
-            }
-        }
-
-        that.custom_filter_search = true;
-        that.onColumntaxonFilter(that.item_to_update.Uid);
-
-    };
-
     var add_phyloioDOM = function () {
         var htmlPhylo = [];
         htmlPhylo.push('<div class="container-fluid">');
