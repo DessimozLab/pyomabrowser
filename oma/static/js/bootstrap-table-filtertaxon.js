@@ -16,6 +16,22 @@
 
     var sprintf = $.fn.bootstrapTable.utils.sprintf;
 
+    // HELPER FUNCTIONS
+
+    var get_item_by_id = function(array, value, type){
+
+            var result = array.filter(function (obj) {
+                return obj[type] == value;
+            });
+
+             if (result.length !== 1){
+                 console.log('BUG: get_item_by_id should return one and only one element. Here it returned: ', result);
+             }
+
+             return result[0]
+
+    }
+
     var build_tax_to_species_converter = function (url_tree, list_taxons) {
 
         var converter = {};
@@ -67,7 +83,6 @@
 
         if (!$("#avdSearchModal" + "_" + that.options.idTable).hasClass("modal")) {
 
-
             var vModal = sprintf("<div id=\"avdSearchModal%s\"  class=\"modal fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"mySmallModalLabel\" aria-hidden=\"true\">", "_" + that.options.idTable);
             vModal += "<div class=\"modal-dialog modal-lg\">";
             vModal += " <div class=\"modal-content\">";
@@ -107,26 +122,29 @@
 
             $('#username').editable();
 
-
             $('#username').on('save', function(e, params) {
-                custom_item.name = params.newValue;
+                that.item_to_update.name = params.newValue;
                 localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
-
-               var span = $('#li_custom_' + custom_item.Uid).find('span[class="spanli"]')[0];
-                span.textContent = custom_item.name;
-
+                var span = $('#li_custom_' + that.item_to_update.Uid).find('span[class="spanli"]')[0];
+                span.textContent = that.item_to_update.name;
             });
 
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
-        } else {
-            $('#username').text(custom_item.name);
+        }
+        else {
             that.item_to_update = custom_item;
-            update_phyloIO(that);
+            $('#username').text(that.item_to_update.name);
+            init_phyloIo(that);
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
         }
     };
 
     var init_phyloIo = function (that) {
+
+        var phylo_con = document.getElementById("phylo_io");
+        while (phylo_con.firstChild) {
+            phylo_con.removeChild(phylo_con.firstChild);
+        }
 
         var maxGenome = 1000000;
         var mouse = {x: 0, y: 0};
@@ -147,7 +165,6 @@
             url: that.options.urlSpecieTree,
             success: function (newick) {
 
-                that.newick = newick;
                 // DEFINED BEHAVIOR ON NODE SELECTION
                 var additionalNodeFunctions = {
                     "selectForExport": [
@@ -160,39 +177,37 @@
                     ]
                 };
                 // INIT THE PHYLO.IO
-                that.treecomp = TreeCompare().init({
+                var treecomp = TreeCompare().init({
                     maxNumGenome: maxGenome,
                     nodeFunc: additionalNodeFunctions
                 });
-                var tree1 = that.treecomp.addTree(that.newick, undefined);
+                var tree1 = treecomp.addTree(newick, undefined);
                 // SET UP THE PHYLO.IO
-                that.treecomp.changeCanvasSettings({
+                treecomp.changeCanvasSettings({
                     autoCollapse: tree1.data.autoCollapseDepth,
                     enableScale: false,
                 });
 
                 // RENDER THE PHYLO.IO
-                that.treecomp.viewTree(tree1.name, "phylo_io");
+                treecomp.viewTree(tree1.name, "phylo_io");
 
                 // SELECT NODES IN CUSTOM SELECTION FILTER
                 for (var i = 0; i < tree1.root.leaves.length; i++) {
                     if (that.item_to_update.lsp.indexOf(tree1.root.leaves[i].name) !== -1) {
-                        that.treecomp.selectAllSpecies(tree1.root.leaves[i], tree1, maxGenome, true);
+                        treecomp.selectAllSpecies(tree1.root.leaves[i], tree1, maxGenome, true);
                     }
                 }
 
                 // RESET THE FILTERING
                 $("#reset_tree").click(function () {
 
-                    that.treecomp.exportList = [];
-
-                    tree1 = that.treecomp.addTree(that.newick, undefined);
-                    that.treecomp.viewTree(tree1.name, "phylo_io");
-
+                    treecomp.exportList = [];
+                    tree1 = treecomp.addTree(newick, undefined);
+                    treecomp.viewTree(tree1.name, "phylo_io");
                     item_to_update.lsp = [];
                     localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
                     that.custom_filter_search = true;
-                    that.onColumntaxonFilter(item_to_update.Uid);
+                    that.onColumntaxonFilter(that.item_to_update.Uid);
 
                 });
             },
@@ -200,20 +215,25 @@
         });
 
 
-
     };
 
     var update_phyloIO = function (that) {
 
-        var tree1 = that.treecomp.addTree(that.newick, undefined);
+        that.treecomp.exportList = [];
+        that.tree1 = that.treecomp.addTree(that.newick, undefined);
+        that.treecomp.viewTree(that.tree1.name, "phylo_io");
+
+        that.treecomp.exportList = that.item_to_update.lsp;
 
         // SELECT NODES IN CUSTOM SELECTION FILTER
-        for (var i = 0; i < tree1.root.leaves.length; i++) {
-            if (that.item_to_update.lsp.indexOf(tree1.root.leaves[i].name) !== -1) {
-                that.treecomp.selectAllSpecies(tree1.root.leaves[i], tree1, 10000, true);
+        for (var i = 0; i < that.tree1.root.leaves.length; i++) {
+            if (that.item_to_update.lsp.indexOf(that.tree1.root.leaves[i].name) !== -1) {
+                that.treecomp.selectAllSpecies(that.tree1.root.leaves[i], that.tree1, 10000, true);
             }
         }
-        that.treecomp.viewTree(tree1.name, "phylo_io");
+
+        that.custom_filter_search = true;
+        that.onColumntaxonFilter(that.item_to_update.Uid);
 
     };
 
@@ -229,6 +249,8 @@
         htmlPhylo.push('</div>');
         return htmlPhylo;
     }
+
+     // EXTENSION OF BOOTSTRAPTABLE LIB
 
     $.extend($.fn.bootstrapTable.defaults, {
         taxonFilter: false,
@@ -345,17 +367,17 @@
         that.$toolbar.find('a[class="li_filtertax_custom"]')
             .off('click').on('click', function (event) {
 
+            // HIDE ALL OK ICON ON LI
             $('[id^="li_ok_"]').toggleClass('hidden', true);
 
-            var a_custom =  $(this)[0];
-            var e_id = a_custom.id.replace(/^li_custom_/, '');
-            var result = that.tax_converter['custom'].filter(function (obj) {
-                return obj.Uid == e_id;
-            });
+            // GET THE RELATED CUSTOM ITEM
+            var liid = $(this)[0].id.replace(/^li_custom_/, '');
+            var ci = get_item_by_id(that.tax_converter['custom'], liid, 'Uid');
 
+            // SHOW OK ICON FOR THIS LI
             $(this).find('[id^="li_ok_"]').toggleClass('hidden', false);
 
-            showAvdSearch(result[0], that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+            showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
         });
 
         //  ADD RESET BUTTON ACTION
@@ -369,20 +391,16 @@
         d3.select("#li_add").on('click', function () {
 
             // create new object in the local storage
-            var locSt = JSON.parse(localStorage.getItem('custom_taxon_filter'));
-
-            var idMax = (locSt.length <= 0) ? 0 : locSt.reduce(function (l, e) {
+            // FIND THE GREATER UID AND ADD PLUS ONE FOR NEW UNIQUE ID
+            var idMax = (that.tax_converter['custom'].length <= 0) ? 0 : that.tax_converter['custom'].reduce(function (l, e) {
                 return e.Uid > l.Uid ? e : l;
             }).Uid;
-
             idMax = idMax + 1;
 
-            var empty_filter = {Uid: idMax, name: 'Unname Item', lsp: []}
-            locSt.push(empty_filter);
-            localStorage.setItem('custom_taxon_filter', JSON.stringify(locSt));
-
-            // update new object in the taxconverter
-            that.tax_converter['custom'] = locSt
+            // INITIATE EMPTY CUSTOM FILTER INTO CUSTOM AND UPDATE LOCAL STORAGE
+            var empty_filter = {Uid: idMax, name: 'Unname Item', lsp: []};
+            that.tax_converter['custom'].push(empty_filter);
+            localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
 
             // add the li in the list after last customfilter li
             var custom_ul = document.getElementById("ul_custom");
@@ -390,15 +408,38 @@
             var li_add = lis[lis.length - 1];
 
             var new_item = document.createElement('li');
-            new_item.innerHTML = ' <a  class="li_filtertax_custom" id="li_custom_' + empty_filter.Uid + '"> &emsp; ' + empty_filter.name + ' <span id="li_ok_' + empty_filter.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> ';
+            new_item.innerHTML = ' <a  class="li_filtertax_custom" id="li_custom_' + empty_filter.Uid + '"> &emsp;  <span class="spanli">' + empty_filter.name + ' </span><span id="li_ok_' + empty_filter.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> ';
 
             custom_ul.insertBefore(new_item, li_add);
+
+            // ADD CLICK EVENT TO NEWLY CREATED LI
+            $(new_item).off('click').on('click', function () {
+
+            // HIDE ALL OK ICON ON LI
+            $('[id^="li_ok_"]').toggleClass('hidden', true);
+
+            // GET THE RELATED CUSTOM ITEM
+            var ci = get_item_by_id(that.tax_converter['custom'], empty_filter.Uid, 'Uid');
+
+            // SHOW OK ICON FOR THIS LI
+            $(new_item).find('[id^="li_ok_"]').toggleClass('hidden', false);
+
+            showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+        });
+
+            // HIDE ALL OK ICON ON LI
+            $('[id^="li_ok_"]').toggleClass('hidden', true);
+            // SHOW OK ICON FOR THIS LI
+            $(new_item).find('[id^="li_ok_"]').toggleClass('hidden', false);
+
 
             // launch the modal
             showAvdSearch(empty_filter, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
 
-        })
+        });
 
+        //turn EDITABLE FIELD to inline mode
+        $.fn.editable.defaults.mode = 'inline';
 
     };
 

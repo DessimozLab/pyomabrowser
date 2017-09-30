@@ -101,15 +101,18 @@
         <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
         <script src="{% static "js/tableExport.min.js" %}"></script>
 
-        <!-- taxon filter import -->
+        <!-- taxon filter import: Core -->
         <script src="{% static "js/tnt.js" %}"></script>
         <script src="{% static "js/bootstrap-table-filtertaxon.js" %}"></script>
+        <link type="text/css" rel="stylesheet" href="{% static "css/filtertaxon.css" %}"/>
+
+        <!-- taxon filter import: phyloIo -->
+        <script src="{% static "js/underscore-min.js" %}"></script>
+        <script src="{% static "js/treecompare.js" %}"></script>
         <link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
         <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
         <link type="text/css" rel="stylesheet" href="{% static "css/treecompare.css" %}"/>
-        <link type="text/css" rel="stylesheet" href="{% static "css/filtertaxon.css" %}"/>
-        <script src="{% static "js/underscore-min.js" %}"></script>
-        <script src="{% static "js/treecompare.js" %}"></script>
+        <!-- taxon filter import: Editable field -->
         <link type="text/css" rel="stylesheet" href="{% static "css/bootstrap-editable.css" %}"/>
         <script src="{% static "js/bootstrap-editable.js" %}"></script>
 
@@ -130,11 +133,6 @@
             $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
             tab.bootstrapTable('refreshOptions', {'icons': icons});
             tab.bootstrapTable('showLoading');
-
-            //turn to inline mode
-$.fn.editable.defaults.mode = 'inline';
-
-
 
         </script>
 
