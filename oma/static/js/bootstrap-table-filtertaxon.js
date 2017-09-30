@@ -88,9 +88,11 @@
             vModal += " <div class=\"modal-content\">";
             vModal += "  <div class=\"modal-header\">";
             vModal += "   <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\" >&times;</button>";
-            vModal += sprintf('  <h4 class=\"modal-title\"><b>Custom filter:</b> <a href="#" id="username" data-type="text" data-url="" data-pk="1"  data-title="Enter username">%s</a> <small>(click on text field to rename this filter)</small> </h4>   ', custom_item.name);
-            vModal += '<a class="" id="reset_tree" > Click here to reset the tree selection.</a> <br>';
-            vModal += '<a class="" id="delete_tree" > Click here to delete this custom filter.</a>';
+            vModal += sprintf('  <h4 class=\"modal-title\"><b>Custom filter:</b> <a href="#" id="username" data-type="text" data-url="" data-pk="1"  data-title="Enter username">%s</a> <small>(click on text field to rename this filter)</small> </h4>  <br>  ', custom_item.name);
+
+            vModal += ' <button type="button" class="btn "  id="reset_tree" > Click here to reset the tree selection. </button>  ';
+            vModal += ' <button type="button" class="btn btn-danger  "  id="delete_tree" > Click here to delete this custom filter. </button>';
+
             vModal += "  </div>";
             vModal += "  <div class=\"modal-body modal-body-custom\">";
             vModal += sprintf("   <div class=\"container-fluid\" id=\"avdSearchModalContent%s\" style=\"padding-right: 0px;padding-left: 0px;\" >", "_" + that.options.idTable);

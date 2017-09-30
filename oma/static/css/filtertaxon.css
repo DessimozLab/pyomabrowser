@@ -17,9 +17,10 @@
 
 .alert{
     width: 100% !important;
-    margin-left: 0px;
+    margin-left: 0px !important;
 }
 
 .fixed-table-toolbar .dropdown-menu {
     max-height: 400px
 }
+
