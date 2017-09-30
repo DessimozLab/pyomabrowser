@@ -88,8 +88,9 @@
             vModal += " <div class=\"modal-content\">";
             vModal += "  <div class=\"modal-header\">";
             vModal += "   <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\" >&times;</button>";
-            vModal += sprintf('  <h4 class=\"modal-title\"><b>Custom filter:</b> <a href="#" id="username" data-type="text" data-url="" data-pk="1"  data-title="Enter username">%s</a> <small>(click on text field to rename filter)</small> </h4>   ', custom_item.name);
-            vModal += '<a class="" id="reset_tree" > Click here to reset tree selection.</a>';
+            vModal += sprintf('  <h4 class=\"modal-title\"><b>Custom filter:</b> <a href="#" id="username" data-type="text" data-url="" data-pk="1"  data-title="Enter username">%s</a> <small>(click on text field to rename this filter)</small> </h4>   ', custom_item.name);
+            vModal += '<a class="" id="reset_tree" > Click here to reset the tree selection.</a> <br>';
+            vModal += '<a class="" id="delete_tree" > Click here to delete this custom filter.</a>';
             vModal += "  </div>";
             vModal += "  <div class=\"modal-body modal-body-custom\">";
             vModal += sprintf("   <div class=\"container-fluid\" id=\"avdSearchModalContent%s\" style=\"padding-right: 0px;padding-left: 0px;\" >", "_" + that.options.idTable);
@@ -127,6 +128,31 @@
                 localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
                 var span = $('#li_custom_' + that.item_to_update.Uid).find('span[class="spanli"]')[0];
                 span.textContent = that.item_to_update.name;
+            });
+
+
+            // REMOVE THIS CUSTOM FILTERING
+            $("#delete_tree").click(function () {
+
+                // REMOVE THE ITEM FROM CUSTOM
+                var custom_cleaned = that.tax_converter['custom'].filter(function(el) {
+                    return el.Uid !== that.item_to_update.Uid;
+                });
+
+                // UPDATE CUSTOM AND LOCAL STORAGE
+                that.tax_converter['custom'] = custom_cleaned;
+                localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
+
+                // REMOVE CORRESPONDING LI
+                document.getElementById('li_custom_' + that.item_to_update.Uid).parentElement.remove();
+
+                // RESET FILTERING
+                that.item_to_update = null;
+                that.onColumntaxonFilter('all');
+
+                // CLOSE MODAL
+                $("#avdSearchModal" + "_" + that.options.idTable).modal('hide');
+
             });
 
             $("#avdSearchModal" + "_" + that.options.idTable).modal();
@@ -200,16 +226,16 @@
 
                 // RESET THE FILTERING
                 $("#reset_tree").click(function () {
-
                     treecomp.exportList = [];
                     tree1 = treecomp.addTree(newick, undefined);
                     treecomp.viewTree(tree1.name, "phylo_io");
-                    item_to_update.lsp = [];
+                    that.item_to_update.lsp = [];
                     localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
                     that.custom_filter_search = true;
                     that.onColumntaxonFilter(that.item_to_update.Uid);
-
                 });
+
+
             },
             dataType: "text"
         });
