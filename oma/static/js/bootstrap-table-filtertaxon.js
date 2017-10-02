@@ -338,7 +338,7 @@
 
         //  ADD LI FOR ALL
         html.push('<li role="presentation" class="dropdown-header li_filter">DEFAULT</li>');
-        html.push(' <li><a  class="li_filtertax"  id="all">&emsp; All <span id="li_ok_all" class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span> </a></li> ');
+        html.push(' <li><a  class="li_filtertax_default"  id="all">&emsp; All <span id="li_ok_all" class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span> </a></li> ');
 
         //  ADD LI FOR EACH DESIRED TAXA
         for (var tax in this.tax_converter) {
