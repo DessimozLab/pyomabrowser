@@ -119,10 +119,7 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
     lookup_field = 'group_id'
 
     def list(self, request, format=None):
-        """List of all the OMA Groups in the current release.
-
-        :queryparam page: the page number of the response json
-        """
+        """List of all the OMA Groups in the current release."""
         nr_groups = utils.db.get_nr_oma_groups()
         data = [rest_models.OMAGroup(GroupNr=i) for i in range(1, nr_groups + 1)]
         page = self.paginator.paginate_queryset(data, request)
@@ -216,14 +213,26 @@ class HOGViewSet(PaginationMixin, ViewSet):
     lookup_value_regex = r'[^/]+'
     serializer_class = serializers.ProteinEntrySerializer
 
+    def _hog_id_from_entry(self, entry_id):
+        try:
+            entry_nr = utils.id_resolver.resolve(entry_id)
+            protein = utils.ProteinEntry(entry_nr)
+            if len(protein.oma_hog) == 0:
+                raise NotFound("{} is not part of any HOG.".format(entry_id))
+            return protein.oma_hog
+        except db.InvalidId:
+            raise NotFound("{} is an unknown identifier for a protein".format(entry_id))
+
+    def _check_level_is_valid(self, level):
+        return level.encode('utf-8') in utils.db.tax.all_hog_levels
+
     def list(self, request, format=None):
         """List of all the HOGs identified by OMA.
 
         :queryparam level: allows filtering of the list of HOGs by a specific taxonomic level
-        :queryparam page: the page number of the response json
         """
         level = self.request.query_params.get('level', None)
-        if level != None:
+        if level is not None:
             # filtering by level
             hog_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(Level==level)')
             hogs = []
@@ -330,58 +339,66 @@ class HOGViewSet(PaginationMixin, ViewSet):
     def members(self, request, hog_id=None, format=None):
         """Retrieve a list of all the protein members for a given hog_id.
 
+        The hog_id parameter uses an encoding of the inferred duplication
+        events along the evolution of the family using the LOFT schema
+        (see https://doi.org/10.1186/1471-2105-8-83).
+
+        The hog_id changes only after duplication events and hence, the
+        ID remains the same for potentially many taxonomic levels. If
+        no level parameter is provided, this endpoint returns the deepest
+        level that contains this specific ID.
+
+        If a level is provided, the endpoint returns the members with respect
+        to this level. Note that if the level is a more ancient taxonomic
+        level than the deepest level for the specified hog_id, the endpoint
+        retuns the members of for that more ancient level (but adjusting the
+        hog_id in the result object).
+        The special level "root" will always return the members of the root
+        HOG together with its deepest level.
+
         :param hog_id: an unique identifier for a hog_group - either
                        its hog id starting with "HOG:" or one of its
-                       member proteins
+                       member proteins in which case the specific
+                       HOG ID of that protein is used.
         :queryparam level: taxonomic level of restriction for a HOG -
-                           default is its deepest most i.e. root level.
+                           default is its deepest level for a given
+                           HOG ID. .
         """
+        if hog_id[:4] != "HOG:":
+            hog_id = self._hog_id_from_entry(hog_id)
+
         level = self.request.query_params.get('level', None)
+        if level.lower() == "root":
+            hog_id = utils.db.format_hogid(utils.db.parse_hog_id(hog_id))
+            level = None
+
+        if level is not None and not self._check_level_is_valid(level):
+            raise ParseError("level parameter is invalid")
+
         if level is not None:
-            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id, level=level)]
-            data = {'hog_id': hog_id, 'level': level,
-                    'members': members}
-            serializer = serializers.HOGMembersListSerializer(instance=data, context={'request': request})
-            return Response(serializer.data)
+            members = [utils.ProteinEntry(entry) for entry in utils.db.hog_members_from_hog_id(hog_id, level)]
         else:
-            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
-            # get all levels for a hog_id
-            fam_nr = members[0].hog_family_nr
-            levels = utils.db.hog_levels_of_fam(fam_nr)
-            # take first member, get species
-            species = members[0].genome
-            # get lineage of the species
-            lineage = species.lineage
-            # indexing of levels for a hog
-            if len(hog_id) > 11:
-                for lvl in levels:
-                    subhogs = utils.db.get_subhogids_at_level(fam_nr, lvl)
-                    if subhogs is not None:
-                        for subhog in subhogs:
-                            subhog = subhog.decode("utf-8")
-                            if subhog == hog_id:
-                                root_hog_level = lvl.decode("utf-8")
+            fam_nr = utils.db.parse_hog_id(hog_id)
+            condition = '(Fam == fam_nr) & (ID == hog_id)'
+            levs = frozenset([hog['Level'].decode() for hog in utils.db.get_hdf5_handle().get_node('/HogLevel').where(condition)])
+            members = [utils.ProteinEntry(entry) for entry in utils.db.member_of_hog_id(hog_id)]
+            if 'LUCA' in levs:
+                level = 'LUCA'
             else:
-                if 'LUCA' in levels:
-                    root_hog_level = 'LUCA'
-                else:
-                    indexed_levels = []
-                    for level in levels:
-                        level = level.decode("utf-8")
-                        if level in lineage:
-                            level_index = lineage.index(level)
-                            indexed_levels.append([level, int(level_index)])
-                    indexed_levels.sort(key=lambda x: x[1])
-                    root_hog_level = indexed_levels[-1][0]
-            data = {'hog_id': hog_id, 'root_level': root_hog_level,
-                    'members': members}
-            serializer = serializers.RootHOGserializer(instance=data, context={'request': request})
-            return Response(serializer.data)
+                lin = members[0].genome.lineage
+                for level in lin[::-1]:
+                    if level in levs:
+                        break
+
+        data = {'hog_id': hog_id, 'level': level,
+                'members': members}
+        serializer = serializers.HOGMembersListSerializer(instance=data, context={'request': request})
+        return Response(serializer.data)
 
 
 class APIVersion(ViewSet):
     def list(self, request, format=None):
-        """Returns the version of the underlying oma browser database release."""
+        """Returns the version information of the api and the underlying oma browser database release."""
         return Response({'oma_version': utils.db.get_release_name(),
                          'api_version': api_settings.DEFAULT_VERSION})
 
@@ -430,9 +447,7 @@ class GenomeViewSet(PaginationMixin, ViewSet):
     lookup_field = 'genome_id'
 
     def list(self, request, format=None):
-        """List of all the genomes present in the current release.
-
-        :queryparam page: the page number of the response json"""
+        """List of all the genomes present in the current release."""
         make_genome = functools.partial(models.Genome, utils.db)
         genomes = [make_genome(g) for g in utils.id_mapper['OMA'].genome_table]
         page = self.paginator.paginate_queryset(genomes, request)
@@ -458,8 +473,7 @@ class GenomeViewSet(PaginationMixin, ViewSet):
 
         :param genome_id: an unique identifier for a genome
                           - either its ncbi taxon id or the
-                          UniProt species code
-        :queryparam page: the page number of the response json"""
+                          UniProt species code"""
 
         try:
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
@@ -512,7 +526,6 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
                           second genome
         :queryparam rel_type: limit relations to a certain type of
                           relations, e.g. '1:1'.
-        :queryparam page: the page number of the response json
         """
         rel_type = request.query_params.get('rel_type', None)
         try:

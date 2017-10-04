@@ -132,7 +132,8 @@ class GenomeTest(APITestCase):
     def test_genome_list(self):
         response = APIClient().get('/api/genome/')
         self.assertEqual(200, response.status_code)
-        self.assertEqual(4, response.data['count'])
+        self.assertEqual(4, int(response["X-Total-Count"]))
+        self.assertEqual(4, len(response.data))
 
     def test_genome_info(self):
         response = APIClient().get('/api/genome/YEAST/')
@@ -141,12 +142,19 @@ class GenomeTest(APITestCase):
 
     def test_member_proteins(self):
         client = APIClient()
+        # test a paginated view
         response = client.get('/api/genome/YEAST/proteins/')
-        self.assertEqual(int(6352), response.data['count'])
+        self.assertEqual(6352, int(response['x-total-count']))
+        self.assertIn('next', response['link'])
+        self.assertIn('last', response['link'])
+        self.assertLessEqual(100, len(response.data))
 
         client = APIClient()
-        response = client.get('/api/genome/ASHGO/proteins/')
-        self.assertEqual(int(4757), response.data['count'])
+        response = client.get('/api/genome/ASHGO/proteins/', {'per_page': 5000})
+        self.assertEqual(4757, int(response['x-total-count']))
+        with self.assertRaises(KeyError):
+            response['link']
+        self.assertEqual(4757, len(response.data))
 
 
 class TaxonomyTest(APITestCase):
