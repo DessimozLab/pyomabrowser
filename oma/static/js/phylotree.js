@@ -17,7 +17,7 @@ $(document).ready(function() {
 
     var viewerHeight = $(document).height();  //height of the browser window
     var navHeight = $('#navbb').height(); // height of the navbar
-    $('#svgg').css('height', viewerHeight - navHeight -110 ); // svgheight = window size - navheight - (some of margin + padding)
+    $('#phylo_io').css('height', viewerHeight - navHeight -110 ); // svgheight = window size - navheight - (some of margin + padding)
     var svgdivHeight = $('#svgdiv').height(); // height of the svgdiv
     var buttonHeight = $('#buttondiv').height();
     $('#UISelected').css('height', svgdivHeight -25 -buttonHeight); //Selectedgenomediv = svgdivheight - margin between the two UI div
@@ -29,7 +29,7 @@ $(document).ready(function() {
 
 
     (function() {
-        $('#svgg').scroll(function() {
+        $('#phylo_io').scroll(function() {
             if ($('.tooltip')){
                 $('.tooltip').remove();
                 contectMenu=false;
@@ -92,9 +92,10 @@ $(document).ready(function() {
             var tree1 = treecomp.addTree(newick, undefined);
             treecomp.changeCanvasSettings({
                 autoCollapse: 0, //tree1.data.autoCollapseDepth,
-                enableScale: false
+                enableScale: false,
+                enableSharing: false
             });
-            treecomp.viewTree(tree1.name, "svgg");
+            treecomp.viewTree(tree1.name, "phylo_io");
             needUpdate = true;
 
             build_dicts(tree1.root);
@@ -154,6 +155,7 @@ $(document).ready(function() {
 
             function updateInfo(exportList, root){
 
+                numberOfSelectedGenome = exportList.length;
                 var h3Title = document.getElementById("textSel");
                 h3Title.innerHTML='Selected genomes ('  + numberOfSelectedGenome + ')';
                 if (numberOfSelectedGenome<=0){h3Title.innerHTML='Selected genomes';}
