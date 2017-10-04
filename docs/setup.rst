@@ -79,4 +79,15 @@ The pool=solo is needed on macos only. obviously, you can play with the loglevel
 
 Production site configuration
 -----------------------------
-The main omabrowser instance has a python and darwin backend. Both are served from
+The main omabrowser instance has a python and darwin backend. Both are served from a single
+VM server (oma.ucl.ac.uk).
+
+
+DNS and contact mail config
+###########################
+
+DNS entries are regegistered at https://hexonet.net with the "cbrg" account. The password
+for this is available on the darwin home account or ask Adrian about it.
+
+The email address contact@omabrowser.org is a mail forward that is registered directly 
+at the hexonet account as well. It currently points to adrian.altenhoff@inf.ethz.ch
