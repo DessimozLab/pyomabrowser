@@ -51,7 +51,7 @@ class ProteinEntrySerializer(ReadOnlySerializer):
     canonicalid = serializers.CharField()
     sequence_md5 = serializers.CharField()
     oma_group = serializers.IntegerField(required=False)
-    oma_hog = serializers.CharField(required=False)
+    oma_hog_id = serializers.CharField(required=False, source='oma_hog')
     chromosome = serializers.CharField()
     locus = serializers.SerializerMethodField(method_name=None)
 
@@ -61,7 +61,6 @@ class ProteinEntrySerializer(ReadOnlySerializer):
 
 class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     roothog_id = serializers.IntegerField(source='hog_family_nr')
-    oma_hog_id = serializers.CharField(source='oma_hog')
     hog_levels = serializers.SerializerMethodField(method_name=None)
 
     sequence_length = serializers.IntegerField()
