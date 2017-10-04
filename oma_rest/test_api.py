@@ -79,6 +79,16 @@ class HOGsTest(APITestCase):
         involved_species = [m['omaid'][0:5] for m in response.data['members']]
         self.assertNotIn('PLAF7', involved_species)
 
+    def test_members_by_protein_id(self):
+        response = APIClient().get('/api/hog/YEAST12/members/')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(1, len(response.data['members']))
+
+    def test_members_by_protein_id_and_level(self):
+        response = APIClient().get('/api/hog/YEAST12/members/', {'level': 'Eukaryota'})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(5, len(response.data['members']))
+
 
 class GroupTest(APITestCase):
     # test group member is in the correct group

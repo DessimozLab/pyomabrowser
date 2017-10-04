@@ -271,17 +271,14 @@ class HOGViewSet(PaginationMixin, ViewSet):
                            returns a list of any subghogs at that level.
         """
         level = self.request.query_params.get('level', None)
-        if hog_id[:3] != "HOG":
+        if hog_id[:4] != "HOG:":
             # hog_id == member
-            entry_nr = utils.id_resolver.resolve(hog_id)
-            protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
-            hog_id = protein.oma_hog
-        if level == None:
-            hogs_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(ID==hog_id)')
+            hog_id = self._hog_id_from_entry(hog_id)
+        if level is None:
+            hogs = utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')
             levels = []
-            for row in hogs_tab:
-                hog_model = rest_models.HOG(hog_id=row[1].decode("utf-8"), level=row[2].decode("utf-8"))
-                levels.append(hog_model)
+            for row in hogs:
+                levels.append(rest_models.HOG(hog_id=row['ID'].decode("utf-8"), level=row['Level'].decode("utf-8")))
 
             # below is the root level calculation
             members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
