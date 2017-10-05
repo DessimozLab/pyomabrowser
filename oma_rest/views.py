@@ -240,23 +240,13 @@ class HOGViewSet(PaginationMixin, ViewSet):
             queryset = LazyPagedPytablesQuery(table=utils.db.get_hdf5_handle().get_node('/HogLevel'),
                                               query=query,
                                               obj_factory=lambda r: rest_models.HOG(hog_id=r['ID'].decode(), level=level))
-            page = self.paginator.paginate_queryset(queryset, request)
-            serializer = serializers.HOGsListSerializer_at_level(page, many=True, context={'request': request})
-            return self.paginator.get_paginated_response(serializer.data)
-
         else:
-            # list of all the hogs
-            hog_tab = utils.db.get_hdf5_handle().root.HogLevel
-            hogs = []
-            for row in hog_tab:
-                hogs.append(row['ID'].decode("utf-8"))
-            hog_ids = sorted(set(hogs))
-            data = []
-            for row in hog_ids:
-                data.append(rest_models.HOG(hog_id=row))
-            page = self.paginator.paginate_queryset(data, request)
-            serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
-            return self.paginator.get_paginated_response(serializer.data)
+            # list of all the rootlevel hogs
+            nr_hogs = utils.db.get_nr_toplevel_hogs()
+            queryset = [rest_models.HOG(hog_id=utils.db.format_hogid(i), level="root") for i in range(1, nr_hogs+1)]
+        page = self.paginator.paginate_queryset(queryset, request)
+        serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
+        return self.paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, hog_id):
         """Retrieve the detail available for a given HOG, along with its deepest level

@@ -126,12 +126,6 @@ class HOGMembersListSerializer(ReadOnlySerializer):
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
 
 
-class RootHOGserializer(ReadOnlySerializer):
-    hog_id = serializers.CharField()
-    root_level = serializers.CharField()
-    members = serializers.ListSerializer(child=ProteinEntrySerializer())
-
-
 class ChromosomeInfoSerializer(ReadOnlySerializer):
     id = serializers.CharField()
     entry_ranges = serializers.ListSerializer(
@@ -235,19 +229,15 @@ class RelatedGroupsSerializer(GroupListSerializer):
     hits = serializers.IntegerField()
 
 
-# the below 2 HOGS serializers are to do with the list of hogs found at api/hogs/
 class HOGsListSerializer(ReadOnlySerializer):
-    roothog_id = serializers.CharField()
+    roothog_id = serializers.IntegerField()
     hog_id = serializers.CharField()
-    hog_id_url = serializers.HyperlinkedIdentityField(view_name='hog-detail', read_only=True, lookup_field='hog_id')
-
-
-# api/hogs/?level
-class HOGsListSerializer_at_level(ReadOnlySerializer):
-    roothog_id = serializers.CharField()
-    hog_id = serializers.CharField()
-    hog_id_url = QueryParamHyperlinkedIdentityField(view_name='hog-detail', lookup_field='hog_id',
+    levels_url = QueryParamHyperlinkedIdentityField(view_name='hog-detail',
+                                                    lookup_field='hog_id',
                                                     query_params={'level': 'level'})
+    members_url = QueryParamHyperlinkedIdentityField(view_name='hog-members',
+                                                     query_params={'level': 'level'},
+                                                     lookup_field='hog_id')
 
 
 class DomainSerializer(ReadOnlySerializer):
