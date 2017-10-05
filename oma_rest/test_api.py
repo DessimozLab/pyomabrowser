@@ -1,6 +1,14 @@
 import json
-
+import unittest
 from rest_framework.test import APIClient, APITestCase
+import re
+
+
+def get_next_url(link):
+    m = re.search(r'<(?P<url>[^>]+)>;[^,]*rel="next"', link)
+    if m is not None:
+        return m.group('url')
+    return None
 
 
 class ProteinTest(APITestCase):
@@ -71,6 +79,16 @@ class HOGsTest(APITestCase):
         protein_url = response.data['members'][0]['entry_url']
         response_2 = client.get(protein_url, format='json')
         self.assertIn('HOG:0000365', response_2.data['oma_hog_id'])
+
+    def test_nr_hogs_at_level(self):
+        client = APIClient()
+        for lev in ('Eukaryota', 'Alveolata'):
+            response = client.get('/api/hog/', {'level': lev, 'per_page': 500})
+            cnts = len(response.data)
+            while get_next_url(response['Link']) is not None:
+                response = client.get(get_next_url(response['Link']))
+                cnts += len(response.data)
+            self.assertEqual(int(response['X-Total-Count']), cnts)
 
     def test_members_at_low_level(self):
         """check that result does not contain any member outside the requested clade"""

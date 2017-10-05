@@ -1,5 +1,7 @@
 import drf_link_header_pagination
+import pyoma.browser.db
 from rest_framework.settings import api_settings
+import itertools
 
 
 class LinkHeaderPagination(drf_link_header_pagination.LinkHeaderPagination):
@@ -26,3 +28,28 @@ class PaginationMixin(object):
             else:
                 self._paginator = self.pagination_class()
         return self._paginator
+
+
+class LazyPagedPytablesQuery(object):
+    def __init__(self, table, query=None, obj_factory=None):
+        self.tab = table
+        self.query = query
+        self.obj_factory = obj_factory
+        self._total_cnt = None
+
+    def count(self):
+        if self._total_cnt is None:
+            if self.query is not None:
+                self._total_cnt = pyoma.browser.db.count_elements(self.tab.where(self.query))
+            else:
+                self._total_cnt = len(self.tab)
+        return self._total_cnt
+
+    def __getitem__(self, item):
+        if isinstance(item, slice):
+            it = self.tab.where(self.query)
+            for row in itertools.islice(it, item.start, item.stop, item.step):
+                if self.obj_factory is not None:
+                    yield self.obj_factory(row.fetch_all_fields())
+                else:
+                    yield row.fetch_all_fields()

@@ -14,7 +14,7 @@ from distutils.util import strtobool
 
 from . import models as rest_models
 from . import serializers
-from .pagination import PaginationMixin
+from .pagination import PaginationMixin, LazyPagedPytablesQuery
 
 from oma import utils, misc
 from pyoma.browser import models, db
@@ -233,16 +233,14 @@ class HOGViewSet(PaginationMixin, ViewSet):
         """
         level = self.request.query_params.get('level', None)
         if level is not None:
-            # filtering by level
-            hog_tab = utils.db.get_hdf5_handle().root.HogLevel.read_where('(Level==level)')
-            hogs = []
-            for row in hog_tab:
-                hogs.append(row[1].decode("utf-8"))
-            hogs = sorted(hogs)
-            data = []
-            for row in hogs:
-                data.append(rest_models.HOG(hog_id=row, level=level))
-            page = self.paginator.paginate_queryset(data, request)
+            if not self._check_level_is_valid(level):
+                raise ParseError('Invalid level parameter')
+            query = 'Level == {!r}'.format(level.encode('utf-8'))
+
+            queryset = LazyPagedPytablesQuery(table=utils.db.get_hdf5_handle().get_node('/HogLevel'),
+                                              query=query,
+                                              obj_factory=lambda r: rest_models.HOG(hog_id=r['ID'].decode(), level=level))
+            page = self.paginator.paginate_queryset(queryset, request)
             serializer = serializers.HOGsListSerializer_at_level(page, many=True, context={'request': request})
             return self.paginator.get_paginated_response(serializer.data)
 
@@ -365,12 +363,12 @@ class HOGViewSet(PaginationMixin, ViewSet):
             hog_id = self._hog_id_from_entry(hog_id)
 
         level = self.request.query_params.get('level', None)
-        if level.lower() == "root":
-            hog_id = utils.db.format_hogid(utils.db.parse_hog_id(hog_id))
-            level = None
-
-        if level is not None and not self._check_level_is_valid(level):
-            raise ParseError("level parameter is invalid")
+        if level is not None:
+            if level.lower() == "root":
+                hog_id = utils.db.format_hogid(utils.db.parse_hog_id(hog_id))
+                level = None
+            elif not self._check_level_is_valid(level):
+                raise ParseError("level parameter is invalid")
 
         if level is not None:
             members = [utils.ProteinEntry(entry) for entry in utils.db.hog_members_from_hog_id(hog_id, level)]
