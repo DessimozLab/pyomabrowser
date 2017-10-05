@@ -68,10 +68,15 @@ class ProteinTest(APITestCase):
 
 
 class HOGsTest(APITestCase):
-    def test_rootlevel(self):
-        client = APIClient()
-        response = client.get('/api/hog/HOG:0000515.1a/')
-        self.assertEqual(response.data['root_level'], 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)')
+    def test_rootlevel_of_subhog(self):
+        response = APIClient().get('/api/hog/HOG:0000515.1a/')
+        self.assertEqual(1, len(response.data))
+        self.assertEqual(response.data[0]['level'], 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)')
+
+    def test_rootlevel_with_roothog_root(self):
+        response = APIClient().get('/api/hog/HOG:0000515.1a/', {'level': 'root'})
+        self.assertEqual(1, len(response.data))
+        self.assertEqual('Saccharomycetaceae', response.data[0]['level'])
 
     def test_hog_members(self):
         client = APIClient()

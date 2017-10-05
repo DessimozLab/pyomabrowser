@@ -1,9 +1,12 @@
 import functools
 import operator
 import itertools
+import os
+
 import Bio.SeqRecord
 import Bio.Alphabet.IUPAC
 import Bio.Seq
+import collections
 
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
@@ -223,20 +226,37 @@ class HOGViewSet(PaginationMixin, ViewSet):
         except db.InvalidId:
             raise NotFound("{} is an unknown identifier for a protein".format(entry_id))
 
+    def _get_level_and_adjust_hogid_if_needed(self, hog_id):
+        level = self.request.query_params.get('level', None)
+        if level is not None:
+            if level.lower() == "root":
+                level = None
+                hog_id = utils.db.format_hogid(utils.db.parse_hog_id(hog_id))
+            elif not self._check_level_is_valid(level):
+                raise ParseError('Invalid or unknown level parameter for this HOG')
+        return level, hog_id
+
     def _check_level_is_valid(self, level):
         return level.encode('utf-8') in utils.db.tax.all_hog_levels
+
+    def _identify_lca_hog_id_from_proteins(self, proteins):
+        hog_id = os.path.commonprefix([p.oma_hog for p in proteins])
+        if hog_id.find('.') >= 0:
+            for k in range(len(hog_id)-1, hog_id.find('.')-1, -1):
+                if not (hog_id[k].isdigit() or hog_id[k] == '.'):
+                    break
+            hog_id = hog_id[0:k+1]
+        return hog_id
 
     def list(self, request, format=None):
         """List of all the HOGs identified by OMA.
 
-        :queryparam level: allows filtering of the list of HOGs by a specific taxonomic level
+        :queryparam level: allows filtering of the list of HOGs by
+            a specific taxonomic level.
         """
-        level = self.request.query_params.get('level', None)
+        level, _ = self._get_level_and_adjust_hogid_if_needed('HOG:000001')
         if level is not None:
-            if not self._check_level_is_valid(level):
-                raise ParseError('Invalid level parameter')
             query = 'Level == {!r}'.format(level.encode('utf-8'))
-
             queryset = LazyPagedPytablesQuery(table=utils.db.get_hdf5_handle().get_node('/HogLevel'),
                                               query=query,
                                               obj_factory=lambda r: rest_models.HOG(hog_id=r['ID'].decode(), level=level))
@@ -253,72 +273,72 @@ class HOGViewSet(PaginationMixin, ViewSet):
         (i.e. root level) as well as the list of all the taxonomic levels that the HOG
         spans through.
 
+        For a given hog_id, the endpoint searches the deepest taxonomic level that
+        has this ID, unless a more recent level has been chosen with the `level` query
+        parameter in which case the following information is returned for all induced
+        hogs.
+
+        The endpoint returns an object per hog with the level, urls to the members and
+        a list of parent and children hogs. The parent and children hogs are more
+        ancient resp. more recent levels that involve at least one duplication event
+        on the lineage from the query hog. So, in the parent_hogs, one can find hogs
+        for which we infer a duplication event *to* the query hog level, where as
+        for the children_hogs there happened at least one duplication event *after*
+        the query hog level. In addition, we indicate alternative levels for which
+        we infer that no event happened between those levels for this specific hog.
+
         :param hog_id: an unique identifier for a hog_group - either its hog id or one
                        of its member proteins
-        :queryparam level: taxonomic level of restriction for a HOG. If indicated
-                           returns a list of any subghogs at that level.
+        :queryparam level: taxonomic level of restriction for a HOG. The special level
+            'root' can be used to identify the level at the roothog.
         """
-        level = self.request.query_params.get('level', None)
         if hog_id[:4] != "HOG:":
             # hog_id == member
             hog_id = self._hog_id_from_entry(hog_id)
-        if level is None:
-            hogs = utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')
-            levels = []
-            for row in hogs:
-                levels.append(rest_models.HOG(hog_id=row['ID'].decode("utf-8"), level=row['Level'].decode("utf-8")))
 
-            # below is the root level calculation
-            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
-            # get all levels for a hog_id
-            fam_nr = members[0].hog_family_nr
-            levels_for_fam = utils.db.hog_levels_of_fam(fam_nr)
-            # take first member, get species
-            species = members[0].genome
-            # get lineage of the species
-            lineage = species.lineage
-            # indexing of levels for a hog
-            if len(hog_id) > 11:  # i.e. it is a subhog
-                # root level for subhogs is the level at which they appear i.e. when the duplication occured
-                for lvl in levels_for_fam:
-                    subhogs = utils.db.get_subhogids_at_level(fam_nr, lvl)
-                    if subhogs is not None:
-                        for subhog in subhogs:
-                            subhog = subhog.decode("utf-8")
-                            if subhog == hog_id:
-                                root_hog_level = lvl.decode("utf-8")
-            else:  # not a subhog
-                if 'LUCA' in levels:
-                    # last universal common ancestor is the deepest level by default
-                    root_hog_level = 'LUCA'
-                else:
-                    indexed_levels = []
-                    for level in levels_for_fam:
-                        level = level.decode("utf-8")
-                        if level in lineage:
-                            level_index = lineage.index(level)
-                            indexed_levels.append([level, int(level_index)])
-                    indexed_levels.sort(key=lambda x: x[1])
-                    root_hog_level = indexed_levels[-1][0]
-                    levels = []  # the spanning levels for the whole hog i.e the family number
-                    for level in levels_for_fam:
-                        hog_model = rest_models.HOG(hog_id=hog_id, level=level.decode("utf-8"))
-                        levels.append(hog_model)
-            data = {'hog_id': hog_id, 'root_level': root_hog_level, 'levels': levels}
-            serializer = serializers.HOGDetailSerializer(instance=data, context={'request': request})
-            return Response(serializer.data)
+        level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
+        fam_nr = utils.db.parse_hog_id(hog_id)
+        if level is None:
+            levs = frozenset([row['Level'].decode() for row in utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')])
+            if 'LUCA' in levs:
+                level = 'LUCA'
+            else:
+                pe = next(utils.db.iter_members_of_hog_id(hog_id))
+                lin = pe.genome.lineage
+                for level in lin[::-1]:
+                    if level in levs:
+                        break
+            result_data = [rest_models.HOG(hog_id=hog_id, level=level)]
         else:
-            # level specified, returns a list of all the subhogs at a level
-            members = [models.ProteinEntry(utils.db, memb) for memb in utils.db.member_of_hog_id(hog_id)]
-            fam_nr = members[0].hog_family_nr
             subhogs = utils.db.get_subhogids_at_level(fam_nr, level)
-            subHOGs_2 = []
-            for i in subhogs:
-                # create hog model instances
-                subHOGs_2.append(rest_models.HOG(hog_id=i.decode("utf-8"), level=level))
-            data = {'hog_id': hog_id, 'level': level, 'subhogs': subHOGs_2}
-            serializer = serializers.HOGInfoSerializer(instance=data, context={'request': request})
-            return Response(serializer.data)
+            result_data = [rest_models.HOG(hog_id=h['ID'].decode(), level=level) for h in subhogs]
+
+        querys = {q.hog_id: i for i, q in enumerate(result_data)}
+        parents = [collections.defaultdict(set)] * len(result_data)
+        children = [collections.defaultdict(set)] * len(result_data)
+        same = [set([])] * len(result_data)
+        for row in utils.db.get_hdf5_handle().get_node('/HogLevel').where('Fam == fam_nr'):
+            cur_id = row['ID'].decode()
+            cur_lev = row['Level'].decode()
+            if cur_id in querys:
+                if cur_lev != level:
+                    same[querys[cur_id]].add(cur_lev)
+                continue
+            for q, i in querys.items():
+                if q.find(cur_id) == 0:
+                    parents[i][cur_id].add(cur_lev)
+                elif cur_id.find(q) == 0:
+                    children[i][cur_id].add(cur_lev)
+
+        for i in range(len(result_data)):
+            if len(same[i]) > 0:
+                result_data[i].alternative_levels = list(same[i])
+            result_data[i].parent_hogs = [rest_models.HOG(hog_id=hog, alternative_levels=list(levs))
+                                          for hog, levs in parents[i].items()]
+            result_data[i].children_hogs = [rest_models.HOG(hog_id=hog, alternative_levels=list(levs))
+                                            for hog, levs in children[i].items()]
+        serializer = serializers.HOGsLevelDetailSerializer(result_data, many=True, context={'request': request})
+        return Response(serializer.data)
 
     @detail_route()
     def members(self, request, hog_id=None, format=None):
@@ -352,16 +372,10 @@ class HOGViewSet(PaginationMixin, ViewSet):
         if hog_id[:4] != "HOG:":
             hog_id = self._hog_id_from_entry(hog_id)
 
-        level = self.request.query_params.get('level', None)
-        if level is not None:
-            if level.lower() == "root":
-                hog_id = utils.db.format_hogid(utils.db.parse_hog_id(hog_id))
-                level = None
-            elif not self._check_level_is_valid(level):
-                raise ParseError("level parameter is invalid")
-
+        level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
         if level is not None:
             members = [utils.ProteinEntry(entry) for entry in utils.db.hog_members_from_hog_id(hog_id, level)]
+            hog_id = self._identify_lca_hog_id_from_proteins(members)
         else:
             fam_nr = utils.db.parse_hog_id(hog_id)
             condition = '(Fam == fam_nr) & (ID == hog_id)'

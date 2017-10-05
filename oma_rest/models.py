@@ -1,7 +1,9 @@
 class HOG(object):
-    def __init__(self, hog_id=None, level=None):
+    def __init__(self, hog_id=None, level=None, **kwargs):
         self.hog_id = hog_id
         self.level = level
+        for k, v in kwargs.items():
+            setattr(self, k, v)
         if hog_id is not None:
             start = hog_id.find(':') + 1
             end = hog_id.find('.')

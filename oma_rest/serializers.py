@@ -8,14 +8,16 @@ from django.utils.http import urlencode
 
 
 class QueryParamHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
-    def __init__(self, query_params, **kwargs):
+    def __init__(self, query_params, nullvalues=None, **kwargs):
         super(QueryParamHyperlinkedIdentityField, self).__init__(**kwargs)
         self.query_params = query_params
+        self.nullvalues = list(nullvalues) if nullvalues is not None else [None]
 
     def get_url(self, obj, view_name, request, format):
         url = super(QueryParamHyperlinkedIdentityField, self).get_url(obj, view_name, request, format)
-        if len(self.query_params) > 0:
-            url += "?" + urlencode({k: getattr(obj, v) for k, v in self.query_params.items()})
+        qparams = {k: getattr(obj, v) for k, v in self.query_params.items() if getattr(obj, v) not in self.nullvalues}
+        if len(qparams) > 0:
+            url += "?" + urlencode(qparams)
         return url
 
 
@@ -106,26 +108,6 @@ class SequenceSearchResultSerializer(ReadOnlySerializer):
     targets = serializers.ListSerializer(child=ApproxSearchProteinSerializer())
 
 
-class SubHOGSerializer(ReadOnlySerializer):
-    hog_id = serializers.CharField()
-    members_url = QueryParamHyperlinkedIdentityField(
-        view_name='hog-members',
-        lookup_field='hog_id',
-        query_params={'level': 'level'})
-
-
-class HOGInfoSerializer(ReadOnlySerializer):
-    hog_id = serializers.CharField()
-    level = serializers.CharField()
-    subhogs = serializers.ListSerializer(child=SubHOGSerializer())
-
-
-class HOGMembersListSerializer(ReadOnlySerializer):
-    hog_id = serializers.CharField()
-    level = serializers.CharField()
-    members = serializers.ListSerializer(child=ProteinEntrySerializer())
-
-
 class ChromosomeInfoSerializer(ReadOnlySerializer):
     id = serializers.CharField()
     entry_ranges = serializers.ListSerializer(
@@ -202,21 +184,6 @@ class GeneOntologySerializer(ReadOnlySerializer):
         return obj.aspect
 
 
-class HOGsLevelSerializer(ReadOnlySerializer):
-    level = serializers.CharField()
-    level_url = QueryParamHyperlinkedIdentityField(view_name='hog-detail', lookup_field='hog_id',
-                                                   query_params={'level': 'level'})
-
-
-class ProteinHOGSerializer(ReadOnlySerializer):
-    hog_id = serializers.CharField()
-    levels = serializers.ListSerializer(child=HOGsLevelSerializer())
-
-
-class HOGDetailSerializer(ProteinHOGSerializer):
-    root_level = serializers.CharField()
-
-
 class GroupListSerializer(ReadOnlySerializer):
     oma_group = serializers.IntegerField(source='GroupNr')
     group_url = serializers.HyperlinkedIdentityField(
@@ -229,15 +196,32 @@ class RelatedGroupsSerializer(GroupListSerializer):
     hits = serializers.IntegerField()
 
 
-class HOGsListSerializer(ReadOnlySerializer):
-    roothog_id = serializers.IntegerField()
+class HOGsBaseSerializer(ReadOnlySerializer):
     hog_id = serializers.CharField()
+    level = serializers.CharField(required=False)
     levels_url = QueryParamHyperlinkedIdentityField(view_name='hog-detail',
                                                     lookup_field='hog_id',
                                                     query_params={'level': 'level'})
     members_url = QueryParamHyperlinkedIdentityField(view_name='hog-members',
                                                      query_params={'level': 'level'},
                                                      lookup_field='hog_id')
+    alternative_levels = serializers.ListSerializer(required=False,
+                                                    child=serializers.CharField())
+
+
+class HOGsListSerializer(HOGsBaseSerializer):
+    roothog_id = serializers.IntegerField()
+
+
+class HOGsLevelDetailSerializer(HOGsListSerializer):
+    parent_hogs = serializers.ListSerializer(child=HOGsBaseSerializer())
+    children_hogs = serializers.ListSerializer(child=HOGsBaseSerializer())
+
+
+class HOGMembersListSerializer(ReadOnlySerializer):
+    hog_id = serializers.CharField()
+    level = serializers.CharField()
+    members = serializers.ListSerializer(child=ProteinEntrySerializer())
 
 
 class DomainSerializer(ReadOnlySerializer):
