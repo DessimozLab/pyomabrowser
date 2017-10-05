@@ -12,6 +12,7 @@ from rest_framework import  schemas
 from rest_framework.utils import formatting
 from rest_framework.compat import coreapi, coreschema, uritemplate
 from django.utils.encoding import smart_text
+from django.utils.html import urlize
 import logging
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
                 method_docstring = re.split(r':(?:query)?param', method_docstring, 1)[0]
             except:
                 pass
-            return formatting.dedent(smart_text(method_docstring))
+            return urlize(formatting.dedent(smart_text(method_docstring)))
 
         description = view.get_view_description()
         lines = [line.strip() for line in description.splitlines()]
