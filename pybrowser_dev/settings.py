@@ -59,8 +59,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'google_analytics',
-    'debug_toolbar',
+    #'google_analytics',
+    #'debug_toolbar',
     'captcha',
     #'debug_toolbar_line_profiler',
     'rest_framework',
@@ -77,8 +77,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'google_analytics.middleware.GoogleAnalyticsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'google_analytics.middleware.GoogleAnalyticsMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 REST_FRAMEWORK = {

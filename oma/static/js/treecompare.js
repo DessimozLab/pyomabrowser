@@ -1,4 +1,4 @@
-var TreeCompare = function(){
+ var TreeCompare = function(){
 
     var trees = [];
 
@@ -4657,6 +4657,7 @@ var TreeCompare = function(){
     External functions
      */
     function unselect(d){
+
         var tree = trees[0];
         for (var leaf = 0; leaf < d.leaves.length; leaf++){
             selectForOMAExport(d.leaves[leaf], true);
@@ -5898,6 +5899,8 @@ var TreeCompare = function(){
         getMaxAutoCollapse: getMaxAutoCollapse,
         changeAutoCollapseDepth: changeAutoCollapseDepth,
         unselect: unselect,
+        selectAllSpecies: selectAllSpecies,
+        update: update,
         // additionalFunc: additionalFunc,
         exportList: exportList
     }
