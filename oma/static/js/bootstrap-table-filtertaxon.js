@@ -190,7 +190,7 @@
 
         //load the data from the Json file
         $.ajax({
-            url: that.options.urlSpecieTree,
+            url: that.options.urlSpeciesTree,
             success: function (newick) {
 
                 // DEFINED BEHAVIOR ON NODE SELECTION
@@ -263,7 +263,7 @@
     $.extend($.fn.bootstrapTable.defaults, {
         taxonFilter: false,
         idTable: 'taxonFilter',
-        urlSpecieTree: undefined,
+        urlSpeciesTree: undefined,
         onColumntaxonFilter: function (name_selector) {
             return false;
         }
@@ -307,7 +307,7 @@
             return;
         }
 
-        if (!this.options.urlSpecieTree) {
+        if (!this.options.urlSpeciesTree) {
             return;
         }
 
@@ -319,7 +319,7 @@
         this.custom_filter_search = false;
 
         // INPUTTED TAXON NAME WITH THEY SPECIES LIST (CHECK FOR VALIDITY)
-        this.tax_converter = build_tax_to_species_converter(this.options.urlSpecieTree, this.list_taxon_accepted);
+        this.tax_converter = build_tax_to_species_converter(this.options.urlSpeciesTree, this.list_taxon_accepted);
 
         // ADD CUSTOM FILTERING FROM LOCAL STORAGE
         var local_custom = localStorage.getItem('custom_taxon_filter');
@@ -458,7 +458,7 @@
             return;
         }
 
-        if (!this.options.urlSpecieTree) {
+        if (!this.options.urlSpeciesTree) {
             return;
         }
 
