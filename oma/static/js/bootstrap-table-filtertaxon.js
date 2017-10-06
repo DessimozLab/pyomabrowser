@@ -499,8 +499,7 @@
 
                     var fval = lsp[sp].toLowerCase();
                     var value = item['taxon'];
-
-                    value = value.species.toLowerCase();
+                    value = (value.species + value.strain).toLowerCase();
 
                     if ($.inArray('taxon', that.header.fields) !== -1 &&
                         (typeof value === 'string' || typeof value === 'number') &&
