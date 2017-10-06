@@ -1,7 +1,6 @@
 class HOG(object):
-    def __init__(self, hog_id=None, level=None, **kwargs):
+    def __init__(self, hog_id=None, **kwargs):
         self.hog_id = hog_id
-        self.level = level
         for k, v in kwargs.items():
             setattr(self, k, v)
         if hog_id is not None:

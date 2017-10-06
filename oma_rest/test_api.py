@@ -78,6 +78,21 @@ class HOGsTest(APITestCase):
         self.assertEqual(1, len(response.data))
         self.assertEqual('Saccharomycetaceae', response.data[0]['level'])
 
+    def test_level_attribute_not_present_in_children_hogs(self):
+        hog_id = "HOG:0000002"
+        response = APIClient().get('/api/hog/{}/'.format(hog_id))
+        self.assertEqual(200, response.status_code)
+        result = json.loads(response.content.decode())
+        self.assertEqual(1, len(result))
+        result = result[0]
+        self.assertEqual('Eukaryota', result['level'], 'unexpected root level')
+        self.assertLess(1, len(result['children_hogs']))
+        for child in result['children_hogs']:
+            self.assertIn(hog_id, child['hog_id'])
+            self.assertNotEqual(hog_id, child['hog_id'])
+            with self.assertRaises(KeyError):
+                child['level']
+
     def test_hog_members(self):
         client = APIClient()
         response = client.get('/api/hog/HOG:0000365/members/', format='json')

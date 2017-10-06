@@ -15,7 +15,14 @@ class QueryParamHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
 
     def get_url(self, obj, view_name, request, format):
         url = super(QueryParamHyperlinkedIdentityField, self).get_url(obj, view_name, request, format)
-        qparams = {k: getattr(obj, v) for k, v in self.query_params.items() if getattr(obj, v) not in self.nullvalues}
+        qparams = {}
+        for param_name, key in self.query_params.items():
+            try:
+                param_value = getattr(obj, key)
+                if param_value not in self.nullvalues:
+                    qparams[param_name] = param_value
+            except AttributeError:
+                pass
         if len(qparams) > 0:
             url += "?" + urlencode(qparams)
         return url
