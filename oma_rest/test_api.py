@@ -93,6 +93,24 @@ class HOGsTest(APITestCase):
             with self.assertRaises(KeyError):
                 child['level']
 
+    def test_hogdetail_with_level_returns_multiple_subhogs(self):
+        hog_id, level = "HOG:0000192", "Saccharomycetaceae"
+        client = APIClient()
+        response = client.get('/api/hog/{}/'.format(hog_id), {'level': level})
+        result = json.loads(response.content.decode())
+        self.assertEqual(5, len(result))
+        for res in result:
+            self.assertIn(hog_id, res['hog_id'])
+            self.assertNotEqual(hog_id, res['hog_id'])
+            self.assertEqual(level, res['level'])
+        parents = result[0]['parent_hogs']
+        self.assertEqual(1, len(parents))
+        # let's check that the parent link works and returns just a single hog
+        response = client.get(parents[0]['levels_url'])
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(1, len(response.data))
+        self.assertEqual(hog_id, response.data[0]['hog_id'])
+
     def test_hog_members(self):
         client = APIClient()
         response = client.get('/api/hog/HOG:0000365/members/', format='json')
