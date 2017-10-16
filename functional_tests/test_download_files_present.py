@@ -1,4 +1,3 @@
-import time
 from .base import FunctionalTest
 import requests
 
@@ -20,3 +19,11 @@ class DownloadPagesTester(FunctionalTest):
         self.browser.find_element_by_link_text("Download").click()
         self.browser.find_element_by_link_text("Current release").click()
         self.check_all_link_exist_on_page()
+
+    def test_oma_ontology_file(self):
+        self.browser.get(self.server_url)
+        self.browser.find_element_by_link_text('Compute').click()
+        el = self.browser.find_element_by_link_text('RDF Schema')
+        schema_url = el.get_property('href')
+        resp = requests.head(schema_url)
+        self.assertEqual(200, resp.status_code, "cannot access oma ontology at {}".format(schema_url))
