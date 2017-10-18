@@ -15,6 +15,10 @@ many requests simultaniously).
 Development configuration
 -------------------------
 
+* consider using a :doc:`virtual machine for the whole project <vagrant_setup>`.
+  This would make sure that your code will integrate well with the real browser, as
+  that one will have a similar setup.
+
 * Prepare a virtual environment for at least python3.4. You can do that best with pyenv.
   details are available :doc:`in the zoo documentation <zoo:setup>`
 
