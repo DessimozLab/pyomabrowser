@@ -21,7 +21,8 @@
             <dd><a href="/cgi-bin/gateway.pl?f=DisplayOS&p1={{entry.genome.uniprot_species_code}}">
                 {{ entry.genome.uniprot_species_code }} - {{ entry.genome.sciname }}</a>
             </dd>
-            <dt>Locus</dt><dd>???</dd>
+            <dt>Locus</dt><dd><span id="chr">{{ entry.chromosome }}</span>:&nbsp;<span id="coordinates">{{ entry.locus_start }}..{{ entry.locus_end }}</span></dd>
+            <dt></dt>
         </dl>
     </div>
 </div>
@@ -35,7 +36,7 @@
     <div class="panel-body">
         <dl class="dl-horizontal test">
             {% for xref in xrefs %}
-                <dt>{{ xref.source }}</dt><dd><a href="{{ xref.url }}">{{ xref.xref }}</a></dd>
+                <dt>{{ xref.source }}</dt><dd><a class="external" href="{{ xref.url }}">{{ xref.xref }}</a></dd>
             {% endfor %}
         </dl>
     </div>
@@ -60,8 +61,8 @@
             <h3 class="panel-title">Gene Ontology</h3>
         </div>
     </div>
-    <div class="panel-body">
-
+    <div id="ontology-panel" class="panel-body">
+        <div id="loader-ontology"><img src="{% static "image/loading.gif"%}"></div>
     </div>
 </div>
 
@@ -100,8 +101,39 @@
 <!-- Domain Visualisation -->
 <script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
 <link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+<!-- Ontology -->
+<script src="{% static "js/underscore-min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/xref_format.js" %}" type="text/javascript"></script>
 <script>
 (function () {
   domains.visualize_all(".domain_row", {{ entry.sequence_length }});
 })();</script>
+
+<script>
+    (function(){
+        $.getJSON("/api/protein/{{ entry.entry_nr }}/ontology/", function(data){
+           _.forEach(_.groupBy(data, "aspect"), function(annos, aspect){
+               var tab = ['<table class="table table-hover"><thead><tr><th colspan="2">',
+                   '<strong>'+ aspect + '</strong></th></tr>',
+                   '<tr><th class="subHead">GO term</th><th class="subHead">Evidence and reference</th></tr>',
+                   '</thead><tbody>'];
+               _.forEach(_.groupBy(annos, "GO_term"), function(term_annos, term){
+                   tab.push('<tr><td>' + term_annos[0].name +
+                       ' (' + xref_format.go_annotation_url(term_annos[0]) + ')</td>', '<td>');
+                   _.forEach(_.groupBy(term_annos, 'evidence'), function(evi_anno, evi){
+                       tab.push(xref_format.go_evi_url(evi));
+                       var ref=[];
+                       evi_anno.forEach(function(anno){
+                           ref.push(xref_format.go_ref_url(anno.reference));
+                       });
+                       tab.push(ref.join(', '), '<br>');
+                   });
+                   tab.push('</td></tr>');
+               });
+               $('#ontology-panel').append(tab.join("\n"))
+           });
+        });
+        $("#loader-ontology").hide();
+    })();
+</script>
 {% endblock contentTab %}
