@@ -13,26 +13,41 @@
         var cur_case = cases[kingdom] ? cases[kingdom] : cases['_default']
         return '<span class="label ' + cur_case.cls + '"><abbr class="abbrNoUnder" ' +
             'title="' + cur_case.display_text + '">' + cur_case.tag + '</abbr></span>';
-    }
+    };
 
     exports.format_sciname = function(value, row) {
         return "<b>" + value.species + "</b> " + value.strain;
-    }
+    };
 
     exports.add_proteinrow_attrs = function(rowdata, index) {
         return {id: rowdata.protid, 'class': "protein"};
-    }
+    };
+
+    exports.format_hogid = function(value, row) {
+        return '<a href="/oma/hogs/' + row.ReprEntryNr 
+                                      + '/">HOG:'
+                                      + ('0000000' + value).slice(-7) // Format with leading 0s
+                                      + '</a>';
+    };
+
+    exports.format_domainprevalence = function(value, row) {
+        return row.PrevFrac.toFixed(1) + "%";
+    };
 
     exports.format_empty = function(value, row) {
         return "";
-    }
+    };
+
+    exports.format_float_value = function(value, row){
+        return parseFloat(value).toPrecision(3)
+    };
 
     exports.format_info_link = function (value, row) {
         return '<a href="/cgi-bin/gateway.pl?f=DisplayEntry&p1=' + value + '">' + value + '</a>';
-    }
+    };
     exports.format_vps_link = function(value, row){
         return '<a href="/oma/vps/' + value + '">' + value + '</a>';
-    }
+    };
 
     var xref_re = {
         'UniProtKB/SwissProt': {
@@ -68,7 +83,8 @@
                 buf += value + '</a>';
                 return false;
             }
-        })
+        });
         return buf;
-    }
+    };
+
 })(this.tablehooks = {});

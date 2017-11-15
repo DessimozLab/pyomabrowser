@@ -1,18 +1,26 @@
-from __future__ import print_function
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, division
 from builtins import map
 from builtins import str
 from builtins import range
+import hashlib
 import collections
 import json
+import pandas as pd
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
-from django.views.decorators.cache import cache_control
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
 from django.views.generic.base import ContextMixin
+from django.core.urlresolvers import reverse
+from django.core.mail import EmailMessage
+from django.template import Context
+from django.template.loader import render_to_string, get_template
 
 from collections import OrderedDict
-import numpy
 import tweepy
 import logging
 import itertools
@@ -20,11 +28,12 @@ import os
 import re
 import time
 import glob
-from io import BytesIO
 
+from . import tasks
 from . import utils
 from . import misc
 from . import forms
+from .models import FileResult
 from pyoma.browser import db, models
 
 logger = logging.getLogger(__name__)
@@ -69,7 +78,7 @@ class JsonModelMixin(object):
                         if isinstance(obj, classmethod):
                             obj = obj()
                 except AttributeError as e:
-                    logger.warn('cannot access '+accessor+ ": "+ e)
+                    logger.warning('cannot access ' + accessor + ": " + str(e))
                     raise
                 obj_dict[name] = obj
             yield obj_dict
@@ -108,12 +117,12 @@ class FastaView(FastaResponseMixin, ContextMixin, View):
 
 
 def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
-    """loads data to visualize the synteny around a query 
-    gene and it's orthologs.
+    """loads data to visualize the synteny around a query
+    gene and its orthologs.
     the parameter 'mod' is used to keep the color between
     calls on different entries compatible, i.e. they selected
-    gene should keep it's color.
-    the window paramter is used to select the size of the 
+    gene should keep its color.
+    the window paramter is used to select the size of the
     neighborhood."""
 
     try:
@@ -178,24 +187,23 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
               6: '#66C2A5', 7: '#5E4FA2', 8: '#F46D43', 9: '#FFFFBF', 10: '#ABDDA4'}
     stripes = {}
 
-    o_sorting = {}
+    # select the closest NR_GENOMES_TO_KEEP genomes
+    NR_GENOMES_TO_KEEP = 50
+    nr_shared_lins_per_genome = collections.Counter()
     for ortholog in orthologs:
-        o_genome = utils.id_mapper['OMA'].genome_of_entry_nr(ortholog)
-        if not o_genome['UniProtSpeciesCode'] in o_sorting:
-            try:
-                o_lin = utils.tax.get_parent_taxa(o_genome['NCBITaxonId'])
-            except Exception:
-                logger.warning("cannot get NCBI Taxonomy for {} ({})".format(
-                    o_genome['UniProtSpeciesCode'],
-                    o_genome['NCBITaxonId']))
-                o_lin = []
+        o_genome = utils.Genome(utils.id_mapper['OMA'].genome_of_entry_nr(ortholog))
+        if not o_genome.uniprot_species_code in nr_shared_lins_per_genome:
             num_match = 0
-            for i in range(1, min(len(o_lin), len(taxa))):
-                if taxa[-i] == o_lin[-i]["Name"]:
-                    num_match += 1
-            o_sorting[o_genome['UniProtSpeciesCode']] = num_match
-    o_sorting = OrderedDict(sorted(list(o_sorting.items()), key=lambda t: t[1], reverse=True))
-    o_sorting = [g.decode() for g in o_sorting.keys()][0:50]
+            try:
+                for i in range(1, min(len(o_genome.lineage), len(taxa))):
+                    if taxa[-i] == o_genome.lineage[-i]:
+                        num_match += 1
+            except db.InvalidTaxonId:
+                logger.exception("cannot get NCBI Taxonomy for {} ({})"
+                                 .format(o_genome.uniprot_species_code, o_genome.ncbi_taxon_id))
+            nr_shared_lins_per_genome[o_genome.uniprot_species_code] = num_match
+    o_sorting = [g[0] for g in nr_shared_lins_per_genome.most_common(NR_GENOMES_TO_KEEP)]
+
     osd = {}  # ortholog sorting dictionary
     for row, each in enumerate(o_sorting):
         osd[each] = row
@@ -255,8 +263,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
                         if st_name in stripe:
                             stripe = stripe
                         else:
-                            stripe = stripe + (
-                                colors[int(i)] + ' ' + str(x) + 'px,' + colors[int(i)] + ' ' + str(x + 15) + 'px,')
+                            stripe += colors[int(i)] + ' ' + str(x) + 'px,' + colors[int(i)] + ' ' + str(x + 15) + 'px,'
                         x += 15
 
                     stripes[st_name] = stripe[:-1]
@@ -354,6 +361,28 @@ class PairsViewFasta(FastaView, PairsBase):
         return self.render_to_fasta_response(itertools.chain([context['entry']], context['vps']))
 
 
+class FamBase(ContextMixin, EntryCentricMixin):
+
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(FamBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+        fam_members = [models.ProteinEntry(utils.db, z) for z in
+                       utils.db.member_of_fam(utils.db.hog_family(entry.entry_nr))]
+        context.update({'entry': entry, 'fam_members': fam_members})
+        return context
+
+
+class FamGeneDataJson(FamBase, JsonModelMixin, View):
+    json_fields = {'entry_nr': 'id', 'omaid': 'protid', 'sequence_length': None,
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'gc_content': None}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = [x for x in self.to_json_dict(context['fam_members'])]
+        return JsonResponse(data, safe=False)
+
+
 class InfoBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoBase, self).get_context_data(**kwargs)
@@ -408,7 +437,9 @@ class HOGsBase(ContextMixin, EntryCentricMixin):
             {'entry': entry,
              'level': level, 'hog_members': hog_members,
              'nr_vps': nr_vps, 'tab': 'hogs', 'levels': levels[::-1],
-             'longest_seq': longest_seq})
+             'longest_seq': longest_seq,
+             'table_data_url': reverse('hog_json', args=(entry.omaid, level)),
+             })
         if hog is not None:
             context['hog'] = hog
         return context
@@ -452,33 +483,40 @@ class HOGsOrthoXMLView(HOGsView):
         return response
 
 
+class AsyncMsaMixin(object):
+    def get_msa_results(self, group_type, *args):
+        msa_id = hashlib.md5(group_type.encode('utf-8'))
+        for arg in args:
+            msa_id.update(str(arg).encode('utf-8'))
+        msa_id = msa_id.hexdigest()
+        try:
+            r = FileResult.objects.get(data_hash=msa_id)
+            do_compute = r.remove_erroneous_or_long_pending()
+        except FileResult.DoesNotExist:
+            do_compute = True
+
+        if do_compute:
+            logger.info('require computing msa for {} {}'.format(group_type, args))
+            r = FileResult(data_hash=msa_id, result_type='msa_{}'.format(group_type),
+                           state="pending")
+            r.save()
+            tasks.compute_msa.delay(msa_id, group_type, *args)
+        return {'msa_file_obj': r}
+
+
+@method_decorator(never_cache, name='dispatch')
+class HOGsMSA(AsyncMsaMixin, HOGsBase, TemplateView):
+    template_name = "hog_msa.html"
+
+    def get_context_data(self, entry_id, level, **kwargs):
+        context = super(HOGsMSA, self).get_context_data(entry_id, level)
+        context.update(self.get_msa_results('hog', context['entry'].entry_nr, level))
+        return context
+
+
 class HOGsVis(EntryCentricMixin, TemplateView):
     template_name = "hog_vis.html"
     show_internal_labels = True
-
-    def _build_per_species_table(self, entries, subhogids_per_lev, taxonomy):
-        per_species = {}
-        for e in entries:
-            genome = utils.id_mapper['OMA'].genome_of_entry_nr(e['EntryNr'])
-            species_dict = per_species.get(genome['SciName'].decode(), {})
-            try:
-                lineage = taxonomy.get_parent_taxa(genome['NCBITaxonId'])
-            except db.InvalidTaxonId:
-                logger.exception("cannot find lineage information for {}".format(genome['NCBITaxonId']))
-                continue
-
-            for lin in lineage:
-                lin_str = lin['Name'].decode()
-                if lin_str not in species_dict:
-                    species_dict[lin_str] = [[] for _ in range(len(subhogids_per_lev[lin['Name']]))]
-                for k, subhogid in enumerate(subhogids_per_lev[lin['Name']]):
-                    if e['OmaHOG'].startswith(subhogid):
-                        species_dict[lin_str][k].append(int(e['EntryNr']))
-                        break
-                else:
-                    raise ValueError('no id found for {}({})'.format(e['EntryNr'], e['OmaHOG']))
-            per_species[genome['SciName'].decode()] = species_dict
-        return per_species
 
     def get_context_data(self, entry_id, idtype='OMA', **kwargs):
         context = super(HOGsVis, self).get_context_data(**kwargs)
@@ -488,22 +526,11 @@ class HOGsVis(EntryCentricMixin, TemplateView):
                         })
         try:
             fam_nr = entry.hog_family_nr
-            levs_of_fam = frozenset(utils.db.hog_levels_of_fam(fam_nr))
-            phylo = utils.tax.get_induced_taxonomy(levs_of_fam)
-            subhogids_per_level = dict((lev, utils.db.get_subhogids_at_level(fam_nr, lev)) for lev in phylo.tax_table['Name'])
-            fam_memb = utils.db.member_of_fam(fam_nr)
-            per_species = self._build_per_species_table(fam_memb, subhogids_per_level, phylo)
-            xrefs = {int(e['EntryNr']): {'omaid': utils.id_mapper['OMA'].map_entry_nr(e['EntryNr']),
-                                    'id': e['CanonicalId'].decode()} for e in fam_memb}
-
             context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
-                            'hog_members': fam_memb,
-                            'per_species': json.dumps(per_species),
-                            'species_tree': json.dumps(phylo.as_dict()),
-                            'xrefs': json.dumps(xrefs),
-                            'cnt_per_kingdom': {'Eukaryota': 6, 'Archaea': 1},
                             'show_internal_labels': self.show_internal_labels,
                             })
+            if fam_nr == 0:
+                context['isSingleton'] = True
         except db.Singleton:
             context['isSingleton'] = True
         return context
@@ -511,6 +538,59 @@ class HOGsVis(EntryCentricMixin, TemplateView):
 
 class HogVisWithoutInternalLabels(HOGsVis):
     show_internal_labels = False
+
+
+class HOGDomainsBase(ContextMixin, EntryCentricMixin):
+    def get_context_data(self, entry_id, idtype='OMA', **kwargs):
+        # TODO: move some of this to misc / a model.
+        context = super(HOGDomainsBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+        fam = entry.hog_family_nr
+
+        (fam_row, sim_fams) = utils.db.get_prevalent_domains(fam)
+
+        longest_seq = fam_row['repr_entry_length'] if fam_row is not None else -1
+        if fam_row is not None:
+            fam_row['repr_entry_omaid'] = utils.db.id_mapper['Oma'].map_entry_nr(fam_row['repr_entry_nr'])
+
+        if sim_fams is not None:
+            longest_seq = max(longest_seq, max(sim_fams['ReprEntryLength']))
+
+            # Map entry numbers
+            sim_fams['ReprEntryNr'] = sim_fams['ReprEntryNr'].apply(
+                utils.db.id_mapper['Oma'].map_entry_nr)
+
+        context.update({'entry': entry,
+                        'hog': 'HOG:{:07d}'.format(fam),
+                        'hog_row': fam_row,
+                        'sim_hogs': sim_fams,
+                        'tab': 'hogs',
+                        'longest_seq': longest_seq})
+
+        return context
+
+
+class HOGDomainsView(HOGDomainsBase, TemplateView):
+    template_name = "hog-domains.html"
+
+
+class HOGDomainsJson(HOGDomainsBase, View):
+    json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
+                   'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
+                   'sim': 'Similarity', 'TopLevel': 'TopLevel',
+                   'Prev': 'PrevFrac'}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        df = context['sim_hogs']
+        df = df[df.Fam != context['hog_row']['fam']]
+        if len(df) == 0:  #len(context['sim_hogs']) == 0:
+            data = ''
+        else:
+            data = df[list(self.json_fields.keys())] \
+                .rename(columns=self.json_fields) \
+                .to_json(orient='records')
+        return HttpResponse(data, content_type='application/json')
 
 
 def domains_json(request, entry_id):
@@ -533,7 +613,6 @@ def home(request):
 
         public_tweets = api.user_timeline('@OMABrowser', exclude_replies=True,
                                           trim_user=True, include_rts=False, include_entities=True)
-        # r = re.compile(r"(http://[^ ]+)")
         tweets = []
         for tweet in public_tweets[:n_latest_tweets]:
             text = tweet.text
@@ -567,6 +646,139 @@ def fellowship(request):
     else:
         form = forms.FellowshipApplicationForm()
     return render(request, 'fellowship.html', {'form': form})
+
+
+def genome_suggestion(request):
+    if request.method == 'POST':
+        form = forms.GenomeSuggestionFrom(request.POST)
+        if form.is_valid():
+            logger.info("received valid genome suggestion form")
+            data = form.cleaned_data
+            subj = "Genome Suggestion {taxon_id} ({name})".format(**data)
+            try:
+                data.update(misc.genome_info_from_uniprot_rest(data['taxon_id']))
+            except Exception:
+                logger.warning('Cannot find information about {} at uniprot'.format(data['taxon_id']))
+            message = get_template('email_genome_suggestion.html').render(form.cleaned_data)
+            for recepient in (data['suggested_from_email'], "contact@omabrowser.org",
+                              "alpae+gqwmhtm2ep3kmeqmmrlp@boards.trello.com"):
+                sender = data['suggested_from_email'] if recepient != data['suggested_from_email'] else "contact@omabrowser.org"
+                msg = EmailMessage(subj, message, to=[recepient], from_email=sender)
+                msg.content_subtype = "html"
+                msg.send()
+            return HttpResponseRedirect(reverse('genome_suggestion_thanks'))
+    else:
+        form = forms.GenomeSuggestionFrom()
+    return render(request, "genome_suggestion.html", {'form': form})
+
+
+class Release(TemplateView):
+    template_name = 'release.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super(Release, self).get_context_data(**kwargs)
+        ctx.update({'rel_name': utils.db.get_release_name(),
+                    'nr_genome': len(utils.id_mapper['OMA']._genome_keys),
+                    'nr_proteins': utils.id_resolver.max_entry_nr,
+                    'nr_oma_groups': utils.db.get_nr_oma_groups(),
+                    'nr_roothogs': utils.db.get_nr_toplevel_hogs(),
+                    })
+        for grp in ('oma', 'hog'):
+            hist = utils.db.group_size_histogram(grp)
+            proteins = (hist['Count'] * hist['Size']).sum()
+            ctx['nr_protein_in_{}'.format(grp)] = proteins
+            ctx['percent_in_{}'.format(grp)] = 100*proteins / ctx['nr_proteins']
+        return ctx
+
+
+class GenomesJson(JsonModelMixin, View):
+    json_fields = {'uniprot_species_code': None,
+                   'sciname': None, 'ncbi_taxon_id': "ncbi",
+                   "nr_entries": "prots", "kingdom": None}
+
+    def get(self, request, *args, **kwargs):
+        genome_key = utils.id_mapper['OMA']._genome_keys
+        lg = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_table[utils.db.id_mapper['OMA']._entry_off_keys[e - 1]]) for e in genome_key]
+        data = list(self.to_json_dict(lg))
+        return JsonResponse(data, safe=False)
+
+
+def export_marker_genes(request):
+    if request.method == 'GET' and 'genomes' in request.GET:
+        genomes = request.GET.getlist('genomes')
+        min_species_coverage = float(request.GET.get('min_species_coverage', 0.5))
+        top_N_genomes = int(request.GET.get('max_nr_markers', 200))
+        if top_N_genomes < 0:
+            top_N_genomes = None
+        if len(genomes) >= 2 and 0 < min_species_coverage <= 1:
+            data_id = hashlib.md5(
+                    (str(genomes) + str(min_species_coverage) + str(top_N_genomes)).encode('utf-8')
+                ).hexdigest()
+            try:
+                r = FileResult.objects.get(data_hash=data_id)
+                do_compute = r.remove_erroneous_or_long_pending()
+            except FileResult.DoesNotExist:
+                do_compute = True
+
+            if do_compute:
+                r = FileResult(data_hash=data_id, result_type='markers', state="pending")
+                r.save()
+                tasks.export_marker_genes.delay(genomes, data_id, min_species_coverage, top_N_genomes)
+            return HttpResponseRedirect(reverse('marker_genes', args=(data_id,)))
+    return render(request, "export_marker.html", context={'max_nr_genomes': 200})
+
+
+def function_projection(request):
+    if request.method == 'POST':
+        form = forms.FunctionProjectionUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            logger.info("received valid function projection form")
+            user_file_info = misc.handle_uploaded_file(request.FILES['file'])
+            data_id = hashlib.md5(user_file_info['md5'].encode('utf-8')).hexdigest()
+            try:
+                r = FileResult.objects.get(data_hash=data_id)
+                do_compute = r.remove_erroneous_or_long_pending()
+            except FileResult.DoesNotExist:
+                do_compute = True
+
+            result_page = reverse('function-projection', args=(data_id,))
+            if do_compute:
+                r = FileResult(data_hash=data_id, result_type='function_projection', state="pending",
+                               name=form.cleaned_data['name'], email=form.cleaned_data['email'])
+                r.save()
+                tasks.assign_go_function_to_user_sequences.delay(
+                    data_id, user_file_info['fname'], tax_limit=None,
+                    result_url=request.build_absolute_uri(result_page))
+            else:
+                os.remove(user_file_info['fname'])
+
+            return HttpResponseRedirect(result_page)
+    else:
+        form = forms.FunctionProjectionUploadForm()
+    return render(request, "function_projection_upload.html", {'form': form})
+
+
+@method_decorator(never_cache, name='dispatch')
+class AbstractFileResultDownloader(TemplateView):
+    reload_frequency = 20
+
+    def get_context_data(self, data_id, **kwargs):
+        context = super(AbstractFileResultDownloader, self).get_context_data(**kwargs)
+        try:
+            result = FileResult.objects.get(data_hash=data_id)
+        except FileResult.DoesNotExist:
+            raise Http404('Invalid dataset')
+        context['file_result'] = result
+        context['reload_every_x_sec'] = self.reload_frequency
+        return context
+
+
+class FunctionProjectionResults(AbstractFileResultDownloader):
+    template_name = "function_projection_download.html"
+
+
+class MarkerGenesResults(AbstractFileResultDownloader):
+    template_name = "marker_download.html"
 
 
 class CurrentView(TemplateView):
@@ -634,3 +846,155 @@ class ArchiveView(CurrentView):
 
     def download_root(self, context):
         return "/" + context['release'].get('id', '')
+
+
+# synteny viewer DotPlot
+def DotplotViewer(request, g1, g2, chr1, chr2):
+    return render(request, 'dotplot_viewer.html', {'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2})
+
+
+class ChromosomeJson(JsonModelMixin, View):
+
+    '''
+    This json aim to get from a genome the list of chromosome associated to him with their genes
+    '''
+    json_fields = {'sciname': None}
+
+    def get(self, request, genome, *args, **kwargs):
+
+        genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(genome))
+        genomerange = utils.db.id_mapper['OMA'].genome_range(genome)
+
+        data = {'entryoff': genome_obj.entry_nr_offset, 'number_entry': genome_obj.nr_entries,
+                'range_start': int(genomerange[0]), 'range_end': int(genomerange[1])}
+
+        chr_with_genes = collections.defaultdict(list)
+
+        for entry_number in range(genomerange[0], genomerange[1]):
+            entry = utils.db.entry_by_entry_nr(entry_number)
+            chr_with_genes[entry["Chromosome"].decode()].append(entry_number)
+
+        # if all genes from a same chromosome make a continuous range of entry number we could just store for each chr the range index !
+        data['list_chr'] = chr_with_genes
+
+        return JsonResponse(data, safe=False)
+
+
+class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
+    '''
+    This json aim to contain the list of orthologous pairs between two genomes
+    '''
+
+    def get(self, request, org1, org2, chr1, chr2, *args, **kwargs):
+
+        genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(org1))
+        genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(org2))
+        tab_name = 'VPairs' if genome1.uniprot_species_code != genome2.uniprot_species_code else 'within'
+        rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/{}'.format(
+            genome1.uniprot_species_code, tab_name))
+
+        data = []
+        cpt = 0
+
+        e1, e2 = genome1.chromosomes[chr1][0], genome1.chromosomes[chr1][-1]
+        t1, t2 = genome2.chromosomes[chr2][0], genome2.chromosomes[chr2][-1]
+
+        logger.debug("EntryRanges: ({},{}), ({},{})".format(e1, e2, t1, t2))
+        for e in rel_tab.where(
+                    '(EntryNr1 >= {:d}) & (EntryNr1 <= {:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'
+                    .format(e1, e2, t1, t2)):
+            rel = models.PairwiseRelation(utils.db, e.fetch_all_fields())
+
+            if rel.entry_1.chromosome == chr1 and rel.entry_2.chromosome == chr2:
+                data.append(rel)
+                cpt += 1
+                if cpt % 100 == 0:
+                    logger.debug('processed {} relations'.format(cpt))
+
+        return JsonResponse(data, safe=False)
+
+
+class OMAGroupBase(ContextMixin):
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroupBase, self).get_context_data(**kwargs)
+        try:
+            context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
+            context.update(utils.db.oma_group_metadata(context['members'][0].oma_group))
+        except db.InvalidId as e:
+            raise Http404(e)
+        return context
+
+
+class OMAGroupFasta(FastaView, OMAGroupBase):
+    def get_fastaheader(self, memb):
+        return ' | '.join([memb.omaid, memb.canonicalid, "OMAGroup:{:05d}".format(memb.oma_group), '[{}]'.format(memb.genome.sciname)])
+
+    def render_to_response(self, context):
+        return self.render_to_fasta_response(context['members'])
+
+
+class OMAGroupJson(OMAGroupBase, JsonModelMixin, View):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'description': None}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['members']))
+        return JsonResponse(data, safe=False)
+
+
+class OMAGroup(OMAGroupBase, TemplateView):
+    template_name = "omagroup.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup, self).get_context_data(group_id, **kwargs)
+        grp_nr = context['members'][0].oma_group
+        king_comp = collections.defaultdict(int)
+        for e in context['members']:
+            king_comp[e.genome.kingdom] += 1
+        context.update({'kingdom_composition': dict(king_comp),
+                        'sub_tab': 'member_list',
+                        'table_data_url': reverse('omagroup-json', args=(grp_nr,)),
+                        'longest_seq': max([len(z.sequence) for z in context['members']])
+                        })
+        return context
+
+
+class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
+    template_name = "omagroup_entry.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        entry = self.get_entry(entry_id)
+        if entry.oma_group != 0:
+            context = super(EntryCentricOMAGroup, self).get_context_data(entry.oma_group, **kwargs)
+        else:
+            context = {}
+        context.update({'entry': entry, 'tab': 'groups',
+                        'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
+        return context
+
+
+@method_decorator(never_cache, name='dispatch')
+class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
+    template_name = "omagroup_msa.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroupMSA, self).get_context_data(group_id)
+        context.update(self.get_msa_results('og', context['group_nr']))
+        context['sub_tab'] = 'msa'
+        return context
+
+
+@method_decorator(never_cache, name='dispatch')
+class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
+    template_name = "omagroup_entry_msa.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        entry = self.get_entry(entry_id)
+        if entry.oma_group != 0:
+            context = super(EntryCentricOMAGroupMSA, self).get_context_data(entry.oma_group)
+        else:
+            context = {}
+        context.update({'sub_tab': 'msa', 'entry': entry})
+        return context

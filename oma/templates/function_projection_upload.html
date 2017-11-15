@@ -1,0 +1,57 @@
+{% extends  "core.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}OMA: Predicting GO Functions{% endblock %}
+{% block meta_description %}Annotated your proteome with Gene Ontology terms based on OMA{% endblock %}
+
+{% block css_hook %}
+<style type="text/css">
+    div.required label:after { content: '*'; }
+</style>
+{% endblock css_hook %}
+
+{% block content %}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<h1 class="text-center">Predicting Gene Ontology function to your sequences</h1>
+					<div class="well well-sm entete"></div>
+                    <p>Are you interested in annotating gene ontology functions to your own proteome? Here,
+                        we provide an easy way to project functions from the entire OMA Browser based on
+                        sequence similarity to your sequences.</p>
+
+                    <p>Please upload a fasta formated file with your sequences (might also be in gzip or bzip
+                        compressed format). The service identifies the closest sequence in a very quick manner
+                        and assigns the known GO annotations to it. We return a
+                        <a href="http://www.geneontology.org/page/go-annotation-file-gaf-format-21" target="_blank">
+                            gaf2.1 formatted file</a>
+                        to you that contain all the annotations and as well the source protein from which the
+                        function has been projected from.</p>
+                    <div class="row">
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h4>Gene Ontology Function Projection</h4>
+							</div>
+                            <div class="panel-body">
+                                {% bootstrap_messages %}
+                                <form role="form" class="form-horizontal" action="{% url 'function-projection-input' %}" method="POST" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    {% bootstrap_form form layout="horizontal" %}
+                                    {% buttons %}
+                                        <button type="submit" class="btn btn-default">Submit</button>
+                                    {% endbuttons %}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock content %}

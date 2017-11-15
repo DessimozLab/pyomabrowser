@@ -7,5 +7,16 @@ django-bootstrap3>=7.0.1
 tweepy>=2.3.0
 django_debug_toolbar>=1.4
 django_debug_toolbar_line_profiler>=0.6.1
+django-recaptcha
+celery>=3.1
+biopython
+djangorestframework==3.6.3
+coreapi
+pygments
+markdown
+djangorestframework-link-header-pagination
 
+
+-e git+https://github.com/alpae/django-google-analytics.git@py3#egg=django-google-analytics-app
 -e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@master#egg=pyoma
+-e git+ssh://gitolite@lab.dessimoz.org:2222/zoo@master#egg=zoo

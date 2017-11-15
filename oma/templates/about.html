@@ -43,7 +43,7 @@
                         </div>
                         <div class="panel-body">
                             {% now 'Y' as current_year %}
-                            <p>The OMA project was initiated in 2004 at ETH Zurich by Prof. Gaston Gonnet, with the goal of identifying orthologs among all publicly available genomes. At the time, most sequenced genomes were bacteria and only only few were eukaryotes. Several PhD students in his group became increasingly involved, in particular Adrian Schneider, Christophe Dessimoz, and Alexander Roth. Over the subsequent  {{ current_year|add:"-2005" }} years, OMA underwent 20 major releases, steadily increasing the number of genomes under consideration.</p>
+                            <p>The OMA project was initiated in 2004 at ETH Zurich by Prof. Gaston Gonnet, with the goal of identifying orthologs among all publicly available genomes. At the time, most sequenced genomes were bacteria and only few were eukaryotes. Several PhD students in his group became increasingly involved, in particular Adrian Schneider, Christophe Dessimoz, and Alexander Roth. Over the subsequent  {{ current_year|add:"-2005" }} years, OMA underwent 20 major releases, steadily increasing the number of genomes under consideration.</p>
                             <br>
 
                             <img src="{% static "image/history.png" %}" class="img-responsive margin-auto" alt="Graph showing growth of OMA over time.">
@@ -67,10 +67,15 @@
 
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h2>Publication</h2>
+                            <h2>Publications</h2>
                         </div>
                         <div class="panel-body">
                             <h3>OMA overview</h3>
+                            <br>
+                            <p>Adrian M Altenhoff, Natasha M Glover, Clément-Marie Train, Klara Kaleb, Alex Warwick Vesztrocy, David Dylus, Tarcisio Mendes de Farias, Karina Zile, Charles Stevenson, Jiao Long, Henning Redestig, Gaston H Gonnet and Christophe Dessimoz<br>
+                            <em>The OMA orthology database in 2018: retrieving evolutionary relationships among all domains of life through richer web and programmatic interfaces</em><br>
+                                Nucleic Acids Research, <em>in press</em> <a href="http://doi.org/10.1093/nar/gkx1019">Full text</a></p>
+
                             <br>
                             <p>Adrian M. Altenhoff, Nives Škunca, Natasha Glover, Clément-Marie Train, Anna Sueki, Ivana Piližota, Kevin Gori, Bartlomiej Tomiczek, Steven Müller, Henning Redestig, Gaston H Gonnet and Christophe Dessimoz<br>
                             <em>
@@ -100,7 +105,11 @@
                             <h3>OMA algorithm</h3>
                             <br>
                             <br>
-
+                            <p>Clément-Marie Train, Natasha M. Glover, Gaston H. Gonnet, Adrian M. Altenhoff, Christophe Dessimoz<br>
+                                <em>Orthologous Matrix (OMA) algorithm 2.0: more robust to asymmetric evolutionary rates and more scalable hierarchical orthologous group inference</em><br>
+                                Bioinformatics, 2017, 33:14, (pp. i75–i82) <a href="https://doi.org/10.1093/bioinformatics/btx229">Full text</a>
+                            </p>
+                            <br>
                             <p>Adrian M. Altenhoff, Manuel Gil, Gaston H. Gonnet, Christophe Dessimoz  <br>
                             <em>
                                 Inferring Hierarchical Orthologous Groups From Orthologous Gene Pairs 

@@ -24,8 +24,14 @@
 /* overwrite classes  */
 .btn{text-align:center;}
 .navbar-nav{text-align:center;font-weight:bold;}
-.dl-horizontal dt{white-space: normal !important; }
-.dl-horizontal dd{width:60% !important;}
+dl.dl-horizontal dt{white-space: normal; }
+dl.dl-horizontal dd{width: auto;}
+dl.wide-label dt{width: 270px;}
+@media (min-width: 768px) {
+	dl.wide-label dd {
+		margin-left: 290px;
+	}
+}
 a{cursor: pointer;}
 
 .thd{
@@ -191,6 +197,9 @@ a.uncurated{
     color: #FF9933;
     font-size: small;
 }
+a.fig{
+	color: #222;
+}
 
 .kw1 {
     font-weight: bold;
@@ -218,5 +227,56 @@ a.uncurated{
     background: linear-gradient(90deg, black 33.3%, yellow 33.3%, yellow 66.6%, red 66.6%, red 100%);
 }
 
+.autocomplete-suggestions { border: 1px solid #999; background: #FFF; overflow: auto; }
 
+.autocomplete-suggestion {
+	padding: 2px 5px;
+	/*white-space: nowrap; */
+	overflow: hidden;
+	cursor:  pointer;
+	}
 
+.autocomplete-suggestion span.auto-xref{
+	display: inline-block;
+	width: 70%;
+	color: black;
+}
+
+.autocomplete-suggestion span.auto-omaid{
+	display: inline-block;
+	width: 30%;
+	font-size: 75%;
+}
+
+.autocomplete-suggestion span.auto-species{
+	display: inline-block;
+	width: 100%;
+	font-size: 75%;
+	font-style: italic;
+	color: #bbb;
+}
+
+.autocomplete-selected { background: #F0F0F0; }
+.autocomplete-suggestion strong { font-weight: bold; color: black;border-bottom: 2px solid #307C3B }
+
+/* Database label */
+.autocomplete-group { padding: 3px 20px; text-align: right; border-bottom: 1px solid #ddd}
+.autocomplete-group strong {display: block;; color: #777; }
+
+.left_hog_tab{
+	position: relative;
+	padding-right: 8px !important;
+	margin-right: 0 !important;
+	border-radius: 4px 0 0 0 !important;
+	cursor: pointer !important;
+	border-right: none !important;
+}
+
+.right_hog_tab{
+	padding-left:8px !important;
+	padding-right: 8px !important;
+	margin-left: 0 !important;
+	border-radius: 0 4px 0 0 !important;
+	cursor: pointer !important;
+	border: 1px #ddd solid !important ;
+}

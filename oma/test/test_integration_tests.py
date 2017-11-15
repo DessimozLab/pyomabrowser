@@ -30,8 +30,13 @@ class VPairsViews_Test(TestCase):
         content = decode_replycontent(reply)
         vps = [z.omaid for z in reply.context['vps']]
         self.assertGreater(len(vps), 0)
+        api_url = re.search(r'data-url="(?P<url>[^"]*)"', content)
+        self.assertIsNotNone(api_url)
+        api_data = self.client.get(api_url.group('url'))
+        self.assertEqual(api_data.status_code, 200)
+        api_data = decode_replycontent(api_data)
         for vp in vps:
-            self.assertIn(vp, content, 'VP {} not found on page.'.format(vp))
+            self.assertIn(vp, api_data, 'VP {} not found on page.'.format(vp))
 
     def test_inexistant_query_genome(self):
         query = 'ECOLI00411'
@@ -90,24 +95,26 @@ class HogView_Test(TestCase):
 
 
 class HogVisViewTest(TestCase):
-    def test_simple_fam_encoding(self):
-        self.maxDiff = None
-        exp_tree = {'name': 'Eukaryota', 'id':2759,
-                    'children': [{'name': 'Ascomycota', 'id':4890,
-                                  'children': [{'name': 'Schizosaccharomyces pombe (strain 972 / ATCC 24843)', 'id': 284812},
-                                               {'name': 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'id': 559292}]},
-                                 {'name': 'Plasmodium falciparum (isolate 3D7)', 'id': 36329}]}
-        reply = self.client.get(reverse('hog_vis', args=['YEAST12']))
-        phylo = json.loads(reply.context['species_tree'])
-        self.assertDictEqual(exp_tree, phylo)
+    def test_return_right_orthoxml_link(self):
+        query = 'YEAST00012'
+        reply = self.client.get(reverse('hog_vis', args=[query]))
+        self.assertEqual(reply.status_code, 200)
+        self.assertTemplateUsed(reply, "hog_vis.html")
+        expected_orthoxml_url = reverse('hogs_orthoxml', args=[query])
+        expected_species_url = '/All/speciestree.nwk'
+        self.assertIn('url: "{}"'.format(expected_orthoxml_url).encode('utf-8'), reply.content)
+        self.assertIn('url: "{}"'.format(expected_species_url).encode('utf-8'), reply.content)
 
-        per_species = json.loads(reply.context['per_species'])
-        for spec, lev, cnts in [('Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'Eukaryota', [2]),
-                                ('Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', 'Saccharomyces cerevisiae (strain ATCC 204508 / S288c)', [1,1]),
-                                ]:
-            nr_genes_per_subhog = [len(z) for z in per_species[spec][lev]]
-            self.assertEqual(nr_genes_per_subhog, cnts, 'missmatch of subhogs at {}/{}: {} vs {}'
-                             .format(spec, lev, nr_genes_per_subhog, cnts))
+        # test that orthoxml has query gene
+        orthoxml = self.client.get(expected_orthoxml_url)
+        self.assertEqual(orthoxml.status_code, 200)
+        self.assertIn('protId="{}"'.format(query).encode('utf-8'), orthoxml.content)
+
+    def test_access_singleton_protein(self):
+        query = 'YEAST11'  # this protein is not part of any HOG
+        reply = self.client.get(reverse('hog_vis', args=[query]))
+        self.assertEqual(200, reply.status_code)
+        self.assertIn('is not part of any hierarchical', decode_replycontent(reply))
 
 
 class SyntenyViewTester(TestCase):

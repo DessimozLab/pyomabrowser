@@ -1,0 +1,52 @@
+<p style="text-align:justify">The OMA Brower now supports its own REST API, which serves as a window
+    into its database. It enables the abstraction of OMA browser’s data which also allows it to be
+    more accessible via other programming languages. Furthermore, due to its RESTful architecture,
+    it allows the users to access the data they need easily through HTTP requests sent to the
+    server which can be found at:</p>
+
+<a href="/api">http://omabrowser.org/api</a>
+
+<p style="text-align:justify">The OMA REST API supports many data formats and its predominant use
+    of the JSON data format makes it very browser-compatible.To further facilitate the ease of
+    access, we have also developed a Python library and R package to serve as user friendly
+    wrappers around the API. The links to their documentation can be found below:</p>
+
+<ul>
+    <li>R package: {linktocome} </li>
+    <li>Python library: {linktocome}</li>
+</ul>
+
+<h3>Pagination in the API</h3>
+<p style="text-align:justify">Note that some endpoints, such as the list of all Hierarchical Orthologous groups,
+    return a very long list.
+    In order to keep the response size and time manageable the API will take advantage of pagination,
+    which is a mechanism for returning a subset of the results for a request
+    (by default, we return the results in chunks of 100 objects) and allowing for subsequent requests
+    to “page” through the rest of the results until the end is reached. This pagination is implemented with a
+    "page" query parameter and a "per_page" parameter to specify the number of objects per page.</p>
+<p>Information about pagination is provided in the <a href="http://www.rfc-editor.org/rfc/rfc5988.txt">Link header</a>
+    of an API call. This is a popular way how to implement pagination for APIs. In essence this
+    strategy includes in the HTTP reply header a "Link" header with the urls to to next, previous,
+    first and last page. Furthermore, we include in the "X-Total-Count" header the total number of
+    objects that the request will return over all pages. Here is an example request:</p>
+
+<pre>curl -I "https://omabrowser.org/api/genomes/?page=2"</pre>
+
+<pre>HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Link: 
+ &lt;https://omabrowser.org/api/genomes/&gt;; rel="first",
+ &lt;https://omabrowser.org/api/genomes/&gt;; rel="prev",
+ &lt;https://omabrowser.org/api/genomes/?page=3&gt;; rel="next",
+ &lt;https://omabrowser.org/api/genomes/?page=64&gt;; rel="last"
+Vary: Accept
+X-Total-Count: 2085
+</pre>
+
+<h3>HTTP status codes</h3>
+<table style="width:70%;border-collapse:collapse;border-spacing:0"><tr><th style="font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;background-color:#9fbd59;color:#000000;text-align:center;vertical-align:top">Status Code</th><th style="font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;background-color:#9fbd59;color:#000000;text-align:center;vertical-align:top">     Description</th></tr><tr><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     200</td><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">   OK. All is well.</td></tr><tr><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     400</td><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">Malformed request.</td></tr><tr><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     404</td><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     Not found.</td></tr><tr><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     500</td><td style="font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;text-align:center;vertical-align:top">     Internal Server Error.</td></tr></table>
+
+<h2>Available API Endpoints</h2>
+<p>Below we list all the available endpoints together with a brief description of what they
+    return and the parameters they take.</p>

@@ -1,0 +1,76 @@
+{% load staticfiles %}
+
+        <table class="table table-hover" id="grpTable"
+               data-show-toggle="true"
+               data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
+               data-show-columns="true" data-search="true" data-show-export="true"
+               data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
+               data-mobile-responsive="true" data-check-on-init="true"
+               data-undefined-text=""
+               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
+               data-url="{{ table_data_url }}">
+            <thead><tr>
+                <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                    data-formatter="tablehooks.format_as_kindom_tag" data-title-tooltip="Domain of Life">D.</th>
+                <th data-field="taxon" data-sortable="true" data-filter-control="input"
+                    data-formatter="tablehooks.format_sciname">Taxon</th>
+                <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_info_link">Protein ID</th>
+                <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                <th data-sortable="false" class="domain_vis">Domain Architectures</th>
+            </tr></thead>
+            <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">
+                Genes not present in selected taxon have been filtered out as per settings.
+                <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a>
+            </div>
+
+        </table>
+
+
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+<!-- Domain Visualisation -->
+<script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<script src="{% static "js/bootstrap-table.min.js" %}"></script>
+<link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+<script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+<script src="{% static "js/tableExport.min.js" %}"></script>
+
+<!-- taxon filter import: Core -->
+<script src="{% static "js/tnt.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-filtertaxon.js" %}"></script>
+<link type="text/css" rel="stylesheet" href="{% static "css/filtertaxon.css" %}"/>
+
+<!-- taxon filter import: phyloIo -->
+<script src="{% static "js/underscore-min.js" %}"></script>
+<script src="{% static "js/treecompare.js" %}"></script>
+<link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
+<link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
+<link type="text/css" rel="stylesheet" href="{% static "css/treecompare.css" %}"/>
+<!-- taxon filter import: Editable field -->
+<link type="text/css" rel="stylesheet" href="{% static "css/bootstrap-editable.css" %}"/>
+<script src="{% static "js/bootstrap-editable.js" %}"></script>
+
+<script>
+    var tab = $("#grpTable");
+    tab.bootstrapTable({
+        reorderableColumns: true,
+        clickToSelect: false,
+        showMultiSort: true,
+        onPostBody: function () {
+            domains.visualize_all(".protein", {{ longest_seq }});
+        },
+        onLoadSuccess: function (data) {
+            tab.bootstrapTable('hideLoading');
+        }
+    });
+    var icons = tab.bootstrapTable('getOptions').icons;
+    $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+    tab.bootstrapTable('refreshOptions', {'icons': icons});
+    tab.bootstrapTable('showLoading');
+
+</script>

@@ -21,12 +21,12 @@
 
                     <div class="row"><div class="panel panel-default">
                         <div class="panel-heading">
-                            <h4>What would you like to do? 
+                            <h4>What would you like to do?
                             </h4>
                         </div>
                         <div class="panel-body">
                             <div class="col-md-4 ">
-                                <ul class="nav nav-pills nav-stacked">
+                                <ul class="nav nav-pills nav-stacked" role="tablist">
                                     <li class="active"><a href="#orthologs" role="tab" data-toggle="tab">
                                         Identify orthologous marker genes to infer a species tree</a>
                                     </li>
@@ -62,14 +62,12 @@
                             <div class="col-md-8 " >
                                 <div class="tab-content">
 
-                                    <div class="tab-pane" id="orthologs">
+                                    <div class="tab-pane active" id="orthologs">
                                         <p><strong>Appropriate orthology type</strong></p>
                                         <p><a href="/oma/landOMA/">OMA groups</a> that have a high-coverage of the species of interest.</p>
                                         <p><em>Comments</em></p>
                                         <p>Since, barring classification error, all sequence pairs within an OMA group are orthologs (and therefore related through speciation events), the corresponding gene tree is expected to follow the species tree.</p>
                                         <p>Note that the full list of OMA groups can be <a href="/oma/current/">downloaded in text or OrthoXML formats</a>.</p>
-                                         
-                                        </p>
                                     </div>
 
                                     <div class="tab-pane" id="pairwise">
@@ -86,7 +84,7 @@
                                     </div>
                                     <div class="tab-pane" id="synteny">
                                         <p><strong>Appropriate orthology type</strong></p>
-                                        <p><a href="/oma/synteny/">Synteny viewer</a>.</p>
+                                        <p><a href="/oma/synteny/">Local synteny viewer</a>.</p>
                                         <p><em>Comments</em></p>
                                         <p>The viewer provides the genomic context of a particular entry and its orthologs in other species.</p>
                                     </div>
@@ -102,7 +100,7 @@
                                         <p><em>Comments</em></p>
                                         <p>The view combines experimental and inferred annotations from <a href="http://www.ebi.ac.uk/GOA">UniProt-GOA</a> as well as terms inferred from OMA orthologs.</p>
                                     </div>
-                                    <div class="tab-pane active" id="propagate">
+                                    <div class="tab-pane" id="propagate">
                                         <p><strong>Appropriate orthology type</strong></p>
                                         <p><a href="/oma/genomePW/">Genome pair view</a>, filtered to 1:1 orthologs.</p>
                                         <p><em>Comments</em></p>
@@ -131,6 +129,6 @@
     </div>
 </div>
 
-
+</div>
 
 {% endblock content %}

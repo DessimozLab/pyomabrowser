@@ -1,0 +1,29 @@
+{% extends  "ogCentric.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA: MSA of OMA Group {{ group_nr }}{% endblock %}
+{% block meta_description %}Multiple sequence alignment of the member proteins of the OMA Group {{ group_nr }}.{% endblock %}
+
+{% block meta_hook %}
+{% if msa_file_obj.state == "pending" or msa_file_obj.state == "running" %}
+    <meta http-equiv="refresh" content="5" />
+{% endif %}
+{% endblock %}
+
+{% block js_hook %}
+<script src="{% static "js/msa.js"%}"></script>
+{% endblock %}
+
+{% block contentTab %}
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+
+        <div class="pull-right">
+
+        </div>
+    </div>
+    <div class="panel-body">
+        {% include "includes/msa.html" %}
+    </div>
+</div>
+{% endblock contentTab %}

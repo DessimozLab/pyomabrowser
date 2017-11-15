@@ -59,9 +59,14 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'google_analytics',
     'debug_toolbar',
+    'captcha',
     #'debug_toolbar_line_profiler',
+    'rest_framework',
+    'drf_link_header_pagination',
     'oma',
+    'oma_rest',
     'bootstrap3',
 )
 
@@ -72,8 +77,17 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'google_analytics.middleware.GoogleAnalyticsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'oma_rest.pagination.LinkHeaderPagination',
+    'PAGE_SIZE': 100,
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning',
+    'DEFAULT_VERSION': '1.0',
+    'ALLOWED_VERSIONS': ('1.0', ),
+}
 
 
 ROOT_URLCONF = 'pybrowser_dev.urls'
@@ -85,31 +99,51 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt' : "%d/%b/%Y %H:%M:%S"
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
         },
     },
     'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(os.getenv('DARWIN_LOG_PATH', default=''), 'pyoma.log'),
+        'console': {
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose'
-        },
+        }
     },
     'loggers': {
         'django': {
-            'handlers':['file'],
+            'handlers': ['console'],
             'propagate': True,
             'level': 'WARNING',
         },
-        'oma': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+        'django.request': {
+            'handlers': ['console'],
+            'propagate': True,
+            'level': 'INFO'
         },
+        'oma': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True
+        },
+        'pyoma': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True
+        },
+        'oma_rest': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True
+        },
+        'google_analytics': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': True
+        }
+
     }
 }
 
@@ -146,10 +180,26 @@ DATABASES = {
     }
 }
 
+os.environ.setdefault('DARWIN_BROWSERDATA_PATH', './')
 HDF5DB = {
     'NAME': 'Production',
     'PATH': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'OmaServer.h5')
 }
+
+EMAIL_HOST = "whippee.com"
+EMAIL_PORT = 8025
+EMAIL_HOST_USER = "labfaq@dessimoz.org"
+EMAIL_HOST_PASSWORD = "yZ4J4nsiVwim"
+EMAIL_USE_TLS = True
+
+RECAPTCHA_PUBLIC_KEY = "6Lc9PScUAAAAAIi2tZFDxzpBKtNoe3X0GxpgRi_t"
+RECAPTCHA_PRIVATE_KEY = "6Lc9PScUAAAAAJzqJ5z5sfJuJJkqxY5EHCB-fmcd"
+NOCAPTCHA = True  # using No Captcha reCaptcha
+
+GOOGLE_ANALYTICS = {
+    'google_analytics_id': 'UA-1093824-1',
+}
+GOOGLE_ANALYTICS_IGNORE_PATH = ['/oma/', ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
@@ -169,3 +219,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "static")
+MEDIA_URL = "/media/"
+if DEPLOYMENT == "PRODUCTION":
+    MEDIA_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "media")
+else:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# some jenkins specific modifications
+if DEPLOYMENT == "CI-JENKINS":
+    INSTALLED_APPS = INSTALLED_APPS + ('django_jenkins',)
+    JENKINS_TASKS = (
+        'django_jenkins.tasks.run_pep8',
+        'django_jenkins.tasks.run_pyflakes',
+    )
