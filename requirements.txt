@@ -10,7 +10,7 @@ django_debug_toolbar_line_profiler>=0.6.1
 django-recaptcha
 celery>=3.1
 biopython
-djangorestframework>=3.6
+djangorestframework==3.6.3
 coreapi
 pygments
 markdown
