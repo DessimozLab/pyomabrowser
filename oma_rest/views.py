@@ -78,6 +78,26 @@ class ProteinEntryViewSet(ViewSet):
         return Response(serializer.data)
 
     @detail_route()
+    def homoeologs(self, request, entry_id=None, format=None):
+        """List of all the homoeologs for a given protein.
+
+        :param entry_id: an unique identifier for a protein - either its
+            entry number, omaid or canonical id."""
+        entry_nr = utils.id_resolver.resolve(entry_id)
+        protein = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
+        if not protein.genome.is_polyploid:
+            raise NotFound("query protein does not belong to a polyploid genome")
+        homoeologs = []
+        for row in utils.db.get_within_species_paralogs(int(entry_nr)):
+            if row['RelType'] != "homeolog":
+                continue
+            hom = models.ProteinEntry.from_entry_nr(utils.db, int(row['EntryNr2']))
+            homoeologs.append(hom)
+        serializer = serializers.ProteinEntrySerializer(instance=homoeologs, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+    @detail_route()
     def ontology(self, request, entry_id=None, format=None):
         """Ontology information available for a protein.
 
