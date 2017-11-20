@@ -331,7 +331,11 @@ class HOGViewSet(PaginationMixin, ViewSet):
             result_data = [rest_models.HOG(hog_id=hog_id, level=level)]
         else:
             subhogs = utils.db.get_subhogids_at_level(fam_nr, level)
-            result_data = [rest_models.HOG(hog_id=h.decode(), level=level) for h in subhogs]
+            result_data = []
+            for h in subhogs:
+                h = h.decode()
+                if hog_id.startswith(h) or h.startswith(hog_id):
+                    result_data.append(rest_models.HOG(hog_id=h, level=level))
 
         querys = {q.hog_id: i for i, q in enumerate(result_data)}
         parents = [collections.defaultdict(set)] * len(result_data)
