@@ -164,7 +164,7 @@ function init_table(div_id) {
         url: json_genome_url,
         reorderableColumns: true,
         pagination: true,
-        pageSize: 25,
+        pageSize: 50,
         showColumns: true,
         search: true,
         showExport: true,
@@ -178,26 +178,35 @@ function init_table(div_id) {
         columns: [{
             field: 'uniprot_species_code',
             title: 'Code',
-            sortable: true
+            sortable: true,
+            formatter: function(value){
+                return '<a href="/cgi-bin/gateway.pl?f=DisplayOS&p1='+value+'">'+value+"</a>";
+            }
         }, {
             field: 'sciname',
             title: 'Scientific Name',
+            sortable: true,
+            formatter: tablehooks.format_sciname
+        }, {
+            field: 'common_name',
+            title: 'Common Name',
             sortable: true
         }, {
             field: 'prots',
             title: '# of Sequences',
             sortable: true
-        },
-            {
-                field: 'ncbi',
-                title: 'NCBI TaxonId',
-                sortable: true
-            },
-            {
-                field: 'kingdom',
-                title: 'Kingdom',
-                sortable: true
-            }]
+        }, {
+            field: 'ncbi',
+            title: 'NCBI TaxonId',
+            sortable: true,
+            formatter: function(value) {
+                return '<a href="https://uniprot.org/taxonomy/'+value +'">' + value + "</a>";
+            }
+        }, {
+            field: 'kingdom',
+            title: 'Kingdom',
+            sortable: true
+        }]
     });
 
     var icons = tab.bootstrapTable('getOptions').icons;
@@ -454,7 +463,7 @@ function init_hist(div_id) {
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", .95);
-                tooltip.html(d.sciname + "</br><b>" + d.uniprot_species_code
+                tooltip.html("<b>" + d.sciname.species + "</b> "+ d.sciname.strain+"</br><b>" + d.uniprot_species_code
                     + ", " + d.prots + "</b>")
                     .style("left", (d3.event.pageX + 5) + "px")
                     .style("top", (d3.event.pageY - 60) + "px");
