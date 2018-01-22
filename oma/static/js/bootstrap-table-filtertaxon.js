@@ -534,17 +534,12 @@
     };
 
     BootstrapTable.prototype.getData = function (useCurrentPage) {
-        var data = this.options.data;
-
-        if (this.multi_species_search || this.searchText || this.options.sortName || !$.isEmptyObject(this.filterColumns) || !$.isEmptyObject(this.filterColumnsPartial)) {
-            data = this.data;
-        }
 
         if (useCurrentPage) {
-            return data.slice(this.pageFrom - 1, this.pageTo);
+            return this.data.slice(this.pageFrom - 1, this.pageTo);
         }
 
-        return data;
+        return this.data;
     };
 
 
