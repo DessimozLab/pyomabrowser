@@ -8,9 +8,9 @@ There is a difference between a development environment setup and the production
 setup. The first one is usually relatively simple to setup as it involves most often
 only a Django server. In the following we explain how to setup the development
 setup from basic to more complicated functions, intended to be run on a simple laptop
-or dev host and finalize the section with the additioinal setup instructions
-requried by the production site (which hosts also darwin and is capable to serve
-many requests simultaniously).
+or dev host and finalize the section with the additional setup instructions
+required by the production site (which hosts also darwin and is capable to serve
+many requests simultaneously).
 
 Development configuration
 -------------------------
@@ -34,11 +34,12 @@ Development configuration
   you could obtain or refer to one.
 
   * a basic test db is accessible from the public OMA Browser:
-    http://omabrowser.org/All/Test.OmaServer.h5. This database is useful if you want
+    http://omabrowser.org/All/Test.OmaServer.h5 as well as the suffix index file
+    http://omabrowser.org/All/Test.OmaServer.h5.idx. This database is useful if you want
     to play around on your laptop and don't have a lot of disc space available. Once you
     downloaded the file, rename it to OmaServer.h5 and either place it into the pyomabrowser
     repo or set the environment variable DARWIN_BROWSERDATA_PATH to the folder where you
-    downloaded the file to, e.g. :sh:`export DARWIN_BRWOSERDATA_PATH=/path/to/download/folder`
+    downloaded the file to, e.g. :sh:`export DARWIN_BROWSERDATA_PATH=/path/to/download/folder`
 
 
   * alternatively, you can copy the big file to you laptop. it is available on the
@@ -57,7 +58,7 @@ Essentially, you can start the service with
 
 .. code-block:: sh
 
-    python manage.py migrations
+    python manage.py migrate
     python manage.py runserver --nothreading
 
 and access the instance in your web browser on http://localhost:8000.
