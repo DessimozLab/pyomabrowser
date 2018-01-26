@@ -52,17 +52,17 @@
     var xref_re = {
         'UniProtKB/SwissProt': {
             re: /[A-Z0-9]{1,5}_[A-Z][A-Z0-9]{2,4}/,
-            url: "http://www.uniprot.org/uniprot/",
+            url: "https://www.uniprot.org/uniprot/",
             img: "reviewed.gif"
         },
         'UniProtKB/TrEMBL': {
             re: /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
-            url: "http://www.uniprot.org/uniprot/",
+            url: "https://www.uniprot.org/uniprot/",
             img: "unreviewed.gif"
         },
         'Ensembl': {
             re: /ENS[A-Z]{0,3}[PGT]\d{11}/,
-            url: "http://www.ensembl.org/id/",
+            url: "https://www.ensembl.org/id/",
             img: "ensembl.gif"
         },
         'FlyBase': {
