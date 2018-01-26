@@ -131,7 +131,7 @@
                         var base_url = "";
                         if (region.source === "Pfam") {
                             class_name = "_pfam";
-                            base_url = "http://pfam.xfam.org/family/";
+                            base_url = "https://pfam.xfam.org/family/";
 
                         } else if (region.source === "CATH/Gene3D") {
                             var cathid = region.domainid.split('.');
