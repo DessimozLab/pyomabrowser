@@ -182,8 +182,8 @@
                 404: function() {}
             },
             error: function () {
-                $.getJSON("/api/genome", function (jsonData) {
-                    jsonData['results'].forEach(function (genome) {
+                $.getJSON("/api/genome/?per_page=5000", function (jsonData) {
+                    jsonData.forEach(function (genome) {
                         var tmp = genome.species + " (" + genome.code + ")";
                         genomeNames.push(tmp);
                         genomeIDs[tmp] = genome.code
