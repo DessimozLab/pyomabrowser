@@ -50,6 +50,8 @@ class LazyPagedPytablesQuery(object):
             it = self.tab.where(self.query)
             for row in itertools.islice(it, item.start, item.stop, item.step):
                 if self.obj_factory is not None:
-                    yield self.obj_factory(row.fetch_all_fields())
+                    inst = self.obj_factory(row.fetch_all_fields())
+                    if inst is not None:
+                        yield inst
                 else:
                     yield row.fetch_all_fields()
