@@ -1,6 +1,9 @@
 # sql database models
 from django.db import models
 from django.utils import timezone
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FileResult(models.Model):
@@ -15,6 +18,7 @@ class FileResult(models.Model):
     def remove_erroneous_or_long_pending(self):
         if self.state == "error" or (self.state == "pending" and
                 (timezone.now() - self.create_time).total_seconds() > 300):
+            logger.info('removing invalid file result: {}'.format(self))
             self.delete()
             return True
         return False
