@@ -279,11 +279,12 @@ class HOGViewSet(PaginationMixin, ViewSet):
             query = 'Level == {!r}'.format(level.encode('utf-8'))
             queryset = LazyPagedPytablesQuery(table=utils.db.get_hdf5_handle().get_node('/HogLevel'),
                                               query=query,
-                                              obj_factory=lambda r: rest_models.HOG(hog_id=r['ID'].decode(), level=level))
+                                              obj_factory=lambda r: rest_models.HOG(hog_id=r['ID'].decode(),
+                                                                                    level=level))
         else:
             # list of all the rootlevel hogs
             nr_hogs = utils.db.get_nr_toplevel_hogs()
-            queryset = [rest_models.HOG(hog_id=utils.db.format_hogid(i), level="root") for i in range(1, nr_hogs+1)]
+            queryset = [rest_models.HOG(hog_id=utils.db.format_hogid(i), level="root") for i in range(1, nr_hogs + 1)]
         page = self.paginator.paginate_queryset(queryset, request)
         serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
@@ -513,6 +514,7 @@ class GenomeViewSet(PaginationMixin, ViewSet):
 
 
 class PairwiseRelationAPIView(PaginationMixin, APIView):
+
     def _get_entry_range(self, genome, chr):
         if chr is None:
             return genome.entry_nr_offset + 1, genome.entry_nr_offset + len(genome)
@@ -565,27 +567,22 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
         chr2 = request.query_params.get('chr2', None)
         range1 = self._get_entry_range(genome1, chr1)
         range2 = self._get_entry_range(genome2, chr2)
-        res = []
-
         logger.debug("EntryRanges: ({0[0]},{0[1]}), ({1[0]},{1[1]})".format(range1, range2))
-        for cnt, row in enumerate(rel_tab.where('(EntryNr1 >= {0[0]}) & (EntryNr1 <= {0[1]}) & '
-                                                '(EntryNr2 >= {1[0]}) & (EntryNr2 <= {1[1]})'
-                                                        .format(range1, range2))):
-            rel = models.PairwiseRelation(utils.db, row.fetch_all_fields())
+
+        def obj_factory(data):
+            rel = models.PairwiseRelation(utils.db, data)
             if ((chr1 is None or chr1 == rel.entry_1.chromosome) and
                     (chr2 is None or chr2 == rel.entry_2.chromosome)):
                 if rel_type is None or rel_type == rel.rel_type:
-                    res.append(rel)
-                if cnt + 1 % 100 == 0:
-                    logger.debug("Processed {} rows".format(cnt))
+                    return rel
+            return None
 
-        if False:
-            page = self.paginator.paginate_queryset(res, request)
-            serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
-            return self.paginator.get_paginated_response(serializer.data)
-        else:
-            serializer = serializers.PairwiseRelationSerializer(instance=res, many=True, context={'request': request})
-            return Response(serializer.data)
+        query = '(EntryNr1 >= {0[0]}) & (EntryNr1 <= {0[1]}) ' \
+                '& (EntryNr2 >= {1[0]}) & (EntryNr2 <= {1[1]})'.format(range1, range2)
+        queryset = LazyPagedPytablesQuery(rel_tab, query=query, obj_factory=obj_factory)
+        page = self.paginator.paginate_queryset(queryset, request)
+        serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
+        return self.paginator.get_paginated_response(serializer.data)
 
 
 class TaxonomyViewSet(ViewSet):

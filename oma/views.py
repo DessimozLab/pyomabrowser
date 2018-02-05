@@ -490,6 +490,7 @@ class AsyncMsaMixin(object):
             msa_id.update(str(arg).encode('utf-8'))
         msa_id = msa_id.hexdigest()
         try:
+            logger.debug('fetching FileResult for {}'.format(msa_id))
             r = FileResult.objects.get(data_hash=msa_id)
             do_compute = r.remove_erroneous_or_long_pending()
         except FileResult.DoesNotExist:
