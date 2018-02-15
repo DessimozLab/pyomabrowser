@@ -73,6 +73,7 @@ class ProteinEntrySerializer(ReadOnlySerializer):
     oma_hog_id = serializers.CharField(required=False, source='oma_hog')
     chromosome = serializers.CharField()
     locus = serializers.SerializerMethodField(method_name=None)
+    is_main_isoform = serializers.BooleanField()
 
     def get_locus(self, obj):
         return collections.OrderedDict([('start', obj.locus_start), ('end', obj.locus_end), ('strand', obj.strand)])
@@ -99,6 +100,10 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
                                                          lookup_url_kwarg='group_id', nullvalues=[0])
     oma_hog_members = OptionalHyperlinkedIdentityField(view_name='hog-members', lookup_field='oma_hog',
                                                            lookup_url_kwarg='hog_id', nullvalues=('', b''))
+    alternative_isoforms_urls = serializers.ListSerializer(
+        child=serializers.HyperlinkedIdentityField(view_name='protein-detail', lookup_field='entry_nr',
+                                                   lookup_url_kwarg='entry_id', read_only=True),
+        source='alternative_isoforms')
 
     def get_hog_levels(self, obj):
         protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)
