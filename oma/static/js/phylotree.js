@@ -20,7 +20,8 @@ $(document).ready(function() {
     $('#phylo_io').css('height', viewerHeight - navHeight -110 ); // svgheight = window size - navheight - (some of margin + padding)
     var svgdivHeight = $('#svgdiv').height(); // height of the svgdiv
     var buttonHeight = $('#buttondiv').height();
-    $('#UISelected').css('height', svgdivHeight -25 -buttonHeight); //Selectedgenomediv = svgdivheight - margin between the two UI div
+    var exportAdditionalInputs = $('#exportAdditionalInputs').height();
+    $('#UISelected').css('height', svgdivHeight - 15 - 25 - buttonHeight - exportAdditionalInputs); //Selectedgenomediv = svgdivheight - margin btw additional input div - margin between the two UI div - height of additional input div
     var row3Width = $('#UISelected').width();
     $('#buttonUnselect').css('width', row3Width*0.45 -5);
     $('#buttonSubmit').css('width', row3Width*0.45 -5);
@@ -163,16 +164,21 @@ $(document).ready(function() {
                 var divList = document.createElement('div');
                 divList.setAttribute('class', 'list-group');
                 divList.setAttribute('id', 'divList');
-                $("#UISelected").append($(divList));
+                //$("#UISelected").append($(divList));
+                $("#UISelectedContent").append($(divList));
                 for (var i = 0; i < root.leaves.length; i++){
                     if(exportList.indexOf(root.leaves[i].name) !== -1){
                         addToInfo(root.leaves[i])
                     }
                 }
 
+                //var UISelectedheight = $('#UISelected').height();
+                //var textSelheight = $('#textSel').height();
+                //$('#divList').css('maxHeight', UISelectedheight  - textSelheight -20 );
                 var UISelectedheight = $('#UISelected').height();
-                var textSelheight = $('#textSel').height();
-                $('#divList').css('maxHeight', UISelectedheight  - textSelheight -20 );
+                var textSelheight = $('#UISelectedHeading').height();
+                var UISelectedContentPadding = parseFloat($('.panel-body').css('padding-top')) + parseFloat($('.panel-body').css('padding-bottom'));
+                $('#divList').css('maxHeight', UISelectedheight - textSelheight - 22 - UISelectedContentPadding);
             }
 
             function addToInfo(d) {
