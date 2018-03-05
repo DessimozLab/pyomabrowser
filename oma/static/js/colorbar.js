@@ -12,8 +12,6 @@ function Colorbar() {
     scaleType = "linear";
 
 
-
-
     checkScaleType = function (scale) {
         // AFAIK, d3 scale types aren't easily accessible from the scale itself.
         // But we need to know the scale type for formatting axes properly
@@ -38,7 +36,6 @@ function Colorbar() {
             return "unknown"
         }
     }
-
 
     function chart(selection) {
         var fillLegend,
@@ -94,7 +91,7 @@ function Colorbar() {
 
         selection.each(function(data) {
 
-            var scaleType = checkScaleType(scale);
+            //var scaleType = checkScaleType(scale);
             var thickness_attr;
             var length_attr;
             var axis_orient;
@@ -111,7 +108,7 @@ function Colorbar() {
                 length_attr = "width"
                 axis_orient = "bottom"
                 position_variable = "x"
-		non_position_variable = "y"
+		        non_position_variable = "y"
                 axis_transform = "translate (0," + thickness + ")"
             }
 
@@ -136,16 +133,16 @@ function Colorbar() {
                 .attr("x",function(d) {return d[0]-margin.right})
                 .attr("y",function(d) {return d[1]-margin.top})
 
-	    offsetGroup = new_colorbars
-                .append("g")
-                .classed("colorbar", true)
-	        .attr("transform","translate(" + margin.left + "," + margin.top + ")")
+            offsetGroup = new_colorbars
+                    .append("g")
+                    .classed("colorbar", true)
+                .attr("transform","translate(" + margin.left + "," + margin.top + ")")
 
-            offsetGroup.append("g")
-		.attr("class","legend rectArea")
+                offsetGroup.append("g")
+            .attr("class","legend rectArea")
 
-            offsetGroup.append("g")
-		.attr("class","axis color")
+                offsetGroup.append("g")
+            .attr("class","axis color")
 
             svg
                 .attr(thickness_attr, thickness + margin.left + margin.right)
@@ -164,7 +161,7 @@ function Colorbar() {
             fillLegendScale = scale.copy();
 
             if (typeof(fillLegendScale.invert)=="undefined") {
-                //console.log("assuming it's a quantile scale")
+                console.log("assuming it's a quantile scale")
                 fillLegendScale = d3.scale
                     .linear()
                     .domain(d3.extent(fillLegendScale.domain()))
@@ -176,13 +173,14 @@ function Colorbar() {
 
             legendRange.push(barlength);
 
-	    if (orient=="vertical") {
-		//Vertical should go bottom to top, horizontal from left to right.
-		//This should be changeable in the options, ideally.
-		legendRange.reverse()
-	    }
-	    fillLegendScale.range(legendRange);
-	    
+            if (orient=="vertical") {
+                //Vertical should go bottom to top, horizontal from left to right.
+                //This should be changeable in the options, ideally.
+                legendRange.reverse()
+            }
+
+            fillLegendScale.range(legendRange);
+
             colorScaleRects = fillLegend
                 .selectAll("rect.legend")
                 .data(d3.range(0, barlength));
@@ -201,28 +199,31 @@ function Colorbar() {
                 .exit()
                 .remove();
 
-	    //Switch to using the original selection so that the transition will be inheirited
-	    selection
-	        .selectAll("rect.legend")
-                .style("opacity", 1)
-                .attr(thickness_attr, thickness)
-                .attr(length_attr, 2) // single pixel thickness produces ghosting on some browsers
-                .attr(position_variable, function(d) {return d;})
-                .attr(non_position_variable, 0)
-                .style("fill", function(d) {
-                    return scale(fillLegendScale.invert(d));
-                })
+            //Switch to using the original selection so that the transition will be inheirited
+            selection
+                .selectAll("rect.legend")
+                    .style("opacity", 1)
+                    .attr(thickness_attr, thickness)
+                    .attr(length_attr, 2) // single pixel thickness produces ghosting on some browsers
+                    .attr(position_variable, function(d) {return d;})
+                    .attr(non_position_variable, 0)
+                    .style("fill", function(d) {
+                        return scale(fillLegendScale.invert(d));
+                    })
 
-
+            // format the ticks to not take too much space
             colorAxisFunction = d3.svg.axis()
                 .scale(fillLegendScale)
-                .orient(axis_orient);
+                .orient(axis_orient).ticks(5).tickFormat(d3.format("s"));
 
-	    if (typeof(scale.quantiles) != "undefined") {
-		quantileScaleMarkers = scale.quantiles().concat( d3.extent(scale.domain()))
-		console.log(quantileScaleMarkers)
-		colorAxisFunction.tickValues(quantileScaleMarkers)
-	    }
+            // "nice" looking scale, although hardcoded
+            colorAxisFunction.tickValues([1, 2000, 4000, 5000, 10000, 15000, 20000, 30000, 40000, 50000]);
+
+            if (typeof(scale.quantiles) != "undefined") {
+                quantileScaleMarkers = scale.quantiles().concat( d3.extent(scale.domain()))
+                console.log(quantileScaleMarkers)
+                colorAxisFunction.tickValues(quantileScaleMarkers)
+            }
 
             //Now make an axis
             fillLegend.selectAll(".color.axis")
