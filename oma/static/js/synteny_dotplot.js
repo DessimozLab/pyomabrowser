@@ -64,7 +64,7 @@ dotplot_theme = function () {
 
             }
 
-            genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
+            genedata_picker = d3.select("#dropdown-reltype").selectAll(".action_dropdown-li").on('click', function () {
                 update_action_dropdown(this.id);
             });
 
@@ -77,6 +77,40 @@ dotplot_theme = function () {
             };
 
 
+
+        };
+
+        this.set_filter_relation = function (relTypeSet) {
+
+
+
+            relTypeSet.forEach(function (d) {
+                var li = '<li class="dropdown-reltype-li" id="' + d +'" ><a href="#" class="small" data-value="' + d +'" tabIndex="-1"><input type="checkbox" checked/>&nbsp;' + d +'</a></li>';
+                 $('#dropdown-reltype').append(li);
+            });
+
+
+
+            $( '.dropdown-reltype-li a' ).on( 'click', function( event ) {
+
+                       var $target = $( event.currentTarget ),
+                           val = $target.attr( 'data-value' ),
+                           $inp = $target.find( 'input' ),
+                           idx;
+
+                       if ( ( idx = type_selected.indexOf( val ) ) > -1 ) {
+                          type_selected.splice( idx, 1 );
+                          setTimeout( function() { $inp.prop( 'checked', false ) }, 0);
+                       } else {
+                          type_selected.push( val );
+                          setTimeout( function() { $inp.prop( 'checked', true ) }, 0);
+                       }
+
+                       $( event.target ).blur();
+
+                       console.log( type_selected );
+                       return false;
+                    });
 
         };
 
@@ -396,6 +430,7 @@ dotplot_theme = function () {
         // Set up image export
         dotplot.setup_image_export();
 
+
         // data accession should be  done with function for the metrix, the x and y value!
 
         //d3.json(url_json, function (error, data) {
@@ -435,7 +470,9 @@ dotplot_theme = function () {
               relTypeSet.add(d['rel_type']);
             });
 
-            console.log(relTypeSet);
+            var type_selected = [];
+            type_selected = Array.from(relTypeSet);
+            dotplot.set_filter_relation(relTypeSet);
 
             dotplot.update_color_scales();
 
