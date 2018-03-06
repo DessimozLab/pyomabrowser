@@ -426,6 +426,17 @@ dotplot_theme = function () {
             filter_max_distance = max_distance;
             filter_min_distance = min_distance;
 
+
+            // get the types of relations available
+
+            var relTypeSet = new Set();
+
+            data.forEach(function(d) {
+              relTypeSet.add(d['rel_type']);
+            });
+
+            console.log(relTypeSet);
+
             dotplot.update_color_scales();
 
             // scaling of data on axis
