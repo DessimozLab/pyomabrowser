@@ -40,6 +40,7 @@
                                 </button>
 
                                 <ul id="action_dropdown" class="dropdown-menu">
+                                    <li class="dropdown-header">Action for rectangle selection</li>
                                     <li class="action_dropdown-li" id="ba-pan">
                                         <a> <span class="glyphicon glyphicon-move" aria-hidden="true"></span>
                                             Pan <span id='brush_ok_pan' class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span></a>
@@ -71,6 +72,8 @@
 
 
                                 <ul class="dropdown-menu" id="dropdown-reltype">
+
+                                    <li class="dropdown-header">Type of relations visible</li>
 
                                 </ul>
 
@@ -176,10 +179,7 @@
                 //d3.json(paged_url, callback);
             };
 
-            var url_json = encodeURI("/api/pairs/" + genome1 + "/" + genome2 + "/?chr1="
-                + chromosome1 + "&chr2=" + chromosome2);
-
-            //var url_json = '/All/dotplot_dumm.json';
+            var url_json = encodeURI("/api/pairs/" + genome1 + "/" + genome2 + "/?chr1=" + chromosome1 + "&chr2=" + chromosome2);
 
             var container = "dotplot_container";
 
@@ -304,6 +304,7 @@
                 }
 
             });
+
 
 
         })();
