@@ -109,6 +109,9 @@ dotplot_theme = function () {
                        $( event.target ).blur();
 
                        console.log( type_selected );
+
+                       dotplot.update_visibility_dot();
+
                        return false;
                     });
 
@@ -174,13 +177,16 @@ dotplot_theme = function () {
                 })
                 .attr("visibility", function (d) {
 
-                    var dist = parseInt(d.distance);
+                    if (( idx = type_selected.indexOf( d.rel_type ) ) > -1 ){
 
+                        var dist = parseInt(d.distance);
 
-                    if (dotplot.between(dist, filter_min_distance, filter_max_distance)) {
-                        return "visible";
+                        if (dotplot.between(dist, filter_min_distance, filter_max_distance)) {
+                            return "visible";
 
+                        }
                     }
+
                     return "hidden";
 
                 });
