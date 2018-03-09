@@ -64,7 +64,7 @@ dotplot_theme = function () {
 
             }
 
-            genedata_picker = d3.select("#dropdown-reltype").selectAll(".action_dropdown-li").on('click', function () {
+            genedata_picker = d3.select("#action_dropdown").selectAll(".action_dropdown-li").on('click', function () {
                 update_action_dropdown(this.id);
             });
 
@@ -79,7 +79,6 @@ dotplot_theme = function () {
 
 
         };
-
         this.set_filter_relation = function (relTypeSet) {
 
 
