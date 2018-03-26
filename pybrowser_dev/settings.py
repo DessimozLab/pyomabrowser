@@ -31,7 +31,7 @@ TWITTER_ACCESS_TOKEN_SECRET = 'wBQDobkrHXAha8IJEEHFiuB1BGeRDE7PaUZrQ0xqEXfRd'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (DEPLOYMENT != "PRODUCTION")
 
-ALLOWED_HOSTS = ['omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk']
+ALLOWED_HOSTS = ['127.0.0.1', 'omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk']
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 SHOW_TOOLBAR_CALLBACK = lambda x: True
