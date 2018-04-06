@@ -201,6 +201,17 @@ a.fig{
 	color: #222;
 }
 
+dd#locus {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+dd#locus:hover {
+    overflow: visible;
+    white-space: normal;
+}
+
 .kw1 {
     font-weight: bold;
     background-color: #FFFF66;

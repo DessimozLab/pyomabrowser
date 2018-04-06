@@ -21,8 +21,8 @@
             <dd><a href="/cgi-bin/gateway.pl?f=DisplayOS&p1={{entry.genome.uniprot_species_code}}">
                 {{ entry.genome.uniprot_species_code }} - {{ entry.genome.sciname }}</a>
             </dd>
-            <dt>Locus</dt><dd><span id="chr">{{ entry.chromosome }}</span>:&nbsp;<span id="coordinates">{{ entry.locus_start }}..{{ entry.locus_end }}</span></dd>
-            <dt></dt>
+            <dt>Locus</dt><dd id="locus"><span id="chr">{{ entry.chromosome }}</span>:&nbsp;<span id="coordinates">{{ entry.exons }}</span></dd>
+            <dt>Number of exons</dt><dd>{{ entry.exons | length }}</dd>
         </dl>
     </div>
 </div>
