@@ -15,14 +15,18 @@
         </div>
     </div>
     <div class="panel-body">
-        <dl class="dl-horizontal test">
+        <dl class="dl-horizontal">
             {% if entry.description %}<dt>Description</dt><dd>{{ entry.description }} </dd> {% endif %}
             <dt>Organism</dt>
             <dd><a href="/cgi-bin/gateway.pl?f=DisplayOS&p1={{entry.genome.uniprot_species_code}}">
                 {{ entry.genome.uniprot_species_code }} - {{ entry.genome.sciname }}</a>
+                <span class="small">(Taxon-ID: <a href="///uniprot.org/taxonomy/{{ entry.genome.ncbi_taxon_id }}" class="external">{{ entry.genome.ncbi_taxon_id }}</a>)</span>
             </dd>
             <dt>Locus</dt><dd id="locus"><span id="chr">{{ entry.chromosome }}</span>:&nbsp;<span id="coordinates">{{ entry.exons }}</span></dd>
             <dt>Number of exons</dt><dd>{{ entry.exons | length }}</dd>
+            {% if "PMP" in xrefs %}
+                <dt>Protein Structures</dt><dd>n/a</dd>
+            {% endif %}
         </dl>
     </div>
 </div>
@@ -34,10 +38,11 @@
         </div>
     </div>
     <div class="panel-body">
-        <dl class="dl-horizontal test">
-            {% for xref in xrefs %}
+        <div id="loader-xrefs"><img src="{% static "image/loading.gif" %}" alt="loading xrefs..."></div>
+        <dl id="xrefs" class="dl-horizontal">
+            <!--{% for xref in xrefs %}
                 <dt>{{ xref.source }}</dt><dd><a class="external" href="{{ xref.url }}">{{ xref.xref }}</a></dd>
-            {% endfor %}
+            {% endfor %} -->
         </dl>
     </div>
 </div>
@@ -62,7 +67,7 @@
         </div>
     </div>
     <div id="ontology-panel" class="panel-body">
-        <div id="loader-ontology"><img src="{% static "image/loading.gif"%}"></div>
+        <div id="loader-ontology"><img src="{% static "image/loading.gif"%}" alt="loading GO annotations..."></div>
     </div>
 </div>
 
@@ -134,6 +139,23 @@
            });
         });
         $("#loader-ontology").hide();
+    })();
+</script>
+
+<script>
+    (function(){
+        $.getJSON("/api/protein/{{ entry.entry_nr }}/xref/", function(data){
+            _.forEach(_.groupBy(data, "source"), function(xrefs, source){
+                var list_item = ["<dt>"+source+"</dt>"];
+                _.forEach(xrefs, function(ref){
+                    list_item.push("<dd>"+xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}") +"</dd>")
+                });
+                console.log(source, xrefs);
+                $('#xrefs').append(list_item.join("")+"\n");
+            })
+
+        });
+        $("#loader-xrefs").hide();
     })();
 </script>
 {% endblock contentTab %}

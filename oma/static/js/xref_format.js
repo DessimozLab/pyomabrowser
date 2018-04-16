@@ -128,4 +128,21 @@
         }
     };
 
+
+    exports.dbxref_url = function(id, src, genome_release){
+        if (src === "UniProtKB/SwissProt"){
+            return '<a class="external" href="///uniprot.org/uniprot/' + id+ '"' +
+                'title="UniProtKB/SwissProt: reviewed">' +
+                   '<img src="'+static_root+'/image/reviewed.gif" alt="UniProtKB/SwissProt" />' +
+                   '&nbsp;'+ id +'</a>';
+        } else if (src === "UniProtKB/TrEMBL"){
+            return '<a class="external" href="///uniprot.org/uniprot/'+ id +'"' +
+                'title="UniProtKB/TrEMBL: unreviewed">' +
+                '<img src="'+static_root+'/image/unreviewed.gif" alt="UniProtKB/TrEMBL" />' +
+                '&nbsp;' + id +'</a>';
+        } else {
+            return id;
+        }
+    }
+
 })(this.xref_format = {});
