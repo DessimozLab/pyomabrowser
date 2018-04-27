@@ -81,9 +81,13 @@
                     buf += '<img src="'+ static_root + 'image/' + obj.img + '" alt="' + src + '" />&nbsp;'
                 }
                 buf += value + '</a>';
-                return false;
+                return false;  // break the loop
             }
         });
+        // in case no regex match, just display xref value
+        if (buf.length === 0){
+            buf = value;
+        }
         return buf;
     };
 

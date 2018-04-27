@@ -145,15 +145,25 @@
 <script>
     (function(){
         $.getJSON("/api/protein/{{ entry.entry_nr }}/xref/", function(data){
-            _.forEach(_.groupBy(data, "source"), function(xrefs, source){
+            // sort accroding to xref_source_order
+            var xref_source_order = {{ xref_order | safe }};
+            data.sort(function(a, b){
+                var idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
+                if (idx_a === idx_b){
+                    return a.xref > b.xref ? 1 : -1;
+                }
+                return idx_a - idx_b;
+            });
+            // remove duplicated xref values of less important sources
+            var clean_data = data.filter(function(obj, pos, arr){
+                return arr.map(function(obj){return obj.xref;}).indexOf(obj.xref) === pos});
+            _.forEach(_.groupBy(clean_data, "source"), function(xrefs, source){
                 var list_item = ["<dt>"+source+"</dt>"];
                 _.forEach(xrefs, function(ref){
                     list_item.push("<dd>"+xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}") +"</dd>")
                 });
-                console.log(source, xrefs);
                 $('#xrefs').append(list_item.join("")+"\n");
-            })
-
+            });
         });
         $("#loader-xrefs").hide();
     })();

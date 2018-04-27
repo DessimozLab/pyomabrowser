@@ -387,8 +387,7 @@ class InfoBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
-        xrefs = list(utils.id_mapper['Linkout'].iter_xrefs_for_entry_nr(entry.entry_nr))
-        context.update({'entry': entry, 'xrefs': xrefs})
+        context.update({'entry': entry, 'xref_order': utils.id_mapper['Xref'].canonical_source_order()})
         return context
 
 
