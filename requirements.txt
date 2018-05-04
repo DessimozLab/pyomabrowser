@@ -15,6 +15,7 @@ coreapi
 pygments
 markdown
 djangorestframework-link-header-pagination
+django-cors-headers
 
 
 -e git+https://github.com/alpae/django-google-analytics.git@py3#egg=django-google-analytics-app
