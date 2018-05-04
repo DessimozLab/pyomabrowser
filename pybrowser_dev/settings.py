@@ -62,6 +62,7 @@ INSTALLED_APPS = (
     'google_analytics',
     'debug_toolbar',
     'captcha',
+    'corsheaders',
     #'debug_toolbar_line_profiler',
     'rest_framework',
     'drf_link_header_pagination',
@@ -72,6 +73,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -169,6 +171,11 @@ TEMPLATES = [
         },
     },
 ]
+
+# CORS stuff to allow iHAM integration on other sites
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_URLS_REGEX = r'^/oma/hog(s|data)?/\w*/(orthoxml|json)/$'
+CORS_ALLOW_METHODS = ('GET',)
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
