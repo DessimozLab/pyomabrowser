@@ -174,7 +174,8 @@ TEMPLATES = [
 
 # CORS stuff to allow iHAM integration on other sites
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_URLS_REGEX = r'^/oma/hog(s|data)?/\w*/(orthoxml|json)/$'
+# allow all /api/ views, hogdata and orthoxml
+CORS_URLS_REGEX = r'^/(api/|oma/hog(s|data)?/\w*/(orthoxml|json)/$)'
 CORS_ALLOW_METHODS = ('GET',)
 
 # Database
