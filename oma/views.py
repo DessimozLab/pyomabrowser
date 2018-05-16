@@ -380,7 +380,9 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         data = [x for x in self.to_json_dict(context['fam_members'])]
-        return JsonResponse(data, safe=False)
+        response = JsonResponse(data, safe=False)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
 
 class InfoBase(ContextMixin, EntryCentricMixin):
@@ -480,6 +482,7 @@ class HOGsOrthoXMLView(HOGsView):
             raise Http404(e.message)
         response = HttpResponse(content_type='text/plain')
         response.write(orthoxml)
+        response['Access-Control-Allow-Origin'] = '*'
         return response
 
 
