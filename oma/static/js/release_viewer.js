@@ -54,10 +54,46 @@ function update_genome_viewer(bid) {
     if (bid === "btree") {
 
         // display under construction
-        var under = document.createElement('h3');
-        under.innerHTML = "This part is under construction!";
-        under.className = "text-center";
+        var under = document.createElement('div');
+        //under.innerHTML = "This part is under construction!";
+        //under.className = "text-center";
+
+
+        under.innerHTML = '<nav class="navbar navbar-default">\
+        <div class="container-fluid">\
+            <div class="nav navbar-nav navbar-left" style="margin-left: 6px; text-align: left;">\
+                <button type="button" id="resetBtn" class="navbar-btn btn btn-default btn-sm" style="left: 20px;"\
+                 onclick="resetTo();">Reset to root</button>\
+                <div class="btn-group" data-toggle="buttons" id="colourGroup">\
+                    <label class="btn btn-primary btn-sm">\
+                        <input type="radio" name="colourSel" id="heatmapRadio" autocomplete="off" value="heatmap-avg_nr_proteins">Avg number of Proteins</label>\
+                    <label class="btn btn-primary  btn-sm">\
+                        <input type="radio" name="colourSel" id="dolRadio" autocomplete="off" value="dol"\
+                         checked>Domains of life\
+                    </label>\
+                </div>\
+            </div>\
+            <div class="nav navbar-nav navbar-right" style="margin-right: 6px;">\
+                <div class="form-group input-group navbar-btn input-group-sm">\
+                    <input type="text" id="search" class="form-control" placeholder="Search...">\
+                    <div class="input-group-btn">\
+                        <button type="button" class="btn btn-warning"\
+                         onclick="$(\'#search\').val(\'\');findByName();">Clear</button>\
+                        <button type="button" class="btn btn-primary" onclick="findByName();">Search</button>\
+                        <button type="button" class="btn btn-info" onclick="zoomIntoName();">Zoom into</button>\
+                    </div>\
+                </div>\
+            </div>\
+        </div>\
+</nav>\
+<div id="chart">\
+    <div style="position: absolute; margin: 0;" id="sequence"></div>\
+    <div style="position: absolute; margin: 20px 0 0 0;" id="colorscale">\
+        <div id="explanation" style="visibility: hidden;"></div>\
+    </div>\
+</div>'
         cviewer.appendChild(under);
+sb();
 
     }
 
@@ -536,11 +572,4 @@ function init_hist(div_id) {
 
     })
 
-
 }
-
-
-
-
-
-
