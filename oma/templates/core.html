@@ -159,9 +159,9 @@
     function update_navbar_autocomplete() {
         var sel=document.getElementById('selectNav');
         if (sel.value === "DisplayEntry"){
-            $('#textNav').autocomplete('enable');
+            $('#textNav').devbridgeAutocomplete('enable');
         } else {
-            $('#textNav').autocomplete('disable');
+            $('#textNav').devbridgeAutocomplete('disable');
         }
     }
     var autocomplete_opts = {
@@ -203,7 +203,7 @@
             return false;
         }
     };
-    $('#textNav').autocomplete(autocomplete_opts);
+    $('#textNav').devbridgeAutocomplete(autocomplete_opts);
     update_navbar_autocomplete();
   </script>
 

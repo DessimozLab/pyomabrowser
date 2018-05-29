@@ -67,6 +67,10 @@
                         <!-- This is the part that is flushed and updated with viewer -->
                         <div class="panel-body" id="genome_panel" style="position: relative;" >
 
+                            <div id="sb">
+
+                            </div>
+
                         </div>
 
                     </div>
@@ -91,6 +95,7 @@
     <script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
     <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
     <script src="{% static "js/tableExport.min.js" %}"></script>
+    <script src="{% static "js/sunburst.js" %}"></script>
 
     <!-- viewer Visualisation -->
     <script>
@@ -103,6 +108,137 @@
     // defaut view on the histogram
     update_genome_viewer("bhist");
     </script>
+<style>
 
+path {
+  stroke: #fff;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    max-width: 220px;
+    min-width: 200px;
+    max-height: 380px;
+    min-height: 100px;
+    padding: 6px;
+    color: azure;
+    font: 10px "Helvetica Neue", Helvetica, Arial, "Droid sans", sans-serif;
+    background: #4B79A1;
+    background: -webkit-linear-gradient(to right, #283E51, #4B79A1);
+    background: linear-gradient(to right, #283E51, #4B79A1);
+    border: 1px;
+    border-radius: 2px;
+    /*pointer-events: none;*/
+    -webkit-box-shadow: 0 1px 2px #777;
+	box-shadow: 0 2px 1px #777;
+}
+
+div.searchtip {
+    position: absolute;
+    text-align: center;
+    padding: 4px;
+    font: 12px sans-serif;
+    background: #d5d5d5;
+    color: #307C3B;
+    border: 0px;
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.ui-menu .ui-menu-item a{
+    background:red;
+    height:10px;
+    font-size:8px;
+}
+
+    body {
+        /* overflow: hidden; */
+    }
+
+
+#sequence {
+  //width: 600px;
+  //height: 70px;
+}
+
+#sequence text {
+    font: 10px "Helvetica Neue", Helvetica, Arial, "Droid sans", sans-serif;
+    fill: azure;
+}
+
+#explanation {
+  position: absolute;
+  top: 260px;
+  left: 305px;
+  width: 140px;
+  text-align: center;
+  color: #666;
+  z-index: -1;
+}
+
+.navbar {
+    margin-bottom: 5px !important;
+}
+
+#colorscale {
+    position: relative;
+}
+
+#colorbarNumber {
+    position: absolute;
+    top: 12px;
+    /* left: 450px; */
+    color: red;
+}
+
+.lineage span:not(:first-child):before {
+    content: " > ";
+}
+
+.lineage span{
+    cursor: pointer;
+}
+
+#permdiv p {
+     text-align: left;
+}
+
+.ui-autocomplete {
+        max-height: 90vh;
+        overflow-y: auto;
+        /* prevent horizontal scrollbar */
+        overflow-x: hidden;
+        /* add padding to account for vertical scrollbar */
+        padding-right: 25px;
+        padding-bottom: 5px;
+}
+
+.ui-menu {
+    padding-right: 20px !important;
+    padding-bottom: 5px !important;
+}
+
+.ui-menu .ui-menu-item a {
+    border-radius: 0px;
+    border: 1px solid #454545;
+
+}
+
+.ui-menu-item-wrapper {
+    color: #307C3B;
+    font-size:10px;
+}
+#chart {
+    height: 100%;
+    width: 100%;
+}
+</style>
+<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
+<script src={% static "js/colorbar.js" %}></script>
 
 {% endblock content %}
