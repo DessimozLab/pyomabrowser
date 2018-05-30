@@ -66,6 +66,14 @@ class ProteinTest(APITestCase):
         response = client.get('/api/protein/50/xref/', format='json')
         self.assertEqual(int(50), response.data[0]['entry_nr'])
 
+    def test_bulk_retrieval_of_proteins(self):
+        client = APIClient()
+        response = client.post('/api/protein/bulk_retrieve/',
+                               {'ids': [1, 'YEAST12', 'NON_EXISTING_ID', 66]},
+                               format='json')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(4, len(response.data))
+
 
 class HOGsTest(APITestCase):
     def test_rootlevel_of_subhog(self):
