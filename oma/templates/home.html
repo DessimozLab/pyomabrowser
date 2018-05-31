@@ -105,15 +105,12 @@ function update_autocomplete() {
         var sel=document.getElementById('selectBrowser');
         var txt=document.getElementById('inputBrowser');
         if (sel.value === "DisplayEntry"){
-            //$('#inputBrowser').autocomplete('enable');
-            $('#inputBrowser').devbridgeAutocomplete('enable');
+            $('#inputBrowser').autocomplete('enable');
         } else {
-            //$('#inputBrowser').autocomplete('disable');
-            $('#inputBrowser').devbridgeAutocomplete('disable');
+            $('#inputBrowser').autocomplete('disable');
         }
     }
-//$('#inputBrowser').autocomplete(autocomplete_opts);
-$('#inputBrowser').devbridgeAutocomplete(autocomplete_opts);
+$('#inputBrowser').autocomplete(autocomplete_opts);
 
 
 </script>

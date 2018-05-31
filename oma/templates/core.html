@@ -17,6 +17,7 @@
     <script src="{% static "js/jquery.js" %}"></script>
     <script src="{% static "js/bootstrap.min.js" %}"></script>
     <script src="{% static "js/jquery.autocomplete.min.js" %}"></script>
+
     <script>var static_root = "{% static "" %}";</script>
     {% block css_hook %}{% endblock %}
     {% block js_hook %}{% endblock %}
@@ -159,9 +160,9 @@
     function update_navbar_autocomplete() {
         var sel=document.getElementById('selectNav');
         if (sel.value === "DisplayEntry"){
-            $('#textNav').devbridgeAutocomplete('enable');
+            $('#textNav').autocomplete('enable');
         } else {
-            $('#textNav').devbridgeAutocomplete('disable');
+            $('#textNav').autocomplete('disable');
         }
     }
     var autocomplete_opts = {
@@ -203,7 +204,7 @@
             return false;
         }
     };
-    $('#textNav').devbridgeAutocomplete(autocomplete_opts);
+    $('#textNav').autocomplete(autocomplete_opts);
     update_navbar_autocomplete();
   </script>
 
