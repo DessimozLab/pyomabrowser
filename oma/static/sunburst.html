@@ -21,7 +21,7 @@ div.tooltip {
     background: linear-gradient(to right, #283E51, #4B79A1);
     border: 1px;
     border-radius: 2px;
-    pointer-events: none;
+    /*pointer-events: none;*/
     -webkit-box-shadow: 0 1px 2px #777;
 	box-shadow: 0 2px 1px #777;
 }
@@ -36,11 +36,6 @@ div.tooltip {
         overflow: hidden;
     }
 
-
-#sequence {
-  width: 600px;
-  height: 70px;
-}
 
 #sequence text {
     font: 10px "Helvetica Neue", Helvetica, Arial, "Droid sans", sans-serif;
@@ -57,9 +52,62 @@ div.tooltip {
   z-index: -1;
 }
 
-    #colorscale {
-        position: relative;
-    }
+.navbar {
+    margin-bottom: 5px !important;
+}
+
+#colorscale {
+    position: relative;
+}
+
+#colorbarNumber {
+    position: absolute;
+    top: 12px;
+    /* left: 450px; */
+    color: red;
+}
+
+.lineage span:not(:first-child):before {
+    content: " > ";
+}
+
+.lineage span{
+    cursor: pointer;
+}
+
+#permdiv p {
+     text-align: left;
+}
+
+.ui-autocomplete {
+        max-height: 90vh;
+        overflow-y: auto;
+        /* prevent horizontal scrollbar */
+        overflow-x: hidden;
+        /* add padding to account for vertical scrollbar */
+        padding-right: 25px;
+        padding-bottom: 5px;
+}
+
+.ui-menu {
+    padding-right: 20px !important;
+    padding-bottom: 5px !important;
+}
+
+.ui-menu .ui-menu-item a {
+    border-radius: 0px;
+    border: 1px solid #454545;
+
+}
+
+.ui-menu-item-wrapper {
+    color: #307C3B;
+    font-size:10px;
+}
+#chart {
+    height: 100%;
+    width: 100%;
+}
 </style>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
@@ -74,22 +122,24 @@ https://bl.ocks.org/mbostock/4348373
 <body>
 
 <nav class="navbar navbar-default">
-    <div class="container-fluid">
+    <div class="container">
 
-        <button type="button" id="resetBtn" class="navbar-btn btn btn-default" style="left: 20px;" onclick="resetTo();">
-            Reset to root
-        </button>
-        <div class="btn-group" data-toggle="buttons" id="colourGroup">
-            <label class="btn btn-primary">
-                <input type="radio" name="colourSel" id="heatmapRadio" autocomplete="off" value="heatmap-avg_nr_proteins">Avg number of Proteins
-            </label>
-            <label class="btn btn-primary">
-                <input type="radio" name="colourSel" id="dolRadio" autocomplete="off" value="dol" checked>Domains of life
-            </label>
+        <div class="nav navbar-nav navbar-left" style="width: 50%;">
+            <button type="button" id="resetBtn" class="navbar-btn btn btn-default btn-sm" style="left: 20px;" onclick="resetTo();">
+                Reset to root
+            </button>
+            <div class="btn-group" data-toggle="buttons" id="colourGroup">
+                <label class="btn btn-primary btn-sm">
+                    <input type="radio" name="colourSel" id="heatmapRadio" autocomplete="off" value="heatmap-avg_nr_proteins">Avg number of Proteins
+                </label>
+                <label class="btn btn-primary  btn-sm">
+                    <input type="radio" name="colourSel" id="dolRadio" autocomplete="off" value="dol" checked>Domains of life
+                </label>
+            </div>
         </div>
 
-        <div class="nav navbar-nav navbar-right">
-            <div class="input-group navbar-btn" style="margin-right: 10px;">
+        <div class="nav navbar-nav navbar-right"  style="width: 40%;">
+            <div class="input-group navbar-btn input-group-sm" style="margin-right: 10px;">
                 <input type="text" id="search" class="form-control" placeholder="Search...">
                 <div class="input-group-btn">
                     <button type="button" class="btn btn-warning" onclick="$('#search').val('');findByName();">Clear
@@ -102,15 +152,20 @@ https://bl.ocks.org/mbostock/4348373
 
     </div>
 </nav>
-<div id="sequence"></div>
-<div id="colorscale"></div>
 <div id="chart">
+    <div style="position: absolute; margin: 0;" id="sequence"></div>
+    <div style="position: absolute; margin: 20px 0 0 0;" id="colorscale">
     <div id="explanation" style="visibility: hidden;">
     </div>
 </div>
+</div>
+
 <script src="//d3js.org/d3.v3.js"></script>
 <script>
 $(function(){
+
+    createPermDiv();
+
     // reset is disable when root is zoomed
     $('#resetBtn').prop('disabled', true);
     // size colouring is the default
@@ -150,8 +205,8 @@ $(function(){
     $("#colourGroup :input").change();
 });
 
-var top_margin = 50,
-    width = window.innerWidth - 30,
+var top_margin = 45,
+    width = window.innerWidth - 10,
     height = window.innerHeight - top_margin,
     rootNode = {},
     scaleName = "dol",
@@ -192,6 +247,7 @@ var arc = d3.svg.arc()
     .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
 
 var svg = d3.select("#chart").append("svg")
+//var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height)
     .append("g")
@@ -205,7 +261,6 @@ $( "#search" ).autocomplete({
     source: all_names,
     delay: 200,
     minLength: 3,
-    change: function( event, ui ) { findByName(); },
     select: function( event, ui ) { findByName(ui.item.value); }
 });
 
@@ -234,7 +289,11 @@ var augment_data = function(node) {
         });
     }
 
-    all_names.push(node.name);
+    if(node.id){
+        all_names.push({label: node.name+" ("+node.id+")", value: node.name});
+    } else {
+        all_names.push({label: node.name, value: node.name});
+    }
 
     if (node.nr_genomes && vals.nr_genomes < node.nr_genomes){
         vals.nr_genomes = node.nr_genomes;
@@ -250,6 +309,9 @@ var div = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
+var divsearchtip = d3.select("body").append("div")
+    .attr("class", "searchtip")
+    .style("opacity", 0);
 
 var scales = {
         "avg_nr_proteins" : [],
@@ -318,25 +380,63 @@ function findByName(term){
         var term = document.getElementById("search").value;
     }
 
-    svg.selectAll("path")[0].forEach(function (d) {
-        d3.select(d).style("opacity", 0.1); //making all paths to opacity 1
-        if (d3.select(d).data()[0].name == term || term == "") {
-            d3.select(d).style("opacity", 1);//making matching path's to opacity 1
+    term = term.toUpperCase();
 
-        } else {
-            d3.select(d).style("opacity", 0.1);//making matching path's to opacity 0.1
+    d3.selectAll("path").style("stroke-width", "").style("stroke", "").style("opacity", 1);
+    divsearchtip.transition().duration(800).style("opacity", 0)
+
+    if(term == "") {
+        return false;
+    }
+
+    svg.selectAll("path").style("opacity", 0.3);
+    var found = false;
+
+    svg.selectAll("path")[0].forEach(function (d) {
+
+        if (d3.select(d).data()[0].name.toUpperCase() == term || (d3.select(d).data()[0].id && d3.select(d).data()[0].id.toUpperCase() == term)) {
+
+            d3.select(d).style("stroke", "red").transition().duration(900).style("opacity", "0").transition().duration(1200).style("opacity", "1").style("stroke-width", "2px");
+                //.style("filter", "url(#glow)");//glow
+
+            divsearchtip.html(d.textContent);
+
+            var tipX = (10 + d.getBoundingClientRect().right).toFixed(0);
+            var tipY = (-15 + d.getBoundingClientRect().top).toFixed(0);
+            divsearchtip.transition()
+                .duration(200)
+                .style("opacity", .9)
+                .style("left", tipX + "px")
+                .style("top", tipY + "px")
+
+            found = true;
         }
     })
 
+    if(!found){
+        divsearchtip.html("<h3>No matches</h3>");
+        divsearchtip.transition()
+                .duration(200)
+                .style("opacity", .9)
+                .style("left", ($("svg").width() / 2) - 75 + "px")
+                .style("top", "200px")
+                .style("width", "150px")
+                .style("padding", "8px")
+    }
+
 }
 
-function zoomIntoName(){
+function zoomIntoName(term){
 
-    var term = document.getElementById("search").value;
+    if (!arguments.length) {
+        var term = document.getElementById("search").value;
+    }
+
+    term = term.toUpperCase();
 
     svg.selectAll("path")[0].forEach(function (d) {
         d3.select(d).style("opacity", 1); //making all paths to opacity 1
-        if (d3.select(d).data()[0].name == term && term != "") {
+        if (d3.select(d).data()[0].name.toUpperCase() == term || (d3.select(d).data()[0].id && d3.select(d).data()[0].id.toUpperCase() == term)) {
             click(d3.select(d).data()[0]);
         }
     });
@@ -351,6 +451,52 @@ function resetTo(node) {
 }
 
 function click(d) {
+
+    // reset line styles, reset searchtip
+    d3.selectAll("path").style("stroke-width", "1px").style("stroke", "#fff");
+    divsearchtip.transition().duration(800).style("opacity", 0);
+
+    // dup code
+    if(d.nr_hogs){
+        var hogs = "<br>Ancestral genome size: "+d.nr_hogs.toFixed(0);
+    } else {
+        var hogs = "";
+    }
+
+    if(d.avg_nr_proteins){
+        var avg_proteins = "<br>Avg genome size: "+d.avg_nr_proteins.toFixed(0);
+    } else {
+        var avg_proteins = "";
+    }
+
+    var lineageItems = d.lineage.split(" > ");
+    lineageItems.shift();
+    var lineage = "";
+    if(lineageItems.length) {
+
+        lineage = "<p class='lineage'>Lineage: ";
+
+        lineageItems.forEach(function (elem) {
+            lineage += "<span>" + elem + "</span>";
+        })
+
+        lineage += "</p>";
+    }
+
+    d3.select('#permdiv')
+    .html("<h5 style='vertical-align: middle;border-bottom: 1px solid black;padding-bottom: 3px;'>"+d.name+
+        "<br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: "+d.taxid+
+        ")</span></h5>"+
+        "<p>Genomes: "+d.nr_genomes+
+        avg_proteins+
+        hogs+"</p>"+
+        lineage)
+        .style("right", 20 + "px")
+        .style("top", "80px")
+        .style("opacity", 0.9)
+        .style("z-index", 99)
+        .attr("class", "tooltip");
+
     if (d.depth > 0) {
         $('#resetBtn').prop('disabled', false);
     } else {
@@ -496,7 +642,7 @@ var color = function(d) {
     return d.color;
 };
 
-d3.json("genomes.mock.json", function (error, root) {
+d3.json("genomes.json", function (error, root) {
     if (error) throw error;
 
     root = augment_data(root);
@@ -556,10 +702,17 @@ function mouseover(d) {
     // highlight colorbar
     if ((typeof colorbarObject !== 'undefined') && (d.avg_nr_proteins)){
         colorbarObject.pointTo(d.avg_nr_proteins.toFixed(0));
+        if(!$("#colorbarNumber").length){
+            $("svg.colorbar").after('<span id="colorbarNumber"></span>');
+            $("#colorBarNumber").css('left', $("svg.colorbar").width() + 10);
+        }
+        $('#colorbarNumber').text(d.avg_nr_proteins.toFixed(0));
     }
 
     // Fade all the segments.
-    d3.selectAll("path").style("opacity", 0.3);
+    d3.selectAll("path").style("opacity", 0.3).style("stroke-width", "1px").style("stroke", "#fff");
+
+    divsearchtip.transition().duration(800).style("opacity", 0);
 
     // Then highlight only those that are an ancestor of the current segment.
     svg.selectAll("path")
@@ -568,19 +721,32 @@ function mouseover(d) {
         })
         .style("opacity", 1);
 
-    div.transition()
-        .duration(200)
-        .style("opacity", .9);
-        div.html("<h5 style='vertical-align: middle;border-bottom: 1px solid black;padding-bottom: 3px;'>"+d.name+
+    var tooltipTop = function(){
+        var element = d3.selectAll('.tooltip').node();
+        var ttHeight = element.getBoundingClientRect().height;
+        var ttTop = d3.event.pageY;
+        var ttBottom = ttTop + ttHeight + ttBottomMargin;
+        var overFlow = ttBottom - height;
+
+        return (overFlow > 0) ? ttTop - (overFlow + ttBottomMargin) : ttTop - ttTopMargin;
+    }
+
+    div.html("<h5 style='vertical-align: middle;border-bottom: 1px solid black;padding-bottom: 3px;'>"+d.name+
         "<br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: "+d.taxid+
         ")</span></h5>"+
         "<p style='text-align: left;'>Genomes: "+d.nr_genomes+
         avg_proteins+
         hogs+
-        "<br>Lineage: <span style='font-size: 1em;'>"+d.lineage+"</span></p>")
-        .style("left", 20 + "px")
-        .style("top", (d3.event.pageY - 28) + "px");
+        "<br>Lineage: <span style='font-size: 1em;'>"+d.lineage+"</span></p>");
 
+    var ttTopMargin = 40;
+    var ttBottomMargin = 20;
+
+    div.transition()
+        .duration(200)
+        .style("opacity", .9)
+        .style("left", 20 + "px")
+        .style("top", tooltipTop() + "px");
 
 }
 
@@ -608,6 +774,7 @@ function mouseleave() {
 
   d3.select("#explanation")
       .style("visibility", "hidden");
+  $('#colorbarNumber').text('');
 }
 
 // Given a node in a partition layout, return an array of all of its ancestor
@@ -626,7 +793,8 @@ function initializeBreadcrumbTrail() {
   // Add the svg area.
   var trail = d3.select("#sequence").append("svg:svg")
       .attr("width", width)
-      .attr("height", 45)
+      .attr("height", 40)
+      .style("fill", "#4B79A1")
       .attr("id", "trail");
 
 }
@@ -694,16 +862,6 @@ function getAncestors(node) {
   return path;
 }
 
-function initializeBreadcrumbTrail() {
-  // Add the svg area.
-  var trail = d3.select("#sequence").append("svg:svg")
-      .attr("width", width)
-      .attr("height", 50)
-      .style("fill", "#4B79A1")
-      .attr("id", "trail");
-
-}
-
 // Generate a string that describes the points of a breadcrumb polygon.
 function breadcrumbPoints(d, i) {
   var points = [];
@@ -725,4 +883,38 @@ function subStr(string){
     return trimmedString;
 }
 
+function createPermDiv(containerElem) {
+    if (!arguments.length || !$( containerElem ).length) {
+        var containerElem = "body";
+    }
+
+    $('<div class="tooltip" style="position: absolute; opacity: 0;" id="permdiv"></div>').prependTo(containerElem);
+
+    $( "#permdiv" ).on( "click", "span", function() {
+      console.log("clicked: "+ $( this ).text() );
+      zoomIntoName($( this ).text())
+    });
+
+}
+
+
+//Container for the gradients
+var defs = svg.append("defs");
+
+//Code taken from http://stackoverflow.com/questions/9630008/how-can-i-create-a-glow-around-a-rectangle-with-svg
+//Filter for the outside glow
+var filter = defs.append("filter")
+    .attr("id","glow");
+
+filter.append("feGaussianBlur")
+    .attr("class", "blur")
+    .attr("color", "red")
+    .attr("stdDeviation","2.5")
+    .attr("result","coloredBlur");
+
+var feMerge = filter.append("feMerge");
+feMerge.append("feMergeNode")
+    .attr("in","coloredBlur");
+feMerge.append("feMergeNode")
+    .attr("in","SourceGraphic");
 </script>
