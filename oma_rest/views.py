@@ -24,7 +24,7 @@ from pyoma.browser import models, db
 import logging
 
 from collections import Counter
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 logger = logging.getLogger(__name__)
 
 
@@ -32,6 +32,36 @@ logger = logging.getLogger(__name__)
 class ProteinEntryViewSet(ViewSet):
     serializer_class = serializers.ProteinEntryDetailSerializer
     lookup_field = 'entry_id'
+
+    @list_route(methods=['post'])
+    def bulk_retrieve(self, request, format=None):
+        """Retrieve the information available for multiple protein IDs at once.
+
+        The POST request must contain a json-encoded list of IDs of
+        up to 100 IDs for which the information is returned.
+
+        In case the ID is not unique or unknown, an empty element is
+        returned for this query element.
+
+        :param ids: list of ids of proteins to retrieve.
+
+        """
+        MAX_SIZE = 100
+        if 'ids' not in request.data:
+            raise NotFound("No results found")
+        if len(request.data['ids']) > MAX_SIZE:
+            raise ParseError("POST request exceeded max number of ids. Please limit to {}".format(MAX_SIZE))
+
+        proteins = []
+        for entry_id in request.data['ids']:
+            try:
+                entry_nr = utils.id_resolver.resolve(entry_id)
+                proteins.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
+            except (db.InvalidId, db.AmbiguousID):
+                proteins.append(None)
+        serializer = serializers.ProteinEntryDetailSerializer(
+            instance=proteins, many=True, context={'request': request})
+        return Response(serializer.data)
 
     def retrieve(self, request, entry_id=None, format=None):
         """
