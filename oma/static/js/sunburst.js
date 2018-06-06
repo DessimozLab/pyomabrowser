@@ -547,7 +547,7 @@ function init_sb() {
 
     //d3.json("genomes.json", function (error, root) {
     //d3.json("http://127.0.0.1:8000/All/genomes.json", function (error, root) {
-    d3.json("https://omabrowser.org/All/genomes.json", function (error, root) {
+    d3.json("/All/genomes.json", function (error, root) {
         if (error) throw error;
 
         root = augment_data(root);
