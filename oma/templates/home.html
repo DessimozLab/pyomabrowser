@@ -12,11 +12,11 @@
 <div class="container-fluid">
     <!-- content    -->
 
-    <div class="row" style="height:450px !important;">
+    <div class="row">
         <!--           -->
         <!-- search    -->
-        <div class="col-sm-8 col-md-8 " style="">
-            <div class="jumbotron jum_custom">
+        <div class="col-sm-12 col-md-10 col-md-offset-1">
+            <div class="jumbotron">
                 <div class="container">
                     <img src="{% static "image/oma2.png" %}" class="img-responsive margin-auto" alt="OMA logo">
 
@@ -55,22 +55,6 @@
                           -  <a id='exPhoto'>Search for "photoreceptor"</a> 
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-4 col-md-4 " >
-            <div class="jumbotron jum_custom  " style="height:450px !important;">
-                <div class="caption comment-text" id="latest-news">
-                    <h1>Latest news</h1>
-                    <ul >
-                        {% autoescape off %}
-                        {%for t in tweets %}
-                        <li>{{ t }}</li>
-                        {% endfor %}
-                        {% endautoescape %}
-
-                    </ul>
-                    <p><a href="https://twitter.com/intent/user?screen_name=OMABrowser" class="btn btn-primary btn-sm bottomright" role="button">Follow us on Twitter</a></p>
                 </div>
             </div>
         </div>
@@ -130,19 +114,21 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
 
 
 </script>
-
 <div class="row">
     <!--           -->
     <!-- 3 columns    -->
-    <div class=" col-sm-12 col-md-12 ">
-            <div class="container-fluid">
+    <div class=" col-sm-12 col-md-10 col-md-offset-1">
+        <div class="jumbotron">
+            <div class="container">
                 <div class="row">
-                    <div class="col-sm-6 col-md-6 ">
+                    <div class="col-sm-4 col-md-4 ">
                         <div class="thumbnail oma-3-panels">
                             <div class="caption">
+                                <p class="text-center ">
+                                    <span class="glyphicon glyphicon-question-sign glyphicon-xl"></span>
+                                </p>
 
-
-                                <h1>First time here?</h1>
+                                <h3>First time here?</h3>
                                 <ul>
                                     <li>Read our
                                         <a href="{% url 'about'  %}">brief introduction to OMA</a>.
@@ -156,43 +142,17 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                                 </ul>
                             </div>
                         </div>
-
-
                     </div>
-
-                    <div class="col-sm-6 col-md-6 ">
+                    <div class="col-sm-4 col-md-4">
                         <div class="thumbnail oma-3-panels">
                             <div class="caption">
 
-
-                                <h1>Online Tools</h1>
-                                <ul>
-                                    <li>Read our
-                                        <a href="{% url 'about'  %}">brief introduction to OMA</a>.
-                                    </li>
-                                    <li>Familiarise yourself with the
-                                        <a href="{% url 'type'  %}">different types of orthologs provided</a>.
-                                    </li>
-                                    <li>Get ideas about
-                                        <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-
-
-
-                </div>
-
-                <div class="row">
-
-                    <div class="col-sm-6 col-md-6">
-                        <div class="thumbnail oma-3-panels">
-                            <div class="caption">
-
-
-                                <h1>Download options</h1>
+                                <p class="text-center ">
+                                    <a href="#" data-toggle="modal" data-target=".bs-example-modal-md">
+                                        <span class="glyphicon glyphicon-circle-arrow-down glyphicon-xl"></span>
+                                    </a>
+                                </p>
+                                <h3>Download options</h3>
                                 <ul>
                                     <li>
                                         <b><a href="{% url 'current'  %}">Current release</a>:</b>
@@ -217,11 +177,14 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-md-6 ">
+                    <div class="col-sm-4 col-md-4 ">
                         <div class="thumbnail oma-3-panels ">
                             <div class="caption comment-text" id="latest-news">
-
-                                <h1>Latest news</h1>
+                                <p class="text-center ">
+                                    <span class="glyphicon glyphicon-info-sign glyphicon-xl">
+                                    </span>
+                                </p>
+                                <h3>Latest news</h3>
                                 <ul >
 				    {% autoescape off %}
                                     {%for t in tweets %}
@@ -236,9 +199,9 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                     </div>
                 </div>
             </div>
+        </div>
     </div>
 </div>
-
     <!--           -->
     <!-- cite    -->
    <div class="row">
