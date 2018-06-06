@@ -67,6 +67,7 @@
                         <!-- This is the part that is flushed and updated with viewer -->
                         <div class="panel-body" id="genome_panel" style="position: relative;" >
 
+
                         </div>
 
                     </div>
@@ -91,6 +92,7 @@
     <script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
     <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
     <script src="{% static "js/tableExport.min.js" %}"></script>
+    <script src="{% static "js/sunburst.js" %}"></script>
 
     <!-- viewer Visualisation -->
     <script>
@@ -101,8 +103,9 @@
 
     <script>
     // defaut view on the histogram
-    update_genome_viewer("bhist");
+    update_genome_viewer("btree");
     </script>
 
+<script src={% static "js/colorbar.js" %}></script>
 
 {% endblock content %}
