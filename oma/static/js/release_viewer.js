@@ -55,6 +55,7 @@ function update_genome_viewer(bid) {
 
         var under = document.createElement('div');
 
+        under.setAttribute('id', 'sb');
         under.innerHTML = '<nav class="navbar navbar-default">\
         <div class="container-fluid">\
             <div class="nav navbar-nav navbar-left" style="margin-left: 6px; text-align: left;">\

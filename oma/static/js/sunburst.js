@@ -458,8 +458,6 @@ var color = function(d) {
 
     if (d.children) {
 
-
-        //console.log(("max value: "+scaleMax));
         // Now distribute those colors to
         // the child nodes. We want to do
         // it in sorted order, so we'll
@@ -493,7 +491,6 @@ var color = function(d) {
 };
 
 function init_sb() {
-
 
     top_margin = 45,
     sbWidth = $("#genome_panel").width() - 10,
@@ -548,10 +545,6 @@ function init_sb() {
 
     all_names = [];
 
-
-
-
-
     //d3.json("genomes.json", function (error, root) {
     //d3.json("http://127.0.0.1:8000/All/genomes.json", function (error, root) {
     d3.json("https://omabrowser.org/All/genomes.json", function (error, root) {
@@ -605,8 +598,6 @@ function mouseover(d) {
     } else {
         var avg_proteins = "";
     }
-
-
 
     d3.select("#explanation").style("visibility", "");
 
@@ -831,4 +822,3 @@ feMerge.append("feMergeNode")
     .attr("in","coloredBlur");
 feMerge.append("feMergeNode")
     .attr("in","SourceGraphic");
-
