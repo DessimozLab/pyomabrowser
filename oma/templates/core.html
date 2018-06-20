@@ -11,11 +11,19 @@
     <link rel="shortcut icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
     <link rel="icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
     <link type="text/css" rel="stylesheet" href="{% static "css/home.css" %}"/>
-    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-    <!-- Bootstrap -->
-    <link href= "{% static "css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
-    <script src="{% static "js/jquery.js" %}"></script>
-    <script src="{% static "js/bootstrap.min.js" %}"></script>
+
+    <!--<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>-->
+
+      <!-- Bootstrap -->
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+
     <script src="{% static "js/jquery.autocomplete.min.js" %}"></script>
     <script>var static_root = "{% static "" %}";</script>
     {% block css_hook %}{% endblock %}
@@ -24,174 +32,201 @@
   <body>
     {% block topelement %}{% endblock %}
 
-    <nav class="navbar navbar-default nav_custom" role="navigation">
-    <div class="container-fluid">
-      <!-- Brand and toggle get grouped for better mobile display -->
 
-      <div class="navbar-header navbar-nav">
-        <button type="button" class="navbar-toggle " data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a href="{% url 'home'  %}">
-          <img alt="OMA logo" src="{% static "image/omalogo.png" %}" class="omalogo">
+<nav class="navbar navbar-light navbar-expand-md bg-light" role="navigation">
+    <a href="https://www.sib.swiss" class="navbar-brand d-none d-lg-block">
+        <img alt="SIB logo" src="{% static "image/SIBlogo.png" %}"  class="siblogo">
+    </a>
 
-        </a>
-      </div>
+    <a href="{% url 'home'  %}" class="navbar-brand d-none d-lg-block">
+        <img alt="OMA logo" src="{% static "image/omalogo.png" %}" class="omalogo">
+        <div class="glyphicon glyphicon-home icon-md"></div>
+    </a>
 
-      <!-- Collect the nav links, forms, and other content for toggling -->
-      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+    <a href="https://www.sib.swiss" class="navbar-brand logo-sm d-lg-none">
+        <img alt="SIB logo" src="{% static "image/SIBlogo.png" %}" class="siblogo">
+    </a>
+
+    <a href="/oma/home/" class="navbar-brand logo-sm d-lg-none">
+        <img alt="OMA logo" src="{% static "image/omalogo.png" %}" class="omalogo">
+        <div class="glyphicon glyphicon-home icon-md"></div>
+    </a>
+
+    <button type="button" class="navbar-toggler ml-auto" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
 
-        <!--       -->
         <!-- search    -->
-
-        <form class="navbar-form navbar-left" role="search" id="searchNavForm" action="/cgi-bin/gateway.pl" method="GET">
-          <div class="form-group">
-            <select id="selectNav" class="form-control btn-mini" name="f" onchange="update_navbar_autocomplete()">
-              <option value="DisplayEntry" selected="selected">Genes/Proteins</option>
-              <option value="DisplayGroup">OMA Groups</option>
-                <option value="DisplayGroup">HOGs</option>
-              <option value="SearchDb">Genome</option>
-            </select>
-          </div>
-
-            <div class="form-group">
-                <select id="selectNav2" class="form-control btn-mini" name="f" onchange="update_navbar_autocomplete()">
+        <div class="text-nowrap">
+            <form class="form-inline" role="search" id="searchNavForm" action="/cgi-bin/gateway.pl" method="GET">
+                <select id="selectNav" class="form-control btn-mini" name="f" onchange="update_navbar_autocomplete()">
                     <option value="DisplayEntry" selected="selected">Identifier</option>
                     <option value="SearchSeqDb">Protein sequence</option>
                     <option value="DisplayGroup">OMA group</option>
                     <option value="SearchDb">Full-text search</option>
                 </select>
-            </div>
+                <div class="input-group ">
+                    <input id="textNav" class="form-control " type="text" name="p1">
+                    <div class="input-group-append">
+                        <button class="btn btn-default" type="submit"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
 
+        <div class="navbar-nav ml-auto">
 
-          <div class="input-group">
-            <input id="textNav" class="form-control" type="text" name="p1" style="width: 200px !important">
-            <span class="input-group-btn">
-              <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search grey"></span></button>
-            </span>
-          </div>
-        </form>
+            <ul class="navbar-nav">
 
-          <ul class="nav navbar-nav">
-              <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Explore<span class="caret"></span></a>
-                  <ul class="dropdown-menu" role="menu">
-                      <li><a class="" href="{% url 'release' %}">Database summary</a></li>
+                <!-- explore dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-nowrap" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">Explore <span class="caret"></span></a>
+                    </a>
 
-                      <li class="divider"></li>
-                      <li role="presentation" class="dropdown-header">Search for</li>
+                    <div class="dropdown-menu" role="menu">
+                        <a class="dropdown-item" href="{% url 'release' %}">Release information</a>
 
-                      <li><a class="" href="{% url 'landOMA' %}">OMA groups</a></li>
-                      <li><a class="" href="{% url 'hogs' %}">Hierarchical orthologous groups (HOGs)</a></li>
-                      <li><a class="" href="{% url 'landAnnotation'  %}">Functional annotations</a></li>
-                      <li><a class="" href="{% url 'synteny' %}">Local synteny</a></li>
+                        <div class="dropdown-divider"></div>
 
-                  </ul>
-              </li>
-          </ul>
+                        <a class="dropdown-item" href="{% url 'landOMA' %}">OMA groups</a>
+                        <a class="dropdown-item" href="{% url 'hogs' %}">Hierarchical orthologous groups (HOGs)</a>
+                        <a class="dropdown-item" href="{% url 'landAnnotation'  %}">Functional annotations</a>
+                        <a class="dropdown-item" href="{% url 'synteny' %}">Local synteny</a>
 
-        <ul class="nav navbar-nav navbar-right">
+                        <div class="dropdown-divider"></div>
 
-            <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-                    <li><a class="" href="{% url 'about'  %}">OMA Browser Website</a></li>
-                    <li><a class="" href="{% url 'type'  %}">OMA Predictions</a></li>
-                    <li><a class="" href="{% url 'uses'  %}">Typical uses</a></li>
-                    <li><a class="" href="{% url 'genome_suggestion' %}">Suggesting a genome</a></li>
-                    <li><a class="" href="{% url 'FAQ'  %}">FAQ</a></li>
-                    <li><a class="" href="https://www.biostars.org/t/oma/">Q&amp;A on BioStars</a></li>
-                </ul>
-            </li>
+                        <a class="dropdown-item" href="/oma/genomePW/">Orthology between two genomes</a>
+                        <a class="dropdown-item" href="/oma/dotplot/">Synteny dotplot</a>
 
+                    </div>
 
-            <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown" >Online Tools<span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-                    <li><a class="" href="{% url 'function-projection-input' %}">Predict GO functions</a></li>
-                    <li><a class="" href="{% url 'function-projection-input' %}">Synteny Dotplot</a></li>
-                    <li><a class="" href="{% url 'function-projection-input' %}">Orthology Between Genome Pair</a></li>
-                    <li><a class="" href="{% url 'function-projection-input' %}">Genome Browser</a></li>
-                </ul>
-            </li>
+                </li>
 
-            <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Software <span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-                    <li role="presentation" class="dropdown-header">User computation</li>
-                    <li><a class="" href="{% url 'function-projection-input' %}">OMA StandAlone</a></li>
-                    <li><a class="" href="{% url 'function-projection-input' %}">pyHam</a></li>
-                    <li role="presentation" class="dropdown-header">Visualisation tools</li>
-                    <li><a class="" href="{% url 'function-projection-input' %}">Phylo.io</a></li>
-                    <li><a class="" href="{% url 'function-projection-input' %}">IHam</a></li>
-                </ul>
-            </li>
-
-            <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Download <span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-                    <li role="presentation" class="dropdown-header">OMA database files</li>
-                    <li><a class="" href="{% url 'current'  %}">Current release</a></li>
-                    <li><a class="" href="{% url 'archives'  %}">Archives</a></li>
-
-                    <li role="presentation" class="dropdown-header">User-side computations</li>
-
-                    <li><a class="" href="{% url 'export' %}">Export All/All</a></li>
-                    <li><a class="" href="{% url 'export_markers' %}">Export marker genes</a></li>
-                </ul>
-            </li>
-
-
-            <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Programmatic Uses <span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-
-                    <li role="presentation" class="dropdown-header">API</li>
-                    <li><a href="{% url 'api-docs:docs-index' %}">REST API</a></li>
-                    <li><a class="" href="{% url 'APISOAP'  %}">SOAP</a></li>
-                    <li class="divider"></li>
-                    <li role="presentation" class="dropdown-header">Semantic web</li>
-                    <li><a class="" href="http://sparql.omabrowser.org">SPARQL endpoint</a></li>
-                    <li><a class="" href="/ontology/oma">RDF Schema</a></li>
-
-                </ul>
-            </li>
-
-
-
-
-
-
-            <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">About<span class="caret"></span></a>
-            <ul class="dropdown-menu" role="menu">
-              <li><a class="" href="{% url 'about'  %}">OMA</a></li>
-              <li><a class="" href="{% url 'team'  %}">Team</a></li>
-              <li><a class="" href="{% url 'funding'  %}">Funding</a></li>
-              <li><a class="" href="{% url 'license'  %}">License</a></li>
-              <li class="divider"></li>
-              <li><a class="" href="mailto:contact@omabrowser.org"><span class="glyphicon glyphicon-envelope"></span> Contact</a></li>
             </ul>
-          </li>
+
+            <!-- compute dropdown -->
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown">Tools <span class="caret"></span></a>
+
+                <div class="dropdown-menu" role="menu">
+
+                    <div role="presentation" class="dropdown-header">Web services</div>
+                    <a class="dropdown-item" href="/oma/functions/">Predict GO functions</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <div role="presentation" class="dropdown-header">API</div>
+                    <a class="dropdown-item" href="/api/docs">REST API</a>
+                    <a class="dropdown-item" href="/oma/APISOAP/">SOAP</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <div role="presentation" class="dropdown-header">Semantic web</div>
+                    <a class="dropdown-item" href="http://sparql.omabrowser.org">SPARQL endpoint</a>
+                    <a class="dropdown-item" href="/ontology/oma">RDF Schema</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <div role="presentation" class="dropdown-header">User-side computations</div>
+                    <a class="dropdown-item" href="/standalone/">OMA standalone</a>
+                    <a class="dropdown-item" href="{% url 'export' %}">Export All/All</a>
+                    <a class="dropdown-item" href="{% url 'export_markers' %}">Export marker genes</a>
+
+                </div>
+
+            </li>
+
+            <!-- Download dropdown -->
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown">Download <span class="caret"></span></a>
+
+                <ul class="dropdown-menu" role="menu">
+
+                    <div role="presentation" class="dropdown-header">OMA database files</div>
+                    <a class="dropdown-item" href="{% url 'current'  %}">Current release</a>
+                    <a class="dropdown-item" href="/oma/current/">All releases</a>
+                    <a class="dropdown-item" href="/oma/current/">Markers</a>
+                    <a class="dropdown-item" href="{% url 'archives'  %}">Archives</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <div role="presentation" class="dropdown-header">Software</div>
+                    <a class="dropdown-item" href="{% url 'api-docs:docs-index' %}">OMA API</a>
+                    <a class="dropdown-item" href="{% url 'function-projection-input' %}">OMA StandAlone</a>
+                    <a class="dropdown-item" href="{% url 'APISOAP'  %}">SOAP</a>
+                    <a class="dropdown-item" href="{% url 'function-projection-input' %}">pyHam</a></li>
+
+                    <div class="dropdown-divider"></div>
+                    <div role="presentation" class="dropdown-header">Semantic web</div>
+                    <a class="dropdown-item" href="http://sparql.omabrowser.org">SPARQL endpoint</a>
+                    <a class="dropdown-item" href="/ontology/oma">RDF Schema</a>
+
+                    <div role="presentation" class="dropdown-header">Visualisation tools</div>
+                    <a class="dropdown-item" href="{% url 'function-projection-input' %}">Phylo.io</a></li>
+                    <a class="dropdown-item" href="{% url 'function-projection-input' %}">IHam</a></li>
+                </ul>
+            </li>
 
 
+            <!-- Help dropdown -->
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown">Help <span class="caret"></span></a>
+
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+
+                    <a class="dropdown-item" href="{% url 'about'  %}">OMA in a nutshell</a>
+                    <a class="dropdown-item" href="{% url 'type'  %}">Types of orthologs</a>
+                    <a class="dropdown-item" href="{% url 'uses'  %}">Typical uses</a>
+                    <a class="dropdown-item" href="{% url 'genome_suggestion' %}">Suggesting a genome</a>
+                    <a class="dropdown-item" href="{% url 'FAQ'  %}">FAQ</a>
+                    <a class="dropdown-item" href="https://www.biostars.org/t/oma/">Q&amp;A on BioStars</a>
+
+                </ul>
+
+            </li>
 
 
+            <!-- about dropdown -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-nowrap" href="#" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">About <span class="caret"></span></a>
+                </a>
 
+                <div class="dropdown-menu dropdown-menu-right" role="menu">
 
-        </ul>
-      </div>
+                    <a class="dropdown-item" href="{% url 'about'  %}">OMA</a>
+                    <a class="dropdown-item" href="{% url 'team'  %}">Team</a>
+                    <a class="dropdown-item" href="{% url 'funding'  %}">Funding</a>
+                    <a class="dropdown-item" href="{% url 'license'  %}">License</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="mailto:contact@omabrowser.org"><span class="glyphicon glyphicon-envelope"></span> Contact</a>
+
+                </div>
+
+            </li>
+
+        </div>
       <!-- /.navbar-collapse -->
-    </div>
-    <!-- /.container-fluid -->
-  </nav>
 
-  <script type="text/javascript">
+    </div>
+
+</nav>
+
+
+<script type="text/javascript">
     function update_navbar_autocomplete() {
-        var sel=document.getElementById('selectNav');
-        if (sel.value === "DisplayEntry"){
+        var sel = document.getElementById('selectNav');
+        if (sel.value === "DisplayEntry") {
             $('#textNav').autocomplete('enable');
         } else {
             $('#textNav').autocomplete('disable');
         }
     }
+
     var autocomplete_opts = {
         paramName: 'search',
         serviceUrl: '/api/xref/',
@@ -206,14 +241,14 @@
             };
         },
         groupBy: 'source',
-        formatResult: function(suggestion, currentValue) {
+        formatResult: function (suggestion, currentValue) {
             // Do not replace anything if there current value is empty
             if (!currentValue) {
                 return suggestion.value;
             }
             // escape any special char
             var pattern = '(' + currentValue.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&") + ')';
-            var highlight_and_escape = function(val){
+            var highlight_and_escape = function (val) {
                 return val.replace(new RegExp(pattern, 'gi'), '<strong>$1<\/strong>')
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
@@ -221,19 +256,19 @@
                     .replace(/"/g, '&quot;')
                     .replace(/&lt;(\/?strong)&gt;/g, '<$1>');
             };
-            var label = '<span class="auto-xref">' + highlight_and_escape(suggestion.data.xref) +'</span> &nbsp;'+
-                        '<span class="auto-omaid">' + suggestion.data.omaid + '</span>'+
-                        '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
+            var label = '<span class="auto-xref">' + highlight_and_escape(suggestion.data.xref) + '</span> &nbsp;' +
+                '<span class="auto-omaid">' + suggestion.data.omaid + '</span>' +
+                '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
             return label;
         },
-        onSelect: function(item){
+        onSelect: function (item) {
             window.location.href = "/cgi-bin/gateway.pl?f=DisplayEntry&p1=" + item.data.entry_nr;
             return false;
         }
     };
     $('#textNav').autocomplete(autocomplete_opts);
     update_navbar_autocomplete();
-  </script>
+</script>
 
   <div id="content">
     {% block content %}{% endblock %}

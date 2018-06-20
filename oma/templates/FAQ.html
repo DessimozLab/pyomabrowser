@@ -5,103 +5,153 @@
 {% block meta_description %}Our answers to questions we often get asked.{% endblock %}
 {% block content %}
 
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-sm-12 col-md-10 col-md-offset-1">
-			<div class="jumbotron">
-				<div class="container">
-					<h1 class="text-center">FAQ 
-					</h1>
-					<h2 class="text-center grey">You have questions, we have answers.
-					</h2>
-					<div class="well well-sm entete">
-					</div>
-					<br>
-					
-					<div class="panel-group" id="accordion">
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								<h4 class="panel-title">
-									<a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
-										I have a question or need help to perform an anlaysis. Can I contact you to get any help?       
-									</a>
-								</h4>
+<style>
+
+	#accordion .card .card-header:hover {
+		cursor: pointer;
+		color: #307C3B;
+	}
+
+</style>
+<div class="container mt-5">
+
+	<div class="card text-center bg-light mb-3 mx-auto">
+		<div class="card-header">
+			<h1 class="display-3 mb-3">FAQ</h1>
+
+			<p class="text-muted">You have questions, we have answers.</p>
+
+			<div class="entete mb-5" style="height: 10px;"></div>
+
+			<div class="card bg-light text-left">
+
+				<div class="card-body">
+
+					<div id="accordion">
+
+						<div class="card mb-1">
+							<div class="card-header" id="headingOne" data-toggle="collapse" data-target="#collapseOne"
+								 aria-expanded="true" aria-controls="collapseOne">
+								I have a question or need help to perform an analysis. Can I contact you to get
+								any help?
 							</div>
-							<div id="collapseFour" class="panel-collapse collapse ">
-								<div class="panel-body">
-									Yes, we are reachable by email at contact@omabrowser.org. However, for general questions about OMA, our preferred way of answering questions is through <a href="https://www.biostars.org/">BioStars</a>. Please consider asking your question there, <b>including the tags "OMA" and "orthologs"</b>. We monitor BioStars for such questions and will answer them directly on that platform.     
+
+							<div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+								 data-parent="#accordion">
+								<div class="card-body">
+									<p>Yes, we are reachable by email at contact@omabrowser.org. However, for general
+										questions about OMA, our preferred way of answering questions is through <a
+											href="https://www.biostars.org/">BioStars</a>. Please consider asking your
+										question
+										there, <b>including the tags "OMA" and "orthologs"</b>. We monitor BioStars for
+										such
+										questions and will answer them directly on that platform.</p>
 								</div>
 							</div>
 						</div>
 
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								<h4 class="panel-title">
-									<a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
-										Why is my favorite genome not present in OMA?
-									</a>
-								</h4>
+
+						<div class="card mb-1">
+							<div class="card-header collapsed" id="headingTwo" data-toggle="collapse"
+								 data-target="#collapseTwo"
+								 aria-expanded="true" aria-controls="collapseTwo">
+								Why is my favorite genome not present in OMA?
 							</div>
-							<div id="collapseFive" class="panel-collapse collapse">
-								<div class="panel-body">
-                                    We strive to include as many complete genomes as possible, provided they are released publicly and meet reasonable quality standards. We are open for suggestions and are willing to adapt our priority queue based on user requests. The best way is to fill a request for a <a href="{% url "genome_suggestion" %}">new or updated genome</a>. For more informal information or batch suggestions drop us an <a href="mailto:contact@omabrowser.org">email</a>.<br/>
-If you want to analyze your "own" genomes, you can use the <a href="http://omabrowser.org/standalone/">OMA standalone pipeline</a> to do so and even make use of already analyzed genomes using the export function. OMA standalone is licenced under the Mozilla Public License Version 2.0. In a nutshell, OMA standalone is open source and free for commercial and non-commercial use.
+
+							<div id="collapseTwo" class="collapse" aria-labelledby="headingOne"
+								 data-parent="#accordion">
+								<div class="card-body">
+									<p>We strive to include as many complete genomes as possible, provided they are
+										released publicly and meet reasonable quality standards. We are open for
+										suggestions and are willing to adapt our priority queue based on user requests.
+										The best way is to fill a request for a <a href="{% url " genome_suggestion"
+										%}">new or updated genome</a>. For more informal information or batch
+										suggestions drop us an <a href="mailto:contact@omabrowser.org">email</a>.</p>
+									<p>If you want to analyze your "own" genomes, you can use the <a
+										href="http://omabrowser.org/standalone/">OMA standalone pipeline</a> to do so
+										and even make use of already analyzed genomes using the export function. OMA
+										standalone is licenced under the Mozilla Public License Version 2.0. In a
+										nutshell, OMA standalone is open source and free for commercial and
+										non-commercial use.</p>
 								</div>
 							</div>
 						</div>
 
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								<h4 class="panel-title">
-									<a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
-										What is the difference between OMA Groups and Hierarchical Groups?   
-									</a>
-								</h4>
+						<div class="card mb-1">
+							<div class="card-header collapsed" id="headingThree" data-toggle="collapse"
+								 data-target="#collapseThree"
+								 aria-expanded="true" aria-controls="collapseThree">
+								What is the difference between OMA Groups and Hierarchical Groups?
 							</div>
-							<div id="collapseSix" class="panel-collapse collapse">
-								<div class="panel-body">
-									OMA Groups are sets of genes which are all orthologous to each other according to the definition of Fitch (1970). In presence of a duplication in certain gene familly, this grouping strategy will pick only one of the two lineages resulting from the duplication event. The hierarchical orthologous groups (HOGs) are defined as sets of genes that have descended from a single common ancestor within a taxonomic range of interest, i.e. they correspond to the member of a clade in a gene tree rooted at the speciation node of interest.
-									Which type of groups you should choose depends highly on the type of your analysis. For more specific information, consult the <a href="/oma/uses">page on typical uses</a>.    
+
+							<div id="collapseThree" class="collapse" aria-labelledby="headingOne"
+								 data-parent="#accordion">
+								<div class="card-body">
+									<p>OMA Groups are sets of genes which are all orthologous to each other according to
+										the definition of Fitch (1970). In presence of a duplication in certain gene
+										familly, this grouping strategy will pick only one of the two lineages resulting
+										from the duplication event. The hierarchical orthologous groups (HOGs) are
+										defined as sets of genes that have descended from a single common ancestor
+										within a taxonomic range of interest, i.e. they correspond to the member of a
+										clade in a gene tree rooted at the speciation node of interest.
+										Which type of groups you should choose depends highly on the type of your
+										analysis. For more specific information, consult the <a href="/oma/uses">page on
+											typical uses</a>.</p>
 								</div>
 							</div>
 						</div>
 
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								<h4 class="panel-title">
-									<a data-toggle="collapse" data-parent="#accordion" href="#collapseSeven">
-										Why are OMA Groups often relatively small? Covering so many genomes, I expected them to be much bigger.     
-									</a>
-								</h4>
+
+						<div class="card mb-1">
+							<div class="card-header collapsed" id="headingFour" data-toggle="collapse"
+								 data-target="#collapseFour"
+								 aria-expanded="true" aria-controls="collapseFour">
+								Why are OMA Groups often relatively small? Covering so many genomes, I expected
+								them to be much bigger.
 							</div>
-							<div id="collapseSeven" class="panel-collapse collapse">
-								<div class="panel-body">
-									For the OMA Groups, we apply a very stringent grouping strategy. All the members of a group need to be bona fide orthologs to each other, i.e. the form a clique in graph-theoretic terms. This grouping strategy is mainly intended for applications which require orthologs of high confidence, e.g. for reconstructing species trees. A gene tree built from the members of an OMA Group should - in absence of LGT are incomplete lineage sorting - be congruent with the underlying species tree. If you are interested in larger groups, consider using the OMA HOGs. These hierarchical orthologous groups are defined as set of genes that all started diverging from a single ancestral gene at a given time point of reference. 
+
+							<div id="collapseFour" class="collapse" aria-labelledby="headingOne"
+								 data-parent="#accordion">
+								<div class="card-body">
+									<p>For the OMA Groups, we apply a very stringent grouping strategy. All the members
+										of a group need to be bona fide orthologs to each other, i.e. the form a clique
+										in graph-theoretic terms. This grouping strategy is mainly intended for
+										applications which require orthologs of high confidence, e.g. for reconstructing
+										species trees. A gene tree built from the members of an OMA Group should - in
+										absence of LGT are incomplete lineage sorting - be congruent with the underlying
+										species tree. If you are interested in larger groups, consider using the OMA
+										HOGs. These hierarchical orthologous groups are defined as set of genes that all
+										started diverging from a single ancestral gene at a given time point of
+										reference.</p>
 								</div>
 							</div>
 						</div>
 
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								<h4 class="panel-title">
-									<a data-toggle="collapse" data-parent="#accordion" href="#collapseHeight">
-										Under what licence is OMA distributed </a>  
-									</h4>
-								</div>
-								<div id="collapseHeight" class="panel-collapse collapse">
-									<div class="panel-body">
-										The OMA Browser is available under the Creative Commons Attribution-Share Alike 2.5 License, and the OMA standalone package under the MPL 2.0 (open source) licence.
-									</div>   
+
+						<div class="card mb-1">
+							<div class="card-header collapsed" id="headingFive"
+								 data-toggle="collapse" data-target="#collapseFive"
+								 aria-expanded="false" aria-controls="collapseFive">
+								Under what licence is OMA distributed
+							</div>
+
+
+							<div id="collapseFive" class="collapse" aria-labelledby="headingFive"
+								 data-parent="#accordion">
+								<div class="card-body">
+									<p>The OMA Browser is available under the Creative Commons Attribution-Share Alike
+										2.5 License, and the OMA standalone package under the MPL 2.0 (open source)
+										licence.</p>
 								</div>
 							</div>
-						</div>      
+						</div>
+
+
 					</div>
 				</div>
-			</div>      
+			</div>
 		</div>
 	</div>
 </div>
-
-
 
 {% endblock content %}

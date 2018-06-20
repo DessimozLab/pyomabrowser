@@ -6,41 +6,76 @@
 {% block title %}OMA orthology database: Development Team{% endblock %}
 
 {% block content %}
+<style>
+    blockquote {
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-12 col-md-10 col-md-offset-1">
-            <div class="jumbotron">
-                <div class="container">
-                    <h1 class="text-center">TEAM<br></h1><br>
-                    <div class="well well-sm entete"></div>
-                    <br>
-                    <div class="panel panel-default">
-                        <br>
-                        <div class="panel-body">
-                            <p>OMA is developed and maintained in the <a href='https://lab.dessimoz.org'>Dessimoz Lab at UCL</a> and <a href='http://www.cbrg.ethz.ch'>CBRG at ETH Zurich</a>.</p>
-                            <h3>Current members:</h3>
-                            <blockquote><strong ><a href='https://people.inf.ethz.ch/adriaal/'>Adrian Altenhoff</a></strong>, Project Manager<br>
-                                <strong ><a href='https://lab.dessimoz.org/people/christophe-dessimoz'>Christophe Dessimoz</a></strong>, PI<br>
-                                <strong ><a href='https://www.inf.ethz.ch/personal/gonnet/'>Gaston H. Gonnet</a></strong>, PI <br>
-                                <strong>Natasha Glover</strong>, Postdoc<br>
-                                <strong>Ivana Piližota</strong>, PhD student<br>
-                                <strong>Clément-Marie Train</strong> PhD student<br>
-                                <strong>Alex Warwick Vesztrocy</strong>, PhD student<br>
-                            </blockquote>
-                            <h3>Former members:</h3>
-                            <blockquote>
-                                <strong>Klara Kaleb</strong> (intern, summer 2017)<br>
-                                <strong>Lucas Wittwer</strong>, intern<br>
-                                <strong>Anna Sueki</strong> (intern, summer 2014)<br>
-                                <strong>Adrian Schneider</strong> (algorithm, inference pipeline, browser, 2005-2010)<br>
-                                <strong>Alexander Roth</strong> (algorithm, 2005-2009)<br>
-                            </blockquote>
-                        </div>
-                    </div>  
+        padding: 10px 20px;
+        margin: 0 0 20px;
+        font-size: 17.5px;
+        border-left: 5px solid #eee;
+    }
+
+    html {
+  font-size: 1rem;
+}
+
+@include media-breakpoint-up(sm) {
+  html {
+    font-size: 1.2rem;
+  }
+}
+
+@include media-breakpoint-up(md) {
+  html {
+    font-size: 1.4rem;
+  }
+}
+
+@include media-breakpoint-up(lg) {
+  html {
+    font-size: 1.6rem;
+  }
+}
+
+</style>
+<div class="container mt-5">
+
+        <div class="card text-center bg-light mb-3 mx-auto">
+            <div class="card-header">
+                <h1 class="display-3 mb-3">TEAM</h1>
+                <div class="entete mb-5" style="height: 10px;"></div>
+
+                <div class="card bg-light m-3 text-left">
+
+                    <div class="card-body">
+                        <p class="lead">OMA is developed and maintained in the <a href='https://lab.dessimoz.org'>Dessimoz Lab at UCL</a> and <a
+                            href='http://www.cbrg.ethz.ch'>CBRG at ETH Zurich</a>.</p>
+                        <h3 class="lead">Current members:</h3>
+                        <blockquote><strong><a href='https://people.inf.ethz.ch/adriaal/'>Adrian Altenhoff</a></strong>, Project
+                            Manager<br>
+                            <strong><a href='https://lab.dessimoz.org/people/christophe-dessimoz'>Christophe Dessimoz</a></strong>,
+                            PI<br>
+                            <strong><a href='https://www.inf.ethz.ch/personal/gonnet/'>Gaston H. Gonnet</a></strong>, PI <br>
+                            <strong>Natasha Glover</strong>, Postdoc<br>
+                            <strong>Ivana Piližota</strong>, PhD student<br>
+                            <strong>Clément-Marie Train</strong> PhD student<br>
+                            <strong>Alex Warwick Vesztrocy</strong>, PhD student<br>
+                        </blockquote>
+                        <h3 class="lead">Former members:</h3>
+                        <blockquote>
+                            <strong>Klara Kaleb</strong> (intern, summer 2017)<br>
+                            <strong>Lucas Wittwer</strong>, intern<br>
+                            <strong>Anna Sueki</strong> (intern, summer 2014)<br>
+                            <strong>Adrian Schneider</strong> (algorithm, inference pipeline, browser, 2005-2010)<br>
+                            <strong>Alexander Roth</strong> (algorithm, 2005-2009)<br>
+                        </blockquote>
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
-    </div>
+
 </div>
 {% endblock content %}
