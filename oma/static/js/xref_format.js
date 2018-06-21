@@ -128,21 +128,93 @@
         }
     };
 
+    var dbxrefs = {
+        'UniProtKB/SwissProt': {
+            url: function(id){ return "https://uniprot.org/uniprot/"+id; },
+            tooltip: "UniProtKB/SwissProt: reviewed",
+            img: '<img src="'+static_root+'/image/reviewed.gif" alt="UniProtKB/SwissProt" />'
+        },
+        'UniProtKB/TrEMBL':{
+            url: function(id){ return "https://uniprot.org/uniprot/"+id; },
+            tooltip: "UniProtKB/TrEMBL: unreviewed",
+            img: '<img src="'+static_root+'/image/unreviewed.gif" alt="UniProtKB/TrEMBL" />'
+        },
+        'RefSeq':{
+            url: function(id){ return "https://www.ncbi.nlm.nih.gov/protein/"+id; },
+            img: '<img src="'+static_root+'/image/ncbi.gif" alt="RefSeq" />'
+        },
+        'Ensembl Protein': {
+            url: function(id){ return "https://www.ensembl.org/id/"+id;},
+            img: '<img src="'+static_root+'/image/ensembl.gif" alt="Ensembl"/>'
+        },
+        'EnsemblGenomes':{
+            url: function(id){ return "https://ensemblgenomes.org/id/"+id; },
+            img: '<img src="'+static_root+'/image/ensembl.gif" alt="EnsemblGenomes"/>'
+        },
+        'PMP':{
+            url: function(id){return "https://www.proteinmodelportal.org/query/up/"+id;},
+            tooltip: "Protein Model Portal",
+            img: '<img src="'+static_root+'/image/pmp.gif" alt="Protein Model Portal"/>'
+        },
+        'PDB': {
+            url: function(id){return "https://www.ebi.ac.uk/pdbe/entry/pdb/"+id;},
+            img: '<img src="'+static_root+'/image/pdb.gif" alt="PDB" />'
+        },
+        'EntrezGene': {
+            url: function(id){return "///www.ncbi.nlm.nih.gov/protein/"+id;},
+            img: '<img src="'+static_root+'/image/ncbi.gif" alt="NCBI" />'
+        },
+        'FlyBase':{
+            url: function(id){ return "http://flybase.org/reports/"+id;},
+            img: '<img src="'+static_root+'/image/flybase.gif" alt="Flybase" />'
+        },
+        'WormBase': {
+            url: function(id){ return "http://www.wormbase.org/db/gene/gene?name="+id;},
+            img: '<img src="'+static_root+'/image/wormbase.gif" alt="Wormbase" />'
+        },
+        'HGNC': {
+            url: function(id){return "https://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id="+id;},
+            img: '<img src="'+static_root+'/image/hgnc.gif" alt="HGNC"/>',
+            label: function(id, elem){
+                $.getJSON("https://rest.genenames.org/fetch/hgnc_id/"+id, function(data){
+                    if (data.hasOwnProperty("response")){
+                        var res = data.response.docs[0];
+                        var span = document.getElementById(elem);
+                        var b = document.createElement('B')
+                        b.append(res['symbol']);
+                        span.append( ' ', b, ': ' + res['name']);
+                    }
+                });
+            }
+        }
+    };
+    dbxrefs['Ensembl Gene'] = dbxrefs['Ensembl Transcript'] = dbxrefs['Ensembl Protein'];
+
 
     exports.dbxref_url = function(id, src, genome_release){
-        if (src === "UniProtKB/SwissProt"){
-            return '<a class="external" href="///uniprot.org/uniprot/' + id+ '"' +
-                'title="UniProtKB/SwissProt: reviewed">' +
-                   '<img src="'+static_root+'/image/reviewed.gif" alt="UniProtKB/SwissProt" />' +
-                   '&nbsp;'+ id +'</a>';
-        } else if (src === "UniProtKB/TrEMBL"){
-            return '<a class="external" href="///uniprot.org/uniprot/'+ id +'"' +
-                'title="UniProtKB/TrEMBL: unreviewed">' +
-                '<img src="'+static_root+'/image/unreviewed.gif" alt="UniProtKB/TrEMBL" />' +
-                '&nbsp;' + id +'</a>';
+        var db;
+        if (dbxrefs[src] !== undefined){
+            db = dbxrefs[src];
+        } else if (genome_release.match('EnsemblGenomes') && (src === "SourceID" || src === "SourceAC")){
+            db = dbxrefs['EnsemblGenomes'];
         } else {
             return id;
         }
-    }
+
+        var elem = '<a class="external" href="'+db.url(id)+'" title="';
+        if (db.tooltip === undefined){ elem +=  src; } else {elem += db.tooltip;}
+        elem += '">';
+        if (db.img) {
+            elem += db.img + "&nbsp;";
+        }
+        elem += id + "</a>";
+        if (db.label !== undefined) {
+            var span_id = src+'_'+id;
+            elem = '<span id="'+span_id+'">' + elem + '</span>';
+            db.label(id, span_id);
+        }
+        return elem;
+
+    };
 
 })(this.xref_format = {});
