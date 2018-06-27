@@ -1,6 +1,4 @@
 {% extends  "core.html" %}
-{% comment %} {% load staticfiles %} {% endcomment %}
-{% comment %} {% load bootstrap3 %} {% endcomment %}
 
 {% block title %}OMA orthology database: Sequence-centric view{% endblock %}
 
@@ -122,7 +120,7 @@ $(window).on('load', function () {
   }
 </style>
 
-<div class="container" id="body" style="margin-top: 2em;">
+<div class="container" id="body" style="margin-top: 2em;"> <!-- .container -->
 
     <div class="row">
         <div class="col-12">
@@ -150,10 +148,10 @@ $(window).on('load', function () {
 
     </div>
 
-    <div class="row content-container-row">
+    <div class="row content-container-row"> <!-- row content-container-row -->
 
         <!-- Sidebar / menu -->
-        <div id="sidebar-container" class="col-3 gene-orthology full-height">
+        <div id="sidebar-container" class="col-3 gene-orthology full-height"> <!-- #sidebar-container -->
 
             <div id="accordion">
                 <div class="menu-tab" style="cursor: pointer;" onclick="console.log('orthology clicked')" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="#collapseOne">
@@ -162,6 +160,7 @@ $(window).on('load', function () {
 
 
                 <div id="collapseOne" class="collapse pt-0" aria-labelledby="headingOne" data-parent="#accordion">
+
                     <div class="card-body pl-4 py-2">
                         <h6>Filter by Taxon</h6>
 
@@ -219,6 +218,7 @@ $(window).on('load', function () {
                         </div>
 
                     </div>
+
                 </div>
 
             </div>
@@ -251,11 +251,11 @@ $(window).on('load', function () {
 
             </div>
 
-        </div>
+        </div> <!-- #sidebar-container -->
 
 
 
-        <div class="col">
+        <div class="col"> <!-- content col -->
             <!--<h2 class="">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %} </h2>
             <h4>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</h4>
             {% block seqhead_hook %}{% endblock %}
@@ -303,11 +303,11 @@ $(window).on('load', function () {
             {% block contentTab %} {% endblock contentTab %}
 
 
-        </div>
+        </div> <!-- content col -->
 
-    </div>
+    </div> <!-- row content-container-row -->
 
-</div>
+</div> <!-- .container -->
 {% endblock content %}
 
 
