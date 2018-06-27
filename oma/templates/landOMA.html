@@ -1,121 +1,118 @@
 {% extends  "core.html" %}
 {% load staticfiles %}
-{% load bootstrap3 %}
+
 
 {% block title %}OMA orthology database: Accessing OMA Groups{% endblock %}
 {% block content %}
 
-<div class="container-fluid">
-    <div class="row">
-        <div class=" col-sm-12 col-md-10 col-md-offset-1">
-            <div class="jumbotron">
-                <div class="container">
-                    <div class="page-header ">
-                        <h1 class="text-center">OMA groups</h1>
-                        <div class="well well-sm entete"></div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
+<div class="container mt-5">
 
-                            <p>
-                                OMA groups are groups of protein sequences that are inferred to be related exclusively by speciation events. Consequently, there is at most one sequence per species in each OMA group. By convention, each sequence belongs to at most one OMA group.  </p>
-                            <p>
-                                For an alternative, more inclusive definition of orthologous groups, consider using <a href="{% url 'hogs'  %}">hierarchical orthologous groups</a>.
-                            </p>
-                            <h3>Search an OMA group</h3> 
-                            <br>
+	<div class="card text-center bg-light mb-3 mx-auto">
+		<div class="card-header">
+			<h1 class="display-3 mb-3">OMA groups</h1>
+			<div class="entete mb-5" style="height: 10px;"></div>
 
-                            <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
-                                <input type="hidden" name="f" value="DisplayGroup"/>
-                                <div class="form-group">
-                                    <label for="textG1" class="col-sm-4 control-label">Fingerprint (stable across releases):
-                                    </label>
-                                    <div class="col-sm-6">
-                                        <div class="input-group">
-                                            <input id='textG1' name="p1" type="text" class="form-control">
-                                            <span class="input-group-btn">
-                                            <button class="btn btn-default" type="submit">
-                                                <span class="glyphicon glyphicon-search "></span>
-                                            </button>
-                                        </span>
-                                        </div>
-                                    </div>
-                                    <br>
-                                    <div class="col-xs-6 col-xs-offset-4">
-                                        <h4>
-                                            <small> Example: 
-                                                <a id='exFinger'>MVPVKTS</a>
-                                            </small>
-                                        </h4>
+			<div class="card bg-light m-3 text-left">
+
+				<div class="card-body">
+
+                    <p class="lead">OMA groups are groups of protein sequences that are inferred to be related exclusively by speciation events. Consequently, there is at most one sequence per species in each OMA group. By convention, each sequence belongs to at most one OMA group.</p>
+                    <p>For an alternative, more inclusive definition of orthologous groups, consider using <a href="{% url 'hogs'  %}">hierarchical orthologous groups</a>.</p>
+
+                    <h3>Search an OMA group</h3>
+
+                    <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
+                        <input type="hidden" name="f" value="DisplayGroup"/>
+                        <div class="form-group form-row">
+                            <label for="textG1" class="col-sm-4 col-form-label control-label text-right">Fingerprint (stable across releases):
+                            </label>
+                            <div class="col-sm-8 no-gutters">
+
+                                <div class="input-group col mb-2">
+                                    <input id='textG1' name="p1" type="text" class="form-control">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></span></button>
                                     </div>
                                 </div>
-                              </form>
+
+                            </div>
+
+                            <div class="col-md-8 offset-sm-4">
+                                <p class="font-weight-bold">Example: <span class="font-italic font-weight-normal">
+                                    <a id='exFinger'>MVPVKTS</a></span>
+                                </p>
+                            </div>
+                        </div>
+                    </form>
 
 
-                            <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
-                                <input type="hidden" name="f" value="DisplayGroup"/>
-                                <div class="form-group">
-                                    <label for="textG2" class="col-sm-4 control-label">Group number (not stable across releases):
-                                    </label>
-                                    <div class="col-sm-6">
-                                        <div class="input-group">
-                                            <input id='textG2' name="p1" type="text" class="form-control">
-                                            <span class="input-group-btn">
-                                            <button class="btn btn-default" type="submit">
-                                                <span class="glyphicon glyphicon-search "></span>
-                                            </button>
-                                        </span>
-                                        </div>
-                                    </div>
-                                    <br>
-                                    <div class="col-xs-6 col-xs-offset-4">
-                                        <h4>
-                                            <small> Example: 
-                                                <a id='exNumber'>70525</a>
-                                            </small>
-                                        </h4>
-                                    </div>
-                                </div>
-                            </form>
+                    <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
+                        <input type="hidden" name="f" value="DisplayGroup"/>
+                        <div class="form-group form-row">
 
-                            <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
-                                <input type="hidden" name="f" value="DisplayGroup"/>
-                                <div class="form-group">
-                                    <label for="textG3" class="col-sm-4 control-label">Member gene/protein:
-                                    </label>
-                                    <div class="col-sm-6">
-                                        <div class="input-group">
-                                            <input id='textG3' name="p1" type="text" class="form-control">
-                                            <span class="input-group-btn">
-                                            <button class="btn btn-default" type="submit">
-                                                <span class="glyphicon glyphicon-search "></span>
-                                            </button>
-                                        </span>
-                                        </div>
-                                    </div>
-                                    <br>
-                                    <div class="col-xs-6 col-xs-offset-4">
-                                        <h4>
-                                            <small> Example: 
-                                                <a id='exMemb'> HUMAN02353</a>
-                                            </small>
-                                        </h4>
+                            <label for="textG2" class="col-sm-4 col-form-label control-label text-right">Group number (not stable across releases):
+                            </label>
+                            <div class="col-sm-8 no-gutters">
+
+                                <div class="input-group col mb-2">
+                                    <input id='textG2' name="p1" type="text" class="form-control">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></span></button>
                                     </div>
                                 </div>
-                            </form>
 
-                            <h3>Export Marker Genes</h3>
-                            <div>
-                                <p>OMA Groups are useful for species tree reconstruction. You can
-                                    <a href="{% url 'export_markers' %}">export a set of marker genes</a> for a subset of species of your choice.</p>
+                            </div>
+
+                            <div class="col-md-8 offset-sm-4">
+
+                                <p class="font-weight-bold">Example: <span class="font-italic font-weight-normal">
+                                    <a id='exNumber'>70525</a></span>
+                                </p>
+
                             </div>
 
                         </div>
-                    </div>
+                    </form>
+
+                    <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
+                        <input type="hidden" name="f" value="DisplayGroup"/>
+                        <div class="form-group form-row">
+
+
+                            <label for="textG3" class="col-sm-4 col-form-label control-label text-right">Member gene/protein:
+                            </label>
+                            <div class="col-sm-8 no-gutters">
+
+                                <div class="input-group col mb-2">
+                                    <input id='textG3' name="p1" type="text" class="form-control">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></span></button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-8 offset-sm-4">
+
+                                <p class="font-weight-bold">Example: <span class="font-italic font-weight-normal">
+                                    <a id='exMemb'> HUMAN02353</a></span>
+                                </p>
+
+                            </div>
+
+
+                        </div>
+                    </form>
+
+                    <h3>Export Marker Genes</h3>
+                    <div>
+                                <p>OMA Groups are useful for species tree reconstruction. You can
+                                    <a href="{% url 'export_markers' %}">export a set of marker genes</a> for a subset of species of your choice.</p>
+                            </div>
                 </div>
-            </div>
-        </div>
-    </div>
+			</div>
+		</div>
+	</div>
 </div>
 
 
