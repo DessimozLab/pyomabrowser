@@ -1,6 +1,5 @@
 {% extends  "core.html" %}
 {% load staticfiles %}
-{% load bootstrap3 %}
 
 {% block title %}{% block titleTab %}OMA orthology database: current release{% endblock titleTab %}{% endblock %}
 {% block meta_description %}Download all the data in various formats from the {% firstof release.name "current" %} OMA release.{% endblock %}
@@ -9,6 +8,7 @@
 <div class="container mt-5">
 
 	<div class="card text-center bg-light mb-3 mx-auto">
+
 		<div class="card-header">
 			<h1 class="display-3 mb-3">{% block titleDownload %}Current release{% endblock titleDownload %}</h1>
 			<div class="entete mb-5" style="height: 10px;"></div>
@@ -19,11 +19,11 @@
 
 				<div class="card-body">
 
-				{% block yearPicker %}  {% endblock yearPicker %}
+				    {% block yearPicker %}  {% endblock yearPicker %}
 
-				{% block Orthology %}
+				    {% block Orthology %}
 
-				<h4 id='orthology-relations' class="panel-heading">Orthology Relationships</h4>
+		    		<h4 id='orthology-relations' class="panel-heading">Orthology Relationships</h4>
 					<p>
 						The orthology relationships are available in two types: groups or pairs of orthologs. The information is given in terms of OMA identifiers (of the form HUMAN04376).
 					</p>
@@ -83,10 +83,10 @@
 							{% endblock genomePW %}
 						</tbody>
 					</table>
-				{% endblock Orthology %}
-				{% block Sequences %}
-				<h4 id='sequences' class="panel-heading">Sequences</h4>
-					<p>
+                    {% endblock Orthology %}
+                    {% block Sequences %}
+                    <h4 id='sequences' class="panel-heading">Sequences</h4>
+                    <p>
 						All sequences with the corresponding OMA identifiers can be downloaded in fasta files. The proteins are all in one file, while the coding DNA is split into two files, one for the Eukaryotes and one for the Prokaryotes.
 					</p>
 					<table class="table table-hover ">
@@ -128,9 +128,9 @@
 						</tbody>
 					</table>
 
-				{% endblock Sequences %}
-				{% block Mapping %}
-				<h4 id='identifier-mapping' class="panel-heading">Identifier Mapping</h4>
+                    {% endblock Sequences %}
+                    {% block Mapping %}
+                    <h4 id='identifier-mapping' class="panel-heading">Identifier Mapping</h4>
 					<p>
 						Mappings of the OMA identifier to various other databases are available. Mappings to UniProt, RefSeq and EntrezGene IDs are based on <em>exact</em> sequence matches, other cross-references come from source genome files directly. :
 					</p>
@@ -200,9 +200,9 @@
 
 						</tbody>
 					</table>
-				{% endblock Mapping %}
-				{% block Other %}
-				<h4 id='other' class="panel-heading">Other files</h4>
+                    {% endblock Mapping %}
+                    {% block Other %}
+                    <h4 id='other' class="panel-heading">Other files</h4>
 					<table class="table table-hover ">
 						<tbody>
 							<tr>
@@ -232,9 +232,9 @@
 							</tr>
 						</tbody>
 					</table>
-				{% endblock Other %}
-				{% block History %}
-				<h4 id='history' class="panel-heading">OMA ID History</h4>
+                    {% endblock Other %}
+                    {% block History %}
+                    <h4 id='history' class="panel-heading">OMA ID History</h4>
 					<p>
 						Mappings of the OMA identifier of updated genomes from one release to another. We track only proteins with same amino acid sequences.
 					</p>
@@ -251,7 +251,8 @@
 							{% endfor %}
 						</tbody>
 					</table>
-				{% endblock History %}
+    				{% endblock History %}
+                </div>
 			</div>
 		</div>
 	</div>
