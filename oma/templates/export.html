@@ -1,6 +1,6 @@
 {% extends  "core.html" %}
 {% load staticfiles %}
-{% load bootstrap3 %}
+
 {% block title %}OMA orthology database: Export for OMA Standalone{% endblock %}
 {% block meta_description %}Export genomes and precomputed all-against-all results for OMA standalone. {% endblock %}
 
@@ -23,77 +23,112 @@
 
 
 {% block content %}
-<div class="container-fluid">
+<style>
+html, body {
+  height: 100%;
+}
+
+.flex-grow {
+  flex: 1 0 auto;
+}
+
+.card > .list-group:last-child .list-group-item:last-child, .card > .list-group:first-child .list-group-item:first-child {
+ border-radius: 0;
+
+}
+element {
+}
+.list-group-item:first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+</style>
+<div class="container-fluid" style="height: 90vh;">
     {% block above_svg %}{% endblock %}
-    <div class="row">       
+    <div class="row" style="height: 100%;">
         <div class="col-md-9" id="svgdiv"> <!-- svg -->
-            <div class="jumbotron" id="phylo_io" style="overflow-x:scroll;" >
-                <button class="btn btn-lg" data-toggle="modal" data-target="#myModal" id="modalhelp">
-                    <span class="glyphicon glyphicon-question-sign"></span>
-                </button>
-                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                <h4 class="modal-title" id="myModalLabel">{% block modal_title %}Export of genomes and All/All for OMA standalone{% endblock modal_title %}</h4>
-                            </div>
-                            <div class="modal-body">
-                                {% block modal_body %}
-                                <p>In order to simplify analysis of customized genomes using the OMA Standalone application, we provide here users with precomputed all-against-all results, i.e. the most time-consuming part of the OMA pipeline. Users can simply augment the dataset with their new genomes and only the new genome-pairs will have to be aligned.</p>
-                                <p> <b>Important limitations and notices</b> </p>
-                                <ul>
-                                    <li><p>Note that for OMA we only store pairwise matches of alignments with a Smith-Waterman score of at least 130 and where the alignment extends over at least 30% of the smaller sequence. If you need more relaxed parameters, you will have to do the alignments again from scratch.</p></li>
-                                    <li><p>The selected genomes cannot be modified. Do not try to add, remove or change any sequences. The changes will not get incorporated, but might invalidate any later inference due to indexing mistakes.</p></li>
-                                </ul>
-                                {% endblock modal_body %}
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                <button class="btn btn-primary " data-toggle="modal" data-target="#myModaltuto">
-                                    How to use the genome-picker 
-                                </button>
-                            </div>
+
+
+            <!-- help modal -->
+            <button class="btn btn-sm ml-3" style="z-index:99" data-toggle="modal" data-target="#myModal" id="modalhelp">
+                <i class="fas fa-question"></i>
+            </button>
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">{% block modal_title %}Export of genomes and All/All for OMA standalone{% endblock modal_title %}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
-                    </div>
-                </div>
-                <div class="modal fade" id="myModaltuto" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                <h4 class="modal-title" id="myModalLabel2">How to use the genome-picker ?</h4>
-                            </div>
-                            <div class="modal-body">
-                                <img src="{%static "image/help_export.png" %}" class="img-responsive margin-auto" alt="OMA genomepicker how to use">
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal"> <span class="glyphicon glyphicon-chevron-left"></span> Back</button>
-                            </div>
+                        <div class="modal-body">
+                            {% block modal_body %}
+                            <p>In order to simplify analysis of customized genomes using the OMA Standalone application, we provide here users with precomputed all-against-all results, i.e. the most time-consuming part of the OMA pipeline. Users can simply augment the dataset with their new genomes and only the new genome-pairs will have to be aligned.</p>
+                            <p> <b>Important limitations and notices</b> </p>
+                            <ul>
+                                <li><p>Note that for OMA we only store pairwise matches of alignments with a Smith-Waterman score of at least 130 and where the alignment extends over at least 30% of the smaller sequence. If you need more relaxed parameters, you will have to do the alignments again from scratch.</p></li>
+                                <li><p>The selected genomes cannot be modified. Do not try to add, remove or change any sequences. The changes will not get incorporated, but might invalidate any later inference due to indexing mistakes.</p></li>
+                            </ul>
+                            {% endblock modal_body %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button class="btn btn-primary " data-toggle="modal" data-target="#myModaltuto">
+                                How to use the genome-picker
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="modal fade" id="myModaltuto" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+
+                            <h5 class="modal-title">How to use the genome-picker ?</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+
+
+                        </div>
+                        <div class="modal-body">
+                            <img src="{%static "image/help_export.png" %}" class="img-fluid mx-auto" alt="OMA
+                            genomepicker how to use">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                            <i class="fas fa-chevron-left"></i> Back
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /help modal -->
+
+            <div class="card" id="phylo_io" style="overflow-x:auto;" >
+
+            </div>
+
         </div>
-        <div class="col-md-3" id="row3"> <!-- UI -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="jumbotron  " id="UISelected"  >
-                        <h3 class="text-center searchg greenb" id="textSel" style="font-size: 18px; color: #fff;padding-top: 10px; padding-bottom: 10px; margin:0px !important;" >Selected genomes</h3>
-                    </div>
+        <div class="col-md-3"> <!-- UI -->
+            <div class="card col-12" id="UISelected"  >
+                <h3 class="text-center searchg greenb py-2 mb-0" id="textSel" style="font-size: 18px; color: #fff;"
+                >Selected
+                 genomes</h3>
+            </div>
+            {% block menu_additional_inputs %}{% endblock %}
+            <div class="row mx-auto" id="buttondiv">
+                <div class="col-xs-12 col-sm-6 mx-auto">
+                    <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff;" id="buttonUnselect">Unselect all</button>
                 </div>
-                {% block menu_additional_inputs %}{% endblock %}
-                <div class="col-md-12"  id="buttondiv">
-                        <div class="col-sm-6 col-md-6">
-                            <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff;" id="buttonUnselect">Unselect all</button>
-                        </div>
-                        <div class="col-sm-6 col-md-6">
-                            <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff;" id="{% block submit_button_id %}buttonSubmit{% endblock %}">Submit</button>
-                        </div>
-                    </div>
+                <div class="col-xs-12 col-sm-6 mx-auto">
+                    <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff;" id="{% block submit_button_id %}buttonSubmit{% endblock %}">Submit</button>
                 </div>
-            </div> <!-- /UI -->
-        </div>  
+            </div>
+
+        </div>
     </div>
 </div>
 {% endblock content %}
