@@ -19,7 +19,7 @@
                     <p class="lead">OMA groups are groups of protein sequences that are inferred to be related exclusively by speciation events. Consequently, there is at most one sequence per species in each OMA group. By convention, each sequence belongs to at most one OMA group.</p>
                     <p>For an alternative, more inclusive definition of orthologous groups, consider using <a href="{% url 'hogs'  %}">hierarchical orthologous groups</a>.</p>
 
-                    <h3>Search an OMA group</h3>
+                    <h5>Search an OMA group</h5>
 
                     <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
                         <input type="hidden" name="f" value="DisplayGroup"/>
@@ -38,9 +38,8 @@
                             </div>
 
                             <div class="col-md-8 offset-sm-4">
-                                <p class="font-weight-bold">Example: <span class="font-italic font-weight-normal">
-                                    <a id='exFinger'>MVPVKTS</a></span>
-                                </p>
+                                <span class="font-weight-bold">Example: </span>
+                                    <a href="#" class="text-muted" id='exFinger'>MVPVKTS</a>
                             </div>
                         </div>
                     </form>
@@ -65,9 +64,8 @@
 
                             <div class="col-md-8 offset-sm-4">
 
-                                <p class="font-weight-bold">Example: <span class="font-italic font-weight-normal">
-                                    <a id='exNumber'>70525</a></span>
-                                </p>
+                                <span class="font-weight-bold">Example: </span>
+                                    <a href="#" class="text-muted" id='exNumber'>70525</a>
 
                             </div>
 
@@ -94,9 +92,8 @@
 
                             <div class="col-md-8 offset-sm-4">
 
-                                <p class="font-weight-bold">Example: <span class="font-italic font-weight-normal">
-                                    <a id='exMemb'> HUMAN02353</a></span>
-                                </p>
+                                <span class="font-weight-bold">Example:</span>
+                                    <a href="#" class="text-muted" id='exMemb'> HUMAN02353</a>
 
                             </div>
 
@@ -104,7 +101,7 @@
                         </div>
                     </form>
 
-                    <h3>Export Marker Genes</h3>
+                    <h5>Export Marker Genes</h5>
                     <div>
                                 <p>OMA Groups are useful for species tree reconstruction. You can
                                     <a href="{% url 'export_markers' %}">export a set of marker genes</a> for a subset of species of your choice.</p>
@@ -124,15 +121,15 @@ function OpenInNewTab(url) {
 
 $('#exMemb').click( function() {
 
-    $('#textG3').val('HUMAN02353').focus();
+    $('#textG3').val($(this).text()).focus();
 });
 
 $('#exNumber').click( function() {
-    $('#textG2').val('70525').focus();
+    $('#textG2').val($(this).text()).focus();
 
 });
 $('#exFinger').click( function() {
-    $('#textG1').val('MVPVKTS').focus();
+    $('#textG1').val($(this).text()).focus();
 
 });
 
