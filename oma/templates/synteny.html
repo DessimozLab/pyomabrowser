@@ -4,9 +4,7 @@
 {% block meta_description %}Explore the synthenic genes around {{ entry.omaid }} across its orthologs. Find out about highly conserved regions, rearangements, segmental duplications and other evolutionary events in this region{% endblock %}
 {% block css_hook %}
 <style type="text/css">
-    /* CSS used here will be applied after bootstrap.css *//* CSS used here will be applied after bootstrap.css */
-
-    /*            .jumbotron{width:80%;margin-left:10%;max-width: 1200px;margin-left:auto; margin-right:auto; }*/
+    /* CSS used here will be applied after bootstrap.css */
     .img-center {
         margin: 0 auto;
     }
@@ -34,6 +32,11 @@
 
     .syntenytable th {
         width: 10%;
+
+    }
+
+    .syntenytable thead tr {
+        background-color: #FFFFFF;
     }
 
     .syntenytable th {
@@ -154,7 +157,7 @@ $(window).on('load', function () {
         <a href="#" class="badge badge-info" role="button" data-toggle="modal" data-target="#myModal"
            id="modalhelp">?</a>
     </h4>
-    <div class="card-body"><!-- .card-body -->
+    <div class="card-body p-1"><!-- .card-body -->
         <div class="twotables"><!-- .twotables -->
             <table class="table table-condensed table-striped syntenytable">
                 <thead>
@@ -175,9 +178,7 @@ $(window).on('load', function () {
                     <td>
                         <a href="/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/"
                            class="btn btn-default btn-synteny cursor_wait btn-{{ geneinfo.type }}"
-                        <!-- TODO Not found? -->
-                        data-toggle="tooltip" data-title="{% include "includes/synteny_xref.html" with
-                        eNr=geneinfo.entryid %}" >
+                        data-toggle="tooltip" data-title="{% comment %} {% include 'includes/synteny_xref.html' with eNr=geneinfo.entryid %} {% endcomment %}" >
                         {% if geneinfo.dir == -1 %}
                         <span class="fa fa-chevron-left"></span>
                         {% endif %}
@@ -211,17 +212,17 @@ $(window).on('load', function () {
                                 btn-{{ entry_ortholog }}
                                 {% endfor %}"
                            data-toggle="{% if lastrow %}tooltip_top{% else %}tooltip{% endif %}"
-                           data-title="{% include " includes/synteny_xref.html" with eNr=geneinfo.entryid %}" >
+                           data-title="{% comment %} {% include 'includes/synteny_xref.html' with eNr=geneinfo.entryid %} {% endcomment %}" >
                         {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir == -1 %}
-                        <span class="glyphicon glyphicon-chevron-left"></span>
+                        <span class="fa fa-chevron-left"></span>
                         {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir == 1 %}
-                        <span class="glyphicon glyphicon-chevron-left"></span>
+                        <span class="fa fa-chevron-left"></span>
                         {% endif %}
                         {{ genetype }}
                         {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir == 1 %}
-                        <span class="glyphicon glyphicon-chevron-right"></span>
+                        <span class="fa fa-chevron-right"></span>
                         {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir == -1 %}
-                        <span class="glyphicon glyphicon-chevron-right"></span>
+                        <span class="fa fa-chevron-right"></span>
                         {% endif %}
                         </span>
                         </a>

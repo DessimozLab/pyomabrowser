@@ -294,6 +294,65 @@ a.fig{
 }
 
 
+/* Sidebar styles */
+#sidebar-container.full-height {
+    /*min-height: 100vh;*/
+}
+
+/* Menu item*/
+#sidebar-container .list-group a {
+    height: 50px;
+    color: white;
+}
+
+/* Submenu item*/
+#sidebar-container .list-group .sidebar-submenu a {
+    height: 45px;
+
+}
+
+.menu-tab {
+    background-color: white;
+    color: #307C3B;
+    /*height: 50px;*/
+    padding: 0.25rem 0.75rem;
+}
+
+.menu-tab:hover {
+    background-color: #C8C8C8;
+    transition: background 0.5s;
+}
+
+.menu-tab {
+    /* display: none; */
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+}
+
+.menu-tab.selected {
+    display: block;
+  }
+
+
+
+@keyframes fadein {
+0%   { opacity: 0; }
+100% { opacity: 1; }
+}
+
+.content-container-row {
+    margin-top: 1.2em;
+}
+
+.card-body.gene-orthology, .gene-orthology .selected {
+    background-color: #90CAF9;
+}
+.card-body.oma-group, .oma-group .selected {
+    background-color: #FFF49D;
+}
+.card-body.genome, .genome .selected {
+    background-color: #FFAB91;
+}
 
 
 
