@@ -7,13 +7,16 @@
 
 {% block contentTab %}
 
-    <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
-         aria-hidden="true">
+    <div class="modal fade" id="orthology-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h3 id="myModalLabel">The OMA Browser reports for every entry different types of orthology</h3>
+
+                    <h5 class="modal-title">The OMA Browser reports for every entry different types of orthology</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+
                 </div>
                 <div class="modal-body">
                     {% include "includes/otypes.html" %}
@@ -26,7 +29,7 @@
         <div class="panel-heading clearfix">
             <div class="pull-left">
                 Pairwise Orthologs <a href="#" class="badge" role="button" data-toggle="modal"
-                                      data-target=".bs-example-modal-lg">?</a>
+                                      data-target="#orthology-modal">?</a>
             </div>
             <div class="pull-right">
                 Download:
