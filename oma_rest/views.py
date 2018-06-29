@@ -72,7 +72,10 @@ class ProteinEntryViewSet(ViewSet):
         """
 
         # Load the entry and its domains, before forming the JSON to draw client-side.
-        entry_nr = utils.id_resolver.resolve(entry_id)
+        try:
+            entry_nr = utils.id_resolver.resolve(entry_id)
+        except db.InvalidId:
+            raise NotFound('requested id is unknown')
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
         serializer = serializers.ProteinEntryDetailSerializer(
             instance=protein, context={'request': request})
