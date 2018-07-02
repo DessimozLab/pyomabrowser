@@ -8,9 +8,9 @@ import hashlib
 import collections
 import json
 import pandas as pd
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.conf import settings
-from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
@@ -764,6 +764,40 @@ def function_projection(request):
     else:
         form = forms.FunctionProjectionUploadForm()
     return render(request, "function_projection_upload.html", {'form': form})
+
+
+class EntrySearchJson(JsonModelMixin):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'oma_group': None,
+                   'hog_family_nr': 'roothog'}
+
+    def as_json(self, iter):
+        return list(self.to_json_dict(iter))
+
+
+class Searcher(View):
+    _allowed_functions = ['id', 'group', 'sequence']
+
+    def search_id(self, query, request):
+        try:
+            entry_nr = utils.id_resolver.resolve(query)
+            return redirect('entry_info', entry_nr)
+        except db.AmbiguousID as ambigiuous:
+            logger.info("query {} maps to {} entries".format(query, len(ambigiuous.candidates)))
+            entrymodels_of_ambigiuous = [models.ProteinEntry.from_entry_nr(utils.db, entry) for entry in ambigiuous.candidates]
+            context = {'query': query, 'data': EntrySearchJson().as_json(entrymodels_of_ambigiuous)}
+            return render(request, 'disambiguate.html', context=context)
+
+    def get(self, request):
+        func = request.GET.get('type', 'id').lower()
+        query = request.GET.get('query')
+        if func not in self._allowed_functions:
+            return HttpResponseBadRequest()
+        meth = getattr(self, "search_"+func)
+        return meth(query, request)
+
+
 
 
 @method_decorator(never_cache, name='dispatch')

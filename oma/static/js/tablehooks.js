@@ -29,6 +29,21 @@
                                       + ('0000000' + value).slice(-7) // Format with leading 0s
                                       + '</a>';
     };
+    exports.format_roothog = function(value, row) {
+        if (value > 0) {
+            return '<a href="/oma/hogs/' + row.protid + '/vis/">HOG:' + ('0000000' + value).slice(-7) + "</a>";
+        } else {
+            return "n/a";
+        }
+    };
+
+    exports.format_omagroup = function(value, row){
+        if (value > 0){
+            return '<a href="/oma/group/'+row.protid+'/">' + value +'</a>';
+        } else {
+            return 'n/a';
+        }
+    };
 
     exports.format_domainprevalence = function(value, row) {
         return row.PrevFrac.toFixed(1) + "%";
