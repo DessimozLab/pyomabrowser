@@ -403,6 +403,7 @@ class InfoViewFasta(InfoBase, FastaView):
     def render_to_response(self, context, **kwargs):
         return self.render_to_fasta_response([context['entry']])
 
+
 class InfoViewCDSFasta(InfoViewFasta):
     def get_sequence(self, member):
         return member.cdna
@@ -481,7 +482,7 @@ class HOGsOrthoXMLView(HOGsView):
         except KeyError:
             raise Http404('requested id is not part of any HOG')
         except ValueError as e:
-            raise Http404(e.message)
+            raise Http404(str(e))
         response = HttpResponse(content_type='text/plain')
         response.write(orthoxml)
         return response

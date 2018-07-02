@@ -43,7 +43,7 @@
     };
 
     exports.format_info_link = function (value, row) {
-        return '<a href="/cgi-bin/gateway.pl?f=DisplayEntry&p1=' + value + '">' + value + '</a>';
+        return '<a href="/oma/info/' + value + '">' + value + '</a>';
     };
     exports.format_vps_link = function(value, row){
         return '<a href="/oma/vps/' + value + '">' + value + '</a>';

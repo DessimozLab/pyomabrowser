@@ -172,6 +172,10 @@
             url: function(id){ return "http://www.wormbase.org/db/gene/gene?name="+id;},
             img: '<img src="'+static_root+'/image/wormbase.gif" alt="Wormbase" />'
         },
+        'NCBI': {
+            url: function(id){return "///www.ncbi.nlm.nih.gov/protein/"+id;},
+            img: '<img src="'+static_root+'/image/ncbi.gif" alt="NCBI" />'
+        },
         'HGNC': {
             url: function(id){return "https://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id="+id;},
             img: '<img src="'+static_root+'/image/hgnc.gif" alt="HGNC"/>',

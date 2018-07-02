@@ -59,7 +59,7 @@
                 <li role="presentation" class="dropdown-header">{{entry.omaid}}</li>
                 <li><a class="" href="{% url 'omagroup-entry' entry.omaid %}">OMA Group</a></li>
                 <li><a class="" href="{% url 'hogs' entry.omaid  %}">Hierarchical orthologous group (HOG)</a></li>
-                <li><a class="" href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{entry.omaid}}">Functional annotations</a></li>
+                <li><a class="" href="{% url 'entry_info' entry.omaid %}">Functional annotations</a></li>
                 <li><a class="" href="{% url 'synteny' entry.omaid  %}">Local synteny</a></li>
               {% else %}
                 <li><a class="" href="{% url 'landOMA' %}">OMA groups</a></li>
@@ -199,7 +199,7 @@
             return label;
         },
         onSelect: function(item){
-            window.location.href = "/cgi-bin/gateway.pl?f=DisplayEntry&p1=" + item.data.entry_nr;
+            window.location.href = "/oma/info/" + item.data.entry_nr;
             return false;
         }
     };
