@@ -1,0 +1,96 @@
+<!-- Sidebar / menu -->
+        <div id="sidebar-container" class="col-3 full-height"> <!-- #sidebar-container -->
+
+            <div id="accordion">
+                <div class="menu-tab" style="cursor: pointer;" onclick="console.log('graphical clicked')"
+                     {% if tab == 'hog' or tab == 'hoggraphicalviewer' %} data-toggle="collapse" data-target="#collapseGraphicalViewer" aria-expanded="true" aria-controls="#collapseOrthology"{%endif%}>
+                    <span class=""><a href="{% url 'hog_vis' entry.omaid %}">Graphical viewer</a></span>
+                </div>
+
+
+                <div id="collapseGraphicalViewer" class="collapse pt-0{% if tab == 'hog' or tab == 'hoggraphicalviewer' %} show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
+
+                    <div class="card-body pl-4 py-2">
+                        <h6>Filter by Taxon</h6>
+
+                        <div class="form-check pl-4">
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="mammalsFilter">
+                                <label class="form-check-label" for="mammalsFilter">
+                                    Mammals
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="vertebratesFilter">
+                                <label class="form-check-label" for="vertebratesFilter">
+                                    Vertebrates
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="customFilter1">
+                                <label class="form-check-label" for="customFilter1">
+                                    Custom 1
+                                </label>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'tableviews' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('tableviews clicked')" data-toggle="collapse" data-target="#collapsetableviews" aria-expanded="false" aria-controls="#collapseTableViews">
+                    <span class=""><a href="{% url 'hogs' entry.omaid %}">Table view</a></span>
+                </div>
+
+                <div id="collapseTableViews" class="collapse pt-0{% if tab == 'tableviews' %} show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
+
+                    <div class="card-body pl-4 py-2">
+                        <h6>Filter by Taxon</h6>
+                        <p class="small">These should be loaded from django side?</p>
+                        <div class="form-check pl-4">
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="mammalsFilter">
+                                <label class="form-check-label" for="mammalsFilter">
+                                    Mammals
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="vertebratesFilter">
+                                <label class="form-check-label" for="vertebratesFilter">
+                                    Vertebrates
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="customFilter1">
+                                <label class="form-check-label" for="customFilter1">
+                                    Custom 1
+                                </label>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'similarhogs' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Similar HOGs')">
+                    <span class=""><a href="{% url 'hog_domains' entry.omaid %}">Similar HOGs</a></span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'information' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('information')">
+                    <span class=""><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}" >Information</a></span>
+                </div>
+
+
+
+
+
+            </div>
+
+        </div> <!-- #sidebar-container -->
+
