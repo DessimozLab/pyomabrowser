@@ -7,76 +7,262 @@
 {% block meta_hook %} <meta name="keywords" content="orthology,evolutionary gene relations,evolution,paralogy,inference"> {% endblock %}
 
 {% block content %}
-<!--           -->
-<!-- alert    -->
+<style>
+.number-large {
+
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1.1;
+
+}
+
+.border-4 {
+    border-width: 4px !important;
+}
+
+</style>
 <div class="container-fluid">
     <!-- content    -->
 
-    <div class="row" style="height:450px !important;">
-        <!--           -->
-        <!-- search    -->
-        <div class="col-sm-8 col-md-8 " style="">
-            <div class="jumbotron jum_custom">
-                <div class="container">
-                    <img src="{% static "image/oma2.png" %}" class="img-responsive margin-auto" alt="OMA logo">
+    <div class="container mt-5" style="width: 100%;">
 
-                    <p><br></p>
-                    <form role="search" id="searchForm" action="/cgi-bin/gateway.pl" method="GET">
-                    <div class="col-md-10 col-md-offset-1">
-                        <div class="col-sm-4">
-                            <select id="selectBrowser" class="form-control btn-mini" name="f" onchange="update_autocomplete()">
-                                <option value="DisplayEntry" selected="selected">Identifier</option>
-                                <option value="SearchSeqDb">Protein sequence</option>
-                                <option value="DisplayGroup">OMA group</option>
-                                <option value="SearchDb">Full-text search</option>
-                            </select>
-                        </div>
-                        <div class="col-sm-8">
-                            <div class="input-group">
-                                <input id='inputBrowser' name="p1" type="text" class="form-control" />
-                                <span class="input-group-btn">
-                                <button class="btn btn-default" id='loupeBrowser' type="submit">
-                                    <span class="glyphicon glyphicon-search "></span>
-                                </button>
-                                </span>
+        <div class="row d-none d-md-block">
+            <div class="col-12">
+                <img src="{% static "image/oma2.png" %}" class="img-responsive mx-auto d-block" alt="OMA logo">
+                <div class="entete my-4" style="height: 10px;"></div>
+            </div>
+        </div>
+
+        <div class="card bg-light text-center">
+
+            <div class="card-body">
+
+                <!-- search    -->
+                <div class="text-nowrap">
+                    <form class="form-inline justify-content-center" role="search" id="searchForm" action="/cgi-bin/gateway.pl" method="GET">
+                        <select id="selectNav" class="form-control btn-mini" name="f" onchange="update_navbar_autocomplete()">
+                            <option value="DisplayEntry" selected="selected">Identifier</option>
+                            <option value="SearchSeqDb">Protein sequence</option>
+                            <option value="DisplayGroup">OMA group</option>
+                            <option value="SearchDb">Full-text search</option>
+                        </select>
+                        <div class="input-group ">
+                            <input id="inputBrowser" class="form-control " type="text" name="p1">
+                            <div class="input-group-append">
+                                <button class="btn btn-default" type="submit"><i class="fas fa-search"></i></button>
                             </div>
-                            <a href="#" id="toggle">Expand (e.g. to paste a long amino-acid sequence)</a>
                         </div>
-                    </div>
                     </form>
-                    <br>
+
                 </div>
-                <div class="row top-buffer">
-                    <div class="col-md-8 col-md-offset-2">
-                        <div class="text-center">
-                            Examples: 
-                            <a id='exEntry'>Entry HUMAN22168</a>
-                          - <a id='exEntry2'>Entry P53_RAT</a>
-                          -  <a id='exPhoto'>Search for "photoreceptor"</a> 
-                        </div>
+
+                <div class="mx-auto small"><a href="#" id="toggle">Expand (e.g. to paste a long amino-acid sequence)</a></div>
+
+
+            </div>
+
+            <div class="mx-auto mb-3">
+                <span class="font-weight-bold">Examples:</span>
+                <a href="#" class="text-muted" id='exEntry'>Entry HUMAN22168</a> - <a href="#" class="text-muted" id='exEntry2'>Entry P53_RAT</a> -  <a href="#" class="text-muted" id='exPhoto'>Search for "photoreceptor"</a>
+            </div>
+
+        </div>
+            <!--
+            <div class="col-sm-4 col-md-4 " >
+                <div class="jumbotron jum_custom  " style="height:450px !important;">
+                    <div class="caption comment-text" id="latest-news">
+                        <h1>Latest news</h1>
+                        <ul >
+                            {% autoescape off %}
+                            {%for t in tweets %}
+                            <li>{{ t }}</li>
+                            {% endfor %}
+                            {% endautoescape %}
+
+                        </ul>
+                        <p><a href="https://twitter.com/intent/user?screen_name=OMABrowser" class="btn btn-primary btn-sm bottomright" role="button">Follow us on Twitter</a></p>
+                    </div>
+                </div>
+            </div>
+            -->
+
+        <section id="release_info" class="my-5 d-flex flex-row justify-content-between border border-4 border-right-0 border-left-0 py-3">
+
+
+            <div class="d-flex flex-column">
+                <span class="flex-item number-large">2190 {{ nr_genome }}</span>
+                <span class="flex-item text-muted text-center">Full genome</span>
+            </div>
+            <div class="d-flex flex-column">
+                <span class="flex-item number-large">12 M{{ nr_proteins }}</span>
+                <span class="flex-item text-muted text-center">Proteins</span>
+            </div>
+            <div class="d-flex flex-column">
+                <span class="flex-item number-large">798760{{ nr_oma_groups }}</span>
+                <span class="flex-item text-muted text-center">OMA groups</span>
+            </div>
+            <div class="d-flex flex-column">
+                <span class="flex-item number-large">603285{{ nr_roothogs }}</span>
+                <span class="flex-item text-muted text-center">Deepest HOGs</span>
+            </div>
+            <div class="d-flex flex-column">
+                <span class="flex-item number-large text-center">May 2018 {{ rel_name }}</span>
+                <span class="flex-item text-muted text-center">Release</span>
+            </div>
+
+
+        </section>
+
+
+
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">First time here?</h5>
+                        <p class="card-text">
+
+                            <ul>
+                                <li>Read our
+                                    <a href="{% url 'about'  %}">brief introduction to OMA</a>.
+                                </li>
+                                <li>Familiarise yourself with the
+                                    <a href="{% url 'type'  %}">different types of orthologs provided</a>.
+                                </li>
+                                <li>Get ideas about
+                                    <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
+                                </li>
+                            </ul>
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Online Tools</h5>
+                        <p class="card-text">
+
+                            <ul>
+                                <li>Read our
+                                    <a href="{% url 'about'  %}">brief introduction to OMA</a>.
+                                </li>
+                                <li>Familiarise yourself with the
+                                    <a href="{% url 'type'  %}">different types of orthologs provided</a>.
+                                </li>
+                                <li>Get ideas about
+                                    <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
+                                </li>
+                            </ul>
+
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-4 col-md-4 " >
-            <div class="jumbotron jum_custom  " style="height:450px !important;">
-                <div class="caption comment-text" id="latest-news">
-                    <h1>Latest news</h1>
-                    <ul >
-                        {% autoescape off %}
-                        {%for t in tweets %}
-                        <li>{{ t }}</li>
-                        {% endfor %}
-                        {% endautoescape %}
 
-                    </ul>
-                    <p><a href="https://twitter.com/intent/user?screen_name=OMABrowser" class="btn btn-primary btn-sm bottomright" role="button">Follow us on Twitter</a></p>
+
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Download options</h5>
+                        <p class="card-text">
+                            <ul>
+                                <li>
+                                    <b><a href="{% url 'current'  %}">Current release</a>:</b>
+                                    All data is available for downloading in a variety of formats.
+                                </li>
+
+                                <li>
+                                    <b><a href="/standalone">OMA Standalone</a>:</b>
+                                    OMA standalone allows you to infer orthologs on your own set of genomes.
+                                </li>
+
+                                <li>
+                                    <b><a href="{% url 'export' %}">Export All-All</a>:</b>
+                                    Export a set of genomes and their precomputed all-against-all comparisons for OMA standalone.
+                                </li>
+
+                                <li>
+                                    <b><a href="{% url 'archives'  %}">Archives</a>:</b>
+                                    Previous OMA releases remain available in this section.
+                                </li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Latest news</h5>
+                        <p class="card-text">
+                            <ul >
+                            {% autoescape off %}
+                            {%for t in tweets %}
+                               <li>{{ t }}</li>
+                            {% endfor %}
+                            {% endautoescape %}
+
+                            </ul>
+
+                            <b>How to stay in touch:</b>
+                            <p>
+                                <a class="fig" href="javascript:show_frame('frame_twitter');" title="Twitter"><i class="fab fa-2x fa-twitter-square"></i></a>
+                                &nbsp;
+                                <a class="fig" href="http://omabrowser.blogspot.com" title="Blog"><i
+                                    class="fa fa-2x fa-pencil-square-o"></i></a>
+                                &nbsp;
+                                <a class="fig" href="http://omabrowser.blogspot.com/feeds/posts/default" title="RSS"><i
+                                    class="fa fa-2x fa-rss"></i></a>
+                                &nbsp;
+                                <a class="fig" href="javascript:show_frame('frame_mailman');" title="Newsletter">
+                                    <i class="fa fa-2x fa-newspaper-o"></i>
+                                    <!--<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 32 32" focusable="false"><title>Newsletter</title><path d="M4,14h20v-2H4V14z M15,26h7v-2h-7V26z M15,22h9v-2h-9V22z M15,18h9v-2h-9V18z M4,26h9V16H4V26z M28,10V6H0v22c0,0,0,4,4,4   h25c0,0,3-0.062,3-4V10H28z M4,30c-2,0-2-2-2-2V8h24v20c0,0.921,0.284,1.558,0.676,2H4z"/></svg> -->
+                                </a>
+
+                            </p>
+                            <span id="frame_twitter" style="display: none;">
+                                <a href="https://twitter.com/omabrowser"
+                                   class="twitter-follow-button" data-show-screen-name="false" data-show-count="true">Follow</a>
+                                <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+                            </span>
+                            <span id="frame_mailman" style="display: none;">
+                                <form action="https://lists.dessimoz.org/subscribe/oma" method="POST">
+                                    Email: <input name="email" size="13"/>
+                                    <input type="submit" value="Sign up"/><br/>(max 1-2 emails/month, no spam!)
+                                </form>
+                            </span>
+                            <script>
+                                function show_frame(frame) {
+                                    var frames = ["frame_twitter", "frame_mailman"];
+                                    frames.forEach(function (frm) {
+                                        document.getElementById(frm).style.display = (frm === frame ? 'initial' : 'none');
+                                    });
+                                }
+                            </script>
+
+                            </p>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col">
+                        <p class="alert alert-success thd" role="alert">
+                        If you use OMA in your work, please consider citing:<br/>
+                        Altenhoff A et al., <em>The OMA orthology database in 2015: function predictions, better plant support, synteny view and other improvements</em>, Nucleic Acids Research, 2015, 43 (D1): D240-D249 (doi:<a href="http://dx.doi.org/10.1093/nar/gku1158">10.1093/nar/gku1158</a>).
+                    </p>
+            </div>
+        </div>
+
     </div>
 
-
+</div>
 <script type="text/javascript">
 
 $('#exPhoto').click( function() {
@@ -131,159 +317,5 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
 
 </script>
 
-<div class="row">
-    <!--           -->
-    <!-- 3 columns    -->
-    <div class=" col-sm-12 col-md-12 ">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-sm-6 col-md-6 ">
-                        <div class="thumbnail oma-3-panels">
-                            <div class="caption">
-
-
-                                <h1>First time here?</h1>
-                                <ul>
-                                    <li>Read our
-                                        <a href="{% url 'about'  %}">brief introduction to OMA</a>.
-                                    </li>
-                                    <li>Familiarise yourself with the
-                                        <a href="{% url 'type'  %}">different types of orthologs provided</a>.
-                                    </li>
-                                    <li>Get ideas about
-                                        <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-
-                    </div>
-
-                    <div class="col-sm-6 col-md-6 ">
-                        <div class="thumbnail oma-3-panels">
-                            <div class="caption">
-
-
-                                <h1>Online Tools</h1>
-                                <ul>
-                                    <li>Read our
-                                        <a href="{% url 'about'  %}">brief introduction to OMA</a>.
-                                    </li>
-                                    <li>Familiarise yourself with the
-                                        <a href="{% url 'type'  %}">different types of orthologs provided</a>.
-                                    </li>
-                                    <li>Get ideas about
-                                        <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-
-
-
-                </div>
-
-                <div class="row">
-
-                    <div class="col-sm-6 col-md-6">
-                        <div class="thumbnail oma-3-panels">
-                            <div class="caption">
-
-
-                                <h1>Download options</h1>
-                                <ul>
-                                    <li>
-                                        <b><a href="{% url 'current'  %}">Current release</a>:</b>
-                                        All data is available for downloading in a variety of formats.
-                                    </li>
-
-                                    <li>
-                                        <b><a href="/standalone">OMA Standalone</a>:</b>
-                                        OMA standalone allows you to infer orthologs on your own set of genomes.
-                                    </li>
-
-                                    <li>
-                                        <b><a href="{% url 'export' %}">Export All-All</a>:</b>
-                                        Export a set of genomes and their precomputed all-against-all comparisons for OMA standalone.
-                                    </li>
-
-                                    <li>
-                                        <b><a href="{% url 'archives'  %}">Archives</a>:</b>
-                                        Previous OMA releases remain available in this section. 
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-md-6 ">
-                        <div class="thumbnail oma-3-panels ">
-                            <div class="caption comment-text" id="latest-news">
-
-                                <h1>Latest news</h1>
-                                <ul >
-				    {% autoescape off %}
-                                    {%for t in tweets %}
-                                       <li>{{ t }}</li>
-                                    {% endfor %}
-				    {% endautoescape %}
-
-                                </ul>
-                                <p><a href="https://twitter.com/intent/user?screen_name=OMABrowser" class="btn btn-primary btn-sm bottomright" role="button">Follow us on Twitter</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-    </div>
-</div>
-
-    <!--           -->
-    <!-- cite    -->
-   <div class="row">
-       <div class="col-sm-12 col-md-7 col-md-offset-1">
-           <div class="alert alert-success thd" role="alert">
-            	If you use OMA in your work, please consider citing:<br/>
-                Altenhoff A et al., <em>The OMA orthology database in 2015: function predictions, better plant support, synteny view and other improvements</em>, Nucleic Acids Research, 2015, 43 (D1): D240-D249 (doi:<a href="http://dx.doi.org/10.1093/nar/gku1158">10.1093/nar/gku1158</a>).
-           </div>
-       </div>
-       <div class="col_sm-12 col-md-3">
-           <div class="thd" style="text-align: right;">
-               <b>How to stay in touch:</b>
-               <p>
-                   <a class="fig" href="javascript:show_frame('frame_twitter');" title="Twitter"> <i class="fa fa-2x fa-twitter"></i></a>
-                   &nbsp;
-                   <a class="fig" href="http://omabrowser.blogspot.com" title="Blog"><i class="fa fa-2x fa-pencil-square-o"></i></a>
-                    &nbsp;
-                   <a class="fig" href="http://omabrowser.blogspot.com/feeds/posts/default" title="RSS"><i class="fa fa-2x fa-rss"></i></a>
-                   &nbsp;
-                   <a class="fig" href="javascript:show_frame('frame_mailman');" title="Newsletter">
-                       <i class="fa fa-2x fa-newspaper-o"></i>
-                       <!--<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 32 32" focusable="false"><title>Newsletter</title><path d="M4,14h20v-2H4V14z M15,26h7v-2h-7V26z M15,22h9v-2h-9V22z M15,18h9v-2h-9V18z M4,26h9V16H4V26z M28,10V6H0v22c0,0,0,4,4,4   h25c0,0,3-0.062,3-4V10H28z M4,30c-2,0-2-2-2-2V8h24v20c0,0.921,0.284,1.558,0.676,2H4z"/></svg> -->
-                       </a>
-
-               </p>
-                <span id="frame_twitter" style="display: none;"><a href="https://twitter.com/omabrowser" class="twitter-follow-button" data-show-screen-name="false" data-show-count="true">Follow</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></span>
-                <span id="frame_mailman" style="display: none;">
-                    <form action="https://lists.dessimoz.org/subscribe/oma" method="POST">
-                        Email: <input name="email" size="13"/>
-                        <input type="submit" value="Sign up" /><br/>(max 1-2 emails/month, no spam!)
-                    </form>
-                </span>
-                <script>
-                    function show_frame(frame){
-                        var frames = ["frame_twitter", "frame_mailman"];
-                        frames.forEach(function(frm){
-                            document.getElementById(frm).style.display = (frm === frame ? 'initial' : 'none');
-                        });
-                    }
-                </script>
-           </div>
-       </div>
-    </div>
-</div>
-<!--    end    -->
-<!-- content    -->
 
 {% endblock content %}
