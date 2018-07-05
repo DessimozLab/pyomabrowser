@@ -73,14 +73,17 @@ $(window).on('load', function () {
 
     <div class="row content-container-row"> <!-- row content-container-row -->
 
+        {% if tab == 'hogs' %}
+        {% include "includes/hogs_menu.html" with tab=tab %}
+        {% else %}
         {% include "includes/gene_menu.html" with tab=tab %}
-
+        {%endif%}
         <!-- tab = {{ tab }}  -->
         <!-- entry.omaid = {{ entry.omaid }}  -->
         <!-- entry.canonicalid = {{ entry.canonicalid }}  -->
         <!-- entry.canonicalid.strain = {{ entry.canonicalid.strain }}  -->
 
-        <div class="col"> <!-- content col -->
+        <div class="col-9"> <!-- content col -->
             <!--<h2 class="">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %} </h2>
             <h4>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</h4>
             {% block seqhead_hook %}{% endblock %}
