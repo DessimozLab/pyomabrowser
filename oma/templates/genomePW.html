@@ -1,6 +1,5 @@
 {% extends  "core.html" %}
 {% load staticfiles %}
-{% load bootstrap3 %}
 
 {% block title %}OMA orthology database: orthologs between two genomes{% endblock %}
 {% block meta_description %}Download the list of predicted orthologs between a pair of genomes.{% endblock %}
@@ -80,34 +79,34 @@
             </div>
         </div>
     </div>
-</div>      
+</div>
 
 <script type="text/javascript">
 $(document).ready(function() {
-  
+
   var genomeNames = new Array();
   var genomeIDs = new Object();
   $.getJSON( "/All/flatgenomes.json", function( jsonData ) {
      $.each( jsonData, function ( id, genome ) {
          var tmp = genome.name+ ' (' + genome.id + ')';
          genomeNames.push ( tmp );
-         genomeIDs[tmp] = genome.id; 
+         genomeIDs[tmp] = genome.id;
      });
   });
-  
+
   var substringMatcher = function(strs) {
     return function findMatches(q, cb) {
       var matches, substrRegex;
-   
+
       // an array that will be populated with substring matches
       matches = [];
       if (q.length < 2) {
           return(cb(matches));
       }
-   
+
       // regex used to determine if a string contains the substring `q`
       substrRegex = new RegExp(q, 'i');
-   
+
       // iterate through the pool of strings and for any string that
       // contains the substring `q`, add it to the `matches` array
       $.each(strs, function(i, str) {
@@ -117,12 +116,12 @@ $(document).ready(function() {
           matches.push({ value: str });
         }
       });
-   
+
       cb(matches);
     };
   };
-   
-  
+
+
   $('#textG1').typeahead({
     hint: true
   },
@@ -134,7 +133,7 @@ $(document).ready(function() {
       if(genomeIDs[$(this).val()] == null) {
         $(this).val('');
       }
-  }); 
+  });
   $('#textG2').typeahead({
     hint: true
   },
@@ -146,8 +145,8 @@ $(document).ready(function() {
       if(genomeIDs[$(this).val()] == null) {
         $(this).val('');
       }
-  });; 
-  
+  });
+
   $('#genomePW').submit(function(){
        $('#textG1').val(genomeIDs[$('#textG1').val()]);
        $('#textG2').val(genomeIDs[$('#textG2').val()]);
