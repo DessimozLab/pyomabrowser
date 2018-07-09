@@ -3,12 +3,12 @@
 
             <div id="accordion">
                 <div class="menu-tab" style="cursor: pointer;" onclick="console.log('orthology clicked')"
-                     {% if tab == 'orthology' or tab == 'hog' %} data-toggle="collapse" data-target="#collapseOrthology" aria-expanded="true" aria-controls="#collapseOrthology"{%endif%}>
-                    <span class="">Orthology</span>
+                     {% if tab == 'orthologs' %} data-toggle="collapse" data-target="#collapseOrthology" aria-expanded="true" aria-controls="#collapseOrthology"{%endif%}>
+                    <span class=""><a href="{% url 'pairs' entry.omaid %}" >Orthologs {% if nr_vps %}<span class="badge badge-info">{{nr_vps}}</span>{% endif %}</a></span>
                 </div>
 
 
-                <div id="collapseOrthology" class="collapse pt-0{% if tab == 'orthology' or tab == 'hog' %} show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
+                <div id="collapseOrthology" class="collapse pt-0{% if tab == 'orthologs' %} show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
 
                     <div class="card-body pl-4 py-2">
                         <h6>Filter by Taxon</h6>
@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'domainarcitecture' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Domain architecture')">
-                    <span class="">Domain architecture</span>
+                    <span class=""><a href="{% url 'hog_domains' entry.omaid %}">Domain architecture</a></span>
                 </div>
 
                 <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Local synteny')"
