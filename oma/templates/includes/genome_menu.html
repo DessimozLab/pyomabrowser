@@ -1,0 +1,21 @@
+<!-- Sidebar / menu -->
+    <div id="sidebar-container" class="col-3 full-height"> <!-- #sidebar-container -->
+
+
+        <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'genomeinformation' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('information')">
+            <span class="">Information</span>
+        </div>
+
+        <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'listgenes' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('List genes')">
+            <span class="">List genes</span>
+        </div>
+
+        <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'species' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Closest species')">
+            <span class="">Closest species</span>
+        </div>
+
+        <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Synteny')">
+            <span class="">Synteny</span>
+        </div>
+
+    </div> <!-- #sidebar-container -->
