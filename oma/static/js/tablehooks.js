@@ -37,12 +37,18 @@
         }
     };
 
-    exports.format_omagroup = function(value, row){
+    exports.format_omagroup_of_entry = function(value, row){
         if (value > 0){
             return '<a href="/oma/group/'+row.protid+'/">' + value +'</a>';
         } else {
             return 'n/a';
         }
+    };
+
+    exports.format_omagroup = function(value){
+        if (value > 0 || (value !== 'n/a') ){
+            return '<a href="/oma/omagroup/'+value+'/">' + value + '</a>';
+        } else {return 'n/a';}
     };
 
     exports.format_domainprevalence = function(value, row) {
@@ -62,6 +68,33 @@
     };
     exports.format_vps_link = function(value, row){
         return '<a href="/oma/vps/' + value + '">' + value + '</a>';
+    };
+    exports.seq_search_alignment_formatter = function(value, row){
+        var seq = row.sequence;
+        var alignment = row.alignment;
+        if (seq === undefined || alignment === undefined) return "n/a";
+        var label = (row.alignment_range[0] <= 9 ? seq.substr(0, row.alignment_range[0]) : "..("+ (row.alignment_range[0]-3)+ ").."+seq.substr(row.alignment_range[0]-3, 3));
+        var matched = false, snip = [];
+        for (var pos=0; pos < alignment[1].length; pos++){
+            if (alignment[1][pos] === "_") continue;
+            if (alignment[1][pos] === alignment[0][pos]) {
+                if (matched) {
+                    snip.push(alignment[1][pos]);
+                } else {
+                    matched = true;
+                    snip.push('<span class="kw1">' + alignment[1][pos]);
+                }
+            } else {
+                if (! matched){
+                    snip.push(alignment[1][pos]);
+                } else {
+                    matched = false;
+                    snip.push('</span>', alignment[1][pos]);
+                }
+            }
+        }
+        if (matched){ snip.push("</span>"); }
+        return label + snip.join("") + "..("+ (seq.length-row.alignment_range[1]) + ")..";
     };
 
     var xref_re = {

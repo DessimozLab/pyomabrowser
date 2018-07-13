@@ -1,0 +1,10 @@
+{% extends "disambiguate_entry.html" %}
+
+{% block bootstrap_table_attrs %}{% endblock %}
+
+{% block bootstrap_table_columns %}
+    <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_omagroup">OMA Group</th>
+    <th data-field="fingerprint" data-sortable="true" data-formatter="tablehooks.format_omagroup">Fingerprint</th>
+    <th data-field="keywords" data-sortable="true">Group description</th>
+    <th data-field="size" data-sortable="true" >Nr genes in OMA Group</th>
+{% endblock %}

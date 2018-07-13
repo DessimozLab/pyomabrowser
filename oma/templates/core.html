@@ -79,17 +79,18 @@
         <!-- search    -->
 
 
-        <form class="navbar-form navbar-left" role="search" id="searchNavForm" action="/cgi-bin/gateway.pl" method="GET">
+        <form class="navbar-form navbar-left" role="search" id="searchNavForm" action="{% url 'search' %}" method="POST">
+          {% csrf_token %}
           <div class="form-group">
-            <select id="selectNav" class="form-control btn-mini" name="f" onchange="update_navbar_autocomplete()">
-              <option value="DisplayEntry" selected="selected">Identifier</option>
-              <option value="SearchSeqDb">Protein sequence</option>
-              <option value="DisplayGroup">OMA group</option>
+            <select id="selectNav" class="form-control btn-mini" name="type" onchange="update_navbar_autocomplete()">
+              <option value="ID" selected="selected">Identifier</option>
+              <option value="Sequence">Protein sequence</option>
+              <option value="Group">OMA group</option>
               <option value="SearchDb">Full-text search</option>
             </select>
           </div>
           <div class="input-group">
-            <input id="textNav" class="form-control" type="text" name="p1">
+            <input id="textNav" class="form-control" type="text" name="query">
             <span class="input-group-btn">
               <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search grey"></span></button>
             </span>

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function, division
+
+import shlex
 from builtins import map
 from builtins import str
 from builtins import range
 import hashlib
 import collections
-import json
 import pandas as pd
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -28,6 +29,7 @@ import os
 import re
 import time
 import glob
+import json
 
 from . import tasks
 from . import utils
@@ -779,25 +781,97 @@ class EntrySearchJson(JsonModelMixin):
 class Searcher(View):
     _allowed_functions = ['id', 'group', 'sequence']
 
-    def search_id(self, query, request):
+    def search_id(self, request, query):
+        context = {'query': query}
         try:
             entry_nr = utils.id_resolver.resolve(query)
             return redirect('entry_info', entry_nr)
-        except db.AmbiguousID as ambigiuous:
-            logger.info("query {} maps to {} entries".format(query, len(ambigiuous.candidates)))
-            entrymodels_of_ambigiuous = [models.ProteinEntry.from_entry_nr(utils.db, entry) for entry in ambigiuous.candidates]
-            context = {'query': query, 'data': EntrySearchJson().as_json(entrymodels_of_ambigiuous)}
-            return render(request, 'disambiguate.html', context=context)
+        except db.AmbiguousID as ambiguous:
+            logger.info("query {} maps to {} entries".format(query, len(ambiguous.candidates)))
+            entries = [models.ProteinEntry.from_entry_nr(utils.db, entry) for entry in ambiguous.candidates]
+        except db.InvalidId as e:
+            entries = []
+            context['message'] = "Could not find any protein matching '{}'".format(query)
+        context['data'] = json.dumps(EntrySearchJson().as_json(entries))
+        return render(request, 'disambiguate_entry.html', context=context)
+
+    def search_group(self, request, query):
+        try:
+            group_nr = utils.db.resolve_oma_group(query)
+            return redirect('omagroup', group_nr)
+        except db.AmbiguousID as ambiguous:
+            logger.info('search_group results in ambiguous match: {}'.format(ambiguous))
+            context = {'query': query,
+                       'data': json.dumps([utils.db.oma_group_metadata(grp) for grp in ambiguous.candidates])}
+            return render(request, "disambiguate_group.html", context=context)
+
+    def search_sequence(self, request, query, strategy='mixed'):
+        strategy = strategy.lower()[:5]
+        if strategy not in ('exact', 'mixed', 'approx'):
+            raise ValueError("invalid search strategy parameter")
+        seq_searcher = utils.db.seq_search
+        seq = seq_searcher._sanitise_seq(query)
+        if len(seq) < 5:
+            raise ValueError('query sequence is too short')
+        context = {'query': seq.decode()}
+        targets = []
+        json_encoder = EntrySearchJson()
+
+        if strategy[:5] in ('exact', 'mixed'):
+            exact_matches = seq_searcher.exact_search(seq,
+                                                      only_full_length=False,
+                                                      is_sanitised=True)
+            if len(exact_matches) == 1:
+                return redirect('entry_info', exact_matches[0])
+
+            context['identified_by'] = 'exact match'
+            targets = [models.ProteinEntry.from_entry_nr(utils.db, enr) for enr in exact_matches]
+
+        if strategy == 'approx' or (strategy == 'mixed' and len(targets) == 0):
+            approx = seq_searcher.approx_search(seq, is_sanitised=True)
+            for enr, align_results in approx:
+                if align_results['score'] < 50:
+                    break
+                protein = models.ProteinEntry.from_entry_nr(utils.db, enr)
+                protein.alignment_score = align_results['score']
+                protein.alignment = [x[0] for x in align_results['alignment']]
+                protein.alignment_range = align_results['alignment'][1][1]
+                targets.append(protein)
+            json_encoder.json_fields.update({'sequence': None, 'alignment': None,
+                                             'alignment_score': None, 'alignment_range': None})
+            context['identified_by'] = 'approximate match'
+        context['data'] = json.dumps(json_encoder.as_json(targets))
+        return render(request, "disambiguate_sequence.html", context=context)
+
+    def search_fulltext(self, request, query):
+        terms = filter(lambda x: True, shlex.split(query))
+        logger.info(terms)
+        cands = []
+        for term in terms:
+            logger.info(term)
+        return HttpResponse('hi there')
 
     def get(self, request):
-        func = request.GET.get('type', 'id').lower()
-        query = request.GET.get('query')
-        if func not in self._allowed_functions:
-            return HttpResponseBadRequest()
-        meth = getattr(self, "search_"+func)
-        return meth(query, request)
+        try:
+            func = request.GET.get('type', 'id').lower()
+            query = request.GET.get('query', '')
+            if func not in self._allowed_functions:
+                raise ValueError('invalid query type')
+            meth = getattr(self, "search_"+func)
+            return meth(request, query)
+        except ValueError as e:
+            return HttpResponseBadRequest(str(e))
 
-
+    def post(self, request):
+        try:
+            func = request.POST.get('type', 'id').lower()
+            query = request.POST.get('query', '')
+            if func not in self._allowed_functions:
+                return HttpResponseBadRequest()
+            meth = getattr(self, "search_"+func)
+            return meth(request, query)
+        except ValueError as e:
+            return HttpResponseBadRequest(str(e))
 
 
 @method_decorator(never_cache, name='dispatch')

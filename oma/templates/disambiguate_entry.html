@@ -13,7 +13,9 @@
         <div class="panel-body">
             <table class="table table-hover" id="matchTable"
                    data-show-toggle="true"
+                   {% block bootstrap_table_attrs %}
                    data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
+                   {% endblock %}
                    data-show-columns="true" data-search="true" data-show-export="true"
                    data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                    data-mobile-responsive="true" data-check-on-init="true"
@@ -21,6 +23,7 @@
                    data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
                 <thead>
                     <tr>
+                        {% block bootstrap_table_columns %}
                         <th data-field="kingdom" data-sortable="true" data-filter-control="select"
                             data-formatter="tablehooks.format_as_kindom_tag" data-title-tooltip="Domain of Life">D.
                         </th>
@@ -30,7 +33,9 @@
                         <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_info_link">Protein ID</th>
                         <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
                         <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
-                        <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup">OMA Group</th>
+                        <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_of_entry">OMA Group</th>
+                        {% endblock bootstrap_table_columns %}
+                        {% block additional_columns %} {% endblock %}
                     </tr>
                 </thead>
 
@@ -81,6 +86,7 @@
         tab.bootstrapTable('refreshOptions', {'icons': icons});
 
     </script>
+    {% block js_formatter_hooks %}{% endblock %}
 
 
 {% endblock content %}
