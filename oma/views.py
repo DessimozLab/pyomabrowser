@@ -394,6 +394,11 @@ class InfoBase(ContextMixin, EntryCentricMixin):
 class InfoView(InfoBase, TemplateView):
     template_name = "info.html"
 
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(InfoView, self).get_context_data(entry_id, **kwargs)
+        context['nr_vps'] = utils.db.count_vpairs(context['entry'].entry_nr)
+        return context
+
 
 class InfoViewFasta(InfoBase, FastaView):
     def get_fastaheader(self, member):
