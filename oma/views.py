@@ -397,6 +397,9 @@ class InfoView(InfoBase, TemplateView):
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoView, self).get_context_data(entry_id, **kwargs)
         context['nr_vps'] = utils.db.count_vpairs(context['entry'].entry_nr)
+        context['tab'] = 'info'
+        if context['entry'].genome.is_polyploid:
+            context['nr_hps'] = utils.db.count_homoeologs(context['entry'].entry_nr)
         return context
 
 
