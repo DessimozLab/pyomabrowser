@@ -19,6 +19,10 @@
         return "<b>" + value.species + "</b> " + value.strain;
     };
 
+    exports.format_subgenome = function(value){
+        return "sub-genome "+value;
+    };
+
     exports.add_proteinrow_attrs = function(rowdata, index) {
         return {id: rowdata.protid, 'class': "protein"};
     };
