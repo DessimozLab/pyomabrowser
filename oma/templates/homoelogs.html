@@ -12,10 +12,15 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h3 id="myModalLabel">The OMA Browser reports for every entry different types of orthology</h3>
+                    <h3 id="myModalLabel">What are homoeologs?</h3>
                 </div>
                 <div class="modal-body">
-                    {% include "includes/otypes.html" %}
+                    <p> In OMA, we define homoeologous genes as pairs of homologous genes that have started
+                        diverging through speciation between the progenitor genomes and then merged back into
+                        the same genome by hybridisation. Homoeologs are thus only defined in polyploid genomes.
+                    </p>
+                    <p>With OMA we aim at reporting a comprehensive list of homoeologs and provide a confidence
+                    scores to help users to distinguish between high-confident and more putative predictions.</p>
                 </div>
             </div>
         </div>
