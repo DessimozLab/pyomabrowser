@@ -162,7 +162,8 @@
             });
             // remove duplicated xref values of less important sources
             var clean_data = data.filter(function(obj, pos, arr){
-                return arr.map(function(obj){return obj.xref;}).indexOf(obj.xref) === pos});
+                return arr.map(function(obj){return obj.xref;}).indexOf(obj.xref) === pos})
+                .filter(function(obj){return !obj.xref.match("^Rep[0-9]+$")});
             _.forEach(_.groupBy(clean_data, "source"), function(xrefs, source){
                 var list_item = ["<dt>"+source+"</dt>"];
                 _.forEach(xrefs, function(ref){
