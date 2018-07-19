@@ -389,12 +389,20 @@ class InfoBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
-        context.update({'entry': entry})
+        context.update({'entry': entry, 'xref_order': utils.id_mapper['Xref'].canonical_source_order()})
         return context
 
 
 class InfoView(InfoBase, TemplateView):
     template_name = "info.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(InfoView, self).get_context_data(entry_id, **kwargs)
+        context['nr_vps'] = utils.db.count_vpairs(context['entry'].entry_nr)
+        context['tab'] = 'info'
+        if context['entry'].genome.is_polyploid:
+            context['nr_hps'] = utils.db.count_homoeologs(context['entry'].entry_nr)
+        return context
 
 
 class InfoViewFasta(InfoBase, FastaView):
@@ -404,6 +412,11 @@ class InfoViewFasta(InfoBase, FastaView):
 
     def render_to_response(self, context, **kwargs):
         return self.render_to_fasta_response([context['entry']])
+
+
+class InfoViewCDSFasta(InfoViewFasta):
+    def get_sequence(self, member):
+        return member.cdna
 
 
 class HOGsBase(ContextMixin, EntryCentricMixin):
@@ -479,7 +492,7 @@ class HOGsOrthoXMLView(HOGsView):
         except KeyError:
             raise Http404('requested id is not part of any HOG')
         except ValueError as e:
-            raise Http404(e.message)
+            raise Http404(str(e))
         response = HttpResponse(content_type='text/plain')
         response.write(orthoxml)
         response['Access-Control-Allow-Origin'] = '*'

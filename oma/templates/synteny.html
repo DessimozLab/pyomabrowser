@@ -142,7 +142,7 @@ $(window).load(function(){
                         {% elif infotype == 'genenumber' %}
                         <td>
                             <a href = "/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/" class="btn btn-default btn-synteny cursor_wait btn-{{ geneinfo.type }}"
-                                data-toggle="tooltip" data-title="{% include "includes/synteny_xref.html" with eNr=geneinfo.entryid %}" >
+                                data-toggle="tooltip" data-title="{% include "includes/synteny_xref.html" %}" >
                                 {% if geneinfo.dir == -1 %}
                                 <span class="glyphicon glyphicon-chevron-left"></span>
                                 {% endif %}

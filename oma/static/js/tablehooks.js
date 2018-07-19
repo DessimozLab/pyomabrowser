@@ -43,7 +43,7 @@
     };
 
     exports.format_info_link = function (value, row) {
-        return '<a href="/cgi-bin/gateway.pl?f=DisplayEntry&p1=' + value + '">' + value + '</a>';
+        return '<a href="/oma/info/' + value + '">' + value + '</a>';
     };
     exports.format_vps_link = function(value, row){
         return '<a href="/oma/vps/' + value + '">' + value + '</a>';
@@ -81,9 +81,13 @@
                     buf += '<img src="'+ static_root + 'image/' + obj.img + '" alt="' + src + '" />&nbsp;'
                 }
                 buf += value + '</a>';
-                return false;
+                return false;  // break the loop
             }
         });
+        // in case no regex match, just display xref value
+        if (buf.length === 0){
+            buf = value;
+        }
         return buf;
     };
 

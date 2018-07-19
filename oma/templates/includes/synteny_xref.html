@@ -1,4 +1,4 @@
-Info: <a href='/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{eNr}}'>{{geneinfo.species}}{{genetype}}</a>
+Info: <a href='{% url "entry_info" geneinfo.entryid %}'>{{geneinfo.species}}{{genetype}}</a>
 {% for source, data in geneinfo.xrefs.iteritems %}
     <br>{{source}}: <a href='{{data.url}}' target='_new'>{{data.id}}</a>
 {% endfor %}
