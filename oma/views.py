@@ -419,6 +419,67 @@ class InfoViewCDSFasta(InfoViewFasta):
         return member.cdna
 
 
+class HomoeologBase(ContextMixin, EntryCentricMixin):
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(HomoeologBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+        hps_raw = sorted(utils.db.get_homoeologs(entry.entry_nr), key=lambda x: -x['Confidence'])
+        hps = [models.PairwiseRelation(utils.db, rel) for rel in hps_raw]
+
+        if entry.is_main_isoform:
+            entry.alt_splicing_variant = entry.omaid
+        else:
+            entry.alt_splicing_variant = utils.id_mapper['OMA'].map_entry_nr(entry._entry['AltSpliceVariant'])
+
+        longest_seq = 0
+        if len(hps) > 0:
+            longest_seq = max(e.entry_2.sequence_length for e in hps)
+        context.update(
+            {'entry': entry, 'nr_vps': utils.db.count_vpairs(entry.entry_nr),
+             'hps': hps, 'nr_hps': len(hps), 'tab': 'homoeologs',
+             'longest_seq': longest_seq})
+        return context
+
+
+class HomoeologView(HomoeologBase, TemplateView):
+    template_name = "homoelogs.html"
+
+
+class HomoeologFasta(HomoeologBase, FastaView):
+    """returns a fasta represenation of all the homoeologs"""
+    def get_fastaheader(self, memb):
+        reltype = memb.reltype if hasattr(memb, 'reltype') else 'self'
+        conf = memb.confidence if hasattr(memb, 'confidence') else 100
+        return ' | '.join(
+                [memb.omaid, memb.canonicalid, reltype,
+                 'Confidence:{:.2f}'.format(conf),
+                 '[{}]'.format(memb.genome.sciname)])
+
+    def render_to_response(self, context, **kwargs):
+        extended_entries = []
+        for rel in context['hps']:
+            e = rel.entry_2
+            e.confidence = rel.confidence
+            e.reltype = rel.rel_type
+            extended_entries.append(e)
+
+        return self.render_to_fasta_response(itertools.chain(
+            [context['entry']], extended_entries))
+
+
+class HomoeologJson(HomoeologBase, JsonModelMixin, View):
+    json_fields = {'entry_2.omaid': 'protid',
+                   'entry_2.genome.kingdom': 'kingdom',
+                   'entry_2.genome.species_and_strain_as_dict': 'taxon',
+                   'entry_2.canonicalid': 'xrefid',
+                   'confidence': None, 'entry_2.subgenome': 'subgenome'}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['hps']))
+        return JsonResponse(data, safe=False)
+
+
 class HOGsBase(ContextMixin, EntryCentricMixin):
 
     def get_context_data(self, entry_id, level=None, idtype='OMA', **kwargs):
