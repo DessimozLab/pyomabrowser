@@ -21,7 +21,7 @@
                             <li {% ifequal tab 'info' %} class="active" {%endifequal%} ><a href="{% url 'entry_info' entry.omaid %}" >Information</a></li>
                             <li {% ifequal tab 'orthologs' %} class="active" {%endifequal%} ><a href="{% url 'pairs' entry.omaid %}" >Orthologs {% if nr_vps %}<span class="badge">{{nr_vps}}</span>{% endif %}</a></li>
                             {% if entry.genome.is_polyploid %}
-                                <li {% ifequal tab 'homeologs' %} class="active" {%endifequal%} ><a href={% url 'homoeologs' entry.omaid %}>Homeologs {% if nr_hps %}<span class="badge">{{nr_hps}}</span>{% endif %}</a></li>
+                                <li {% ifequal tab 'homoeologs' %} class="active" {%endifequal%} ><a href={% url 'homoeologs' entry.omaid %}>Homoeologs {% if nr_hps %}<span class="badge">{{nr_hps}}</span>{% endif %}</a></li>
                             {% endif %}
                             <li {% ifequal tab 'synteny' %} class="active" {%endifequal%} ><a href="{% url 'synteny' entry.omaid 4 4 %}" >Local synteny</a></li>
 

@@ -434,7 +434,7 @@ class HomoeologBase(ContextMixin, EntryCentricMixin):
             longest_seq = max(e.entry_2.sequence_length for e in hps)
         context.update(
             {'entry': entry, 'nr_vps': utils.db.count_vpairs(entry.entry_nr),
-             'hps': hps, 'nr_hps': len(hps), 'tab': 'homeologs',
+             'hps': hps, 'nr_hps': len(hps), 'tab': 'homoeologs',
              'longest_seq': longest_seq})
         return context
 
