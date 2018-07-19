@@ -454,14 +454,23 @@ class HomoeologFasta(HomoeologBase, FastaView):
                  '[{}]'.format(memb.genome.sciname)])
 
     def render_to_response(self, context, **kwargs):
-        return self.render_to_fasta_response(itertools.chain([context['entry']], context['hps']))
+        extended_entries = []
+        for rel in context['hps']:
+            e = rel.entry_2
+            e.confidence = rel.confidence
+            e.reltype = rel.rel_type
+            extended_entries.append(e)
+
+        return self.render_to_fasta_response(itertools.chain(
+            [context['entry']], extended_entries))
 
 
 class HomoeologJson(HomoeologBase, JsonModelMixin, View):
-    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
-                   'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'reltype': None,
-                   'confidence': None, 'subgenome': None}
+    json_fields = {'entry_2.omaid': 'protid',
+                   'entry_2.genome.kingdom': 'kingdom',
+                   'entry_2.genome.species_and_strain_as_dict': 'taxon',
+                   'entry_2.canonicalid': 'xrefid',
+                   'confidence': None, 'entry_2.subgenome': 'subgenome'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
