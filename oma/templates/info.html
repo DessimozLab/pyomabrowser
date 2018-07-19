@@ -24,6 +24,12 @@
             </dd>
             <dt>Locus</dt><dd id="locus"><span id="chr">{{ entry.chromosome }}</span>:&nbsp;<span id="coordinates">{{ entry.exons }}</span></dd>
             <dt>Number of exons</dt><dd>{{ entry.exons | length }}</dd>
+            {% if entry.alternative_isoforms %}
+            <dt>Alternative splicing</dt>
+                {% for variant in entry.alternative_isoforms %}
+                <dd><a href="{% url "entry_info" variant.omaid %}">{{ variant.omaid }}</a></dd>
+                {% endfor %}
+            {% endif %}
             {% if "PMP" in xrefs %}
                 <dt>Protein Structures</dt><dd>n/a</dd>
             {% endif %}
