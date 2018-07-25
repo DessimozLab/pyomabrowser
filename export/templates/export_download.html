@@ -35,6 +35,26 @@
                                 {% endfor %}
                             </ul>
 
+                            <div id="mailman-signup" class="row">
+                              <div class="col-md-8 col-sm-8">
+                                <div class="thumbnail">
+                                  <div class="caption">
+                                    <h3>Mailing list</h3>
+                                    If you would like to get notified about important information regarding OMA standalone (e.g.
+                                       crucial bug fixes, new features, ...) please sign up for our low volume mailing list.
+                                    <form action="https://lists.dessimoz.org/subscribe/omastandalone" method="post" target="_blank">
+                                      <div class="input-group">
+                                        <input type="email" name="email" class="form-control" placeholder="Email">
+                                        <span class="input-group-btn">
+                                          <button class="btn btn-default" type="submit">Sign up</button>
+                                        </span>
+                                      </div>
+                                    </form>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
                             {% if file_result.state == "done" %}
                                 <p>Your dataset is now ready. You can download it from <a href="{{ file_result.result.url }} ">here</a>.</p>
                             {% else %}

@@ -30,13 +30,14 @@ class JobStatus(object):
 
 
 def submit_export(session, res_file=None, genomes=None):
-    res_file = 'blank' if res_file is None else res_file
-    genomes = ['blank'] if genomes is None else genomes
     session_dir = '/tmp/gc3sessions'
     if not os.path.isdir(session_dir):
         os.makedirs(session_dir)
-    if not os.path.isdir(os.path.dirname(res_file)):
+    if res_file is not None and not os.path.isdir(os.path.dirname(res_file)):
         os.makedirs(os.path.dirname(res_file))
+
+    res_file = 'blank' if res_file is None else res_file
+    genomes = ['blank'] if genomes is None else genomes
 
     cmd = ['source', os.path.expanduser(os.path.join('~', 'gc3pie', 'bin', 'activate'))]
     cmd.extend(['&&', 'python', 'gc3workflow.py', '-u' 'sqlite:///tmp/gc3session.db',
