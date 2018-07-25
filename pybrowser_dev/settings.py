@@ -10,6 +10,9 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+
+from celery.schedules import crontab
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # deployment, either DEV (default) or PRODUCTION
@@ -68,6 +71,7 @@ INSTALLED_APPS = (
     'drf_link_header_pagination',
     'oma',
     'oma_rest',
+    'export',
     'bootstrap3',
 )
 
@@ -171,6 +175,13 @@ TEMPLATES = [
         },
     },
 ]
+
+CELERY_BEAT_SCHEDULE = {
+    'task-update-omastandalone-exports': {
+        'task': 'export.tasks.update_running_jobs',
+        'schedule': 30.0,
+    }
+}
 
 # CORS stuff to allow iHAM integration on other sites
 CORS_ORIGIN_ALLOW_ALL = True
