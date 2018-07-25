@@ -34,7 +34,7 @@ TWITTER_ACCESS_TOKEN_SECRET = 'wBQDobkrHXAha8IJEEHFiuB1BGeRDE7PaUZrQ0xqEXfRd'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (DEPLOYMENT != "PRODUCTION")
 
-ALLOWED_HOSTS = ['127.0.0.1', 'omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk']
+ALLOWED_HOSTS = ['127.0.0.1', 'omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk', '.vital-it.ch']
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 SHOW_TOOLBAR_CALLBACK = lambda x: True
@@ -239,10 +239,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "static")
 MEDIA_URL = "/media/"
-if DEPLOYMENT == "PRODUCTION":
-    MEDIA_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "media")
-else:
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, 'media'))
 
 
 # some jenkins specific modifications
