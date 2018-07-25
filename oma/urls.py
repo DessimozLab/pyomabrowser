@@ -53,7 +53,6 @@ urlpatterns = [
     url(r'^hogs/$', TemplateView.as_view(template_name='landHOG.html'), name='hogs'),
     url(r'^synteny/$', TemplateView.as_view(template_name='landsynteny.html'), name='synteny'),
     url(r'^about/$', TemplateView.as_view(template_name='about.html'), name='about'),
-    url(r'^export/$', TemplateView.as_view(template_name='export.html'), name='export'),
     url(r'^landAnnotation/$', TemplateView.as_view(template_name='landAnnotation.html'),
         name='landAnnotation'),
     url(r'^team/$', TemplateView.as_view(template_name='team.html'), name='team'),
