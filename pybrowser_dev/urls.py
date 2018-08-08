@@ -9,6 +9,7 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^api/', include('oma_rest.urls')),
     url(r'^oma/', include('oma.urls')),
+    url(r'^oma/', include('export.urls'))
 ]
 
 if settings.DEPLOYMENT != "PRODUCTION":

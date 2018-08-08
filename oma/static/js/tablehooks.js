@@ -19,6 +19,10 @@
         return "<b>" + value.species + "</b> " + value.strain;
     };
 
+    exports.format_subgenome = function(value){
+        return "sub-genome "+value;
+    };
+
     exports.add_proteinrow_attrs = function(rowdata, index) {
         return {id: rowdata.protid, 'class': "protein"};
     };
@@ -43,7 +47,7 @@
     };
 
     exports.format_info_link = function (value, row) {
-        return '<a href="/cgi-bin/gateway.pl?f=DisplayEntry&p1=' + value + '">' + value + '</a>';
+        return '<a href="/oma/info/' + value + '">' + value + '</a>';
     };
     exports.format_vps_link = function(value, row){
         return '<a href="/oma/vps/' + value + '">' + value + '</a>';
@@ -52,17 +56,17 @@
     var xref_re = {
         'UniProtKB/SwissProt': {
             re: /[A-Z0-9]{1,5}_[A-Z][A-Z0-9]{2,4}/,
-            url: "http://www.uniprot.org/uniprot/",
+            url: "https://www.uniprot.org/uniprot/",
             img: "reviewed.gif"
         },
         'UniProtKB/TrEMBL': {
             re: /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
-            url: "http://www.uniprot.org/uniprot/",
+            url: "https://www.uniprot.org/uniprot/",
             img: "unreviewed.gif"
         },
         'Ensembl': {
             re: /ENS[A-Z]{0,3}[PGT]\d{11}/,
-            url: "http://www.ensembl.org/id/",
+            url: "https://www.ensembl.org/id/",
             img: "ensembl.gif"
         },
         'FlyBase': {
@@ -81,9 +85,13 @@
                     buf += '<img src="'+ static_root + 'image/' + obj.img + '" alt="' + src + '" />&nbsp;'
                 }
                 buf += value + '</a>';
-                return false;
+                return false;  // break the loop
             }
         });
+        // in case no regex match, just display xref value
+        if (buf.length === 0){
+            buf = value;
+        }
         return buf;
     };
 

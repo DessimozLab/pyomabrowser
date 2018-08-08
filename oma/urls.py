@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import include, patterns, url
+from django.conf.urls import include, url
 from django.views.generic.base import TemplateView
 from . import views
 
@@ -27,12 +27,17 @@ urlpatterns = [
     url(r'^synteny/(?P<entry_id>\w+)/(?P<windows>\d)/$', views.synteny, name='synteny'),
     url(r'^synteny/(?P<entry_id>\w+)/(?P<mod>\d)/(?P<windows>\d)/$',
         views.synteny, name='synteny'),
+    url(r'^info/(?P<entry_id>\w+)/$', views.InfoView.as_view(), name='entry_info'),
     url(r'^info/(?P<entry_id>\w+)/fasta/$', views.InfoViewFasta.as_view(), name='entry_fasta'),
+    url(r'^info/(?P<entry_id>\w+)/cds/fasta/$', views.InfoViewCDSFasta.as_view(), name='entry_cds'),
     url(r'^$', views.home),
     url(r'^home/$', views.home, name='home'),
     url(r'^vps/(?P<entry_id>\w+)/$', views.PairsView.as_view(), name="pairs"),
     url(r'^vps/(?P<entry_id>\w+)/fasta/$', views.PairsViewFasta.as_view(), name="pairs_fasta"),
     url(r'^vps/(?P<entry_id>\w+)/json/$', views.PairsJson.as_view(), name="pairs_json"),
+    url(r'^homoeologs/(?P<entry_id>\w+)/$', views.HomoeologView.as_view(), name="homoeologs"),
+    url(r'^homoeologs/(?P<entry_id>\w+)/fasta/$', views.HomoeologFasta.as_view(), name="homoeologs-fasta"),
+    url(r'^homoeologs/(?P<entry_id>\w+)/json/$', views.HomoeologJson.as_view(), name="homoeologs-json"),
     url(r'^group/(?P<entry_id>\w+)/$', views.EntryCentricOMAGroup.as_view(), name="omagroup-entry"),
     url(r'^group/(?P<entry_id>\w+)/msa/$', views.EntryCentricOMAGroupMSA.as_view(), name="omagroup-entry-msa"),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/$', views.OMAGroup.as_view(), name='omagroup'),
@@ -48,7 +53,6 @@ urlpatterns = [
     url(r'^hogs/$', TemplateView.as_view(template_name='landHOG.html'), name='hogs'),
     url(r'^synteny/$', TemplateView.as_view(template_name='landsynteny.html'), name='synteny'),
     url(r'^about/$', TemplateView.as_view(template_name='about.html'), name='about'),
-    url(r'^export/$', TemplateView.as_view(template_name='export.html'), name='export'),
     url(r'^landAnnotation/$', TemplateView.as_view(template_name='landAnnotation.html'),
         name='landAnnotation'),
     url(r'^team/$', TemplateView.as_view(template_name='team.html'), name='team'),

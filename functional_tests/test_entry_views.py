@@ -19,20 +19,20 @@ class EntryViewPageTest(FunctionalTest):
 
         # she knows that wheat is a polyploid genome and expects to find a tab on Homeologs
         tab_lnks = self.browser.find_elements_by_css_selector('.nav-tabs>li>a')
-        self.assertIn('Homeologs', "".join([tab.text for tab in tab_lnks]))
+        self.assertIn('Homoeologs', "".join([tab.text for tab in tab_lnks]))
 
         # is this also true if she starts from a django served page?
         synteny_lnks = [lnk for lnk in tab_lnks if 'Local synteny' in lnk.text]
         self.assertEqual(1, len(synteny_lnks))
         synteny_lnks[0].click()
         tab_lnks = self.browser.find_elements_by_css_selector('.nav-tabs>li>a')
-        self.assertIn('Homeologs', "".join([tab.text for tab in tab_lnks]))
+        self.assertIn('Homoeologs', "".join([tab.text for tab in tab_lnks]))
 
     def test_human_pages(self):
         # Cecile now want's to verify that on non-polyploid genomes there are no homeologs
         self.browser.get(self.server_url+'/oma/hogs/P53_HUMAN')
         tab_lnks = self.browser.find_elements_by_css_selector('.nav-tabs>li>a')
-        self.assertNotIn('Homeologs', "".join([tab.text for tab in tab_lnks]))
+        self.assertNotIn('Homoeologs', "".join([tab.text for tab in tab_lnks]))
 
     def test_synteny_page(self):
         # Tom navigates via the info page of the P53_HUMAN info page to the synteny page

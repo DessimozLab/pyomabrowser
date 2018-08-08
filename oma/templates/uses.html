@@ -72,13 +72,13 @@
 
                                     <div class="tab-pane" id="pairwise">
                                         <p><strong>Appropriate orthology type</strong></p>
-                                        <p>Ortholog view ("tab") for that particular gene (<a href="/cgi-bin/gateway.pl?f=DisplayEntry&p1=HUMAN22168&p2=orthologs">example for ADH1A_HUMAN</a>).</p>
+                                        <p>Ortholog view ("tab") for that particular gene (<a href="{% url 'pairs' "ADH1A_HUMAN" %}">example for ADH1A_HUMAN</a>).</p>
                                         <p><em>Comments</em></p>
                                         <p>This includes in-paralogs in the target genomes lineages with respect to the speciation event with the query genome.</p>
                                     </div>
                                     <div class="tab-pane" id="hogs">
                                         <p><strong>Appropriate orthology type</strong></p>
-                                        <p><a href="/oma/hogs/HBB_HUMAN/Tetrapoda">Hierarchical group of human β-hemoglobin with "Tetrapoda" as taxonomic range</a>.</p>
+                                        <p><a href="{% url 'hogs' 'HBB_HUMAN' 'Tetrapoda'%}">Hierarchical group of human β-hemoglobin with "Tetrapoda" as taxonomic range</a>.</p>
                                         <p><em>Comments</em></p>
                                         <p>This also retrieves γ-hemoglobin and ε-hemoglobin, which are thought to have diverged within the tetrapodes.</p>
                                     </div>

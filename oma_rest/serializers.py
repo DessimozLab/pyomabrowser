@@ -39,6 +39,16 @@ class OptionalHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
         return super(OptionalHyperlinkedIdentityField, self).get_url(obj, view_name, request, format)
 
 
+class OnlyPolyploidHyperlinkedIdentifyField(serializers.HyperlinkedIdentityField):
+    def __init__(self, **kwargs):
+        super(OnlyPolyploidHyperlinkedIdentifyField, self).__init__(required=False, **kwargs)
+
+    def get_url(self, obj, view_name, request, format):
+        if not obj.genome.is_polyploid:
+            return None
+        return super(OnlyPolyploidHyperlinkedIdentifyField, self).get_url(obj, view_name, request, format)
+
+
 class ReadOnlySerializer(serializers.Serializer):
     """Base class for Serializers that don't store data
     into the database and hence do not need a create/update
@@ -63,6 +73,7 @@ class ProteinEntrySerializer(ReadOnlySerializer):
     oma_hog_id = serializers.CharField(required=False, source='oma_hog')
     chromosome = serializers.CharField()
     locus = serializers.SerializerMethodField(method_name=None)
+    is_main_isoform = serializers.BooleanField()
 
     def get_locus(self, obj):
         return collections.OrderedDict([('start', obj.locus_start), ('end', obj.locus_end), ('strand', obj.strand)])
@@ -81,12 +92,18 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
                                                 lookup_url_kwarg='entry_id')
     orthologs = serializers.HyperlinkedIdentityField(view_name='protein-orthologs', read_only=True,
                                                      lookup_field='entry_nr', lookup_url_kwarg='entry_id')
+    homoeologs = OnlyPolyploidHyperlinkedIdentifyField(view_name='protein-homoeologs',
+                                                  lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     ontology = serializers.HyperlinkedIdentityField(view_name='protein-ontology', read_only=True,
                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     oma_group_url = OptionalHyperlinkedIdentityField(view_name='group-detail', lookup_field='oma_group',
                                                          lookup_url_kwarg='group_id', nullvalues=[0])
     oma_hog_members = OptionalHyperlinkedIdentityField(view_name='hog-members', lookup_field='oma_hog',
                                                            lookup_url_kwarg='hog_id', nullvalues=('', b''))
+    alternative_isoforms_urls = serializers.ListSerializer(
+        child=serializers.HyperlinkedIdentityField(view_name='protein-detail', lookup_field='entry_nr',
+                                                   lookup_url_kwarg='entry_id', read_only=True),
+        source='alternative_isoforms')
 
     def get_hog_levels(self, obj):
         protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)

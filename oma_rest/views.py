@@ -24,7 +24,7 @@ from pyoma.browser import models, db
 import logging
 
 from collections import Counter
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 logger = logging.getLogger(__name__)
 
 
@@ -32,6 +32,36 @@ logger = logging.getLogger(__name__)
 class ProteinEntryViewSet(ViewSet):
     serializer_class = serializers.ProteinEntryDetailSerializer
     lookup_field = 'entry_id'
+
+    @list_route(methods=['post'])
+    def bulk_retrieve(self, request, format=None):
+        """Retrieve the information available for multiple protein IDs at once.
+
+        The POST request must contain a json-encoded list of IDs of
+        up to 100 IDs for which the information is returned.
+
+        In case the ID is not unique or unknown, an empty element is
+        returned for this query element.
+
+        :param ids: list of ids of proteins to retrieve.
+
+        """
+        MAX_SIZE = 100
+        if 'ids' not in request.data:
+            raise NotFound("No results found")
+        if len(request.data['ids']) > MAX_SIZE:
+            raise ParseError("POST request exceeded max number of ids. Please limit to {}".format(MAX_SIZE))
+
+        proteins = []
+        for entry_id in request.data['ids']:
+            try:
+                entry_nr = utils.id_resolver.resolve(entry_id)
+                proteins.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
+            except (db.InvalidId, db.AmbiguousID):
+                proteins.append(None)
+        serializer = serializers.ProteinEntryDetailSerializer(
+            instance=proteins, many=True, context={'request': request})
+        return Response(serializer.data)
 
     def retrieve(self, request, entry_id=None, format=None):
         """
@@ -42,7 +72,10 @@ class ProteinEntryViewSet(ViewSet):
         """
 
         # Load the entry and its domains, before forming the JSON to draw client-side.
-        entry_nr = utils.id_resolver.resolve(entry_id)
+        try:
+            entry_nr = utils.id_resolver.resolve(entry_id)
+        except db.InvalidId:
+            raise NotFound('requested id is unknown')
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
         serializer = serializers.ProteinEntryDetailSerializer(
             instance=protein, context={'request': request})
@@ -76,6 +109,26 @@ class ProteinEntryViewSet(ViewSet):
                 content.append(ortholog)
         serializer = serializers.OrthologsListSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
+
+    @detail_route()
+    def homoeologs(self, request, entry_id=None, format=None):
+        """List of all the homoeologs for a given protein.
+
+        :param entry_id: an unique identifier for a protein - either its
+            entry number, omaid or canonical id."""
+        entry_nr = utils.id_resolver.resolve(entry_id)
+        protein = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
+        if not protein.genome.is_polyploid:
+            raise NotFound("query protein does not belong to a polyploid genome")
+        homoeologs = []
+        for row in utils.db.get_within_species_paralogs(int(entry_nr)):
+            if row['RelType'] != "homeolog":
+                continue
+            hom = models.ProteinEntry.from_entry_nr(utils.db, int(row['EntryNr2']))
+            homoeologs.append(hom)
+        serializer = serializers.ProteinEntrySerializer(instance=homoeologs, many=True, context={'request': request})
+        return Response(serializer.data)
+
 
     @detail_route()
     def ontology(self, request, entry_id=None, format=None):
@@ -259,11 +312,12 @@ class HOGViewSet(PaginationMixin, ViewSet):
             query = 'Level == {!r}'.format(level.encode('utf-8'))
             queryset = LazyPagedPytablesQuery(table=utils.db.get_hdf5_handle().get_node('/HogLevel'),
                                               query=query,
-                                              obj_factory=lambda r: rest_models.HOG(hog_id=r['ID'].decode(), level=level))
+                                              obj_factory=lambda r: rest_models.HOG(hog_id=r['ID'].decode(),
+                                                                                    level=level))
         else:
             # list of all the rootlevel hogs
             nr_hogs = utils.db.get_nr_toplevel_hogs()
-            queryset = [rest_models.HOG(hog_id=utils.db.format_hogid(i), level="root") for i in range(1, nr_hogs+1)]
+            queryset = [rest_models.HOG(hog_id=utils.db.format_hogid(i), level="root") for i in range(1, nr_hogs + 1)]
         page = self.paginator.paginate_queryset(queryset, request)
         serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
@@ -311,7 +365,11 @@ class HOGViewSet(PaginationMixin, ViewSet):
             result_data = [rest_models.HOG(hog_id=hog_id, level=level)]
         else:
             subhogs = utils.db.get_subhogids_at_level(fam_nr, level)
-            result_data = [rest_models.HOG(hog_id=h.decode(), level=level) for h in subhogs]
+            result_data = []
+            for h in subhogs:
+                h = h.decode()
+                if hog_id.startswith(h) or h.startswith(hog_id):
+                    result_data.append(rest_models.HOG(hog_id=h, level=level))
 
         querys = {q.hog_id: i for i, q in enumerate(result_data)}
         parents = [collections.defaultdict(set)] * len(result_data)
@@ -489,6 +547,7 @@ class GenomeViewSet(PaginationMixin, ViewSet):
 
 
 class PairwiseRelationAPIView(PaginationMixin, APIView):
+
     def _get_entry_range(self, genome, chr):
         if chr is None:
             return genome.entry_nr_offset + 1, genome.entry_nr_offset + len(genome)
@@ -541,27 +600,22 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
         chr2 = request.query_params.get('chr2', None)
         range1 = self._get_entry_range(genome1, chr1)
         range2 = self._get_entry_range(genome2, chr2)
-        res = []
-
         logger.debug("EntryRanges: ({0[0]},{0[1]}), ({1[0]},{1[1]})".format(range1, range2))
-        for cnt, row in enumerate(rel_tab.where('(EntryNr1 >= {0[0]}) & (EntryNr1 <= {0[1]}) & '
-                                                '(EntryNr2 >= {1[0]}) & (EntryNr2 <= {1[1]})'
-                                                        .format(range1, range2))):
-            rel = models.PairwiseRelation(utils.db, row.fetch_all_fields())
+
+        def obj_factory(data):
+            rel = models.PairwiseRelation(utils.db, data)
             if ((chr1 is None or chr1 == rel.entry_1.chromosome) and
                     (chr2 is None or chr2 == rel.entry_2.chromosome)):
                 if rel_type is None or rel_type == rel.rel_type:
-                    res.append(rel)
-                if cnt + 1 % 100 == 0:
-                    logger.debug("Processed {} rows".format(cnt))
+                    return rel
+            return None
 
-        if False:
-            page = self.paginator.paginate_queryset(res, request)
-            serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
-            return self.paginator.get_paginated_response(serializer.data)
-        else:
-            serializer = serializers.PairwiseRelationSerializer(instance=res, many=True, context={'request': request})
-            return Response(serializer.data)
+        query = '(EntryNr1 >= {0[0]}) & (EntryNr1 <= {0[1]}) ' \
+                '& (EntryNr2 >= {1[0]}) & (EntryNr2 <= {1[1]})'.format(range1, range2)
+        queryset = LazyPagedPytablesQuery(rel_tab, query=query, obj_factory=obj_factory)
+        page = self.paginator.paginate_queryset(queryset, request)
+        serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
+        return self.paginator.get_paginated_response(serializer.data)
 
 
 class TaxonomyViewSet(ViewSet):

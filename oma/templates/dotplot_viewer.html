@@ -39,7 +39,9 @@
                                     <span class="caret"></span>
                                 </button>
 
+
                                 <ul id="action_dropdown" class="dropdown-menu">
+                                    <li class="dropdown-header">Action for rectangle selection</li>
                                     <li class="action_dropdown-li" id="ba-pan">
                                         <a> <span class="glyphicon glyphicon-move" aria-hidden="true"></span>
                                             Pan <span id='brush_ok_pan' class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span></a>
@@ -59,6 +61,25 @@
                                     <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
                                 </button>
                             </div>
+
+
+                            <div class="btn-group pull-right" style="margin: 6px;">
+
+                                <button class="btn btn-default btn-sm dropdown-toggle" type="button"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                                    <span class="caret"></span>
+                                </button>
+
+
+                                <ul class="dropdown-menu" id="dropdown-reltype">
+
+                                    <li class="dropdown-header">Type of relations visible</li>
+
+                                </ul>
+
+                            </div>
+
 
                             <div class="btn-group pull-right" style="margin: 6px;">
 
@@ -83,7 +104,7 @@
                     </div>
 
                     <hr>
-
+                    <div id="loader"><img src="{% static "image/loading.gif"%}"></div>
                     <div id="plot_div" style="width: 100%">
 
                     </div>
@@ -142,14 +163,37 @@
 
             var DotPlot = dotplot_theme();
 
-            var url_json = encodeURI("/api/pairs/" + genome1 + "/" + genome2 + "/?chr1=" + chromosome1 + "&chr2=" + chromosome2);
+            var load_paginated_api = function(url, per_page, callback){
+                var paged_url = encodeURI(url + "&per_page=10&page=1");
+                d3.request(paged_url)
+                    .mimeType('application/json')
+                    .response(function(xhr) {
+                        return parseInt(xhr.getResponseHeader("X-Total-Count"), 10);
+                    })
+                    .get(function (err, tot_count){
+                        var q = d3.queue();
+                        for (var i = 1; i <= Math.ceil(tot_count / per_page); i++) {
+                            q.defer(d3.json, encodeURI(url + "&per_page=" + per_page + "&page=" + i));
+                        }
+                        q.awaitAll(callback);
+                    });
+                //d3.json(paged_url, callback);
+            };
 
-            //var url_json = '/All/dotplot_dumm.json';
+            var url_json = encodeURI("/api/pairs/" + genome1 + "/" + genome2 + "/?chr1=" + chromosome1 + "&chr2=" + chromosome2);
 
             var container = "dotplot_container";
 
-            d3.json(url_json, function (error, data) {
-
+            load_paginated_api(url_json, 1000, function (error, data_parts) {
+                $("#loader").hide();
+                if (error){
+                    console.log("cannot load data. \n URL: "+error.currentTarget.responseURL
+                        + "\n Response: "+error.currentTarget.responseText);
+                    $("#plot_div").append("<p>Cannot load data from server: "+error.currentTarget.statusText+"</p>");
+                    return;
+                }
+                var data = d3.merge(data_parts);
+                $("#loader").hide();
                 launch_dotplot();
 
                 var t = null;
@@ -261,6 +305,7 @@
                 }
 
             });
+
 
 
         })();
