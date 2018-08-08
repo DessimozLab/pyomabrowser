@@ -233,6 +233,10 @@ function init_table(div_id) {
             title: 'Common Name',
             sortable: true
         }, {
+            field: 'last_modified',
+            title: 'Last Update',
+            sortable: true
+        }, {
             field: 'prots',
             title: '# of Sequences',
             sortable: true

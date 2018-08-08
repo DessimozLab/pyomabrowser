@@ -774,7 +774,8 @@ class GenomesJson(JsonModelMixin, View):
                    "species_and_strain_as_dict": 'sciname',
                    'ncbi_taxon_id': "ncbi",
                    "common_name": None,
-                   "nr_entries": "prots", "kingdom": None}
+                   "nr_entries": "prots", "kingdom": None,
+                   "last_modified": None}
 
     def get(self, request, *args, **kwargs):
         genome_key = utils.id_mapper['OMA']._genome_keys
