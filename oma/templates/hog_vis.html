@@ -154,7 +154,7 @@
                                 dataType: "text"}),
                         $.ajax({url: "/All/speciestree.nwk"})
                     ).then(function(orthoxml, speciestree) {
-                        var hog_data = hogvis.parse_orthoxml(speciestree[0], orthoxml[0]);
+                        var hog_data = parse_xml.parse_orthoxml(speciestree[0], orthoxml[0]);
                         var hogvis_obj = new Hogvis(hogvis_container_id, query, hog_data.per_species,
                             hog_data.tree, tooltip_data, default_options, document.getElementById("genedata-vis"));
                     });
