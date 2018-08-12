@@ -13,6 +13,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError
 from rest_framework.settings import api_settings
+from django.http import HttpResponse
 from distutils.util import strtobool
 
 from . import models as rest_models
@@ -626,66 +627,62 @@ class TaxonomyViewSet(ViewSet):
     def list(self, request, format=None):
         """Retrieve the taxonomic tree that is available in the current release.
 
-        :queryparam type: the type of the returned data - either dictionary (default) or newick.
-        :queryparam members: list of members to get the induced the taxonomy from.
-               Member id's can be either their ncbi taxon ids or their UniProt
-               species codes - they just have to be consistent.
+        :queryparam type: the type of the returned data - either
+               dictionary (default), newick or phyloxml.
+
+        :queryparam members: list of members to get the induced taxonomy
+               from. The list is supposed to be a comma-separated list.
+               Member IDs can be either their ncbi taxon IDs or their
+               UniProt species codes - they just have to be consistent.
+
+        :queryparam collapse: whether or not taxonomic levels with a single
+            child should be collapsed or not. Defaults to yes.
         """
 
         # e.g. members = YEAST,ASHGO
         members = request.query_params.get('members', None)  # read as a string
         type = request.query_params.get('type', None)  # if none, dictionary returned
-        taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
-        tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
-        if members != None:
-            members = members.split(',')  # as the query param is passed as a string
+        collapse = strtobool(request.query_params.get('collapse', 'True'))
+        tax_obj = utils.db.tax
+        if members is not None:
+            members = list(map(str.strip, members.split(',')))   # as the query param is passed as a string
             members_list = []
-            try:
-                int(members[0])
-                isListOfNames = False
-            except:
-                isListOfNames = True
-            if isListOfNames:
-                decoded_members_array = []
-                for i in range(len(members)):
-                    decoded_members_array.append(members[i])
-                if (len(members[0])) > 5:  # names provided
-                    for i in range(len(decoded_members_array)):
-                        for lvl in taxonomy_tab.read(field='Name'):
-                            if str(lvl.decode("utf-8")) == decoded_members_array[i]:
-                                members_list.append(lvl)
-                else:  # if user provides a list of oma_ids
-                    for i in range(len(decoded_members_array)):
-                        genome_tab = utils.db.get_hdf5_handle().root.Genome
-                        encoded_id = decoded_members_array[i].encode("utf-8")
-                        txn_id = genome_tab.read_where('UniProtSpeciesCode == encoded_id', field='NCBITaxonId')
-                        members_list.append(str(txn_id)[1:-1])
+            if not members[0].isdigit():
+                if all(map(lambda x: len(x) == 5, members)):
+                    members = list(map(str.upper, members))
+                    for ncbi, genome in tax_obj.genomes.items():
+                        if genome.uniprot_species_code in members:
+                            members_list.append(ncbi)
+                else:
+                    for level in tax_obj.tax_table:
+                        if level['Name'].decode() in members:
+                            members_list.append(int(level['NCBITaxonId']))
             else:
                 # handling the case user gave a list of NCBI taxon ids
-                for i in range(len(members)):
-                    members_list.append(members[i])
-            tx = tax_obj.get_induced_taxonomy(members=members_list)
-            root = tx._get_root_taxon()
-            root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[0]}
-            if type == 'newick':
-                data = {'root_taxon': root_data, 'newick': tx.newick()}
-                serializer = serializers.TaxonomyNewickSerializer(instance=data)
-                return Response(serializer.data)
-            else:
-                data = tx.as_dict()
-                return Response(data)
+                try:
+                    members_list = [int(z) for z in members]
+                except ValueError:
+                    raise ParseError("not all passed members are numeric")
 
+            try:
+                tx = tax_obj.get_induced_taxonomy(members=members_list, augment_parents=True, collapse=collapse)
+            except db.InvalidTaxonId as e:
+                raise ParseError(str(e))
         else:
-            # whole taxonomy returned
-            root = tax_obj._get_root_taxon()
-            root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[0]}
-            if type == 'newick':
-                data = {'root_taxon': root_data, 'newick': tax_obj.newick()}
-                serializer = serializers.TaxonomyNewickSerializer(instance=data)
-                return Response(serializer.data)
-            else:
-                data = tax_obj.as_dict()
-                return Response(data)
+            tx = tax_obj
+
+        root = tx._get_root_taxon()
+        root_data = {'name': root['Name'].decode(), 'taxon_id': int(root['NCBITaxonId'])}
+        if type == 'newick':
+            data = {'root_taxon': root_data, 'newick': tx.newick()}
+            serializer = serializers.TaxonomyNewickSerializer(instance=data)
+            return Response(serializer.data)
+        elif type == "phyloxml":
+            phyloxml = tax_obj.as_phyloxml()
+            return HttpResponse(phyloxml, content_type="application/xml")
+        else:
+            data = tx.as_dict()
+            return Response(data)
 
     def retrieve(self, request, root_id, format=None):
         """
@@ -693,28 +690,34 @@ class TaxonomyViewSet(ViewSet):
 
         :param root_id: either the taxon id, species name or the 5 letter UniProt
             species code for a root taxonomic level
+
         :queryparam type: the type of the returned data - either dictionary
             (default) or newick.
+
+        :queryparam collapse: whether or not taxonomic levels with a single
+            child should be collapsed or not. Defaults to yes.
         """
         type = request.query_params.get('type', None)
         subtree = []
         taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
-        tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
 
         try:
             taxon_id = int(root_id)
-        except:
-            if root_id.isupper():
-                genome_tab = utils.db.get_hdf5_handle().root.Genome
-                encoded_id = root_id.encode("utf-8")
-                taxon_id = genome_tab.read_where('UniProtSpeciesCode == encoded_id', field='NCBITaxonId')
-                taxon_id = int(taxon_id)
-            else:
-                taxon_id = taxonomy_tab.read_where('Name==root_id', field='NCBITaxonId')
-                taxon_id = int(taxon_id)
+        except ValueError:
+            if len(root_id) == 5:
+                try:
+                    g = utils.db.id_mapper['OMA'].genome_from_UniProtCode(root_id.upper())
+                    return self.retrieve(request, g['NCBITaxonId'], format=format)
+                except db.UnknownSpecies:
+                    pass
+
+            taxon_id = taxonomy_tab.read_where('Name==root_id', field='NCBITaxonId')
+            if len(taxon_id) != 1:
+                raise NotFound("root level '{}' not found".format(root_id))
+            return self.retrieve(request, int(taxon_id), format=format)
 
         def get_children(id):
-            children = db.Taxonomy._direct_children_taxa(tax_obj, id)
+            children = utils.db.tax._direct_children_taxa(id)
             if len(children) > 0:
                 for child in children:
                     child_id = child['NCBITaxonId']
@@ -724,14 +727,19 @@ class TaxonomyViewSet(ViewSet):
 
         subtree.append(taxon_id)
         branch = get_children(taxon_id)
-        induced_tax = tax_obj.get_induced_taxonomy(members=branch)
+
+        collapse = strtobool(request.query_params.get('collapse', 'True').lower())
+        induced_tax = utils.db.tax.get_induced_taxonomy(members=branch, collapse=collapse)
 
         if type == 'newick':
-            root_taxon = tax_obj._taxon_from_numeric(taxon_id)
-            root_data = {'name': root_taxon[2].decode("utf-8"), 'taxon_id': root_taxon[0]}
+            root_taxon = induced_tax._taxon_from_numeric(taxon_id)
+            root_data = {'name': root_taxon['Name'].decode(), 'taxon_id': int(root_taxon['NCBITaxonId'])}
             data = {'root_taxon': root_data, 'newick': induced_tax.newick()}
             serializer = serializers.TaxonomyNewickSerializer(instance=data)
             return Response(serializer.data)
+        elif type == 'phyloxml':
+            phyloxml = induced_tax.as_phyloxml()
+            return HttpResponse(phyloxml, content_type="application/xml")
         else:
             data = induced_tax.as_dict()
             return Response(data)
