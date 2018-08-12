@@ -192,7 +192,9 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
         try:
             # get members in case its a group id or fingerprint
             memb = utils.db.oma_group_members(group_id)
-        except db.InvalidId:
+        except db.AmbiguousID:
+            raise NotFound("{} is not a unique id".format(group_id))
+        except db.InvalidId as ex:
             try:
                 # let's try if group_id is a member protein id
                 entry_nr = utils.id_resolver.resolve(group_id)
@@ -201,7 +203,7 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
                     return Response({})
                 return self.retrieve(request, prot.oma_group)
             except db.InvalidId:
-                raise NotFound(group_id)
+                raise NotFound(str(ex))
 
         if len(memb) == 0:
             group = []
