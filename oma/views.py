@@ -902,8 +902,15 @@ class CurrentView(TemplateView):
 
     def get_release_data(self, release):
         relname = utils.db.get_release_name()
-        relid = 'All.' + relname.replace(' ', '')
-        return {'name': relname, 'id': relid, 'date': relname.replace(' ', '')}
+        m = self._re_rel2name.match(relname)
+        if m is not None:
+            res = {'name': "{} {}".format(m.group('month'), m.group('year')),
+                   'date': "{}{}".format(m.group('month'), m.group('year')),
+                   'id': relname}
+        else:
+            res = {'relid': 'All.' + relname.replace(' ', ''),
+                   'date': relname.replace(' ', ''), 'name': relname}
+        return res
 
     def get_context_data(self, release=None, **kwargs):
         context = super(CurrentView, self).get_context_data(**kwargs)
