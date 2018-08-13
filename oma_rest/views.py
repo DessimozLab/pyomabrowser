@@ -698,8 +698,6 @@ class TaxonomyViewSet(ViewSet):
             child should be collapsed or not. Defaults to yes.
         """
         type = request.query_params.get('type', None)
-        subtree = []
-        taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
 
         try:
             taxon_id = int(root_id)
@@ -710,7 +708,10 @@ class TaxonomyViewSet(ViewSet):
                     return self.retrieve(request, g['NCBITaxonId'], format=format)
                 except db.UnknownSpecies:
                     pass
+            elif root_id.upper() == 'LUCA':
+                return self.list(request, format=format)
 
+            taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
             taxon_id = taxonomy_tab.read_where('Name==root_id', field='NCBITaxonId')
             if len(taxon_id) != 1:
                 raise NotFound("root level '{}' not found".format(root_id))
@@ -725,7 +726,7 @@ class TaxonomyViewSet(ViewSet):
                     get_children(child_id)
             return subtree
 
-        subtree.append(taxon_id)
+        subtree = [taxon_id]
         branch = get_children(taxon_id)
 
         collapse = strtobool(request.query_params.get('collapse', 'True').lower())
