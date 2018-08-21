@@ -1,0 +1,362 @@
+{% extends  "core.html" %}
+
+{% block title %}GENOME {{genome_sub_page|"information"}}{% endblock %}
+
+{% block content %}
+<script src="{% static "js/menuScript.js" %}"></script>
+
+<style>
+
+#sidebar-container.full-height {
+    /*min-height: 100vh;*/
+}
+
+/* Menu item*/
+#sidebar-container .list-group a {
+    height: 50px;
+    color: white;
+}
+
+/* Submenu item*/
+#sidebar-container .list-group .sidebar-submenu a {
+    height: 45px;
+
+}
+
+
+/* Closed submenu icon */
+#sidebar-container .list-group .list-group-item[aria-expanded="false"] .submenu-icon::after {
+  content: " \f0d7";
+  font-family: FontAwesome;
+  display: inline;
+  text-align: right;
+  padding-left: 10px;
+}
+/* Opened submenu icon */
+#sidebar-container .list-group .list-group-item[aria-expanded="true"] .submenu-icon::after {
+  content: " \f0da";
+  font-family: FontAwesome;
+  display: inline;
+  text-align: right;
+  padding-left: 10px;
+}
+
+.menu-tab {
+    background-color: white;
+    color: #307C3B;
+    /*height: 50px;*/
+    padding: 0.25rem 0.75rem;
+}
+
+.menu-tab:hover {
+    background-color: #C8C8C8;
+    transition: background 0.5s;
+}
+
+
+@keyframes fadein {
+0%   { opacity: 0; }
+100% { opacity: 1; }
+}
+
+.content-container-row {
+    margin-top: 1.2em;
+}
+
+.card-body.gene-orthology, .gene-orthology .selected {
+    background-color: #90CAF9;
+}
+.card-body.oma-group, .oma-group .selected {
+    background-color: #FFF49D;
+}
+.card-body.genome, .genome .selected {
+    background-color: #FFAB91;
+}
+
+.card-body.gene-orthology, .gene-orthology .selected {
+    /*background-color: #9acfea;*/
+}
+
+.menu-tab {
+    display: none;
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+}
+
+.menu-tab.selected {
+    display: block;
+  }
+</style>
+
+<div class="container" id="body" style="margin-top: 2em;"> <!-- .container -->
+
+    <div class="row">
+        <div class="col-12">
+
+            <div class="card">
+                <div class="card-body gene-orthology">
+                    <h5 class="card-title">Entry RATNO1256 ( P53_RAT)</h5>
+                    <p class="card-subtitle mb-2 text-muted">Rattus Norvegicus</p>
+                    <div class="d-flex">
+                        <p class="card-text mr-auto">In recent years, much research has been devoted to the synthesis of systems; however, few have evaluated the analysis of cache coherence. Given the current status of linear-time theory, statisticians compellingly desire the exploration of replication. We introduce new stable communication, which we call Windas. </p>
+                    </div>
+                    <div class="d-flex justify-content-sm-end mt-2">
+                        <button type="button" class="btn btn-sm btn-default dropdown-toggle col-6 col-sm-2  mr-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Groups</button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Group 1</a>
+                            <a class="dropdown-item" href="#">Group 2</a>
+                            <a class="dropdown-item" href="#">Group 3</a>
+                        </div>
+                        <button class="btn btn-sm col-6 col-sm-2">Genome</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row content-container-row"> <!-- row content-container-row -->
+
+        <!-- Sidebar / menu -->
+        <div id="sidebar-container" class="col-3 gene-orthology full-height"> <!-- #sidebar-container -->
+
+            <div id="accordion">
+                <div class="menu-tab" style="cursor: pointer;" onclick="console.log('orthology clicked')" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="#collapseOne">
+                    <span class="">Orthology</span>
+                </div>
+
+
+                <div id="collapseOne" class="collapse pt-0" aria-labelledby="headingOne" data-parent="#accordion">
+
+                    <div class="card-body pl-4 py-2">
+                        <h6>Filter by Taxon</h6>
+
+                        <div class="form-check pl-4">
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="mammalsFilter">
+                                <label class="form-check-label" for="mammalsFilter">
+                                    Mammals
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="vertebratesFilter">
+                                <label class="form-check-label" for="vertebratesFilter">
+                                    Vertebrates
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="customFilter1">
+                                <label class="form-check-label" for="customFilter1">
+                                    Custom 1
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <div class="dropdown-divider pl-0"></div>
+
+                        <h6>Display only:</h6>
+
+                        <div class="form-check pl-4">
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="hogFilter">
+                                <label class="form-check-label" for="hogFilter">
+                                    HOG
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="omagroupFilter">
+                                <label class="form-check-label" for="omagroupFilter">
+                                    OMA Group
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="pairwiseFilter">
+                                <label class="form-check-label" for="pairwiseFilter">
+                                    Pairwise
+                                </label>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="row justify-content-center mx-2 mx-sm-0">
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('paralogy clicked')">
+                    <span class="">Paralogy</span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('Gene information')">
+                    <span class="">Gene information</span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('GO annotations')">
+                    <span class="">GO annotations</span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('Sequence')">
+                    <span class="">Sequences</span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('Domain architecture')">
+                    <span class="">Domain architecture</span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% ifequal tab 'synteny' %} active selected {%endifequal%}" style="cursor: pointer;" onclick="console.log('Local synteny')">
+                    <span class="">Local synteny</span>
+                </div>
+
+
+            </div>
+
+        </div> <!-- sidebar-container -->
+
+
+
+        <div class="col"> <!-- content col -->
+
+
+
+    <!--
+    <h2 class="">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %} </h2>
+            <h4>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</h4>
+            {% block seqhead_hook %}{% endblock %}
+            <br>
+            <ul class="nav nav-tabs" role="tablist">
+                <li {% ifequal tab 'info' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}" >Information</a></li>
+                <li {% ifequal tab 'orthologs' %} class="active" {%endifequal%} ><a href="{% url 'pairs' entry.omaid %}" >Orthologs {% if nr_vps %}<span class="badge">{{nr_vps}}</span>{% endif %}</a></li>
+
+
+                {% if entry.genome.is_polyploid %}
+                    <li {% ifequal tab 'homeologs' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}&amp;p2=homeologs" >Homeologs {% if nr_hps %}<span class="badge">{{nr_hps}}</span>{% endif %}</a></li>
+                {% endif %}
+
+
+                <li {% ifequal tab 'synteny' %} class="active" {%endifequal%} ><a href="{% url 'synteny' entry.omaid 4 4 %}" >Local synteny</a></li>-->
+
+
+
+                <!-- <li {% ifequal tab 'hogs' %} class="active" {%endifequal%} ><a href="{% url 'hogs' entry.omaid %}" >Hierarchical Orthologous Groups</a></li> -->
+
+
+                <!--<li {% if tab == 'hogs' %} class="dropdown active " {% else %} class="dropdown" {% endif %} >
+                    <a class='left_hog_tab' href="{% url 'hog_vis' entry.omaid %}">Hierarchical Orthologous Groups  </a>
+
+                </li>
+
+            <li {% if tab == 'hogs' %} class="dropdown active " {% else %} class="dropdown" {% endif %} >
+                    <a href="" class="dropdown-toggle right_hog_tab" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></a>
+
+                <ul class="dropdown-menu">
+                        <li class="dropdown-header">Visualise HOG with:</li>
+                        <li class="text-left"><a href="{% url 'hog_vis' entry.omaid %}">graphical viewer</a> </li>
+                        <li class="text-left"><a href="{% url 'hogs' entry.omaid %}">table viewer</a></li>
+                        <li class="divider"></li>
+                        <li class="dropdown-header">List similar HOGs based on:</li>
+                        <li class="text-left"><a href="{% url 'hog_domains' entry.omaid %}">Domain architectures</a></li>
+                    </ul>
+                </li>
+
+
+                <li {% ifequal tab 'groups' %} class="active" {%endifequal%} ><a href="{% url 'omagroup-entry' entry.omaid %}">OMA Groups</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane active" id="{{tab}}">
+                    &lt;!&ndash; {% block contentTabXX %} {% endblock contentTabXX %} &ndash;&gt;
+                </div>
+            </div>
+    -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!--<h2 class="">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %} </h2>
+            <h4>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</h4>
+            {% block seqhead_hook %}{% endblock %}
+            <br>
+            <ul class="nav nav-tabs" role="tablist">
+                <li {% ifequal tab 'info' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}" >Information</a></li>
+                <li {% ifequal tab 'orthologs' %} class="active" {%endifequal%} ><a href="{% url 'pairs' entry.omaid %}" >Orthologs {% if nr_vps %}<span class="badge">{{nr_vps}}</span>{% endif %}</a></li>
+                {% if entry.genome.is_polyploid %}
+                    <li {% ifequal tab 'homeologs' %} class="active" {%endifequal%} ><a href="/cgi-bin/gateway.pl?f=DisplayEntry&amp;p1={{ entry.omaid }}&amp;p2=homeologs" >Homeologs {% if nr_hps %}<span class="badge">{{nr_hps}}</span>{% endif %}</a></li>
+                {% endif %}
+                <li {% ifequal tab 'synteny' %} class="active" {%endifequal%} ><a href="{% url 'synteny' entry.omaid 4 4 %}" >Local synteny</a></li>-->
+
+                <!-- <li {% ifequal tab 'hogs' %} class="active" {%endifequal%} ><a href="{% url 'hogs' entry.omaid %}" >Hierarchical Orthologous Groups</a></li> -->
+
+
+                <!--<li {% if tab == 'hogs' %} class="dropdown active " {% else %} class="dropdown" {% endif %} >
+                    <a class='left_hog_tab' href="{% url 'hog_vis' entry.omaid %}">Hierarchical Orthologous Groups  </a>
+
+                </li>
+
+            <li {% if tab == 'hogs' %} class="dropdown active " {% else %} class="dropdown" {% endif %} >
+                    <a href="" class="dropdown-toggle right_hog_tab" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></a>
+
+                <ul class="dropdown-menu">
+                        <li class="dropdown-header">Visualise HOG with:</li>
+                        <li class="text-left"><a href="{% url 'hog_vis' entry.omaid %}">graphical viewer</a> </li>
+                        <li class="text-left"><a href="{% url 'hogs' entry.omaid %}">table viewer</a></li>
+                        <li class="divider"></li>
+                        <li class="dropdown-header">List similar HOGs based on:</li>
+                        <li class="text-left"><a href="{% url 'hog_domains' entry.omaid %}">Domain architectures</a></li>
+                    </ul>
+                </li>
+
+
+                <li {% ifequal tab 'groups' %} class="active" {%endifequal%} ><a href="{% url 'omagroup-entry' entry.omaid %}">OMA Groups</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane active" id="{{tab}}">
+                    &lt;!&ndash; {% block contentTabXX %} {% endblock contentTabXX %} &ndash;&gt;
+                </div>
+            </div>-->
+
+
+            {% block contentTab %} {% endblock contentTab %}
+
+
+        </div> <!-- content col -->
+
+    </div> <!-- row content-container-row -->
+
+</div> <!-- .container -->
+{% endblock content %}
+
+

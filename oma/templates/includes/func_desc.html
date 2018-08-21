@@ -1,0 +1,44 @@
+<div class="modal fade function-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> x </button>
+        <h3 id="modalLabel">Explanation of Oma FunThe OMA Browser reports for every entry different types of orthology</h3>
+      </div>
+      <div class="modal-body">
+        <div class="panel-body">
+          <div class="col-md-4 ">
+            <ul class="nav nav-pills nav-stacked" role="tablist">
+              <li class="active"><a href="#oma_fun001" role="tab" data-toggle="tab">OMA_Fun:001</a></li>
+              <li><a href="#oma_fun002" role="tab" data-toggle="tab">OMA_Fun:002</a></li>
+            </ul>
+          </div>
+
+          <div class="col-md-8 " >
+            <div class="tab-content">
+              <div class="tab-pane active" id="oma_fun001">
+                <p>The common evolutionary history of orthologs allows for the creation of hypotheses of function: based on the known function of a protein, we can make reasonable hypotheses about the function of its orthologs.</p>
+
+                <p>For OMA function inference, we assume all OMA members share function. In fact, we have previously shown that OMA groups tend to be functionally coherent [1], providing ground for the propagation of known function from one member of an OMA group-typically a model organism protein-to all the other members of the OMA group.</p>
+
+                <p>To avoid circularity in our function inference, we only propagated function assigned by a curator using direct evidence (Gene Ontology annotations with evidence codes EXP, IDA, IPI, IMP, IGI, IEP). Additionally, we account for the large evolutionary span in OMA orthologous groups and we do not propagate functions that would be inappropriate for the clade.</p>
+
+                <p>[1] Skunca N, Bosnjak M, Krisko A, Panov P, Dzeroski S, Smuc T, Supek F.
+                <b>Phyletic profiling with cliques of orthologs is enhanced by signatures of paralogy
+                relationships</b>. <i>PLoS Comput Biol</i>. 2013;9(1):e1002852.
+                <a href="http://dx.doi.org/doi:10.1371/journal.pcbi.1002852" target="_blank">doi:10.1371/journal.pcbi.1002852</a>. Epub 2013 Jan 3. PubMed PMID: 23308060</p>
+
+              </div>
+
+              <div class="tab-pane active" id="oma_fun002">
+                <p>The common evolutionary history of orthologs allows for the creation of hypotheses of function: based on the known function of a protein, we can make reasonable hypotheses about the function of its orthologs.</p>
+                <p>When OMA is used to predict gene function from user-provided sequences using the <a href="{% url "function-projection-input" %}">Predict GO functions</a> functionality, the algorithm transfers the Gene Ontology annotations from the most similar gene in OMA. As reference code we use the special tag "OMA_Fun:002" to label the type of algorithm used in the annotation.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
