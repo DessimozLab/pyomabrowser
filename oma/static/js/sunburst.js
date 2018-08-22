@@ -62,6 +62,7 @@ function sb() {
     init_sb();
 }
 
+
 var top_margin = 45,
     sbWidth = window.innerWidth - 10,
     //sbHeight = window.innerHeight - top_margin,
@@ -104,13 +105,20 @@ var arc = d3.svg.arc()
     .innerRadius(function(d) { return Math.max(0, y(d.y)); })
     .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
 
-var svg = d3.select("#chart").append("svg")
+
+var svg = d3.select("#chart")
+    .on("touchstart", nozoom)
+    .on("touchmove", nozoom)
+    .append("svg")
+    .attr("id", "sbSvg")
     .attr("width", sbWidth)
     .attr("height", sbHeight)
+    .call(d3.behavior.zoom().on("zoom", function () {
+    svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+    }))
     .append("g")
     .attr("id", "container")
     .attr("transform", "translate(" + sbWidth / 2 + "," + (sbHeight / 2) + ")");
-
 
 var all_names = [];
 
@@ -296,11 +304,15 @@ function zoomIntoName(term){
 function resetTo(node) {
     if(!node){
         node = rootNode;
+        zoom.scale(1);
+        zoom.translate([0, 0]);
     }
     click(node);
 }
 
 function click(d) {
+
+    if (d3.event !== null && d3.event.defaultPrevented) return; // zoomed
 
     // reset line styles, reset searchtip
     d3.selectAll("path").style("stroke-width", "1px").style("stroke", "#fff");
@@ -319,6 +331,12 @@ function click(d) {
         var avg_proteins = "";
     }
 
+    if(d.id){
+        var id = "Species: <a href='https://omabrowser.org/cgi-bin/gateway.pl?f=DisplayOS&p1="+d.id+"'>"+d.id+"</a>";
+    } else {
+        var id = "";
+    }
+
     var lineageItems = d.lineage.split(" > ");
     lineageItems.shift();
     var lineage = "";
@@ -334,10 +352,12 @@ function click(d) {
     }
 
     d3.select('#permdiv')
-    .html("<h5 style='vertical-align: middle;border-bottom: 1px solid black;padding-bottom: 3px;'>"+d.name+
-        "<br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: "+d.taxid+
-        ")</span></h5>"+
-        "<p>Genomes: "+d.nr_genomes+
+    .html("<h5 style='vertical-align: middle;border-bottom: 1px solid black;padding-bottom: 3px;'>Selected<br>" +
+        " <strong>"+d.name+
+        "</strong><br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: "+d.taxid+
+        ")</span></h5><p>"+
+        id+
+        "<br>Genomes: "+d.nr_genomes+
         avg_proteins+
         hogs+"</p>"+
         lineage)
@@ -345,7 +365,7 @@ function click(d) {
         .style("top", "80px")
         .style("opacity", 0.9)
         .style("z-index", 99)
-        .attr("class", "tooltip");
+        .attr("class", "selectedpopup");
 
     if (d.depth > 0) {
         $('#resetBtn').prop('disabled', false);
@@ -534,14 +554,68 @@ function init_sb() {
         .innerRadius(function(d) { return Math.max(0, y(d.y)); })
         .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
 
-    svg = d3.select("#chart").append("svg")
-    //svg = d3.select("body").append("svg")
+    zoom = d3.behavior.zoom().on("zoom", zoomed);
+
+    svg = d3.select("#chart")
+        .on("touchstart", nozoom)
+        .on("touchmove", nozoom)
+        .append("svg")
+        .attr("id", "sbSvg")
         .attr("width", sbWidth)
         .attr("height", sbHeight)
         .append("g")
+        .call(zoom)
         .attr("id", "container")
-        .attr("transform", "translate(" + sbWidth / 2 + "," + (sbHeight / 2) + ")");
+        .attr("transform", "translate(" + sbWidth / 2 + "," + (sbHeight / 2) + ")")
 
+
+    var dragListener = d3.behavior.drag()
+    .on("drag", function() {
+        dragX = d3.event.dx;
+        dragY = d3.event.dy;
+    });
+
+    svg.call(dragListener);
+
+    var dragging = 0;
+    var dragX = 0, dragY = 0;
+
+    dragListener.on("dragstart", function() {
+        console.log("drag start");
+      dragging = 1;
+    });
+
+    dragListener.on("dragend", function() {
+        console.log("drag end");
+      dragging = 0;
+      dragX = 0;
+      dragY = 0;
+    });
+
+    function zoomed () {
+        console.log("raw scale: "+d3.event.scale);
+        var scale = d3.event.scale < 4 ? d3.event.scale < 1 ? 1 : d3.event.scale : 4;
+        console.log("scale: "+scale);
+        var trans = d3.transform(svg.attr("transform"));
+        var tpos = trans.translate;
+        var tscale = trans.scale;
+        var tx = tpos[0];
+        var ty = tpos[1];
+        var mx = sbWidth/2;
+        var my = sbHeight/2;
+
+        var dx =  (mx - tx - dragX)/tscale[0];
+        var dy =  (my - ty - dragY)/tscale[1];
+        var dx2 = (mx - dx)/scale - dx;
+        var dy2 = (my - dy)/scale - dy;
+
+        var tform = "translate(" + dx + "," + dy + ")scale(" + scale + ")translate(" + dx2 + "," + dy2 + ")"
+        svg.attr("transform", tform);
+
+
+    }
+
+    // zoom & drag
 
     all_names = [];
 
@@ -559,6 +633,10 @@ function init_sb() {
 
     });
 
+}
+
+function nozoom() {
+  d3.event.preventDefault();
 }
 
 function createVisualization(root) {
