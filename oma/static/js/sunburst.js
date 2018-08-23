@@ -28,7 +28,7 @@ function sb() {
 
     // dynamic function call based on the selected buttons value
 
-    $('#colourSel > button').click(function() {
+    $('#colourSel > .radioBtn').click(function() {
         $(this).addClass('active').siblings().removeClass('active');
         var func = $(this).data('value').split("-");
 
@@ -62,6 +62,7 @@ function sb() {
     init_sb();
 }
 
+var zoom = null;
 
 var top_margin = 45,
     sbWidth = window.innerWidth - 10,
@@ -195,8 +196,6 @@ function scaleGen() {
 
         scales[key] = arr;
     }
-
-    //console.log(scales);
 
 }
 
@@ -554,7 +553,9 @@ function init_sb() {
         .innerRadius(function(d) { return Math.max(0, y(d.y)); })
         .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
 
-    zoom = d3.behavior.zoom().on("zoom", zoomed);
+    zoom = d3.behavior.zoom()
+    .scaleExtent([0.8, 5])
+    .on("zoom", zoomed);
 
     svg = d3.select("#chart")
         .on("touchstart", nozoom)
@@ -581,21 +582,17 @@ function init_sb() {
     var dragX = 0, dragY = 0;
 
     dragListener.on("dragstart", function() {
-        console.log("drag start");
       dragging = 1;
     });
 
     dragListener.on("dragend", function() {
-        console.log("drag end");
       dragging = 0;
       dragX = 0;
       dragY = 0;
     });
 
     function zoomed () {
-        console.log("raw scale: "+d3.event.scale);
-        var scale = d3.event.scale < 4 ? d3.event.scale < 1 ? 1 : d3.event.scale : 4;
-        console.log("scale: "+scale);
+        var scale = d3.event.scale;
         var trans = d3.transform(svg.attr("transform"));
         var tpos = trans.translate;
         var tscale = trans.scale;
@@ -611,8 +608,6 @@ function init_sb() {
 
         var tform = "translate(" + dx + "," + dy + ")scale(" + scale + ")translate(" + dx2 + "," + dy2 + ")"
         svg.attr("transform", tform);
-
-
     }
 
     // zoom & drag
@@ -874,7 +869,6 @@ function createPermDiv(containerElem) {
     $('<div class="tooltip" style="position: absolute; opacity: 0;" id="permdiv"></div>').prependTo(containerElem);
 
     $( "#permdiv" ).on( "click", "span", function() {
-      console.log("clicked: "+ $( this ).text() );
       zoomIntoName($( this ).text())
     });
 
