@@ -56,30 +56,34 @@ function update_genome_viewer(bid) {
         var under = document.createElement('div');
 
         under.setAttribute('id', 'sb');
-        under.innerHTML = '<nav class="navbar navbar-default">\
-        <div class="container-fluid">\
-            <div class="nav navbar-nav navbar-left" style="margin-left: 6px; text-align: left;">\
-                <button type="button" id="resetBtn" class="navbar-btn btn btn-default btn-sm" style="left: 20px;"\
-                 onclick="resetTo();">Reset to root</button>\
-                <div class="btn-group btn-group-sm" id="colourSel" role="group" aria-label="...">\
-                    <button type="button" class="btn btn-primary" id="heatmapRadio" data-value="heatmap-avg_nr_proteins">Avg number of\
-                 Proteins</button>\
-                    <button type="button" class="btn btn-primary" id="dolRadio" data-value="dol">Domains of life</button>\
-                </div>\
-            </div>\
-            <div class="nav navbar-nav navbar-right" style="margin-right: 6px;">\
-                <div class="form-group input-group navbar-btn input-group-sm">\
-                    <input type="text" id="search" class="form-control searchField" placeholder="Search...">\
-                    <div class="input-group-btn">\
-                        <button type="button" class="btn btn-warning"\
-                         onclick="$(\'#search\').val(\'\');findByName();">Clear</button>\
-                        <button type="button" class="btn btn-primary" onclick="findByName();">Search</button>\
-                        <button type="button" class="btn btn-info" onclick="zoomIntoName();">Zoom into</button>\
+        under.innerHTML = '<div class="row">\
+                <div class="col-sm-7 col-xs-12">\
+                    <div class="nav navbar-nav navbar-left">\
+                        <div class="btn-group btn-group-sm" id="colourSel" role="group" aria-label="...">\
+                            <button type="button" id="resetBtn" class="btn btn-default btn-sm" onclick="resetTo();">Reset to root</button>\
+                            <button type="button" class="btn btn-primary btn-sm radioBtn" id="heatmapRadio"\
+                             data-value="heatmap-avg_nr_proteins">Avg number of\
+                         Proteins</button>\
+                            <button type="button" class="btn btn-primary btn-sm radioBtn" id="dolRadio"\
+                             data-value="dol">Domains of\
+                             life</button>\
+                        </div>\
                     </div>\
                 </div>\
-            </div>\
+                <div class="col-sm-5 col-xs-12">\
+                    <div class="nav navbar-nav navbar-right">\
+                        <div class="form-group input-group input-group-sm" >\
+                            <input type="text" id="search" class="form-control searchField" placeholder="Search...">\
+                            <div class="input-group-btn">\
+                                <button type="button" class="btn btn-warning"\
+                                 onclick="$(\'#search\').val(\'\');findByName();">Clear</button>\
+                                <button type="button" class="btn btn-primary" onclick="findByName();">Search</button>\
+                                <button type="button" class="btn btn-info" onclick="zoomIntoName();">Zoom into</button>\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>\
         </div>\
-</nav>\
 <div id="chart">\
     <div style="position: absolute; margin: 0;" id="sequence"></div>\
     <div style="position: absolute; margin: 20px 0 0 0;" id="colorscale">\
@@ -96,7 +100,6 @@ function update_genome_viewer(bid) {
             lookup: all_names,
             delay: 200,
             minLength: 3,
-            //select: function( event, ui ) { findByName(ui.item.value); }
             onSelect: function( event ) { findByName(event.value); }
         });
 
