@@ -165,7 +165,7 @@ var augment_data = function(node) {
 }
 
 var div = d3.select("body").append("div")
-    .attr("class", "tooltip")
+    .attr("class", "nodetooltip")
     .style("opacity", 0);
 
 var divsearchtip = d3.select("body").append("div")
@@ -700,7 +700,7 @@ function mouseover(d) {
         .style("opacity", 1);
 
     var tooltipTop = function(){
-        var element = d3.selectAll('.tooltip').node();
+        var element = d3.selectAll('.nodetooltip').node();
         var ttHeight = element.getBoundingClientRect().sbHeight;
         var ttTop = d3.event.pageY;
         var ttBottom = ttTop + ttHeight + ttBottomMargin;
@@ -866,7 +866,7 @@ function createPermDiv(containerElem) {
         var containerElem = "#genome_panel";
     }
 
-    $('<div class="tooltip" style="position: absolute; opacity: 0;" id="permdiv"></div>').prependTo(containerElem);
+    $('<div class="nodetooltip" style="position: absolute; opacity: 0;" id="permdiv"></div>').prependTo(containerElem);
 
     $( "#permdiv" ).on( "click", "span", function() {
       zoomIntoName($( this ).text())
