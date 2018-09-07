@@ -8,14 +8,20 @@
 $(window).on('resize', function() {
     if($(window).width() < 768) {
         $('#sidebar-container').addClass('col-12');
+        $('#content-column').addClass('col-12');
         $('#sidebar-container').removeClass('col-3');
+        $('#content-column').removeClass('col-9');
         $('#sidebar-container').removeClass('full-height');
         /*$('#collapseOne').collapse('hide');*/
+        console.log("< 768");
     } else {
         $('#sidebar-container').addClass('col-3');
+        $('#content-column').addClass('col-9');
         $('#sidebar-container').addClass('full-height');
         $('#sidebar-container').removeClass('col-12');
+        $('#content-column').removeClass('col-12');
         /*$('#collapseOne').collapse('show');*/
+        console.log("> 768");
     }
 })
 
@@ -55,7 +61,9 @@ $(window).on('load', function () {
 
                     <h5 class="card-title">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %}</h5>
                     <div class="d-flex">
-                        <p class="card-subtitle mb-2 text-muted mr-auto">{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</p>
+                        <p class="card-subtitle text-muted mr-auto">{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</p>
+                    </div>
+                    <div class="d-flex justify-content-sm-end mt-2">
                         <button type="button" class="btn btn-sm btn-default dropdown-toggle col-6 col-sm-2 mr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Groups</button>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="#">Group 1</a>
@@ -83,7 +91,7 @@ $(window).on('load', function () {
         <!-- entry.canonicalid = {{ entry.canonicalid }}  -->
         <!-- entry.canonicalid.strain = {{ entry.canonicalid.strain }}  -->
 
-        <div class="col-9"> <!-- content col -->
+        <div id="content-column" class="col-9"> <!-- content col -->
             <!--<h2 class="">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %} </h2>
             <h4>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</h4>
             {% block seqhead_hook %}{% endblock %}
