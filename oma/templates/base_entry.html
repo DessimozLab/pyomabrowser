@@ -1,63 +1,9 @@
-{% extends  "core.html" %}
-
-{% block title %}OMA orthology database: Sequence-centric view{% endblock %}
-
-{% block content %}
-<script>
-
-$(window).on('resize', function() {
-    if($(window).width() < 768) {
-        $('#sidebar-container').addClass('col-12');
-        $('#content-column').addClass('col-12');
-        $('#sidebar-container').removeClass('col-3');
-        $('#content-column').removeClass('col-9');
-        $('#sidebar-container').removeClass('full-height');
-        /*$('#collapseOne').collapse('hide');*/
-        console.log("< 768");
-    } else {
-        $('#sidebar-container').addClass('col-3');
-        $('#content-column').addClass('col-9');
-        $('#sidebar-container').addClass('full-height');
-        $('#sidebar-container').removeClass('col-12');
-        $('#content-column').removeClass('col-12');
-        /*$('#collapseOne').collapse('show');*/
-        console.log("> 768");
-    }
-})
-
-$(document).on('hidden.bs.collapse', '#accordion', function (e) {
-    console.log("hiding");
-    $('.menu-tab .active').removeClass('selected');
-    $('.menu-tab').removeClass('d-block');
-})
+{% extends  "base_data_centric.html" %}
 
 
-$(document).on('shown.bs.collapse', '#accordion', function (e) {
-    console.log("showing");
-    $('.menu-tab .active').addClass('selected');
-    $('.menu-tab').addClass('d-block');
-})
+{% block header_color_class %} gene-orthology {% endblock %}
 
-$(window).on('load', function () {
-    $(window).resize();
-});
-
-</script>
-<style>
-
-
-</style>
-
-
-
-<div class="container" id="body" style="margin-top: 2em;"> <!-- .container -->
-
-
-    <div class="row">
-        <div class="col-12">
-
-            <div class="card">
-                <div class="card-body gene-orthology">
+{% block header_body %}
 
                     <h5 class="card-title">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %}</h5>
                     <div class="d-flex">
@@ -72,26 +18,32 @@ $(window).on('load', function () {
                         </div>
                         <button class="btn btn-sm col-6 col-sm-2">Genome</button>
                     </div>
-                </div>
-            </div>
 
-        </div>
+{% endblock %}
 
-    </div>
 
-    <div class="row content-container-row"> <!-- row content-container-row -->
+
+{% block data_content %}
+
+
+
+
+
+
+
+
 
         {% if tab == 'hogs' %}
         {% include "includes/hogs_menu.html" with tab=tab %}
         {% else %}
-        {% include "includes/gene_menu.html" with tab=tab %}
+        {% include "includes/gene_sidebar.html" with tab=tab %}
         {%endif%}
         <!-- tab = {{ tab }}  -->
         <!-- entry.omaid = {{ entry.omaid }}  -->
         <!-- entry.canonicalid = {{ entry.canonicalid }}  -->
         <!-- entry.canonicalid.strain = {{ entry.canonicalid.strain }}  -->
 
-        <div id="content-column" class="col-9"> <!-- content col -->
+        <div id="content-column" class="col-xs-12 col-9" style="background-color: #edf"> <!-- content col -->
             <!--<h2 class="">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %} </h2>
             <h4>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</h4>
             {% block seqhead_hook %}{% endblock %}
@@ -141,9 +93,9 @@ $(window).on('load', function () {
 
         </div> <!-- content col -->
 
-    </div> <!-- row content-container-row -->
 
-</div> <!-- .container -->
-{% endblock content %}
+
+
+{% endblock data_content %}
 
 

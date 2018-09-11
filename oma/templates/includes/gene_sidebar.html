@@ -1,8 +1,8 @@
 <!-- Sidebar / menu -->
-        <div id="sidebar-container" class="col-3 gene-orthology full-height"> <!-- #sidebar-container -->
+        <div id="sidebar-container" class="col-sm-12 col-md-3 gene-orthology full-height" style="background-color: #d4f"> <!-- #sidebar-container -->
 
             <div id="accordion">
-                <div class="menu-tab" style="cursor: pointer;" onclick="console.log('orthology clicked')"
+                <div class="menu-tab " style="cursor: pointer;" onclick="console.log('orthology clicked')"
                      {% if tab == 'orthologs' %} data-toggle="collapse" data-target="#collapseOrthology" aria-expanded="true" aria-controls="#collapseOrthology"{%endif%}>
                     <span class=""><a href="{% url 'pairs' entry.omaid %}" >Orthologs {% if nr_vps %}<span class="badge badge-info">{{nr_vps}}</span>{% endif %}</a></span>
                 </div>
@@ -73,27 +73,27 @@
             <!--</div>
 
             <div class="row justify-content-center mx-2 mx-sm-0">-->
-                <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'paralogy' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('paralogy clicked')" data-toggle="collapse" data-target="#collapseParalogy" aria-expanded="false" aria-controls="#collapseParalogy">
+                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'paralogy' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('paralogy clicked')" data-toggle="collapse" data-target="#collapseParalogy" aria-expanded="false" aria-controls="#collapseParalogy">
                     <span class="">Paralogy</span>
                 </div>
 
-                <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'geneinformation' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Gene information')">
+                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'geneinformation' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Gene information')">
                     <span class="">Gene information</span>
                 </div>
 
-                <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'goannotations' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('GO annotations')">
+                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'goannotations' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('GO annotations')">
                     <span class="">GO annotations</span>
                 </div>
 
-                <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'sequence' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Sequence')">
+                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'sequence' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Sequence')">
                     <span class="">Sequences</span>
                 </div>
 
-                <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'domainarcitecture' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Domain architecture')">
+                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'domainarcitecture' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Domain architecture')">
                     <span class=""><a href="{% url 'hog_domains' entry.omaid %}">Domain architecture</a></span>
                 </div>
 
-                <div class="menu-tab d-none d-sm-block col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Local synteny')"
+                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Local synteny')"
                      {% if tab == 'synteny' %} data-toggle="collapse" data-target="#collapseSynteny" aria-expanded="true" aria-controls="#collapseSynteny"{%endif%}>
                     <span class=""><a href="{% url 'synteny' entry.omaid 4 4 %}" >Local synteny</a></span>
                 </div>

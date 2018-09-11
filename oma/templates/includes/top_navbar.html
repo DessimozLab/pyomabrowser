@@ -1,41 +1,6 @@
-<!DOCTYPE html>
-<html>
-  <head>
 {% load staticfiles %}
-{% comment %} {% load bootstrap3 %} {% endcomment %}
-    <meta charset="utf-8">
-    <title>{% block title %}OMA{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}The OMA Browser provides orthology predictions among hundreds of complete genomes across all of life{% endblock %}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% block meta_hook %}{% endblock %}
-    <link rel="shortcut icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
-    <link rel="icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
-    <link type="text/css" rel="stylesheet" href="{% static "css/home.css" %}"/>
 
-      <!-- Bootstrap -->
-
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
-
-    <script
-			  src="https://code.jquery.com/jquery-3.3.1.min.js"
-			  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-			  crossorigin="anonymous"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
-
-    <script src="{% static "js/jquery.autocomplete.min.js" %}"></script>
-    <script>var static_root = "{% static "" %}";</script>
-    {% block css_hook %}{% endblock %}
-    {% block js_hook %}{% endblock %}
-  </head>
-  <body>
-    {% block topelement %}{% endblock %}
-
-
-<nav class="navbar navbar-light navbar-expand-md bg-light" role="navigation">
+<nav class="navbar navbar-light navbar-expand-md bg-light fixed-top" role="navigation">
     <a href="https://www.sib.swiss" class="navbar-brand d-none d-lg-block">
         <img alt="SIB logo" src="{% static "image/SIBlogo.png" %}"  class="siblogo">
     </a>
@@ -219,6 +184,8 @@
 </nav>
 
 
+<div style="height: 50px;"></div>
+
 <script type="text/javascript">
     function update_navbar_autocomplete() {
         var sel = document.getElementById('selectNav');
@@ -271,13 +238,3 @@
     $('#textNav').autocomplete(autocomplete_opts);
     update_navbar_autocomplete();
 </script>
-
-  <div id="content"> <!-- #content -->
-    {% block content %}{% endblock %}
-  </div> <!-- #content -->
-
-
-  {% comment %} {% include 'includes/analytics.html' %} {% endcomment %}
-
-</body>
-</html>

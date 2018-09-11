@@ -1,0 +1,55 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+
+    {% comment %} {% load bootstrap4 %} {% endcomment %}
+
+    <meta charset="utf-8">
+
+    <title>{% block title %}OMA{% endblock %}</title>
+
+    <meta name="description" content="{% block meta_description %}The OMA Browser provides orthology predictions among hundreds of complete genomes across all of life{% endblock %}">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% block meta_hook %}{% endblock %}
+
+    <link rel="shortcut icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
+    <link rel="icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
+    <link type="text/css" rel="stylesheet" href="{% static "css/base.css" %}"/>
+
+    <!-- Bootstrap -->
+    <link type="text/css" rel="stylesheet" href="{% static "css/bootstrap4.min.css" %}"/>
+    <script src="{% static "js/jquery-3.3.1.min.js" %}"></script>
+    <script src="{% static "js/popper.min.js" %}"></script>
+    <script src="{% static "js/bootstrap4min.js" %}"></script>
+
+    <!-- <link type="text/css" rel="stylesheet" href="{% static "css/all.css" %}"/> -->
+
+    <script src="{% static "js/jquery.autocomplete.min.js" %}"></script>
+    <script>var static_root = "{% static "" %}";</script>
+
+    {% block css_hook %}{% endblock %}
+
+    {% block js_hook %}{% endblock %}
+
+</head>
+
+<body>
+
+{% block topelement %}{% endblock %}
+
+{% include "includes/top_navbar.html" %}
+
+<div id="content"> <!-- #content -->
+
+    {% block content %}{% endblock %}
+
+</div> <!-- #content -->
+
+{% comment %} {% include 'includes/analytics.html' %} {% endcomment %}
+
+</body>
+</html>
