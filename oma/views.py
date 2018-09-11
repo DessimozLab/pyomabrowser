@@ -301,7 +301,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
                'entry': entry,
                'tab': 'synteny', 'xrefs': xrefs
     }
-    return render(request, 'synteny.html', context)
+    return render(request, 'entry_localSynteny.html', context)
 
 
 class PairsBase(ContextMixin, EntryCentricMixin):
@@ -347,7 +347,7 @@ class PairsJson(PairsBase, JsonModelMixin, View):
 
 
 class PairsView(TemplateView, PairsBase):
-    template_name = "pairs.html"
+    template_name = "entry_orthology.html"
 
 
 class PairsViewFasta(FastaView, PairsBase):
@@ -392,7 +392,7 @@ class InfoBase(ContextMixin, EntryCentricMixin):
 
 
 class InfoView(InfoBase, TemplateView):
-    template_name = "info.html"
+    template_name = "entry_info.html"
 
 
 class InfoViewFasta(InfoBase, FastaView):
@@ -516,7 +516,7 @@ class HOGsMSA(AsyncMsaMixin, HOGsBase, TemplateView):
 
 
 class HOGsVis(EntryCentricMixin, TemplateView):
-    template_name = "hog_vis.html"
+    template_name = "hog_iHam.html"
     show_internal_labels = True
 
     def get_context_data(self, entry_id, idtype='OMA', **kwargs):
@@ -572,7 +572,7 @@ class HOGDomainsBase(ContextMixin, EntryCentricMixin):
 
 
 class HOGDomainsView(HOGDomainsBase, TemplateView):
-    template_name = "hog-domains.html"
+    template_name = "hog_domains.html"
 
 
 class HOGDomainsJson(HOGDomainsBase, View):
@@ -601,6 +601,72 @@ def domains_json(request, entry_id):
     domains = utils.db.get_domains(entry['EntryNr'])
     response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
     return JsonResponse(response)
+
+
+class HOGBase(ContextMixin, EntryCentricMixin):
+
+    def get_context_data(self, group_id, level=None, idtype='OMA', **kwargs):
+        context = super(HOGBase, self).get_context_data(**kwargs)
+        entry_id = utils.db.member_of_fam(int(group_id))[0][0]
+        entry = self.get_entry(entry_id)
+        hog_member_entries = []
+        hog = None
+        levels = []
+        try:
+            levs_of_fam = frozenset([z.decode() for z in utils.db.hog_levels_of_fam(entry.hog_family_nr)])
+            levels = [l for l in itertools.chain(entry.genome.lineage, ('LUCA',))
+                      if l.encode('ascii') in utils.tax.all_hog_levels and l in levs_of_fam]
+            hog = {'id': entry.oma_hog, 'fam': entry.hog_family_nr}
+            if not level is None:
+                hog_member_entries = utils.db.hog_members(entry.entry_nr, level)
+        except db.Singleton:
+            pass
+        except ValueError as e:
+            raise Http404(str(e))
+        except db.InvalidTaxonId:
+            logger.error("cannot get NCBI Taxonomy for {} ({})".format(
+                entry.genome.uniprot_species_code,
+                entry.genome.ncbi_taxon_id))
+
+        hog_members = [models.ProteinEntry(utils.db, e) for e in hog_member_entries]
+        nr_vps = utils.db.count_vpairs(entry.entry_nr)
+        longest_seq = 0
+        if len(hog_member_entries) > 0:
+            longest_seq = max(e['SeqBufferLength'] for e in hog_member_entries)
+        context.update(
+            {'entry': entry,
+             'level': level, 'hog_members': hog_members,
+             'nr_vps': nr_vps, 'tab': 'hogs', 'levels': levels[::-1],
+             'longest_seq': longest_seq,
+             'table_data_url': reverse('hog_json', args=(entry.omaid, level)),
+             })
+        if hog is not None:
+            context['hog'] = hog
+        return context
+
+class HOGiHam(HOGBase, TemplateView):
+    template_name = "hog_iHam.html"
+    show_internal_labels = True
+
+    def get_context_data(self, group_id, idtype='OMA', **kwargs):
+        context = super(HOGiHam, self).get_context_data(group_id, **kwargs)
+
+        entry_id = utils.db.member_of_fam(int(group_id))[0][0]
+        entry = self.get_entry(entry_id)
+
+        context.update({'tab': 'hogs',
+                        'entry': entry,
+                        })
+        try:
+            fam_nr = entry.hog_family_nr
+            context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
+                            'show_internal_labels': self.show_internal_labels,
+                            })
+            if fam_nr == 0:
+                context['isSingleton'] = True
+        except db.Singleton:
+            context['isSingleton'] = True
+        return context
 
 
 @cache_control(max_age=1800)
@@ -670,11 +736,11 @@ def genome_suggestion(request):
             return HttpResponseRedirect(reverse('genome_suggestion_thanks'))
     else:
         form = forms.GenomeSuggestionFrom()
-    return render(request, "genome_suggestion.html", {'form': form})
+    return render(request, "help_genome_suggestion.html", {'form': form})
 
 
 class Release(TemplateView):
-    template_name = 'release.html'
+    template_name = 'explore_release.html'
 
     def get_context_data(self, **kwargs):
         ctx = super(Release, self).get_context_data(**kwargs)
@@ -728,7 +794,7 @@ def export_marker_genes(request):
                 r.save()
                 tasks.export_marker_genes.delay(genomes, data_id, min_species_coverage, top_N_genomes)
             return HttpResponseRedirect(reverse('marker_genes', args=(data_id,)))
-    return render(request, "export_marker.html", context={'max_nr_genomes': 200})
+    return render(request, "dlOMA_exportMarker.html", context={'max_nr_genomes': 200})
 
 
 def function_projection(request):
@@ -785,7 +851,7 @@ class MarkerGenesResults(AbstractFileResultDownloader):
 
 
 class CurrentView(TemplateView):
-    template_name = "current.html"
+    template_name = "dlOMA_current.html"
     _re_rel2name = re.compile(r'(?:(?P<scope>[A-Za-z]+).)?(?P<month>[A-Za-z]{3})(?P<year>\d{4})')
 
     def _get_all_releases_with_downloads(self, prefix_filter='All.'):
@@ -837,7 +903,7 @@ class CurrentView(TemplateView):
 
 
 class ArchiveView(CurrentView):
-    template_name = "archives.html"
+    template_name = "dlOMA_archives.html"
 
     def get_release_data(self, release):
         res = {}
@@ -961,6 +1027,8 @@ class OMAGroup(OMAGroupBase, TemplateView):
                         'table_data_url': reverse('omagroup-json', args=(grp_nr,)),
                         'longest_seq': max([len(z.sequence) for z in context['members']])
                         })
+
+        print(context)
         return context
 
 
@@ -1001,3 +1069,11 @@ class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
             context = {}
         context.update({'sub_tab': 'msa', 'entry': entry})
         return context
+
+def GenomeInfoView(request, specie_id):
+
+    context = {'specie_id': specie_id}
+
+    return render(request, 'genome_info.html', context)
+
+

@@ -99,7 +99,7 @@ class HogVisViewTest(TestCase):
         query = 'YEAST00012'
         reply = self.client.get(reverse('hog_vis', args=[query]))
         self.assertEqual(reply.status_code, 200)
-        self.assertTemplateUsed(reply, "hog_vis.html")
+        self.assertTemplateUsed(reply, "hog_iHam.html")
         expected_orthoxml_url = reverse('hogs_orthoxml', args=[query])
         expected_species_url = '/All/speciestree.nwk'
         self.assertIn('url: "{}"'.format(expected_orthoxml_url).encode('utf-8'), reply.content)
