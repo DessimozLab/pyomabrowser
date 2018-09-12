@@ -6,7 +6,7 @@
 
 {% block header_body %}
 
-                    <h5 class="card-title">Genome {{specie_id }} </h5>
+                    <h5 class="card-title">Genome {{genome.sciname }} </h5>
 
 
 {% endblock %}
@@ -14,7 +14,7 @@
 {% block data_content %}
 
 
-        {% include "includes/genome_sidebar.html" with tab=tab %}
+        {% include "includes/sidebar_genome.html" with tab=tab %}
 
 
         <div id="content-column" class="col-xs-12 col-9" style="background-color: #edf"> <!-- content col -->

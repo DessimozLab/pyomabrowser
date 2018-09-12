@@ -383,27 +383,6 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         return JsonResponse(data, safe=False)
 
 
-class InfoBase(ContextMixin, EntryCentricMixin):
-    def get_context_data(self, entry_id, **kwargs):
-        context = super(InfoBase, self).get_context_data(**kwargs)
-        entry = self.get_entry(entry_id)
-        context.update({'entry': entry})
-        return context
-
-
-class InfoView(InfoBase, TemplateView):
-    template_name = "entry_info.html"
-
-
-class InfoViewFasta(InfoBase, FastaView):
-    def get_fastaheader(self, member):
-        return " | ".join([member.omaid, member.canonicalid,
-                           "[{}]".format(member.genome.sciname)])
-
-    def render_to_response(self, context, **kwargs):
-        return self.render_to_fasta_response([context['entry']])
-
-
 class HOGsBase(ContextMixin, EntryCentricMixin):
 
     def get_context_data(self, entry_id, level=None, idtype='OMA', **kwargs):
@@ -1070,10 +1049,47 @@ class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
         context.update({'sub_tab': 'msa', 'entry': entry})
         return context
 
-def GenomeInfoView(request, specie_id):
 
-    context = {'specie_id': specie_id}
+# Genome Centric
 
-    return render(request, 'genome_info.html', context)
+class GenomeBase(ContextMixin):
+    def get_context_data(self, specie_id, **kwargs):
+        context = super(GenomeBase, self).get_context_data(**kwargs)
+        try:
+            genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(specie_id))
+            context['genome'] = genome_obj
+        except db.InvalidId as e:
+            raise Http404(e)
+        return context
+
+class GenomeCentricInfo(GenomeBase, TemplateView):
+    template_name = "genome_info.html"
+
+
+# Entry Centric
+class InfoBase(ContextMixin, EntryCentricMixin):
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(InfoBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+        context.update({'entry': entry, 'tab': 'geneinformation'})
+        return context
+
+
+class EntryInfoView(InfoBase, TemplateView):
+    template_name = "entry_info.html"
+
+
+class InfoViewFasta(InfoBase, FastaView):
+    def get_fastaheader(self, member):
+        return " | ".join([member.omaid, member.canonicalid,
+                           "[{}]".format(member.genome.sciname)])
+
+    def render_to_response(self, context, **kwargs):
+        return self.render_to_fasta_response([context['entry']])
+
+
+
+
+
 
 

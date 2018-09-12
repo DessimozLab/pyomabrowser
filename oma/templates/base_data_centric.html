@@ -6,6 +6,7 @@
 
 $(window).on('resize', function() {
     if($(window).width() < 768) {
+        $('#accordion').addClass('collapse');
         //$('#sidebar-container').addClass('col-12');
         $('#content-column').addClass('col-12');
        // $('#sidebar-container').removeClass('col-3');
@@ -14,6 +15,7 @@ $(window).on('resize', function() {
         /*$('#collapseOne').collapse('hide');*/
         console.log("< 768");
     } else {
+        $('#accordion').removeClass('collapse');
         //$('#sidebar-container').addClass('col-3');
         $('#content-column').addClass('col-9');
         $('#sidebar-container').addClass('full-height');
@@ -24,18 +26,6 @@ $(window).on('resize', function() {
     }
 })
 
-$(document).on('hidden.bs.collapse', '#accordion', function (e) {
-    console.log("hiding");
-    $('.menu-tab .active').removeClass('selected');
-    $('.menu-tab').removeClass('d-block');
-})
-
-
-$(document).on('shown.bs.collapse', '#accordion', function (e) {
-    console.log("showing");
-    $('.menu-tab .active').addClass('selected');
-    $('.menu-tab').addClass('d-block');
-})
 
 $(window).on('load', function () {
     $(window).resize();
@@ -66,7 +56,7 @@ $(window).on('load', function () {
     {% block data_content %} {% endblock data_content%}
 
 
-    </div> <!-- row content-container-row -->`
+    </div> <!-- row content-container-row -->
 
 
     </div> <!-- .container -->

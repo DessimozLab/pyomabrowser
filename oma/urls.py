@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^synteny/(?P<entry_id>\w+)/(?P<mod>\d)/(?P<windows>\d)/$',
         views.synteny, name='synteny'),
     url(r'^info/(?P<entry_id>\w+)/fasta/$', views.InfoViewFasta.as_view(), name='entry_fasta'),
+    url(r'^info/(?P<entry_id>\w+)/$', views.EntryInfoView.as_view(), name='entry_info'),
 
     # HOG via Entry
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGsView.as_view(), name='hogs'),
@@ -51,7 +52,8 @@ urlpatterns = [
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/fasta/$', views.OMAGroupFasta.as_view(), name='omagroup-fasta'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
 
-    url(r'^genome/(?P<specie_id>\w+)/$', TemplateView.as_view(template_name='genome_info.html'), name='genome_info'),
+    # Genome
+    url(r'^genome/(?P<specie_id>\w+)/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
 
     url(r'^export_markers', views.export_marker_genes, name='export_markers'),
     url(r'^markers/(?P<data_id>\w+)/$', views.MarkerGenesResults.as_view(), name='marker_genes'),

@@ -13,11 +13,11 @@
 
 {% block data_content %}
 
-        <!-- % include "includes/hogs_menu.html" with tab=tab %}
+        {% include "includes/hogs_menu.html" with tab=tab %}
 
         <div id="content-column" class="col-xs-12 col-9" style="background-color: #edf">
-            % block contentTab %} % endblock contentTab %}
-        </div>  content col -->
+           {% block contentTab %} {% endblock contentTab %}
+        </div>
 
 {% endblock data_content %}
 

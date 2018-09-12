@@ -25,13 +25,13 @@
 
 
 
-        <!-- % include "includes/gene_sidebar.html" with tab=tab %}
+    {% include "includes/sidebar_gene.html" with tab=tab %}
 
-        <div id="content-column" class="col-xs-12 col-9" style="background-color: #edf">
+        <div id="content-column" class="col-xs-12 col-9">
 
-            % block contentTab %} % endblock contentTab %}
+            {% block contentTab %} {% endblock contentTab %}
 
-        </div>  content col -->
+        </div>
 
 {% endblock data_content %}
 

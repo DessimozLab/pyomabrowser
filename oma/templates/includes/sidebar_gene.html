@@ -1,12 +1,30 @@
 <!-- Sidebar / menu -->
-        <div id="sidebar-container" class="col-sm-12 col-md-3 gene-orthology full-height" style="background-color: #d4f"> <!-- #sidebar-container -->
 
-            <div id="accordion">
-                <div class="menu-tab " style="cursor: pointer;" onclick="console.log('orthology clicked')"
+<style>
+
+    [data-toggle="collapse"] .fa:before {
+  content: "\f139";
+}
+
+[data-toggle="collapse"].collapsed .fa:before {
+  content: "\f13a";
+}
+
+
+</style>
+
+
+
+        <div id="sidebar-container" class="col-sm-12 col-md-3 gene-orthology full-height" > <!-- #sidebar-container -->
+
+        <button href="#accordion" class="btn btn-default d-md-none col-6 col-sm-12 " data-toggle="collapse">Select a tab</button>
+
+
+            <div class="" id="accordion">
+                <div class="menu-tab  col-6 col-sm-12 {% if tab == 'orthologs' %} active selected {%endif%} " style="cursor: pointer;" {% if tab != 'orthologs' %}  onclick="window.location='{% url 'pairs' entry.omaid %}'" {%endif%}
                      {% if tab == 'orthologs' %} data-toggle="collapse" data-target="#collapseOrthology" aria-expanded="true" aria-controls="#collapseOrthology"{%endif%}>
-                    <span class=""><a href="{% url 'pairs' entry.omaid %}" >Orthologs {% if nr_vps %}<span class="badge badge-info">{{nr_vps}}</span>{% endif %}</a></span>
+                    <span class=""><a href="{% url 'pairs' entry.omaid %}" >Orthologs {% if nr_vps %}<span class="badge badge-info">{{nr_vps}}</span>{% endif %}</a>  <i class="fa float-right" aria-hidden="true"> </i> </span>
                 </div>
-
 
                 <div id="collapseOrthology" class="collapse pt-0{% if tab == 'orthologs' %} show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
 
@@ -70,35 +88,20 @@
 
                 </div>
 
-            <!--</div>
 
-            <div class="row justify-content-center mx-2 mx-sm-0">-->
-                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'paralogy' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('paralogy clicked')" data-toggle="collapse" data-target="#collapseParalogy" aria-expanded="false" aria-controls="#collapseParalogy">
-                    <span class="">Paralogy</span>
+                <div  class="menu-tab col-6 col-sm-12 {% if tab == 'geneinformation' %} active selected {%endif%}"  style="cursor: pointer;"  {% if tab != 'geneinformation' %}  onclick="window.location='{% url 'entry_info' entry.omaid %}'" {%endif%} onclick="console.log('Gene information')">
+
+                    <span class=""><a href="{% url 'entry_info' entry.omaid %}" >Gene information</a></span>
                 </div>
 
-                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'geneinformation' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Gene information')">
-                    <span class="">Gene information</span>
-                </div>
 
-                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'goannotations' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('GO annotations')">
-                    <span class="">GO annotations</span>
-                </div>
 
-                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'sequence' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Sequence')">
-                    <span class="">Sequences</span>
-                </div>
-
-                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'domainarcitecture' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Domain architecture')">
-                    <span class=""><a href="{% url 'hog_domains' entry.omaid %}">Domain architecture</a></span>
-                </div>
-
-                <div class="menu-tab d-none d-md-block col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}" style="cursor: pointer;" onclick="console.log('Local synteny')"
+                <div class="menu-tab  col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}" style="cursor: pointer;" {% if tab != 'synteny' %}  onclick="window.location='{% url 'synteny' entry.omaid 4 4 %}'" {%endif%}
                      {% if tab == 'synteny' %} data-toggle="collapse" data-target="#collapseSynteny" aria-expanded="true" aria-controls="#collapseSynteny"{%endif%}>
-                    <span class=""><a href="{% url 'synteny' entry.omaid 4 4 %}" >Local synteny</a></span>
+                    <span class=""><a href="{% url 'synteny' entry.omaid 4 4 %}" >Local synteny</a> <i class="fa float-right" aria-hidden="true"></i>  </span>
                 </div>
 
-                <div id="collapseSynteny" class="collapse pt-0{% if tab == 'synteny' %} show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
+                <div id="collapseSynteny" class="collapse  pt-0{% if tab == 'synteny' %} show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
 
                     <div class="card-body pl-4 py-2">
                         <h6>Filter by Taxon</h6>
