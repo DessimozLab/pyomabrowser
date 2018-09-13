@@ -1191,7 +1191,7 @@ class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroupMSA, self).get_context_data(group_id)
         context.update(self.get_msa_results('og', context['group_nr']))
-        context['tab'] = 'alignment'
+        context.update({'tab':'alignment'})
         return context
 
 
@@ -1210,7 +1210,6 @@ class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
 
 
 # Genome Centric
-
 class GenomeBase(ContextMixin):
     def get_context_data(self, specie_id, **kwargs):
         context = super(GenomeBase, self).get_context_data(**kwargs)
@@ -1223,6 +1222,38 @@ class GenomeBase(ContextMixin):
 
 class GenomeCentricInfo(GenomeBase, TemplateView):
     template_name = "genome_info.html"
+
+    def get_context_data(self, specie_id, **kwargs):
+        context = super(GenomeCentricInfo, self).get_context_data(specie_id, **kwargs)
+        context.update({'tab': 'information'})
+        return context
+
+class GenomeCentricGenes(GenomeBase, TemplateView):
+    template_name = "genome_genes.html"
+
+    def get_context_data(self, specie_id, **kwargs):
+        context = super(GenomeCentricGenes, self).get_context_data(specie_id, **kwargs)
+        context.update({'tab': 'genes'})
+        return context
+
+
+class GenomeCentricClosest(GenomeBase, TemplateView):
+    template_name = "genome_closest.html"
+
+    def get_context_data(self, specie_id, **kwargs):
+        context = super(GenomeCentricClosest, self).get_context_data(specie_id, **kwargs)
+        context.update({'tab': 'closest'})
+        return context
+
+
+class GenomeCentricSynteny(GenomeBase, TemplateView):
+    template_name = "genome_synteny.html"
+
+    def get_context_data(self, specie_id, **kwargs):
+        context = super(GenomeCentricSynteny, self).get_context_data(specie_id, **kwargs)
+        context.update({'tab': 'synteny'})
+        return context
+
 
 
 

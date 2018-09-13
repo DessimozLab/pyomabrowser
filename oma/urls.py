@@ -61,7 +61,10 @@ urlpatterns = [
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
 
     # Genome
-    url(r'^genome/(?P<specie_id>\w+)/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
+    url(r'^genome/(?P<specie_id>\w+)/info/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
+    url(r'^genome/(?P<specie_id>\w+)/genes/$', views.GenomeCentricGenes.as_view(), name='genome_genes'),
+    url(r'^genome/(?P<specie_id>\w+)/closest/$', views.GenomeCentricClosest.as_view(), name='genome_closest'),
+    url(r'^genome/(?P<specie_id>\w+)/synteny/$', views.GenomeCentricSynteny.as_view(), name='genome_synteny'),
 
     url(r'^export_markers', views.export_marker_genes, name='export_markers'),
     url(r'^markers/(?P<data_id>\w+)/$', views.MarkerGenesResults.as_view(), name='marker_genes'),
