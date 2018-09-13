@@ -18,6 +18,9 @@ urlpatterns = [
         views.synteny, name='synteny'),
     url(r'^info/(?P<entry_id>\w+)/fasta/$', views.InfoViewFasta.as_view(), name='entry_fasta'),
     url(r'^info/(?P<entry_id>\w+)/$', views.EntryInfoView.as_view(), name='entry_info'),
+    url(r'^paralogs/(?P<entry_id>\w+)/$', views.Entry_Paralogy.as_view(), name="pair_paralogs"),
+    url(r'^GOA/(?P<entry_id>\w+)/$', views.Entry_GOA.as_view(), name="entry_goa"),
+    url(r'^sequences/(?P<entry_id>\w+)/$', views.Entry_sequences.as_view(), name="entry_sequences"),
 
     # HOG via Entry
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGsView.as_view(), name='hogs'),
@@ -38,6 +41,7 @@ urlpatterns = [
         views.HOGsJson.as_view(), name='hog_json'),
     url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/msa/$',
         views.HOGsMSA.as_view(), name='hogs_msa'),
+    url(r'^hogdata/(?P<entry_id>\w+)/json', views.FamGeneDataJson.as_view(), name="fam_genedata"),
 
     # HOG
     url(r'^hog/(?P<group_id>[A-Z0-9]+)/iham/$', views.HOGiHam.as_view(), name='hog_iham'),
@@ -47,6 +51,10 @@ urlpatterns = [
     url(r'^group/(?P<entry_id>\w+)/msa/$', views.EntryCentricOMAGroupMSA.as_view(), name="omagroup-entry-msa"),
 
     # OMA Group
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/members/$', views.OMAGroup_members.as_view(), name='omagroup_members'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/close/$', views.OMAGroup_close.as_view(), name='omagroup_close'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/ontology/$', views.OMAGroup_ontology.as_view(), name='omagroup_ontology'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/info/$', views.OMAGroup_info.as_view(), name='omagroup_info'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/$', views.OMAGroup.as_view(), name='omagroup'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroupMSA.as_view(), name='omagroup-msa'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/fasta/$', views.OMAGroupFasta.as_view(), name='omagroup-fasta'),
@@ -57,8 +65,7 @@ urlpatterns = [
 
     url(r'^export_markers', views.export_marker_genes, name='export_markers'),
     url(r'^markers/(?P<data_id>\w+)/$', views.MarkerGenesResults.as_view(), name='marker_genes'),
-    # hogdata
-    url(r'^hogdata/(?P<entry_id>\w+)/json', views.FamGeneDataJson.as_view(), name="fam_genedata"),
+
     # static pages that can be rendered directly to a template.
     url(r'^hogs/$', TemplateView.as_view(template_name='explore_HOG.html'), name='hogs'),
     url(r'^synteny/$', TemplateView.as_view(template_name='tool_synteny.html'), name='synteny'),

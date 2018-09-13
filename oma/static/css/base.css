@@ -311,11 +311,22 @@ a.fig{
 
 }
 
+[data-toggle="collapse"] .chevron_alias:before {
+  content: "\f139";
+}
+
+[data-toggle="collapse"].collapsed .chevron_alias:before {
+  content: "\f13a";
+}
+
+
 .menu-tab {
     background-color: white;
     color: #307C3B;
-    /*height: 50px;*/
+    height: 50px;
     padding: 0.25rem 0.75rem;
+	border-radius: 2px;
+    margin-bottom: 0.5rem;
 }
 
 .menu-tab:hover {
@@ -323,16 +334,10 @@ a.fig{
     transition: background 0.5s;
 }
 
-.menu-tab {
-    /* display: none; */
-    border-radius: 2px;
-    margin-bottom: 0.5rem;
-}
 
 .menu-tab.selected {
     display: block;
   }
-
 
 
 @keyframes fadein {

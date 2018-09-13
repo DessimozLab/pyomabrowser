@@ -1,0 +1,98 @@
+<!-- Sidebar / menu -->
+
+<div id="sidebar-container" class="col-sm-12 col-md-3 gene-orthology full-height" > <!-- #sidebar-container -->
+
+<button href="#accordion" class="btn btn-primary d-md-none tn-lg btn-block" data-toggle="collapse">Select a tab <i class="fa chevron_alias" aria-hidden="true"> </i> </button>
+
+
+    <div class="" id="accordion">
+
+        <div class="menu-tab col-6 col-sm-12 {% if tab == 'members' %} active selected {%endif%}"
+             style="cursor: pointer;" {% if tab != 'members' %}
+             onclick="window.location='{% url 'omagroup_members' group_id %}'" {%endif%}
+             {% if tab == 'members' %} data-toggle="collapse" data-target="#collapseMembers" aria-expanded="true" aria-controls="#collapseMemebers"{%endif%}
+        >
+            <span class="">
+                <a href="{% url 'omagroup_members' group_id %}" >Gene Members
+                </a>
+                <i class="fa chevron_alias float-right" aria-hidden="true"> </i>
+            </span>
+        </div>
+
+        <div id="collapseMembers" class="collapse pt-0{% if tab == 'members' %} show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
+
+                <div class="card-body pl-4 py-2">
+                    <h6>Filter by Taxon</h6>
+
+                    <div class="form-check pl-4">
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="mammalsFilter">
+                            <label class="form-check-label" for="mammalsFilter">
+                                Mammals
+                            </label>
+                        </div>
+
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="vertebratesFilter">
+                            <label class="form-check-label" for="vertebratesFilter">
+                                Vertebrates
+                            </label>
+                        </div>
+
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="customFilter1">
+                            <label class="form-check-label" for="customFilter1">
+                                Custom 1
+                            </label>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        <div  class="menu-tab col-6 col-sm-12 {% if tab == 'alignment' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'alignment' %}
+              onclick="window.location='{% url 'omagroup-msa' group_id %}'" {%endif%}
+              >
+
+            <span class="">
+                <a href="{% url 'omagroup-msa' group_id %}" >MSA</a>
+            </span>
+        </div>
+
+        <div  class="menu-tab col-6 col-sm-12 {% if tab == 'closegroups' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'closegroups' %}
+              onclick="window.location='{% url 'omagroup_close' group_id %}'" {%endif%}
+              >
+            <span class="">
+                <a href="{% url 'omagroup_close' group_id %}" >Close Groups</a>
+            </span>
+        </div>
+
+        <div  class="menu-tab col-6 col-sm-12 {% if tab == 'ontology' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'ontology' %}
+              onclick="window.location='{% url 'omagroup_ontology' group_id %}'" {%endif%}
+              >
+
+            <span class="">
+                <a href="{% url 'omagroup_ontology' group_id %}" >Ontology</a>
+            </span>
+        </div>
+
+    <div  class="menu-tab col-6 col-sm-12 {% if tab == 'information' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'information' %}
+              onclick="window.location='{% url 'omagroup_info' group_id %}'" {%endif%}
+              >
+
+            <span class="">
+                <a href="{% url 'omagroup_info' group_id %}" >Information</a>
+            </span>
+        </div>
+
+    </div>
+
+</div> <!-- #sidebar-container -->
+
+

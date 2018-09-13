@@ -6,6 +6,7 @@
 
 {% block header_body %}
 
+
                     <h5 class="card-title">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %}</h5>
                     <div class="d-flex">
                         <p class="card-subtitle text-muted mr-auto">{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</p>
@@ -14,7 +15,7 @@
                         <button type="button" class="btn btn-sm btn-default dropdown-toggle col-6 col-sm-2 mr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Groups</button>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="{% url 'hog_iham' entry.hog_family_nr %}">HOG</a>
-                            <a class="dropdown-item" href="{% url 'omagroup' entry.oma_group %}">Oma Group</a>
+                            <a class="dropdown-item" href="{% url 'omagroup_members' entry.oma_group %}">Oma Group</a>
                         </div>
                         <button class="btn btn-sm col-6 col-sm-2"><a class="dropdown-item"  href="{% url 'genome_info' entry.genome.uniprot_species_code %}">Genome</a></button>
                     </div>
@@ -24,14 +25,13 @@
 {% block data_content %}
 
 
-
     {% include "includes/sidebar_gene.html" with tab=tab %}
 
-        <div id="content-column" class="col-xs-12 col-9">
+    <div id="content-column" class="col-xs-12 col-9">
 
-            {% block contentTab %} {% endblock contentTab %}
+        {% block contentTab %} {% endblock contentTab %}
 
-        </div>
+    </div>
 
 {% endblock data_content %}
 
