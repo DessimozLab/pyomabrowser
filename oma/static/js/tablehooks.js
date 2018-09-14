@@ -34,6 +34,13 @@
                                       + '</a>';
     };
 
+    exports.format_hogid_vis = function(value, row) {
+        return '<a href="/oma/hogs/' + row.ReprEntryNr
+                                      + '/vis/">HOG:'
+                                      + ('0000000' + value).slice(-7) // Format with leading 0s
+                                      + '</a>';
+    };
+
     exports.format_domainprevalence = function(value, row) {
         return row.PrevFrac.toFixed(1) + "%";
     };
