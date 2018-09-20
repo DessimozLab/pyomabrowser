@@ -14,13 +14,31 @@ urlpatterns = [
     url(r'^domains/(?P<entry_id>\w+)/json/$', views.domains_json, name='domains_json'),
     url(r'^synteny/(?P<entry_id>\w+)/$', views.synteny, name='synteny'),
     url(r'^synteny/(?P<entry_id>\w+)/(?P<windows>\d)/$', views.synteny, name='synteny'),
-    url(r'^synteny/(?P<entry_id>\w+)/(?P<mod>\d)/(?P<windows>\d)/$',
-        views.synteny, name='synteny'),
+    url(r'^synteny/(?P<entry_id>\w+)/(?P<mod>\d)/(?P<windows>\d)/$', views.synteny, name='synteny'),
     url(r'^info/(?P<entry_id>\w+)/fasta/$', views.InfoViewFasta.as_view(), name='entry_fasta'),
     url(r'^info/(?P<entry_id>\w+)/$', views.EntryInfoView.as_view(), name='entry_info'),
     url(r'^paralogs/(?P<entry_id>\w+)/$', views.Entry_Paralogy.as_view(), name="pair_paralogs"),
     url(r'^GOA/(?P<entry_id>\w+)/$', views.Entry_GOA.as_view(), name="entry_goa"),
     url(r'^sequences/(?P<entry_id>\w+)/$', views.Entry_sequences.as_view(), name="entry_sequences"),
+
+    # HOG
+    url(r'^hog/(?P<group_id>[A-Z0-9]+)/iham/$', views.HOGiHam.as_view(), name='hog_iham'),
+
+    # OMA Group
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/members/$', views.OMAGroup_members.as_view(), name='omagroup_members'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/close/$', views.OMAGroup_close.as_view(), name='omagroup_close'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/ontology/$', views.OMAGroup_ontology.as_view(), name='omagroup_ontology'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/info/$', views.OMAGroup_info.as_view(), name='omagroup_info'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/$', views.OMAGroup.as_view(), name='omagroup'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroupMSA.as_view(), name='omagroup-msa'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/fasta/$', views.OMAGroupFasta.as_view(), name='omagroup-fasta'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
+
+    # Genome
+    url(r'^genome/(?P<specie_id>\w+)/info/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
+    url(r'^genome/(?P<specie_id>\w+)/genes/$', views.GenomeCentricGenes.as_view(), name='genome_genes'),
+    url(r'^genome/(?P<specie_id>\w+)/closest/$', views.GenomeCentricClosest.as_view(), name='genome_closest'),
+    url(r'^genome/(?P<specie_id>\w+)/synteny/$', views.GenomeCentricSynteny.as_view(), name='genome_synteny'),
 
     # HOG via Entry
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGsView.as_view(), name='hogs'),
@@ -43,28 +61,9 @@ urlpatterns = [
         views.HOGsMSA.as_view(), name='hogs_msa'),
     url(r'^hogdata/(?P<entry_id>\w+)/json', views.FamGeneDataJson.as_view(), name="fam_genedata"),
 
-    # HOG
-    url(r'^hog/(?P<group_id>[A-Z0-9]+)/iham/$', views.HOGiHam.as_view(), name='hog_iham'),
-
     # OMA Groups via Entry
     url(r'^group/(?P<entry_id>\w+)/$', views.EntryCentricOMAGroup.as_view(), name="omagroup-entry"),
     url(r'^group/(?P<entry_id>\w+)/msa/$', views.EntryCentricOMAGroupMSA.as_view(), name="omagroup-entry-msa"),
-
-    # OMA Group
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/members/$', views.OMAGroup_members.as_view(), name='omagroup_members'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/close/$', views.OMAGroup_close.as_view(), name='omagroup_close'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/ontology/$', views.OMAGroup_ontology.as_view(), name='omagroup_ontology'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/info/$', views.OMAGroup_info.as_view(), name='omagroup_info'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/$', views.OMAGroup.as_view(), name='omagroup'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroupMSA.as_view(), name='omagroup-msa'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/fasta/$', views.OMAGroupFasta.as_view(), name='omagroup-fasta'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
-
-    # Genome
-    url(r'^genome/(?P<specie_id>\w+)/info/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
-    url(r'^genome/(?P<specie_id>\w+)/genes/$', views.GenomeCentricGenes.as_view(), name='genome_genes'),
-    url(r'^genome/(?P<specie_id>\w+)/closest/$', views.GenomeCentricClosest.as_view(), name='genome_closest'),
-    url(r'^genome/(?P<specie_id>\w+)/synteny/$', views.GenomeCentricSynteny.as_view(), name='genome_synteny'),
 
     url(r'^export_markers', views.export_marker_genes, name='export_markers'),
     url(r'^markers/(?P<data_id>\w+)/$', views.MarkerGenesResults.as_view(), name='marker_genes'),
