@@ -106,6 +106,28 @@ class FastaView(FastaResponseMixin, ContextMixin, View):
         return self.render_to_fasta_response(context)
 
 
+class AsyncMsaMixin(object):
+    def get_msa_results(self, group_type, *args):
+        msa_id = hashlib.md5(group_type.encode('utf-8'))
+        for arg in args:
+            msa_id.update(str(arg).encode('utf-8'))
+        msa_id = msa_id.hexdigest()
+        try:
+            logger.debug('fetching FileResult for {}'.format(msa_id))
+            r = FileResult.objects.get(data_hash=msa_id)
+            do_compute = r.remove_erroneous_or_long_pending()
+        except FileResult.DoesNotExist:
+            do_compute = True
+
+        if do_compute:
+            logger.info('require computing msa for {} {}'.format(group_type, args))
+            r = FileResult(data_hash=msa_id, result_type='msa_{}'.format(group_type),
+                           state="pending")
+            r.save()
+            tasks.compute_msa.delay(msa_id, group_type, *args)
+        return {'msa_file_obj': r}
+
+
 #<editor-fold desc="Entry Centric">
 
 #  --- Entry Centric -------
@@ -127,8 +149,7 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         entry = self.get_entry(entry_id)
         context.update({'entry': entry, 'tab': 'geneinformation'})
         context.update(
-            {'nr_pps': 666,
-             'nr_vps': 666})
+            {'nr_pps': 666})
         return context
 
 
@@ -143,6 +164,7 @@ class InfoViewFasta(InfoBase, FastaView):
 
     def render_to_response(self, context, **kwargs):
         return self.render_to_fasta_response([context['entry']])
+
 
 # Synteny
 def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
@@ -326,7 +348,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
     context = {'positions': positions, 'windows': windows,
                'md': md_geneinfos, 'o_md': o_md_geneinfos, 'colors': colors,
-               'stripes': stripes, 'nr_vps': len(orthologs),
+               'stripes': stripes,  'nr_pps': 666,
                'entry': entry,
                'tab': 'synteny', 'xrefs': xrefs
     }
@@ -360,7 +382,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
             longest_seq = max(e.sequence_length for e in vps)
         context.update(
             {'entry': entry, 'nr_pps': 666,
-             'vps': vps, 'nr_vps': len(vps_raw), 'tab': 'orthologs',
+             'vps': vps, 'tab': 'orthologs',
              'longest_seq': longest_seq})
         return context
 
@@ -390,6 +412,7 @@ class PairsViewFasta(FastaView, PairsBase):
     def render_to_response(self, context, **kwargs):
         return self.render_to_fasta_response(itertools.chain([context['entry']], context['vps']))
 
+
 # Paralogs
 class ParalogyBase(ContextMixin, EntryCentricMixin):
     """Base class to collect data for pairwise orthologs."""
@@ -417,7 +440,7 @@ class ParalogyBase(ContextMixin, EntryCentricMixin):
             longest_seq = max(e.sequence_length for e in vps)
         context.update(
             {'entry': entry, 'pps': [], 'nr_pps': 666,
-             'vps': vps, 'nr_vps': len(vps_raw), 'tab': 'paralogs',
+             'vps': vps, 'tab': 'paralogs',
              'longest_seq': longest_seq})
         return context
 
@@ -437,7 +460,7 @@ class Entry_GOA(TemplateView, InfoBase):
 
         context.update(
             {'entry': entry, 'nr_pps': 666,
-             'nr_vps': len(vps_raw), 'tab': 'goa'})
+              'tab': 'goa'})
         return context
 
 
@@ -448,33 +471,41 @@ class Entry_sequences(TemplateView, InfoBase):
     def get_context_data(self, entry_id, **kwargs):
         context = super(Entry_sequences, self).get_context_data(entry_id, **kwargs)
         entry = self.get_entry(entry_id)
-        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
 
         context.update(
             {'entry': entry, 'nr_pps': 666,
-             'nr_vps': len(vps_raw), 'tab': 'sequences'})
+              'tab': 'sequences'})
         return context
-
 
 #</editor-fold>
 
 
 #<editor-fold desc="OMAGroup Centric">
-class OMAGroupBase(ContextMixin):
+
+#--- OMAGroup Centric -------
+class OMAGroupCentricMixin(object):
+    def get_omagroup(self, group_id):
+        """resolve any ID and return an entry or a 404 if it is unknown"""
+        try:
+            group_id = utils.db.resolve_oma_group(group_id)
+        except db.InvalidId:
+            raise Http404('requested id is unknown')
+        omagroup = utils.db.oma_group_metadata(group_id)
+        return models.OMAGroup(utils.db, omagroup)
+
+
+class OMAGroupBase(ContextMixin, OMAGroupCentricMixin):
+
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroupBase, self).get_context_data(**kwargs)
-        try:
-            context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
-            context.update(utils.db.oma_group_metadata(context['members'][0].oma_group))
-            context['group_id'] = context['members'][0].oma_group
-        except db.InvalidId as e:
-            raise Http404(e)
+        context.update({'omagroup': self.get_omagroup(group_id)})
         return context
 
 
 class OMAGroupFasta(FastaView, OMAGroupBase):
     def get_fastaheader(self, memb):
-        return ' | '.join([memb.omaid, memb.canonicalid, "OMAGroup:{:05d}".format(memb.oma_group), '[{}]'.format(memb.genome.sciname)])
+        return ' | '.join([memb.omaid, memb.canonicalid, "OMAGroup:{:05d}".format(memb.oma_group),
+                           '[{}]'.format(memb.genome.sciname)])
 
     def render_to_response(self, context):
         return self.render_to_fasta_response(context['members'])
@@ -487,24 +518,17 @@ class OMAGroupJson(OMAGroupBase, JsonModelMixin, View):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        data = list(self.to_json_dict(context['members']))
+        data = list(self.to_json_dict(context['omagroup'].members))
         return JsonResponse(data, safe=False)
 
 
-class OMAGroup(OMAGroupBase, TemplateView):
-    template_name = "omagroup_members.html"
+# Close groups
+class OMAGroup_close(OMAGroupBase, TemplateView):
+    template_name = "omagroup_close.html"
 
     def get_context_data(self, group_id, **kwargs):
-        context = super(OMAGroup, self).get_context_data(group_id, **kwargs)
-        grp_nr = context['members'][0].oma_group
-        king_comp = collections.defaultdict(int)
-        for e in context['members']:
-            king_comp[e.genome.kingdom] += 1
-        context.update({'kingdom_composition': dict(king_comp),
-                        'sub_tab': 'member_list',
-                        'table_data_url': reverse('omagroup-json', args=(grp_nr,)),
-                        'longest_seq': max([len(z.sequence) for z in context['members']])
-                        })
+        context = super(OMAGroup_close, self).get_context_data(group_id, **kwargs)
+        context.update({'tab': 'closegroups'})
         return context
 
 
@@ -513,32 +537,7 @@ class OMAGroup_members(OMAGroupBase, TemplateView):
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup_members, self).get_context_data(group_id, **kwargs)
-        grp_nr = context['members'][0].oma_group
-        king_comp = collections.defaultdict(int)
-        for e in context['members']:
-            king_comp[e.genome.kingdom] += 1
-
-        context.update({'kingdom_composition': dict(king_comp),
-                        'tab': 'members',
-                        'table_data_url': reverse('omagroup-json', args=(grp_nr,)),
-                        'longest_seq': max([len(z.sequence) for z in context['members']])
-                        })
-        return context
-
-
-class OMAGroup_close(OMAGroupBase, TemplateView):
-    template_name = "omagroup_close.html"
-
-    def get_context_data(self, group_id, **kwargs):
-        context = super(OMAGroup_close, self).get_context_data(group_id, **kwargs)
-        grp_nr = context['members'][0].oma_group
-        king_comp = collections.defaultdict(int)
-        for e in context['members']:
-            king_comp[e.genome.kingdom] += 1
-        context.update({'kingdom_composition': dict(king_comp),
-                        'tab': 'closegroups',
-                        'longest_seq': max([len(z.sequence) for z in context['members']])
-                        })
+        context.update({'tab':'members', 'table_data_url': reverse('omagroup-json', args=(group_id,))})
         return context
 
 
@@ -547,14 +546,7 @@ class OMAGroup_ontology(OMAGroupBase, TemplateView):
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup_ontology, self).get_context_data(group_id, **kwargs)
-        grp_nr = context['members'][0].oma_group
-        king_comp = collections.defaultdict(int)
-        for e in context['members']:
-            king_comp[e.genome.kingdom] += 1
-        context.update({'kingdom_composition': dict(king_comp),
-                        'tab': 'ontology',
-                        'longest_seq': max([len(z.sequence) for z in context['members']])
-                        })
+        context.update({'tab': 'ontology'})
         return context
 
 
@@ -563,39 +555,17 @@ class OMAGroup_info(OMAGroupBase, TemplateView):
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup_info, self).get_context_data(group_id, **kwargs)
-        grp_nr = context['members'][0].oma_group
-        king_comp = collections.defaultdict(int)
-        for e in context['members']:
-            king_comp[e.genome.kingdom] += 1
-        context.update({'kingdom_composition': dict(king_comp),
-                        'tab': 'information',
-                        'longest_seq': max([len(z.sequence) for z in context['members']])
-                        })
+        context.update({'tab': 'information'})
         return context
-
-
-class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
-    template_name = "omagroup_entry.html"
-
-    def get_context_data(self, entry_id, **kwargs):
-        entry = self.get_entry(entry_id)
-        if entry.oma_group != 0:
-            context = super(EntryCentricOMAGroup, self).get_context_data(entry.oma_group, **kwargs)
-        else:
-            context = {}
-        context.update({'entry': entry, 'tab': 'groups',
-                        'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
-        return context
-
 
 @method_decorator(never_cache, name='dispatch')
-class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
+class OMAGroupMSA(AsyncMsaMixin, OMAGroupBase, TemplateView):
     template_name = "omagroup_msa.html"
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroupMSA, self).get_context_data(group_id)
-        context.update(self.get_msa_results('og', context['group_nr']))
-        context.update({'tab':'alignment'})
+        context.update(self.get_msa_results('og', context['omagroup'].members))
+        context.update({'tab': 'alignment'})
         return context
 
 
@@ -1042,6 +1012,9 @@ class ArchiveView(CurrentView):
 # </editor-fold>
 
 
+#<editor-fold desc="MISC">
+
+
 class FamBase(ContextMixin, EntryCentricMixin):
 
     def get_context_data(self, entry_id, **kwargs):
@@ -1143,26 +1116,7 @@ class HOGsOrthoXMLView(HOGsView):
         return response
 
 
-class AsyncMsaMixin(object):
-    def get_msa_results(self, group_type, *args):
-        msa_id = hashlib.md5(group_type.encode('utf-8'))
-        for arg in args:
-            msa_id.update(str(arg).encode('utf-8'))
-        msa_id = msa_id.hexdigest()
-        try:
-            logger.debug('fetching FileResult for {}'.format(msa_id))
-            r = FileResult.objects.get(data_hash=msa_id)
-            do_compute = r.remove_erroneous_or_long_pending()
-        except FileResult.DoesNotExist:
-            do_compute = True
 
-        if do_compute:
-            logger.info('require computing msa for {} {}'.format(group_type, args))
-            r = FileResult(data_hash=msa_id, result_type='msa_{}'.format(group_type),
-                           state="pending")
-            r.save()
-            tasks.compute_msa.delay(msa_id, group_type, *args)
-        return {'msa_file_obj': r}
 
 
 @method_decorator(never_cache, name='dispatch')
@@ -1173,7 +1127,6 @@ class HOGsMSA(AsyncMsaMixin, HOGsBase, TemplateView):
         context = super(HOGsMSA, self).get_context_data(entry_id, level)
         context.update(self.get_msa_results('hog', context['entry'].entry_nr, level))
         return context
-
 
 class HOGsVis(EntryCentricMixin, TemplateView):
     template_name = "hog_iHam.html"
@@ -1261,7 +1214,37 @@ def domains_json(request, entry_id):
     domains = utils.db.get_domains(entry['EntryNr'])
     response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
     return JsonResponse(response)
-@method_decorator(never_cache, name='dispatch')
+
+
+class OMAGroup(OMAGroupBase, TemplateView):
+    template_name = "omagroup_members.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup, self).get_context_data(group_id, **kwargs)
+        grp_nr = context['members'][0].oma_group
+        king_comp = collections.defaultdict(int)
+        for e in context['members']:
+            king_comp[e.genome.kingdom] += 1
+        context.update({'kingdom_composition': dict(king_comp),
+                        'sub_tab': 'member_list',
+                        'table_data_url': reverse('omagroup-json', args=(grp_nr,)),
+                        'longest_seq': max([len(z.sequence) for z in context['members']])
+                        })
+        return context
+
+
+class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
+    template_name = "omagroup_entry.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        entry = self.get_entry(entry_id)
+        if entry.oma_group != 0:
+            context = super(EntryCentricOMAGroup, self).get_context_data(entry.oma_group, **kwargs)
+        else:
+            context = {}
+        context.update({'entry': entry, 'tab': 'groups',
+                        'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
+        return context
 
 
 class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
@@ -1276,11 +1259,7 @@ class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
         context.update({'sub_tab': 'msa', 'entry': entry})
         return context
 
-
-
-
-
-
+#</editor-fold>
 
 
 
