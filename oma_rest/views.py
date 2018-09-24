@@ -25,7 +25,8 @@ from pyoma.browser import models, db
 import logging
 
 from collections import Counter
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import detail_route, list_route, api_view
+
 logger = logging.getLogger(__name__)
 
 
@@ -619,6 +620,28 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
         page = self.paginator.paginate_queryset(queryset, request)
         serializer = serializers.PairwiseRelationSerializer(instance=page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
+
+
+@api_view(['GET'])
+def pairwise_relations_minimal_data(request, genome_id1, genome_id2, format=None):
+    """retrieve minimal version of pairs for a genome pair.
+
+    :param genome_id1: an unique identifier for the first genome
+                       - either its ncbi taxon id or the UniProt
+                       species code
+    :param genome_id2: an unique identifier for the second genome
+                       - either its ncbi taxon id or the UniProt
+                       species code"""
+    try:
+        genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id1))
+        genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id2))
+    except db.UnknownSpecies as e:
+        raise NotFound(e)
+    tab_name = 'VPairs' if genome1.uniprot_species_code != genome2.uniprot_species_code else 'within'
+    rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/{}'.format(
+        genome1.uniprot_species_code, tab_name))
+    rels = [[int(row['EntryNr1']), int(row['EntryNr2'])] for row in rel_tab.read()]
+    return Response({'pairs': rels})
 
 
 class TaxonomyViewSet(ViewSet):
