@@ -62,7 +62,7 @@ svg text.label {
   text-anchor: middle;
 }
 
-.tooltip {
+.nodetooltip {
     background-color: rgba(255,255,255,0.9);
   position: absolute;
   width: auto;
@@ -108,7 +108,7 @@ path {
   stroke: #fff;
 }
 
-div.tooltip {
+div.nodetooltip {
     position: absolute;
     text-align: center;
     max-width: 220px;
@@ -128,6 +128,29 @@ div.tooltip {
 	box-shadow: 0 2px 1px #777;
 }
 
+div.selectedpopup {
+    position: absolute;
+    text-align: center;
+    max-width: 220px;
+    min-width: 200px;
+    max-height: 380px;
+    min-height: 100px;
+    padding: 6px;
+    color: azure;
+    font: 10px "Helvetica Neue", Helvetica, Arial, "Droid sans", sans-serif;
+    background: #4c5135;
+    background: -webkit-linear-gradient(to right, #4c5135, #a19b25);
+    background: linear-gradient(to right, #4c5135, #a19b25);
+    border: 1px;
+    border-radius: 2px;
+    /*pointer-events: none;*/
+    -webkit-box-shadow: 0 1px 2px #777;
+	box-shadow: 0 2px 1px #777;
+}
+
+.selectedpopup a:hover, .selectedpopup a:focus, .selectedpopup a {
+    color: #9acfea;
+}
 div.searchtip {
     position: absolute;
     text-align: center;
@@ -227,3 +250,4 @@ div.searchtip {
     height: 100%;
     width: 100%;
 }
+
