@@ -1,7 +1,7 @@
 {% load staticfiles %}
 
         <table class="table table-hover" id="grpTable"
-               data-show-toggle="true"
+               data-show-toggle="false"
                data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
                data-show-columns="true" data-search="true" data-show-export="true"
                data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
@@ -51,9 +51,15 @@
 <link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
 <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
 <link type="text/css" rel="stylesheet" href="{% static "css/treecompare.css" %}"/>
-<!-- taxon filter import: Editable field -->
-<link type="text/css" rel="stylesheet" href="{% static "css/bootstrap-editable.css" %}"/>
-<script src="{% static "js/bootstrap-editable.js" %}"></script>
+
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+
+
+<!-- taxon filter import: Editable field
+<link type="text/css" rel="stylesheet" href=" ////// % static "css/bootstrap-editable.css" %}"/>
+<script src="{% static "js/bootstrap-editable.js" %}"></script> -->
 
 <script>
     var tab = $("#grpTable");
@@ -69,7 +75,7 @@
         }
     });
     var icons = tab.bootstrapTable('getOptions').icons;
-    $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+    $.extend(icons, {export: 'fa-download', columns: 'fa-list'});
     tab.bootstrapTable('refreshOptions', {'icons': icons});
     tab.bootstrapTable('showLoading');
 

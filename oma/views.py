@@ -383,7 +383,10 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         context.update(
             {'entry': entry, 'nr_pps': 666,
              'vps': vps, 'tab': 'orthologs',
-             'longest_seq': longest_seq})
+             'longest_seq': longest_seq,
+             'table_data_url': reverse('pairs_json', args=(entry.omaid,))
+             })
+
         return context
 
 
@@ -623,6 +626,8 @@ class GenomeCentricSynteny(GenomeBase, TemplateView):
 
 
 # <editor-fold desc="HOG Centric">
+
+#--- OMAGroup Centric -------
 
 class HOGBase(ContextMixin, EntryCentricMixin):
 
@@ -1114,10 +1119,6 @@ class HOGsOrthoXMLView(HOGsView):
         response = HttpResponse(content_type='text/plain')
         response.write(orthoxml)
         return response
-
-
-
-
 
 @method_decorator(never_cache, name='dispatch')
 class HOGsMSA(AsyncMsaMixin, HOGsBase, TemplateView):

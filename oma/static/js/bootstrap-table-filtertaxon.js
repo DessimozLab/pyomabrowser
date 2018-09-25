@@ -115,7 +115,7 @@
             that.custom_filter_search = true;
             that.onColumntaxonFilter(that.item_to_update.Uid);
 
-            jmodal.append(sprintf('<button type="button" id="btnCloseAvd%s" class="btn btn-default pull-right" >%s</button>', "_" + that.options.idTable, searchText));
+            jmodal.append(sprintf('<button type="button" id="btnCloseAvd%s" class="btn btn-default float-right" >%s</button>', "_" + that.options.idTable, searchText));
 
             $("#btnCloseAvd" + "_" + that.options.idTable).click(function () {
                 that.custom_filter_search = true;
@@ -123,7 +123,7 @@
                 $("#avdSearchModal" + "_" + that.options.idTable).modal('hide');
             });
 
-            $('#username').editable();
+            $('#username').editable({mode: 'inline',});
 
             $('#username').on('save', function(e, params) {
                 that.item_to_update.name = params.newValue;
@@ -270,7 +270,7 @@
     });
 
     $.extend($.fn.bootstrapTable.defaults.icons, {
-        taxonFilterIcon: 'glyphicon-filter'
+        taxonFilterIcon: 'fa-filter'
     });
 
     $.extend($.fn.bootstrapTable.Constructor.EVENTS, {
@@ -329,7 +329,7 @@
             html = [];
 
         //  ADD DROPDOWN MENU
-        html.push(sprintf('<div class="dropdown columns columns-%s btn-group pull-%s" role="group">', this.options.buttonsAlign, this.options.buttonsAlign));
+        html.push(sprintf('<div class="dropdown columns columns-%s btn-group float-%s" role="group">', this.options.buttonsAlign, this.options.buttonsAlign));
         html.push(sprintf('<button class="btn btn-default%s dropdown-toggle' + '" type="button" name="taxonFilter" aria-label="advanced search" title="%s" data-toggle="dropdown">', that.options.iconSize === undefined ? '' : ' btn-' + that.options.iconSize, that.options.formattaxonFilter()));
         html.push(sprintf('<i class="%s %s"></i>', that.options.iconsPrefix, that.options.icons.taxonFilterIcon));
         html.push('<span class="caret"></span>');
@@ -338,12 +338,12 @@
 
         //  ADD LI FOR ALL
         html.push('<li role="presentation" class="dropdown-header li_filter">DEFAULT</li>');
-        html.push(' <li><a  class="li_filtertax_default"  id="all">&emsp; All <span id="li_ok_all" class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span> </a></li> ');
+        html.push(' <li><a  class="li_filtertax_default"  id="all">&emsp; All <span id="li_ok_all" class="glyphicon glyphicon-ok float-right" aria-hidden="true"></span> </a></li> ');
 
         //  ADD LI FOR EACH DESIRED TAXA
         for (var tax in this.tax_converter) {
             if (tax !== 'custom') {
-                html.push(' <li><a  class="li_filtertax_default" id="' + tax + '"> &emsp; ' + tax + ' <span id="li_ok_' + tax + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ');
+                html.push(' <li><a  class="li_filtertax_default" id="' + tax + '"> &emsp; ' + tax + ' <span id="li_ok_' + tax + '" class="glyphicon glyphicon-ok float-right hidden" aria-hidden="true"></span> </a></li> ');
             }
         }
 
@@ -354,7 +354,7 @@
         //  ADD LI FOR EACH CUSTOM FILTER
         for (var tax in this.tax_converter['custom']) {
             var custom_item = this.tax_converter['custom'][tax];
-            html.push(' <li><a  class="li_filtertax_custom" id="li_custom_' + custom_item.Uid + '">&emsp;  <span class="spanli">' + custom_item.name + ' </span> <span id="li_ok_' + custom_item.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ')
+            html.push(' <li><a  class="li_filtertax_custom" id="li_custom_' + custom_item.Uid + '">&emsp;  <span class="spanli">' + custom_item.name + ' </span> <span id="li_ok_' + custom_item.Uid + '" class="glyphicon glyphicon-ok float-right hidden" aria-hidden="true"></span> </a></li> ')
         }
         html.push(' <li><a  class="li_filtertax"  id="li_add"> <h6 id="li_h6_add">Add custom filter</h6> </a> </li> ');
         html.push(' </ul>');
@@ -416,7 +416,7 @@
             var li_add = lis[lis.length - 1];
 
             var new_item = document.createElement('li');
-            new_item.innerHTML = ' <a  class="li_filtertax_custom" id="li_custom_' + empty_filter.Uid + '"> &emsp;  <span class="spanli">' + empty_filter.name + ' </span><span id="li_ok_' + empty_filter.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> ';
+            new_item.innerHTML = ' <a  class="li_filtertax_custom" id="li_custom_' + empty_filter.Uid + '"> &emsp;  <span class="spanli">' + empty_filter.name + ' </span><span id="li_ok_' + empty_filter.Uid + '" class="glyphicon glyphicon-ok float-right hidden" aria-hidden="true"></span> </a> ';
 
             custom_ul.insertBefore(new_item, li_add);
 
@@ -447,7 +447,8 @@
         });
 
         //turn EDITABLE FIELD to inline mode
-        $.fn.editable.defaults.mode = 'inline';
+        //$.fn.editable.defaults.mode = 'inline';
+
 
     };
 
