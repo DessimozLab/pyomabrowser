@@ -18,6 +18,8 @@
 
     var container_filter_taxon = $("#filter-taxon-container");
 
+    var that;
+
 
     // HELPER FUNCTIONS
 
@@ -113,7 +115,7 @@
             $('body').append(modal_html.join(''));
 
             // ADD PHYLO.IO DOM ELEMENT
-            var phyloContent = add_phyloioDOM(), jmodal = $('#avdSearchModalContent' + "_" + that.options.idTable);
+            var phyloContent = add_phyloioDOM(), jmodal = $('#avdSearchModalContent_' + that.options.idTable);
 
             jmodal.append(phyloContent.join(''));
 
@@ -136,9 +138,8 @@
             $('#username').on('save', function(e, params) {
                 that.item_to_update.name = params.newValue;
                 localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
+                $('#custom_' + that.item_to_update.Uid)[0].nextSibling.textContent = that.item_to_update.name;
 
-
-                $('#custom_' + that.item_to_update.Uid).val(that.item_to_update.name);
             });
 
 
@@ -267,6 +268,34 @@
         return htmlPhylo;
     }
 
+    // UTILS FUNCTIONS
+
+    var add_input_div= function( id_input, label_text, custom ){
+
+        if (!custom){
+
+        return '<div> <input type="checkbox" class="form-check-input checkbox_taxa" id="'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+'</label> </div>';
+        }
+
+        else {
+           return '<div> <input type="checkbox" class="form-check-input checkbox_taxa" id="custom_'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+' <a href="javascript:void(0);" class="edit" id="edit_' + id_input + '">(edit)</a> </label> </div>';
+        }
+    };
+
+    var click_input = function (event) {
+
+                    container_filter_taxon.find('input').not(this).prop('checked', false);
+                    that.onColumntaxonFilter($(event.currentTarget)[0].id);
+            }
+
+    var click_edit = function (event) {
+
+                    // GET THE RELATED CUSTOM ITEM
+                    var liid = $(this)[0].id.replace(/^edit_/, '');
+                    var ci = get_item_by_id(that.tax_converter['custom'], liid, 'Uid');
+                    showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+            }
+
      // EXTENSION OF BOOTSTRAPTABLE LIB
 
     $.extend($.fn.bootstrapTable.defaults, {
@@ -306,7 +335,7 @@
         _load = BootstrapTable.prototype.load,
         _initSearch = BootstrapTable.prototype.initSearch;
 
-        BootstrapTable.prototype.initToolbar = function () {
+    BootstrapTable.prototype.initToolbar = function () {
             _initToolbar.apply(this, Array.prototype.slice.apply(arguments));
 
             if (!this.options.search) {
@@ -335,8 +364,8 @@
             var local_custom = localStorage.getItem('custom_taxon_filter');
             this.tax_converter['custom'] = (JSON.parse(local_custom) === null) ? [] : JSON.parse(local_custom);
 
-            var that = this,
-                html = [];
+            that = this;
+            var html = [];
 
             //  ADD CHECKBOX MENU
 
@@ -345,10 +374,11 @@
 
             //  ADD CHECKBOX FOR EACH DEFAULT TAXA
             html.push('<h6 class="float-right">Default Taxon</h6> <br>');
-            html.push('<div> <input type="checkbox" class="form-check-input checkbox_taxa" id="all" <label class="form-check-label" for="all">All Taxon</label> </div>');
+             html.push(add_input_div( 'all', 'All Taxon', false ));
+
             for (var tax in this.tax_converter) {
                 if (tax !== 'custom') {
-                html.push('<div> <input type="checkbox" class="form-check-input checkbox_taxa" id="' + tax + '" <label class="form-check-label" for="' + tax + '">'+ tax+'</label> </div>');
+                    html.push(add_input_div( tax, tax, false));
                 }
             }
 
@@ -356,9 +386,9 @@
             html.push('<h6 class="float-right" >Custom Filter</h6> <br>');
             for (var tax in this.tax_converter['custom']) {
                 var custom_item = this.tax_converter['custom'][tax];
-                    html.push('<div>  <input type="checkbox" class="form-check-input checkbox_taxa" id="custom_' + custom_item.Uid + '" <label class="form-check-label" for="custom_' + custom_item.Uid + '">' + custom_item.name + ' <a href="javascript:void(0);" class="edit" id="edit_' + custom_item.Uid + '">(edit)</a></label> </div>');
+                html.push(add_input_div(custom_item.Uid, custom_item.name, true ));
             }
-            html.push('<div> <a  class="li_filtertax"  id="li_add"> <h6 id="li_h6_add">Add custom filter</h6> </a> </div>');
+            html.push('<div id="div_add" > <a  class="li_filtertax"  id="li_add"> <h6 id="li_h6_add">Add custom filter</h6> </a> </div>');
             html.push('</div>');
 
             container_filter_taxon.prepend(html.join(''));
@@ -366,22 +396,11 @@
 
             //  ADD BOX  ACTION
             container_filter_taxon.find('input')
-                .off('click').on('click', function (event) {
-                    container_filter_taxon.find('input').not(this).prop('checked', false);
-                    that.onColumntaxonFilter($(event.currentTarget)[0].id);
-            });
+                .off('click').on('click', click_input );
 
             // ADD EDIT CUSTOM ACTION
             container_filter_taxon.find('a[class=edit]')
-                .off('click').on('click', function (event) {
-
-                    // GET THE RELATED CUSTOM ITEM
-                    var liid = $(this)[0].id.replace(/^edit_/, '');
-
-                    var ci = get_item_by_id(that.tax_converter['custom'], liid, 'Uid');
-
-                    showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
-            });
+                .off('click').on('click', click_edit );
 
             //  ADD RESET BUTTON ACTION
             d3.select("#reset_taxon_filter").on('click', function () {
@@ -409,26 +428,18 @@
                 var new_item = document.createElement('div');
                 new_item.innerHTML = ' <input type="checkbox" class="form-check-input checkbox_taxa" id="custom_' + empty_filter.Uid + '" <label class="form-check-label" for="custom_' + empty_filter.Uid + '">' + empty_filter.name + ' <a href="javascript:void(0);" class="edit" id="edit_' + empty_filter.Uid + '">(edit)</a></label>';
 
-                container_filter_taxon.insertBefore(new_item, d3.select("#li_add"));
+                $(new_item).insertBefore($("#div_add")[0]);
 
                 // ADD CLICK EVENT TO NEWLY CREATED LI
-                $(new_item).off('click').on('click', function () {
-
-                    container_filter_taxon.find('input').not(this).prop('checked', false);
-                    that.onColumntaxonFilter($(event.currentTarget)[0].id);
-                });
-
+                $(new_item).off('click').on('click', click_input);
 
                 // ADD EDIT CUSTOM ACTION
-                    $(new_item).find('a[class=edit]').off('click').on('click', function (event) {
+                $(new_item).find('a[class=edit]').off('click').on('click', click_edit);
 
-                    // GET THE RELATED CUSTOM ITEM
-                    var liid = $(this)[0].id.replace(/^edit_/, '');
+                $(new_item).trigger( "click");
 
-                    var ci = get_item_by_id(that.tax_converter['custom'], liid, 'Uid');
-
-                    showAvdSearch(empty_filter, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
-            })
+                var ci = get_item_by_id(that.tax_converter['custom'], empty_filter.Uid, 'Uid');
+                showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
 
                 });
 
