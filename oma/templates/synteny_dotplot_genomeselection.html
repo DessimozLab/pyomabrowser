@@ -11,21 +11,22 @@
     <script src="{% static "js/typeahead.bundle.js" %}"></script>
 
 <style>
-div.tooltip_bu {
+.x-axis, .y-axis {
+    font-size: 8px;
+    text-align: left;
+}
+div.tooltip {
     position: absolute;
     text-align: left;
-    width: 120px;
-    height: 40px;
+    width: 130px;
+    height: 60px;
     padding: 4px;
     font: 12px sans-serif;
     background: lightsteelblue;
     border: 1px steelblue solid;
-    border-radius: 3px;
+    border-radius: 2px;
 	pointer-events: none;
 	color: white;
-}
-.tooltip{
-    position: relative;
 }
 </style>
 {% endblock js_hook %}
@@ -110,7 +111,6 @@ div.tooltip_bu {
                                             <div class="col-sm-6">
                                                 <select id="selectchr2"></select>
                                             </div>
-                                            <br>
 
                                         </div>
                                     </div>
@@ -124,11 +124,12 @@ div.tooltip_bu {
 
                             </form>
 
+                            <div id="hm" style="width: 100%;">
+
+                            </div>
+
                         </div>
-<div id="hm" style="margin: 100px;">
 
-
-</div>
                     </div>
                 </div>
             </div>
@@ -308,11 +309,11 @@ div.tooltip_bu {
                 name: 'genomes',
                 minLength: 4,
                 source: substringMatcher(genomeNames)
-            })
-            .on('blur', function(){update_chromosome_select($(this), 1)})
+            });
+            /*.on('blur', function(){update_chromosome_select($(this), 1)})
             .on('typeahead:selected', function(ev, suggestion) {
                 update_chromosome_select($(this), 1);
-            });
+            });*/
         $('#g2_name')
             .typeahead({
                     hint: true
@@ -321,11 +322,11 @@ div.tooltip_bu {
                     name: 'genomes',
                     minLength: 4,
                     source: substringMatcher(genomeNames)
-                })
-            .on('blur', function(){update_chromosome_select($(this), 2)})
+                });
+            /*.on('blur', function(){update_chromosome_select($(this), 2)})
             .on('typeahead:selected', function(ev, suggestion) {
                 update_chromosome_select($(this), 2);
-            });
+            });*/
 
         $(window).keydown(function(event){
             if(event.keyCode == 13) {
@@ -363,8 +364,8 @@ div.tooltip_bu {
             //return false;
 */
 
-            //var server = "http://localhost:8000";
-            var server = "http://omabrowser.org";
+            var server = "http://localhost:8000";
+            //var server = "http://omabrowser.org";
 
             var get1 = $.getJSON(server+'/api/genome/' + genome_1 + '/?format=json');
             var get2 = $.getJSON(server+'/api/genome/'+genome_2+'/?format=json');
@@ -381,9 +382,15 @@ div.tooltip_bu {
                 chromosomes2 = chromosomes2.sort(comparatorSmallestEntry);
 
                 function comparatorSmallestEntry(a, b) {
-                    if (a.entry_ranges[0][1] < b.entry_ranges[0][0]) return -1;
-                    if (a.entry_ranges[0][0] > b.entry_ranges[0][1]) return 1;
-                    return 0
+
+                    return a.id.localeCompare(b.id, undefined, {
+                        numeric: true,
+                        sensitivity: 'base'
+                    });
+
+                    //if (a.entry_ranges[0][1] < b.entry_ranges[0][0]) return -1;
+                    //if (a.entry_ranges[0][0] > b.entry_ranges[0][1]) return 1;
+                    //return 0
                 }
 
                 function matrix(rows, cols, defaultValue) {
@@ -439,17 +446,19 @@ div.tooltip_bu {
 
                     }
 
-                    var margin = {top: 35, right: 20, bottom: 20, left: 70},
-                        width = 335 - margin.left - margin.right,
-                        height = 300 - margin.top - margin.bottom;
+                    var margin = {top: 65, right: 60, bottom: 60, left: 30},
+                        width = $('#hm').width() - margin.left - margin.right,
+                        matrixWidth = width - (width / 4);
+                        height = matrixWidth;
+                        matrixHeight = height- 70;
 
                     var x = d3.scaleLinear()
                         .domain([0, data[0].length])
-                        .range([0, width]);
+                        .range([0, matrixWidth]);
 
                     var y = d3.scaleLinear()
                         .domain([0, data.length])
-                        .range([0, height]);
+                        .range([0, matrixHeight]);
 
                     values = [].concat.apply([], data);
 
@@ -461,13 +470,16 @@ div.tooltip_bu {
                         .domain(colorDomain)
                         .range(["white", "green"]);
 
+                    d3.select("#heatmap").remove();
+
                     var svg = d3.select("#hm").append("svg")
+                        .attr("id", "heatmap")
                         .attr("width", width + margin.left + margin.right)
-                        .attr("height", height + margin.top + margin.bottom)
+                        .attr("height", height)
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                    var ttdiv = d3.select("#hm").append("div")
+                    var div = d3.select("#hm").append("div")
                         .attr("class", "tooltip")
                         .style("opacity", 0);
 
@@ -504,22 +516,19 @@ div.tooltip_bu {
                             return colorScale(d.value);
                         })
 
-                        .on("mouseover", function (d, i) {
-
-                            ttdiv.transition()
-                                .duration(50)
-                                .style("opacity", .9);
-                            ttdiv.html("Chromosome: " + chromosomes1[i].id + ":" + chromosomes2[d.row].id + "<br>Value: " + d.value)
-                                .style("position", "realtive")
-                                .style("left", "90px")
-                                .style("top", 0);
-                        })
-                        .on("mouseout", function (d) {
-                            ttdiv.transition()
-                                .duration(50)
-                                .style("opacity", 0);
-                        })
-
+                        .on("mouseover", function(d,i) {
+                                div.transition()
+                                    .duration(50)
+                                    .style("opacity", .9);
+                                div.html("Chromosome: " + chromosomes1[i].id + ":" + chromosomes2[d.row].id + "<br>Value: " + d.value)
+                                    .style("left", x(i)+120 + "px")
+                                    .style("top", y(d.row)+matrixHeight+margin.top + "px");
+                            })
+                            .on("mouseout", function (d) {
+                                div.transition()
+                                    .duration(50)
+                                    .style("opacity", 0);
+                            })
 
                     // Axes
                     var xAxisCall = d3.axisTop(x).ticks(cols).tickFormat(function (d) {
@@ -532,6 +541,7 @@ div.tooltip_bu {
                         .attr("class", "x-axis")
                         .attr("transform", "translate(" + 0 + "," + 0 + ")")
                         .call(xAxisCall)
+                        .style("text-anchor", "start")
                         .call(adjustTextLabelsX);
 
                     var yAxisCall = d3.axisLeft(y).ticks(rows).tickFormat(function (d) {
@@ -547,19 +557,18 @@ div.tooltip_bu {
                     // Labels
                     svg.append("g").append("text")
                         .attr("class", "axis-title")
-                        .attr("transform", "translate(" + 0 + ", -10)")
-                        .attr("y", -10)
+                        .attr("transform", "translate(" + ((matrixWidth / 2) + margin.left) + ", "+(matrixHeight+margin.bottom)+")")
                         .text(genome_1)
                     svg.append("g").append("text")
                         .attr("class", "axis-title")
-                        .attr("transform", "translate(-60, 0) rotate(-270)")
+                        .attr("transform", "translate("+(matrixWidth+30)+", 0) rotate(-270)")
                         .attr("y", 0)
                         .text(genome_2);
 
                     function adjustTextLabelsX(selection) {
                         selection.selectAll('.x-axis text')
                             .attr('transform', function (d) {
-                                return 'translate(' + x(1) * 1.5 + ', -5) rotate(-45)'
+                                return 'translate(' + x(1) * 1.5 + ', -10) rotate(-90)'
                             });
                     }
 
