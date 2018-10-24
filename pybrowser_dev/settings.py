@@ -180,6 +180,10 @@ CELERY_BEAT_SCHEDULE = {
     'task-update-omastandalone-exports': {
         'task': 'export.tasks.update_running_jobs',
         'schedule': 30.0,
+    },
+    'task-purge-old-exports': {
+        'task': 'export.tasks.purge_old_exports',
+        'schedule': 6 * 3600,
     }
 }
 
