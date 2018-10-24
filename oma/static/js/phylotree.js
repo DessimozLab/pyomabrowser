@@ -115,9 +115,9 @@ $(document).ready(function() {
 
                 if (export_button) {
                     export_button.onclick = function() {
-                        var urlExport= '/cgi-bin/gateway.pl?f=AllAllExport';
+                        var urlExport= '/oma/export/?';
                         for (var i in arrayIdSelectedGenome){
-                            urlExport=urlExport+'&p'+i+'='+hashGenome[arrayIdSelectedGenome[i]];
+                            urlExport=urlExport + (i == 0 ? '' : '&') + 'genomes='+hashGenome[arrayIdSelectedGenome[i]];
                         }
                         OpenInNewTab(urlExport);
                     };

@@ -548,7 +548,7 @@ dotplot_theme = function () {
                 .attr("fill", function (d) {
                     return color_threshold(d[metric_option.accessor])
                 })
-                //.attr('r', function(d){ return currentZoom ? 2.5  / currentZoom.k : 2.5})
+                .attr('r', function(d){ return currentZoom ? 2.5  / currentZoom.k : 2.5})
                 .on("mouseover", function (d) {
                     tooltip_div.transition()
                         .duration(200)

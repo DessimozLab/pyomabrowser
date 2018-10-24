@@ -271,7 +271,7 @@ class PairwiseRelationSerializer(ReadOnlySerializer):
 
 class TaxonSerializer(ReadOnlySerializer):
     name = serializers.CharField()
-    taxon_id = serializers.CharField()
+    taxon_id = serializers.IntegerField()
 
 
 class TaxonomyNewickSerializer(ReadOnlySerializer):

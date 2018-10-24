@@ -148,7 +148,7 @@
             img: '<img src="'+static_root+'/image/ensembl.gif" alt="Ensembl"/>'
         },
         'EnsemblGenomes':{
-            url: function(id){ return "https://ensemblgenomes.org/id/"+id; },
+            url: function(id){ return "http://ensemblgenomes.org/id/"+id; },
             img: '<img src="'+static_root+'/image/ensembl.gif" alt="EnsemblGenomes"/>'
         },
         'PMP':{

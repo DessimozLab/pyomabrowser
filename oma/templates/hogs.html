@@ -50,6 +50,7 @@ This entry is not part of any hierarchical orthologous group.
         <div class="pull-right">
             Download:
             <a href="{% url 'hogs_orthoxml' entry.omaid %}"><span class="glyphicon glyphicon-download"></span> OrthoXML</a> /
+            <a href="{% url 'taxonomy-detail' levels|first%}?type=phyloxml"><span class="glyphicon glyphicon-download"></span> Phyloxml species tree ({{ levels | first }})</a> /
             <a href="{% url 'hogs_fasta' entry.omaid level %}"><span class="glyphicon glyphicon-download"></span> Sequences (fasta)</a> /
             <a href="{% url 'hogs_msa' entry.omaid level %}"><span class="glyphicon glyphicon-download"></span> MSA (fasta)</a>
         </div>

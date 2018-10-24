@@ -53,11 +53,55 @@ function update_genome_viewer(bid) {
     // build tree view
     if (bid === "btree") {
 
-        // display under construction
-        var under = document.createElement('h3');
-        under.innerHTML = "This part is under construction!";
-        under.className = "text-center";
+        var under = document.createElement('div');
+
+        under.setAttribute('id', 'sb');
+        under.innerHTML = '<div class="row">\
+                <div class="col-sm-7 col-xs-12">\
+                    <div class="nav navbar-nav navbar-left">\
+                        <div class="btn-group btn-group-sm" id="colourSel" role="group" aria-label="...">\
+                            <button type="button" id="resetBtn" class="btn btn-default btn-sm" onclick="resetTo();">Reset to root</button>\
+                            <button type="button" class="btn btn-primary btn-sm radioBtn" id="heatmapRadio"\
+                             data-value="heatmap-avg_nr_proteins">Avg number of\
+                         Proteins</button>\
+                            <button type="button" class="btn btn-primary btn-sm radioBtn" id="dolRadio"\
+                             data-value="dol">Domains of\
+                             life</button>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="col-sm-5 col-xs-12">\
+                    <div class="nav navbar-nav navbar-right">\
+                        <div class="form-group input-group input-group-sm" >\
+                            <input type="text" id="search" class="form-control searchField" placeholder="Search...">\
+                            <div class="input-group-btn">\
+                                <button type="button" class="btn btn-warning"\
+                                 onclick="$(\'#search\').val(\'\');findByName();">Clear</button>\
+                                <button type="button" class="btn btn-primary" onclick="findByName();">Search</button>\
+                                <button type="button" class="btn btn-info" onclick="zoomIntoName();">Zoom into</button>\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>\
+        </div>\
+<div id="chart">\
+    <div style="position: absolute; margin: 0;" id="sequence"></div>\
+    <div style="position: absolute; margin: 20px 0 0 0;" id="colorscale">\
+        <div id="explanation" style="visibility: hidden;"></div>\
+    </div>\
+</div>'
         cviewer.appendChild(under);
+        // reset is disabled when root is zoomed
+        $('#resetBtn').prop('disabled', true);
+        /* init sunburst */
+        sb();
+        $(document).find('#search').autocomplete({
+            //source: all_names,
+            lookup: all_names,
+            delay: 200,
+            minLength: 3,
+            onSelect: function( event ) { findByName(event.value); }
+        });
 
     }
 
@@ -190,6 +234,10 @@ function init_table(div_id) {
         }, {
             field: 'common_name',
             title: 'Common Name',
+            sortable: true
+        }, {
+            field: 'last_modified',
+            title: 'Last Update',
             sortable: true
         }, {
             field: 'prots',
@@ -536,11 +584,4 @@ function init_hist(div_id) {
 
     })
 
-
 }
-
-
-
-
-
-

@@ -10,6 +10,9 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+
+from celery.schedules import crontab
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # deployment, either DEV (default) or PRODUCTION
@@ -31,7 +34,7 @@ TWITTER_ACCESS_TOKEN_SECRET = 'wBQDobkrHXAha8IJEEHFiuB1BGeRDE7PaUZrQ0xqEXfRd'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (DEPLOYMENT != "PRODUCTION")
 
-ALLOWED_HOSTS = ['127.0.0.1', 'omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk']
+ALLOWED_HOSTS = ['127.0.0.1', 'omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk', '.vital-it.ch']
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 SHOW_TOOLBAR_CALLBACK = lambda x: True
@@ -62,16 +65,19 @@ INSTALLED_APPS = (
     'google_analytics',
     'debug_toolbar',
     'captcha',
+    'corsheaders',
     #'debug_toolbar_line_profiler',
     'rest_framework',
     'drf_link_header_pagination',
     'oma',
     'oma_rest',
+    'export',
     'bootstrap3',
 )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -85,8 +91,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'oma_rest.pagination.LinkHeaderPagination',
     'PAGE_SIZE': 100,
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning',
-    'DEFAULT_VERSION': '1.0',
-    'ALLOWED_VERSIONS': ('1.0', ),
+    'DEFAULT_VERSION': '1.2',
+    'ALLOWED_VERSIONS': ('1.0', '1.1', '1.2'),
 }
 
 
@@ -170,6 +176,23 @@ TEMPLATES = [
     },
 ]
 
+CELERY_BEAT_SCHEDULE = {
+    'task-update-omastandalone-exports': {
+        'task': 'export.tasks.update_running_jobs',
+        'schedule': 30.0,
+    },
+    'task-purge-old-exports': {
+        'task': 'export.tasks.purge_old_exports',
+        'schedule': 6 * 3600,
+    }
+}
+
+# CORS stuff to allow iHAM integration on other sites
+CORS_ORIGIN_ALLOW_ALL = True
+# allow all /api/ views, hogdata and orthoxml
+CORS_URLS_REGEX = r'^/(api/|oma/hog(s|data)?/\w*/(orthoxml|json)/$)'
+CORS_ALLOW_METHODS = ('GET',)
+
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
@@ -220,10 +243,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "static")
 MEDIA_URL = "/media/"
-if DEPLOYMENT == "PRODUCTION":
-    MEDIA_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "media")
-else:
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, 'media'))
 
 
 # some jenkins specific modifications

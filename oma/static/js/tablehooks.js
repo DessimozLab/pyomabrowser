@@ -19,6 +19,10 @@
         return "<b>" + value.species + "</b> " + value.strain;
     };
 
+    exports.format_subgenome = function(value){
+        return "sub-genome "+value;
+    };
+
     exports.add_proteinrow_attrs = function(rowdata, index) {
         return {id: rowdata.protid, 'class': "protein"};
     };
@@ -49,6 +53,13 @@
         if (value > 0 || (value !== 'n/a') ){
             return '<a href="/oma/omagroup/'+value+'/">' + value + '</a>';
         } else {return 'n/a';}
+    };
+
+    exports.format_hogid_vis = function(value, row) {
+        return '<a href="/oma/hogs/' + row.ReprEntryNr
+                                      + '/vis/">HOG:'
+                                      + ('0000000' + value).slice(-7) // Format with leading 0s
+                                      + '</a>';
     };
 
     exports.format_domainprevalence = function(value, row) {
