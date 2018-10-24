@@ -63,22 +63,22 @@
     var xref_re = {
         'UniProtKB/SwissProt': {
             re: /[A-Z0-9]{1,5}_[A-Z][A-Z0-9]{2,4}/,
-            url: "https://www.uniprot.org/uniprot/",
+            url: function(id){return "https://www.uniprot.org/uniprot/" + id;},
             img: "reviewed.gif"
         },
         'UniProtKB/TrEMBL': {
             re: /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
-            url: "https://www.uniprot.org/uniprot/",
+            url: function(id){return "https://www.uniprot.org/uniprot/" + id;},
             img: "unreviewed.gif"
         },
         'Ensembl': {
             re: /ENS[A-Z]{0,3}[PGT]\d{11}/,
-            url: "https://www.ensembl.org/id/",
+            url: function(id){return "https://www.ensembl.org/id/"+id;},
             img: "ensembl.gif"
         },
         'FlyBase': {
             re: /FB[gnptr]{2}\d{7}/,
-            url: "http://flybase.org/reports/"
+            url: function(id){return "http://flybase.org/reports/"+id;}
         },
     };
 
@@ -86,7 +86,7 @@
         var buf = "";
         $.each(xref_re, function (src, obj) {
             if (obj.re.test(value)) {
-                buf = '<a class="external" href="' + obj.url + value
+                buf = '<a class="external" href="' + obj.url(value)
                     + '" title="' + src + '">';
                 if (obj.img) {
                     buf += '<img src="'+ static_root + 'image/' + obj.img + '" alt="' + src + '" />&nbsp;'
