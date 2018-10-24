@@ -243,6 +243,11 @@ class TaxonomyTest(APITestCase):
         response = client.get(url, format='json')
         self.assertNotIn('Alveolata', response.data['newick'])
 
+    def test_member_contains_lca(self):
+        client = APIClient()
+        response = client.get('/api/taxonomy/?members=559292&members=284811')
+        self.assertEqual(200, response.status_code)
+
     def cross_check_taxon_ids(self):
         client = APIClient()
         url1 = '/api/taxonomy/?type=newick'
