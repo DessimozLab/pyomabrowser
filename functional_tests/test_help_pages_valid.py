@@ -30,6 +30,13 @@ class HelpPagesTest(FunctionalTest):
         self.assertEqual(1, len(active_tab_id))
         self.assertTrue(active_li[0].find_element_by_tag_name('a').get_attribute('href').endswith(active_tab_id[0]))
 
+        # Tom realizes that his favorite genome is not available in OMA yet and wants to add it
+        self.browser.find_element_by_link_text('Help').click()
+        self.browser.find_element_by_partial_link_text('Suggesting a genome').click()
+        self.assertIn('Suggesting', self.browser.title)
+        form = self.browser.find_element_by_class_name('form-horizontal')
+        self.assertIn('NCBI Taxonomy Identifier', form.text)
+
 
 class ExplorePagesTester(FunctionalTest):
     def test_hog_landing_page_has_valid_examples(self):
