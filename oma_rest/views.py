@@ -638,9 +638,10 @@ def pairwise_relations_minimal_data(request, genome_id1, genome_id2, format=None
     except db.UnknownSpecies as e:
         raise NotFound(e)
     tab_name = 'VPairs' if genome1.uniprot_species_code != genome2.uniprot_species_code else 'within'
+    range2 = genome2.entry_nr_offset + 1, genome2.entry_nr_offset + len(genome2)
     rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/{}'.format(
         genome1.uniprot_species_code, tab_name))
-    rels = [[int(row['EntryNr1']), int(row['EntryNr2'])] for row in rel_tab.read()]
+    rels = [[int(row['EntryNr1']), int(row['EntryNr2'])] for row in rel_tab.read_where('(EntryNr2>={0}) & (EntryNr2<={1})'.format(range2[0], range2[1]))]
     return Response({'pairs': rels})
 
 
