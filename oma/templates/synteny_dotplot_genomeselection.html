@@ -22,14 +22,15 @@
 }
 
 div.tooltip {
+    margin: 10px;
+    min-width: 80px;
+    background-color: #80CBC4;
+    float: left;
     position: absolute;
-    text-align: left;
-    width: 130px;
-    height: 60px;
-    padding: 4px;
+    padding: 4px 8px;
     font: 12px sans-serif;
     background: lightsteelblue;
-    border: 1px steelblue solid;
+    border: 1px darkgrey solid;
     border-radius: 2px;
 	pointer-events: none;
 	color: white;
@@ -97,8 +98,8 @@ div.tooltip {
                                     </div>
                                 </div>
 
-
-                                <div id="message" class="col-sm-12" style="padding: 0;">
+                                <div id="message" class="col-sm-12" style="padding: 0; display:none;">
+                                <div id="message" class="col-sm-12" style="padding: 0; display:none;">
                                     <div id="loader" class="alert alert-info fade in">
                                         <img id="spinner" src="{% static "image/loading.gif"%}">
                                         <span id="msg"></span>
@@ -272,12 +273,9 @@ div.tooltip {
 
         function set_chromosome_select(id_select, data){
             var select = document.getElementById(id_select);
-            console.log("constructing: "+id_select);
-
             select.innerHTML = "";
 
             $.each(data, function (index) {
-
                 var el = document.createElement("option");
                 el.textContent = this.id;
                 el.value = this.id;
@@ -348,8 +346,6 @@ div.tooltip {
                 }
 
             });
-
-            console.log(tmpData);
 
             if(tmpData.length > 5){
 
@@ -503,12 +499,11 @@ div.tooltip {
                         chromosomes1 = chrom2.slice(0, 50);
                         chromosomes2 = chrom1.slice(0, 50);
 
-                        // change naming so genome with more chromosomes is shown in rows
+                        // change naming so genome with more chromosomes is shown in rows instead of columns
                         var genome_1tmp = genome_1;
                         genome_1 = genome_2;
                         genome_2 = genome_1tmp;
                     } else {
-                        console.log("keeping array");
                         chromosomes1 = chrom1.slice(0, 50);
                         chromosomes2 = chrom2.slice(0, 50);
                     }
@@ -616,7 +611,7 @@ div.tooltip {
 
                         $("#dotPlotSubmit").show();
 
-                        var margin = {top: 25 + colLblLen, right: 0, bottom: 0, left: 10 + rowLblLen},
+                        var margin = {top: 15 + colLblLen, right: 0, bottom: 0, left: 15 + rowLblLen},
                             width = $('#hm').width(),
                             matrixWidth = width - rowLblLen;
                             height = matrixWidth/cols * rows;
@@ -646,13 +641,13 @@ div.tooltip {
                             .attr("id", "heatmap")
                             .attr("width", width + margin.left + margin.right)
                             .attr("height", height + margin.top + margin.bottom)
+                            .style("margin-top", "20px")
                             .append("g")
                             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
                         var div = d3.select("#hm").append("div")
                             .attr("class", "tooltip")
                             .style("opacity", 0);
-
 
                         var row = svg.selectAll(".row")
                             .data(data, function (d, i) {
@@ -668,10 +663,6 @@ div.tooltip {
                                 })
                             })
                             .enter()
-                            //.append("a")
-                            //.attr("xlink:href", function (d, i) {
-                            //    return server+"/oma/dotplot/" + genome_1 + "/" + genome_2 + "/" + chromosomes1[i].id + "/" + chromosomes2[d.row].id;
-                            //})
                             .append("svg:rect")
                             .attr("class", "cell")
                             .attr("x", function (d, i) {
@@ -705,14 +696,17 @@ div.tooltip {
                                     server+"/oma/dotplot/" + genome_1 + "/" + genome_2 + "/" + chromosomes1[i].id + "/" + chromosomes2[d.row].id;
                             })
 
+
                             .on("mouseover", function(d,i) {
-                                    div.transition()
-                                        .duration(50)
-                                        .style("opacity", .9);
-                                    div.html("Chromosome: " + chromosomes1[i].id + ":" + chromosomes2[d.row].id + "<br>Value: " + d.value)
-                                        .style("width", rowLblLen+"px")
-                                        .style("left", x(i)+80 + "px")
-                                        .style("top", y(d.row)+ "px");
+
+                                var ttText = "Chromosome: " + chromosomes1[i].id + ":" + chromosomes2[d.row].id;
+                                ttText += "<br>Value: " + d.value;
+                                div.transition()
+                                    .duration(50)
+                                    .style("opacity", .9);
+                                div.html(ttText)
+                                    .style("left", Math.max(0, d3.event.pageX - 280) + "px")
+                                    .style("top", (d3.event.pageY - 350) + "px");
                                 })
                                 .on("mouseout", function (d) {
                                     div.transition()
@@ -736,7 +730,7 @@ div.tooltip {
                             .call(adjustTextLabelsX)
                             .append("text")
                             .attr("class", "axis-title")
-                            .attr("y", 0-colLblLen)
+                            .attr("y", 20 - margin.top)
                             .style("text-anchor", "start")
                             .attr("fill", "green")
                             .text(genome_1);
@@ -754,8 +748,10 @@ div.tooltip {
                             .append("text")
                             .attr("class", "axis-title")
                             .attr("transform", "rotate(-90)")
-                            .attr("y", 0-rowLblLen)
-                            .attr("dy", ".71em")
+                            .attr("y", function(d){
+                                return 0 - (margin.left);
+                            })
+                            .attr("dy", "1em")
                             .style("text-anchor", "end")
                             .attr("fill", "green")
                             .text(genome_2);
