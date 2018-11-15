@@ -164,6 +164,26 @@ class SyntenyViewTester(TestCase):
         self.verify_colors(query, 4)
 
 
+class SearchTester(TestCase):
+    def test_unique_ids_resolve_directly(self):
+        for query in ("PGTB2_SCHPO", "SPAC167.02", "O13948"):
+            res = self.client.get(reverse('search'), data={'query': query})
+            self.assertEqual(302, res.status_code, "ID '{}' did not resolve uniquely".format(query))
+            self.assertTrue(res.url.startswith('/oma/info/'))
+
+    def test_sequence_search(self):
+        s = "RSYKNSSAEGVLTGKGLNWGGSLIRPEAFGLVYYTQAMIDYATNGSFEGKRVTISGSGANVAQYAALKVIEVVSLSDSKGCIISETSEQIHD"
+        res = self.client.post(reverse('search'), data={'query': s, 'type': 'sequence'})
+        self.assertEqual(200, res.status_code)
+        self.assertIn('DHE5_YEAST', [z['xrefid'] for z in json.loads(res.context['data'])])
+
+    def test_numeric_group_search(self):
+        gnr = 10
+        res = self.client.get(reverse('search'), data={'query': gnr, 'type': 'group'})
+        self.assertEqual(302, res.status_code)
+        self.assertEqual(reverse('omagroup', args=[gnr]), res.url)
+
+
 class TemplatetagTester(TestCase):
 
     def test_uniprot_seq_repr(self):
