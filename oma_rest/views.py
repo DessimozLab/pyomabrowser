@@ -645,8 +645,8 @@ class TaxonomyViewSet(ViewSet):
         type = request.query_params.get('type', None)  # if none, dictionary returned
         collapse = strtobool(request.query_params.get('collapse', 'True'))
         tax_obj = utils.db.tax
-        if members is not None:
-            members = list(map(str.strip, members.split(',')))   # as the query param is passed as a string
+        if members is not None and len(members) > 0:
+            members = [m.strip() for m in itertools.chain.from_iterable(ml.split(',') for ml in members)]   # as the query param is passed as a string
             members_list = []
             if not members[0].isdigit():
                 if all(map(lambda x: len(x) == 5, members)):

@@ -1,5 +1,4 @@
 import json
-import unittest
 from rest_framework.test import APIClient, APITestCase
 import re
 
@@ -234,8 +233,21 @@ class GenomeTest(APITestCase):
 class TaxonomyTest(APITestCase):
     def test_root(self):
         client = APIClient()
-        response = client.get('/api/taxonomy/Opisthokonta/?type=newick', format='json')
+        response = client.get('/api/taxonomy/Opisthokonta/?type=newick&collapse=no')
         self.assertEqual('Opisthokonta', response.data['root_taxon']['name'])
+
+    def test_root_collapsed_always_severl_children(self):
+        client = APIClient()
+        response = client.get('/api/taxonomy/Opisthokonta/?type=json')
+        self.assertEqual(200, response.status_code)
+        res = json.loads(response.content.decode())
+
+        def rec_trav(n):
+            if "children" in n:
+                self.assertGreaterEqual(len(n['children']), 2)
+                for c in n['children']:
+                    rec_trav(c)
+        rec_trav(res)
 
     def test_members(self):
         client = APIClient()
@@ -248,7 +260,7 @@ class TaxonomyTest(APITestCase):
         response = client.get('/api/taxonomy/?members=559292&members=284811')
         self.assertEqual(200, response.status_code)
 
-    def cross_check_taxon_ids(self):
+    def test_cross_check_taxon_ids(self):
         client = APIClient()
         url1 = '/api/taxonomy/?type=newick'
         response1 = client.get(url1, format='json')
