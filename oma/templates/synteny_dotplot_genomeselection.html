@@ -25,7 +25,6 @@ div.tooltip {
     margin: 10px;
     min-width: 80px;
     background-color: #80CBC4;
-    float: left;
     position: absolute;
     padding: 4px 8px;
     font: 12px sans-serif;
@@ -181,7 +180,7 @@ div.tooltip {
 
               $.extend(oAjaxOptions, {
                 error: function(oXHR, sTextStatus, sErrorThrown) {
-                  console.log('customer info request failed: ' + sErrorThrown);
+                  console.log('ajax request failed: ' + sErrorThrown);
                   oDeferred.resolve(null);
                 },
                 success: function(oData) {
@@ -278,37 +277,6 @@ div.tooltip {
                 el.value = this.id;
                 select.appendChild(el);
             });
-
-        }
-
-        function set_chromosome_select_bu(genome_name, id_select){
-            var MIN_NR_PROTEINS_PER_CHR = 10;
-            var select = document.getElementById(id_select);
-
-            $.cachedAjaxPromise("/api/genome/" + genome_name + "/")
-                .done(function (jsonData) {
-                    jsonData.chromosomes.sort(function (a, b) {
-                        return (a.id > b.id) ? 1 : ((b.id > a.id) ? -1 : 0);
-                    });
-
-
-
-                    $.each(jsonData.chromosomes, function (index) {
-                        var nr_prot_on_chr = this.entry_ranges.reduce(function (acc, cur) {
-                            return acc + cur[1] - cur[0] + 1
-                        }, 0);
-                        if (nr_prot_on_chr < MIN_NR_PROTEINS_PER_CHR) {
-                            // skip scaffolds with only very few proteins
-                            //console.log('skipping ' + genome_name + ' chromosome/scaffold ' + index);
-                            return;
-                        }
-                        var el = document.createElement("option");
-                        el.textContent = this.id;
-                        el.value = this.id;
-                        select.appendChild(el);
-                    });
-                }
-            );
 
         }
 
@@ -450,9 +418,6 @@ div.tooltip {
 
 
             if($('#g1_name').val() == "" || $('#g2_name').val() == "" || $('#g2_name').val().length < 5 || $('#g2_name').val().length < 5) {
-                //console.log("not all values available or too short");
-                //console.log(genome_1+" : "+$('#g1_name').val());
-                //console.log(genome_2+" : "+$('#g2_name').val());
                 return false;
             }
 
@@ -460,9 +425,6 @@ div.tooltip {
             genome_2 = genomeIDs[$('#g2_name').val()];
 
             if(genome_1 === undefined || genome_2 === undefined){
-                //console.log("one genome not found");
-                //console.log(genome_1+" : "+$('#g1_name').val());
-                //console.log(genome_2+" : "+$('#g2_name').val());
                 return false;
             }
 
@@ -506,9 +468,6 @@ div.tooltip {
 
                     $("#fg_first_chr > label").html("Chromosome for "+genome_1);
                     $("#fg_second_chr > label").html("Chromosome for "+genome_2);
-
-                    //var chromosomes1 = filterChromosomesByCount(res1[0].chromosomes, 10);
-                    //var chromosomes2 = filterChromosomesByCount(res2[0].chromosomes, 10);
 
                     changeMessage("Sorting genome data...", true);
 
@@ -608,7 +567,7 @@ div.tooltip {
                         $("#dotPlotSubmit").show();
 
                         var margin = {top: 15 + colLblLen, right: 0, bottom: 0, left: 15 + rowLblLen},
-                            width = $('#hm').width(),
+                            width = ($('#hm').width() / cols) > 30 ? (cols * 30) : $('#hm').width();
                             matrixWidth = width - rowLblLen;
                             height = matrixWidth/cols * rows;
                             matrixHeight = height - colLblLen;
@@ -641,7 +600,8 @@ div.tooltip {
                             .append("g")
                             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                        var div = d3.select("#hm").append("div")
+                        var div = d3.select("body")
+                            .append("div")
                             .attr("class", "tooltip")
                             .style("opacity", 0);
 
@@ -692,8 +652,15 @@ div.tooltip {
                                     server+"/oma/dotplot/" + genome_1 + "/" + genome_2 + "/" + chromosomes1[i].id + "/" + chromosomes2[d.row].id;
                             })
 
-
                             .on("mouseover", function(d,i) {
+
+                                // normalize to browser coordinates
+                                var my = d3.event.pageY - window.scrollY;
+                                var mx = d3.event.pageX - window.scrollX;
+
+                                // move tooltip into viewport if cell is too close to the viewport edge
+                                var xPos = (mx > ($(window).width() - 140)) ? d3.event.pageX - 150 : d3.event.pageX + 15;
+                                var yPos = (my > ($(window).height() - 60)) ? d3.event.pageY - 55 : d3.event.pageY + 15;
 
                                 var ttText = "Chromosome: " + chromosomes1[i].id + ":" + chromosomes2[d.row].id;
                                 ttText += "<br>Value: " + d.value;
@@ -701,12 +668,12 @@ div.tooltip {
                                     .duration(50)
                                     .style("opacity", .9);
                                 div.html(ttText)
-                                    .style("left", Math.max(0, d3.event.pageX - 280) + "px")
-                                    .style("top", (d3.event.pageY - 350) + "px");
+                                    .style("left", xPos + "px")
+                                    .style("top", yPos + "px");
                                 })
                                 .on("mouseout", function (d) {
                                     div.transition()
-                                        .duration(50)
+                                        .duration(100)
                                         .style("opacity", 0);
                                 })
 
