@@ -144,7 +144,7 @@ div.tooltip {
     <script type="text/javascript">
     (function($) {
 
-        var genome_1, genome_2 = "";
+        var genome_1, genome_2, genomeFullName_1, genomeFullName_2 = "";
 
         $("#loader, #message, #spinner, #dotPlotSubmit").hide();
         $("#msg").html('Please choose both genomes');
@@ -201,6 +201,7 @@ div.tooltip {
 
         var genomeNames = [];
         var genomeIDs = {};
+        var genomeSpecies = {};
 
         $.ajax({
             url: "/All/flatgenomes.json",
@@ -211,6 +212,7 @@ div.tooltip {
                     var tmp = genome.name + ' (' + genome.id + ')';
                     genomeNames.push(tmp);
                     genomeIDs[tmp] = genome.id;
+                    genomeSpecies[tmp] = genome.name;
                 })
             },
             statusCode: {
@@ -221,7 +223,8 @@ div.tooltip {
                     jsonData.forEach(function (genome) {
                         var tmp = genome.species + " (" + genome.code + ")";
                         genomeNames.push(tmp);
-                        genomeIDs[tmp] = genome.code
+                        genomeIDs[tmp] = genome.code;
+                        genomeSpecies[tmp] = genome.name;
                     })
                 })
             }
@@ -423,6 +426,8 @@ div.tooltip {
 
             genome_1 = genomeIDs[$('#g1_name').val()];
             genome_2 = genomeIDs[$('#g2_name').val()];
+            genomeFullName_1 = genomeSpecies[$('#g1_name').val()];
+            genomeFullName_2 = genomeSpecies[$('#g2_name').val()];
 
             if(genome_1 === undefined || genome_2 === undefined){
                 return false;
@@ -530,8 +535,8 @@ div.tooltip {
                         var cols = chromosomes1.length;
                         var rows = chromosomes2.length;
 
-                        var colLblLen = getLongestId(chromosomes1)*8 + 8;
-                        var rowLblLen = getLongestId(chromosomes2)*6 + 8;
+                        var colLblLen = getLongestId(chromosomes1)*8 + 12;
+                        var rowLblLen = getLongestId(chromosomes2)*6 + 16;
 
                         var data = matrix(rows, cols, 0)
 
@@ -566,9 +571,11 @@ div.tooltip {
 
                         $("#dotPlotSubmit").show();
 
-                        var margin = {top: 15 + colLblLen, right: 0, bottom: 0, left: 15 + rowLblLen},
-                            width = ($('#hm').width() / cols) > 30 ? (cols * 30) : $('#hm').width();
-                            matrixWidth = width - rowLblLen;
+                        // TODO: cleanup
+                        var fullWidth = $('#hm').width();
+                        var margin = {top: 25 + colLblLen, right: 30, bottom: 0, left: 15 + rowLblLen},
+                            width = (fullWidth / cols) > 30 ? (cols * 30) : fullWidth;
+                            matrixWidth = (width - rowLblLen) < 30 ? width : (width - rowLblLen);
                             height = matrixWidth/cols * rows;
                             matrixHeight = height - colLblLen;
 
@@ -594,11 +601,12 @@ div.tooltip {
 
                         var svg = d3.select("#hm").append("svg")
                             .attr("id", "heatmap")
-                            .attr("width", width + margin.left + margin.right)
+                            //.attr("width", width + margin.left + margin.right)
+                            .attr("width", fullWidth)
                             .attr("height", height + margin.top + margin.bottom)
-                            .style("margin-top", "20px")
+                            .style("margin-top", "10px")
                             .append("g")
-                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                            .attr("transform", "translate(" + (margin.left + 20)+ "," + (margin.top + 20)+ ")");
 
                         var div = d3.select("body")
                             .append("div")
@@ -691,12 +699,25 @@ div.tooltip {
                             .call(xAxisCall)
                             .style("text-anchor", "start")
                             .call(adjustTextLabelsX)
+                            .append("g")
+                            .attr("fill", "green")
+                            .attr("id", "x-axislbl");
+
+                        xAxis
                             .append("text")
                             .attr("class", "axis-title")
-                            .attr("y", 20 - margin.top)
+                            .attr("y", 10 - margin.top)
                             .style("text-anchor", "start")
-                            .attr("fill", "green")
+                            .attr("dx", "0")
                             .text(genome_1);
+                        xAxis
+                            .append("text")
+                            .attr("class", "axis-title")
+                            .attr("y", 10 - margin.top)
+                            .attr("dy", "1em")
+                            .style("font-size", "13px")
+                            .attr("dx", "0")
+                            .text(genomeFullName_1);
 
                         var yAxisCall = d3.axisLeft(y).ticks(rows).tickFormat(function (d) {
                             if (chromosomes2[d] && typeof chromosomes2[d].id !== 'undefined') {
@@ -704,20 +725,37 @@ div.tooltip {
                             }
                         });
 
-                        var yAxis = svg.append("g")
+                        var yAxis = svg
+                            .append("g")
                             .attr("class", "y-axis")
                             .call(yAxisCall)
                             .call(adjustTextLabelsY)
-                            .append("text")
-                            .attr("class", "axis-title")
+                            .append("g")
                             .attr("transform", "rotate(-90)")
-                            .attr("y", function(d){
-                                return 0 - (margin.left);
-                            })
-                            .attr("dy", "1em")
                             .style("text-anchor", "end")
                             .attr("fill", "green")
+                            .attr("id", "y-axislbl");
+
+                            yAxis
+                            .append("text")
+                            .attr("class", "axis-title")
+                            .attr("y", function(d){
+                                return 0 - (margin.left + 15);
+                            })
+                            .attr("dy", "1em")
+                            .attr("dx", "0")
                             .text(genome_2);
+
+                            yAxis
+                            .append("text")
+                            .attr("class", "axis-title")
+                            .attr("y", function(d){
+                                return 0 - (margin.left + 20);
+                            })
+                            .attr("dy", "2.5em")
+                            .attr("dx", "0")
+                            .style("font-size", "13px")
+                            .text(genomeFullName_2);
 
 
                         function adjustTextLabelsX(selection) {
