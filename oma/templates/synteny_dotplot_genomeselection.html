@@ -450,6 +450,8 @@ div.tooltip {
                 changeMessage("Loading genome data...", true);
                 var server = "";  //"http://omabrowser.org";
 
+                $.ajaxSetup({ timeout: 7000 });
+
                 var get1 = $.getJSON(server+'/api/genome/' + genome_1 + '/?format=json');
                 var get2 = $.getJSON(server+'/api/genome/' + genome_2 + '/?format=json');
 
@@ -779,6 +781,8 @@ div.tooltip {
 
                     });
 
+                }).fail(function() {
+                  changeMessage("Sorry, could not load pair data.", false);;
                 });
 
             }, 1000));
