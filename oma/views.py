@@ -852,7 +852,7 @@ class EntrySearchJson(JsonModelMixin):
 
 
 class Searcher(View):
-    _allowed_functions = ['id', 'group', 'sequence']
+    _allowed_functions = ['id', 'group', 'sequence', 'species']
 
     def search_id(self, request, query):
         context = {'query': query}
@@ -877,6 +877,15 @@ class Searcher(View):
             context = {'query': query,
                        'data': json.dumps([utils.db.oma_group_metadata(grp) for grp in ambiguous.candidates])}
             return render(request, "disambiguate_group.html", context=context)
+
+    def search_species(self, request, query):
+        try:
+            species = utils.db.tax._get_taxids_from_any([query])
+            return redirect('/cgi-bin/gateway.pl?f=DisplayOS&p1={}'.format(species.omaid))
+        except db.AmbiguousID as ambiguous:
+            context = {'query': query,
+                       'data': json.dumps(ambiguous)}
+            return render(request, "disambiguate_species.html", context=context)
 
     def search_sequence(self, request, query, strategy='mixed'):
         strategy = strategy.lower()[:5]

@@ -206,6 +206,15 @@ class SearchTester(TestCase):
         self.assertEqual(302, res.status_code)
         self.assertEqual(reverse('omagroup', args=[gnr]), res.url)
 
+    def test_search_species_name(self):
+        queries = ["YEAST", "559292", "4890", "Saccharomyces cerevisiae", "Baker's yeast"]
+        expected_code = "YEAST"
+        for query in queries:
+            reply = self.query_server(query, type="species")
+            self.assertEqual(200, reply.status_code)
+            self.assertIn('YEAST', [z['uniprot_species_code'] for z in json.loads(reply.context['data'])])
+
+
 
 class TemplatetagTester(TestCase):
 
