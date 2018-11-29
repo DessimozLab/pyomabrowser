@@ -165,11 +165,29 @@ class SyntenyViewTester(TestCase):
 
 
 class SearchTester(TestCase):
+
+    def query_server(self, query, **kwargs):
+        url = reverse('search')
+        args = {'query': query}
+        args.update(kwargs)
+        reply = self.client.get(url, data=args)
+        return reply
+
     def test_unique_ids_resolve_directly(self):
         for query in ("PGTB2_SCHPO", "SPAC167.02", "O13948"):
-            res = self.client.get(reverse('search'), data={'query': query})
+            res = self.query_server(query)
             self.assertEqual(302, res.status_code, "ID '{}' did not resolve uniquely".format(query))
             self.assertTrue(res.url.startswith('/oma/info/'))
+
+    def test_part_of_id(self):
+        query = "TB2"
+        reply = self.query_server(query)
+        for target in json.loads(reply.context['data']):
+            for xref in target['xrefs']:
+                if query.lower() in xref['xref'].lower():
+                    break
+            else:
+                self.assertTrue(False, "Couldn't find '{}' in search result {}".format(query, target))
 
     def test_sequence_search(self):
         s = "RSYKNSSAEGVLTGKGLNWGGSLIRPEAFGLVYYTQAMIDYATNGSFEGKRVTISGSGANVAQYAALKVIEVVSLSDSKGCIISETSEQIHD"
@@ -177,9 +195,14 @@ class SearchTester(TestCase):
         self.assertEqual(200, res.status_code)
         self.assertIn('DHE5_YEAST', [z['xrefid'] for z in json.loads(res.context['data'])])
 
+    def test_sequence_in_lowercase(self):
+        s = "RSYKNSSAEGVLTGKGLNWGGSLIRPEAF".lower()
+        reply = self.query_server(s, type="sequence")
+        self.assertIn('DHE5_YEAST', [z['xrefid'] for z in json.loads(reply.context['data'])])
+
     def test_numeric_group_search(self):
         gnr = 10
-        res = self.client.get(reverse('search'), data={'query': gnr, 'type': 'group'})
+        res = self.query_server(gnr, type='group')
         self.assertEqual(302, res.status_code)
         self.assertEqual(reverse('omagroup', args=[gnr]), res.url)
 

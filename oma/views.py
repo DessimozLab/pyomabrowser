@@ -845,7 +845,7 @@ class EntrySearchJson(JsonModelMixin):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'oma_group': None,
-                   'hog_family_nr': 'roothog'}
+                   'hog_family_nr': 'roothog', 'xrefs': None}
 
     def as_json(self, iter):
         return list(self.to_json_dict(iter))
