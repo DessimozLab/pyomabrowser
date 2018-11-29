@@ -1,5 +1,7 @@
 from django.db import models
+from django.dispatch import receiver
 from django.utils import timezone
+import os
 import logging
 logger = logging.getLogger(__name__)
 
@@ -25,3 +27,19 @@ class StandaloneExportJobs(models.Model):
             self.delete()
             return True
         return False
+
+
+@receiver(models.signals.post_delete, sender=StandaloneExportJobs)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `StandaloneExportJobs` object is deleted.
+    """
+    if instance.result:
+        if os.path.isfile(instance.result.path):
+            logger.info("Removing old AllAll Export file '{}' ({.1f}MB).".format(
+                instance.result.path, os.path.getsize(instance.result.path) / (2 ** 20)))
+            os.remove(instance.result.path)
+        else:
+            logger.warning("Removing StandaloneExportJob model with in-existing file '{}' on disk"
+                           .format(instance.result.path))

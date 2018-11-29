@@ -7,6 +7,7 @@ from django.db.models import Q
 from .models import StandaloneExportJobs
 import shutil
 from django.utils import timezone
+from datetime import datetime, timedelta
 from celery import task
 import subprocess
 
@@ -72,3 +73,9 @@ def update_running_jobs():
         job.create_time = timezone.now()
         job.processing = False
         job.save()
+
+
+@task()
+def purge_old_exports():
+    time_threshold = datetime.now() - timedelta(days=7)
+    StandaloneExportJobs.objects.filter(created_time__lt=time_threshold).delete()

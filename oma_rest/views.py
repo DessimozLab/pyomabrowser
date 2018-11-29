@@ -130,7 +130,6 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.ProteinEntrySerializer(instance=homoeologs, many=True, context={'request': request})
         return Response(serializer.data)
 
-
     @detail_route()
     def ontology(self, request, entry_id=None, format=None):
         """Ontology information available for a protein.
@@ -298,10 +297,10 @@ class HOGViewSet(PaginationMixin, ViewSet):
     def _identify_lca_hog_id_from_proteins(self, proteins):
         hog_id = os.path.commonprefix([p.oma_hog for p in proteins])
         if hog_id.find('.') >= 0:
-            for k in range(len(hog_id)-1, hog_id.find('.')-1, -1):
+            for k in range(len(hog_id) - 1, hog_id.find('.') - 1, -1):
                 if not (hog_id[k].isdigit() or hog_id[k] == '.'):
                     break
-            hog_id = hog_id[0:k+1]
+            hog_id = hog_id[0:k + 1]
         return hog_id
 
     def list(self, request, format=None):
@@ -356,7 +355,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
         level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
         fam_nr = utils.db.parse_hog_id(hog_id)
         if level is None:
-            levs = frozenset([row['Level'].decode() for row in utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')])
+            levs = frozenset(
+                [row['Level'].decode() for row in utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')])
             if 'LUCA' in levs:
                 level = 'LUCA'
             else:
@@ -440,7 +440,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
         else:
             fam_nr = utils.db.parse_hog_id(hog_id)
             condition = '(Fam == fam_nr) & (ID == hog_id)'
-            levs = frozenset([hog['Level'].decode() for hog in utils.db.get_hdf5_handle().get_node('/HogLevel').where(condition)])
+            levs = frozenset(
+                [hog['Level'].decode() for hog in utils.db.get_hdf5_handle().get_node('/HogLevel').where(condition)])
             members = [utils.ProteinEntry(entry) for entry in utils.db.member_of_hog_id(hog_id)]
             if 'LUCA' in levs:
                 level = 'LUCA'
@@ -640,12 +641,12 @@ class TaxonomyViewSet(ViewSet):
         """
 
         # e.g. members = YEAST,ASHGO
-        members = request.query_params.get('members', None)  # read as a string
+        members = request.query_params.getlist('members', None)  # read as a string
         type = request.query_params.get('type', None)  # if none, dictionary returned
         collapse = strtobool(request.query_params.get('collapse', 'True'))
         tax_obj = utils.db.tax
-        if members is not None:
-            members = list(map(str.strip, members.split(',')))   # as the query param is passed as a string
+        if members is not None and len(members) > 0:
+            members = [m.strip() for m in itertools.chain.from_iterable(ml.split(',') for ml in members)]   # as the query param is passed as a string
             members_list = []
             if not members[0].isdigit():
                 if all(map(lambda x: len(x) == 5, members)):
@@ -747,7 +748,6 @@ class TaxonomyViewSet(ViewSet):
 
 
 class IdentifiySequenceAPIView(APIView):
-
     def get(self, request, format=None):
         """Identify a protein sequence
 
