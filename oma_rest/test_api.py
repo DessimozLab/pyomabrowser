@@ -21,6 +21,18 @@ class ProteinTest(APITestCase):
         response = client.get('/api/protein/300/')
         self.assertEqual(response.data['omaid'], 'YEAST00300')
 
+    def test_unknown_protein_id(self):
+        response = APIClient().get('/api/protein/cs3sfg21aa2/')
+        self.assertEqual(404, response.status_code)
+        res = json.loads(response.content.decode())
+        self.assertIn('unknown', res['detail'])
+
+    def test_unambigous_protein_id(self):
+        response = APIClient().get('/api/protein/MAL/')
+        self.assertEqual(404, response.status_code)
+        res = json.loads(response.content.decode())
+        self.assertIn('not unique', res['detail'])
+
     def test_protein_without_hog_membership(self):
         response = APIClient().get('/api/protein/2/')
         self.assertEqual(200, response.status_code)
