@@ -1,0 +1,82 @@
+{% extends "base_entry.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA orthology database: Information for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} OMA stores the following information about the gene/protein.{% endblock %}
+{% block contentTab %}
+
+{% include "includes/func_desc.html" %}
+
+<div class="card">
+    <div class="card-header">
+        <div class="float-left">
+            <h3 class="card-title">General Information</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <dl class="dl-horizontal">
+            {% if entry.description %}<dt>Description</dt><dd>{{ entry.description }} </dd> {% endif %}
+            <dt>Organism</dt>
+            <dd><a href="/cgi-bin/gateway.pl?f=DisplayOS&p1={{entry.genome.uniprot_species_code}}">
+                {{ entry.genome.uniprot_species_code }} - {{ entry.genome.sciname }}</a>
+                <span class="small">(Taxon-ID: <a href="///uniprot.org/taxonomy/{{ entry.genome.ncbi_taxon_id }}" class="external">{{ entry.genome.ncbi_taxon_id }}</a>)</span>
+            </dd>
+            <dt>Locus</dt><dd id="locus"><span id="chr">{{ entry.chromosome }}</span>:&nbsp;<span id="coordinates">{{ entry.exons }}</span></dd>
+            <dt>Number of exons</dt><dd>{{ entry.exons | length }}</dd>
+            {% if "PMP" in xrefs %}
+                <dt>Protein Structures</dt><dd>n/a</dd>
+            {% endif %}
+        </dl>
+    </div>
+</div>
+
+<div class="card ">
+    <div class="card-headwe clearfix">
+        <div class="float-left">
+            <h3 class="card-title">IDs and Cross-references</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="loader-xrefs"><img src="{% static "image/loading.gif" %}" alt="loading xrefs..."></div>
+        <dl id="xrefs" class="dl-horizontal">
+            {% for xref in xrefs %}
+                <dt>{{ xref.source }}</dt><dd><a class="external" href="{{ xref.url }}">{{ xref.xref }}</a></dd>
+            {% endfor %}
+        </dl>
+    </div>
+</div>
+
+    <!-- Ontology -->
+<script src="{% static "js/underscore-min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/xref_format.js" %}" type="text/javascript"></script>
+
+
+    <script>
+    (function(){
+        $.getJSON("/api/protein/{{ entry.entry_nr }}/xref/", function(data){
+            // sort accroding to xref_source_order
+            var xref_source_order = {{ xref_order | safe }};
+            data.sort(function(a, b){
+                var idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
+                if (idx_a === idx_b){
+                    return a.xref > b.xref ? 1 : -1;
+                }
+                return idx_a - idx_b;
+            });
+            // remove duplicated xref values of less important sources
+            var clean_data = data.filter(function(obj, pos, arr){
+                return arr.map(function(obj){return obj.xref;}).indexOf(obj.xref) === pos});
+            _.forEach(_.groupBy(clean_data, "source"), function(xrefs, source){
+                var list_item = ["<dt>"+source+"</dt>"];
+                _.forEach(xrefs, function(ref){
+                    list_item.push("<dd>"+xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}") +"</dd>")
+                });
+                $('#xrefs').append(list_item.join("")+"\n");
+            });
+        });
+        $("#loader-xrefs").hide();
+    })();
+</script>
+
+
+{% endblock contentTab %}

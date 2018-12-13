@@ -1,0 +1,25 @@
+{% extends  "base_data_centric.html" %}
+
+{% block header_color_class %} oma-group {% endblock %}
+
+{% block header_body %}
+
+                    <h5 class="card-title">OMA GROUP {{ omagroup.group_id }} with {{ omagroup.nr_entries }} members.</h5>
+                    <div class="d-flex">
+                        <h4>Fingerprint: {{ omagroup.fingerprint }}</h4>
+                    </div>
+
+{% endblock %}
+
+{% block data_content %}
+
+        {% include "includes/sidebar_omagroup.html" with tab=tab %}
+
+        <div id="content-column" class="col-xs-12 col-9" style="background-color: #edf">
+            {% block contentTab %} {% endblock contentTab %}
+        </div>
+
+{% endblock data_content %}
+
+
+

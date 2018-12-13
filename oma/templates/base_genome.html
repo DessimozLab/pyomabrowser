@@ -1,0 +1,28 @@
+{% extends  "base_data_centric.html" %}
+
+{% block title %}xxxx{% endblock %}
+
+{% block header_color_class %} genome {% endblock %}
+
+{% block header_body %}
+
+                    <h5 class="card-title"> Genome {{ genome.sciname }} [{{  genome.uniprot_species_code }}] </h5>
+
+
+{% endblock %}
+
+{% block data_content %}
+
+
+        {% include "includes/sidebar_genome.html" with tab=tab %}
+
+
+        <div id="content-column" class="col-xs-12 col-9" style="background-color: #edf"> <!-- content col -->
+
+            {% block contentTab %} {% endblock contentTab %}
+
+        </div> <!-- content col -->
+
+{% endblock data_content %}
+
+

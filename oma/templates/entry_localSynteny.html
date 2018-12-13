@@ -1,0 +1,241 @@
+{% extends "base_entry.html" %}
+{% load staticfiles %}
+{% block title %}OMA: Explore conserved neighboring genes of {{ entry.omaid }} across genomes{% endblock %}
+{% block meta_description %}Explore the synthenic genes around {{ entry.omaid }} across its orthologs. Find out about highly conserved regions, rearangements, segmental duplications and other evolutionary events in this region{% endblock %}
+{% block css_hook %}
+<style type="text/css">
+    /* CSS used here will be applied after bootstrap.css */
+    .img-center {
+        margin: 0 auto;
+    }
+
+    .dl-horizontal dt {
+        white-space: normal;
+        width: 250px;
+        margin-right: 50px;
+    }
+
+    .omacenter {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .titre {
+        color: #fff;
+    }
+
+    .syntenytable {
+        margin-bottom: 0px;
+        /*min-width:870px;*/
+        font-size: 0.7rem;
+    }
+
+    .syntenytable th {
+        width: 10%;
+
+    }
+
+    .syntenytable thead tr {
+        background-color: #FFFFFF;
+    }
+
+    .syntenytable th {
+        text-align: center;
+    }
+
+    .syntenytable td {
+        vertical-align: middle !important;
+    }
+
+    .btn-synteny {
+        background-color: #C8C8C8;
+        color: #000;
+        border-width: 2px;
+        text-shadow: 1px 0 2px #dcdcdc, 0 -1px 2px #dcdcdc, 0 1px 2px #dcdcdc, -1px 0 2px #dcdcdc;
+        font-size: 0.7rem;
+    }
+
+{% for key, value in colors.items %}
+.btn-{{ key }} {background-color:{{ value }}; border-width: 2px;}
+.btn-{{ key }}.active, .btn-{{ key }}:active{
+    background-color:{{ value }};
+    border-color: #000;
+}
+{% endfor %}
+
+{% for key, value in stripes.items %}
+.btn-{{ key }}{
+    background-image:
+    repeating-linear-gradient(
+    45deg, {{ value }}
+    ) !important;
+}
+{% endfor %}
+
+    .entete {
+        background-color: #22780F;
+        width: 80%;
+        margin-left: 10%;
+    }
+
+    table {
+        table-layout: fixed;
+        border-top: none;
+        border-bottom: none;
+        background-color: #FFF;
+    }
+
+    .twotables {
+        overflow-y: hidden;
+    }
+
+</style>
+{% endblock css_hook %}
+
+{% block js_hook %}
+<script src="{%static "js/jquery.floatThead.min.js" %}"></script>
+<script type='text/javascript'>
+$(document).ready(function() {
+        $(function() {
+            {% for key, value in colors.items %}
+            $('.btn-{{key}}').hover(
+                function(){ $('.btn-{{key}}').addClass('active');},
+                function(){ $('.btn-{{key}}').removeClass('active');}
+                );
+            {% endfor %}
+            //$('.table-fixed-header').fixedHeader();
+        });
+        jQuery('.cursor_wait').click(function () {
+            jQuery('body').css('cursor', 'wait');
+            $(this).css('cursor', 'wait');
+        });
+        $("[data-toggle=tooltip]").tooltip({
+            html: true,
+            placement: 'bottom',
+            delay: {"show": 750, "hide": 2500}
+        });
+        $("[data-toggle=tooltip_right]").tooltip({
+            html: true,
+            placement: 'right',
+            delay: {"show": 750, "hide": 2500}
+        });
+        $("[data-toggle=tooltip_top]").tooltip({
+            html: true,
+            placement: 'top',
+            delay: {"show": 750, "hide": 2500}
+        });
+    });
+$(window).on('load', function () {
+    $(".table").floatThead();
+});
+</script>
+{% endblock js_hook %}
+
+{% block seqhead_hook %}
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                    class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">How does the local synteny viewer work?</h4>
+            </div>
+            <div class="modal-body">
+                <img src="/static/image/tutsyn.png" class="img-responsive margin-auto" alt="help synteny">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock seqhead_hook %}
+
+{% block contentTab %}
+<div class="card"><!-- .card -->
+    <h4 class="card-header">Local Synteny Conservation
+        <a href="#" class="badge badge-info" role="button" data-toggle="modal" data-target="#myModal"
+           id="modalhelp">?</a>
+    </h4>
+    <div class="card-body p-1"><!-- .card-body -->
+        <div class="twotables"><!-- .twotables -->
+            <table class="table table-condensed table-striped syntenytable">
+                <thead>
+                <tr>
+                    <th></th>
+                    {% for position in positions %}
+                    <th>{{ position }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <td><span data-toggle="tooltip_right" data-html=false data-title="{{ entry.genome.sciname }}">{{ md.species }}</span>
+                    </td>
+                    {% for index, geneinfo in md.genes.items %}
+                    {% for infotype, genetype in geneinfo.items %}
+                    {% if genetype == 'blank' %}
+                    <td></td>
+                    {% elif infotype == 'genenumber' %}
+                    <td>
+                        <a href="/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/"
+                           class="btn btn-default btn-synteny cursor_wait btn-{{ geneinfo.type }}"
+                        data-toggle="tooltip" data-title="{% comment %} {% include 'includes/synteny_xref.html' with eNr=geneinfo.entryid %} {% endcomment %}" >
+                        {% if geneinfo.dir == -1 %}
+                        <span class="fa fa-chevron-left"></span>
+                        {% endif %}
+                        {{ genetype }}
+                        {% if geneinfo.dir == 1 %}
+                        <span class="fa fa-chevron-right"></span>
+                        {% endif %}
+                        </a>
+                    </td>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                </tr>
+                </thead><!-- -->
+
+                <tbody><!-- -->
+                {% for ortholog_id, ortholog_info in o_md.items %}
+                {% with lastrow=forloop.last %}
+                <tr>
+                    <td><span data-toggle="tooltip_right" data-html=false data-title="{{ortholog_info.o_sciname}}">{{ ortholog_info.o_species }}</span>
+                    </td>
+                    {% for gene, geneinfo in ortholog_info.o_genes.items %}
+                    {% for infotype, genetype in geneinfo.items %}
+                    {% if genetype == 'blank' %}
+                    <td></td>
+                    {% elif infotype == 'genenumber' %}
+                    <td>
+                        <a href="/oma/synteny/{{ geneinfo.entryid }}/{% if geneinfo.o_type == 'not found' %}{{ windows }}{% else %}{{ geneinfo.o_type.0 }}{% endif %}/{{ windows }}/"
+                           class="btn btn-default btn-synteny cursor_wait
+                                {% for entry_ortholog in geneinfo.o_type %}
+                                btn-{{ entry_ortholog }}
+                                {% endfor %}"
+                           data-toggle="{% if lastrow %}tooltip_top{% else %}tooltip{% endif %}"
+                           data-title="{% comment %} {% include 'includes/synteny_xref.html' with eNr=geneinfo.entryid %} {% endcomment %}" >
+                        {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir == -1 %}
+                        <span class="fa fa-chevron-left"></span>
+                        {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir == 1 %}
+                        <span class="fa fa-chevron-left"></span>
+                        {% endif %}
+                        {{ genetype }}
+                        {% if md.entry_dir == ortholog_info.row_dir and geneinfo.dir == 1 %}
+                        <span class="fa fa-chevron-right"></span>
+                        {% elif md.entry_dir != ortholog_info.row_dir and geneinfo.dir == -1 %}
+                        <span class="fa fa-chevron-right"></span>
+                        {% endif %}
+                        </span>
+                        </a>
+                    </td>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                </tr>
+                {% endwith %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div><!-- .twotables -->
+    </div><!-- .card-body -->
+</div><!-- .card -->
+{% endblock contentTab %}

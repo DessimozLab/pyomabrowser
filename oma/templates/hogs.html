@@ -1,4 +1,4 @@
-{% extends "seqCV.html" %}
+{% extends "base_hog.html" %}
 {% load staticfiles %}
 
 {% block title %}OMA: Hierarchical Orthologous Groups for {{ entry.omaid }}{% endblock %}
@@ -28,7 +28,7 @@
 {% if levels %}
 <ol class="breadcrumb">
 {% for lev in levels %}
-<li {% ifequal lev level %}class="active" {%endifequal%}><a href="{%url 'hogs' entry.omaid lev %}">{{lev}}</a></li>
+<li class="breadcrumb-item{% ifequal lev level %} active{%endifequal%}"><a href="{%url 'hogs' entry.omaid lev %}">{{lev}}</a></li>
 {% endfor %}
 </ol>
 {% else %}

@@ -1,0 +1,52 @@
+<!-- Sidebar / menu -->
+
+<div id="sidebar-container" class="col-sm-12 col-md-3 genome full-height" > <!-- #sidebar-container -->
+
+<button href="#accordion" class="btn btn-primary d-md-none tn-lg btn-block" data-toggle="collapse">Select a tab <i class="fa chevron_alias" aria-hidden="true"> </i> </button>
+
+
+    <div class="" id="accordion">
+
+
+            <div  class="menu-tab col-6 col-sm-12 {% if tab == 'information' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'information' %}
+              onclick="window.location='{% url 'genome_info' genome.uniprot_species_code %}'" {%endif%}
+              >
+
+            <span class="">
+                <a href="{% url 'genome_info' genome.uniprot_species_code %}" >Information</a>
+            </span>
+        </div>
+
+            <div  class="menu-tab col-6 col-sm-12 {% if tab == 'genes' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'genes' %}
+              onclick="window.location='{% url 'genome_genes' genome.uniprot_species_code %}'" {%endif%}
+              >
+
+            <span class="">
+                <a href="{% url 'genome_genes' genome.uniprot_species_code %}" >List genes</a>
+            </span>
+        </div>
+
+            <div  class="menu-tab col-6 col-sm-12 {% if tab == 'closest' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'closest' %}
+              onclick="window.location='{% url 'genome_closest' genome.uniprot_species_code %}'" {%endif%}
+              >
+
+            <span class="">
+                <a href="{% url 'genome_closest' genome.uniprot_species_code %}" >Closest species</a>
+            </span>
+        </div>
+
+            <div  class="menu-tab col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'synteny' %}
+              onclick="window.location='{% url 'genome_synteny' genome.uniprot_species_code %}'" {%endif%}
+              >
+
+            <span class="">
+                <a href="{% url 'genome_synteny' genome.uniprot_species_code %}" >Synteny</a>
+            </span>
+        </div>
+ </div>
+
+    </div> <!-- #sidebar-container -->

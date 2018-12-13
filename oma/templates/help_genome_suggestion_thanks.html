@@ -1,0 +1,24 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}Suggesting Genome for OMA{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<h1 class="text-center">Suggesting a new or updated genome for OMA</h1>
+					<div class="well well-sm entete"></div>
+                    <p>Thank you for your suggestion. You should receive a copy of your suggestion by mail.
+                        We might contact you to clarify some further aspects of your suggestion.</p>
+                    <p>Are you on Twitter? Please <a href="https://twitter.com/intent/user?screen_name=OMABrowser">follow us</a>
+                        to not missing out on important updates.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

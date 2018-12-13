@@ -1,0 +1,24 @@
+{% extends  "dlOMA_current.html" %}
+{% load staticfiles %}
+
+{% block titleTab %}OMA orthology database: Archives {{ release.name }} {% endblock %}
+{% block titleDownload %}Archives {{ release.name }} {% endblock %}
+{% block yearPicker %}
+<strong>OMA Browser Archive</strong>: the download files form the previous releases of OMA are still available:
+</p>
+<div class="text-center">
+	<ol class="breadcrumb ">
+        {%  for rel in all_releases %}
+		    <li>{% if rel.id != release.id %}<a href="{% url 'archives' rel.id %}">{% endif %}{{ rel.name }}</a></li>
+        {%  endfor %}
+	</ol>
+</div>
+{% endblock  %}
+
+{% block genomePW %} {% endblock genomePW %}
+
+{% block Orthology %}{% if release.id %} {{ block.super }} {% endif %}{% endblock  %}
+{% block Sequences %}{% if release.id %} {{ block.super }}{% endif %}{% endblock  %}
+{% block Mapping %}{% if release.id %} {{ block.super }} {% endif %}{% endblock  %}
+{% block Other %}{% if release.id %} {{ block.super }} {% endif %}{% endblock  %}
+{% block History %}{% if release.id %} {{ block.super }} {% endif %}{% endblock  %}

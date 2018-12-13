@@ -1,0 +1,44 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+
+{% block title %}OMA orthology database: SOAP API{% endblock %}
+{% block meta_description %}Explaination how to access the OMA data through our SOAP API.{% endblock %}
+{% block content %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<h1 class="text-center">API: SOAP </h1>
+					<h2 class="text-center grey"> Simple Object Access Protocol</h2>
+					<div class="well well-sm entete"></div>
+					<br>
+                    <div class="alert alert-danger" role="alert">
+                        The SOAP API is deprecated. We will soon terminate this service. Please use instead the
+                        <a href="{% url 'api-docs:docs-index' %}">REST API</a>.
+                    </div>
+					<div class="panel panel-default">
+						<div class="panel-body">
+
+							<p>
+								The OMA Browser API lets you integrate orthologs predictions from the OMA algorithm into your own programs or web services. The specification of the SOAP interface can be found here: <a href='http://omabrowser.org/omabrowser.wsdl' class='comment-text'>http://omabrowser.org/omabrowser.wsdl</a>
+							</p>
+
+							<p>
+                            An easy way to explore the SOAP functionality of the OMA Browser is using a generic SOAP client. Try for example 
+                            <a href="http://www.soapclient.com/soapclient?template=/clientform.html&fn=soapform&SoapTemplate=none&SoapWSDL=http://omabrowser.org/omabrowser.wsdl">this web based client</a>.
+							</p>
+
+							<p>
+                            You can download example clients written in <a href="/python-client.py">Python code</a> and <a href="perl-client.pl">Perl code</a> to see demonstrations of the functionality of the OMA SOAP API.             
+							</p>
+						</div>
+					</div>  
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock content %}

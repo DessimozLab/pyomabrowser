@@ -1,0 +1,12 @@
+{% extends "base_entry.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA orthology database: Pairwise Orthologs for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ vps|length }} pairwise
+    orthologs{% endblock %}
+
+{% block contentTab %}
+
+    {% include "includes/groupTable.html" %}
+
+{% endblock contentTab %}

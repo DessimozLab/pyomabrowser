@@ -16,6 +16,11 @@
 
     var sprintf = $.fn.bootstrapTable.utils.sprintf;
 
+    var container_filter_taxon = $("#filter-taxon-container");
+
+    var that;
+
+
     // HELPER FUNCTIONS
 
     var get_item_by_id = function(array, value, type){
@@ -81,31 +86,36 @@
 
     var showAvdSearch = function (custom_item, searchTitle, searchText, that) {
 
-        if (!$("#avdSearchModal" + "_" + that.options.idTable).hasClass("modal")) {
+        if (!$("#avdSearchModal_" + that.options.idTable).hasClass("modal")) {
 
-            var vModal = sprintf("<div id=\"avdSearchModal%s\"  class=\"modal fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"mySmallModalLabel\" aria-hidden=\"true\">", "_" + that.options.idTable);
-            vModal += "<div class=\"modal-dialog modal-lg\">";
-            vModal += " <div class=\"modal-content\">";
-            vModal += "  <div class=\"modal-header\">";
-            vModal += "   <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\" >&times;</button>";
-            vModal += sprintf('  <h4 class=\"modal-title\"><b>Custom filter:</b> <a href="#" id="username" data-type="text" data-url="" data-pk="1"  data-title="Enter username">%s</a> <small>(click on text field to rename this filter)</small> </h4>  <br>  ', custom_item.name);
+            var modal_html = [] ;
 
-            vModal += ' <button type="button" class="btn "  id="reset_tree" > Click here to reset the tree selection. </button>  ';
-            vModal += ' <button type="button" class="btn btn-danger  "  id="delete_tree" > Click here to delete this custom filter. </button>';
+            modal_html.push(' <div id="avdSearchModal_'+that.options.idTable+'" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">');
+            modal_html.push('<div class="modal-dialog modal-lg">');
+            modal_html.push('<div class="modal-content">');
 
-            vModal += "  </div>";
-            vModal += "  <div class=\"modal-body modal-body-custom\">";
-            vModal += sprintf("   <div class=\"container-fluid\" id=\"avdSearchModalContent%s\" style=\"padding-right: 0px;padding-left: 0px;\" >", "_" + that.options.idTable);
-            vModal += "   </div>";
-            vModal += "  </div>";
-            vModal += "  </div>";
-            vModal += " </div>";
-            vModal += "</div>";
+            // HEADER
+            modal_html.push('<div class="modal-header">');
+            modal_html.push('<h4 class="modal-title"><b>Custom filter:</b> <a href="#" id="username" data-type="text" data-url="" data-pk="1"  data-title="Enter username">'+custom_item.name+'</a> <small>(click on text field to rename this filter)</small> </h4>  <br>  ');
+            modal_html.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true" >&times;</button>');
+            modal_html.push('</div>');
 
-            $("body").append($(vModal));
+            // CONTENT
+            modal_html.push('<div class="modal-body modal-body-custom">');
+            modal_html.push('<button type="button" class="btn "  id="reset_tree" > Click here to reset the tree selection. </button>');
+            modal_html.push('<button type="button" class="btn btn-danger  "  id="delete_tree" > Click here to delete this custom filter. </button>');
+            modal_html.push(sprintf("   <div class=\"container-fluid\" id=\"avdSearchModalContent%s\" style=\"padding-right: 0px;padding-left: 0px;\" >", "_" + that.options.idTable));
+            modal_html.push('</div>');
+            modal_html.push('</div>');
+            modal_html.push('</div>');
+            modal_html.push('</div>');
+            modal_html.push('</div>');
+
+
+            $('body').append(modal_html.join(''));
 
             // ADD PHYLO.IO DOM ELEMENT
-            var phyloContent = add_phyloioDOM(), jmodal = $('#avdSearchModalContent' + "_" + that.options.idTable);
+            var phyloContent = add_phyloioDOM(), jmodal = $('#avdSearchModalContent_' + that.options.idTable);
 
             jmodal.append(phyloContent.join(''));
 
@@ -115,7 +125,7 @@
             that.custom_filter_search = true;
             that.onColumntaxonFilter(that.item_to_update.Uid);
 
-            jmodal.append(sprintf('<button type="button" id="btnCloseAvd%s" class="btn btn-default pull-right" >%s</button>', "_" + that.options.idTable, searchText));
+            jmodal.append(sprintf('<button type="button" id="btnCloseAvd%s" class="btn btn-default float-right" >%s</button>', "_" + that.options.idTable, searchText));
 
             $("#btnCloseAvd" + "_" + that.options.idTable).click(function () {
                 that.custom_filter_search = true;
@@ -123,13 +133,13 @@
                 $("#avdSearchModal" + "_" + that.options.idTable).modal('hide');
             });
 
-            $('#username').editable();
+            $('#username').editable({mode: 'inline',});
 
             $('#username').on('save', function(e, params) {
                 that.item_to_update.name = params.newValue;
                 localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
-                var span = $('#li_custom_' + that.item_to_update.Uid).find('span[class="spanli"]')[0];
-                span.textContent = that.item_to_update.name;
+                $('#custom_' + that.item_to_update.Uid)[0].nextSibling.textContent = that.item_to_update.name;
+
             });
 
 
@@ -146,7 +156,7 @@
                 localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
 
                 // REMOVE CORRESPONDING LI
-                document.getElementById('li_custom_' + that.item_to_update.Uid).parentElement.remove();
+                document.getElementById('custom_' + that.item_to_update.Uid).parentElement.remove();
 
                 // RESET FILTERING
                 that.item_to_update = null;
@@ -258,6 +268,34 @@
         return htmlPhylo;
     }
 
+    // UTILS FUNCTIONS
+
+    var add_input_div= function( id_input, label_text, custom ){
+
+        if (!custom){
+
+        return '<div> <input type="checkbox" class="form-check-input checkbox_taxa" id="'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+'</label> </div>';
+        }
+
+        else {
+           return '<div> <input type="checkbox" class="form-check-input checkbox_taxa" id="custom_'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+' <a href="javascript:void(0);" class="edit" id="edit_' + id_input + '">(edit)</a> </label> </div>';
+        }
+    };
+
+    var click_input = function (event) {
+
+                    container_filter_taxon.find('input').not(this).prop('checked', false);
+                    that.onColumntaxonFilter($(event.currentTarget)[0].id);
+            }
+
+    var click_edit = function (event) {
+
+                    // GET THE RELATED CUSTOM ITEM
+                    var liid = $(this)[0].id.replace(/^edit_/, '');
+                    var ci = get_item_by_id(that.tax_converter['custom'], liid, 'Uid');
+                    showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+            }
+
      // EXTENSION OF BOOTSTRAPTABLE LIB
 
     $.extend($.fn.bootstrapTable.defaults, {
@@ -270,7 +308,7 @@
     });
 
     $.extend($.fn.bootstrapTable.defaults.icons, {
-        taxonFilterIcon: 'glyphicon-filter'
+        taxonFilterIcon: 'fa-filter'
     });
 
     $.extend($.fn.bootstrapTable.Constructor.EVENTS, {
@@ -285,7 +323,8 @@
             return "Apply";
         },
         taxon_to_show: function () {
-            return ['Vertebrata', 'Mammalia', 'Neoptera', 'Viridiplantae', 'Fungi'];
+            //return ['Vertebrata', 'Mammalia', 'Neoptera', 'Viridiplantae', 'Fungi'];
+            return ['Dikarya', 'Saccharomycetaceae', 'Fungi', 'Viridiplantae', 'Fungi', 'Ascomycota', 'Eukaryota'];
         }
     });
 
@@ -297,159 +336,114 @@
         _initSearch = BootstrapTable.prototype.initSearch;
 
     BootstrapTable.prototype.initToolbar = function () {
-        _initToolbar.apply(this, Array.prototype.slice.apply(arguments));
+            _initToolbar.apply(this, Array.prototype.slice.apply(arguments));
 
-        if (!this.options.search) {
-            return;
-        }
-
-        if (!this.options.taxonFilter) {
-            return;
-        }
-
-        if (!this.options.urlSpeciesTree) {
-            return;
-        }
-
-        // List of inputted taxon name (not checked vor validity)
-        this.list_taxon_accepted = this.options.taxon_to_show();
-
-        // SEARCH MODE TYPE
-        this.multi_species_search = false;
-        this.custom_filter_search = false;
-
-        // INPUTTED TAXON NAME WITH THEY SPECIES LIST (CHECK FOR VALIDITY)
-        this.tax_converter = build_tax_to_species_converter(this.options.urlSpeciesTree, this.list_taxon_accepted);
-
-        // ADD CUSTOM FILTERING FROM LOCAL STORAGE
-        var local_custom = localStorage.getItem('custom_taxon_filter');
-        this.tax_converter['custom'] = (JSON.parse(local_custom) === null) ? [] : JSON.parse(local_custom);
-
-        var that = this,
-            html = [];
-
-        //  ADD DROPDOWN MENU
-        html.push(sprintf('<div class="dropdown columns columns-%s btn-group pull-%s" role="group">', this.options.buttonsAlign, this.options.buttonsAlign));
-        html.push(sprintf('<button class="btn btn-default%s dropdown-toggle' + '" type="button" name="taxonFilter" aria-label="advanced search" title="%s" data-toggle="dropdown">', that.options.iconSize === undefined ? '' : ' btn-' + that.options.iconSize, that.options.formattaxonFilter()));
-        html.push(sprintf('<i class="%s %s"></i>', that.options.iconsPrefix, that.options.icons.taxonFilterIcon));
-        html.push('<span class="caret"></span>');
-        html.push('</button>');
-        html.push('<ul class="dropdown-menu" id="ul_custom" >');
-
-        //  ADD LI FOR ALL
-        html.push('<li role="presentation" class="dropdown-header li_filter">DEFAULT</li>');
-        html.push(' <li><a  class="li_filtertax_default"  id="all">&emsp; All <span id="li_ok_all" class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span> </a></li> ');
-
-        //  ADD LI FOR EACH DESIRED TAXA
-        for (var tax in this.tax_converter) {
-            if (tax !== 'custom') {
-                html.push(' <li><a  class="li_filtertax_default" id="' + tax + '"> &emsp; ' + tax + ' <span id="li_ok_' + tax + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ');
+            if (!this.options.search) {
+                return;
             }
-        }
 
-        // ADD SEPARATOR AND LI FOR CUSTOM
-        html.push(' <li class="divider"></li> ');
-        html.push('<li role="presentation" class="dropdown-header li_filter">CUSTOM</li>');
+            if (!this.options.taxonFilter) {
+                return;
+            }
 
-        //  ADD LI FOR EACH CUSTOM FILTER
-        for (var tax in this.tax_converter['custom']) {
-            var custom_item = this.tax_converter['custom'][tax];
-            html.push(' <li><a  class="li_filtertax_custom" id="li_custom_' + custom_item.Uid + '">&emsp;  <span class="spanli">' + custom_item.name + ' </span> <span id="li_ok_' + custom_item.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a></li> ')
-        }
-        html.push(' <li><a  class="li_filtertax"  id="li_add"> <h6 id="li_h6_add">Add custom filter</h6> </a> </li> ');
-        html.push(' </ul>');
-        html.push('</div>');
+            if (!this.options.urlSpeciesTree) {
+                return;
+            }
 
-        that.$toolbar.prepend(html.join(''));
+            // List of inputted taxon name (not checked vor validity)
+            this.list_taxon_accepted = this.options.taxon_to_show();
 
-        //  ADD LI CLICK ACTION
-        that.$toolbar.find('a[class="li_filtertax_default"]')
-            .off('click').on('click', function (event) {
+            // SEARCH MODE TYPE
+            this.multi_species_search = false;
+            this.custom_filter_search = false;
 
-            $('[id^="li_ok_"]').toggleClass('hidden', true);
-            $(this).find("span").toggleClass('hidden', false);
-            that.onColumntaxonFilter($(event.currentTarget)[0].id);
+            // INPUTTED TAXON NAME WITH THEY SPECIES LIST (CHECK FOR VALIDITY)
+            this.tax_converter = build_tax_to_species_converter(this.options.urlSpeciesTree, this.list_taxon_accepted);
 
-        });
+            // ADD CUSTOM FILTERING FROM LOCAL STORAGE
+            var local_custom = localStorage.getItem('custom_taxon_filter');
+            this.tax_converter['custom'] = (JSON.parse(local_custom) === null) ? [] : JSON.parse(local_custom);
 
-        that.$toolbar.find('a[class="li_filtertax_custom"]')
-            .off('click').on('click', function (event) {
+            that = this;
+            var html = [];
 
-            // HIDE ALL OK ICON ON LI
-            $('[id^="li_ok_"]').toggleClass('hidden', true);
+            //  ADD CHECKBOX MENU
 
-            // GET THE RELATED CUSTOM ITEM
-            var liid = $(this)[0].id.replace(/^li_custom_/, '');
-            var ci = get_item_by_id(that.tax_converter['custom'], liid, 'Uid');
+            html.push('<h5>Filter by Taxon:</h5>');
+            html.push('<div class="form-check pl-4">');
 
-            // SHOW OK ICON FOR THIS LI
-            $(this).find('[id^="li_ok_"]').toggleClass('hidden', false);
+            //  ADD CHECKBOX FOR EACH DEFAULT TAXA
+            html.push('<h6 class="float-right">Default Taxon</h6> <br>');
+             html.push(add_input_div( 'all', 'All Taxon', false ));
 
-            showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
-        });
+            for (var tax in this.tax_converter) {
+                if (tax !== 'custom') {
+                    html.push(add_input_div( tax, tax, false));
+                }
+            }
 
-        //  ADD RESET BUTTON ACTION
-        d3.select("#reset_taxon_filter").on('click', function () {
-            $('[id^="li_ok_"]').toggleClass('hidden', true);
-            $('[id^="li_ok_all"]').toggleClass('hidden', false);
-            that.onColumntaxonFilter('all');
-        })
+            //  ADD CHECKBOX FOR EACH CUSTOM TAXA
+            html.push('<h6 class="float-right" >Custom Filter</h6> <br>');
+            for (var tax in this.tax_converter['custom']) {
+                var custom_item = this.tax_converter['custom'][tax];
+                html.push(add_input_div(custom_item.Uid, custom_item.name, true ));
+            }
+            html.push('<div id="div_add" > <a  class="li_filtertax"  id="li_add"> <h6 id="li_h6_add">Add custom filter</h6> </a> </div>');
+            html.push('</div>');
 
-        //  ADD NEW CUSTOM FILTER
-        d3.select("#li_add").on('click', function () {
+            container_filter_taxon.prepend(html.join(''));
+            container_filter_taxon.find('input[id=all]').prop('checked', true);
 
-            // create new object in the local storage
-            // FIND THE GREATER UID AND ADD PLUS ONE FOR NEW UNIQUE ID
-            var idMax = (that.tax_converter['custom'].length <= 0) ? 0 : that.tax_converter['custom'].reduce(function (l, e) {
-                return e.Uid > l.Uid ? e : l;
-            }).Uid;
-            idMax = idMax + 1;
+            //  ADD BOX  ACTION
+            container_filter_taxon.find('input')
+                .off('click').on('click', click_input );
 
-            // INITIATE EMPTY CUSTOM FILTER INTO CUSTOM AND UPDATE LOCAL STORAGE
-            var empty_filter = {Uid: idMax, name: 'Unname Item', lsp: []};
-            that.tax_converter['custom'].push(empty_filter);
-            localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
+            // ADD EDIT CUSTOM ACTION
+            container_filter_taxon.find('a[class=edit]')
+                .off('click').on('click', click_edit );
 
-            // add the li in the list after last customfilter li
-            var custom_ul = document.getElementById("ul_custom");
-            var lis = custom_ul.getElementsByTagName("li");
-            var li_add = lis[lis.length - 1];
+            //  ADD RESET BUTTON ACTION
+            d3.select("#reset_taxon_filter").on('click', function () {
+                container_filter_taxon.find('input').prop('checked', false);
+                that.onColumntaxonFilter('all');
+                container_filter_taxon.find('input[id=all]').prop('checked', true);
+            })
 
-            var new_item = document.createElement('li');
-            new_item.innerHTML = ' <a  class="li_filtertax_custom" id="li_custom_' + empty_filter.Uid + '"> &emsp;  <span class="spanli">' + empty_filter.name + ' </span><span id="li_ok_' + empty_filter.Uid + '" class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span> </a> ';
+            //  ADD NEW CUSTOM FILTER
+            d3.select("#li_add").on('click', function () {
 
-            custom_ul.insertBefore(new_item, li_add);
+                // create new object in the local storage
+                // FIND THE GREATER UID AND ADD PLUS ONE FOR NEW UNIQUE ID
+                var idMax = (that.tax_converter['custom'].length <= 0) ? 0 : that.tax_converter['custom'].reduce(function (l, e) {
+                    return e.Uid > l.Uid ? e : l;
+                }).Uid;
+                idMax = idMax + 1;
 
-            // ADD CLICK EVENT TO NEWLY CREATED LI
-            $(new_item).off('click').on('click', function () {
+                // INITIATE EMPTY CUSTOM FILTER INTO CUSTOM AND UPDATE LOCAL STORAGE
+                var empty_filter = {Uid: idMax, name: 'Unnamed Item', lsp: []};
+                that.tax_converter['custom'].push(empty_filter);
+                localStorage.setItem('custom_taxon_filter', JSON.stringify(that.tax_converter['custom']));
 
-            // HIDE ALL OK ICON ON LI
-            $('[id^="li_ok_"]').toggleClass('hidden', true);
+                // add the new item after last customfilter
+                var new_item = document.createElement('div');
+                new_item.innerHTML = ' <input type="checkbox" class="form-check-input checkbox_taxa" id="custom_' + empty_filter.Uid + '" <label class="form-check-label" for="custom_' + empty_filter.Uid + '">' + empty_filter.name + ' <a href="javascript:void(0);" class="edit" id="edit_' + empty_filter.Uid + '">(edit)</a></label>';
 
-            // GET THE RELATED CUSTOM ITEM
-            var ci = get_item_by_id(that.tax_converter['custom'], empty_filter.Uid, 'Uid');
+                $(new_item).insertBefore($("#div_add")[0]);
 
-            // SHOW OK ICON FOR THIS LI
-            $(new_item).find('[id^="li_ok_"]').toggleClass('hidden', false);
+                // ADD CLICK EVENT TO NEWLY CREATED LI
+                $(new_item).off('click').on('click', click_input);
 
-            showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
-        });
+                // ADD EDIT CUSTOM ACTION
+                $(new_item).find('a[class=edit]').off('click').on('click', click_edit);
 
-            // HIDE ALL OK ICON ON LI
-            $('[id^="li_ok_"]').toggleClass('hidden', true);
-            // SHOW OK ICON FOR THIS LI
-            $(new_item).find('[id^="li_ok_"]').toggleClass('hidden', false);
+                $(new_item).trigger( "click");
 
+                var ci = get_item_by_id(that.tax_converter['custom'], empty_filter.Uid, 'Uid');
+                showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
 
-            // launch the modal
-            showAvdSearch(empty_filter, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
+                });
 
-        });
-
-        //turn EDITABLE FIELD to inline mode
-        $.fn.editable.defaults.mode = 'inline';
-
-    };
+        };
 
     BootstrapTable.prototype.load = function (data) {
         _load.apply(this, Array.prototype.slice.apply(arguments));

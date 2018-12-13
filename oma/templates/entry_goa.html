@@ -1,0 +1,52 @@
+{% extends "base_entry.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA orthology database: GO Annotations for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} OMA stores the following information about the gene/protein.{% endblock %}
+{% block contentTab %}
+
+{% include "includes/func_desc.html" %}
+
+
+
+<div class="card">
+    <div class="card-header">
+        <div class="float-left">
+            <h3 class="card-title">Gene Ontology</h3>
+        </div>
+    </div>
+    <div id="ontology-panel" class="card-body">
+        <div id="loader-ontology"><img src="{% static "image/loading.gif"%}" alt="loading GO annotations..."></div>
+    </div>
+</div>
+
+    <script>
+    (function(){
+        $.getJSON("/api/protein/{{ entry.entry_nr }}/ontology/", function(data){
+           _.forEach(_.groupBy(data, "aspect"), function(annos, aspect){
+               var tab = ['<table class="table table-hover"><thead><tr><th colspan="2">',
+                   '<strong>'+ aspect + '</strong></th></tr>',
+                   '<tr><th class="subHead">GO term</th><th class="subHead">Evidence and reference</th></tr>',
+                   '</thead><tbody>'];
+               _.forEach(_.groupBy(annos, "GO_term"), function(term_annos, term){
+                   tab.push('<tr><td>' + term_annos[0].name +
+                       ' (' + xref_format.go_annotation_url(term_annos[0]) + ')</td>', '<td>');
+                   _.forEach(_.groupBy(term_annos, 'evidence'), function(evi_anno, evi){
+                       tab.push(xref_format.go_evi_url(evi));
+                       var ref=[];
+                       evi_anno.forEach(function(anno){
+                           ref.push(xref_format.go_ref_url(anno.reference));
+                       });
+                       tab.push(ref.join(', '), '<br>');
+                   });
+                   tab.push('</td></tr>');
+               });
+               $('#ontology-panel').append(tab.join("\n"))
+           });
+        });
+        $("#loader-ontology").hide();
+    })();
+</script>
+
+
+{% endblock contentTab %}
