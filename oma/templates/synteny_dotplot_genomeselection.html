@@ -292,10 +292,11 @@ div.tooltip {
         }
 
         function filterChromosomesByCount(data, filterCount){
+            var MIN_NR_PROTEINS_PER_CHR;
             if(isInt(filterCount)){
-                var MIN_NR_PROTEINS_PER_CHR = filterCount;
+                MIN_NR_PROTEINS_PER_CHR = filterCount;
             } else {
-                var MIN_NR_PROTEINS_PER_CHR = 10;
+                MIN_NR_PROTEINS_PER_CHR = 10;
             }
 
             var tmpData = [];
@@ -436,11 +437,6 @@ div.tooltip {
             // Clear any previously set timer before setting a fresh one
             window.clearTimeout($(this).data("timeout"));
             $(this).data("timeout", setTimeout(function () {
-
-                if (genome_1 === genome_2){
-                    changeMessage("You cannot select twice the same genome.", false);
-                    return false;
-                }
 
                 var clickTimeout = null;
 
@@ -698,7 +694,7 @@ div.tooltip {
                             if (chromosomes1[d] && typeof chromosomes1[d].id !== 'undefined') {
                                 return chromosomes1[d].id;
                             }
-                        })
+                        });
 
                         var xAxis = svg.append("g")
                             .attr("class", "x-axis")
