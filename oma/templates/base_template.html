@@ -24,15 +24,14 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"
             integrity="sha256-E/V4cWE4qvAeO5MOhjtGtqDzPndRO1LBk8lJ/PR7CA4=" crossorigin="anonymous"></script>
     <script>var static_root = "{% static "" %}";</script>
-    <script src="{% static "js/oma.js" %}"></script>
 
-<!-- AA: not sure which of those libs will still be needed. I suspect autocomplete.min.js for sure, rest probably not
+
+<!-- AA: not sure which of those libs will still be needed. I suspect autocomplete.min.js for sure, rest probably not  -->
 <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-<!-- Bootstrap
 <script src="{% static "js/jquery.js" %}"></script>
-<script src="{% static "js/jquery.autocomplete.min.js" %}"></script> -->
-
-    {% block js_hook %}{% endblock %}
+<script src="{% static "js/jquery.autocomplete.min.js" %}"></script>
+<script src="{% static "js/oma.js" %}"></script>
+{% block js_hook %}{% endblock %}
 </head>
 
 <body class="landing">
