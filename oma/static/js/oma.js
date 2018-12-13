@@ -25,11 +25,25 @@ $( document ).ready(function() {
         $('#sideNavMobile').toggle();
         $('#oma-details-sideNav-mobile').toggleClass('sideNavMobile-opened');
     });
+
+    sideBarActivation();
 });
 
-if ( $(window).width() < 769) {
-    $('.oma-mobile-accordion').click(function () {
-        $(this).next('.oma-card-content').slideToggle('fast').siblings('.oma-card-content:visible').slideUp('fast');
-        $(this).toggleClass("active").siblings().removeClass("active");
-    });
+$(window).resize(sideBarActivation);
+
+function sideBarActivation() {
+
+
+    if ( $(window).width() < 769) {
+        $('.oma-mobile-accordion').click(function () {
+            $(this).next('.oma-card-content').slideToggle('fast').siblings('.oma-card-content:visible').slideUp('fast');
+            $(this).toggleClass("active").siblings().removeClass("active");
+        });
+    } else {
+        // remove click event from the card header
+        $('.oma-mobile-accordion').off( "click");
+        // show every cards content
+        $('.oma-card-content').show();
+    }
+
 }
