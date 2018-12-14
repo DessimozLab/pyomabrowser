@@ -21,6 +21,8 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^pairs/(?P<genome_id1>\w+)/(?P<genome_id2>\w+)/$',
         views.PairwiseRelationAPIView.as_view(), name='pairs'),
+    url(r'^pairs/(?P<genome_id1>\w+)/(?P<genome_id2>\w+)/minimal/$',
+        views.pairwise_relations_minimal_data, name="minimal-pairs"),
     url(r'^sequence/$', views.IdentifiySequenceAPIView.as_view(), name='sequence'),
     url(r'^function/$', views.PropagateFunctionAPIView.as_view(), name='function-propagation'),
     url(r'^schema/$', get_schema_view(title="OMA REST API")),
