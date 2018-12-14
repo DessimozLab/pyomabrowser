@@ -83,13 +83,6 @@ class ExploreMenuTest(FunctionalTest):
         g1_input = self.browser.find_element_by_id("g1_name")
         self.input_in_autocomplete_and_select(g1_input, 'Homo', 'Homo sapiens')
 
-        # we select chromosome 2
-        self.wait_for(
-            lambda: self.assertIsNotNone(
-                self.browser.find_element_by_css_selector('#selectchr1 option'))
-        )
-        self.browser.find_element_by_xpath("//select[@id='selectchr1']//option[text()='2']").click()
-
         # as second genome we select Mus musculus by typing Mus and selecting from dropdown
         g2_input = self.browser.find_element_by_id("g2_name")
         self.input_in_autocomplete_and_select(g2_input, 'Mus', 'Mus musculus')
@@ -97,7 +90,17 @@ class ExploreMenuTest(FunctionalTest):
         # we select chromosome 2
         self.wait_for(
             lambda: self.assertIsNotNone(
-                self.browser.find_element_by_css_selector('#selectchr2 option'))
+                self.browser.find_element_by_css_selector('#selectchr1 option')),
+            timeout=10,
+        )
+        time.sleep(2)
+        self.browser.find_element_by_xpath("//select[@id='selectchr1']//option[text()='2']").click()
+
+        # we select chromosome 2
+        self.wait_for(
+            lambda: self.assertIsNotNone(
+                self.browser.find_element_by_css_selector('#selectchr2 option')),
+            timeout=10
         )
         self.browser.find_element_by_xpath("//select[@id='selectchr2']//option[text()='2']").click()
         # let's submit this pair (HUMAN/2 vs MOUSE/2) and see the dotplot
