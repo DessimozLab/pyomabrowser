@@ -25,8 +25,18 @@ from pyoma.browser import models, db
 import logging
 
 from collections import Counter
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import detail_route, list_route, api_view
+
 logger = logging.getLogger(__name__)
+
+
+def resolve_protein_from_id_or_raise(id):
+    try:
+        return utils.id_resolver.resolve(id)
+    except db.InvalidId:
+        raise NotFound("requested id '{}' is unknown".format(id))
+    except db.AmbiguousID:
+        raise NotFound("requested id '{}' is not unique".format(id))
 
 
 # Create your views here.
@@ -73,10 +83,7 @@ class ProteinEntryViewSet(ViewSet):
         """
 
         # Load the entry and its domains, before forming the JSON to draw client-side.
-        try:
-            entry_nr = utils.id_resolver.resolve(entry_id)
-        except db.InvalidId:
-            raise NotFound('requested id is unknown')
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
         serializer = serializers.ProteinEntryDetailSerializer(
             instance=protein, context={'request': request})
@@ -95,7 +102,7 @@ class ProteinEntryViewSet(ViewSet):
                               for a specific relationship type only
         """
         rel_type = request.query_params.get('rel_type', None)
-        p_entry_nr = utils.id_resolver.resolve(entry_id)
+        p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
         data = utils.db.get_vpairs(int(p_entry_nr))
         content = []
         for row in data:
@@ -117,7 +124,7 @@ class ProteinEntryViewSet(ViewSet):
 
         :param entry_id: an unique identifier for a protein - either its
             entry number, omaid or canonical id."""
-        entry_nr = utils.id_resolver.resolve(entry_id)
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
         if not protein.genome.is_polyploid:
             raise NotFound("query protein does not belong to a polyploid genome")
@@ -130,7 +137,6 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.ProteinEntrySerializer(instance=homoeologs, many=True, context={'request': request})
         return Response(serializer.data)
 
-
     @detail_route()
     def ontology(self, request, entry_id=None, format=None):
         """Ontology information available for a protein.
@@ -138,7 +144,7 @@ class ProteinEntryViewSet(ViewSet):
         :param entry_id: an unique identifier for a protein - either it
                          entry number, omaid or its canonical id
         """
-        p_entry_nr = utils.id_resolver.resolve(entry_id)
+        p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
         data = db.Database.get_gene_ontology_annotations(utils.db, int(p_entry_nr))
         ontologies = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
         serializer = serializers.GeneOntologySerializer(instance=ontologies, many=True)
@@ -150,7 +156,7 @@ class ProteinEntryViewSet(ViewSet):
 
         :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
         """
-        entry_nr = utils.id_resolver.resolve(entry_id)
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
         entry = utils.db.entry_by_entry_nr(entry_nr)
         domains = utils.db.get_domains(entry['EntryNr'])
         response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
@@ -163,7 +169,7 @@ class ProteinEntryViewSet(ViewSet):
         :param entry_id: an unique identifier for a protein - either it
                          entry number, omaid or its canonical id
         """
-        entry_nr = utils.id_resolver.resolve(entry_id)
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
         xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
         for ref in xrefs:
             ref['entry_nr'] = entry_nr
@@ -273,14 +279,11 @@ class HOGViewSet(PaginationMixin, ViewSet):
     serializer_class = serializers.ProteinEntrySerializer
 
     def _hog_id_from_entry(self, entry_id):
-        try:
-            entry_nr = utils.id_resolver.resolve(entry_id)
-            protein = utils.ProteinEntry(entry_nr)
-            if len(protein.oma_hog) == 0:
-                raise NotFound("{} is not part of any HOG.".format(entry_id))
-            return protein.oma_hog
-        except db.InvalidId:
-            raise NotFound("{} is an unknown identifier for a protein".format(entry_id))
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
+        protein = utils.ProteinEntry(entry_nr)
+        if len(protein.oma_hog) == 0:
+            raise NotFound("{} is not part of any HOG.".format(entry_id))
+        return protein.oma_hog
 
     def _get_level_and_adjust_hogid_if_needed(self, hog_id):
         level = self.request.query_params.get('level', None)
@@ -298,10 +301,10 @@ class HOGViewSet(PaginationMixin, ViewSet):
     def _identify_lca_hog_id_from_proteins(self, proteins):
         hog_id = os.path.commonprefix([p.oma_hog for p in proteins])
         if hog_id.find('.') >= 0:
-            for k in range(len(hog_id)-1, hog_id.find('.')-1, -1):
+            for k in range(len(hog_id) - 1, hog_id.find('.') - 1, -1):
                 if not (hog_id[k].isdigit() or hog_id[k] == '.'):
                     break
-            hog_id = hog_id[0:k+1]
+            hog_id = hog_id[0:k + 1]
         return hog_id
 
     def list(self, request, format=None):
@@ -356,7 +359,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
         level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
         fam_nr = utils.db.parse_hog_id(hog_id)
         if level is None:
-            levs = frozenset([row['Level'].decode() for row in utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')])
+            levs = frozenset(
+                [row['Level'].decode() for row in utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')])
             if 'LUCA' in levs:
                 level = 'LUCA'
             else:
@@ -440,7 +444,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
         else:
             fam_nr = utils.db.parse_hog_id(hog_id)
             condition = '(Fam == fam_nr) & (ID == hog_id)'
-            levs = frozenset([hog['Level'].decode() for hog in utils.db.get_hdf5_handle().get_node('/HogLevel').where(condition)])
+            levs = frozenset(
+                [hog['Level'].decode() for hog in utils.db.get_hdf5_handle().get_node('/HogLevel').where(condition)])
             members = [utils.ProteinEntry(entry) for entry in utils.db.member_of_hog_id(hog_id)]
             if 'LUCA' in levs:
                 level = 'LUCA'
@@ -621,6 +626,29 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
         return self.paginator.get_paginated_response(serializer.data)
 
 
+@api_view(['GET'])
+def pairwise_relations_minimal_data(request, genome_id1, genome_id2, format=None):
+    """retrieve minimal version of pairs for a genome pair.
+
+    :param genome_id1: an unique identifier for the first genome
+                       - either its ncbi taxon id or the UniProt
+                       species code
+    :param genome_id2: an unique identifier for the second genome
+                       - either its ncbi taxon id or the UniProt
+                       species code"""
+    try:
+        genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id1))
+        genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id2))
+    except db.UnknownSpecies as e:
+        raise NotFound(e)
+    tab_name = 'VPairs' if genome1.uniprot_species_code != genome2.uniprot_species_code else 'within'
+    range2 = genome2.entry_nr_offset + 1, genome2.entry_nr_offset + len(genome2)
+    rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/{}'.format(
+        genome1.uniprot_species_code, tab_name))
+    rels = [[int(row['EntryNr1']), int(row['EntryNr2'])] for row in rel_tab.read_where('(EntryNr2>={0}) & (EntryNr2<={1})'.format(range2[0], range2[1]))]
+    return Response({'pairs': rels})
+
+
 class TaxonomyViewSet(ViewSet):
     lookup_field = 'root_id'
 
@@ -640,12 +668,12 @@ class TaxonomyViewSet(ViewSet):
         """
 
         # e.g. members = YEAST,ASHGO
-        members = request.query_params.get('members', None)  # read as a string
+        members = request.query_params.getlist('members', None)  # read as a string
         type = request.query_params.get('type', None)  # if none, dictionary returned
         collapse = strtobool(request.query_params.get('collapse', 'True'))
         tax_obj = utils.db.tax
-        if members is not None:
-            members = list(map(str.strip, members.split(',')))   # as the query param is passed as a string
+        if members is not None and len(members) > 0:
+            members = [m.strip() for m in itertools.chain.from_iterable(ml.split(',') for ml in members)]   # as the query param is passed as a string
             members_list = []
             if not members[0].isdigit():
                 if all(map(lambda x: len(x) == 5, members)):
@@ -747,7 +775,6 @@ class TaxonomyViewSet(ViewSet):
 
 
 class IdentifiySequenceAPIView(APIView):
-
     def get(self, request, format=None):
         """Identify a protein sequence
 

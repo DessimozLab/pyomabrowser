@@ -272,6 +272,14 @@
 											<a href="{{ download_root }}/oma-close-groups.txt.gz"> <span class="glyphicon glyphicon-download"></span> Text format</a><br>
 										</td>
 									</tr>
+                                    {% if "OmaServer.h5" in existing_download_files %}
+                                        <tr>
+                                            <td class="col-md-6">OMA Browser database (as hdf5)</td>
+                                            <td class="col-md-6">
+                                                <a href="{{ download_root }}/OmaServer.h5"> <span class="glyphicon glyphicon-download"></span> HDF5 pytables</a><br>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
 								</tbody>
 							</table>
 						</div>

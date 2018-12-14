@@ -1017,6 +1017,19 @@ class CurrentView(TemplateView):
     def download_root(self, context):
         return "/All"
 
+    def existing_download_files(self, release):
+        root = os.getenv('DARWIN_BROWSER_SHARE', '')
+        try:
+            download_dir = os.path.join(root, release['id'], "downloads")
+        except KeyError:
+            # expected to happen if no archive release has been selected yet.
+            return []
+
+        if not os.path.isdir(download_dir):
+            logger.warning("Download folder for release {} does not exists ({})".format(release, download_dir))
+            return []
+        return [f for f in os.listdir(download_dir) if os.path.exists(os.path.join(download_dir, f))]
+
     def get_release_data(self, release):
         relname = utils.db.get_release_name()
         m = self._re_rel2name.match(relname)
@@ -1025,7 +1038,7 @@ class CurrentView(TemplateView):
                    'date': "{}{}".format(m.group('month'), m.group('year')),
                    'id': relname}
         else:
-            res = {'relid': 'All.' + relname.replace(' ', ''),
+            res = {'id': 'All.' + relname.replace(' ', ''),
                    'date': relname.replace(' ', ''), 'name': relname}
         return res
 
@@ -1035,6 +1048,7 @@ class CurrentView(TemplateView):
         context['all_releases'] = self._get_all_releases_with_downloads()
         context['release_with_backlinks'] = self._get_previous_releases(context['release'], context['all_releases'])
         context['download_root'] = self.download_root(context)
+        context['existing_download_files'] = self.existing_download_files(context['release'])
         return context
 
 
@@ -1043,7 +1057,7 @@ class ArchiveView(CurrentView):
 
     def get_release_data(self, release):
         res = {}
-        if not release is None:
+        if release is not None:
             res['id'] = release
             res['name'] = self._name_from_release(release)
             res['date'] = res['name'].replace(' ', '')
