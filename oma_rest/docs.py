@@ -56,6 +56,8 @@ class ModifiedSchemaGenerator(schemas.SchemaGenerator):
     def get_path_fields(self, path, method, view):
         method_name = getattr(view, 'action', method.lower())
         method_docstring = getattr(view, method_name, None).__doc__
+        if method_docstring is None:
+            return []
 
         # split docstring in "general part" - "params" - "queryparams"
         params = collections.defaultdict(list)
