@@ -94,7 +94,7 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
                                                      lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     homoeologs = OnlyPolyploidHyperlinkedIdentifyField(view_name='protein-homoeologs',
                                                   lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    ontology = serializers.HyperlinkedIdentityField(view_name='protein-ontology', read_only=True,
+    gene_ontology = serializers.HyperlinkedIdentityField(view_name='protein-gene-ontology', read_only=True,
                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     oma_group_url = OptionalHyperlinkedIdentityField(view_name='group-detail', lookup_field='oma_group',
                                                          lookup_url_kwarg='group_id', nullvalues=[0])
