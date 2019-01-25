@@ -9,7 +9,7 @@
         _default: {cls: 'label-default', display_text: "unknown", tag: "?"}
     };
 
-    exports.format_as_kindom_tag = function (kingdom) {
+    exports.format_as_kingdom_tag = function (kingdom) {
         var cur_case = cases[kingdom] ? cases[kingdom] : cases['_default']
         return '<span class="label ' + cur_case.cls + '"><abbr class="abbrNoUnder" ' +
             'title="' + cur_case.display_text + '">' + cur_case.tag + '</abbr></span>';
@@ -17,6 +17,14 @@
 
     exports.format_sciname = function(value, row) {
         return "<b>" + value.species + "</b> " + value.strain;
+    };
+
+    exports.format_species_code = function(value, row){
+        return '<a href="/cgi-bin/gateway.pl?f=DisplayOS&p1=' + value + '">' + value + "</a>";
+    };
+
+    exports.format_taxonid_as_link = function(value, row){
+        return '<a class="external" href="https://uniprot.org/taxonomy/' + value +'">' + value + "</a>"
     };
 
     exports.format_subgenome = function(value){

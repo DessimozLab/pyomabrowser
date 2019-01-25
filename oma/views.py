@@ -85,6 +85,9 @@ class JsonModelMixin(object):
                 obj_dict[name] = obj
             yield obj_dict
 
+    def as_json(self, iter):
+        return list(self.to_json_dict(iter))
+
 
 class FastaResponseMixin(object):
     """A mixin to generate Fasta response."""
@@ -771,7 +774,7 @@ class Release(TemplateView):
         return ctx
 
 
-class GenomesJson(JsonModelMixin, View):
+class GenomeModelJsonMixin(JsonModelMixin):
     json_fields = {'uniprot_species_code': None,
                    "species_and_strain_as_dict": 'sciname',
                    'ncbi_taxon_id': "ncbi",
@@ -779,6 +782,8 @@ class GenomesJson(JsonModelMixin, View):
                    "nr_entries": "prots", "kingdom": None,
                    "last_modified": None}
 
+
+class GenomesJson(GenomeModelJsonMixin, View):
     def get(self, request, *args, **kwargs):
         genome_key = utils.id_mapper['OMA']._genome_keys
         lg = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_table[utils.db.id_mapper['OMA']._entry_off_keys[e - 1]]) for e in genome_key]
@@ -847,9 +852,6 @@ class EntrySearchJson(JsonModelMixin):
                    'canonicalid': 'xrefid', 'oma_group': None,
                    'hog_family_nr': 'roothog', 'xrefs': None}
 
-    def as_json(self, iter):
-        return list(self.to_json_dict(iter))
-
 
 class Searcher(View):
     _allowed_functions = ['id', 'group', 'sequence', 'species']
@@ -880,12 +882,20 @@ class Searcher(View):
 
     def search_species(self, request, query):
         try:
-            species = utils.db.tax._get_taxids_from_any([query])
-            return redirect('/cgi-bin/gateway.pl?f=DisplayOS&p1={}'.format(species.omaid))
-        except db.AmbiguousID as ambiguous:
-            context = {'query': query,
-                       'data': json.dumps(ambiguous)}
-            return render(request, "disambiguate_species.html", context=context)
+            species = utils.id_mapper['OMA'].identify_genome(query)
+            return redirect('/cgi-bin/gateway.pl?f=DisplayOS&p1={}'
+                            .format(species['UniProtSpeciesCode'].decode()))
+        except db.UnknownSpecies:
+            pass
+        # here we will only end up if species is ambiguous
+        cand_species = utils.id_mapper['OMA'].approx_search_genomes(query)
+        context = {'query': query}
+        if len(cand_species) == 0:
+            context['message'] = 'Could not find any species that is similar to your query'
+        else:
+            context['data'] = json.dumps(GenomeModelJsonMixin().as_json(cand_species))
+
+        return render(request, "disambiguate_species.html", context=context)
 
     def search_sequence(self, request, query, strategy='mixed'):
         strategy = strategy.lower()[:5]
