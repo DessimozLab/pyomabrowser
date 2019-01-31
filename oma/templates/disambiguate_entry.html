@@ -11,6 +11,11 @@
             </div>
         </div>
         <div class="panel-body">
+            {% if message %}<div class="alert-warning">{{ message }}</div>{% endif %}
+            {% if total_candidates > total_shown %}<div>Found {{ total_candidates }} in total. Showing top {{ total_shown }}</div>{% endif %}
+            {% if missing_terms %}<div style="font-size:smaller;">Missing terms:
+                <span style="text-decoration: line-through;">{{ missing_terms | join:", " }}</span></div>
+            {% endif %}
             <table class="table table-hover" id="matchTable"
                    data-show-toggle="true"
                    {% block bootstrap_table_attrs %}
@@ -34,6 +39,7 @@
                         <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
                         <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
                         <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_of_entry">OMA Group</th>
+                        <th data-field="description" data-sortable="true">Description</th>
                         {% endblock bootstrap_table_columns %}
                         {% block additional_columns %} {% endblock %}
                     </tr>
@@ -70,6 +76,7 @@
     <!-- taxon filter import: Editable field -->
     <link type="text/css" rel="stylesheet" href="{% static "css/bootstrap-editable.css" %}"/>
     <script src="{% static "js/bootstrap-editable.js" %}"></script>
+    <script src="{% static "js/highlight.js" %}"></script>
 
     <script>
         var data = {{ data | safe }};
@@ -84,6 +91,10 @@
         var icons = tab.bootstrapTable('getOptions').icons;
         $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
         tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+        var myHilitor = new Hilitor("matchTable");
+        myHilitor.setMatchType("open");
+        myHilitor.apply("{{ query }}");
 
     </script>
     {% block js_formatter_hooks %}{% endblock %}

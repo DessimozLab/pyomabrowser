@@ -850,11 +850,12 @@ class EntrySearchJson(JsonModelMixin):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'oma_group': None,
-                   'hog_family_nr': 'roothog', 'xrefs': None}
+                   'hog_family_nr': 'roothog', 'xrefs': None,
+                   'description': None}
 
 
 class Searcher(View):
-    _allowed_functions = ['id', 'group', 'sequence', 'species']
+    _allowed_functions = ['id', 'group', 'sequence', 'species', 'fulltext']
 
     def search_id(self, request, query):
         context = {'query': query}
@@ -935,13 +936,65 @@ class Searcher(View):
         context['data'] = json.dumps(json_encoder.as_json(targets))
         return render(request, "disambiguate_sequence.html", context=context)
 
+    def _genome_entries_from_taxonomy(self, tax):
+        taxids = tax.get_taxid_of_extent_genomes()
+        if len(tax.genomes) > 0:
+            genomes = [tax.genomes[taxid] for taxid in taxids]
+        else:
+            genomes = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_taxid(taxid)) for taxid in taxids]
+        return set(itertools.chain(range(g.entry_nr_offset+1, g.entry_nr_offset+g.nr_entries+1) for g in genomes))
+
+    def check_term_for_entry_nr(self, term):
+        try:
+            prefix, id_ = term.split(':', maxsplit=1)
+            if prefix == "GO": return utils.db.entrynrs_with_go_annotation(id_)
+            elif prefix == "EC": return utils.db.entrynrs_with_ec_annotation(id_)
+            elif prefix == "HOG": return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
+            elif prefix.lower() in ('oma', 'omagrp', 'omagroup'):
+                return {e['EntryNr'] for e in utils.db.oma_group_members(id_)}
+            elif prefix.lower() in ("tax", "ncbitax", "taxid", "species"):
+                try:
+                    return self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(id_))
+                except ValueError:
+                    pass
+        except ValueError:
+            entry_nrs = set()
+            try:
+                entry_nrs.add(utils.id_resolver.resolve(term))
+            except db.AmbiguousID as e:
+                entry_nrs.update(e.candidates)
+            except db.InvalidId:
+                pass
+
+            if len(term) >= 7 and utils.db.seq_search.contains_only_valid_chars(term):
+                # check if valid AA sequence
+                entry_nrs.update(utils.db.seq_search.exact_search(term))
+            return entry_nrs
+
     def search_fulltext(self, request, query):
-        terms = filter(lambda x: True, shlex.split(query))
+        terms = shlex.split(query)
         logger.info(terms)
-        cands = []
+        entry_cands = collections.Counter()
+        species_cands = collections.Counter()
+        missing_terms = []
         for term in terms:
-            logger.info(term)
-        return HttpResponse('hi there')
+            enr = self.check_term_for_entry_nr(term)
+            if len(enr) == 0:
+                missing_terms.append(term)
+            entry_cands.update(enr)
+            logger.info("term: '{}' matched {} entries".format(term, len(enr)))
+        context = {'query': ' AND '.join(terms), 'missing_terms': missing_terms,
+                   'total_candidates': len(entry_cands)}
+        if len(entry_cands) == 0:
+            context['message'] = 'Could not find any protein matching your search pattern'
+        else:
+            _, top_cnt = entry_cands.most_common(1)[0]
+            candidates = (models.ProteinEntry(utils.db, enr) for enr, cnts in entry_cands.most_common()
+                          if cnts>=top_cnt-2)
+            candidates = list(itertools.islice(candidates, 0, 1000))
+            context['data'] = json.dumps(EntrySearchJson().as_json(candidates))
+            context['total_shown'] = len(candidates)
+        return render(request, 'disambiguate_entry.html', context=context)
 
     def get(self, request):
         try:
