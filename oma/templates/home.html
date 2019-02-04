@@ -21,19 +21,20 @@
                     <img src="{% static "image/oma2.png" %}" class="img-responsive margin-auto" alt="OMA logo">
 
                     <p><br></p>
-                    <form role="search" id="searchForm" action="/cgi-bin/gateway.pl" method="GET">
+                    <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
                     <div class="col-md-10 col-md-offset-1">
                         <div class="col-sm-4">
-                            <select id="selectBrowser" class="form-control btn-mini" name="f" onchange="update_autocomplete()">
-                                <option value="DisplayEntry" selected="selected">Identifier</option>
-                                <option value="SearchSeqDb">Protein sequence</option>
-                                <option value="DisplayGroup">OMA group</option>
-                                <option value="SearchDb">Full-text search</option>
+                            <select id="selectBrowser" class="form-control btn-mini" name="type" onchange="update_autocomplete()">
+                                <option value="id" selected="selected">Identifier</option>
+                                <option value="sequence">Protein sequence</option>
+                                <option value="group">OMA group</option>
+                                <option value="fulltext">Full-text search</option>
+                                <option value="species">Species</option>
                             </select>
                         </div>
                         <div class="col-sm-8">
                             <div class="input-group">
-                                <input id='inputBrowser' name="p1" type="text" class="form-control" />
+                                <input id='inputBrowser' name="query" type="text" class="form-control" />
                                 <span class="input-group-btn">
                                 <button class="btn btn-default" id='loupeBrowser' type="submit">
                                     <span class="glyphicon glyphicon-search "></span>
@@ -52,7 +53,8 @@
                             Examples: 
                             <a id='exEntry'>Entry HUMAN22168</a>
                           - <a id='exEntry2'>Entry P53_RAT</a>
-                          -  <a id='exPhoto'>Search for "photoreceptor"</a> 
+                          -  <a id='exPhoto'>Search for "photoreceptor"</a>
+                          - <a id="exSpecies">"Drosophila" species</a>
                         </div>
                     </div>
                 </div>
@@ -64,22 +66,28 @@
 <script type="text/javascript">
 
 $('#exPhoto').click( function() {
-    $('#selectBrowser').val('SearchDb');
+    $('#selectBrowser').val('fulltext');
     $('#inputBrowser').val('photoreceptor').focus();
     $('#textarea').val('photoreceptor').focus();
 });
 
 $('#exEntry').click( function() {
-    $('#selectBrowser').val('DisplayEntry');
+    $('#selectBrowser').val('id');
     $('#inputBrowser').val('HUMAN22168').focus();
     $('#textarea').val('HUMAN22168').focus();
 });
 
 $('#exEntry2').click( function() {
-    $('#selectBrowser').val('DisplayEntry');
+    $('#selectBrowser').val('id');
     $('#inputBrowser').val('P53_RAT').focus();
     $('#textarea').val('P53_RAT').focus();
 });
+$('#exSpecies').click( function(){
+    $('#selectBrowser').val('species');
+    $('#inputBrowser').val('Drosophila').focus();
+    $('$textarea').val('Drosophila').focus();
+});
+
 var textbox = $("#inputBrowser");
 var textarea = $("<textarea id='textarea' rows='3' name='p1'></textarea>");
 $("#toggle").click(function () {
