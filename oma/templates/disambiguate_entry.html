@@ -41,7 +41,9 @@
                         <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_of_entry">OMA Group</th>
                         <th data-field="description" data-sortable="true">Description</th>
                         {% endblock bootstrap_table_columns %}
-                        {% block additional_columns %} {% endblock %}
+                        {% block additional_columns %}
+                        <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
+                        {% endblock %}
                     </tr>
                 </thead>
 
@@ -80,6 +82,17 @@
 
     <script>
         var data = {{ data | safe }};
+        format_result_refs = function(value, row){
+            var qterms = "{{ query }}".split(' AND ');
+            var all_evids = [];
+            if (row.hasOwnProperty('xrefs')){
+                all_evids = row.xrefs.map(x => x['source'] + ": " + x['xref']);
+            }
+            var keep = all_evids.filter(function(token){
+                return qterms.some(term => token.match(term));
+            });
+            return keep.join('<br>');
+        };
 
         var tab = $("#matchTable");
         tab.bootstrapTable({
