@@ -645,6 +645,7 @@ class HOGDomainsBase(ContextMixin, EntryCentricMixin):
 
         context.update({'entry': entry,
                         'hog': 'HOG:{:07d}'.format(fam),
+                        'fam_nr': fam,
                         'hog_row': fam_row,
                         'sim_hogs': sim_fams,
                         'tab': 'hogs',

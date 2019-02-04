@@ -138,17 +138,22 @@ class ProteinEntryViewSet(ViewSet):
         return Response(serializer.data)
 
     @detail_route()
-    def ontology(self, request, entry_id=None, format=None):
-        """Ontology information available for a protein.
+    def gene_ontology(self, request, entry_id=None, format=None):
+        """Gene ontology information available for a protein.
 
-        :param entry_id: an unique identifier for a protein - either it
+        :param entry_id: an unique identifier for a protein - either its
                          entry number, omaid or its canonical id
         """
         p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
         data = db.Database.get_gene_ontology_annotations(utils.db, int(p_entry_nr))
-        ontologies = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
-        serializer = serializers.GeneOntologySerializer(instance=ontologies, many=True)
+        annotations = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
+        serializer = serializers.GeneOntologySerializer(instance=annotations, many=True)
         return Response(serializer.data)
+
+    @detail_route()
+    def ontology(self, request, entry_id=None, format=None):
+        """Deprecated: use gene_ontology endpoint instead"""
+        return self.gene_ontology(request, entry_id, format=format)
 
     @detail_route()
     def domains(self, request, entry_id=None, format=None):

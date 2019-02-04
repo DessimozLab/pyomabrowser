@@ -24,9 +24,10 @@
 	</div>
 </div>
 
-
-{% if hog_row == None %}
+{% if fam_nr <= 0 %}
 This entry is not part of any hierarchical orthologous group.
+{% elif hog_row == None %}
+This HOG does not contain domain annotations. We can therefore not provide other HOGs with a similar domain structure.
 {% else %}
 
 <h3>Hierarchical group {{ hog }}</h3>
