@@ -94,20 +94,22 @@
             return keep.join('<br>');
         };
 
+        var myHilitor = new Hilitor("matchTable");
+        myHilitor.setMatchType("open");
+
         var tab = $("#matchTable");
         tab.bootstrapTable({
             reorderableColumns: true,
             clickToSelect: false,
             showMultiSort: true,
-            data: data
+            data: data,
+            onPostBody: function(d){
+                myHilitor.apply("{{ query }}");
+            }
         });
         var icons = tab.bootstrapTable('getOptions').icons;
         $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
         tab.bootstrapTable('refreshOptions', {'icons': icons});
-
-        var myHilitor = new Hilitor("matchTable");
-        myHilitor.setMatchType("open");
-        myHilitor.apply("{{ query }}");
 
     </script>
     {% block js_formatter_hooks %}{% endblock %}

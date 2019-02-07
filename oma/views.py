@@ -950,6 +950,8 @@ class Searcher(View):
             prefix, id_ = term.split(':', maxsplit=1)
             if prefix == "GO": return utils.db.entrynrs_with_go_annotation(id_)
             elif prefix == "EC": return utils.db.entrynrs_with_ec_annotation(id_)
+            elif prefix.lower() in ('cathdb', 'cath', 'gene3d', 'pfam', 'cath/gene3d'):
+                return utils.db.entrynrs_with_domain_id(id_)
             elif prefix == "HOG": return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
             elif prefix.lower() in ('oma', 'omagrp', 'omagroup'):
                 return {e['EntryNr'] for e in utils.db.oma_group_members(id_)}
