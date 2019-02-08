@@ -889,8 +889,13 @@ class Searcher(View):
                             .format(species['UniProtSpeciesCode'].decode()))
         except db.UnknownSpecies:
             pass
-        # here we will only end up if species is ambiguous
-        cand_species = utils.id_mapper['OMA'].approx_search_genomes(query)
+        # search in taxonomy
+        try:
+            cand_species = self._genomes_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(query))
+        except ValueError:
+            # here we will only end up if species is ambiguous
+            cand_species = utils.id_mapper['OMA'].approx_search_genomes(query)
+
         context = {'query': query}
         if len(cand_species) == 0:
             context['message'] = 'Could not find any species that is similar to your query'
@@ -938,28 +943,36 @@ class Searcher(View):
         return render(request, "disambiguate_sequence.html", context=context)
 
     def _genome_entries_from_taxonomy(self, tax):
+        genomes = self._genomes_from_taxonomy(tax)
+        return set(enr for enr in itertools.chain.from_iterable(
+            range(g.entry_nr_offset+1, g.entry_nr_offset+g.nr_entries+1) for g in genomes))
+
+    def _genomes_from_taxonomy(self, tax):
         taxids = tax.get_taxid_of_extent_genomes()
         if len(tax.genomes) > 0:
             genomes = [tax.genomes[taxid] for taxid in taxids]
         else:
             genomes = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_taxid(taxid)) for taxid in taxids]
-        return set(itertools.chain(range(g.entry_nr_offset+1, g.entry_nr_offset+g.nr_entries+1) for g in genomes))
+        return genomes
 
     def check_term_for_entry_nr(self, term):
         try:
             prefix, id_ = term.split(':', maxsplit=1)
-            if prefix == "GO": return utils.db.entrynrs_with_go_annotation(id_)
-            elif prefix == "EC": return utils.db.entrynrs_with_ec_annotation(id_)
+            if prefix == "GO":
+                return utils.db.entrynrs_with_go_annotation(id_)
+            elif prefix == "EC":
+                return utils.db.entrynrs_with_ec_annotation(id_)
             elif prefix.lower() in ('cathdb', 'cath', 'gene3d', 'pfam', 'cath/gene3d'):
                 return utils.db.entrynrs_with_domain_id(id_)
-            elif prefix == "HOG": return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
+            elif prefix == "HOG":
+                return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
             elif prefix.lower() in ('oma', 'omagrp', 'omagroup'):
                 return {e['EntryNr'] for e in utils.db.oma_group_members(id_)}
             elif prefix.lower() in ("tax", "ncbitax", "taxid", "species"):
                 try:
                     return self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(id_))
                 except ValueError:
-                    pass
+                    return set([])
         except ValueError:
             entry_nrs = set()
             try:
