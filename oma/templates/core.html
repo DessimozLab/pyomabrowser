@@ -175,6 +175,14 @@
         deferRequestBy: 200,
         transformResult: function (response) {
             var json = JSON.parse(response);
+            var xref_source_order = {{ xref_order | safe }};
+            json.sort(function (a, b){
+                var idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
+                if (idx_a === idx_b){
+                    return a.xref > b.xref ? 1 : -1;
+                }
+                return idx_a - idx_b;
+            });
             return {
                 suggestions: $.map(json, function (dataItem) {
                     return {value: dataItem.xref, data: dataItem};
