@@ -24,7 +24,7 @@
                     <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
                     <div class="col-md-10 col-md-offset-1">
                         <div class="col-sm-4">
-                            <select id="selectBrowser" class="form-control btn-mini" name="type" onchange="update_autocomplete()">
+                            <select id="selectBrowser" class="form-control btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
                                 <option value="id" selected="selected">Identifier</option>
                                 <option value="sequence">Protein sequence</option>
                                 <option value="group">OMA group</option>
@@ -109,19 +109,10 @@ $("#toggle").click(function () {
     $('#selectBrowser').val('SearchSeqDb');
 });
 
-function update_autocomplete() {
-        var sel=document.getElementById('selectBrowser');
-        var txt=document.getElementById('inputBrowser');
-        if (sel.value === "DisplayEntry"){
-            $('#inputBrowser').autocomplete('enable');
-        } else {
-            $('#inputBrowser').autocomplete('disable');
-        }
-    }
 $('#inputBrowser').autocomplete(autocomplete_opts);
-
-
 </script>
+
+
 <div class="row">
     <!--           -->
     <!-- 3 columns    -->

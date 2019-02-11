@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
 {% load staticfiles %}
 {% load bootstrap3 %}
@@ -83,11 +83,12 @@
         <form class="navbar-form navbar-left" role="search" id="searchNavForm" action="{% url 'search' %}" method="POST">
           {% csrf_token %}
           <div class="form-group">
-            <select id="selectNav" class="form-control btn-mini" name="type" onchange="update_navbar_autocomplete()">
-              <option value="ID" selected="selected">Identifier</option>
-              <option value="Sequence">Protein sequence</option>
-              <option value="Group">OMA group</option>
-              <option value="SearchDb">Full-text search</option>
+            <select id="selectNav" class="form-control btn-mini" name="type" onchange="update_autocomplete_enableing('searchNavForm')">
+              <option value="id" selected="selected">Identifier</option>
+              <option value="sequence">Protein sequence</option>
+              <option value="group">OMA group</option>
+              <option value="fulltext">Full-text search</option>
+              <option value="species">Species</option>
             </select>
           </div>
           <div class="input-group">
@@ -157,12 +158,14 @@
   </nav>
 
   <script type="text/javascript">
-    function update_navbar_autocomplete() {
-        var sel=document.getElementById('selectNav');
-        if (sel.value === "DisplayEntry"){
-            $('#textNav').autocomplete('enable');
+    function update_autocomplete_enableing(form_elem_id) {
+        var form_elem = document.getElementById(form_elem_id);
+        var sel = form_elem.querySelector("select[name='type']");
+        var txt = $(form_elem.querySelector("input[name='query']"));
+        if (sel.value === "id"){
+            txt.autocomplete('enable');
         } else {
-            $('#textNav').autocomplete('disable');
+            txt.autocomplete('disable');
         }
     }
     var autocomplete_opts = {
@@ -205,7 +208,7 @@
         }
     };
     $('#textNav').autocomplete(autocomplete_opts);
-    update_navbar_autocomplete();
+    update_autocomplete_enableing('searchNavForm');
   </script>
 
   <div id="content">
