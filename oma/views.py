@@ -859,7 +859,7 @@ class Searcher(View):
     _allowed_functions = ['id', 'group', 'sequence', 'species', 'fulltext']
 
     def search_id(self, request, query):
-        context = {'query': query}
+        context = {'query': query, 'search_method': 'id'}
         try:
             entry_nr = utils.id_resolver.resolve(query)
             return redirect('entry_info', entry_nr)
@@ -878,7 +878,7 @@ class Searcher(View):
             return redirect('omagroup', group_nr)
         except db.AmbiguousID as ambiguous:
             logger.info('search_group results in ambiguous match: {}'.format(ambiguous))
-            context = {'query': query,
+            context = {'query': query, 'search_method': 'group',
                        'data': json.dumps([utils.db.oma_group_metadata(grp) for grp in ambiguous.candidates])}
             return render(request, "disambiguate_group.html", context=context)
 
@@ -896,7 +896,7 @@ class Searcher(View):
             # here we will only end up if species is ambiguous
             cand_species = utils.id_mapper['OMA'].approx_search_genomes(query)
 
-        context = {'query': query}
+        context = {'query': query, 'search_method': 'species'}
         if len(cand_species) == 0:
             context['message'] = 'Could not find any species that is similar to your query'
         else:
@@ -912,7 +912,7 @@ class Searcher(View):
         seq = seq_searcher._sanitise_seq(query)
         if len(seq) < 5:
             raise ValueError('query sequence is too short')
-        context = {'query': seq.decode()}
+        context = {'query': seq.decode(), 'search_method': 'sequence'}
         targets = []
         json_encoder = EntrySearchJson()
 
@@ -936,6 +936,7 @@ class Searcher(View):
                 protein.alignment = [x[0] for x in align_results['alignment']]
                 protein.alignment_range = align_results['alignment'][1][1]
                 targets.append(protein)
+            json_encoder.json_fields = dict(EntrySearchJson.json_fields)
             json_encoder.json_fields.update({'sequence': None, 'alignment': None,
                                              'alignment_score': None, 'alignment_range': None})
             context['identified_by'] = 'approximate match'
@@ -999,14 +1000,14 @@ class Searcher(View):
                 missing_terms.append(term)
             entry_cands.update(enr)
             logger.info("term: '{}' matched {} entries".format(term, len(enr)))
-        context = {'query': ' AND '.join(terms), 'missing_terms': missing_terms,
-                   'total_candidates': len(entry_cands)}
+        context = {'query': query, 'tokens': terms, 'missing_terms': missing_terms,
+                   'total_candidates': len(entry_cands), 'search_method': 'fulltext'}
         if len(entry_cands) == 0:
             context['message'] = 'Could not find any protein matching your search pattern'
         else:
             _, top_cnt = entry_cands.most_common(1)[0]
             candidates = (models.ProteinEntry(utils.db, enr) for enr, cnts in entry_cands.most_common()
-                          if cnts>=top_cnt-2)
+                          if cnts >= top_cnt-2)
             candidates = list(itertools.islice(candidates, 0, 1000))
             context['data'] = json.dumps(EntrySearchJson().as_json(candidates))
             context['total_shown'] = len(candidates)

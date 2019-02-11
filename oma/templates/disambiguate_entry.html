@@ -1,5 +1,6 @@
 {% extends  "core.html" %}
 {% load staticfiles %}
+{% load oma_extras %}
 
 {% block title %}{% block titleTab %}OMA orthology database: Disambiguate {% endblock titleTab %}{% endblock %}
 {% block meta_description %}Disambiguate result page for OMA Browser query "{{ query }}"{% endblock %}
@@ -7,7 +8,7 @@
     <div class="panel panel-default">
         <div class="panel-heading clearfix">
             <div class="pull-left">
-                Search results matching "{{ query }}"
+                <h4>Search results matching "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}"</h4>
             </div>
         </div>
         <div class="panel-body">
@@ -48,8 +49,25 @@
                 </thead>
 
                 <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">Genes not present in selected taxon have been filtered out as per settings. <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a></div>
-
             </table>
+
+            <div id="suggest_new_search" style="margin-top:1em;">
+                <p>Not found what you tried to search for?</p>
+                <ul>
+                    {% if search_method != 'fulltext' %}
+                    <li>Try <a href="{% url 'search' %}?type=fulltext&query={{ query | urlencode }}">fulltext search</a></li>
+                    {% endif %}
+                    {% if search_method != 'sequence' %}
+                    {% with aa_seq=query|as_amino_acid_seq %} {% if aa_seq|length > 4  %}
+                    <li>Try <a href="{% url 'search' %}?type=sequence&query={{ aa_seq }}">sequence search ({{ aa_seq }})</a></li>
+                    {% endif %}{% endwith %}
+                    {% endif %}
+                    {% if search_method != 'species' %}
+                    <li>Try <a href="{% url 'search' %}?type=species&query={{ query }}">species search</a></li>
+                    {% endif %}
+                    <li>Try a <a href="{% url 'home' %}">new search</a></li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -83,7 +101,7 @@
     <script>
         var data = {{ data | safe }};
         format_result_refs = function(value, row){
-            var qterms = "{{ query }}".split(' AND ');
+            var qterms = "{{ query }}".split('\s+');
             var all_evids = [];
             if (row.hasOwnProperty('xrefs')){
                 all_evids = row.xrefs.map(x => x['source'] + ": " + x['xref']);
