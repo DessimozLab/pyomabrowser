@@ -43,7 +43,7 @@
                         </div>
                         <div class="panel-body">
                             {% now 'Y' as current_year %}
-                            <p>The OMA project was initiated in 2004 at ETH Zurich by Prof. Gaston Gonnet, with the goal of identifying orthologs among all publicly available genomes. At the time, most sequenced genomes were bacteria and only few were eukaryotes. Several PhD students in his group became increasingly involved, in particular Adrian Schneider, Christophe Dessimoz, and Alexander Roth. Over the subsequent  {{ current_year|add:"-2005" }} years, OMA underwent 20 major releases, steadily increasing the number of genomes under consideration.</p>
+                            <p>The OMA project was initiated in 2004 at ETH Zurich by Prof. Gaston Gonnet, with the goal of identifying orthologs among all publicly available genomes. At the time, most sequenced genomes were bacteria and only few were eukaryotes. Several PhD students in his group became increasingly involved, in particular Adrian Schneider, Christophe Dessimoz, and Alexander Roth. Over the subsequent  {{ current_year|add:"-2005" }} years, OMA underwent 24 major releases, steadily increasing the number of genomes under consideration.</p>
                             <br>
 
                             <img src="{% static "image/history.png" %}" class="img-responsive margin-auto" alt="Graph showing growth of OMA over time.">
@@ -61,8 +61,6 @@
 
                         </div>
                     </div>	
-
-
 
 
                     <div class="panel panel-default">
@@ -104,6 +102,10 @@
 
                             <h3>OMA algorithm</h3>
                             <br>
+                            <p>Natasha M. Glover, Adrian Altenhoff, Christophe Dessimoz<br>
+                                <em>Assigning confidence scores to homoeologs using fuzzy logic</em>
+                                PeerJ, 2019, 6, e6231 doi: 10.7717/peerj.6231 <a href="https://dx.doi.org/10.7717/peerj.6231">Full text</a>
+                            </p>
                             <br>
                             <p>Clément-Marie Train, Natasha M. Glover, Gaston H. Gonnet, Adrian M. Altenhoff, Christophe Dessimoz<br>
                                 <em>Orthologous Matrix (OMA) algorithm 2.0: more robust to asymmetric evolutionary rates and more scalable hierarchical orthologous group inference</em><br>
