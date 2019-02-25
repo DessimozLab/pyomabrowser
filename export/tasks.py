@@ -77,5 +77,5 @@ def update_running_jobs():
 
 @task()
 def purge_old_exports():
-    time_threshold = datetime.now() - timedelta(days=7)
-    StandaloneExportJobs.objects.filter(created_time__lt=time_threshold).delete()
+    time_threshold = datetime.now() - timedelta(days=8)
+    StandaloneExportJobs.objects.filter(create_time__lt=time_threshold).delete()
