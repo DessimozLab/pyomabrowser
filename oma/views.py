@@ -837,7 +837,8 @@ def function_projection(request):
             return HttpResponseRedirect(result_page)
     else:
         form = forms.FunctionProjectionUploadForm()
-    return render(request, "function_projection_upload.html", {'form': form})
+    return render(request, "function_projection_upload.html",
+                  {'form': form, 'max_upload_size': form.fields['file'].max_upload_size / (2**20)})
 
 
 @method_decorator(never_cache, name='dispatch')

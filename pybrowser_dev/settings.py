@@ -219,6 +219,9 @@ RECAPTCHA_PUBLIC_KEY = "6Lc9PScUAAAAAIi2tZFDxzpBKtNoe3X0GxpgRi_t"
 RECAPTCHA_PRIVATE_KEY = "6Lc9PScUAAAAAJzqJ5z5sfJuJJkqxY5EHCB-fmcd"
 NOCAPTCHA = True  # using No Captcha reCaptcha
 
+# Maximum upload size for files: 10MB
+MAX_UPLOAD_SIZE = 10*2**20
+
 GOOGLE_ANALYTICS = {
     'google_analytics_id': 'UA-1093824-1',
 }
