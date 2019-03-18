@@ -44,7 +44,7 @@ class EntryCentricMixin(object):
         """resolve any ID and return an entry or a 404 if it is unknown"""
         try:
             entry_nr = utils.id_resolver.resolve(entry_id)
-        except db.InvalidId:
+        except (db.InvalidId, db.AmbiguousID):
             raise Http404('requested id is unknown')
         entry = utils.db.entry_by_entry_nr(entry_nr)
         return models.ProteinEntry(utils.db, entry)
