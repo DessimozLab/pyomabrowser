@@ -209,11 +209,7 @@ HDF5DB = {
     'PATH': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'OmaServer.h5')
 }
 
-EMAIL_HOST = "whippee.com"
-EMAIL_PORT = 8025
-EMAIL_HOST_USER = "labfaq@dessimoz.org"
-EMAIL_HOST_PASSWORD = "yZ4J4nsiVwim"
-EMAIL_USE_TLS = True
+EMAIL_HOST = "localhost"
 
 RECAPTCHA_PUBLIC_KEY = "6Lc9PScUAAAAAIi2tZFDxzpBKtNoe3X0GxpgRi_t"
 RECAPTCHA_PRIVATE_KEY = "6Lc9PScUAAAAAJzqJ5z5sfJuJJkqxY5EHCB-fmcd"
