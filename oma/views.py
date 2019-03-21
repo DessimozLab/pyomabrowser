@@ -739,7 +739,7 @@ def genome_suggestion(request):
             except Exception:
                 logger.warning('Cannot find information about {} at uniprot'.format(data['taxon_id']))
             message = get_template('email_genome_suggestion.html').render(form.cleaned_data)
-            for recepient in (data['suggested_from_email'], "contact@omabrowser.org",
+            for recepient in (data['suggested_from_email'], "adrian.altenhoff@inf.ethz.ch",
                               "alpae+gqwmhtm2ep3kmeqmmrlp@boards.trello.com"):
                 sender = data['suggested_from_email'] if recepient != data['suggested_from_email'] else "contact@omabrowser.org"
                 msg = EmailMessage(subj, message, to=[recepient], from_email=sender)
