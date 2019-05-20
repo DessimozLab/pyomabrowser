@@ -37,7 +37,7 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
     """
     if instance.result:
         if os.path.isfile(instance.result.path):
-            logger.info("Removing old AllAll Export file '{}' ({.1f}MB).".format(
+            logger.info("Removing old AllAll Export file '{}' ({:.1f}MB).".format(
                 instance.result.path, os.path.getsize(instance.result.path) / (2 ** 20)))
             os.remove(instance.result.path)
         else:

@@ -49,7 +49,7 @@ class ProteinEntryViewSet(ViewSet):
         """Retrieve the information available for multiple protein IDs at once.
 
         The POST request must contain a json-encoded list of IDs of
-        up to 100 IDs for which the information is returned.
+        up to 1000 IDs for which the information is returned.
 
         In case the ID is not unique or unknown, an empty element is
         returned for this query element.
@@ -57,7 +57,7 @@ class ProteinEntryViewSet(ViewSet):
         :param ids: list of ids of proteins to retrieve.
 
         """
-        MAX_SIZE = 100
+        MAX_SIZE = 1000
         if 'ids' not in request.data:
             raise NotFound("No results found")
         if len(request.data['ids']) > MAX_SIZE:

@@ -196,7 +196,10 @@ def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit=None,
             sender = "noreply@omabrowser.org"
             msg = EmailMessage("GO Function Predictions ready", message, to=[db_entry.email], from_email=sender)
             msg.content_subtype = "html"
-            msg.send()
+            try:
+                msg.send()
+            except OSError as e:
+                logger.error('cannot send confirmation mail: {}'.format(e))
 
         db_entry.result = name
         db_entry.state = 'done'
