@@ -49,7 +49,7 @@ def submit_export(session, res_file=None, genomes=None):
     cmd = " ".join(cmd)
     logger.info('running command: ' + cmd)
     try:
-        res = subprocess.run(cmd, cwd=os.path.dirname(__file__), timeout=600,
+        res = subprocess.run(cmd, cwd=os.path.dirname(__file__), timeout=1500,
                              shell=True, stdout=subprocess.PIPE)
         if res.returncode == 0:
             shutil.rmtree(os.path.join(session_dir, session))
