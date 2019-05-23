@@ -15,7 +15,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
 from django.views.generic.base import ContextMixin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.mail import EmailMessage
 from django.template import Context
 from django.template.loader import render_to_string, get_template

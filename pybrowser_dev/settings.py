@@ -36,26 +36,27 @@ DEBUG = (DEPLOYMENT != "PRODUCTION")
 
 ALLOWED_HOSTS = ['127.0.0.1', 'omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk', '.vital-it.ch']
 
-DEBUG_TOOLBAR_PATCH_SETTINGS = False
-SHOW_TOOLBAR_CALLBACK = lambda x: True
+#DEBUG_TOOLBAR_PATCH_SETTINGS = False
+#SHOW_TOOLBAR_CALLBACK = lambda x: True
 INTERNAL_IPS = ('127.0.0.1')
-DEBUG_TOOLBAR_PANELS = (
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
-    'debug_toolbar.panels.cache.CachePanel',
-    'debug_toolbar.panels.signals.SignalsPanel',
-    'debug_toolbar.panels.logging.LoggingPanel',
-    'debug_toolbar.panels.redirects.RedirectsPanel',
-    #'debug_toolbar_line_profiler.panel.ProfilingPanel',
-)
+
+# DEBUG_TOOLBAR_PANELS = (
+#     'debug_toolbar.panels.versions.VersionsPanel',
+#     'debug_toolbar.panels.timer.TimerPanel',
+#     'debug_toolbar.panels.settings.SettingsPanel',
+#     'debug_toolbar.panels.headers.HeadersPanel',
+#     'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+#     'debug_toolbar.panels.templates.TemplatesPanel',
+#     'debug_toolbar.panels.cache.CachePanel',
+#     'debug_toolbar.panels.signals.SignalsPanel',
+#     'debug_toolbar.panels.logging.LoggingPanel',
+#     'debug_toolbar.panels.redirects.RedirectsPanel',
+#     #'debug_toolbar_line_profiler.panel.ProfilingPanel',
+# )
 
 # Application definition
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -63,7 +64,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'google_analytics',
-    'debug_toolbar',
+    #'debug_toolbar',
     'captcha',
     'corsheaders',
     #'debug_toolbar_line_profiler',
@@ -73,9 +74,10 @@ INSTALLED_APPS = (
     'oma_rest',
     'export',
     'bootstrap3',
-)
+]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -84,8 +86,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'google_analytics.middleware.GoogleAnalyticsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-)
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'oma_rest.pagination.LinkHeaderPagination',
@@ -122,7 +124,7 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'propagate': True,
-            'level': 'WARNING',
+            'level': 'INFO',
         },
         'django.request': {
             'handlers': ['console'],
@@ -164,12 +166,15 @@ TEMPLATES = [
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
                 # list if you haven't customized them:
-                'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
-                'django.template.context_processors.i18n',
-                'django.template.context_processors.media',
-                'django.template.context_processors.static',
-                'django.template.context_processors.tz',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                # TODO: remove? commented for Django 2.2 (upgrade phase)
+                #'django.template.context_processors.debug',
+                #'django.template.context_processors.i18n',
+                #'django.template.context_processors.media',
+                #'django.template.context_processors.static',
+                #'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
             ],
         },

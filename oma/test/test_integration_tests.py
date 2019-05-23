@@ -1,7 +1,7 @@
 from __future__ import print_function, absolute_import, division
 import json
 from django.test import TestCase
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 import re
 import collections
 
