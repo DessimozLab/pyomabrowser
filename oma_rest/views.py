@@ -595,7 +595,7 @@ class GenomeViewSet(PaginationMixin, ViewSet):
         """Retrieve the list of all the protein entries available for a genome.
         ---
         parameters:
-          - name: genome_id:
+          - name: genome_id
             description: an unique identifier for a genome
                          - either its ncbi taxon id or the
                          UniProt species code"""
@@ -660,7 +660,7 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
                          second genome
             location: query
 
-          - name: rel_type:
+          - name: rel_type
             description: limit relations to a certain type of
                         relations, e.g. '1:1'.
             location: query
@@ -941,7 +941,7 @@ class PropagateFunctionAPIView(APIView):
         query parameter
         ---
         parameters:
-          - name query
+          - name: query
             description: the sequence to be annotated
             location: query
             required: True
