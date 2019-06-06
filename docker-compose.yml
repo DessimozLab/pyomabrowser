@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  web:
+    image: oma:latest
+    command: ./manage.py runserver 0.0.0.0:8000 --nothreading
+    volumes:
+      - .:/usr/src/pyomabrowser5
+    ports:
+      - 8005:8000
+    environment:
+      - DARWIN_BROWSERDATA_PATH=/data/
+      - SECRET_KEY=foo
