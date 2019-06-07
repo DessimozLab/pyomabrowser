@@ -181,6 +181,7 @@ TEMPLATES = [
     },
 ]
 
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER', None)
 CELERY_BEAT_SCHEDULE = {
     'task-update-omastandalone-exports': {
         'task': 'export.tasks.update_running_jobs',
@@ -203,8 +204,12 @@ CORS_ALLOW_METHODS = ('GET',)
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.getenv('SQL_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': os.getenv('SQL_DATABASE', os.path.join(BASE_DIR, 'db.sqlite3')),
+        'USER': os.getenv('SQL_USER', 'user'),
+        'PASSWORD': os.getenv('SQL_PASSWORD', 'password'),
+        'HOST': os.getenv('SQL_HOST', 'localhost'),
+        'PORT': os.getenv('SQL_PORT', '5432'),
     }
 }
 
@@ -249,7 +254,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "static")
+STATIC_ROOT = os.getenv('DARWIN_BROWSERSTATIC_PATH', os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "static"))
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, 'media'))
 

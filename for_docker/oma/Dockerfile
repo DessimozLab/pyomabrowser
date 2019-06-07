@@ -13,22 +13,25 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
        wget openssh-client git-core gcc build-essential \
+       libpq-dev mafft \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -m 700 /root/.ssh/ \
-    && touch -m 600 /root/.ssh/known_hosts \
-    && ssh-keyscan -p 2222 lab.dessimoz.org >> /root/.ssh/known_hosts
+    && touch /root/.ssh/known_hosts \
+    && ssh-keyscan -p 2222 lab.dessimoz.org >> /root/.ssh/known_hosts \
+    && chmod 600 /root/.ssh/known_hosts
 
 
 # install dependencies
-RUN pip install --upgrade pip
-RUN pip install pipenv
+RUN pip3 install --upgrade pip
+RUN pip3 install psycopg2
+RUN pip3 install uwsgi
+#RUN pip install pipenv
 #COPY ./Pipfile .Pipfile.lock /usr/src/pyomabrowser
 COPY requirements.txt /usr/src/pyomabrowser
-COPY ./OmaServer.h5 ./OmaServer.h5.idx /data/
 
 #RUN pipenv install --system --dev
-RUN --mount=type=ssh pip install -r requirements.txt
+RUN --mount=type=ssh pip3 install -r requirements.txt --src /usr/local/src
 
 COPY . /usr/src/pyomabrowser
 
