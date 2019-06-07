@@ -45,4 +45,32 @@ To get a debug instance of pyoma, do the following:
 
 
 
-  
+Docker based instance
+---------------------
+
+we can now also build a full working omabrowser (as of now no darwin parts, but
+all the rest is supported) in Docker.
+
+You need to have a recent version of Docker installed on your host computer (at
+least version 18.09). Then you can:
+
+1) build oma:latest container:
+   docker build -t oma:latest -f for_docker/oma/Dockerfile --ssh default .
+
+2) run the omabrowser using composer:
+   docker-composer up -d
+
+3) if this is the first time you use it, you need to add dataset to the docker 
+   volume. Get it from the ucl project share 
+     /data/ul/projects/cdessimo/oma-browser/<release>/data
+   and add it to the docker volume:
+   docker cp <path> pyomabrowser_web_1:/data/release/
+
+4) run migrate and collect static:
+   docker-compose exec web ./manage.py migrate
+   docker-compose exec web ./manage.py collectstatic --no-input --flush
+
+5) restart docker-compose
+   docker-compose down
+   docker-compose up -d 
+3/6) access in your browser localhost:8080
