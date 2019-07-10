@@ -3,7 +3,7 @@ version: '3.7'
 services:
   web:
     image: oma:latest
-    command: uwsgi --http-socket 0.0.0.0:8000 --master --processes 3 --module pybrowser_dev.wsgi
+    command: uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi
     env_file: &envfile
       - ./for_docker/env
     volumes:
