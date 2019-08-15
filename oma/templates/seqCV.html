@@ -19,7 +19,7 @@
                         <br>
                         <ul class="nav nav-tabs" role="tablist">
                             <li {% ifequal tab 'info' %} class="active" {%endifequal%} ><a href="{% url 'entry_info' entry.omaid %}" >Information</a></li>
-                            <li {% ifequal tab 'orthologs' %} class="active" {%endifequal%} ><a href="{% url 'pairs' entry.omaid %}" >Orthologs {% if nr_vps %}<span class="badge">{{nr_vps}}</span>{% endif %}</a></li>
+                            <li {% ifequal tab 'orthologs' %} class="active" {%endifequal%} ><a href="{% url 'pairs' entry.omaid %}" >Pairwise orthologs {% if nr_vps %}<span class="badge">{{nr_vps}}</span>{% endif %}</a></li>
                             {% if entry.genome.is_polyploid %}
                                 <li {% ifequal tab 'homoeologs' %} class="active" {%endifequal%} ><a href={% url 'homoeologs' entry.omaid %}>Homoeologs {% if nr_hps %}<span class="badge">{{nr_hps}}</span>{% endif %}</a></li>
                             {% endif %}
@@ -29,14 +29,13 @@
 
 
                             <li {% if tab == 'hogs' %} class="dropdown active " {% else %} class="dropdown" {% endif %} >
-                                <a class='left_hog_tab' href="{% url 'hog_vis' entry.omaid %}">Hierarchical Orthologous Groups  </a>
-
+                                <a class='left_hog_tab' href="{% url 'hog_vis' entry.omaid %}">Hierarchical Orthologous Groups</a>
                             </li>
 
-                        <li {% if tab == 'hogs' %} class="dropdown active " {% else %} class="dropdown" {% endif %} >
+                            <li {% if tab == 'hogs' %} class="dropdown active " {% else %} class="dropdown" {% endif %} >
                                 <a href="" class="dropdown-toggle right_hog_tab" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></a>
 
-                            <ul class="dropdown-menu">
+                                <ul class="dropdown-menu">
                                     <li class="dropdown-header">Visualise HOG with:</li>
                                     <li class="text-left"><a href="{% url 'hog_vis' entry.omaid %}">graphical viewer</a> </li>
                                     <li class="text-left"><a href="{% url 'hogs' entry.omaid %}">table viewer</a></li>
@@ -45,7 +44,6 @@
                                     <li class="text-left"><a href="{% url 'hog_domains' entry.omaid %}">Domain architectures</a></li>
                                 </ul>
                             </li>
-
 
                             <li {% ifequal tab 'groups' %} class="active" {%endifequal%} ><a href="{% url 'omagroup-entry' entry.omaid %}">OMA Groups</a></li>
                         </ul>
