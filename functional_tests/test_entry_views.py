@@ -45,7 +45,7 @@ class EntryViewPageTest(FunctionalTest):
         species_column = [g.text for g in self.browser.find_elements_by_xpath("//div[@class='twotables']//table/tbody/tr/td[1]")]
         self.assertLess(5, len(species_column), 'Too few genomes containing P53 orthologs')
         row_nr_of_species = []
-        for g in ('PANTR', 'PONAB', 'MACMU', 'MOUSE', 'BOVIN', 'LOXAF'):
+        for g in ('PANTR', 'PONAB', 'MACMU', 'MOUSE', 'BOVIN'):
             try:
                 pos = species_column.index(g)
             except ValueError:
