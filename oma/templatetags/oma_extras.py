@@ -17,3 +17,9 @@ def uniprot_seq_repr(value):
         res.extend(('{:{pad}d}'.format(min(i+60, len_seq), pad=padding), '\n'))
     return "".join(res)
 
+
+@register.filter
+@stringfilter
+def as_amino_acid_seq(value):
+    PROTEIN_CHARS = 'ACDEFGHIKLMNPQRSTVWXY'
+    return "".join(filter(lambda c: c in PROTEIN_CHARS, value.upper()))

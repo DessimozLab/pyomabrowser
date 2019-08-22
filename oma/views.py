@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function, division
+
+import shlex
 from builtins import map
 from builtins import str
 from builtins import range
 import hashlib
 import collections
-import json
 import pandas as pd
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.conf import settings
-from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
@@ -28,6 +29,7 @@ import os
 import re
 import time
 import glob
+import json
 
 from . import tasks
 from . import utils
@@ -82,6 +84,9 @@ class JsonModelMixin(object):
                     raise
                 obj_dict[name] = obj
             yield obj_dict
+
+    def as_json(self, iter):
+        return list(self.to_json_dict(iter))
 
 
 class FastaResponseMixin(object):
@@ -389,7 +394,7 @@ class InfoBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
-        context.update({'entry': entry, 'xref_order': utils.id_mapper['Xref'].canonical_source_order()})
+        context.update({'entry': entry})
         return context
 
 
@@ -770,7 +775,7 @@ class Release(TemplateView):
         return ctx
 
 
-class GenomesJson(JsonModelMixin, View):
+class GenomeModelJsonMixin(JsonModelMixin):
     json_fields = {'uniprot_species_code': None,
                    "species_and_strain_as_dict": 'sciname',
                    'ncbi_taxon_id': "ncbi",
@@ -778,6 +783,8 @@ class GenomesJson(JsonModelMixin, View):
                    "nr_entries": "prots", "kingdom": None,
                    "last_modified": None}
 
+
+class GenomesJson(GenomeModelJsonMixin, View):
     def get(self, request, *args, **kwargs):
         genome_key = utils.id_mapper['OMA']._genome_keys
         lg = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_table[utils.db.id_mapper['OMA']._entry_off_keys[e - 1]]) for e in genome_key]
@@ -839,6 +846,195 @@ def function_projection(request):
         form = forms.FunctionProjectionUploadForm()
     return render(request, "function_projection_upload.html",
                   {'form': form, 'max_upload_size': form.fields['file'].max_upload_size / (2**20)})
+
+
+class EntrySearchJson(JsonModelMixin):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'oma_group': None,
+                   'hog_family_nr': 'roothog', 'xrefs': None,
+                   'description': None}
+
+
+class Searcher(View):
+    _allowed_functions = ['id', 'group', 'sequence', 'species', 'fulltext']
+
+    def search_id(self, request, query):
+        context = {'query': query, 'search_method': 'id'}
+        try:
+            entry_nr = utils.id_resolver.resolve(query)
+            return redirect('entry_info', entry_nr)
+        except db.AmbiguousID as ambiguous:
+            logger.info("query {} maps to {} entries".format(query, len(ambiguous.candidates)))
+            entries = [models.ProteinEntry.from_entry_nr(utils.db, entry) for entry in ambiguous.candidates]
+        except db.InvalidId as e:
+            entries = []
+            context['message'] = "Could not find any protein matching '{}'".format(query)
+        context['data'] = json.dumps(EntrySearchJson().as_json(entries))
+        return render(request, 'disambiguate_entry.html', context=context)
+
+    def search_group(self, request, query):
+        try:
+            group_nr = utils.db.resolve_oma_group(query)
+            return redirect('omagroup', group_nr)
+        except db.AmbiguousID as ambiguous:
+            logger.info('search_group results in ambiguous match: {}'.format(ambiguous))
+            context = {'query': query, 'search_method': 'group',
+                       'data': json.dumps([utils.db.oma_group_metadata(grp) for grp in ambiguous.candidates])}
+            return render(request, "disambiguate_group.html", context=context)
+
+    def search_species(self, request, query):
+        try:
+            species = utils.id_mapper['OMA'].identify_genome(query)
+            return redirect('/cgi-bin/gateway.pl?f=DisplayOS&p1={}'
+                            .format(species['UniProtSpeciesCode'].decode()))
+        except db.UnknownSpecies:
+            pass
+        # search in taxonomy
+        try:
+            cand_species = self._genomes_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(query))
+        except ValueError:
+            # here we will only end up if species is ambiguous
+            cand_species = utils.id_mapper['OMA'].approx_search_genomes(query)
+
+        context = {'query': query, 'search_method': 'species'}
+        if len(cand_species) == 0:
+            context['message'] = 'Could not find any species that is similar to your query'
+        else:
+            context['data'] = json.dumps(GenomeModelJsonMixin().as_json(cand_species))
+
+        return render(request, "disambiguate_species.html", context=context)
+
+    def search_sequence(self, request, query, strategy='mixed'):
+        strategy = strategy.lower()[:5]
+        if strategy not in ('exact', 'mixed', 'approx'):
+            raise ValueError("invalid search strategy parameter")
+        seq_searcher = utils.db.seq_search
+        seq = seq_searcher._sanitise_seq(query)
+        if len(seq) < 5:
+            raise ValueError('query sequence is too short')
+        context = {'query': seq.decode(), 'search_method': 'sequence'}
+        targets = []
+        json_encoder = EntrySearchJson()
+
+        if strategy[:5] in ('exact', 'mixed'):
+            exact_matches = seq_searcher.exact_search(seq,
+                                                      only_full_length=False,
+                                                      is_sanitised=True)
+            if len(exact_matches) == 1:
+                return redirect('entry_info', exact_matches[0])
+
+            context['identified_by'] = 'exact match'
+            targets = [models.ProteinEntry.from_entry_nr(utils.db, enr) for enr in exact_matches]
+
+        if strategy == 'approx' or (strategy == 'mixed' and len(targets) == 0):
+            approx = seq_searcher.approx_search(seq, is_sanitised=True)
+            for enr, align_results in approx:
+                if align_results['score'] < 50:
+                    break
+                protein = models.ProteinEntry.from_entry_nr(utils.db, enr)
+                protein.alignment_score = align_results['score']
+                protein.alignment = [x[0] for x in align_results['alignment']]
+                protein.alignment_range = align_results['alignment'][1][1]
+                targets.append(protein)
+            json_encoder.json_fields = dict(EntrySearchJson.json_fields)
+            json_encoder.json_fields.update({'sequence': None, 'alignment': None,
+                                             'alignment_score': None, 'alignment_range': None})
+            context['identified_by'] = 'approximate match'
+        context['data'] = json.dumps(json_encoder.as_json(targets))
+        return render(request, "disambiguate_sequence.html", context=context)
+
+    def _genome_entries_from_taxonomy(self, tax):
+        genomes = self._genomes_from_taxonomy(tax)
+        return set(enr for enr in itertools.chain.from_iterable(
+            range(g.entry_nr_offset+1, g.entry_nr_offset+g.nr_entries+1) for g in genomes))
+
+    def _genomes_from_taxonomy(self, tax):
+        taxids = tax.get_taxid_of_extent_genomes()
+        if len(tax.genomes) > 0:
+            genomes = [tax.genomes[taxid] for taxid in taxids]
+        else:
+            genomes = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_taxid(taxid)) for taxid in taxids]
+        return genomes
+
+    def check_term_for_entry_nr(self, term):
+        try:
+            prefix, id_ = term.split(':', maxsplit=1)
+            if prefix == "GO":
+                return utils.db.entrynrs_with_go_annotation(id_)
+            elif prefix == "EC":
+                return utils.db.entrynrs_with_ec_annotation(id_)
+            elif prefix.lower() in ('cathdb', 'cath', 'gene3d', 'pfam', 'cath/gene3d'):
+                return utils.db.entrynrs_with_domain_id(id_)
+            elif prefix == "HOG":
+                return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
+            elif prefix.lower() in ('oma', 'omagrp', 'omagroup'):
+                return {e['EntryNr'] for e in utils.db.oma_group_members(id_)}
+            elif prefix.lower() in ("tax", "ncbitax", "taxid", "species"):
+                try:
+                    return self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(id_))
+                except ValueError:
+                    return set([])
+        except ValueError:
+            entry_nrs = set()
+            try:
+                entry_nrs.add(utils.id_resolver.resolve(term))
+            except db.AmbiguousID as e:
+                entry_nrs.update(e.candidates)
+            except db.InvalidId:
+                pass
+
+            if len(term) >= 7 and utils.db.seq_search.contains_only_valid_chars(term):
+                # check if valid AA sequence
+                entry_nrs.update(utils.db.seq_search.exact_search(term))
+            return entry_nrs
+
+    def search_fulltext(self, request, query):
+        terms = shlex.split(query)
+        logger.info(terms)
+        entry_cands = collections.Counter()
+        species_cands = collections.Counter()
+        missing_terms = []
+        for term in terms:
+            enr = self.check_term_for_entry_nr(term)
+            if len(enr) == 0:
+                missing_terms.append(term)
+            entry_cands.update(enr)
+            logger.info("term: '{}' matched {} entries".format(term, len(enr)))
+        context = {'query': query, 'tokens': terms, 'missing_terms': missing_terms,
+                   'total_candidates': len(entry_cands), 'search_method': 'fulltext'}
+        if len(entry_cands) == 0:
+            context['message'] = 'Could not find any protein matching your search pattern'
+        else:
+            _, top_cnt = entry_cands.most_common(1)[0]
+            candidates = (models.ProteinEntry(utils.db, enr) for enr, cnts in entry_cands.most_common()
+                          if cnts >= top_cnt-2)
+            candidates = list(itertools.islice(candidates, 0, 1000))
+            context['data'] = json.dumps(EntrySearchJson().as_json(candidates))
+            context['total_shown'] = len(candidates)
+        return render(request, 'disambiguate_entry.html', context=context)
+
+    def get(self, request):
+        try:
+            func = request.GET.get('type', 'id').lower()
+            query = request.GET.get('query', '')
+            if func not in self._allowed_functions:
+                raise ValueError('invalid query type')
+            meth = getattr(self, "search_"+func)
+            return meth(request, query)
+        except ValueError as e:
+            return HttpResponseBadRequest(str(e))
+
+    def post(self, request):
+        try:
+            func = request.POST.get('type', 'id').lower()
+            query = request.POST.get('query', '')
+            if func not in self._allowed_functions:
+                return HttpResponseBadRequest()
+            meth = getattr(self, "search_"+func)
+            return meth(request, query)
+        except ValueError as e:
+            return HttpResponseBadRequest(str(e))
 
 
 @method_decorator(never_cache, name='dispatch')

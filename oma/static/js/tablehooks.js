@@ -9,7 +9,7 @@
         _default: {cls: 'label-default', display_text: "unknown", tag: "?"}
     };
 
-    exports.format_as_kindom_tag = function (kingdom) {
+    exports.format_as_kingdom_tag = function (kingdom) {
         var cur_case = cases[kingdom] ? cases[kingdom] : cases['_default']
         return '<span class="label ' + cur_case.cls + '"><abbr class="abbrNoUnder" ' +
             'title="' + cur_case.display_text + '">' + cur_case.tag + '</abbr></span>';
@@ -17,6 +17,14 @@
 
     exports.format_sciname = function(value, row) {
         return "<b>" + value.species + "</b> " + value.strain;
+    };
+
+    exports.format_species_code = function(value, row){
+        return '<a href="/cgi-bin/gateway.pl?f=DisplayOS&p1=' + value + '">' + value + "</a>";
+    };
+
+    exports.format_taxonid_as_link = function(value, row){
+        return '<a class="external" href="https://uniprot.org/taxonomy/' + value +'">' + value + "</a>"
     };
 
     exports.format_subgenome = function(value){
@@ -32,6 +40,27 @@
                                       + '/">HOG:'
                                       + ('0000000' + value).slice(-7) // Format with leading 0s
                                       + '</a>';
+    };
+    exports.format_roothog = function(value, row) {
+        if (value > 0) {
+            return '<a href="/oma/hogs/' + row.protid + '/vis/">HOG:' + ('0000000' + value).slice(-7) + "</a>";
+        } else {
+            return "n/a";
+        }
+    };
+
+    exports.format_omagroup_of_entry = function(value, row){
+        if (value > 0){
+            return '<a href="/oma/group/'+row.protid+'/">' + value +'</a>';
+        } else {
+            return 'n/a';
+        }
+    };
+
+    exports.format_omagroup = function(value){
+        if (value > 0 || (value !== 'n/a') ){
+            return '<a href="/oma/omagroup/'+value+'/">' + value + '</a>';
+        } else {return 'n/a';}
     };
 
     exports.format_hogid_vis = function(value, row) {
@@ -58,6 +87,33 @@
     };
     exports.format_vps_link = function(value, row){
         return '<a href="/oma/vps/' + value + '">' + value + '</a>';
+    };
+    exports.seq_search_alignment_formatter = function(value, row){
+        var seq = row.sequence;
+        var alignment = row.alignment;
+        if (seq === undefined || alignment === undefined) return "n/a";
+        var label = (row.alignment_range[0] <= 9 ? seq.substr(0, row.alignment_range[0]) : "..("+ (row.alignment_range[0]-3)+ ").."+seq.substr(row.alignment_range[0]-3, 3));
+        var matched = false, snip = [];
+        for (var pos=0; pos < alignment[1].length; pos++){
+            if (alignment[1][pos] === "_") continue;
+            if (alignment[1][pos] === alignment[0][pos]) {
+                if (matched) {
+                    snip.push(alignment[1][pos]);
+                } else {
+                    matched = true;
+                    snip.push('<span class="kw1">' + alignment[1][pos]);
+                }
+            } else {
+                if (! matched){
+                    snip.push(alignment[1][pos]);
+                } else {
+                    matched = false;
+                    snip.push('</span>', alignment[1][pos]);
+                }
+            }
+        }
+        if (matched){ snip.push("</span>"); }
+        return label + snip.join("") + "..("+ (seq.length-row.alignment_range[1]) + ")..";
     };
 
     var xref_re = {
