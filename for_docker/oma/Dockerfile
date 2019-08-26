@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.0.0-experimental
+# syntax=docker/dockerfile:experimental
 
 # pull official base image
 FROM python:3.7-slim

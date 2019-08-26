@@ -55,7 +55,7 @@ You need to have a recent version of Docker installed on your host computer (at
 least version 18.09). Then you can:
 
 1) build oma:latest container:
-   docker build -t oma:latest -f for_docker/oma/Dockerfile --ssh default .
+   DOCKER_BUILDKIT=1 docker build -t oma:latest -f for_docker/oma/Dockerfile --ssh default .
 
 2) run the omabrowser using composer:
    docker-composer up -d
