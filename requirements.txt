@@ -1,7 +1,7 @@
 Django>=2.2.0
 numexpr>=2.4-rc2
-numpy>=1.8.1,<1.16.0
-tables>=3.2
+numpy>1.16.0
+tables>=3.5.1
 future>=0.12.3
 django-bootstrap3>=7.0.1
 tweepy>=2.3.0
