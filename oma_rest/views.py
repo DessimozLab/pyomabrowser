@@ -26,7 +26,7 @@ from pyoma.browser import models, db
 import logging
 
 from collections import Counter
-from rest_framework.decorators import detail_route, list_route, api_view
+from rest_framework.decorators import action, api_view
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class ProteinEntryViewSet(ViewSet):
     lookup_field = 'entry_id'
     schema = DocStringSchemaExtractor()
 
-    @list_route(methods=['post'])
+    @action(detail=False, methods=['post'])
     def bulk_retrieve(self, request, format=None):
         """Retrieve the information available for multiple protein IDs at once.
 
@@ -97,7 +97,7 @@ class ProteinEntryViewSet(ViewSet):
             instance=protein, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def orthologs(self, request, entry_id=None, format=None):
         """List of all the identified orthologues for a protein. Filtering
         specific subtypes of orthology is possible specifying a rel_type
@@ -131,7 +131,7 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.OrthologsListSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def homoeologs(self, request, entry_id=None, format=None):
         """List of all the homoeologs for a given protein.
 
@@ -153,7 +153,7 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.ProteinEntrySerializer(instance=homoeologs, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def gene_ontology(self, request, entry_id=None, format=None):
         """Gene ontology information available for a protein.
         ---
@@ -168,12 +168,12 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.GeneOntologySerializer(instance=annotations, many=True)
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def ontology(self, request, entry_id=None, format=None):
         """Deprecated: use gene_ontology endpoint instead"""
         return self.gene_ontology(request, entry_id, format=format)
 
-    @detail_route()
+    @action(detail=True)
     def domains(self, request, entry_id=None, format=None):
         """List of the domains present in a protein.
         ---
@@ -188,7 +188,7 @@ class ProteinEntryViewSet(ViewSet):
         response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
         return Response(response)
 
-    @detail_route()
+    @action(detail=True)
     def xref(self, request, entry_id=None, format=None):
         """List of cross-references for a protein.
         ---
@@ -255,7 +255,7 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
             instance=group, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def close_groups(self, request, group_id=None, format=None):
         """Retrieve the sorted list of closely related groups for a given OMA group.
         ---
@@ -447,7 +447,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializers.HOGsLevelDetailSerializer(result_data, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def members(self, request, hog_id=None, format=None):
         """Retrieve a list of all the protein members for a given hog_id.
 
@@ -590,7 +590,7 @@ class GenomeViewSet(PaginationMixin, ViewSet):
         serializer = serializers.GenomeDetailSerializer(instance=g, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def proteins(self, request, genome_id=None):
         """Retrieve the list of all the protein entries available for a genome.
         ---
