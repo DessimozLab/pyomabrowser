@@ -58,13 +58,17 @@ least version 18.09). Then you can:
    DOCKER_BUILDKIT=1 docker build -t oma:latest -f for_docker/oma/Dockerfile --ssh default .
 
 2) run the omabrowser using composer:
-   docker-composer up -d
+   docker-compose up -d
 
 3) if this is the first time you use it, you need to add dataset to the docker 
    volume. Get it from the ucl project share 
      /data/ul/projects/cdessimo/oma-browser/<release>/data
    and add it to the docker volume:
    docker cp <path> pyomabrowser_web_1:/data/release/
+
+   alternatively, if this is going to be too big for your docker volume, you 
+   can also mount it directly. see in docker-compose.yml the commented version
+   which uses the data from an external usb disk (/Volumes/TOSHIBA\ EXT/...)
 
 4) run migrate and collect static:
    docker-compose exec web ./manage.py migrate

@@ -10,6 +10,12 @@ services:
       - static_volume:/data/static
       - media_volume:/data/media
       - release_volume:/data/release
+      #- type: bind
+      #  source: "/Volumes/TOSHIBA EXT/browser/All.Jun2019/data"
+      #  target: "/data/release"
+      #  read_only: true
+      #  volume:
+      #    nocopy: true
     ports:
       - 8000:8000
     depends_on:
@@ -38,6 +44,12 @@ services:
       - static_volume:/data/static
       - media_volume:/data/media
       - release_volume:/data/release
+      # - type: bind
+      #   source: "/Volumes/TOSHIBA EXT/browser/All.Jun2019/data"
+      #   target: "/data/release"
+      #   read_only: true
+      #   volume:
+      #     nocopy: true
     depends_on:
       - broker
       - db
