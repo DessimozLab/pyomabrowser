@@ -1,17 +1,16 @@
 function Colorbar() {
     var scale, // the input scale this represents;
-        margin = {top: 5, right: 30, bottom: 25, left: 0}
+        margin = {top: 5, right: 15, bottom: 25, left: 10}
     orient = "vertical",
     origin = {
         x: 0,
         y: 0
     }, // where on the parent to put it
+    maxValue = 50000, // larger values are not shown with pointer
     barlength = 100, // how long is the bar
-    thickness = 50, // how thick is the bar
+    thickness = 40, // how thick is the bar
     title = "", // title for the colorbar
     scaleType = "linear";
-
-
 
 
     checkScaleType = function (scale) {
@@ -39,28 +38,25 @@ function Colorbar() {
         }
     }
 
-
     function chart(selection) {
-        var fillLegend,
-            fillLegendScale;
+        var fillLegend, fillLegendScale;
         selection.pointTo = function(inputNumbers) {
+            inputNumbers = maxValue < inputNumbers ? maxValue : inputNumbers;
             var pointer = fillLegend.selectAll(".pointer");
             var pointerWidth = Math.round(thickness*3/4);
-
 
             //Also creates a pointer if it doesn't exist yet.
             pointers = fillLegend
                 .selectAll('.pointer')
                 .data([inputNumbers]);
 
-	    pointerSVGdef = function() {
-		return (
-                orient=="horizontal" ? 
-		    'M ' + 0 +' '+ thickness + ' l -' +  pointerWidth + ' -' + pointerWidth + ' l ' + 2*pointerWidth + ' -' + 0 + ' z' :
-		    'M ' + thickness +' '+ 0 + ' l -' +  pointerWidth + ' -' + pointerWidth + ' l ' + 0 + ' ' +  2*pointerWidth + ' z' 
-			
-		)
-	    }
+            pointerSVGdef = function() {
+                return (orient=="horizontal" ?
+                'M ' + 0 +' '+ thickness + ' l -' +  pointerWidth + ' -' + pointerWidth + ' l ' + 2*pointerWidth + ' -' + 0 + ' z' :
+                'M ' + thickness +' '+ 0 + ' l -' +  pointerWidth + ' -' + pointerWidth + ' l ' + 0 + ' ' +  2*pointerWidth + ' z'
+
+                )
+            }
 
             pointers
                 .enter()
@@ -80,21 +76,22 @@ function Colorbar() {
                 .duration(1000)
                 .attr('opacity',1)
                 .attr('transform',
-		      orient=="vertical" ?
-		      "translate(0," + (fillLegendScale(inputNumbers))+ ')':
-		      "translate(" + (fillLegendScale(inputNumbers))+ ',0)'
-		     )
+              orient=="vertical" ?
+              "translate(0," + (fillLegendScale(inputNumbers))+ ')':
+              "translate(" + (fillLegendScale(inputNumbers))+ ',0)'
+             )
             //and then it fades the pointer out over 5 seconds.
-                .transition()
-                .delay(2000)
-                .duration(3000)
-                .attr('opacity',0)
-                .remove();
+            .transition()
+            .delay(2000)
+            .duration(3000)
+            .attr('opacity',0)
+            .remove();
+
         }
 
         selection.each(function(data) {
 
-            var scaleType = checkScaleType(scale);
+            //var scaleType = checkScaleType(scale);
             var thickness_attr;
             var length_attr;
             var axis_orient;
@@ -111,7 +108,7 @@ function Colorbar() {
                 length_attr = "width"
                 axis_orient = "bottom"
                 position_variable = "x"
-		non_position_variable = "y"
+		        non_position_variable = "y"
                 axis_transform = "translate (0," + thickness + ")"
             }
 
@@ -135,17 +132,18 @@ function Colorbar() {
                 .classed("colorbar", true)
                 .attr("x",function(d) {return d[0]-margin.right})
                 .attr("y",function(d) {return d[1]-margin.top})
+                ;
 
-	    offsetGroup = new_colorbars
+            offsetGroup = new_colorbars
                 .append("g")
                 .classed("colorbar", true)
-	        .attr("transform","translate(" + margin.left + "," + margin.top + ")")
+                .attr("transform","translate(" + margin.left + "," + margin.top + ")")
 
             offsetGroup.append("g")
-		.attr("class","legend rectArea")
+                .attr("class","legend rectArea")
 
             offsetGroup.append("g")
-		.attr("class","axis color")
+                .attr("class","axis color")
 
             svg
                 .attr(thickness_attr, thickness + margin.left + margin.right)
@@ -164,7 +162,7 @@ function Colorbar() {
             fillLegendScale = scale.copy();
 
             if (typeof(fillLegendScale.invert)=="undefined") {
-                //console.log("assuming it's a quantile scale")
+                console.log("assuming it's a quantile scale")
                 fillLegendScale = d3.scale
                     .linear()
                     .domain(d3.extent(fillLegendScale.domain()))
@@ -174,15 +172,17 @@ function Colorbar() {
                 0, barlength,
                 by=barlength / (fillLegendScale.domain().length - 1));
 
+
             legendRange.push(barlength);
 
-	    if (orient=="vertical") {
-		//Vertical should go bottom to top, horizontal from left to right.
-		//This should be changeable in the options, ideally.
-		legendRange.reverse()
-	    }
-	    fillLegendScale.range(legendRange);
-	    
+            if (orient=="vertical") {
+                //Vertical should go bottom to top, horizontal from left to right.
+                //This should be changeable in the options, ideally.
+                legendRange.reverse()
+            }
+
+            fillLegendScale.range(legendRange);
+
             colorScaleRects = fillLegend
                 .selectAll("rect.legend")
                 .data(d3.range(0, barlength));
@@ -201,28 +201,32 @@ function Colorbar() {
                 .exit()
                 .remove();
 
-	    //Switch to using the original selection so that the transition will be inheirited
-	    selection
-	        .selectAll("rect.legend")
-                .style("opacity", 1)
-                .attr(thickness_attr, thickness)
-                .attr(length_attr, 2) // single pixel thickness produces ghosting on some browsers
-                .attr(position_variable, function(d) {return d;})
-                .attr(non_position_variable, 0)
-                .style("fill", function(d) {
-                    return scale(fillLegendScale.invert(d));
-                })
+            //Switch to using the original selection so that the transition will be inherited
+            selection
+                .selectAll("rect.legend")
+                    .style("opacity", 1)
+                    .attr(thickness_attr, thickness)
+                    .attr(length_attr, 2) // single pixel thickness produces ghosting on some browsers
+                    .attr(position_variable, function(d) {return d;})
+                    .attr(non_position_variable, 0)
+                    .style("fill", function(d) {
+                        return scale(fillLegendScale.invert(d));
+                    })
 
-
+            // format the ticks to not take too much space
             colorAxisFunction = d3.svg.axis()
                 .scale(fillLegendScale)
-                .orient(axis_orient);
+                .orient(axis_orient).ticks(5).tickFormat(d3.format("s"));
 
-	    if (typeof(scale.quantiles) != "undefined") {
-		quantileScaleMarkers = scale.quantiles().concat( d3.extent(scale.domain()))
-		console.log(quantileScaleMarkers)
-		colorAxisFunction.tickValues(quantileScaleMarkers)
-	    }
+            // "nice" looking scale, although hardcoded
+            colorAxisFunction.tickValues([1, 1000, 3000, 5000, 10000, 15000, 20000, 30000, 40000, 50000]);
+
+            if (typeof(scale.quantiles) != "undefined") {
+                //quantileScaleMarkers = scale.quantiles().concat( d3.extent(scale.domain()))
+                quantileScaleMarkers = scale.quantiles().concat( [1, 50000])
+                console.log(quantileScaleMarkers);
+                colorAxisFunction.tickValues(quantileScaleMarkers)
+            }
 
             //Now make an axis
             fillLegend.selectAll(".color.axis")
@@ -241,7 +245,7 @@ function Colorbar() {
                 .exit()
                 .remove();
 
-//            return this;
+//          return this;
         });
     }
 

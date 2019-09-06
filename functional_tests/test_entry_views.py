@@ -8,9 +8,9 @@ class EntryViewPageTest(FunctionalTest):
         # Cecile navigates to OMA Browser page
         self.browser.get(self.server_url)
 
-        # she wants to search for her favorite wheat gene - A0A1D5VN70
+        # she wants to search for her favorite wheat gene - AVLA1_WHEAT
         # she first finds the search field
-        query = 'A0A1D5VN70'
+        query = 'AVLA1_WHEAT'
         inputbox = self.browser.find_element_by_id('inputBrowser')
         # she enters the query gene into it, and presses enter
         inputbox.send_keys('{}\n'.format(query))
@@ -19,20 +19,20 @@ class EntryViewPageTest(FunctionalTest):
 
         # she knows that wheat is a polyploid genome and expects to find a tab on Homeologs
         tab_lnks = self.browser.find_elements_by_css_selector('.nav-tabs>li>a')
-        self.assertIn('Homeologs', "".join([tab.text for tab in tab_lnks]))
+        self.assertIn('Homoeologs', "".join([tab.text for tab in tab_lnks]))
 
         # is this also true if she starts from a django served page?
         synteny_lnks = [lnk for lnk in tab_lnks if 'Local synteny' in lnk.text]
         self.assertEqual(1, len(synteny_lnks))
         synteny_lnks[0].click()
         tab_lnks = self.browser.find_elements_by_css_selector('.nav-tabs>li>a')
-        self.assertIn('Homeologs', "".join([tab.text for tab in tab_lnks]))
+        self.assertIn('Homoeologs', "".join([tab.text for tab in tab_lnks]))
 
     def test_human_pages(self):
         # Cecile now want's to verify that on non-polyploid genomes there are no homeologs
         self.browser.get(self.server_url+'/oma/hogs/P53_HUMAN')
         tab_lnks = self.browser.find_elements_by_css_selector('.nav-tabs>li>a')
-        self.assertNotIn('Homeologs', "".join([tab.text for tab in tab_lnks]))
+        self.assertNotIn('Homoeologs', "".join([tab.text for tab in tab_lnks]))
 
     def test_synteny_page(self):
         # Tom navigates via the info page of the P53_HUMAN info page to the synteny page
@@ -45,7 +45,7 @@ class EntryViewPageTest(FunctionalTest):
         species_column = [g.text for g in self.browser.find_elements_by_xpath("//div[@class='twotables']//table/tbody/tr/td[1]")]
         self.assertLess(5, len(species_column), 'Too few genomes containing P53 orthologs')
         row_nr_of_species = []
-        for g in ('PANTR', 'PONAB', 'MACMU', 'MOUSE', 'BOVIN', 'LOXAF'):
+        for g in ('PANTR', 'PONAB', 'MACMU', 'MOUSE', 'BOVIN'):
             try:
                 pos = species_column.index(g)
             except ValueError:
@@ -83,13 +83,6 @@ class ExploreMenuTest(FunctionalTest):
         g1_input = self.browser.find_element_by_id("g1_name")
         self.input_in_autocomplete_and_select(g1_input, 'Homo', 'Homo sapiens')
 
-        # we select chromosome 2
-        self.wait_for(
-            lambda: self.assertIsNotNone(
-                self.browser.find_element_by_css_selector('#selectchr1 option'))
-        )
-        self.browser.find_element_by_xpath("//select[@id='selectchr1']//option[text()='2']").click()
-
         # as second genome we select Mus musculus by typing Mus and selecting from dropdown
         g2_input = self.browser.find_element_by_id("g2_name")
         self.input_in_autocomplete_and_select(g2_input, 'Mus', 'Mus musculus')
@@ -97,7 +90,17 @@ class ExploreMenuTest(FunctionalTest):
         # we select chromosome 2
         self.wait_for(
             lambda: self.assertIsNotNone(
-                self.browser.find_element_by_css_selector('#selectchr2 option'))
+                self.browser.find_element_by_css_selector('#selectchr1 option')),
+            timeout=10,
+        )
+        time.sleep(2)
+        self.browser.find_element_by_xpath("//select[@id='selectchr1']//option[text()='2']").click()
+
+        # we select chromosome 2
+        self.wait_for(
+            lambda: self.assertIsNotNone(
+                self.browser.find_element_by_css_selector('#selectchr2 option')),
+            timeout=10
         )
         self.browser.find_element_by_xpath("//select[@id='selectchr2']//option[text()='2']").click()
         # let's submit this pair (HUMAN/2 vs MOUSE/2) and see the dotplot

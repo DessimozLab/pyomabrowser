@@ -46,7 +46,7 @@ element {
 <div class="container-fluid" style="height: 90vh;">
     {% block above_svg %}{% endblock %}
     <div class="row" style="height: 100%;">
-        <div class="col-md-9" id="svgdiv"> <!-- svg -->
+        <div class="col-md-9" id="svgdiv" style="overflow: hidden;"> <!-- svg -->
 
 
             <!-- help modal -->
@@ -114,17 +114,16 @@ element {
         </div>
         <div class="col-md-3"> <!-- UI -->
             <div class="card col-12" id="UISelected"  >
-                <h3 class="text-center searchg greenb py-2 mb-0" id="textSel" style="font-size: 18px; color: #fff;"
-                >Selected
-                 genomes</h3>
+                <h3 class="text-center searchg greenb py-2 mb-0" id="textSel" style="font-size: 18px; color: #fff; background-color: #307C3B">
+                    Selected genomes</h3>
             </div>
             {% block menu_additional_inputs %}{% endblock %}
             <div class="row mx-auto" id="buttondiv">
                 <div class="col-xs-12 col-sm-6 mx-auto">
-                    <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff;" id="buttonUnselect">Unselect all</button>
+                    <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff; background-color: #307C3B" id="buttonUnselect">Unselect all</button>
                 </div>
                 <div class="col-xs-12 col-sm-6 mx-auto">
-                    <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff;" id="{% block submit_button_id %}buttonSubmit{% endblock %}">Submit</button>
+                    <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff; background-color: #307C3B" id="{% block submit_button_id %}buttonSubmit{% endblock %}">Submit</button>
                 </div>
             </div>
 

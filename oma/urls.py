@@ -1,10 +1,9 @@
 from django.conf import settings
-from django.conf.urls import include, patterns, url
+from django.conf.urls import include, url
 from django.views.generic.base import TemplateView
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.home),
     url(r'^home/$', views.home, name='home'),
 
     # Entry
@@ -15,10 +14,12 @@ urlpatterns = [
     url(r'^synteny/(?P<entry_id>\w+)/$', views.synteny, name='synteny'),
     url(r'^synteny/(?P<entry_id>\w+)/(?P<windows>\d)/$', views.synteny, name='synteny'),
     url(r'^synteny/(?P<entry_id>\w+)/(?P<mod>\d)/(?P<windows>\d)/$', views.synteny, name='synteny'),
-    url(r'^info/(?P<entry_id>\w+)/fasta/$', views.InfoViewFasta.as_view(), name='entry_fasta'),
     url(r'^info/(?P<entry_id>\w+)/$', views.EntryInfoView.as_view(), name='entry_info'),
+    url(r'^info/(?P<entry_id>\w+)/fasta/$', views.InfoViewFasta.as_view(), name='entry_fasta'),
+    url(r'^info/(?P<entry_id>\w+)/cds/fasta/$', views.InfoViewCDSFasta.as_view(), name='entry_cds'),
+    # TODO: Are these 3 urls really needed?
+    url(r'^info/(?P<entry_id>\w+)/go/$', views.Entry_GOA.as_view(), name="entry_goa"),
     url(r'^paralogs/(?P<entry_id>\w+)/$', views.Entry_Paralogy.as_view(), name="pair_paralogs"),
-    url(r'^GOA/(?P<entry_id>\w+)/$', views.Entry_GOA.as_view(), name="entry_goa"),
     url(r'^sequences/(?P<entry_id>\w+)/$', views.Entry_sequences.as_view(), name="entry_sequences"),
 
     # HOG
@@ -44,7 +45,7 @@ urlpatterns = [
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGsView.as_view(), name='hogs'),
     url(r'^hogs/(?P<entry_id>\w+)/orthoxml/$', views.HOGsOrthoXMLView.as_view(),
         name='hogs_orthoxml'),
-    url(r'^hogs/(?P<entry_id>\w+)/vis/$', views.HOGsVis.as_view(), name='hog_vis'),
+    url(r'^hogs/(?P<entry_id>\w+)/vis/$', views.HOGiHam.as_view(), name='hog_vis'),
     url(r'^hogs/(?P<entry_id>\w+)/vis0/$', views.HogVisWithoutInternalLabels.as_view(),
         name='hog_vis_no_internal_labels'),
     url(r'^hogs/(?P<entry_id>\w+)/domains/$',
@@ -64,6 +65,8 @@ urlpatterns = [
     # OMA Groups via Entry
     url(r'^group/(?P<entry_id>\w+)/$', views.EntryCentricOMAGroup.as_view(), name="omagroup-entry"),
     url(r'^group/(?P<entry_id>\w+)/msa/$', views.EntryCentricOMAGroupMSA.as_view(), name="omagroup-entry-msa"),
+
+    url(r'^search/$', views.Searcher.as_view(), name='search'),
 
     url(r'^export_markers', views.export_marker_genes, name='export_markers'),
     url(r'^markers/(?P<data_id>\w+)/$', views.MarkerGenesResults.as_view(), name='marker_genes'),
@@ -88,7 +91,7 @@ urlpatterns = [
     url(r'^fellowship/$', views.fellowship, name="fellowship"),
     url(r'^fellowship/thanks/', TemplateView.as_view(template_name='fellowship_thanks.html'), name='fellowship_thanks'),
     url(r'^suggestion/genome/$', views.genome_suggestion, name="genome_suggestion"),
-    url(r'^suggestion/genome/thanks$', TemplateView.as_view(template_name="help_genome_suggestion_thanks.html"), name="genome_suggestion_thanks"),
+    url(r'^suggestion/genome/thanks$', TemplateView.as_view(template_name="genome_suggestion_thanks.html"), name="genome_suggestion_thanks"),
     url(r'^functions/$', views.function_projection, name='function-projection-input'),
     url(r'^functions/(?P<data_id>\w+)/$', views.FunctionProjectionResults.as_view(), name="function-projection"),
 
@@ -108,8 +111,11 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    import debug_toolbar
+    try:
+        import debug_toolbar
 
-    urlpatterns.extend([
-        url(r'^__debug__/', include(debug_toolbar.urls)),
-    ])
+        urlpatterns.extend([
+            url(r'^__debug__/', include(debug_toolbar.urls)),
+        ])
+    except ImportError:
+        pass

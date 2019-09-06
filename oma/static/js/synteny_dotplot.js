@@ -79,6 +79,42 @@ dotplot_theme = function () {
 
 
         };
+        this.set_filter_relation = function (relTypeSet) {
+
+
+
+            relTypeSet.forEach(function (d) {
+                var li = '<li class="dropdown-reltype-li" id="' + d +'" ><a href="#" class="small" data-value="' + d +'" tabIndex="-1"><input type="checkbox" checked/>&nbsp;' + d +'</a></li>';
+                 $('#dropdown-reltype').append(li);
+            });
+
+
+
+            $( '.dropdown-reltype-li a' ).on( 'click', function( event ) {
+
+                       var $target = $( event.currentTarget ),
+                           val = $target.attr( 'data-value' ),
+                           $inp = $target.find( 'input' ),
+                           idx;
+
+                       if ( ( idx = type_selected.indexOf( val ) ) > -1 ) {
+                          type_selected.splice( idx, 1 );
+                          setTimeout( function() { $inp.prop( 'checked', false ) }, 0);
+                       } else {
+                          type_selected.push( val );
+                          setTimeout( function() { $inp.prop( 'checked', true ) }, 0);
+                       }
+
+                       $( event.target ).blur();
+
+                       console.log( type_selected );
+
+                       dotplot.update_visibility_dot();
+
+                       return false;
+                    });
+
+        };
 
         //dotplot
         this.add_legend_color = function () {
@@ -140,13 +176,16 @@ dotplot_theme = function () {
                 })
                 .attr("visibility", function (d) {
 
-                    var dist = parseInt(d.distance);
+                    if (( idx = type_selected.indexOf( d.rel_type ) ) > -1 ){
 
+                        var dist = parseInt(d.distance);
 
-                    if (dotplot.between(dist, filter_min_distance, filter_max_distance)) {
-                        return "visible";
+                        if (dotplot.between(dist, filter_min_distance, filter_max_distance)) {
+                            return "visible";
 
+                        }
                     }
+
                     return "hidden";
 
                 });
@@ -396,6 +435,7 @@ dotplot_theme = function () {
         // Set up image export
         dotplot.setup_image_export();
 
+
         // data accession should be  done with function for the metrix, the x and y value!
 
         //d3.json(url_json, function (error, data) {
@@ -425,6 +465,19 @@ dotplot_theme = function () {
             // set the inital filtering boundaries to extremum values
             filter_max_distance = max_distance;
             filter_min_distance = min_distance;
+
+
+            // get the types of relations available
+
+            var relTypeSet = new Set();
+
+            data.forEach(function(d) {
+              relTypeSet.add(d['rel_type']);
+            });
+
+            var type_selected = [];
+            type_selected = Array.from(relTypeSet);
+            dotplot.set_filter_relation(relTypeSet);
 
             dotplot.update_color_scales();
 
@@ -495,7 +548,7 @@ dotplot_theme = function () {
                 .attr("fill", function (d) {
                     return color_threshold(d[metric_option.accessor])
                 })
-                //.attr('r', function(d){ return currentZoom ? 2.5  / currentZoom.k : 2.5})
+                .attr('r', function(d){ return currentZoom ? 2.5  / currentZoom.k : 2.5})
                 .on("mouseover", function (d) {
                     tooltip_div.transition()
                         .duration(200)

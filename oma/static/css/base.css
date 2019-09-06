@@ -201,6 +201,33 @@ a.fig{
 	color: #222;
 }
 
+dd#locus {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+dd#locus:hover {
+    overflow: visible;
+    white-space: normal;
+}
+
+.cell-ellipsis {
+	overflow:hidden;
+	white-space:nowrap;
+	text-overflow:ellipsis;
+	word-break: normal;
+}
+.cell-ellipsis:hover{
+	overflow: visible;
+	white-space: normal;
+	word-break: break-all;
+}
+.cell-full {
+	max-width:1px;
+	width:100%;
+}
+
 .kw1 {
     font-weight: bold;
     background-color: #FFFF66;

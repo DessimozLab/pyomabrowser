@@ -229,7 +229,10 @@
 
     <!--
     <h2 class="">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %} </h2>
-            <h4>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</h4>
+            <h4>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %}
+                <b>{{entry.genome.species}}</b>{{entry.genome.strain}}
+                {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %}
+            </h4>
             {% block seqhead_hook %}{% endblock %}
             <br>
             <ul class="nav nav-tabs" role="tablist">
@@ -306,7 +309,10 @@
 
 
             <!--<h2 class="">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %} </h2>
-            <h4>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</h4>
+            <h4>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %}
+                <b>{{entry.genome.species}}</b>{{entry.genome.strain}}
+                {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %}
+            </h4>
             {% block seqhead_hook %}{% endblock %}
             <br>
             <ul class="nav nav-tabs" role="tablist">

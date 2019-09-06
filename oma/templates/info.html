@@ -1,0 +1,186 @@
+{% extends "seqCV.html" %}
+{% load staticfiles %}
+{% load oma_extras %}
+
+{% block title %}OMA orthology database: Information for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} OMA stores the following information about the gene/protein.{% endblock %}
+{% block contentTab %}
+
+{% include "includes/func_desc.html" %}
+
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <div class="pull-left">
+            <h3 class="panel-title">General Information</h3>
+        </div>
+    </div>
+    <div class="panel-body">
+        <dl class="dl-horizontal">
+            {% if entry.description %}<dt>Description</dt><dd>{{ entry.description }} </dd> {% endif %}
+            <dt>Organism</dt>
+            <dd><a href="/cgi-bin/gateway.pl?f=DisplayOS&p1={{entry.genome.uniprot_species_code}}">
+                {{ entry.genome.uniprot_species_code }} - {{ entry.genome.sciname }}</a>
+                <span class="small">(Taxon-ID: <a href="///uniprot.org/taxonomy/{{ entry.genome.ncbi_taxon_id }}" class="external">{{ entry.genome.ncbi_taxon_id }}</a>)</span>
+            </dd>
+            <dt>Locus</dt><dd id="locus"><span id="chr">{{ entry.chromosome }}</span>:&nbsp;<span id="coordinates">{{ entry.exons }}</span></dd>
+            <dt>Number of exons</dt><dd>{{ entry.exons | length }}</dd>
+            {% if entry.alternative_isoforms %}
+            <dt>Alternative splicing</dt>
+                {% for variant in entry.alternative_isoforms %}
+                <dd><a href="{% url "entry_info" variant.omaid %}">{{ variant.omaid }}</a></dd>
+                {% endfor %}
+            {% endif %}
+            {% if "PMP" in xrefs %}
+                <dt>Protein Structures</dt><dd>n/a</dd>
+            {% endif %}
+            {% if entry.ec_numbers %}
+                <dt>EC number</dt>
+                <dd>
+                    {% for ecnum in entry.ec_numbers %}
+                    <a class="external" href="https://enzyme.expasy.org/EC/{{ ecnum }}">EC:{{ ecnum }}</a>
+                    {% endfor %}
+                </dd>
+            {% endif %}
+        </dl>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <div class="pull-left">
+            <h3 class="panel-title">IDs and Cross-references</h3>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div id="loader-xrefs"><img src="{% static "image/loading.gif" %}" alt="loading xrefs..."></div>
+        <dl id="xrefs" class="dl-horizontal">
+            <!--{% for xref in xrefs %}
+                <dt>{{ xref.source }}</dt><dd><a class="external" href="{{ xref.url }}">{{ xref.xref }}</a></dd>
+            {% endfor %} -->
+        </dl>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <div class="pull-left">
+            <h3 class="panel-title">Domain Architecture</h3>
+        </div>
+    </div>
+    <div class="panel-body">
+        <table class="table">
+            <tr class="domain_row" id="{{ entry.omaid }}"><td class="domain_vis"></td></tr>
+        </table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <div class="pull-left">
+            <h3 class="panel-title">Gene Ontology</h3>
+        </div>
+    </div>
+    <div id="ontology-panel" class="panel-body">
+        <div id="loader-ontology"><img src="{% static "image/loading.gif"%}" alt="loading GO annotations..."></div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <div class="pull-left">
+            <h3 class="panel-title">Protein Sequence</h3>
+        </div>
+        <div class="pull-right">
+            Download:
+            <a href="{% url 'entry_fasta' entry.omaid %}"><span class="glyphicon glyphicon-download">Fasta</span></a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <pre>{{ entry.sequence|uniprot_seq_repr }}</pre>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <div class="pull-left">
+            <h3 class="panel-title">Coding Sequence</h3>
+        </div>
+        <div class="pull-right">
+            Download:
+            <a href="{% url 'entry_cds' entry.omaid %}"><span class="glyphicon glyphicon-download">Fasta</span></a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <pre>{{ entry.cdna|uniprot_seq_repr }}</pre>
+    </div>
+</div>
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+<!-- Domain Visualisation -->
+<script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+<!-- Ontology -->
+<script src="{% static "js/underscore-min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/xref_format.js" %}" type="text/javascript"></script>
+<script>
+(function () {
+  domains.visualize_all(".domain_row", {{ entry.sequence_length }});
+})();</script>
+
+<script>
+    (function(){
+        $.getJSON("/api/protein/{{ entry.entry_nr }}/ontology/", function(data){
+           _.forEach(_.groupBy(data, "aspect"), function(annos, aspect){
+               var tab = ['<table class="table table-hover"><thead><tr><th colspan="2">',
+                   '<strong>'+ aspect + '</strong></th></tr>',
+                   '<tr><th class="subHead">GO term</th><th class="subHead">Evidence and reference</th></tr>',
+                   '</thead><tbody>'];
+               _.forEach(_.groupBy(annos, "GO_term"), function(term_annos, term){
+                   tab.push('<tr><td>' + term_annos[0].name +
+                       ' (' + xref_format.go_annotation_url(term_annos[0]) + ')</td>', '<td>');
+                   _.forEach(_.groupBy(term_annos, 'evidence'), function(evi_anno, evi){
+                       tab.push(xref_format.go_evi_url(evi));
+                       var ref=[];
+                       evi_anno.forEach(function(anno){
+                           ref.push(xref_format.go_ref_url(anno.reference));
+                       });
+                       tab.push(ref.join(', '), '<br>');
+                   });
+                   tab.push('</td></tr>');
+               });
+               $('#ontology-panel').append(tab.join("\n"))
+           });
+        });
+        $("#loader-ontology").hide();
+    })();
+</script>
+
+<script>
+    (function(){
+        $.getJSON("/api/protein/{{ entry.entry_nr }}/xref/", function(data){
+            // sort accroding to xref_source_order
+            var xref_source_order = {{ xref_order | safe }};
+            data.sort(function(a, b){
+                var idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
+                if (idx_a === idx_b){
+                    return a.xref > b.xref ? 1 : -1;
+                }
+                return idx_a - idx_b;
+            });
+            // remove duplicated xref values of less important sources
+            var clean_data = data.filter(function(obj, pos, arr){
+                return arr.map(function(obj){return obj.xref;}).indexOf(obj.xref) === pos})
+                .filter(function(obj){return !obj.xref.match("^Rep[0-9]+$")});
+            _.forEach(_.groupBy(clean_data, "source"), function(xrefs, source){
+                var list_item = ["<dt>"+source+"</dt>"];
+                _.forEach(xrefs, function(ref){
+                    list_item.push("<dd>"+xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}") +"</dd>")
+                });
+                $('#xrefs').append(list_item.join("")+"\n");
+            });
+        });
+        $("#loader-xrefs").hide();
+    })();
+</script>
+{% endblock contentTab %}

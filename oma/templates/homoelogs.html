@@ -1,0 +1,122 @@
+{% extends "seqCV.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA orthology database: Homoeologs for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ nr_hps }} homoeologs {% endblock %}
+
+{% block contentTab %}
+
+    <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="myModalLabel">What are homoeologs?</h3>
+                </div>
+                <div class="modal-body">
+                    <p> In OMA, we define homoeologous genes as pairs of homologous genes that have started
+                        diverging through speciation between the progenitor genomes and then merged back into
+                        the same genome by hybridisation. Homoeologs are thus only defined in polyploid genomes.
+                    </p>
+                    <p>With OMA we aim at reporting a comprehensive list of homoeologs and provide a confidence
+                    scores to help users to distinguish between high-confident and more putative predictions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <div class="pull-left">
+                Homoeologous Pairs <a href="#" class="badge" role="button" data-toggle="modal"
+                                      data-target=".bs-example-modal-lg">?</a>
+            </div>
+            <div class="pull-right">
+                Download:
+                <a href="{% url 'homoeologs-fasta' entry.omaid %}"><span
+                        class="glyphicon glyphicon-download">Fasta</span></a>
+            </div>
+        </div>
+        <div class="panel-body">
+
+            {% if entry.omaid == entry.alt_splicing_variant %}
+
+                <table class="table table-hover" id="relTable"
+                       data-show-toggle="true"
+                       data-show-columns="true" data-search="true" data-show-export="true"
+                       data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
+                       data-mobile-responsive="true" data-check-on-init="true"
+                       data-undefined-text=""
+                       data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
+                       data-url="{% url 'homoeologs-json' entry.omaid %}">
+                    <thead>
+
+                    <tr>
+                        <th data-field="taxon" data-sortable="true"
+                            data-formatter="tablehooks.format_sciname">Taxon
+                        </th>
+                        <th data-field="subgenome" data-sortable="true"
+                            data-formatter="tablehooks.format_subgenome">Sub-genome
+                        </th>
+                        <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_info_link">
+                            Protein ID
+                        </th>
+                        <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">
+                            Cross reference
+                        </th>
+                        <th data-field="confidence" data-sortable="true" data-formatter="tablehooks.format_float_value">
+                            Confidence
+                        </th>
+                        <th data-sortable="false" class="domain_vis">Domain Architectures</th>
+                    </tr>
+                    </thead>
+
+                </table>
+            {% else %}
+                <div>Homoeologs for this gene have been computed for a different splicing variant:
+                    <a href="{% url 'homoeologs' entry.alt_splicing_variant %}">{{ entry.alt_splicing_variant }}</a></div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- D3 and D3 Tooltip -->
+    <script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+    <script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+    <!-- Domain Visualisation -->
+    <script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
+    <link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css"/>
+
+    {% if entry.omaid == entry.alt_splicing_variant %}
+        <!-- bootstrap-table -->
+        <script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+        <script src="{% static "js/bootstrap-table.min.js" %}"></script>
+        <link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+        <script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+        <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+        <script src="{% static "js/tableExport.min.js" %}"></script>
+
+        <script>
+            var tab = $("#relTable");
+            tab.bootstrapTable({
+                reorderableColumns: true,
+                clickToSelect: false,
+                showMultiSort: true,
+                onPostBody: function () {
+                    domains.visualize_all(".protein", {{ longest_seq }});
+                },
+                onLoadSuccess: function (data) {
+                    tab.bootstrapTable('hideLoading');
+                }
+            });
+            var icons = tab.bootstrapTable('getOptions').icons;
+            $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+            tab.bootstrapTable('refreshOptions', {'icons': icons});
+            tab.bootstrapTable('showLoading');
+
+        </script>
+
+    {% endif %}
+
+{% endblock contentTab %}

@@ -61,17 +61,18 @@
 
             <div class="search">
                 <h3>Search</h3>
-                <form class="oma-search-mobile">
+                <form class="oma-search-mobile" id="searchNavForm" role="search" action="{% url 'search' %}" method="POST">
                     <div class="oma-search-select">
-                        <select>
-                            <option value="DisplayEntry" selected="selected">Identifier</option>
-                            <option value="SearchSeqDb">Protein sequence</option>
-                            <option value="DisplayGroup">OMA group</option>
-                            <option value="fullTextSearch">Full-text search</option>
+                        <select id="selectNav" class="form-control btn-mini" name="type" onchange="update_autocomplete_enableing('searchNavForm')">
+                            <option value="id" selected="selected">Identifier</option>
+                            <option value="sequence">Protein sequence</option>
+                            <option value="group">OMA group</option>
+                            <option value="fulltext">Full-text search</option>
+                            <option value="species">Species</option>
                         </select>
                     </div>
-                    <input type="text" placeholder="Please enter a value"/>
-                    <button><img src="{% static "image/icon-logo-oma-o.png" %}" alt="Logo OMA icon"/></button>
+                    <input type="text" id="textNav" class="form-control" name="query" placeholder="Please enter a value"/>
+                    <button type="submit"><img src="{% static "image/icon-logo-oma-o.png" %}" alt="Logo OMA icon"/></button>
                 </form>
             </div>
 
@@ -140,6 +141,8 @@
                         <a class="dropdown-item" href="/standalone">OMA StandAlone</a>
                         <a class="dropdown-item" href="{% url 'APISOAP' %}">SOAP</a>
                         <a class="dropdown-item" href="https://github.com/dessimozlab/pyham">pyHam</a>
+                        <a class="dropdown-item" href="https://bioconductor.org/packages/release/bioc/html/OmaDB.html">R API binding</a>
+                        <a class="dropdown-item" href="https://github.com/DessimozLab/pyomadb">Python API binding</a>
 
                         <div class="dropdown-divider"></div>
                         <div role="presentation" class="dropdown-header">Semantic web</div>
@@ -194,6 +197,81 @@
     </div>
 
 </nav>
+
+<script type="text/javascript">
+    function update_autocomplete_enableing(form_elem_id) {
+        var form_elem = document.getElementById(form_elem_id);
+        var sel = form_elem.querySelector("select[name='type']");
+        var txt = $(form_elem.querySelector("input[name='query']"));
+        if (sel.value === "id"){
+            txt.autocomplete('enable');
+        } else {
+            txt.autocomplete('disable');
+        }
+    }
+    function update_autocomplete_enableing(form_elem_id) {
+        var form_elem = document.getElementById(form_elem_id);
+        var sel = form_elem.querySelector("select[name='type']");
+        var txt = $(form_elem.querySelector("input[name='query']"));
+        if (sel.value === "id"){
+            txt.autocomplete('enable');
+        } else {
+            txt.autocomplete('disable');
+        }
+    }
+    var autocomplete_opts = {
+        paramName: 'search',
+        serviceUrl: '/api/xref/',
+        minChars: 3,
+        deferRequestBy: 200,
+        serviceUrl: '/api/xref/',
+        minChars: 3,
+        deferRequestBy: 200,
+        transformResult: function (response) {
+            var json = JSON.parse(response);
+            var xref_source_order = {{ xref_order | safe }};
+            json.sort(function (a, b){
+                var idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
+                if (idx_a === idx_b){
+                    return a.xref > b.xref ? 1 : -1;
+                }
+                return idx_a - idx_b;
+            });
+            return {
+                suggestions: $.map(json, function (dataItem) {
+                    return {value: dataItem.xref, data: dataItem};
+                })
+            };
+        },
+        groupBy: 'source',
+        formatResult: function(suggestion, currentValue) {
+            // Do not replace anything if there current value is empty
+            if (!currentValue) {
+                return suggestion.value;
+            }
+            // escape any special char
+            var pattern = '(' + currentValue.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&") + ')';
+            var highlight_and_escape = function(val){
+                return val.replace(new RegExp(pattern, 'gi'), '<strong>$1<\/strong>')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/&lt;(\/?strong)&gt;/g, '<$1>');
+            };
+            var label = '<span class="auto-xref">' + highlight_and_escape(suggestion.data.xref) +'</span> &nbsp;'+
+                        '<span class="auto-omaid">' + suggestion.data.omaid + '</span>'+
+                        '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
+            return label;
+        },
+        onSelect: function(item){
+            window.location.href = "/oma/info/" + item.data.entry_nr;
+            return false;
+        }
+    };
+    $('#textNav').autocomplete(autocomplete_opts);
+    update_autocomplete_enableing('searchNavForm');
+</script>
 
 {% block content %}{% endblock %}
 {% include 'includes/analytics.html' %}

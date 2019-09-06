@@ -14,57 +14,97 @@
         <div class="logo-oma-lg"></div>
 
         <div class="oma-search">
-
-            <form>
+            <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
                 <div class="oma-search-select">
-                    <select>
-                        <option value="identifier">Identifier</option>
-                        <option value="proteinSequence">Protein sequence</option>
-                        <option value="omaGroup">OMA group</option>
-                        <option value="fullTextSearch">Full-text search</option>
+                    <select id="selectBrowser" class="form-control btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
+                        <option value="id" selected="selected">Identifier</option>
+                        <option value="sequence">Protein sequence</option>
+                        <option value="group">OMA group</option>
+                        <option value="fulltext">Full-text search</option>
+                        <option value="species">Species</option>
                     </select>
                 </div>
-                <input type="text" placeholder="Please enter a value"/>
+                <input id='inputBrowser' name="query" type="text" class="form-control" placeholder="Please enter a value"/>
                 <button><img src="{% static "image/icon-logo-oma-o.png" %}" alt="Logo OMA icon"/></button>
             </form>
-
         </div>
+
         <p><a href="#" data-toggle="modal" data-target="#largeTextareaModal">Expand (e.g. to paste a long amino-acid
             sequence)</a></p>
 
         <!-- Modal Textarea -->
         <div class="modal fade" id="largeTextareaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
              aria-hidden="true">
-            <div class="modal-dialog" role="document">
+              <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-body">
                         <img src="{% static "image/icon-logo-oma-o.png" %}" alt="Icon OMA"/>
-                        <form>
+                        <form role="search" id="searchFormModal" action="{% url 'search' %}" method="POST">
                             <div class="oma-search-select">
-                                <select>
-                                    <option value="identifier">Identifier</option>
-                                    <option value="proteinSequence">Protein sequence</option>
-                                    <option value="omaGroup">OMA group</option>
-                                    <option value="fullTextSearch">Full-text search</option>
+                                 <select id="selectBrowserModal" class="form-control btn-mini" name="type" onchange="update_autocomplete_enableing('searchFormModal')">
+                                    <option value="id" selected="selected">Identifier</option>
+                                    <option value="sequence">Protein sequence</option>
+                                    <option value="group">OMA group</option>
+                                    <option value="fulltext">Full-text search</option>
+                                    <option value="species">Species</option>
                                 </select>
                             </div>
-                            <textarea placeholder="Please enter a value"></textarea>
-                            <button type="button" class="btn btn-lg btn-block btn-primary">Search</button>
+                            <textarea id='inputBrowserModal' name="query" type="text" class="form-control" placeholder="Please enter a value"></textarea>
+                            <button type="submit" class="btn btn-lg btn-block btn-primary">Search</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- End Modal Textarea -->
+
 
         <div class="oma-quick-start">
             <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/>
-            <p><strong>Examples:</strong> <a href="#">Entry HUMAN22168</a> - <a href="#">Entry P53_RAT</a> - <a
-                    href="#">Search for "photoreceptor"</a></p>
+            <p>
+                <strong>Examples:</strong>
+                <a id='exEntry'>Entry HUMAN22168</a> -
+                <a id='exEntry2'>Entry P53_RAT</a> -
+                <a id='exPhoto'>Search for "photoreceptor"</a> -
+                <a id="exSpecies">"Drosophila" species</a>
+            </p>
         </div>
-
     </div>
-
 </div>
+<script type="text/javascript">
+$('#exPhoto').click( function() {
+    $('#selectBrowser').val('fulltext');
+    $('#selectBrowserModal').val('fulltext');
+    $('#inputBrowser').val('photoreceptor').focus();
+    $('#inputBrowserModal').val('photoreceptor').focus();
+});
+
+$('#exEntry').click( function() {
+    $('#selectBrowser').val('id');
+    $('#selectBrowserModal').val('id');
+    $('#inputBrowser').val('HUMAN22168').focus();
+    $('#inputBrowserModal').val('HUMAN22168').focus();
+});
+
+$('#exEntry2').click( function() {
+    $('#selectBrowser').val('id');
+    $('#selectBrowserModal').val('id');
+    $('#inputBrowser').val('P53_RAT').focus();
+    $('#inputBrowserModal').val('P53_RAT').focus();
+});
+
+$('#exSpecies').click( function(){
+    $('#selectBrowser').val('species');
+    $('#selectBrowser').val('species');
+    $('#inputBrowser').val('Drosophila').focus();
+    $('inputBrowserModal').val('Drosophila').focus();
+});
+
+
+$('#inputBrowser').autocomplete(autocomplete_opts);
+$('#inputBrowserModal').autocomplete(autocomplete_opts);
+</script>
+
 
 <div id="omaLandingOthersContainer">
 
@@ -73,23 +113,23 @@
             <div class="row row-centered">
                 <div class="col-md-1"></div>
                 <div class="col-md-2">
-                    <h1>2190</h1>
-                    <h3>Full genome</h3>
+                    <h1>{{ nr_genomes }}</h1>
+                    <h3>Full genomes</h3>
                 </div>
                 <div class="col-md-2">
-                    <h1>12M</h1>
+                    <h1>{{ nr_proteins }}</h1>
                     <h3>Proteins</h3>
                 </div>
                 <div class="col-md-2">
-                    <h1>798760</h1>
+                    <h1>{{ nr_groups }}</h1>
                     <h3>OMA groups</h3>
                 </div>
                 <div class="col-md-2">
-                    <h1>603285</h1>
+                    <h1>{{ nr_hogs }}</h1>
                     <h3>Deepest HOGs</h3>
                 </div>
                 <div class="col-md-2">
-                    <h1>May 2018</h1>
+                    <h1>{{ release }}</h1>
                     <h3>Release</h3>
                 </div>
                 <div class="col-md-1"></div>
@@ -97,7 +137,7 @@
         </div>
     </div>
 
-    <div id="oma-landing-cards">
+ <div id="oma-landing-cards">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-3 col-md-6">
@@ -115,14 +155,20 @@
                         </div>
                         <div class="oma-card-content">
                             <ul>
-                                <li>A List</li>
-                                <li>With items</li>
-                                <li>A List</li>
-                                <li>With items</li>
+                                <li>Read our
+                                        <a href="{% url 'about'  %}">brief introduction to OMA</a>.
+                                </li>
+                                <li>Familiarise yourself with the
+                                    <a href="{% url 'type'  %}">different types of orthologs provided</a>.
+                                </li>
+                                <li>Get ideas about
+                                    <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
+                                </li>
                             </ul>
                         </div>
                     </div>
                 </div>
+
                 <div class="col-lg-3 col-md-6">
                     <div class="oma-card">
                         <div class="oma-mobile-accordion">
@@ -146,6 +192,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-lg-3 col-md-6">
                     <div class="oma-card">
                         <div class="oma-mobile-accordion">
@@ -161,14 +208,26 @@
                         </div>
                         <div class="oma-card-content">
                             <ul>
-                                <li>A List</li>
-                                <li>With items</li>
-                                <li>A List</li>
-                                <li>With items</li>
+                                <li><b><a href="{% url 'current'  %}">Current release</a>:</b>
+                                    All data is available for downloading in a variety of formats.
+                                </li>
+
+                                <li><b><a href="/standalone">OMA Standalone</a>:</b>
+                                    OMA standalone allows you to infer orthologs on your own set of genomes.
+                                </li>
+
+                                <li><b><a href="{% url 'export' %}">Export All-All</a>:</b>
+                                    Export a set of genomes and their precomputed all-against-all comparisons for OMA standalone.
+                                </li>
+
+                                <li><b><a href="{% url 'archives'  %}">Archives</a>:</b>
+                                    Previous OMA releases remain available in this section.
+                                </li>
                             </ul>
                         </div>
                     </div>
                 </div>
+
                 <div class="col-lg-3 col-md-6">
                     <div class="oma-card">
                         <div class="oma-mobile-accordion">
@@ -186,29 +245,43 @@
                             <!-- Insert Twitter feed -->
                             <div class="oma-twitter">
                                 <ul>
-                                    <li>OMA is *not* affected. (We do full Smith-Waterman alignments and have our own bugs!) <a href="https://twitter.com/strnr/status/1044684254347767808">https://twitter.com/strnr/status/1044684254347767808</a>
-                                    </li>
-                                    <li>New blog post: New OMA Release with 2167 species <a href="https://ift.tt/2M4cvf0">https://ift.tt/2M4cvf0</a>
-                                    </li>
-                                    <li>Due to server maintenance, the omabrowser will be shortly unaccessible during this afternoon (CEST). We apologise f… <a href="https://twitter.com/i/web/status/1026400131137130497">https://twitter.com/i/web/status/1026400131137130497</a>
-                                    </li>
+                                    {% autoescape off %}
+                                    {%for t in tweets %}
+                                    <li>{{ t }}</li>
+                                    {% endfor %}
+				                    {% endautoescape %}
                                 </ul>
                             </div>
                             <h1>Stay in touch</h1>
                             <div class="icons-stay-in-touch">
-                                <a href="#">
+                                <a href="javascript:show_frame('frame_twitter');" title="Twitter">
                                     <img src="{% static "image/icon-twitter-sm.png" %}" alt="Twitter"/>
                                 </a>
-                                <a href="#">
+                                <a href="http://omabrowser.blogspot.com" title="Blog">
                                     <img src="{% static "image/icon-blog-write-sm.png" %}" alt="Blog"/>
                                 </a>
-                                <a href="#">
+                                <a href="javascript:show_frame('frame_mailman');" title="Newsletter">
                                     <img src="{% static "image/icon-newspaper-sm.png" %}" alt="News"/>
                                 </a>
-                                <a href="#">
+                                <a href="http://omabrowser.blogspot.com/feeds/posts/default" title="RSS">
                                     <img src="{% static "image/icon-rss-sm.png" %}" alt="RSS"/>
                                 </a>
                             </div>
+                            <span id="frame_twitter" style="display: none;"><a href="https://twitter.com/omabrowser" class="twitter-follow-button" data-show-screen-name="false" data-show-count="true">Follow</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></span>
+                            <span id="frame_mailman" style="display: none;">
+                                <form action="https://lists.dessimoz.org/subscribe/oma" method="POST">
+                                    Email: <input name="email" size="13"/>
+                                    <input type="submit" value="Sign up" /><br/>(max 1-2 emails/month, no spam!)
+                                </form>
+                            </span>
+                            <script>
+                                function show_frame(frame){
+                                    var frames = ["frame_twitter", "frame_mailman"];
+                                    frames.forEach(function(frm){
+                                        document.getElementById(frm).style.display = (frm === frame ? 'initial' : 'none');
+                                    });
+                                }
+                            </script>
                         </div>
                     </div>
                 </div>
@@ -220,10 +293,11 @@
         <div class="container">
             <div class="oma-alert">
                 <img src="{% static "image/icon-info.svg" %}" alt="!"/>
-                <p>If you use OMA in your work, please consider citing:
-                    Altenhoff A et al., The OMA orthology database in 2015: function predictions, better plant support,
-                    synteny view and other improvements, Nucleic Acids Research, 2015, 43 (D1): D240-D249
-                    (doi:10.1093/nar/gku1158).</p>
+                <p>If you use OMA in your work, please consider citing:<br/>
+               Altenhoff A et al., <em>The OMA orthology database in 2018: retrieving evolutionary
+               relationships among all domains of life through richer web and programmatic interfaces</em>
+               Nucleic Acids Research, 2018, 46 (D1): D477-D485
+               (doi:<a href="http://doi.org/10.1093/nar/gkx1019">10.1093/nar/gkx1019</a>)</p>
             </div>
         </div>
     </div>

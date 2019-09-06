@@ -42,19 +42,16 @@
                     <p class="section-title">SPECIES INFORMATION
 
 
-                        <button type="button" id="btree" class="btn btn-default pull-right icon_selector">
-                        <span class="glyphicon glyphicon-tree-deciduous pull-right " aria-hidden="true"
-                              data-toggle="tooltip" data-placement="top" title="view as species tree" ></span>
+                        <button type="button" id="btree" class="btn btn-default pull-right icon_selector" data-toggle="tooltip" data-placement="top" title="view as species tree" >
+                        <span class="glyphicon glyphicon-tree-deciduous pull-right " aria-hidden="true"></span>
                         </button>
 
-                        <button type="button" id="blist"  class="btn btn-default pull-right icon_selector" >
-                        <span class="glyphicon glyphicon-list pull-right " aria-hidden="true"
-                              data-toggle="tooltip" data-placement="top" title="view as species list" ></span>
+                        <button type="button" id="blist"  class="btn btn-default pull-right icon_selector" data-toggle="tooltip" data-placement="top" title="view as species list">
+                        <span class="glyphicon glyphicon-list pull-right " aria-hidden="true"></span>
                         </button>
 
-                        <button type="button" id="bhist"  class="btn btn-default pull-right icon_selector" >
-                        <span class="glyphicon  glyphicon-stats pull-right " aria-hidden="true"
-                              data-toggle="tooltip" data-placement="top" title="view as species histogram"></span>
+                        <button type="button" id="bhist"  class="btn btn-default pull-right icon_selector" data-toggle="tooltip" data-placement="top" title="view as species histogram">
+                        <span class="glyphicon  glyphicon-stats pull-right " aria-hidden="true"></span>
                         </button>
 
                         <span class="pull-right text_selector">Change the view: </span>
@@ -65,6 +62,7 @@
 
                         <!-- This is the part that is flushed and updated with viewer -->
                         <div class="panel-body" id="genome_panel" style="position: relative;" >
+
 
                         </div>
 
@@ -90,6 +88,7 @@
     <script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
     <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
     <script src="{% static "js/tableExport.min.js" %}"></script>
+    <script src="{% static "js/sunburst.js" %}"></script>
 
     <!-- viewer Visualisation -->
     <script>
@@ -100,8 +99,9 @@
 
     <script>
     // defaut view on the histogram
-    update_genome_viewer("bhist");
+    update_genome_viewer("btree");
     </script>
 
+<script src={% static "js/colorbar.js" %}></script>
 
 {% endblock content %}

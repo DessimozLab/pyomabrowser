@@ -1,21 +1,28 @@
 from django.conf import settings
-from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.urls import include, path
 import os
 
 admin.autodiscover()
 
 urlpatterns = [
-    url(r'^api/', include('oma_rest.urls')),
-    url(r'^oma/', include('oma.urls')),
+    path('api/', include('oma_rest.urls')),
+    path('oma/', include('oma.urls')),
+    path('oma/', include('export.urls'))
 ]
 
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView
+    from django.urls import re_path
     urlpatterns += [
-        url(r'^$', RedirectView.as_view(url="/oma/home/", permanent=True))
+        re_path(r'^$', RedirectView.as_view(url="/oma/home/", permanent=True)),
     ]
+    try:
+        import debug_toolbar
+        urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
+    except ImportError:
+        pass
 
     dwnld_folder = os.path.normpath(os.path.join(os.getenv('DARWIN_BROWSERDATA_PATH', default="./"), '..', 'downloads'))
     if not os.path.isdir(dwnld_folder):

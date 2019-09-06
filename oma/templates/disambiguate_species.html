@@ -1,0 +1,14 @@
+{% extends "disambiguate_entry.html" %}
+
+{% block bootstrap_table_attrs %}{% endblock %}
+
+{% block bootstrap_table_columns %}
+    <th data-field="kingdom" data-sortable="true" data-formatter="tablehooks.format_as_kingdom_tag" title="Domain of Life">D.</th>
+    <th data-field="uniprot_species_code" data-sortable="true" data-formatter="tablehooks.format_species_code">Code</th>
+    <th data-field="ncbi" data-sortable="true" data-formatter="tablehooks.format_taxonid_as_link">NCBI Taxon ID</th>
+    <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname">Scientific Name</th>
+    <th data-field="common_name" data-sortable="true">Common Name</th>
+    <th data-field="last_modified" data-sortable="true">Last Update</th>
+    <th data-field="prots" data-sortable="true"># of Sequences</th>
+{% endblock %}
+{% block additional_columns %}{% endblock %}

@@ -1,0 +1,73 @@
+version: '3.7'
+
+services:
+  web:
+    image: oma:latest
+    command: uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi
+    env_file: &envfile
+      - ./for_docker/env
+    volumes:
+      - static_volume:/data/static
+      - media_volume:/data/media
+      - release_volume:/data/release
+      #- type: bind
+      #  source: "/Volumes/TOSHIBA EXT/browser/All.Jun2019/data"
+      #  target: "/data/release"
+      #  read_only: true
+      #  volume:
+      #    nocopy: true
+    ports:
+      - 8000:8000
+    depends_on:
+      - broker
+      - db
+
+  db:
+    image: postgres:11.2-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file: *envfile
+
+
+  broker:
+    image: rabbitmq:3
+    env_file: *envfile
+    ports:
+      - 5672:5672
+
+  worker:
+    image: oma:latest
+    restart: "no"
+    env_file: *envfile
+    command: ["celery", "worker", "--app=pybrowser_dev.celery_app", "--concurrency=1", "--hostname=worker@%h", "--loglevel=DEBUG"]
+    volumes:
+      - static_volume:/data/static
+      - media_volume:/data/media
+      - release_volume:/data/release
+      # - type: bind
+      #   source: "/Volumes/TOSHIBA EXT/browser/All.Jun2019/data"
+      #   target: "/data/release"
+      #   read_only: true
+      #   volume:
+      #     nocopy: true
+    depends_on:
+      - broker
+      - db
+
+  nginx:
+    build: ./for_docker/nginx
+    ports:
+      - 8080:80
+    volumes:
+      - static_volume:/data/static
+      - media_volume:/data/media
+    depends_on:
+      - web
+
+
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  release_volume:

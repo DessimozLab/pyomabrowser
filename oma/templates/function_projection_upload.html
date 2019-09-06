@@ -24,7 +24,7 @@
                         we provide an easy way to project functions from the entire OMA Browser based on
                         sequence similarity to your sequences.</p>
 
-                    <p>Please upload a fasta formated file with your sequences (might also be in gzip or bzip
+                    <p>Please upload a fasta formatted file of maximum {{max_upload_size | floatformat }}MB with your sequences (might also be in gzip or bzip
                         compressed format). The service identifies the closest sequence in a very quick manner
                         and assigns the known GO annotations to it. We return a
                         <a href="http://www.geneontology.org/page/go-annotation-file-gaf-format-21" target="_blank">
@@ -53,5 +53,25 @@
 		</div>
 	</div>
 </div>
+
+<script>
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.getElementsByClassName('needs-validation');
+    // Loop over them and prevent submission
+    var validation = Array.prototype.filter.call(forms, function(form) {
+        form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+});
+}, false);
+})();
+</script>
 
 {% endblock content %}

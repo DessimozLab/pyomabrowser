@@ -13,10 +13,12 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError
 from rest_framework.settings import api_settings
+from django.http import HttpResponse
 from distutils.util import strtobool
 
 from . import models as rest_models
 from . import serializers
+from .schema import DocStringSchemaExtractor
 from .pagination import PaginationMixin, LazyPagedPytablesQuery
 
 from oma import utils, misc
@@ -24,44 +26,96 @@ from pyoma.browser import models, db
 import logging
 
 from collections import Counter
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import action, api_view
+
 logger = logging.getLogger(__name__)
+
+
+def resolve_protein_from_id_or_raise(id):
+    try:
+        return utils.id_resolver.resolve(id)
+    except db.InvalidId:
+        raise NotFound("requested id '{}' is unknown".format(id))
+    except db.AmbiguousID:
+        raise NotFound("requested id '{}' is not unique".format(id))
 
 
 # Create your views here.
 class ProteinEntryViewSet(ViewSet):
     serializer_class = serializers.ProteinEntryDetailSerializer
     lookup_field = 'entry_id'
+    schema = DocStringSchemaExtractor()
+
+    @action(detail=False, methods=['post'])
+    def bulk_retrieve(self, request, format=None):
+        """Retrieve the information available for multiple protein IDs at once.
+
+        The POST request must contain a json-encoded list of IDs of
+        up to 1000 IDs for which the information is returned.
+
+        In case the ID is not unique or unknown, an empty element is
+        returned for this query element.
+        ---
+        parameters:
+          - name: ids
+            description: A list of ids of proteins to retrieve
+            location: body
+            required: True
+
+        """
+        MAX_SIZE = 1000
+        if 'ids' not in request.data:
+            raise NotFound("No results found")
+        if len(request.data['ids']) > MAX_SIZE:
+            raise ParseError("POST request exceeded max number of ids. Please limit to {}".format(MAX_SIZE))
+
+        proteins = []
+        for entry_id in request.data['ids']:
+            try:
+                entry_nr = utils.id_resolver.resolve(entry_id)
+                proteins.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
+            except (db.InvalidId, db.AmbiguousID):
+                proteins.append(None)
+        serializer = serializers.ProteinEntryDetailSerializer(
+            instance=proteins, many=True, context={'request': request})
+        return Response(serializer.data)
 
     def retrieve(self, request, entry_id=None, format=None):
         """
         Retrieve the information available for a protein entry.
-
-        :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
-
+        ---
+        parameters:
+          - name: entry_id
+            description: an unique identifier for a protein - either it
+                         entry number, omaid or its canonical id
         """
 
         # Load the entry and its domains, before forming the JSON to draw client-side.
-        entry_nr = utils.id_resolver.resolve(entry_id)
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
         serializer = serializers.ProteinEntryDetailSerializer(
             instance=protein, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def orthologs(self, request, entry_id=None, format=None):
-        """List of all the identified orthologues for a protein.
-
-        Possible to filter out orthologs by specifying the ?rel_type
+        """List of all the identified orthologues for a protein. Filtering
+        specific subtypes of orthology is possible specifying a rel_type
         query parameter.
-
-        :param entry_id: an unique identifier for a protein - either it
+        ---
+        parameters:
+          - name: entry_id
+            description: an unique identifier for a protein - either it
                          entry number, omaid or its canonical id
-        :queryparam rel_type: allows the user to filter the orthologs
-                              for a specific relationship type only
+
+          - name: rel_type
+            description: filter for orthologs of a specific relationship type only
+            location: query
+            type: string
+            example: "1:1"
         """
         rel_type = request.query_params.get('rel_type', None)
-        p_entry_nr = utils.id_resolver.resolve(entry_id)
+        p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
         data = utils.db.get_vpairs(int(p_entry_nr))
         content = []
         for row in data:
@@ -77,13 +131,16 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.OrthologsListSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def homoeologs(self, request, entry_id=None, format=None):
         """List of all the homoeologs for a given protein.
 
-        :param entry_id: an unique identifier for a protein - either its
-            entry number, omaid or canonical id."""
-        entry_nr = utils.id_resolver.resolve(entry_id)
+        ---
+        parameters:
+          - name: entry_id
+            description: an unique identifier for a protein - either its
+                         entry number, omaid or canonical id."""
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
         if not protein.genome.is_polyploid:
             raise NotFound("query protein does not belong to a polyploid genome")
@@ -96,40 +153,51 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.ProteinEntrySerializer(instance=homoeologs, many=True, context={'request': request})
         return Response(serializer.data)
 
-
-    @detail_route()
-    def ontology(self, request, entry_id=None, format=None):
-        """Ontology information available for a protein.
-
-        :param entry_id: an unique identifier for a protein - either it
+    @action(detail=True)
+    def gene_ontology(self, request, entry_id=None, format=None):
+        """Gene ontology information available for a protein.
+        ---
+        parameters:
+          - name: entry_id
+            description: an unique identifier for a protein - either its
                          entry number, omaid or its canonical id
         """
-        p_entry_nr = utils.id_resolver.resolve(entry_id)
+        p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
         data = db.Database.get_gene_ontology_annotations(utils.db, int(p_entry_nr))
-        ontologies = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
-        serializer = serializers.GeneOntologySerializer(instance=ontologies, many=True)
+        annotations = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
+        serializer = serializers.GeneOntologySerializer(instance=annotations, many=True)
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
+    def ontology(self, request, entry_id=None, format=None):
+        """Deprecated: use gene_ontology endpoint instead"""
+        return self.gene_ontology(request, entry_id, format=format)
+
+    @action(detail=True)
     def domains(self, request, entry_id=None, format=None):
         """List of the domains present in a protein.
-
-        :param entry_id: an unique identifier for a protein - either it entry number, omaid or its canonical id
+        ---
+        parameters:
+          - name: entry_id
+            description: an unique identifier for a protein -
+                         either it entry number, omaid or its canonical id
         """
-        entry_nr = utils.id_resolver.resolve(entry_id)
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
         entry = utils.db.entry_by_entry_nr(entry_nr)
         domains = utils.db.get_domains(entry['EntryNr'])
         response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
         return Response(response)
 
-    @detail_route()
+    @action(detail=True)
     def xref(self, request, entry_id=None, format=None):
         """List of cross-references for a protein.
-
-        :param entry_id: an unique identifier for a protein - either it
+        ---
+        parameters:
+          - name: entry_id
+            description: an unique identifier for a protein - either it
                          entry number, omaid or its canonical id
         """
-        entry_nr = utils.id_resolver.resolve(entry_id)
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
         xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
         for ref in xrefs:
             ref['entry_nr'] = entry_nr
@@ -140,6 +208,7 @@ class ProteinEntryViewSet(ViewSet):
 
 class OmaGroupViewSet(PaginationMixin, ViewSet):
     lookup_field = 'group_id'
+    schema = DocStringSchemaExtractor()
 
     def list(self, request, format=None):
         """List of all the OMA Groups in the current release."""
@@ -151,15 +220,19 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
 
     def retrieve(self, request, group_id=None, format=None):
         """Retrieve the information available for a given OMA group.
-
-        :param group_id: an unique identifier for an OMA group - either its
+        ---
+        parameters:
+          - name: group_id
+            description: an unique identifier for an OMA group - either its
                          group number, its fingerprint or an entry id of one
                          of its members
         """
         try:
             # get members in case its a group id or fingerprint
             memb = utils.db.oma_group_members(group_id)
-        except db.InvalidId:
+        except db.AmbiguousID:
+            raise NotFound("{} is not a unique id".format(group_id))
+        except db.InvalidId as ex:
             try:
                 # let's try if group_id is a member protein id
                 entry_nr = utils.id_resolver.resolve(group_id)
@@ -168,7 +241,7 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
                     return Response({})
                 return self.retrieve(request, prot.oma_group)
             except db.InvalidId:
-                raise NotFound(group_id)
+                raise NotFound(str(ex))
 
         if len(memb) == 0:
             group = []
@@ -182,11 +255,13 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
             instance=group, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def close_groups(self, request, group_id=None, format=None):
         """Retrieve the sorted list of closely related groups for a given OMA group.
-
-        :param group_id: an unique identifier for an OMA group - either its
+        ---
+        parameters:
+          - name: group_id
+            description: an unique identifier for an OMA group - either its
                          group number, its fingerprint or an entry id of one
                          of its members
         """
@@ -235,16 +310,14 @@ class HOGViewSet(PaginationMixin, ViewSet):
     lookup_field = 'hog_id'
     lookup_value_regex = r'[^/]+'
     serializer_class = serializers.ProteinEntrySerializer
+    schema = DocStringSchemaExtractor()
 
     def _hog_id_from_entry(self, entry_id):
-        try:
-            entry_nr = utils.id_resolver.resolve(entry_id)
-            protein = utils.ProteinEntry(entry_nr)
-            if len(protein.oma_hog) == 0:
-                raise NotFound("{} is not part of any HOG.".format(entry_id))
-            return protein.oma_hog
-        except db.InvalidId:
-            raise NotFound("{} is an unknown identifier for a protein".format(entry_id))
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
+        protein = utils.ProteinEntry(entry_nr)
+        if len(protein.oma_hog) == 0:
+            raise NotFound("{} is not part of any HOG.".format(entry_id))
+        return protein.oma_hog
 
     def _get_level_and_adjust_hogid_if_needed(self, hog_id):
         level = self.request.query_params.get('level', None)
@@ -262,17 +335,20 @@ class HOGViewSet(PaginationMixin, ViewSet):
     def _identify_lca_hog_id_from_proteins(self, proteins):
         hog_id = os.path.commonprefix([p.oma_hog for p in proteins])
         if hog_id.find('.') >= 0:
-            for k in range(len(hog_id)-1, hog_id.find('.')-1, -1):
+            for k in range(len(hog_id) - 1, hog_id.find('.') - 1, -1):
                 if not (hog_id[k].isdigit() or hog_id[k] == '.'):
                     break
-            hog_id = hog_id[0:k+1]
+            hog_id = hog_id[0:k + 1]
         return hog_id
 
     def list(self, request, format=None):
         """List of all the HOGs identified by OMA.
-
-        :queryparam level: allows filtering of the list of HOGs by
-            a specific taxonomic level.
+        ---
+        parameters:
+          - name: level
+            description: filter the list of HOGs by a specific
+                         taxonomic level.
+            location: query
         """
         level, _ = self._get_level_and_adjust_hogid_if_needed('HOG:000001')
         if level is not None:
@@ -307,11 +383,16 @@ class HOGViewSet(PaginationMixin, ViewSet):
         for the children_hogs there happened at least one duplication event *after*
         the query hog level. In addition, we indicate alternative levels for which
         we infer that no event happened between those levels for this specific hog.
-
-        :param hog_id: an unique identifier for a hog_group - either its hog id or one
-                       of its member proteins
-        :queryparam level: taxonomic level of restriction for a HOG. The special level
-            'root' can be used to identify the level at the roothog.
+        ---
+        parameters:
+          - name: hog_id
+            description: an unique identifier for a hog_group - either its hog id or one
+                         of its member proteins
+          - name: level
+            description: taxonomic level of restriction for a HOG. The special level
+                         'root' can be used to identify the level at the roothog, i.e.
+                         the deepest level of that HOG.
+            location: query
         """
         if hog_id[:4] != "HOG:":
             # hog_id == member
@@ -320,7 +401,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
         level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
         fam_nr = utils.db.parse_hog_id(hog_id)
         if level is None:
-            levs = frozenset([row['Level'].decode() for row in utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')])
+            levs = frozenset(
+                [row['Level'].decode() for row in utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')])
             if 'LUCA' in levs:
                 level = 'LUCA'
             else:
@@ -365,7 +447,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializers.HOGsLevelDetailSerializer(result_data, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def members(self, request, hog_id=None, format=None):
         """Retrieve a list of all the protein members for a given hog_id.
 
@@ -386,13 +468,21 @@ class HOGViewSet(PaginationMixin, ViewSet):
         The special level "root" will always return the members of the root
         HOG together with its deepest level.
 
-        :param hog_id: an unique identifier for a hog_group - either
-                       its hog id starting with "HOG:" or one of its
-                       member proteins in which case the specific
-                       HOG ID of that protein is used.
-        :queryparam level: taxonomic level of restriction for a HOG -
-                           default is its deepest level for a given
-                           HOG ID. .
+        ---
+        parameters:
+          - name: hog_id
+            description: an unique identifier for a hog_group - either
+                         its hog id starting with "HOG:" or one of its
+                         member proteins in which case the specific
+                         HOG ID of that protein is used.
+            example: HOG:0001221.1a,  P12345
+
+          - name: level
+            description: taxonomic level of restriction for a HOG -
+                         default is its deepest level for a given
+                         HOG ID.
+            location: query
+            example: "Mammalia"
         """
         if hog_id[:4] != "HOG:":
             hog_id = self._hog_id_from_entry(hog_id)
@@ -404,7 +494,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
         else:
             fam_nr = utils.db.parse_hog_id(hog_id)
             condition = '(Fam == fam_nr) & (ID == hog_id)'
-            levs = frozenset([hog['Level'].decode() for hog in utils.db.get_hdf5_handle().get_node('/HogLevel').where(condition)])
+            levs = frozenset(
+                [hog['Level'].decode() for hog in utils.db.get_hdf5_handle().get_node('/HogLevel').where(condition)])
             members = [utils.ProteinEntry(entry) for entry in utils.db.member_of_hog_id(hog_id)]
             if 'LUCA' in levs:
                 level = 'LUCA'
@@ -422,7 +513,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
 
 class APIVersion(ViewSet):
     def list(self, request, format=None):
-        """Returns the version information of the api and the underlying oma browser database release."""
+        """Returns the version information of the api and
+        the underlying oma browser database release."""
         return Response({'oma_version': utils.db.get_release_name(),
                          'api_version': api_settings.DEFAULT_VERSION})
 
@@ -430,6 +522,7 @@ class APIVersion(ViewSet):
 class XRefsViewSet(ViewSet):
     serializer_class = serializers.XRefSerializer
     lookup_field = 'entry_id'
+    schema = DocStringSchemaExtractor()
 
     def _order_xrefs(self, xrefs, key='entry_nr'):
         if isinstance(key, str):
@@ -446,10 +539,13 @@ class XRefsViewSet(ViewSet):
 
     def list(self, request, format=None):
         """List all the crossreferences that match a certain pattern.
-
-        :queryparam search: the pattern to be searched for. The pattern
-                            must be at least 3 characters long in order to
-                            return a hit."""
+        ---
+        parameters:
+          - name: search
+            description: the pattern to be searched for. The pattern
+                         must be at least 3 characters long in order to
+                         return a hit.
+            location: query"""
         pattern = request.query_params.get('search', None)
         res = []
         if pattern is not None and len(pattern) >= 3:
@@ -469,6 +565,7 @@ class XRefsViewSet(ViewSet):
 
 class GenomeViewSet(PaginationMixin, ViewSet):
     lookup_field = 'genome_id'
+    schema = DocStringSchemaExtractor()
 
     def list(self, request, format=None):
         """List of all the genomes present in the current release."""
@@ -480,8 +577,10 @@ class GenomeViewSet(PaginationMixin, ViewSet):
 
     def retrieve(self, request, genome_id, format=None):
         """Retrieve the information available for a given genome.
-
-        :param genome_id: an unique identifier for a genome
+        ---
+        parameters:
+          - name: genome_id
+            description: an unique identifier for a genome
                          - either its ncbi taxon id or the
                          UniProt species code"""
         try:
@@ -491,13 +590,15 @@ class GenomeViewSet(PaginationMixin, ViewSet):
         serializer = serializers.GenomeDetailSerializer(instance=g, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route()
+    @action(detail=True)
     def proteins(self, request, genome_id=None):
         """Retrieve the list of all the protein entries available for a genome.
-
-        :param genome_id: an unique identifier for a genome
-                          - either its ncbi taxon id or the
-                          UniProt species code"""
+        ---
+        parameters:
+          - name: genome_id
+            description: an unique identifier for a genome
+                         - either its ncbi taxon id or the
+                         UniProt species code"""
 
         try:
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
@@ -514,6 +615,7 @@ class GenomeViewSet(PaginationMixin, ViewSet):
 
 
 class PairwiseRelationAPIView(PaginationMixin, APIView):
+    schema = DocStringSchemaExtractor()
 
     def _get_entry_range(self, genome, chr):
         if chr is None:
@@ -538,19 +640,30 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
         the relations to a certain chromosome for one or both
         genomes. The id of the chromosome corresponds to the ids
         returned by the genome endpoint.
+        ---
+        parameters:
+          - name: genome_id1
+            description: an unique identifier for the first genome
+                         - either its ncbi taxon id or the UniProt
+                         species code
+          - name: genome_id2
+            description: an unique identifier for the second genome
+                         - either its ncbi taxon id or the UniProt
+                         species code
+          - name: chr1
+            description: id of the chromosome of interest in the
+                         first genome
+            location: query
 
-        :param genome_id1: an unique identifier for the first genome
-                           - either its ncbi taxon id or the UniProt
-                           species code
-        :param genome_id2: an unique identifier for the second genome
-                           - either its ncbi taxon id or the UniProt
-                           species code
-        :queryparam chr1: id of the chromosome of interest in the
-                          first genome
-        :queryparam chr2: id of the chromosome of interest in the
-                          second genome
-        :queryparam rel_type: limit relations to a certain type of
-                          relations, e.g. '1:1'.
+          - name: chr2
+            description: id of the chromosome of interest in the
+                         second genome
+            location: query
+
+          - name: rel_type
+            description: limit relations to a certain type of
+                        relations, e.g. '1:1'.
+            location: query
         """
         rel_type = request.query_params.get('rel_type', None)
         try:
@@ -585,101 +698,149 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
         return self.paginator.get_paginated_response(serializer.data)
 
 
+class MinimalPairwiseRelation(APIView):
+    schema = None
+
+    def get(self, request, genome_id1, genome_id2, format=None):
+        """Retrieve minimal version of pairs for a genome pair.
+        ---
+        parameters:
+          - name: genome_id1
+            description: an unique identifier for the first genome
+                         - either its ncbi taxon id or the UniProt
+                         species code
+          - name: genome_id2
+            description: an unique identifier for the second genome
+                         - either its ncbi taxon id or the UniProt
+                         species code"""
+        try:
+            genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id1))
+            genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id2))
+        except db.UnknownSpecies as e:
+            raise NotFound(e)
+        tab_name = 'VPairs' if genome1.uniprot_species_code != genome2.uniprot_species_code else 'within'
+        range2 = genome2.entry_nr_offset + 1, genome2.entry_nr_offset + len(genome2)
+        rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/{}'.format(
+            genome1.uniprot_species_code, tab_name))
+        rels = [[int(row['EntryNr1']), int(row['EntryNr2'])] for row in rel_tab.read_where('(EntryNr2>={0}) & (EntryNr2<={1})'.format(range2[0], range2[1]))]
+        return Response({'pairs': rels})
+
+
 class TaxonomyViewSet(ViewSet):
     lookup_field = 'root_id'
+    schema = DocStringSchemaExtractor()
 
     def list(self, request, format=None):
         """Retrieve the taxonomic tree that is available in the current release.
+        ---
+        parameters:
+          - name: type
+            description: the type of the returned data - either
+                dictionary (default), newick or phyloxml.
+            location: query
 
-        :queryparam type: the type of the returned data - either dictionary (default) or newick.
-        :queryparam members: list of members to get the induced the taxonomy from.
-               Member id's can be either their ncbi taxon ids or their UniProt
-               species codes - they just have to be consistent.
+          - name: members
+            description: list of members to get the induced taxonomy
+                from. The list is supposed to be a comma-separated list.
+                Member IDs can be either their ncbi taxon IDs or their
+                UniProt species codes - they just have to be consistent.
+            location: query
+
+          - name: collapse
+            description: whether or not taxonomic levels with a single
+                child should be collapsed or not. Defaults to yes.
+            location: query
+            type: boolean
         """
 
         # e.g. members = YEAST,ASHGO
-        members = request.query_params.get('members', None)  # read as a string
+        members = request.query_params.getlist('members', None)  # read as a string
         type = request.query_params.get('type', None)  # if none, dictionary returned
-        taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
-        tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
-        if members != None:
-            members = members.split(',')  # as the query param is passed as a string
+        collapse = strtobool(request.query_params.get('collapse', 'True'))
+        tax_obj = utils.db.tax
+        if members is not None and len(members) > 0:
+            members = [m.strip() for m in itertools.chain.from_iterable(ml.split(',') for ml in members)]   # as the query param is passed as a string
             members_list = []
-            try:
-                int(members[0])
-                isListOfNames = False
-            except:
-                isListOfNames = True
-            if isListOfNames:
-                decoded_members_array = []
-                for i in range(len(members)):
-                    decoded_members_array.append(members[i])
-                if (len(members[0])) > 5:  # names provided
-                    for i in range(len(decoded_members_array)):
-                        for lvl in taxonomy_tab.read(field='Name'):
-                            if str(lvl.decode("utf-8")) == decoded_members_array[i]:
-                                members_list.append(lvl)
-                else:  # if user provides a list of oma_ids
-                    for i in range(len(decoded_members_array)):
-                        genome_tab = utils.db.get_hdf5_handle().root.Genome
-                        encoded_id = decoded_members_array[i].encode("utf-8")
-                        txn_id = genome_tab.read_where('UniProtSpeciesCode == encoded_id', field='NCBITaxonId')
-                        members_list.append(str(txn_id)[1:-1])
+            if not members[0].isdigit():
+                if all(map(lambda x: len(x) == 5, members)):
+                    members = list(map(str.upper, members))
+                    for ncbi, genome in tax_obj.genomes.items():
+                        if genome.uniprot_species_code in members:
+                            members_list.append(ncbi)
+                else:
+                    for level in tax_obj.tax_table:
+                        if level['Name'].decode() in members:
+                            members_list.append(int(level['NCBITaxonId']))
             else:
                 # handling the case user gave a list of NCBI taxon ids
-                for i in range(len(members)):
-                    members_list.append(members[i])
-            tx = tax_obj.get_induced_taxonomy(members=members_list)
-            root = tx._get_root_taxon()
-            root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[0]}
-            if type == 'newick':
-                data = {'root_taxon': root_data, 'newick': tx.newick()}
-                serializer = serializers.TaxonomyNewickSerializer(instance=data)
-                return Response(serializer.data)
-            else:
-                data = tx.as_dict()
-                return Response(data)
+                try:
+                    members_list = [int(z) for z in members]
+                except ValueError:
+                    raise ParseError("not all passed members are numeric")
 
+            try:
+                tx = tax_obj.get_induced_taxonomy(members=members_list, augment_parents=True, collapse=collapse)
+            except db.InvalidTaxonId as e:
+                raise ParseError(str(e))
         else:
-            # whole taxonomy returned
-            root = tax_obj._get_root_taxon()
-            root_data = {'name': root[2].decode("utf-8"), 'taxon_id': root[0]}
-            if type == 'newick':
-                data = {'root_taxon': root_data, 'newick': tax_obj.newick()}
-                serializer = serializers.TaxonomyNewickSerializer(instance=data)
-                return Response(serializer.data)
-            else:
-                data = tax_obj.as_dict()
-                return Response(data)
+            tx = tax_obj
+
+        root = tx._get_root_taxon()
+        root_data = {'name': root['Name'].decode(), 'taxon_id': int(root['NCBITaxonId'])}
+        if type == 'newick':
+            data = {'root_taxon': root_data, 'newick': tx.newick()}
+            serializer = serializers.TaxonomyNewickSerializer(instance=data)
+            return Response(serializer.data)
+        elif type == "phyloxml":
+            phyloxml = tax_obj.as_phyloxml()
+            return HttpResponse(phyloxml, content_type="application/xml")
+        else:
+            data = tx.as_dict()
+            return Response(data)
 
     def retrieve(self, request, root_id, format=None):
         """
         Retrieve the subtree rooted at the taxonomic level indicated.
+        ---
+        parameters:
+          - name: root_id
+            description: either the taxon id, species name or the 5 letter UniProt
+                species code for a root taxonomic level
 
-        :param root_id: either the taxon id, species name or the 5 letter UniProt
-            species code for a root taxonomic level
-        :queryparam type: the type of the returned data - either dictionary
-            (default) or newick.
+          - name: type
+            description: the type of the returned data - either dictionary
+                 (default) or newick.
+            location: query
+
+
+          - name: collapse
+            description: whether or not taxonomic levels with a single
+                 child should be collapsed or not. Defaults to yes.
+            type: boolean
+            location: query
         """
         type = request.query_params.get('type', None)
-        subtree = []
-        taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
-        tax_obj = db.Taxonomy(taxonomy_tab[0:int(len(taxonomy_tab))])
 
         try:
             taxon_id = int(root_id)
-        except:
-            if root_id.isupper():
-                genome_tab = utils.db.get_hdf5_handle().root.Genome
-                encoded_id = root_id.encode("utf-8")
-                taxon_id = genome_tab.read_where('UniProtSpeciesCode == encoded_id', field='NCBITaxonId')
-                taxon_id = int(taxon_id)
-            else:
-                taxon_id = taxonomy_tab.read_where('Name==root_id', field='NCBITaxonId')
-                taxon_id = int(taxon_id)
+        except ValueError:
+            if len(root_id) == 5:
+                try:
+                    g = utils.db.id_mapper['OMA'].genome_from_UniProtCode(root_id.upper())
+                    return self.retrieve(request, g['NCBITaxonId'], format=format)
+                except db.UnknownSpecies:
+                    pass
+            elif root_id.upper() == 'LUCA':
+                return self.list(request, format=format)
+
+            taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
+            taxon_id = taxonomy_tab.read_where('Name==root_id', field='NCBITaxonId')
+            if len(taxon_id) != 1:
+                raise NotFound("root level '{}' not found".format(root_id))
+            return self.retrieve(request, int(taxon_id), format=format)
 
         def get_children(id):
-            children = db.Taxonomy._direct_children_taxa(tax_obj, id)
+            children = utils.db.tax._direct_children_taxa(id)
             if len(children) > 0:
                 for child in children:
                     child_id = child['NCBITaxonId']
@@ -687,35 +848,51 @@ class TaxonomyViewSet(ViewSet):
                     get_children(child_id)
             return subtree
 
-        subtree.append(taxon_id)
+        subtree = [taxon_id]
         branch = get_children(taxon_id)
-        induced_tax = tax_obj.get_induced_taxonomy(members=branch)
+
+        collapse = strtobool(request.query_params.get('collapse', 'True').lower())
+        induced_tax = utils.db.tax.get_induced_taxonomy(members=branch, collapse=collapse)
 
         if type == 'newick':
-            root_taxon = tax_obj._taxon_from_numeric(taxon_id)
-            root_data = {'name': root_taxon[2].decode("utf-8"), 'taxon_id': root_taxon[0]}
+            root_taxon = induced_tax._taxon_from_numeric(taxon_id)
+            root_data = {'name': root_taxon['Name'].decode(), 'taxon_id': int(root_taxon['NCBITaxonId'])}
             data = {'root_taxon': root_data, 'newick': induced_tax.newick()}
             serializer = serializers.TaxonomyNewickSerializer(instance=data)
             return Response(serializer.data)
+        elif type == 'phyloxml':
+            phyloxml = induced_tax.as_phyloxml()
+            return HttpResponse(phyloxml, content_type="application/xml")
         else:
             data = induced_tax.as_dict()
             return Response(data)
 
 
 class IdentifiySequenceAPIView(APIView):
+    schema = DocStringSchemaExtractor()
 
     def get(self, request, format=None):
-        """Identify a protein sequence
-
-        :queryparam query: the sequence to be searched.
-        :queryparam search: argument to choose search strategy. Can be set
-            to 'exact', 'approximate' or 'mixed'. Defaults to 'mixed', meaning
-            first tries to find exact match. If no target can be found, uses
-            approximate search strategy to identify query sequence in database.
-        :queryparam full_length: a boolean indicating whether or not for
-            exact matches, the query sequence must be matching the full
-            target sequence. By default, a partial exact match is also
-            reported as exact match."""
+        """Identify a protein sequence.
+        ---
+        parameters:
+          - name: query
+            description: the sequence to be searched.
+            location: query
+            required: True
+          - name: search
+            description: argument to choose search strategy. Can be set
+                to 'exact', 'approximate' or 'mixed'. Defaults to 'mixed', meaning
+                first tries to find exact match. If no target can be found, uses
+                approximate search strategy to identify query sequence in database.
+            location: query
+          - name: full_length
+            description: a boolean indicating whether or not for
+                exact matches, the query sequence must be matching the full
+                target sequence. By default, a partial exact match is also
+                reported as exact match.
+            location: query
+            type: boolean
+        """
         query_seq = request.query_params.get('query', '')
         strategy = request.query_params.get('search', 'mixed').lower()
         if strategy not in ('approximate', 'exact', 'mixed'):
@@ -756,11 +933,19 @@ class IdentifiySequenceAPIView(APIView):
 
 
 class PropagateFunctionAPIView(APIView):
+    schema = DocStringSchemaExtractor()
     def get(self, request, format=None):
         """Annotate a sequence with GO functions based on all
-        annotations in OMA.
-
-        :queryparam query: the sequence to be annotated"""
+        annotations in OMA. The sequence is expected to be a
+        simple string of amino acids and can be passed as a
+        query parameter
+        ---
+        parameters:
+          - name: query
+            description: the sequence to be annotated
+            location: query
+            required: True
+        """
         query_seq = request.query_params.get('query', '')
         query_seq = utils.db.seq_search._sanitise_seq(query_seq)
         if len(query_seq) < 10:

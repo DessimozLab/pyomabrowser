@@ -1,0 +1,80 @@
+{% extends "core.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA standalone: Export of public OMA data for OMA standalone{% endblock %}
+{% block meta_description %}Download selected species and precomputed homology data for OMA standalone{% endblock %}
+
+{% block meta_hook %}
+    {% if file_result.state == "pending" or file_result.state == "running" %}
+    <meta http-equiv="refresh" content="{{ reload_every_x_sec }}">
+    {% endif %}
+{% endblock meta_hook %}
+
+{% block content %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-12 col-md-10 col-md-offset-1">
+			<div class="jumbotron">
+				<div class="container">
+					<h1 class="text-center">Export of Genomes and AllAll for OMA Standalone</h1>
+					<div class="well well-sm entete"></div>
+					<br>
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<p>The data we provide in here is intended to speed up the usage of the
+                                <a href="/standalone/">OMA Standalone package</a>. The compressed tar-file must be
+                                deflated in the root directory of your analysis.
+                                <b>Do not change these files
+                                    in any way, i.e. shuffling the sequences, adding or removing any sequences or
+                                    renamingany file, unless you understand what you do.</b>
+                            </p>
+
+                            <p>For this dataset you selected the genomes and the all-against-all alignments of the following species</p>
+                            <ul>{% for g in genomes %}
+                                <li>{{ g }}
+                                {% endfor %}
+                            </ul>
+
+                            <div id="mailman-signup" class="row">
+                              <div class="col-md-8 col-sm-8">
+                                <div class="thumbnail">
+                                  <div class="caption">
+                                    <h3>Mailing list</h3>
+                                    If you would like to get notified about important information regarding OMA standalone (e.g.
+                                       crucial bug fixes, new features, ...) please sign up for our low volume mailing list.
+                                    <form action="https://lists.dessimoz.org/subscribe/omastandalone" method="post" target="_blank">
+                                      <div class="input-group">
+                                        <input type="email" name="email" class="form-control" placeholder="Email">
+                                        <span class="input-group-btn">
+                                          <button class="btn btn-default" type="submit">Sign up</button>
+                                        </span>
+                                      </div>
+                                    </form>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {% if file_result.state == "done" %}
+                                <p>Your dataset is now ready. You can download it from <a href="{{ file_result.result.url }} ">here</a>.</p>
+                            {% else %}
+                                <p>Your dataset is currently being assembled. Its status is <b>{{ file_result.state }}</b>.
+                                    Depending on the size of your requested dataset as well as the server load, this
+                                    may still take some time. Once the file is ready, we will store it
+                                    for 7 days. You can come back to this page using this link:
+                                    <a href="">{{ request.get_host }}{% url 'export-download' file_result.data_hash %}</a>
+                                </p>
+
+                            <p>This page gets automatically reloaded every {{ reload_every_x_sec }} secs or after pressing the refresh button</p>
+                            <form action="{% url 'export-download' file_result.data_hash %}">
+                              <input type="submit" value="Refresh" />
+                            </form></p>
+                            {% endif %}
+                        </div>
+			        </div>
+		        </div>
+	        </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

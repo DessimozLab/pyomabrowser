@@ -9,7 +9,9 @@
 
                     <h5 class="card-title">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %}</h5>
                     <div class="d-flex">
-                        <p class="card-subtitle text-muted mr-auto">{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} <b>{{entry.genome.species}}</b>{{entry.genome.strain}}</p>
+                        <p class="card-subtitle text-muted mr-auto">{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %}
+                            <b>{{entry.genome.species}}</b>{{entry.genome.strain}}
+                            {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %}</p>
                     </div>
                     <div class="d-flex justify-content-sm-end mt-2">
                         <button type="button" class="btn btn-sm btn-default dropdown-toggle col-6 col-sm-2 mr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Groups</button>
