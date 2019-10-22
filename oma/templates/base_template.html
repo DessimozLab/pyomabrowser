@@ -45,8 +45,36 @@
 
     <div class="logos-navbar mr-auto">
         <a href="#"><img src="{% static "image/logo-SIB.png" %}" alt="Logo SIB"/></a>
-        <a href="#"><img src="{% static "image/logo-oma-mobile.png" %}" alt="Logo OMA small"/></a>
+        <a href="/oma/home/"><img src="{% static "image/logo-oma-mobile.png" %}" alt="Logo OMA small"/></a>
     </div>
+
+
+
+    {% url 'home' as home %}
+
+    {% if request.get_full_path != home %}
+
+    <div class="oma-main-search-header">
+
+        <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
+                <div class="oma-search-select">
+                    <select id="selectBrowser" class=" btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
+                        <option value="id" selected="selected">Identifier</option>
+                        <option value="sequence">Protein sequence</option>
+                        <option value="group">OMA group</option>
+                        <option value="fulltext">Full-text search</option>
+                        <option value="species">Species</option>
+                    </select>
+                </div>
+                <input id='inputBrowser' name="query" type="text" class="" placeholder="Please enter a value"/>
+                <button><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
+            </form>
+
+    </div>
+
+    {% endif %}
+
+
 
     <button type="button" class="navbar-toggler ml-auto collapsed" data-toggle="collapse"
             data-target="#bs-example-navbar-collapse-1">
@@ -63,7 +91,7 @@
                 <h3>Search</h3>
                 <form class="oma-search-mobile" id="searchNavForm" role="search" action="{% url 'search' %}" method="POST">
                     <div class="oma-search-select">
-                        <select id="selectNav" class="form-control btn-mini" name="type" onchange="update_autocomplete_enableing('searchNavForm')">
+                        <select id="selectNav" class=" btn-mini" name="type" onchange="update_autocomplete_enableing('searchNavForm')">
                             <option value="id" selected="selected">Identifier</option>
                             <option value="sequence">Protein sequence</option>
                             <option value="group">OMA group</option>
@@ -71,8 +99,8 @@
                             <option value="species">Species</option>
                         </select>
                     </div>
-                    <input type="text" id="textNav" class="form-control" name="query" placeholder="Please enter a value"/>
-                    <button type="submit"><img src="{% static "image/icon-logo-oma-o.png" %}" alt="Logo OMA icon"/></button>
+                    <input type="text" id="textNav" class="" name="query" placeholder="Please enter a value"/>
+                    <button type="submit"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
                 </form>
             </div>
 
