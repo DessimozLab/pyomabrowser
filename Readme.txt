@@ -43,6 +43,13 @@ To get a debug instance of pyoma, do the following:
 
   --> you can access the omabrowser on http://127.0.0.1:8000/
 
+Pro tips
+--------
+
+- If the port 8000 is already used and you get an error when running the server,
+you can shutdown process using it by running 'sudo lsof -t -i tcp:8000 | xargs kill -9')
+- If the page take forever to load (especially on hard load), don't use
+the --nothreading argument in python manage.py runserver 8000.
 
 
 Docker based instance
@@ -66,9 +73,11 @@ least version 18.09). Then you can:
    and add it to the docker volume:
    docker cp <path> pyomabrowser_web_1:/data/release/
 
-   alternatively, if this is going to be too big for your docker volume, you 
+   Alternatively, if this is going to be too big for your docker volume, you 
    can also mount it directly. see in docker-compose.yml the commented version
    which uses the data from an external usb disk (/Volumes/TOSHIBA\ EXT/...)
+   -> Note that 'release_volume' argument should be commented (3 instances in the
+   files)
 
 4) run migrate and collect static:
    docker-compose exec web ./manage.py migrate
@@ -77,4 +86,5 @@ least version 18.09). Then you can:
 5) restart docker-compose
    docker-compose down
    docker-compose up -d 
-3/6) access in your browser localhost:8080
+
+6) access in your browser localhost:8080
