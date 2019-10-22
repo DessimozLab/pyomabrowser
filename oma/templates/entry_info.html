@@ -7,14 +7,9 @@
 
 {% include "includes/func_desc.html" %}
 
-<div class="card">
-    <div class="card-header">
-        <div class="float-left">
-            <h3 class="card-title">General Information</h3>
-        </div>
-    </div>
-    <div class="card-body">
-        <dl class="dl-horizontal">
+
+<h1 class="content-section-title-entry">General Information</h1>
+<p><dl class="dl-horizontal">
             {% if entry.description %}<dt>Description</dt><dd>{{ entry.description }} </dd> {% endif %}
             <dt>Organism</dt>
             <dd><a href="/cgi-bin/gateway.pl?f=DisplayOS&p1={{entry.genome.uniprot_species_code}}">
@@ -26,25 +21,21 @@
             {% if "PMP" in xrefs %}
                 <dt>Protein Structures</dt><dd>n/a</dd>
             {% endif %}
-        </dl>
-    </div>
-</div>
+        </dl></p>
 
-<div class="card ">
-    <div class="card-headwe clearfix">
-        <div class="float-left">
-            <h3 class="card-title">IDs and Cross-references</h3>
-        </div>
-    </div>
-    <div class="card-body">
-        <div id="loader-xrefs"><img src="{% static "image/loading.gif" %}" alt="loading xrefs..."></div>
+
+<h1 class="content-section-title-entry">IDs and Cross-references</h1>
+<p>
+    <div id="loader-xrefs"><img src="{% static "image/loading.gif" %}" alt="loading xrefs..."></div>
         <dl id="xrefs" class="dl-horizontal">
             {% for xref in xrefs %}
                 <dt>{{ xref.source }}</dt><dd><a class="external" href="{{ xref.url }}">{{ xref.xref }}</a></dd>
             {% endfor %}
         </dl>
-    </div>
-</div>
+</p>
+
+
+
 
     <!-- Ontology -->
 <script src="{% static "js/underscore-min.js" %}" type="text/javascript"></script>

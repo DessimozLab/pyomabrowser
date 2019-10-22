@@ -333,4 +333,46 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
 
 </div>
 
+<script>
+
+
+    $('.oma-mobile-accordion').click(function () {
+        if ( $(window).width() < 769) {
+            $(this).next('.oma-card-content').slideToggle('fast').siblings('.oma-card-content:visible').slideUp('fast');
+            $(this).toggleClass("active").siblings().removeClass("active");
+
+        }
+    });
+
+
+
+
+    function resize() {
+
+        if ($(window).width() < 769) {
+            [].forEach.call(document.querySelectorAll('.oma-card-content'), function (el) {
+                $(el).toggle(false);
+                $(el).prev('.oma-mobile-accordion').removeClass("active");
+            });
+        }
+        ;
+        if ($(window).width() > 769) {
+            [].forEach.call(document.querySelectorAll('.oma-card-content'), function (el) {
+                $(el).toggle(true);
+                $(el).prev('.oma-mobile-accordion').removeClass("active");
+            });
+        }
+        ;
+
+    }
+
+
+  window.onresize = resize;
+
+
+
+
+
+</script>
+
 {% endblock content %}

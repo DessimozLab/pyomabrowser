@@ -33,33 +33,21 @@ $(window).on('load', function () {
 
 </script>
 
-    <div class="container" id="body" style="margin-top: 2em;"> <!-- .container -->
+<div class="oma-details-header {% block header_color_class %} gene-orthology {% endblock %}">
 
-    <div class="row">
-        <div class="col-12">
+    {% block header_body %} {% endblock%}
 
-            <div class="card">
-                <div class="card-body   {% block header_color_class %} {% endblock%} ">
 
-                {% block header_body %} {% endblock%}
+</div>
 
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="row content-container-row"> <!-- row content-container-row -->
-
+<div class="oma-details-container">
 
     {% block data_content %} {% endblock data_content%}
 
+</div>
 
-    </div> <!-- row content-container-row -->
 
 
-    </div> <!-- .container -->
 
 
 {% endblock content %}

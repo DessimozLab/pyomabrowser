@@ -104,7 +104,7 @@ body {
 }
  body #oma-search-container {
 	 background: #f8f9fa;
-	 padding: 80px 0 140px;
+	 padding: 64px 0 128px;
 	 text-align: center;
 	 border-radius: 0 0 50% 50%;
 	 width: 120%;
@@ -272,7 +272,6 @@ body {
 	 position: fixed;
 	 z-index: 1000;
 	 width: 100%;
-	 background: #369;
 	 padding: 10px;
 	 color: #fff;
 }
@@ -712,7 +711,7 @@ body {
 		 margin: 0 10px 0 0;
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content {
-		 /*display: none;*/
+		 display: none;
 		 padding: 10px;
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content h1 {
@@ -850,4 +849,19 @@ body {
     text-align: center;
     display: inline-flex;
     align-items: center;
+}
+
+.gene-orthology, .gene-orthology .selected {
+    background-color: #369;
+}
+.oma-group, .oma-group .selected {
+    background-color: #FFF49D;
+}
+.genome, .genome .selected {
+    background-color: #FFAB91;
+}
+
+
+.content-section-title-entry{
+	border-bottom: 2px solid #90CAF9;
 }
