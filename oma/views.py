@@ -820,7 +820,13 @@ def home(request):
     except tweepy.TweepError:
         tweets = ['Currently no tweets found']
 
-    context = {'tweets': tweets}
+    context = {'tweets': tweets,
+               'nr_genomes':len(utils.id_mapper['OMA']._genome_keys),
+               'nr_proteins':utils.id_resolver.max_entry_nr,
+               'nr_groups': utils.db.get_nr_oma_groups(),
+               'nr_hogs':utils.db.get_nr_toplevel_hogs(),
+               'release': "Oct 2019"
+               }
     return render(request, 'home.html', context)
 
 

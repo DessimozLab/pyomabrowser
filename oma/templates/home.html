@@ -17,7 +17,7 @@
         <div class="oma-search">
             <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
                 <div class="oma-search-select">
-                    <select id="selectBrowser" class="form-control btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
+                    <select id="selectBrowser" class="btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
                         <option value="id" selected="selected">Identifier</option>
                         <option value="sequence">Protein sequence</option>
                         <option value="group">OMA group</option>
@@ -25,8 +25,8 @@
                         <option value="species">Species</option>
                     </select>
                 </div>
-                <input id='inputBrowser' name="query" type="text" class="form-control" placeholder="Please enter a value"/>
-                <button><img src="{% static "image/icon-logo-oma-o.png" %}" alt="Logo OMA icon"/></button>
+                <input id='inputBrowser' name="query" type="text" class="" placeholder="Please enter a value"/>
+                <button><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
             </form>
         </div>
 
@@ -38,11 +38,14 @@
              aria-hidden="true">
               <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-body">
-                        <img src="{% static "image/icon-logo-oma-o.png" %}" alt="Icon OMA"/>
-                        <form role="search" id="searchFormModal" action="{% url 'search' %}" method="POST">
+                    <div class="modal-body oma-search">
+                        <img src="{% static "image/logo-oma-o.svg" %}" alt="Icon OMA"/>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+                        <form class="search-long-string" role="search" id="searchFormModal" action="{% url 'search' %}" method="POST">{% csrf_token %}
                             <div class="oma-search-select">
-                                 <select id="selectBrowserModal" class="form-control btn-mini" name="type" onchange="update_autocomplete_enableing('searchFormModal')">
+                                 <select id="selectBrowserModal" class="btn-mini" name="type" onchange="update_autocomplete_enableing('searchFormModal')">
                                     <option value="id" selected="selected">Identifier</option>
                                     <option value="sequence">Protein sequence</option>
                                     <option value="group">OMA group</option>
@@ -50,7 +53,7 @@
                                     <option value="species">Species</option>
                                 </select>
                             </div>
-                            <textarea id='inputBrowserModal' name="query" type="text" class="form-control" placeholder="Please enter a value"></textarea>
+                            <textarea id='inputBrowserModal' name="query" type="text" class="" placeholder="Please enter a value"></textarea>
                             <button type="submit" class="btn btn-lg btn-block btn-primary">Search</button>
                         </form>
                     </div>
@@ -59,19 +62,29 @@
         </div>
         <!-- End Modal Textarea -->
 
-
         <div class="oma-quick-start">
             <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/>
             <p>
                 <strong>Examples:</strong>
-                <a id='exEntry'>Entry HUMAN22168</a> -
-                <a id='exEntry2'>Entry P53_RAT</a> -
-                <a id='exPhoto'>Search for "photoreceptor"</a> -
-                <a id="exSpecies">"Drosophila" species</a>
+                <a href="#" id='exEntry'>Entry HUMAN22168</a> -
+                <a href="#"  id='exEntry2'>Entry P53_RAT</a> -
+                <a href="#" id='exPhoto'>Search for "photoreceptor"</a> -
+                <a href="#" id="exSpecies">"Drosophila" species</a>
             </p>
         </div>
+
+
+
+        <div class="d-none d-lg-block scroll4more">
+            <h5>Scroll to discover more</h5>
+            <img style="height: 48px" src="{% static "image/down-chevron.svg" %}" alt=""/>
+        </div>
+
+
+
     </div>
 </div>
+
 <script type="text/javascript">
 $('#exPhoto').click( function() {
     $('#selectBrowser').val('fulltext');
@@ -138,9 +151,12 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
         </div>
     </div>
 
+
+
+
  <div id="oma-landing-cards">
         <div class="container-fluid">
-            <div class="row">
+            <div class="row ">
                 <div class="col-lg-3 col-md-6">
                     <div class="oma-card">
                         <div class="oma-mobile-accordion">
@@ -155,15 +171,19 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                             </i>
                         </div>
                         <div class="oma-card-content">
+                            <br>
                             <ul>
-                                <li>Read our
-                                        <a href="{% url 'about'  %}">brief introduction to OMA</a>.
+                                <li><p>
+                                    Read our
+                                        <a href="{% url 'about'  %}">brief introduction to OMA</a>.</p>
                                 </li>
-                                <li>Familiarise yourself with the
-                                    <a href="{% url 'type'  %}">different types of orthologs provided</a>.
+                                <li><p>
+                                    Familiarise yourself with the
+                                    <a href="{% url 'type'  %}">different types of orthologs provided</a>.</p>
                                 </li>
-                                <li>Get ideas about
-                                    <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
+                                <li><p>
+                                    Get ideas about
+                                    <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.</p>
                                 </li>
                             </ul>
                         </div>
@@ -184,11 +204,17 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                             </i>
                         </div>
                         <div class="oma-card-content">
+                             <br>
                             <ul>
-                                <li>A List</li>
-                                <li>With items</li>
-                                <li>A List</li>
-                                <li>With items</li>
+                                <li><a href="{% url 'home' %}">Fast mapping</a></li>
+                                <li> <a  href="{% url 'function-projection-input' %}">Functional prediction</a></li>
+                                <li> <a  href="{% url 'land_syntenyDP' %}">Synteny dotplot</a></li>
+                                <li><a href="{% url 'genomePW' %}">Genome pair orthology</a></li>
+
+
+
+
+
                             </ul>
                         </div>
                     </div>
@@ -208,6 +234,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                             </i>
                         </div>
                         <div class="oma-card-content">
+                             <br>
                             <ul>
                                 <li><b><a href="{% url 'current'  %}">Current release</a>:</b>
                                     All data is available for downloading in a variety of formats.
@@ -243,6 +270,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                             </i>
                         </div>
                         <div class="oma-card-content">
+                             <br>
                             <!-- Insert Twitter feed -->
                             <div class="oma-twitter">
                                 <ul>
@@ -295,8 +323,8 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
             <div class="oma-alert">
                 <img src="{% static "image/icon-info.svg" %}" alt="!"/>
                 <p>If you use OMA in your work, please consider citing:<br/>
-               Altenhoff A et al., <em>The OMA orthology database in 2018: retrieving evolutionary
-               relationships among all domains of life through richer web and programmatic interfaces</em>
+               Altenhoff A et al., <em> <b>The OMA orthology database in 2018: retrieving evolutionary
+               relationships among all domains of life through richer web and programmatic interfaces </b></em>
                Nucleic Acids Research, 2018, 46 (D1): D477-D485
                (doi:<a href="http://doi.org/10.1093/nar/gkx1019">10.1093/nar/gkx1019</a>)</p>
             </div>

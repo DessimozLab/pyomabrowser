@@ -189,8 +189,9 @@ body {
 	 background: #f1f3f4;
 	 padding: 18px 10px 10px 10px;
 	 border-radius: 10px;
-	 min-height: 500px;
-	 font-size: 0.8rem;
+	 height:100%;
+	 /*min-height: 500px;
+	 font-size: 0.8rem;*/
 }
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card h1 {
 	 font-family: "Dosis", sans-serif;
@@ -203,10 +204,13 @@ body {
 	 max-height: 62px;
 }
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul {
+	 text-align: left;
 	 padding: 0;
 }
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul li {
+	 margin-bottom: 8px;
 	 list-style: none;
+	 text-align: justify !important;
 }
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .oma-mobile-accordion i {
 	 display: none;
@@ -708,7 +712,7 @@ body {
 		 margin: 0 10px 0 0;
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content {
-		 display: none;
+		 /*display: none;*/
 		 padding: 10px;
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content h1 {
@@ -837,4 +841,13 @@ body {
 	 body .oma-details-container {
 		 margin: 0;
 	}
+}
+
+.scroll4more {
+	margin: 60px auto 0;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
 }
