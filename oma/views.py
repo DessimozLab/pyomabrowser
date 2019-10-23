@@ -425,8 +425,19 @@ class ParalogyBase(PairsBase):
     pass
 
 
-class Entry_Paralogy(TemplateView, ParalogyBase):
-        template_name = "entry_paralogy.html"
+class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
+    template_name = "entry_paralogy.html"
+
+
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(Entry_Paralogy, self).get_context_data(entry_id, **kwargs)
+        entry = self.get_entry(entry_id)
+        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
+
+        context.update(
+            {'entry': entry, 'nr_pps': 666,
+              'tab': 'paralogs'})
+        return context
 
 
 # GOA

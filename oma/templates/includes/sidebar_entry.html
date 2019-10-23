@@ -1,0 +1,83 @@
+{% load staticfiles %}
+
+<div id="oma-details-sideNav-mobile">
+    <a href="#" id="toggleSidenav">
+        <span>Select a Tab</span><img src="{% static " image/icon-arrow.png" %}" alt="Arrow" />
+    </a>
+</div>
+
+
+<div class="oma-details-nav-left" id="sideNavMobile">
+
+    <ul>
+        <li class="{% if tab == 'orthologs' %} active selected {%endif%}" {% if tab != 'orthologs' %}
+             onclick="window.location='{% url 'pairs' entry.omaid %}'" {%endif%}>
+            <a href="{% url 'pairs' entry.omaid %}" data-toggle="collapse" data-target="#filterOrthologs">
+
+                <span>Orthologs</span>
+
+                {% if entry.number_vps %}
+                <span class="badge badge-info">{{entry.number_vps}}</span>{% endif %}
+                {% if tab == 'orthologs' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
+            </a>
+
+            <div id="filterOrthologs" class="collapse">
+
+                <div id="filter-taxon-container"></div>
+                <div>
+
+
+                <div class="dropdown-divider pl-0"></div>
+
+                <h6>Display only:</h6>
+
+                <div class="form-check pl-4">
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="hogFilter">
+                        <label class="form-check-label" for="hogFilter">
+                            HOG
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="omagroupFilter">
+                        <label class="form-check-label" for="omagroupFilter">
+                            OMA Group
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="pairwiseFilter">
+                        <label class="form-check-label" for="pairwiseFilter">
+                            Pairwise
+                        </label>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </li>
+
+
+        <li class="{% if tab == 'paralogs' %} active selected {%endif%}">
+            <a href="{% url 'pair_paralogs' entry.omaid %}">
+                <span>Paralogs</span>
+                {% if nr_pps %}
+                <span class="badge badge-info">{{nr_pps}}</span>{% endif %}
+            </a>
+
+        </li>
+
+
+
+
+    </ul>
+</div>
+
+
+
+

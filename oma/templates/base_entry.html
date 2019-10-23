@@ -10,7 +10,8 @@
 <div class="oma-details-title">
     <h2>Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %}</h2>
 
-    <p>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} {{entry.genome.species}} {{entry.genome.strain}}
+    <p>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} {{entry.genome.species}}
+        {{entry.genome.strain}}
         {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %}</p>
 </div>
 <div class="oma-details-title-buttons">
@@ -24,7 +25,8 @@
         <a class="dropdown-item" href="{% url 'omagroup_members' entry.oma_group %}">Oma Group</a>
     </div>
 
-    <button  class="btn btn-default"><a href="{% url 'genome_info' entry.genome.uniprot_species_code %}">Genome</a></button>
+    <button class="btn btn-default"><a href="{% url 'genome_info' entry.genome.uniprot_species_code %}">Genome</a>
+    </button>
 
 </div>
 
@@ -32,52 +34,41 @@
 
 {% block data_content %}
 
-<div id="oma-details-sideNav-mobile">
-        <a href="#" id="toggleSidenav">
-            <span>Select a Tab</span><img src="{% static "image/icon-arrow.png" %}" alt="Arrow" />
-        </a>
-    </div>
-
-<div class="oma-details-nav-left" id="sideNavMobile">
-
-        <ul>
-            <li><a href="#">Orthologs</a></li>
-            <li><a href="#" data-toggle="collapse" data-target="#filterParalogs">
-                <span>Paralogs</span>
-                <i class="material-icons">keyboard_arrow_right</i>
-            </a>
-                <div id="filterParalogs" class="collapse">
-                    <p>Filters</p>
-                    <p>Filters</p>
-                    <p>Filters</p>
-                </div>
-            </li>
-            <li class="active"><a href="#">Gene information</a></li>
-            <li><a href="#">GO Annotations</a></li>
-            <li><a href="#">Sequences</a></li>
-            <li><a href="#">Local synteny</a></li>
-        </ul>
-    </div>
+{% include "includes/sidebar_entry.html" with tab=tab %}
 
 <div class="oma-details-content">
 
-        {% block contentTab %} {% endblock contentTab %}
+    {% block contentTab %} {% endblock contentTab %}
 
-    </div>
+</div>
 
 
 <script>
-    $( document ).ready(function() {
-    $("#toggleSidenav").click( function() {
-        $('#sideNavMobile').toggle();
-        $('#oma-details-sideNav-mobile').toggleClass('sideNavMobile-opened');
+
+    $(document).ready(function () {
+        $("#toggleSidenav").click(function () {
+            $('#sideNavMobile').toggle();
+            $('#oma-details-sideNav-mobile').toggleClass('sideNavMobile-opened');
+        });
     });
-});
+
+
+    var resizeTimer;
+
+    $(window).on('resize', function (e) {
+
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+
+            $('#sideNavMobile').toggle(true);
+
+
+        }, 50);
+
+    });
+
+
 </script>
-
-
-
-
 
 
 {% endblock data_content %}
