@@ -72,6 +72,39 @@
 
         </li>
 
+        <li class="{% if tab == 'geneinformation' %} active selected {%endif%}">
+            <a href="{% url 'entry_info' entry.omaid %}">
+                <span>Gene information</span>
+                {% if nr_pps %}
+                <span class="badge badge-info">{{nr_pps}}</span>{% endif %}
+            </a>
+
+        </li>
+
+        <li class="{% if tab == 'goa' %} active selected {%endif%}">
+            <a href="{% url 'entry_goa' entry.omaid %}">
+                <span>GO Annotations</span>
+
+            </a>
+
+        </li>
+
+        <li class="{% if tab == 'sequences' %} active selected {%endif%}">
+            <a href="{% url 'entry_sequences' entry.omaid %}">
+                <span>Sequences</span>
+
+            </a>
+
+        </li>
+
+        <li class="{% if tab == 'synteny' %} active selected {%endif%}">
+            <a href="{% url 'synteny' entry.omaid 4 4 %}">
+                <span>Local synteny</span>
+
+            </a>
+
+        </li>
+
 
 
 
