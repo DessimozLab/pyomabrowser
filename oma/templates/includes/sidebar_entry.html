@@ -14,10 +14,13 @@
              onclick="window.location='{% url 'pairs' entry.omaid %}'" {%endif%}>
             <a href="{% url 'pairs' entry.omaid %}" data-toggle="collapse" data-target="#filterOrthologs">
 
-                <span>Orthologs</span>
+                <span>Orthologs
 
-                {% if entry.number_vps %}
-                <span class="badge badge-info">{{entry.number_vps}}</span>{% endif %}
+                {% if nr_vps %}
+
+                <span class="badge badge-info">{{nr_vps}}</span>
+                {% endif %}
+                    </span>
                 {% if tab == 'orthologs' %}
                 <i class="material-icons">keyboard_arrow_right</i>
                 {%endif%}
@@ -62,12 +65,13 @@
 
         </li>
 
-
         <li class="{% if tab == 'paralogs' %} active selected {%endif%}">
             <a href="{% url 'pair_paralogs' entry.omaid %}">
-                <span>Paralogs</span>
+                <span>Paralogs
                 {% if nr_pps %}
-                <span class="badge badge-info">{{nr_pps}}</span>{% endif %}
+                <span class="badge badge-info">{{nr_pps}}</span>
+                {% endif %}
+                    </span>
             </a>
 
         </li>
@@ -75,8 +79,7 @@
         <li class="{% if tab == 'geneinformation' %} active selected {%endif%}">
             <a href="{% url 'entry_info' entry.omaid %}">
                 <span>Gene information</span>
-                {% if nr_pps %}
-                <span class="badge badge-info">{{nr_pps}}</span>{% endif %}
+
             </a>
 
         </li>

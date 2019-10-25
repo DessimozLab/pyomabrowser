@@ -326,6 +326,8 @@ body {
 }
  body .oma-details-container .oma-details-nav-left ul li.active {
 	 background: #369;
+	 border-top:    2px solid  #f8f9fa;
+	 border-bottom: 2px solid #f8f9fa;
 }
  body .oma-details-container .oma-details-nav-left ul li.active > a {
 	 font-weight: 700;
@@ -343,7 +345,6 @@ body {
 	 background-color:#f8f9fa;
 	 padding: 4px;
 }
-
  body .oma-details-container .oma-details-nav-left ul li a:hover {
 	 text-decoration: none;
 }

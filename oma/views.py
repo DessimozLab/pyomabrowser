@@ -40,6 +40,7 @@ from pyoma.browser import db, models
 
 logger = logging.getLogger(__name__)
 
+#<editor-fold desc="General">
 
 # --- General -------
 class JsonModelMixin(object):
@@ -132,8 +133,9 @@ class AsyncMsaMixin(object):
             tasks.compute_msa.delay(msa_id, group_type, *args)
         return {'msa_file_obj': r}
 
+# //</editor-fold>
 
-#<editor-fold desc="Entry Centric">
+#//<editor-fold desc="Entry Centric">
 
 #  --- Entry Centric -------
 class EntryCentricMixin(object):
@@ -152,7 +154,8 @@ class InfoBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
-        context.update({'entry': entry, 'tab': 'geneinformation',
+        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
+        context.update({'entry': entry, 'tab': 'geneinformation','nr_vps': len(vps_raw),
                         'nr_pps': 666})
         return context
 
@@ -385,6 +388,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         longest_seq = 0
         if len(vps) > 0:
             longest_seq = max(e.sequence_length for e in vps)
+
         context.update(
             {'entry': entry, 'nr_pps': 666,  # TODO: compute real number of paralogs
              'vps': vps, 'nr_vps': len(vps_raw), 'tab': 'orthologs',
@@ -435,7 +439,7 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
 
         context.update(
-            {'entry': entry, 'nr_pps': 666,
+            {'entry': entry, 'nr_pps': 666,'nr_vps': len(vps_raw),
               'tab': 'paralogs'})
         return context
 
@@ -450,7 +454,7 @@ class Entry_GOA(TemplateView, InfoBase):
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
 
         context.update(
-            {'entry': entry, 'nr_pps': 666,
+            {'entry': entry, 'nr_pps': 666, 'nr_vps': len(vps_raw),
               'tab': 'goa'})
         return context
 
@@ -462,9 +466,10 @@ class Entry_sequences(TemplateView, InfoBase):
     def get_context_data(self, entry_id, **kwargs):
         context = super(Entry_sequences, self).get_context_data(entry_id, **kwargs)
         entry = self.get_entry(entry_id)
+        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
 
         context.update(
-            {'entry': entry, 'nr_pps': 666,
+            {'entry': entry, 'nr_pps': 666, 'nr_vps': len(vps_raw),
               'tab': 'sequences'})
         return context
 
@@ -579,6 +584,7 @@ class HomoeologJson(HomoeologBase, JsonModelMixin, View):
         data = list(self.to_json_dict(context['hps']))
         return JsonResponse(data, safe=False)
 
+# //</editor-fold>
 
 #<editor-fold desc="Genome Centric">
 class GenomeBase(ContextMixin):
@@ -628,6 +634,8 @@ class GenomeCentricSynteny(GenomeBase, TemplateView):
         return context
 
 #</editor-fold >
+
+#<editor-fold desc="HOGs Centric">
 
 class HOGsBase(ContextMixin, EntryCentricMixin):
 
@@ -707,8 +715,6 @@ class HOGsOrthoXMLView(HOGsView):
         response.write(orthoxml)
         response['Access-Control-Allow-Origin'] = '*'
         return response
-
-
 
 @method_decorator(never_cache, name='dispatch')
 class HOGsMSA(AsyncMsaMixin, HOGsBase, TemplateView):
@@ -807,7 +813,9 @@ def domains_json(request, entry_id):
     response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
     return JsonResponse(response)
 
+# //</editor-fold>
 
+#<editor-fold desc="Static">
 @cache_control(max_age=1800)
 def home(request):
     n_latest_tweets = 3
@@ -1275,6 +1283,9 @@ class ArchiveView(CurrentView):
     def download_root(self, context):
         return "/" + context['release'].get('id', '')
 
+# //</editor-fold>
+
+# <editor-fold desc="Dot plot">
 
 # synteny viewer DotPlot
 def DotplotViewer(request, g1, g2, chr1, chr2):
@@ -1341,6 +1352,9 @@ class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
 
         return JsonResponse(data, safe=False)
 
+# //</editor-fold>
+
+#<editor-fold desc="Group Centric">
 
 class OMAGroupBase(ContextMixin):
     def get_context_data(self, group_id, **kwargs):
@@ -1401,7 +1415,6 @@ class OMAGroup_ontology(OMAGroup):
 class OMAGroup_info(OMAGroup):
     template_name = "omagroup_info.html"
 
-
 class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
     template_name = "omagroup_entry.html"
 
@@ -1415,7 +1428,6 @@ class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
                         'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
         return context
 
-
 @method_decorator(never_cache, name='dispatch')
 class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
     template_name = "omagroup_msa.html"
@@ -1425,7 +1437,6 @@ class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
         context.update(self.get_msa_results('og', context['group_nr']))
         context['sub_tab'] = 'msa'
         return context
-
 
 @method_decorator(never_cache, name='dispatch')
 class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
@@ -1439,3 +1450,6 @@ class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
             context = {}
         context.update({'sub_tab': 'msa', 'entry': entry})
         return context
+
+
+# //</editor-fold>
