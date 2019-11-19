@@ -3,27 +3,32 @@
  */
 (function(exports) {
     var evidence = {
-        EXP: {txt: "Inferred from Experiment", typ: "experimental", url: "http://www.geneontology.org/page/exp-inferred-experiment/"},
-        IDA: {txt: "Inferred from Direct Assay", typ: "experimental", url: "http://www.geneontology.org/page/ida-inferred-direct-assay/"},
-        IPI: {txt: "Inferred from Physical Interaction", typ: "experimental", url: "http://www.geneontology.org/page/ipi-inferred-physical-interaction/"},
-        IMP: {txt: "Inferred from Mutant Phenotype", typ: "experimental", url: "http://www.geneontology.org/page/imp-inferred-mutant-phenotype/"},
-        IGI: {txt: "Inferred from Genetic Interaction", typ: "experimental", url: "http://www.geneontology.org/page/igi-inferred-genetic-interaction/"},
-        IEP: {txt: "Inferred from Expression Pattern", typ: "experimental", url: "http://www.geneontology.org/page/iep-inferred-expression-pattern/"},
-        ISS: {txt: "Inferred from Sequence or Structural Similarity", typ: "curated", url: "http://www.geneontology.org/page/iss-inferred-sequence-or-structural-similarity/"},
-        ISO: {txt: "Inferred from Sequence Orthology", typ: "curated", url: "http://www.geneontology.org/page/iso-inferred-sequence-orthology/"},
-        ISA: {txt: "Inferred from Sequence Alignment", typ: "curated", url: "http://www.geneontology.org/page/isa-inferred-sequence-alignment/"},
-        ISM: {txt: "Inferred from Sequence Model", typ: "curated", url: "http://www.geneontology.org/page/ism-inferred-sequence-model/"},
-        IGC: {txt: "Inferred from Genomic Context", typ: "curated", url: "http://www.geneontology.org/page/igc-inferred-genomic-context/"},
-        IBA: {txt: "Inferred from Biological aspect of Ancestor", typ: "curated", url: "http://www.geneontology.org/page/iba-inferred-biological-aspect-ancestor/"},
-        IBD: {txt: "Inferred from Biological aspect of Descendant", typ: "curated", url: "http://www.geneontology.org/page/ibd-inferred-biological-aspect-descendent/"},
-        IKR: {txt: "Inferred from Key Residues", typ: "curated", url: "http://www.geneontology.org/page/ikr-inferred-key-residues/"},
-        IRD: {txt: "Inferred from Rapid Divergence", typ: "curated", url: "http://www.geneontology.org/page/ird-inferred-rapid-divergence/"},
-        RCA: {txt: "Inferred from Reviewed Computational Analysis", typ: "curated", url: "http://www.geneontology.org/page/rca-inferred-reviewed-computational-analysis/"},
-        TAS: {txt: "Traceable Author Statement", typ: "curated", url: "http://www.geneontology.org/page/tas-traceable-author-statement/"},
-        NAS: {txt: "Non-traceable Author Statement", typ: "curated", url: "http://www.geneontology.org/page/nas-non-traceable-author-statement/"},
-        IC : {txt: "Inferred by Curator", typ: "curated", url: "http://www.geneontology.org/page/ic-inferred-curator/"},
-        ND : {txt: "No biological Data available", typ: "curated", url: "http://www.geneontology.org/page/nd-no-biological-data-available/"},
-        IEA: {txt: "Inferred from Electronic Annotation", typ: "uncurated", url: "http://www.geneontology.org/page/automatically-assigned-evidence-codes/"},
+        EXP: {txt: "Inferred from Experiment", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_Experiment_(EXP)"},
+        IDA: {txt: "Inferred from Direct Assay", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_Direct_Assay_(IDA)"},
+        IPI: {txt: "Inferred from Physical Interaction", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_Physical_Interaction_(IPI)"},
+        IMP: {txt: "Inferred from Mutant Phenotype", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_Mutant_Phenotype_(IMP)"},
+        IGI: {txt: "Inferred from Genetic Interaction", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_Genetic_Interaction_(IGI)"},
+        IEP: {txt: "Inferred from Expression Pattern", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_Expression_Pattern_(IEP)"},
+        HTP: {txt: "Inferred from High Throughput Experiment", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_High_Throughput_Experiment_(HTP)"},
+        HDA: {txt: "Inferred from High Throughput Direct Assay", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_High_Throughput_Direct_Assay_(HDA)"},
+        HMP: {txt: "Inferred from High Throughput Mutant Phenotype", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_High_Throughput_Mutant_Phenotype_(HMP)"},
+        HGI: {txt: "Inferred from High Throughput Genetic Interaction", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_High_Throughput_Genetic_Interaction_(HGI)"},
+        HEP: {txt: "Inferred from High Throughput Expression Pattern", typ: "experimental", url: "http://wiki.geneontology.org/index.php/Inferred_from_High_Throughput_Expression_Pattern_(HEP)"},
+        ISS: {txt: "Inferred from Sequence or Structural Similarity", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Sequence_or_structural_Similarity_(ISS)"},
+        ISO: {txt: "Inferred from Sequence Orthology", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Sequence_Orthology_(ISO)"},
+        ISA: {txt: "Inferred from Sequence Alignment", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Sequence_Alignment_(ISA)"},
+        ISM: {txt: "Inferred from Sequence Model", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Sequence_Model_(ISM)"},
+        IGC: {txt: "Inferred from Genomic Context", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Genomic_Context_(IGC)"},
+        IBA: {txt: "Inferred from Biological aspect of Ancestor", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Biological_aspect_of_Ancestor_(IBA)"},
+        IBD: {txt: "Inferred from Biological aspect of Descendant", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Biological_aspect_of_Descendant_(IBD)"},
+        IKR: {txt: "Inferred from Key Residues", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Key_Residues_(IKR)"},
+        IRD: {txt: "Inferred from Rapid Divergence", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Rapid_Divergence(IRD)"},
+        RCA: {txt: "Inferred from Reviewed Computational Analysis", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Reviewed_Computational_Analysis_(RCA)"},
+        TAS: {txt: "Traceable Author Statement", typ: "curated", url: "http://wiki.geneontology.org/index.php/Traceable_Author_Statement_(TAS)"},
+        NAS: {txt: "Non-traceable Author Statement", typ: "curated", url: "http://wiki.geneontology.org/index.php/Non-traceable_Author_Statement_(NAS)"},
+        IC : {txt: "Inferred by Curator", typ: "curated", url: "http://wiki.geneontology.org/index.php/Inferred_by_Curator_(IC)"},
+        ND : {txt: "No biological Data available", typ: "curated", url: "http://wiki.geneontology.org/index.php/No_biological_Data_available_(ND)_evidence_code"},
+        IEA: {txt: "Inferred from Electronic Annotation", typ: "uncurated", url: "http://wiki.geneontology.org/index.php/Inferred_from_Electronic_Annotation_(IEA)"},
     };
 
     var special_ref_map = {
@@ -73,10 +78,11 @@
         if (ref.startsWith("PMID:")){
             lnk = "http://www.ncbi.nlm.nih.gov/pubmed/" + ref.substr(5);
         } else if (special_ref_map[ref] !== undefined){
-            lnk = "http://www.geneontology.org/cgi-bin/references.cgi#"+special_ref_map[ref];
+            var goref = special_ref_map[ref].split(':')[1];
+            lnk = "http://purl.obolibrary.org/obo/go/references/"+goref;
         } else if (ref.startsWith("GO_REF:")){
             var refcode = ('0000000' + parseInt(ref.substr(7), 10)).slice(-7);
-            lnk = "http://www.geneontology.org/cgi-bin/references.cgi#GO_REF:"+refcode;
+            lnk = "http://purl.obolibrary.org/obo/go/references/"+refcode;
         } else if (ref.startsWith("OMA_Fun:")){
             return '<a href="#" role="button" data-toggle="modal" data-target=".function-modal">'+ref+"</a>";
         } else if (ref.startsWith("FB:")){

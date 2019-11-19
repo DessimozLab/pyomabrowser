@@ -18,6 +18,7 @@ from zoo.wrappers.aligners import Mafft, DataType, WrapperError
 
 from django.conf import settings
 from celery import shared_task
+from celery.exceptions import SoftTimeLimitExceeded
 import pyoma.browser.models
 from pyoma.browser.db import FastMapper
 from . import utils, misc
@@ -115,7 +116,7 @@ class FastaTarballResultBuilder(object):
         return misc.as_fasta(headers=headers, seqs=seqs)
 
 
-@shared_task
+@shared_task(soft_time_limit=800)
 def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
     t0 = time.time()
     logger.info('starting computing MSA')
@@ -152,6 +153,11 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
         logger.exception('error while computing msa for dataset: {}'.format(
             ', '.join(arglist)))
         db_entry.state = 'error'
+    except SoftTimeLimitExceeded as e:
+        arglist = [group_type, str(entry_nr_or_grp_nr)]
+        arglist.extend(args)
+        logger.warning('computing msa timed out for dataset: {}'.format(', '.join(arglist)))
+        db_entry.state = 'timeout'
     db_entry.save()
 
 
