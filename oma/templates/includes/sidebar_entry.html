@@ -12,7 +12,7 @@
     <ul>
         <li class="{% if tab == 'orthologs' %} active selected {%endif%}" {% if tab != 'orthologs' %}
              onclick="window.location='{% url 'pairs' entry.omaid %}'" {%endif%}>
-            <a href="{% url 'pairs' entry.omaid %}" data-toggle="collapse" data-target="#filterOrthologs">
+            <a href="{% url 'pairs' entry.omaid %}" {% if tab == 'orthologs' %}data-toggle="collapse" data-target="#filterOrthologs"{%endif%}>
 
                 <span>Orthologs
 
