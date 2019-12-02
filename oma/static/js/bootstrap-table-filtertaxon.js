@@ -284,8 +284,20 @@
 
     var click_input = function (event) {
 
+                    var name_ ;
+
+                    if ($(event.currentTarget)[0].id.startsWith('custom_')) {
+                        that.custom_filter_search =true;
+
+                        name_ = $(event.currentTarget)[0].id.replace("custom_", "")
+                    }
+
+                    else {
+                        name_ = $(event.currentTarget)[0].id
+                    }
+
                     container_filter_taxon.find('input').not(this).prop('checked', false);
-                    that.onColumntaxonFilter($(event.currentTarget)[0].id);
+                    that.onColumntaxonFilter(name_);
             }
 
     var click_edit = function (event) {
@@ -426,7 +438,7 @@
 
                 // add the new item after last customfilter
                 var new_item = document.createElement('div');
-                new_item.innerHTML = ' <input type="checkbox" class="form-check-input checkbox_taxa" id="custom_' + empty_filter.Uid + '" <label class="form-check-label" for="custom_' + empty_filter.Uid + '">' + empty_filter.name + ' <a href="javascript:void(0);" class="edit" id="edit_' + empty_filter.Uid + '">(edit)</a></label>';
+                new_item.innerHTML = ' <input type="checkbox" class="form-check-input checkbox_taxa" id="custom_' + empty_filter.Uid + '" <label class="form-check-label" for="custom_' + empty_filter.Uid + '">' + empty_filter.name + ' <a href="javascript:void(0);" class="edit" id="edit_' + empty_filter.Uid + '"> (edit)</a></label>';
 
                 $(new_item).insertBefore($("#div_add")[0]);
 
@@ -474,15 +486,19 @@
 
         if (this.multi_species_search && this.multi_species_search !== 'all') {
             var that = this;
+
+
             this.data = $.grep(this.data, function (item, i) {
 
                 var lsp;
 
                 if (that.custom_filter_search) {
                     var result = that.tax_converter['custom'].filter(function (obj) {
-                        return obj.Uid === that.multi_species_search;
+                        return obj.Uid == that.multi_species_search;
                     });
+
                     lsp = result[0].lsp;
+
                 }
                 else {
                     lsp = that.tax_converter[that.multi_species_search];
@@ -504,6 +520,8 @@
                 }
                 return false;
             })
+
+
         }
 
         if (this.multi_species_search && this.multi_species_search !== 'all' || this.options.searchText) {
@@ -517,7 +535,6 @@
 
     BootstrapTable.prototype.onColumntaxonFilter = function (name_selector) {
         this.resetSearch('');
-
         this.multi_species_search = name_selector;
         this.options.pageNumber = 1;
         this.initSearch();
