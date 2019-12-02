@@ -332,7 +332,19 @@ body {
  body .oma-details-container .oma-details-nav-left ul li.active > a {
 	 font-weight: 700;
 	 color: #fff;
+
+
 }
+
+   body .oma-details-container .oma-details-nav-left .edit {
+	 display: inline;
+	 width: 100%;
+	 padding: 0px 0;
+	 padding-left: 0px;
+	   color: blue;
+}
+
+
  body .oma-details-container .oma-details-nav-left ul li a {
 	 display: flex;
 	 width: 100%;
