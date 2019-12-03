@@ -497,9 +497,9 @@ class XRefsViewSet(ViewSet):
             return sorted(xrefs, key=operator.itemgetter(*key))
 
     def _remove_redundant_xrefs(self, xrefs):
-        xrefs = self._order_xrefs(xrefs, ('xref', 'source'))
+        xrefs = self._order_xrefs(xrefs, ('xref', 'entry_nr', 'source'))
         res = []
-        for k, grp in itertools.groupby(xrefs, key=operator.itemgetter('xref')):
+        for k, grp in itertools.groupby(xrefs, key=operator.itemgetter('xref', 'entry_nr')):
             res.append(next(grp))
         return res
 
