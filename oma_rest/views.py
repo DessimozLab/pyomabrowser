@@ -99,8 +99,8 @@ class ProteinEntryViewSet(ViewSet):
 
     @action(detail=True)
     def orthologs(self, request, entry_id=None, format=None):
-        """List of all the identified orthologues for a protein. Filtering
-        specific subtypes of orthology is possible specifying a rel_type
+        """List of all the identified pairwise orthologues for a protein. Filtering
+        specific subtypes of orthology is possible by specifying a rel_type
         query parameter.
         ---
         parameters:
@@ -129,6 +129,22 @@ class ProteinEntryViewSet(ViewSet):
             else:
                 content.append(ortholog)
         serializer = serializers.OrthologsListSerializer(instance=content, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=True)
+    def hog_derived_orthologs(self, request, entry_id, format=None):
+        """List of the orthologs derived from the hog for a given protein.
+
+        ---
+        parameters:
+          - name: entry_id
+            description: an unique identifier for a protein - either it
+                         entry number, omaid or its canonical id
+        """
+        p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
+        data = utils.db.get_hog_induced_pairwise_orthologs(p_entry_nr)
+        content = [models.ProteinEntry(utils.db, e) for e in data]
+        serializer = serializers.ProteinEntrySerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 
     @action(detail=True)
@@ -531,9 +547,9 @@ class XRefsViewSet(ViewSet):
             return sorted(xrefs, key=operator.itemgetter(*key))
 
     def _remove_redundant_xrefs(self, xrefs):
-        xrefs = self._order_xrefs(xrefs, ('xref', 'source'))
+        xrefs = self._order_xrefs(xrefs, ('xref', 'entry_nr', 'source'))
         res = []
-        for k, grp in itertools.groupby(xrefs, key=operator.itemgetter('xref')):
+        for k, grp in itertools.groupby(xrefs, key=operator.itemgetter('xref', 'entry_nr')):
             res.append(next(grp))
         return res
 
