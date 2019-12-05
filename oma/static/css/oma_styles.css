@@ -288,7 +288,14 @@ body {
 	 border-radius: 3px;
 	 border: none;
 	 padding: 10px 25px;
+     color:#fff;
+     background: rgba(0, 0, 0, 0.2);
 }
+
+ body .oma-details-header .oma-details-title-buttons .btn a {
+     color:#fff !important;
+ }
+
  body .oma-details-container {
 	 height: calc(100vh - 202px);
 	 margin: 105px 0 0;
@@ -596,8 +603,10 @@ body {
 		 font-size: 1.4rem;
 	}
 	 body .oma-details-header .oma-details-title-buttons {
-		 display: flex;
+		 display: block !important;
 		 float: none;
+         color: #fff;
+		 border-radius: 0;
 		 background: rgba(0, 0, 0, 0.2);
 	}
 	 body .oma-details-header .oma-details-title-buttons .btn {
