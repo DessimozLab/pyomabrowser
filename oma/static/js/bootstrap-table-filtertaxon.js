@@ -402,8 +402,10 @@
                 var custom_item = this.tax_converter['custom'][tax];
                 html.push(add_input_div(custom_item.Uid, custom_item.name, true ));
             }
-            html.push('<div id="div_add" > <a  class="li_filtertax"  id="li_add"> <h6 id="li_h6_add">Add custom filter</h6> </a> </div>');
-            html.push('</div>');
+
+
+
+            html.push('<div id="div_add" class="text-center" ><button type="button" id="li_add" class="btn btn-outline-secondary  ">Add custom filter</button> </div>');
 
             container_filter_taxon.prepend(html.join(''));
             container_filter_taxon.find('input[id=all]').prop('checked', true);
