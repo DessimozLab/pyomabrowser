@@ -96,14 +96,11 @@
 
             // HEADER
             modal_html.push('<div class="modal-header">');
-            modal_html.push('<h4 class="modal-title"><b>Custom filter:</b> <a href="#" id="username" data-type="text" data-url="" data-pk="1"  data-title="Enter username">'+custom_item.name+'</a> <small>(click on text field to rename this filter)</small> </h4>  <br>  ');
-            modal_html.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true" >&times;</button>');
+            modal_html.push('<h4 class="modal-title"><b>Custom filter:</b> <a href="#" id="username" data-type="text" data-url="" data-pk="1"  data-title="Enter username">'+custom_item.name+'</a> <small>(click to rename)</small> </h4>  <br>  ');
             modal_html.push('</div>');
 
             // CONTENT
             modal_html.push('<div class="modal-body modal-body-custom">');
-            modal_html.push('<button type="button" class="btn "  id="reset_tree" > Click here to reset the tree selection. </button>');
-            modal_html.push('<button type="button" class="btn btn-danger  "  id="delete_tree" > Click here to delete this custom filter. </button>');
             modal_html.push(sprintf("   <div class=\"container-fluid\" id=\"avdSearchModalContent%s\" style=\"padding-right: 0px;padding-left: 0px;\" >", "_" + that.options.idTable));
             modal_html.push('</div>');
             modal_html.push('</div>');
@@ -125,7 +122,12 @@
             that.custom_filter_search = true;
             that.onColumntaxonFilter(that.item_to_update.Uid);
 
-            jmodal.append(sprintf('<button type="button" id="btnCloseAvd%s" class="btn btn-default float-right" >%s</button>', "_" + that.options.idTable, searchText));
+
+
+             jmodal.append(sprintf('<button type="button" class="btn btn-outline-danger"  id="reset_tree" > Reset the tree selection</button> <span></span>'));
+             jmodal.append(sprintf('<button type="button" class="btn btn-outline-danger"  id="delete_tree" > Delete the filter</button>'));
+
+            jmodal.append(sprintf('<button type="button" id="btnCloseAvd%s" class="btn btn-primary float-right" >%s</button>', "_" + that.options.idTable, searchText));
 
             $("#btnCloseAvd" + "_" + that.options.idTable).click(function () {
                 that.custom_filter_search = true;
