@@ -409,6 +409,8 @@ body {
 }
  #oma-generic-container .container .jumbotron {
 	 position: relative;
+     background: none;
+    padding: 2rem 1rem;
 }
  #oma-generic-container .container .jumbotron .oma-seperator {
 	 position: relative;
