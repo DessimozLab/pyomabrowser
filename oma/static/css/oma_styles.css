@@ -895,7 +895,12 @@ body {
     background-color: #FFAB91;
 }
 
-
 .content-section-title-entry{
 	border-bottom: 2px solid #90CAF9;
+}
+
+.header-oma{
+    background-color: #317d3d ;
+    text-align: center;
+    color: #fff;
 }

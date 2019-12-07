@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     'oma',
     'oma_rest',
     'export',
-    'bootstrap3',
+    'bootstrap4',
 ]
 
 MIDDLEWARE = [

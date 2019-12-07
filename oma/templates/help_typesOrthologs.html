@@ -6,32 +6,49 @@
 
 {% block content %}
 
+<div id="oma-generic-container">
 
-<div class="container mt-5">
+    <div class="container">
 
-    <div class="card text-center bg-light mb-3 mx-auto">
-        <div class="card-header">
-            <h1 class="display-3 mb-3">Types of orthologs</h1>
-            <div class="entete mb-5" style="height: 10px;"></div>
+        <div class="jumbotron">
 
-			<p class="lead">Homologous sequences are sequence that sharing a common ancestry, be they within or between species. They can be further classified in two main categories: <i>orthologs</i>, which are pairs of genes that started diverging through speciation, and <i>paralogs</i>, which are pairs of genes that started diverging through gene duplication.</p>
 
-            <div class="card bg-light m-3 text-left">
+            <h1>Types of orthologs</h1>
 
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <p class="text-justify">Homologous sequences are sequence that sharing a common ancestry, be they within or
+                between species. They can be further classified in two main categories: <i>orthologs</i>, which are
+                pairs of genes that started diverging through speciation, and <i>paralogs</i>, which are pairs of genes
+                that started diverging through gene duplication.</p>
+
+
+            <div class="card" >
+                <div class="card-header">
+    The OMA Browser reports different subtypes of orthologous and paralogous
+                        relationships:
+  </div>
                 <div class="card-body">
+                    <p class="card-text">{% include "includes/otypes.html" %}</p>
 
-					<p class="lead">The OMA Browser reports different subtypes of orthologous and paralogous relationships:</p>
-					{% include "includes/otypes.html" %}
+                </div>
+            </div>
 
-				</div>
-			</div>
-		</div>
-	</div>
+
+        </div>
+    </div>
+
+
 </div>
 
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         var hash = window.location.hash;
         hash && $('ul.nav a[href="' + hash + '"]').tab('show');
     });

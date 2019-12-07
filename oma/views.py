@@ -889,7 +889,7 @@ def genome_suggestion(request):
             return HttpResponseRedirect(reverse('genome_suggestion_thanks'))
     else:
         form = forms.GenomeSuggestionFrom()
-    return render(request, "genome_suggestion.html", {'form': form})
+    return render(request, "help_genome_suggestion.html", {'form': form})
 
 
 class Release(TemplateView):

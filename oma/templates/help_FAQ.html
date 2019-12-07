@@ -10,22 +10,29 @@
 	#accordion .card .card-header:hover {
 		cursor: pointer;
 		color: #307C3B;
+		font-weight: bolder;
 	}
 
 </style>
-<div class="container mt-5">
 
-	<div class="card text-center bg-light mb-3 mx-auto">
-		<div class="card-header">
-			<h1 class="display-3 mb-3">FAQ</h1>
 
-			<p class="text-muted">You have questions, we have answers.</p>
+<div id="oma-generic-container">
 
-			<div class="entete mb-5" style="height: 10px;"></div>
+    <div class="container">
 
-			<div class="card bg-light text-left">
+        <div class="jumbotron">
 
-				<div class="card-body">
+
+			 <h1>FAQ <h5 class="text-muted text-center">You have questions, we have answers.</h5></h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+
 
 					<div id="accordion">
 
@@ -151,7 +158,8 @@
 				</div>
 			</div>
 		</div>
-	</div>
-</div>
+
+
+
 
 {% endblock content %}
