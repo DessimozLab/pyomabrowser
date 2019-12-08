@@ -1,0 +1,91 @@
+
+                <div class="row mx-1">
+                    <div class="col-md-4">
+
+                        <div class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical">
+                            <a class="nav-link active" href="#orthologs" role="tab" data-toggle="tab">
+                                Identify orthologous marker genes to infer a species tree</a>
+
+                            <a class="nav-link" href="#pairwise" role="tab" data-toggle="tab">
+                                Identify all orthologs of a gene in a given set of organisms</a>
+                            <a class="nav-link" href="#hogs" role="tab" data-toggle="tab">
+                                Identify all genes in tetrapodes that descended from the ancestral β-hemoglobin</a>
+                            <a class="nav-link" href="#synteny" role="tab" data-toggle="tab">
+                                Assess the conservation of local genomic neighbourhood across multiple species</a>
+                            <a class="nav-link" href="#customdata" role="tab" data-toggle="tab">
+                                Apply the OMA pipeline to custom genome/transcriptome data</a>
+                            <a class="nav-link" href="#GO" role="tab" data-toggle="tab">Consult inferred Gene Ontology terms for a particular gene present in OMA.</a>
+                            <a class="nav-link" href="#propagate" role="tab" data-toggle="tab">Propagate functional annotations between two specific genomes</a>
+                            <a class="nav-link" href="#twg" role="tab" data-toggle="tab">
+                                Align two whole genomes</a>
+                            <a class="nav-link" href="#Align" role="tab" data-toggle="tab">
+                                Align protein–protein interaction networks between two genomes</a>
+
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="tab-content">
+
+                            <div class="tab-pane active" id="orthologs">
+                                <p><strong>Appropriate orthology type</strong></p>
+                                <p><a href="/oma/landOMA/">OMA groups</a> that have a high-coverage of the species of interest.</p>
+                                <p><em>Comments</em></p>
+                                <p>Since, barring classification error, all sequence pairs within an OMA group are orthologs (and therefore related through speciation events), the corresponding gene tree is expected to follow the species tree.</p>
+                                <p>Note that the full list of OMA groups can be <a href="/oma/current/">downloaded in text or OrthoXML formats</a>.</p>
+                            </div>
+
+                            <div class="tab-pane" id="pairwise">
+                                <p><strong>Appropriate orthology type</strong></p>
+                                <p>Ortholog view ("tab") for that particular gene (<a href="{% url "pairs" "ADH1A_HUMAN" %}">example for ADH1A_HUMAN</a>).</p>
+                                <p><em>Comments</em></p>
+                                <p>This includes in-paralogs in the target genomes lineages with respect to the speciation event with the query genome.</p>
+                            </div>
+                            <div class="tab-pane" id="hogs">
+                                <p><strong>Appropriate orthology type</strong></p>
+                                <p><a href="{% url 'hogs' 'HBB_HUMAN' 'Tetrapoda' %}">Hierarchical group of human β-hemoglobin with "Tetrapoda" as taxonomic range</a>.</p>
+                                <p><em>Comments</em></p>
+                                <p>This also retrieves γ-hemoglobin and ε-hemoglobin, which are thought to have diverged within the tetrapodes.</p>
+                            </div>
+                            <div class="tab-pane" id="synteny">
+                                <p><strong>Appropriate orthology type</strong></p>
+                                <p><a href="/oma/synteny/">Local synteny viewer</a>.</p>
+                                <p><em>Comments</em></p>
+                                <p>The viewer provides the genomic context of a particular entry and its orthologs in other species.</p>
+                            </div>
+                            <div class="tab-pane" id="customdata">
+                                <p><strong>Appropriate orthology type</strong></p>
+                                <p>The free <a href="/standalone">OMA standalone</a> software package can infer pairwise orthologs, OMA groups, and hierarchical orthologous groups on custom data.</p>
+                                <p><em>Comments</em></p>
+                                <p>It is even possible to combine custom data with precomputed public data from OMA using the <a href="/oma/export">all-against-all export function</a>.</p>
+                            </div>
+                            <div class="tab-pane" id="GO">
+                                <p><strong>Appropriate orthology type</strong></p>
+                                <p><a href="/oma/landAnnotation/">Gene ontology annotations</a> associated with a particular entry.</p>
+                                <p><em>Comments</em></p>
+                                <p>The view combines experimental and inferred annotations from <a href="http://www.ebi.ac.uk/GOA">UniProt-GOA</a> as well as terms inferred from OMA orthologs.</p>
+                            </div>
+                            <div class="tab-pane" id="propagate">
+                                <p><strong>Appropriate orthology type</strong></p>
+                                <p><a href="/oma/genomePW/">Genome pair view</a>, filtered to 1:1 orthologs.</p>
+                                <p><em>Comments</em></p>
+                                <p>According to current models, 1:1 orthologs are likely to have a similar function.</p>
+                            </div>
+                            <div class="tab-pane" id="twg">
+                                <p><strong>Appropriate orthology type</strong></p>
+                                <p><a href="/oma/genomePW/">Genome pair view</a>.</p>
+                                <p><em>Comments</em></p>
+                                <p>Orthologous genes can be used as anchor points.</p>
+                            </div>
+
+                            <div class="tab-pane" id="Align">
+                                <p><strong>Appropriate orthology type</strong></p>
+                                <p><a href="/oma/genomePW/">Genome pair view</a>.</p>
+                                <p><em>Comments</em></p>
+                                <p>Orthologs can be used to restrict the alignment search space. Thus, only conserved parts are used as anchors.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+

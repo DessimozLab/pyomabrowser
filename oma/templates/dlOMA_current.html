@@ -5,279 +5,514 @@
 {% block meta_description %}Download all the data in various formats from the {% firstof release.name "current" %} OMA release.{% endblock %}
 {% block content %}
 
-<div class="container mt-5">
+<div id="oma-generic-container">
 
-	<div class="card text-center bg-light mb-3 mx-auto">
+    <div class="container">
 
-		<div class="card-header">
-			<h1 class="display-3 mb-3">{% block titleDownload %}Current release{% endblock titleDownload %}</h1>
-			<div class="entete mb-5" style="height: 10px;"></div>
+        <div class="jumbotron">
 
-			<p class="text-muted">The entire OMA database is available for download in several formats. It is also possible to download each group separately. This option is available in the group view. Please read our terms and conditions before integrating OMA data into your own research or database.</p>
 
-			<div class="card bg-light m-3 text-left">
+            <h1>{% block titleDownload %}Current release{% endblock titleDownload %}</h1>
 
-				<div class="card-body">
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
 
-				    {% block yearPicker %}  {% endblock yearPicker %}
 
-				    {% block Orthology %}
+            <p class="text-justify">The entire OMA database is available for download in several formats. It is also
+                possible to download each group separately. This option is available in the group view. Please read our
+                terms and conditions before integrating OMA data into your own research or database.</p>
 
-		    		<h4 id='orthology-relations' class="panel-heading">Orthology Relationships</h4>
-					<p>
-						The orthology relationships are available in two types: groups or pairs of orthologs. The information is given in terms of OMA identifiers (of the form HUMAN04376).
-					</p>
-					<table class="table table-hover ">
-						<tbody>
-							<tr>
-								<td class="col-md-6" >OMA groups:
-								</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-groups.txt.gz" >
-										<span class="glyphicon glyphicon-download">
-										</span>
-										Text format
-									</a>
-									<br>
-									<a href="{{ download_root }}/oma-groups.orthoXML.xml.gz">
-										<span class="glyphicon glyphicon-download">
-										</span>
-										OrthoXML format
-									</a>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">Hierarchical orthologous groups (HOGs):
-								</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-hogs.orthoXML.gz">
-										<span class="glyphicon glyphicon-download"></span>
-										OrthoXML format
-									</a>
-								</td>
-							</tr>
-                            <tr>
-                                <td class="col-md-6">Species phylogeny of HOGs</td>
-                                <td class="col-md-6">
-                                    <a href="{{ download_root }}/speciestree.phyloxml">
-                                        <span class="glyphicon glyphicon-download"></span>
-                                        Phyloxml format
-                                    </a> <br>
-                                    <a href="{{ download_root }}/speciestree.nwk">
-                                        <span class="glyphicon glyphicon-download"></span>
-                                        Newick format
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-								<td class="col-md-6">Pairwise orthologs:
-								</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-pairs.txt.gz">
-										<span class="glyphicon glyphicon-download">
-										</span>
-										Text format
-									</a> <br>
-									<!--<a href="{{ download_root }}/oma-pairs.orthoXML.xml.gz">
-										<span class="glyphicon glyphicon-download">
-										</span>
-										OrthoXML format
-									</a> -->
-								</td>
-							</tr>
-							{% block genomePW %}
-							<tr>
-								<td class="col-md-6">Pairs between two species:
-								</td>
-								<td class="col-md-6">
-									<a href="{% url 'genomePW'  %}">Genome Pair View <img alt="ext logo" src="{% static "image/ext.png" %}" /></a>
-								</td>
-							</tr>
-							{% endblock genomePW %}
-						</tbody>
-					</table>
-                    {% endblock Orthology %}
-                    {% block Sequences %}
-                    <h4 id='sequences' class="panel-heading">Sequences</h4>
-                    <p>
-						All sequences with the corresponding OMA identifiers can be downloaded in fasta files. The proteins are all in one file, while the coding DNA is split into two files, one for the Eukaryotes and one for the Prokaryotes.
-					</p>
-					<table class="table table-hover ">
-						<tbody>
-							<tr>
-								<td class="col-md-6">Protein sequences:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-seqs.fa.gz">
-										<span class="glyphicon glyphicon-download"></span>
-										Fasta format
-									</a>
-									<br>
-									<a href="{{ download_root }}/oma-seqs.seqxml.tgz">
-										<span class="glyphicon glyphicon-download"></span>
-										SeqXML format
-									</a>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">cDNA Eukaryotes:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/eukaryotes.cdna.fa.gz"><span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
-								</td>
+            <br>
 
-							</tr>
-							<tr>
-								<td class="col-md-6">cDNA Prokaryotes:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/prokaryotes.cdna.fa.gz"> <span class="glyphicon glyphicon-download"></span> Fasta format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">Protein Annotations:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-protein-annotations.txt.gz"><span class="glyphicon glyphicon-download"></span>  Text format</a><br>
-								</td>
+            {% block yearPicker %} {% endblock yearPicker %}
 
-							</tr>
-						</tbody>
-					</table>
+            {% block Orthology %}
 
-                    {% endblock Sequences %}
-                    {% block Mapping %}
-                    <h4 id='identifier-mapping' class="panel-heading">Identifier Mapping</h4>
-					<p>
-						Mappings of the OMA identifier to various other databases are available. Mappings to UniProt, RefSeq and EntrezGene IDs are based on <em>exact</em> sequence matches, other cross-references come from source genome files directly. :
-					</p>
-					<table class="table table-hover ">
-						<tbody>
-							<tr>
-								<td class="col-md-6">Mapping to UniProt:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-uniprot.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">Mapping to Ensembl:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-ensembl.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6" >Mapping to Refseq ACs:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-refseq.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6" >Mapping to Entrez Gene IDs:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-entrez.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6" >Mapping to NCBI GIs:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-gi.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6" >Mapping to NCBI GenBank IDs:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-ncbi.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">Mapping to Wormbase:
-								</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-wormbase.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">Mapping to JGI:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-jgi.txt.gz"><span class="glyphicon glyphicon-download"></span>	Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">Mapping to GO:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-go.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">Plant mappings:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-plants.txt.gz"><span class="glyphicon glyphicon-download"></span>	Text format</a><br>
-								</td>
-							</tr>
-
-						</tbody>
-					</table>
-                    {% endblock Mapping %}
-                    {% block Other %}
-                    <h4 id='other' class="panel-heading">Other files</h4>
-					<table class="table table-hover ">
-						<tbody>
-							<tr>
-								<td class="col-md-6">OMA Groups/Sequences in COGs format:
-								</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/All.cog.tar.gz"><span class="glyphicon glyphicon-download"></span> Cog format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">Species information: (Taxon IDs, scientific names, genome sources)</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-species.txt"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">Group descriptions:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/group-descriptions.txt.gz"><span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-							<tr>
-								<td class="col-md-6">Close OMA Groups:</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/oma-close-groups.txt.gz"> <span class="glyphicon glyphicon-download"></span> Text format</a><br>
-								</td>
-							</tr>
-                            {% if "OmaServer.h5" in existing_download_files %}
-                            <tr>
-                                <td class="col-md-6">OMA Browser database (as hdf5)</td>
-                                <td class="col-md-6">
-                                    <a href="{{ download_root }}/OmaServer.h5"> <span class="glyphicon glyphicon-download"></span> HDF5 pytables</a><br>
-                                    <a href="{{ download_root }}/OmaServer.h5.idx"> <span class="glyphicon glyphicon-download"></span> HDF5 pytables suffix index</a><br>
-                                </td>
-                            </tr>
-                           {% endif %}
-						</tbody>
-					</table>
-                    {% endblock Other %}
-                    {% block History %}
-                    <h4 id='history' class="panel-heading">OMA ID History</h4>
-					<p>
-						Mappings of the OMA identifier of updated genomes from one release to another. We track only proteins with same amino acid sequences.
-					</p>
-					<table class="table table-hover ">
-						<tbody>
-							{% for back in release_with_backlinks %}
-							<tr>
-								<td class="col-md-6">From {{ back.name }} release
-								</td>
-								<td class="col-md-6">
-									<a href="{{ download_root }}/IDHistory-{{ back.date }}-to-{{ release.date }}.txt.gz"><span class="glyphicon glyphicon-download"></span>Text format</a><br>
-								</td>
-							</tr>
-							{% endfor %}
-						</tbody>
-					</table>
-    				{% endblock History %}
+            <div class="card">
+                <div class="card-header" id='orthology-relations'>
+                    Orthology Relationships
                 </div>
-			</div>
-		</div>
-	</div>
+                <div class="card-body">
+
+                    <p>
+                        The orthology relationships are available in two types: groups or pairs of orthologs. The
+                        information is given in terms of OMA identifiers (of the form HUMAN04376).
+                    </p>
+
+
+                    <hr>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-6">OMA groups</dt>
+                        <dd class="col-sm-6"><a href="{{ download_root }}/oma-groups.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                            <br>
+                            <a href="{{ download_root }}/oma-groups.orthoXML.xml.gz">
+                                <i class="fas fa-download"></i>
+                                OrthoXML format
+                            </a>
+                        </dd>
+                    </dl>
+
+                    <hr>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Hierarchical orthologous groups (HOGs)</dt>
+                        <dd class="col-sm-6"><a href="{{ download_root }}/oma-hogs.orthoXML.gz">
+                            <i class="fas fa-download"></i>
+                            OrthoXML format
+                        </a>
+
+                        </dd>
+                    </dl>
+
+
+                    <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Species phylogeny of HOGs</dt>
+                        <dd class="col-sm-6"> <a href="{{ download_root }}/speciestree.phyloxml">
+                            <i class="fas fa-download"></i>
+                            Phyloxml format
+                        </a>
+                            <br>
+                           <a href="{{ download_root }}/speciestree.nwk">
+                                <i class="fas fa-download"></i>
+                                Newick format
+                            </a>
+                        </dd>
+                    </dl>
+
+                    <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Pairwise orthologs</dt>
+                        <dd class="col-sm-6"><a href="{{ download_root }}/oma-pairs.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+
+                            <!--<a href="{{ download_root }}/oma-pairs.orthoXML.xml.gz">
+                                    <span class="glyphicon glyphicon-download">
+                                    </span>
+                                    OrthoXML format
+                                </a> -->
+
+                        </dd>
+                    </dl>
+
+                    <hr>
+
+                    {% block genomePW %}
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Pairs between two species</dt>
+                        <dd class="col-sm-6">
+                            <a href="{% url 'genomePW'  %}">Genome Pair View <i class="fas fa-external-link-alt"></i> </a>
+
+                        </a>
+
+                        </dd>
+                    </dl>
+
+                    {% endblock genomePW %}
+
+
+
+
+
+
+                </div>
+            </div>
+
+            {% endblock Orthology %}
+
+            <br>
+
+            {% block Sequences %}
+
+
+            <div class="card">
+                <div class="card-header" id='sequences'>
+                    Sequences
+                </div>
+                <div class="card-body">
+                    <p>
+                        All sequences with the corresponding OMA identifiers can be downloaded in fasta files. The
+                        proteins are all in one file, while the coding DNA is split into two files, one for the
+                        Eukaryotes and one for the Prokaryotes.
+                    </p>
+
+
+                    <hr>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Protein sequences</dt>
+                        <dd class="col-sm-6"><a href="{{ download_root }}/oma-seqs.fa.gz">
+                            <i class="fas fa-download"></i>
+                            Fasta format
+                        </a>
+                            <br>
+                            <a href="{{ download_root }}/oma-seqs.seqxml.tgz">
+                                <i class="fas fa-download"></i>
+                                SeqXML format
+                            </a>
+                        </dd>
+                    </dl>
+
+
+
+                    <hr>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-6">cDNA Eukaryotes</dt>
+                        <dd class="col-sm-6"><a href="{{ download_root }}/eukaryotes.cdna.fa.gz">
+                            <i class="fas fa-download"></i>
+                            Fasta format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+                     <hr>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-6">cDNA Prokaryotes</dt>
+                        <dd class="col-sm-6"><a href="{{ download_root }}/prokaryotes.cdna.fa.gz">
+                            <i class="fas fa-download"></i>
+                            Fasta format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+
+
+                     <hr>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Protein Annotations</dt>
+                        <dd class="col-sm-6"> <a href="{{ download_root }}/oma-protein-annotations.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+
+
+
+
+
+
+
+                </div>
+            </div>
+
+
+            {% endblock Sequences %}
+
+            <br>
+
+            {% block Mapping %}
+
+            <div class="card">
+                <div class="card-header" id='identifier-mapping'>
+                    Identifier Mapping
+                </div>
+                <div class="card-body">
+                    <p>
+                        Mappings of the OMA identifier to various other databases are available. Mappings to UniProt,
+                        RefSeq and EntrezGene IDs are based on <em>exact</em> sequence matches, other cross-references
+                        come from source genome files directly.
+                    </p>
+
+                    <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Mapping to UniProt:</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-uniprot.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+                     <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Mapping to Ensembl</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-ensembl.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+                     <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Mapping to Refseq ACs</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-refseq.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+
+                     <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Mapping to Entrez Gene IDs</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-entrez.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+
+                     <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Mapping to NCBI GIs</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-gi.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+                     <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Mapping to NCBI GenBank IDs</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-ncbi.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+
+                     <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Mapping to Wormbase</dt>
+                        <dd class="col-sm-6">
+                             <a href="{{ download_root }}/oma-wormbase.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+                     <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Mapping to JGI</dt>
+                        <dd class="col-sm-6">
+                             <a href="{{ download_root }}/oma-jgi.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+
+                     <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Mapping to GO</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-go.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+
+                     <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Plant mappings</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-plants.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+                </div>
+            </div>
+
+
+            {% endblock Mapping %}
+
+            <br>
+
+            {% block Other %}
+
+
+            <div class="card">
+                <div class="card-header" id='other'>
+                    Other files
+                </div>
+                <div class="card-body">
+
+
+                    <hr>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-6">OMA Groups/Sequences in COGs format</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/All.cog.tar.gz">
+                            <i class="fas fa-download"></i>
+                            Cog format
+                        </a>
+                        </dd>
+                    </dl>
+
+                     <hr>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Species information (Taxon IDs, scientific names, genome sources)</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-species.txt">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+                     <hr>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Group descriptions</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/group-descriptions.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+                     <hr>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-6">Close OMA Groups</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-close-groups.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+                     <hr>
+
+{% if "OmaServer.h5" in existing_download_files %}
+                    <dl class="row">
+                        <dt class="col-sm-6">OMA Browser database (as hdf5)</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/OmaServer.h5">
+                            <i class="fas fa-download"></i>
+                            HDF5 pytables
+                        </a>
+                            <br>
+
+                            <a href="{{ download_root }}/OmaServer.h5.idx">
+                            <i class="fas fa-download"></i>
+                            HDF5 pytables suffix index
+                        </a>
+                        </dd>
+                    </dl>
+
+                    {% endif %}
+
+
+                </div>
+            </div>
+
+
+            {% endblock Other %}
+
+
+            <br>
+
+
+            {% block History %}
+
+
+            <div class="card">
+                <div class="card-header" id='history'>
+                    OMA ID History
+                </div>
+                <div class="card-body">
+                    <p>
+                        Mappings of the OMA identifier of updated genomes from one release to another. We track only
+                        proteins with same amino acid sequences.
+                    </p>
+
+
+                    {% for back in release_with_backlinks %}
+
+                    <dl class="row">
+                        <dt class="col-sm-6">From {{ back.name }} release</dt>
+                        <dd class="col-sm-6"> <a href="{{ download_root }}/IDHistory-{{ back.date }}-to-{{ release.date }}.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+
+
+                    {% endfor %}
+
+
+                </div>
+            </div>
+
+            {% endblock History %}
+
+        </div>
+    </div>
 </div>
+</div>
+
 
 {% endblock content %}
