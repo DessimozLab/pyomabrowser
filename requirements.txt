@@ -3,7 +3,7 @@ numexpr>=2.4-rc2
 numpy>1.16.0
 tables>=3.5.1
 future>=0.12.3
-django-bootstrap3>=7.0.1
+django-bootstrap4
 tweepy>=2.3.0
 #django_debug_toolbar>=1.4
 #django_debug_toolbar_line_profiler>=0.6.1
