@@ -2,6 +2,7 @@
 {% load staticfiles %}
 {% block title %}OMA: Explore conserved neighboring genes of {{ entry.omaid }} across genomes{% endblock %}
 {% block meta_description %}Explore the synthenic genes around {{ entry.omaid }} across its orthologs. Find out about highly conserved regions, rearangements, segmental duplications and other evolutionary events in this region{% endblock %}
+
 {% block css_hook %}
 <style type="text/css">
     /* CSS used here will be applied after bootstrap.css */
@@ -131,33 +132,42 @@ $(window).on('load', function () {
 </script>
 {% endblock js_hook %}
 
-{% block seqhead_hook %}
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                    class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="myModalLabel">How does the local synteny viewer work?</h4>
-            </div>
-            <div class="modal-body">
-                <img src="/static/image/tutsyn.png" class="img-responsive margin-auto" alt="help synteny">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock seqhead_hook %}
+
+
+
+
 
 {% block contentTab %}
-<div class="card"><!-- .card -->
-    <h4 class="card-header">Local Synteny Conservation
-        <a href="#" class="badge badge-info" role="button" data-toggle="modal" data-target="#myModal"
-           id="modalhelp">?</a>
-    </h4>
-    <div class="card-body p-1"><!-- .card-body -->
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="myModalLabel"> How does the local synteny viewer work?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <img src="/static/image/tutsyn.png" class="img-fluid" alt="Help synteny">
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<h4 >Local Synteny Conservation
+       <span class="float-right"> <h5><a href="#" class="badge badge-pill badge-dark" role="button" data-toggle="modal" data-target="#myModal"
+           id="modalhelp">Help ?</a></h5></span></h4>
+
         <div class="twotables"><!-- .twotables -->
             <table class="table table-condensed table-striped syntenytable">
                 <thead>
@@ -236,6 +246,5 @@ $(window).on('load', function () {
                 </tbody>
             </table>
         </div><!-- .twotables -->
-    </div><!-- .card-body -->
-</div><!-- .card -->
+
 {% endblock contentTab %}

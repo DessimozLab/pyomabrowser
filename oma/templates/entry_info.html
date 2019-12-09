@@ -8,31 +8,36 @@
 {% include "includes/func_desc.html" %}
 
 
-<h1 class="content-section-title-entry">General Information</h1>
-<p><dl class="dl-horizontal">
-            {% if entry.description %}<dt>Description</dt><dd>{{ entry.description }} </dd> {% endif %}
-            <dt>Organism</dt>
-            <dd><a href="/cgi-bin/gateway.pl?f=DisplayOS&p1={{entry.genome.uniprot_species_code}}">
+<h4 >General Information</h4>
+
+<dl class="">
+            {% if entry.description %}<dt class="col-sm-3">Description</dt><dd class="col-sm-6">{{ entry.description }} </dd>
+     {% endif %}
+            <dt class="col-sm-3">Organism</dt>
+            <dd class="col-sm-6"><a href="/cgi-bin/gateway.pl?f=DisplayOS&p1={{entry.genome.uniprot_species_code}}">
                 {{ entry.genome.uniprot_species_code }} - {{ entry.genome.sciname }}</a>
                 <span class="small">(Taxon-ID: <a href="///uniprot.org/taxonomy/{{ entry.genome.ncbi_taxon_id }}" class="external">{{ entry.genome.ncbi_taxon_id }}</a>)</span>
             </dd>
-            <dt>Locus</dt><dd id="locus"><span id="chr">{{ entry.chromosome }}</span>:&nbsp;<span id="coordinates">{{ entry.exons }}</span></dd>
-            <dt>Number of exons</dt><dd>{{ entry.exons | length }}</dd>
+
+            <dt class="col-sm-3">Locus</dt><dd id="locus"><span id="chr">{{ entry.chromosome }}</span>:&nbsp;<span id="coordinates">{{ entry.exons }}</span></dd>
+
+            <dt class="col-sm-3">Number of exons</dt><dd class="col-sm-6">{{ entry.exons | length }}</dd>
+
             {% if "PMP" in xrefs %}
-                <dt>Protein Structures</dt><dd>n/a</dd>
+                <dt class="col-sm-3">Protein Structures</dt><dd class="col-sm-6">n/a</dd>
             {% endif %}
-        </dl></p>
+        </dl>
 
 
-<h1 class="content-section-title-entry">IDs and Cross-references</h1>
-<p>
+<h4 >IDs and Cross-references</h4>
+
     <div id="loader-xrefs"><img src="{% static "image/loading.gif" %}" alt="loading xrefs..."></div>
-        <dl id="xrefs" class="dl-horizontal">
+        <dl id="xrefs" class="">
             {% for xref in xrefs %}
-                <dt>{{ xref.source }}</dt><dd><a class="external" href="{{ xref.url }}">{{ xref.xref }}</a></dd>
+                <dt class="col-sm-3">{{ xref.source }}</dt><dd class="col-sm-6"><a class="external" href="{{ xref.url }}">{{ xref.xref }}</a></dd>
             {% endfor %}
         </dl>
-</p>
+
 
 
     <!-- Ontology -->
@@ -56,9 +61,9 @@
             var clean_data = data.filter(function(obj, pos, arr){
                 return arr.map(function(obj){return obj.xref;}).indexOf(obj.xref) === pos});
             _.forEach(_.groupBy(clean_data, "source"), function(xrefs, source){
-                var list_item = ["<dt>"+source+"</dt>"];
+                var list_item = ["<dt class='col-sm-3'>"+source+"</dt>"];
                 _.forEach(xrefs, function(ref){
-                    list_item.push("<dd>"+xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}") +"</dd>")
+                    list_item.push("<dd class='col-sm-6'>"+xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}") +"</dd>")
                 });
                 $('#xrefs').append(list_item.join("")+"\n");
             });
