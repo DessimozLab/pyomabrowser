@@ -899,8 +899,17 @@ body {
 	border-bottom: 2px solid #90CAF9;
 }
 
+
+.card-header-oma{
+    border-radius: 16px !important;
+}
+
 .header-oma{
     background-color: #317d3d ;
     text-align: center;
     color: #fff;
+    border-top-right-radius: 16px !important;
+    border-top-left-radius: 16px!important;
+    border-bottom-right-radius: 0px!important;
+    border-bottom-left-radius: 0px!important;
 }
