@@ -8,12 +8,12 @@
 {% include "includes/func_desc.html" %}
 
 
+<script src="{% static "js/underscore-min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/xref_format.js" %}" type="text/javascript"></script>
 
-<h4> Gene Ontology</h4>
 
 
 
-<div class="card">
 
     <div id="ontology-panel" class="card-body">
         <div id="loader-ontology"><img src="{% static "image/loading.gif"%}" alt="loading GO annotations..."></div>
@@ -21,16 +21,35 @@
 </div>
 
     <script>
-    (function(){
+
+        (function(){
         $.getJSON("/api/protein/{{ entry.entry_nr }}/ontology/", function(data){
-           _.forEach(_.groupBy(data, "aspect"), function(annos, aspect){
-               var tab = ['<table class="table table-hover"><thead><tr><th colspan="2">',
-                   '<strong>'+ aspect + '</strong></th></tr>',
+
+            _.forEach(_.groupBy(data, "aspect"), function(annos, aspect){
+
+                var type_name;
+
+               switch (aspect) {
+                  case 'molecular_function':
+                    type_name ="Molecular function";
+                    break;
+                  case 'cellular_component':
+                      type_name ="Cellular component";
+                    break;
+                  case 'biological_process':
+                    type_name ="Biological process";
+                    break;
+                }
+
+               var tab = ['<table class="table table-hover " ><thead style="border-top:hidden"><tr><th colspan="2">',
+                   '<h5><strong> '+ type_name + '</strong></h5></th></tr>',
                    '<tr><th class="subHead">GO term</th><th class="subHead">Evidence and reference</th></tr>',
-                   '</thead><tbody>'];
+                   '</thead><tbody><br>'];
+
                _.forEach(_.groupBy(annos, "GO_term"), function(term_annos, term){
                    tab.push('<tr><td>' + term_annos[0].name +
                        ' (' + xref_format.go_annotation_url(term_annos[0]) + ')</td>', '<td>');
+
                    _.forEach(_.groupBy(term_annos, 'evidence'), function(evi_anno, evi){
                        tab.push(xref_format.go_evi_url(evi));
                        var ref=[];
@@ -41,8 +60,13 @@
                    });
                    tab.push('</td></tr>');
                });
+
                $('#ontology-panel').append(tab.join("\n"))
+
+
+
            });
+
         });
         $("#loader-ontology").hide();
     })();

@@ -165,10 +165,11 @@ $(document).ready(function() {
                 divList.setAttribute('class', 'list-group');
                 divList.setAttribute('id', 'divList');
                 //$("#UISelected").append($(divList));
-                $("#UISelectedContent").append($(divList));
+                $("#UISelected").append($(divList));
                 for (var i = 0; i < root.leaves.length; i++){
                     if(exportList.indexOf(root.leaves[i].name) !== -1){
                         addToInfo(root.leaves[i])
+
                     }
                 }
 

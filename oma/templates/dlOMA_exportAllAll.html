@@ -9,20 +9,22 @@
 <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
 <link type="text/css" rel="stylesheet" href="{% static "css/treecompare.css" %}"/>
 {% endblock css_hook %}
+
 {% block js_hook %}
 {% if max_nr_genomes %}<script type="text/javascript">MAX_NR_GENOMES = {{ max_nr_genomes }}; </script>{% endif %}
-<script src="https://use.fontawesome.com/28dcb2432d.js"></script>
-<script src="{% static "js/underscore-min.js" %}"></script>
-<script src="{% static "js/canvas-toBlob.js" %}"></script>
-<script src="{% static "js/FileSaver.min.js" %}"></script>
-<script src="{% static "js/treecompare.js" %}"></script>
-<script src="{% static "js/phylotree.js" %}"></script>
-<script src="{% static "js/d3.v3.min.js" %}"></script>
-<script src="{% static "js/typeahead.bundle.js" %}"></script>
+<script src='{% static "js/underscore-min.js" %}'></script>
+<script src='{% static "js/canvas-toBlob.js" %}'></script>
+<script src='{% static "js/FileSaver.min.js" %}'></script>
+<script src='{% static "js/treecompare.js" %}'></script>
+<script src='{% static "js/phylotree.js" %}'></script>
+<script src='{% static "js/d3.v3.min.js" %}'></script>
+<script src='{% static "js/typeahead.bundle.js" %}'></script>
 {% endblock js_hook %}
 
 
 {% block content %}
+
+
 <style>
 html, body {
   height: 100%;
@@ -42,17 +44,27 @@ element {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
+
+
+
+
 </style>
-<div class="container-fluid" style="height: 90vh;">
+
+
+<div class="container-fluid" style="height: calc(100%);">
     {% block above_svg %}{% endblock %}
+
     <div class="row" style="height: 100%;">
+
         <div class="col-md-9" id="svgdiv" style="overflow: hidden;"> <!-- svg -->
 
 
             <!-- help modal -->
-            <button class="btn btn-sm ml-3" style="z-index:99" data-toggle="modal" data-target="#myModal" id="modalhelp">
+
+            <button class="btn btn-outline-dark" style="z-index:99; margin: 4px" data-toggle="modal" data-target="#myModal" id="modalhelp">Help
                 <i class="fas fa-question"></i>
             </button>
+
             <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -107,20 +119,35 @@ element {
             </div>
             <!-- /help modal -->
 
-            <div class="card" id="phylo_io" style="overflow-x:auto;" >
+            <div  id="phylo_io"  >
+
+
 
             </div>
 
         </div>
+
         <div class="col-md-3"> <!-- UI -->
             <div class="card col-12" id="UISelected"  >
                 <h3 class="text-center searchg greenb py-2 mb-0" id="textSel" style="font-size: 18px; color: #fff; background-color: #307C3B">
                     Selected genomes</h3>
             </div>
-            {% block menu_additional_inputs %}{% endblock %}
+
+
+
+            <div class="col-md-12" id="exportAdditionalInputs">
+
+                {% block menu_additional_inputs %}
+
+</div>
+
+
+            {% endblock %}
+
+
             <div class="row mx-auto" id="buttondiv">
                 <div class="col-xs-12 col-sm-6 mx-auto">
-                    <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff; background-color: #307C3B" id="buttonUnselect">Unselect all</button>
+                    <button type="button" class="btn btn-default btn-lg greenb  " style="color: #fff; background-color: #307C3B" id="buttonUnselect">Unselect all</button>
                 </div>
                 <div class="col-xs-12 col-sm-6 mx-auto">
                     <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff; background-color: #307C3B" id="{% block submit_button_id %}buttonSubmit{% endblock %}">Submit</button>
