@@ -84,6 +84,15 @@
 
         </li>
 
+
+        <li class="{% if tab == 'isoform' %} active selected {%endif%}">
+            <a href="{% url 'entry_isoform' entry.omaid %}">
+                <span>Isoforms</span>
+
+            </a>
+
+        </li>
+
         <li class="{% if tab == 'goa' %} active selected {%endif%}">
             <a href="{% url 'entry_goa' entry.omaid %}">
                 <span>GO Annotations</span>

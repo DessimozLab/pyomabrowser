@@ -443,6 +443,19 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
               'tab': 'paralogs'})
         return context
 
+# Isoform
+class Entry_Isoform(TemplateView, InfoBase):
+    template_name = "entry_isoform.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(Entry_Isoform, self).get_context_data(entry_id, **kwargs)
+        entry = self.get_entry(entry_id)
+        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
+
+        context.update(
+            {'entry': entry, 'nr_pps': 666, 'nr_vps': len(vps_raw),
+             'tab': 'isoform'})
+        return context
 
 # GOA
 class Entry_GOA(TemplateView, InfoBase):
