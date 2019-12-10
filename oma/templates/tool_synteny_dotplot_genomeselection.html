@@ -4,562 +4,586 @@
 {% block title %}OMA orthology database: Synteny between chromosome{% endblock %}
 {% block meta_description %}Select a chromosome pair for a synteny dot plot.{% endblock %}
 {% block css_hook %}
-    <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
+<link type="text/css" rel="stylesheet" href="{% static 'css/typeaheadjs.css' %}"/>
 
 {% endblock css_hook %}
 {% block js_hook %}
-    <script src="{% static "js/typeahead.bundle.js" %}"></script>
+<script src="{% static 'js/typeahead.bundle.js' %}"></script>
 
 <style>
-.x-axis, .y-axis {
-    font-size: 8px;
-    text-align: left;
-}
+    .x-axis, .y-axis {
+        font-size: 8px;
+        text-align: left;
+    }
 
-.axis-title{
-    font-size: 18px;
-    text-align: left;
-}
+    .axis-title {
+        font-size: 18px;
+        text-align: left;
+    }
 
-div.tooltip {
-    margin: 10px;
-    min-width: 80px;
-    background-color: #80CBC4;
-    position: absolute;
-    padding: 4px 8px;
-    font: 12px sans-serif;
-    background: lightsteelblue;
-    border: 1px darkgrey solid;
-    border-radius: 2px;
-	pointer-events: none;
-	color: white;
-}
+    div.tooltip {
+        margin: 10px;
+        min-width: 80px;
+        background-color: #80CBC4;
+        position: absolute;
+        padding: 4px 8px;
+        font: 12px sans-serif;
+        background: lightsteelblue;
+        border: 1px darkgrey solid;
+        border-radius: 2px;
+        pointer-events: none;
+        color: white;
+    }
+
 </style>
 {% endblock js_hook %}
 
 {% block content %}
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class=" col-sm-12 col-md-10 col-md-offset-1">
-                <div class="jumbotron">
-                    <div class="container">
+<div id="oma-generic-container">
 
-                        <div class="page-header ">
+    <div class="container">
 
-                            <h1 class="text-center">Synteny Dot Plot <br>
-                                <small> Visualise synteny between chromosomes</small>
-                            </h1>
+        <div class="jumbotron">
 
-                            <div class="well well-sm entete"></div>
+            <h1>Synteny Dot Plot
+
+                <span> <small class="text-center text-muted h3 d-block">Visualise synteny between chromosomes
+                </small></span></h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <div class="card card-header-oma">
+                <div class="card-header">
+                    <strong>Step 1: Select a pair of genomes </strong>
+                </div>
+                <div class="card-body ">
+
+
+                    <p class="text-justify">Use the following form to choose two genomes using their scientific name or 5 letter OMA species name. </p>
+
+                    <form id="form_GP">
+                        <div class="form-group row">
+                            <label for="g1_name" class="col-md-2 offset-md-1 control-label">Genome 1</label>
+                            <div class="col-sm-7">
+                                <input id="g1_name" type="text" class="form-control typeahead" name="g1_name">
+
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="g2_name" class="col-md-2 offset-md-1 control-label">Genome 2</label>
+                            <div class="col-sm-7">
+                                <input id="g2_name" type="text" class="form-control typeahead" name="g2_name">
+                            </div>
+                        </div>
+
+
+                    </form>
+
+                </div>
+            </div>
+
+
+            <br>
+
+
+            <div class="card card-header-oma" id="step2">
+
+
+                <div class="card-header">
+                    <strong>Step 2: Select a chromosome in each genome</strong>
+                </div>
+                <div class="card-body ">
+
+                    <div id="loader" class="alert alert-info ">
+                                        <img id="spinner" src="{% static "image/loading.gif"%}">
+                                        <span id="msg"></span>
+                    </div>
+
+
+                    <p class="text-justify">Are you missing an important genome in OMA? Is our coverage in a certain
+                        region
+                        of the phylogenetic tree underrepresented? Or did we miss out on an crucial update
+                        of your genome of interest? Please let us know with the form below and we will
+                        try to do our best to include your suggestion in the next possible release.</p>
+
+
+                    <div id="message" class="row" style="padding: 0; display:none;">
+
+                        <div class="col-xs-12 col-lg-6">
+
+                            <div id="hm" style="width: 100%;">
+                            </div>
 
                         </div>
 
-                        <div class="col-sm-12 col-md-10 col-md-offset-1">
+                        <div class="col-xs-12 col-md-6">
 
-                            <p>Use the following form to select two chromosomes for synteny visualisation.</p>
 
-                            <form class="form-horizontal" id="form_DP">
+                            <form id="form_DP">
 
-                                <div class="panel panel-default">
-                                    <div class="panel-body">
 
-                                        <h4>Select the first genome:</h4>
-
-                                        <div class="form-group">
-
-                                            <label for="g1_name" class="col-sm-2 control-label">Genome 1:</label>
-
-                                            <div class="col-sm-8">
-                                                <input  id="g1_name" type="text"  class="form-control typeahead" name="g1_name">
-                                            </div>
-
-                                        </div>
-
+                                <div class="form-row">
+                                    <div class="form-group col-md-12" id="fg_first_chr">
+                                        <label class="col-sm-12" for="selectchr1"></label>
+                                        <select style="margin-left: 15px;" id="selectchr1"></select>
+                                    </div>
+                                    <div class="form-group col-md-12" id="fg_second_chr">
+                                        <label class="col-sm-12" for="selectchr2"></label>
+                                        <select style="margin-left: 15px;" id="selectchr2"></select>
                                     </div>
                                 </div>
 
-                                <div class="panel panel-default">
-                                    <div class="panel-body">
-
-                                        <h4>Select the second genome:</h4>
-
-                                        <div class="form-group">
-
-                                            <label for="g2_name" class="col-sm-2 control-label">Genome 2:</label>
-
-                                            <div class="col-sm-8">
-                                                <input  id="g2_name" type="text"  class="form-control typeahead" name="g2_name">
-                                            </div>
-
-                                        </div>
-
+                                <div id="dotPlotSubmit" class="col-sm-4 col-push-4">
+                                    <div style="padding-right:0;">
+                                        <button class="btn btn-success greenb" type="submit" id="launch_PP">Launch
+                                            DotPlot
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div id="message" class="col-sm-12" style="padding: 0; display:none;">
-                                    <div id="loader" class="alert alert-info fade in">
-                                        <img id="spinner" src="{% static "image/loading.gif"%}">
-                                        <span id="msg"></span>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="form-group hidden" id="fg_first_chr">
-
-                                            <label class="col-sm-12" for="selectchr1"></label>
-                                            <select style="margin-left: 15px;" id="selectchr1"></select>
-
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-
-                                        <div class="form-group hidden" id="fg_second_chr">
-
-                                            <label class="col-sm-12" for="selectchr2"></label>
-                                            <select style="margin-left: 15px;" id="selectchr2"></select>
-
-                                        </div>
-                                    </div>
-
-                                    <div id="dotPlotSubmit" class="col-sm-4 col-push-4">
-                                        <div style="padding-right:0;">
-                                            <button class="btn btn-success greenb" type="submit" id="launch_PP">Launch DotPlot</button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div id="hm" style="width: 100%;">
-                                </div>
                             </form>
 
+                        </div>
+
                     </div>
-                </div>
+
+
                 </div>
             </div>
+
+
         </div>
     </div>
+
+
+</div>
+</div>
+
+
 <script src="//d3js.org/d3.v4.js" type="text/javascript"></script>
 
-    <script type="text/javascript">
-    (function($) {
+<script type="text/javascript">
+    (function ($) {
 
         var genome_1, genome_2, genomeFullName_1, genomeFullName_2 = "";
 
         $("#loader, #message, #spinner, #dotPlotSubmit").hide();
         $("#msg").html('Please choose both genomes');
         $("#message").show('slow');
-          var oKeyDeferredMap = {};
+        var oKeyDeferredMap = {};
 
-          function fnReadData(sKey) {
+        function fnReadData(sKey) {
             var sValue = window.localStorage.getItem(sKey);
             return sValue ? JSON.parse(sValue) : sValue;
-          }
+        }
 
-          function fnWriteData(sKey, oData) {
+        function fnWriteData(sKey, oData) {
             var sValue = JSON.stringify(oData);
             window.localStorage.setItem(sKey, sValue);
-          }
+        }
 
-          $.cachedAjaxPromise = function(sUrl, oAjaxOptions) {
+        $.cachedAjaxPromise = function (sUrl, oAjaxOptions) {
             var oDeferred = oKeyDeferredMap[sUrl];
             var sValue;
 
             if (!oDeferred) {
-              oDeferred = new jQuery.Deferred();
-              oKeyDeferredMap[sUrl] = oDeferred;
-              sValue = fnReadData(sUrl);
+                oDeferred = new jQuery.Deferred();
+                oKeyDeferredMap[sUrl] = oDeferred;
+                sValue = fnReadData(sUrl);
 
-              if (sValue) {
-                oDeferred.resolve(sValue);
-              }
-
-              if (!oAjaxOptions) {
-                oAjaxOptions = {};
-              }
-
-              $.extend(oAjaxOptions, {
-                error: function(oXHR, sTextStatus, sErrorThrown) {
-                  console.log('ajax request failed: ' + sErrorThrown);
-                  oDeferred.resolve(null);
-                },
-                success: function(oData) {
-                  // making assumption that data is JSON
-                  fnWriteData(sUrl, oData);
-                  oDeferred.resolve(oData);
-                }
-              });
-
-              $.ajax(sUrl, oAjaxOptions);
-            }
-
-            return oDeferred.promise();
-          };
-        }(jQuery));
-
-
-
-        var genomeNames = [];
-        var genomeIDs = {};
-        var genomeSpecies = {};
-
-        $.ajax({
-            url: "/All/flatgenomes.json",
-            method: "GET",
-            dataType: 'json',
-            success: function (jsonData) {
-                $.each(jsonData, function (id, genome) {
-                    var tmp = genome.name + ' (' + genome.id + ')';
-                    genomeNames.push(tmp);
-                    genomeIDs[tmp] = genome.id;
-                    genomeSpecies[tmp] = genome.name;
-                })
-            },
-            statusCode: {
-                404: function() {}
-            },
-            error: function () {
-                $.getJSON("/api/genome/?per_page=5000", function (jsonData) {
-                    jsonData.forEach(function (genome) {
-                        var tmp = genome.species + " (" + genome.code + ")";
-                        genomeNames.push(tmp);
-                        genomeIDs[tmp] = genome.code;
-                        genomeSpecies[tmp] = genome.name;
-                    })
-                })
-            }
-        });
-
-        function changeMessage(msg, showSpinner) {
-
-            if (msg == "") {
-
-                $("#loader, #message, #spinner").hide();
-                $("#msg").html('');
-
-            } else {
-
-                if (showSpinner) {
-                    $("#spinner").show();
-                } else {
-                    $("#spinner").hide();
+                if (sValue) {
+                    oDeferred.resolve(sValue);
                 }
 
-                $("#msg").html(msg);
-                $("#loader, #message").show('slow');
-
-            }
-
-        }
-
-        changeMessage('Please choose both genomes', false);
-
-        function remove_chromosome_select(id_select){
-
-            var select = document.getElementById(id_select);
-
-            var i;
-            for(i = select.options.length - 1 ; i >= 0 ; i--)
-            {
-                select.remove(i);
-            }
-
-            var el = document.createElement("option");
-            el.textContent = 'Choose a chromosome';
-            el.value = 'Choose a chromosome';
-            select.appendChild(el);
-        }
-
-        function set_chromosome_select(id_select, data){
-            var select = document.getElementById(id_select);
-            select.innerHTML = "";
-
-            $.each(data, function (index) {
-                var el = document.createElement("option");
-                el.textContent = this.id;
-                el.value = this.id;
-                select.appendChild(el);
-            });
-
-        }
-
-        function isInt(value) {
-            if (isNaN(value)) {
-                return false;
-            }
-            var x = parseFloat(value);
-            return (x | 0) === x;
-        }
-
-        function filterChromosomesByCount(data, filterCount){
-            var MIN_NR_PROTEINS_PER_CHR;
-            if(isInt(filterCount)){
-                MIN_NR_PROTEINS_PER_CHR = filterCount;
-            } else {
-                MIN_NR_PROTEINS_PER_CHR = 10;
-            }
-
-            var tmpData = [];
-
-            $.each(data, function (index, arr) {
-
-                var nr_prot_on_chr = arr.entry_ranges.reduce(function (acc, cur) {
-                    return acc + cur[1] - cur[0] + 1
-                }, 0);
-                if (nr_prot_on_chr >= MIN_NR_PROTEINS_PER_CHR) {
-                    // skip scaffolds with only very few proteins
-                    //console.log('adding ' +arr.id + " at index "+ index);
-                    //data.splice(index, 1);
-                    arr.count = nr_prot_on_chr;
-                    tmpData.push(arr);
+                if (!oAjaxOptions) {
+                    oAjaxOptions = {};
                 }
 
-            });
-
-            if(tmpData.length > 5){
-
-                tmpData = tmpData.sort(comparatorNrProteins);
-
-                    function comparatorNrProteins(a, b) {
-                        return b.count - a.count;
-                    }
-
-            }
-
-            return tmpData;
-
-        }
-
-        var substringMatcher = function(strs) {
-            return function findMatches(q, cb) {
-                var matches, substrRegex;
-
-                // an array that will be populated with substring matches
-                matches = [];
-                if (q.length < 2) {
-                    return(cb(matches));
-                }
-
-                // regex used to determine if a string contains the substring `q`
-                substrRegex = new RegExp(q, 'i');
-
-                // iterate through the pool of strings and for any string that
-                // contains the substring `q`, add it to the `matches` array
-                $.each(strs, function(i, str) {
-                    if (substrRegex.test(str)) {
-                        // the typeahead jQuery plugin expects suggestions to a
-                        // JavaScript object, refer to typeahead docs for more info
-                        matches.push({ value: str });
+                $.extend(oAjaxOptions, {
+                    error: function (oXHR, sTextStatus, sErrorThrown) {
+                        console.log('ajax request failed: ' + sErrorThrown);
+                        oDeferred.resolve(null);
+                    },
+                    success: function (oData) {
+                        // making assumption that data is JSON
+                        fnWriteData(sUrl, oData);
+                        oDeferred.resolve(oData);
                     }
                 });
 
-                cb(matches);
-            };
-        };
-
-        function update_chromosome_select(input){
-
-            if (genomeIDs[input.val()] === null || genomeIDs[input.val()] === undefined){
-                input.val('');
-                return false;
+                $.ajax(sUrl, oAjaxOptions);
             }
-            input.trigger("input");
+
+            return oDeferred.promise();
         };
+    }(jQuery));
 
-        $('#g1_name').typeahead({
-                hint: true
-            },
-            {
-                name: 'genomes',
-                minLength: 4,
-                source: substringMatcher(genomeNames)
+    var genomeNames = [];
+    var genomeIDs = {};
+    var genomeSpecies = {};
+
+    $.ajax({
+        url: "/All/flatgenomes.json",
+        method: "GET",
+        dataType: 'json',
+        success: function (jsonData) {
+            $.each(jsonData, function (id, genome) {
+                var tmp = genome.name + ' (' + genome.id + ')';
+                genomeNames.push(tmp);
+                genomeIDs[tmp] = genome.id;
+                genomeSpecies[tmp] = genome.name;
             })
-        //.on('typeahead:selected', change());
-
-
-            //.on('blur', function(){update_chromosome_select($(this))})
-            .on('typeahead:selected', function(ev, suggestion) {
-                update_chromosome_select($(this));
-            });
-
-
-        $('#g2_name').typeahead({
-                hint: true
-            },
-            {
-                name: 'genomes',
-                minLength: 4,
-                source: substringMatcher(genomeNames)
+        },
+        statusCode: {
+            404: function () {
+            }
+        },
+        error: function () {
+            $.getJSON("/api/genome/?per_page=5000", function (jsonData) {
+                jsonData.forEach(function (genome) {
+                    var tmp = genome.species + " (" + genome.code + ")";
+                    genomeNames.push(tmp);
+                    genomeIDs[tmp] = genome.code;
+                    genomeSpecies[tmp] = genome.name;
+                })
             })
-            //.on('blur', function(){update_chromosome_select($(this))})
-            .on('typeahead:selected', function(){
-                update_chromosome_select($(this));
-            });
+        }
+    });
 
-        function getLongestId(data){
+    function changeMessage(msg, showSpinner) {
 
-            return data.reduce(function(maxLen, val) {
-                return val.id.length > maxLen ? val.id.length : maxLen
-            }, 0);
+        if (msg == "") {
+
+            $("#loader, #message, #spinner").hide();
+            $("#msg").html('');
+
+        } else {
+
+            if (showSpinner) {
+                $("#spinner").show();
+            } else {
+                $("#spinner").hide();
+            }
+
+            $("#msg").html(msg);
+            $("#loader, #message").show('slow');
 
         }
 
-        $(window).keydown(function(event){
-            if(event.keyCode == 13) {
-                event.preventDefault();
-                return false;
+    }
+
+    changeMessage('Please choose both genomes', false);
+
+    function remove_chromosome_select(id_select) {
+
+        var select = document.getElementById(id_select);
+
+        var i;
+        for (i = select.options.length - 1; i >= 0; i--) {
+            select.remove(i);
+        }
+
+        var el = document.createElement("option");
+        el.textContent = 'Choose a chromosome';
+        el.value = 'Choose a chromosome';
+        select.appendChild(el);
+    }
+
+    function set_chromosome_select(id_select, data) {
+        var select = document.getElementById(id_select);
+        select.innerHTML = "";
+
+        $.each(data, function (index) {
+            var el = document.createElement("option");
+            el.textContent = this.id;
+            el.value = this.id;
+            select.appendChild(el);
+        });
+
+    }
+
+    function isInt(value) {
+        if (isNaN(value)) {
+            return false;
+        }
+        var x = parseFloat(value);
+        return (x | 0) === x;
+    }
+
+    function filterChromosomesByCount(data, filterCount) {
+        var MIN_NR_PROTEINS_PER_CHR;
+        if (isInt(filterCount)) {
+            MIN_NR_PROTEINS_PER_CHR = filterCount;
+        } else {
+            MIN_NR_PROTEINS_PER_CHR = 10;
+        }
+
+        var tmpData = [];
+
+        $.each(data, function (index, arr) {
+
+            var nr_prot_on_chr = arr.entry_ranges.reduce(function (acc, cur) {
+                return acc + cur[1] - cur[0] + 1
+            }, 0);
+            if (nr_prot_on_chr >= MIN_NR_PROTEINS_PER_CHR) {
+                // skip scaffolds with only very few proteins
+                //console.log('adding ' +arr.id + " at index "+ index);
+                //data.splice(index, 1);
+                arr.count = nr_prot_on_chr;
+                tmpData.push(arr);
             }
+
+        });
+
+        if (tmpData.length > 5) {
+
+            tmpData = tmpData.sort(comparatorNrProteins);
+
+            function comparatorNrProteins(a, b) {
+                return b.count - a.count;
+            }
+
+        }
+
+        return tmpData;
+
+    }
+
+    var substringMatcher = function (strs) {
+        return function findMatches(q, cb) {
+            var matches, substrRegex;
+
+            // an array that will be populated with substring matches
+            matches = [];
+            if (q.length < 2) {
+                return (cb(matches));
+            }
+
+            // regex used to determine if a string contains the substring `q`
+            substrRegex = new RegExp(q, 'i');
+
+            // iterate through the pool of strings and for any string that
+            // contains the substring `q`, add it to the `matches` array
+            $.each(strs, function (i, str) {
+                if (substrRegex.test(str)) {
+                    // the typeahead jQuery plugin expects suggestions to a
+                    // JavaScript object, refer to typeahead docs for more info
+                    matches.push({value: str});
+                }
+            });
+
+            cb(matches);
+        };
+    };
+
+    function update_chromosome_select(input) {
+
+        if (genomeIDs[input.val()] === null || genomeIDs[input.val()] === undefined) {
+            input.val('');
+            return false;
+        }
+        input.trigger("input");
+    };
+
+    $('#g1_name').typeahead({
+            hint: true
+        },
+        {
+            name: 'genomes',
+            minLength: 4,
+            source: substringMatcher(genomeNames)
+        })
+    //.on('typeahead:selected', change());
+
+
+    //.on('blur', function(){update_chromosome_select($(this))})
+        .on('typeahead:selected', function (ev, suggestion) {
+            update_chromosome_select($(this));
         });
 
 
-        $('#g1_name, #g2_name').bind("input propertychange", function (event) {
+    $('#g2_name').typeahead({
+            hint: true
+        },
+        {
+            name: 'genomes',
+            minLength: 4,
+            source: substringMatcher(genomeNames)
+        })
+    //.on('blur', function(){update_chromosome_select($(this))})
+        .on('typeahead:selected', function () {
+            update_chromosome_select($(this));
+        });
+
+    function getLongestId(data) {
+
+        return data.reduce(function (maxLen, val) {
+            return val.id.length > maxLen ? val.id.length : maxLen
+        }, 0);
+
+    }
+
+    $(window).keydown(function (event) {
+        if (event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
 
 
-            // If it's the propertychange event, make sure it's the value that changed.
-            if (window.event && event.type == "propertychange" && event.propertyName != "value"){
-                return false;
-            }
+    $('#g1_name, #g2_name').bind("input propertychange", function (event) {
 
 
-            if($('#g1_name').val() == "" || $('#g2_name').val() == "" || $('#g2_name').val().length < 5 || $('#g2_name').val().length < 5) {
-                return false;
-            }
+        // If it's the propertychange event, make sure it's the value that changed.
+        if (window.event && event.type == "propertychange" && event.propertyName != "value") {
+            return false;
+        }
 
-            genome_1 = genomeIDs[$('#g1_name').val()];
-            genome_2 = genomeIDs[$('#g2_name').val()];
-            genomeFullName_1 = genomeSpecies[$('#g1_name').val()];
-            genomeFullName_2 = genomeSpecies[$('#g2_name').val()];
 
-            if(genome_1 === undefined || genome_2 === undefined){
-                return false;
-            }
+        if ($('#g1_name').val() == "" || $('#g2_name').val() == "" || $('#g2_name').val().length < 5 || $('#g2_name').val().length < 5) {
+            return false;
+        }
 
-            // Clear any previously set timer before setting a fresh one
-            window.clearTimeout($(this).data("timeout"));
-            $(this).data("timeout", setTimeout(function () {
+        genome_1 = genomeIDs[$('#g1_name').val()];
+        genome_2 = genomeIDs[$('#g2_name').val()];
+        genomeFullName_1 = genomeSpecies[$('#g1_name').val()];
+        genomeFullName_2 = genomeSpecies[$('#g2_name').val()];
 
-                var clickTimeout = null;
+        if (genome_1 === undefined || genome_2 === undefined) {
+            return false;
+        }
 
-                //stop form submission
-                event.preventDefault();
+        // Clear any previously set timer before setting a fresh one
+        window.clearTimeout($(this).data("timeout"));
+        $(this).data("timeout", setTimeout(function () {
 
-                changeMessage("Loading genome data...", true);
-                var server = "";  //"http://omabrowser.org";
+            var clickTimeout = null;
 
-                $.ajaxSetup({ timeout: 7000 });
+            //stop form submission
+            event.preventDefault();
 
-                var get1 = $.getJSON(server+'/api/genome/' + genome_1 + '/?format=json');
-                var get2 = $.getJSON(server+'/api/genome/' + genome_2 + '/?format=json');
+            changeMessage("Loading genome data...", true);
+            var server = "";  //"http://omabrowser.org";
 
-                $.when(get1, get2).done(function (res1, res2) {
+            $.ajaxSetup({timeout: 7000});
 
-                    var chrom1 = filterChromosomesByCount(res1[0].chromosomes, 10);
-                    var chrom2 = filterChromosomesByCount(res2[0].chromosomes, 10);
+            var get1 = $.getJSON(server + '/api/genome/' + genome_1 + '/?format=json');
+            var get2 = $.getJSON(server + '/api/genome/' + genome_2 + '/?format=json');
 
-                    if(chrom1.length > chrom2.length){
-                        chromosomes1 = chrom2.slice(0, 50);
-                        chromosomes2 = chrom1.slice(0, 50);
+            $.when(get1, get2).done(function (res1, res2) {
 
-                        // change naming so genome with more chromosomes is shown in rows instead of columns
-                        var genome_1tmp = genome_1;
-                        genome_1 = genome_2;
-                        genome_2 = genome_1tmp;
+                var chrom1 = filterChromosomesByCount(res1[0].chromosomes, 10);
+                var chrom2 = filterChromosomesByCount(res2[0].chromosomes, 10);
 
-                        var genomeFullName_tmp = genomeFullName_1;
-                        genomeFullName_1 = genomeFullName_2;
-                        genomeFullName_2 = genomeFullName_tmp;
+                if (chrom1.length > chrom2.length) {
+                    chromosomes1 = chrom2.slice(0, 50);
+                    chromosomes2 = chrom1.slice(0, 50);
 
-                    } else {
-                        chromosomes1 = chrom1.slice(0, 50);
-                        chromosomes2 = chrom2.slice(0, 50);
+                    // change naming so genome with more chromosomes is shown in rows instead of columns
+                    var genome_1tmp = genome_1;
+                    genome_1 = genome_2;
+                    genome_2 = genome_1tmp;
+
+                    var genomeFullName_tmp = genomeFullName_1;
+                    genomeFullName_1 = genomeFullName_2;
+                    genomeFullName_2 = genomeFullName_tmp;
+
+                } else {
+                    chromosomes1 = chrom1.slice(0, 50);
+                    chromosomes2 = chrom2.slice(0, 50);
+                }
+
+                $("#fg_first_chr > label").html("Chromosome for " + genome_1);
+                $("#fg_second_chr > label").html("Chromosome for " + genome_2);
+
+                changeMessage("Sorting genome data...", true);
+
+                chromosomes1 = chromosomes1.sort(comparatorGenomeName);
+                chromosomes2 = chromosomes2.sort(comparatorGenomeName);
+
+                function comparatorGenomeName(a, b) {
+
+                    return a.id.localeCompare(b.id, undefined, {
+                        numeric: true,
+                        sensitivity: 'base'
+                    });
+
+                }
+
+                set_chromosome_select('selectchr1', chromosomes1)
+                set_chromosome_select('selectchr2', chromosomes2)
+
+                function matrix(rows, cols, defaultValue) {
+
+                    var arr = [];
+
+                    for (var i = 0; i < rows; i++) {
+
+                        arr.push([]);
+
+                        // Adds cols to the empty row
+                        arr[i].push(new Array(cols));
+
+                        for (var j = 0; j < cols; j++) {
+                            // Initializes:
+                            arr[i][j] = defaultValue;
+                        }
                     }
 
-                    $("#fg_first_chr > label").html("Chromosome for "+genome_1);
-                    $("#fg_second_chr > label").html("Chromosome for "+genome_2);
+                    return arr;
+                }
 
-                    changeMessage("Sorting genome data...", true);
+                function inRange(val, entries) {
 
-                    chromosomes1 = chromosomes1.sort(comparatorGenomeName);
-                    chromosomes2 = chromosomes2.sort(comparatorGenomeName);
+                    this.value = val;
+                    this.found = false;
+                    entries.forEach(function (entry) {
 
-                    function comparatorGenomeName(a, b) {
-
-                        return a.id.localeCompare(b.id, undefined, {
-                            numeric: true,
-                            sensitivity: 'base'
-                        });
-
-                    }
-
-                    set_chromosome_select('selectchr1', chromosomes1)
-                    set_chromosome_select('selectchr2', chromosomes2)
-
-                    function matrix(rows, cols, defaultValue) {
-
-                        var arr = [];
-
-                        for (var i = 0; i < rows; i++) {
-
-                            arr.push([]);
-
-                            // Adds cols to the empty row
-                            arr[i].push(new Array(cols));
-
-                            for (var j = 0; j < cols; j++) {
-                                // Initializes:
-                                arr[i][j] = defaultValue;
-                            }
+                        if (this.value >= entry[0] && this.value <= entry[1]) {
+                            this.found = true;
                         }
 
-                        return arr;
-                    }
+                    }, this);
 
-                    function inRange(val, entries){
+                    return this.found;
+                }
 
-                        this.value = val;
-                        this.found = false;
-                        entries.forEach(function(entry) {
+                changeMessage("Loading pairs...", true);
 
-                            if (this.value >= entry[0] && this.value <= entry[1]) {
-                                this.found = true;
-                            }
+                d3.json(server + "/api/pairs/" + genome_1 + "/" + genome_2 + "/minimal/?format=json", function (pairdata) {
 
-                        }, this);
+                    var pairs = pairdata.pairs.slice(0);
+                    var count = pairs.length;
+                    var cols = chromosomes1.length;
+                    var rows = chromosomes2.length;
 
-                        return this.found;
-                    }
+                    var colLblLen = getLongestId(chromosomes1) * 8 + 12;
+                    var rowLblLen = getLongestId(chromosomes2) * 6 + 16;
 
-                    changeMessage("Loading pairs...", true);
+                    var data = matrix(rows, cols, 0)
 
-                    d3.json(server+"/api/pairs/" + genome_1 + "/" + genome_2 + "/minimal/?format=json", function (pairdata) {
+                    changeMessage("Matching pairs...", true);
+                    for (var i = 0; i < count; i++) {
 
-                        var pairs = pairdata.pairs.slice(0);
-                        var count = pairs.length;
-                        var cols = chromosomes1.length;
-                        var rows = chromosomes2.length;
+                        var pair0 = pairs[i][0];
+                        var pair1 = pairs[i][1];
 
-                        var colLblLen = getLongestId(chromosomes1)*8 + 12;
-                        var rowLblLen = getLongestId(chromosomes2)*6 + 16;
+                        for (var col = 0; col < cols; col++) {
 
-                        var data = matrix(rows, cols, 0)
+                            if (inRange(pair0, chromosomes1[col].entry_ranges)) {
 
-                        changeMessage("Matching pairs...", true);
-                        for (var i = 0; i < count; i++) {
+                                for (var row = 0; row < rows; row++) {
 
-                            var pair0 = pairs[i][0];
-                            var pair1 = pairs[i][1];
-
-                            for (var col = 0; col < cols; col++) {
-
-                                if(inRange(pair0, chromosomes1[col].entry_ranges)){
-
-                                     for (var row = 0; row < rows; row++) {
-
-                                        if(inRange(pair1, chromosomes2[row].entry_ranges)){
-                                            data[row][col] += 1;
-                                            break;
-                                        }
-
+                                    if (inRange(pair1, chromosomes2[row].entry_ranges)) {
+                                        data[row][col] += 1;
+                                        break;
                                     }
 
                                 }
@@ -567,247 +591,256 @@ div.tooltip {
                             }
 
                         }
-                        changeMessage("Click pair: select, double click: launch dotplot", false);
 
-                        $("#fg_first_chr").removeClass('hidden');
-                        $("#fg_second_chr").removeClass('hidden');
+                    }
+                    changeMessage("Click pair: select, double click: launch dotplot", false);
 
-                        $("#dotPlotSubmit").show();
+                    $("#fg_first_chr").removeClass('hidden');
+                    $("#fg_second_chr").removeClass('hidden');
 
-                        // TODO: cleanup
-                        var fullWidth = $('#hm').width();
-                        var margin = {top: 25 + colLblLen, right: 30, bottom: 0, left: 15 + rowLblLen},
-                            width = (fullWidth / cols) > 30 ? (cols * 30) : fullWidth;
-                            matrixWidth = (width - rowLblLen) < 30 ? width : (width - rowLblLen);
-                            height = matrixWidth/cols * rows;
-                            matrixHeight = height - colLblLen;
+                    $("#dotPlotSubmit").show();
 
-                        var x = d3.scaleLinear()
-                            .domain([0, data[0].length])
-                            .range([0, matrixWidth]);
+                    // TODO: cleanup
+                    var fullWidth = $('#hm').width();
+                    var margin = {top: 25 + colLblLen, right: 30, bottom: 0, left: 15 + rowLblLen},
+                        width = (fullWidth / cols) > 30 ? (cols * 30) : fullWidth;
+                    matrixWidth = (width - rowLblLen) < 30 ? width : (width - rowLblLen);
+                    height = matrixWidth / cols * rows;
+                    matrixHeight = height - colLblLen;
 
-                        var y = d3.scaleLinear()
-                            .domain([0, data.length])
-                            .range([0, matrixHeight]);
+                    var x = d3.scaleLinear()
+                        .domain([0, data[0].length])
+                        .range([0, matrixWidth]);
 
-                        values = [].concat.apply([], data);
+                    var y = d3.scaleLinear()
+                        .domain([0, data.length])
+                        .range([0, matrixHeight]);
 
-                        var colorDomain = d3.extent(values, function (d) {
-                            return d;
-                        });
+                    values = [].concat.apply([], data);
 
-                        var colorScale = d3.scaleLinear()
-                            .domain(colorDomain)
-                            .range(["white", "green"]);
-
-                        d3.select("#heatmap").remove();
-
-                        var svg = d3.select("#hm").append("svg")
-                            .attr("id", "heatmap")
-                            //.attr("width", width + margin.left + margin.right)
-                            .attr("width", fullWidth)
-                            .attr("height", height + margin.top + margin.bottom)
-                            .style("margin-top", "10px")
-                            .append("g")
-                            .attr("transform", "translate(" + (margin.left + 20)+ "," + (margin.top + 20)+ ")");
-
-                        var div = d3.select("body")
-                            .append("div")
-                            .attr("class", "tooltip")
-                            .style("opacity", 0);
-
-                        var row = svg.selectAll(".row")
-                            .data(data, function (d, i) {
-                                return i;
-                            })
-                            .enter().append("svg:g")
-                            .attr("class", "row");
-
-                        var col = row.selectAll(".cell")
-                            .data(function (d, i) {
-                                return d.map(function (a) {
-                                    return {value: a, row: i};
-                                })
-                            })
-                            .enter()
-                            .append("svg:rect")
-                            .attr("class", "cell")
-                            .attr("x", function (d, i) {
-                                return x(i);
-                            })
-                            .attr("y", function (d) {
-                                return y(d.row);
-                            })
-                            .attr("width", x(1))
-                            .attr("height", y(1))
-                            .style("fill", function (d) {
-                                return colorScale(d.value);
-                            })
-
-                            .on("click", function (d, i) {
-                                if (clickTimeout != null) {
-                                    clearTimeout(clickTimeout);
-                                }
-
-                                clickTimeout = setTimeout(function () {
-                                    $("#selectchr1").val(chromosomes1[i].id);
-                                    $("#selectchr2").val(chromosomes2[d.row].id);
-                                }, 300)
-                            })
-
-                            .on("dblclick", function (d, i) {
-                                if (clickTimeout != null) {
-                                    clearTimeout(clickTimeout);
-                                }
-                                window.location =
-                                    server+"/oma/dotplot/" + genome_1 + "/" + genome_2 + "/" + chromosomes1[i].id + "/" + chromosomes2[d.row].id;
-                            })
-
-                            .on("mouseover", function(d,i) {
-
-                                // normalize to browser coordinates
-                                var my = d3.event.pageY - window.scrollY;
-                                var mx = d3.event.pageX - window.scrollX;
-
-                                // move tooltip into viewport if cell is too close to the viewport edge
-                                var xPos = (mx > ($(window).width() - 140)) ? d3.event.pageX - 150 : d3.event.pageX + 15;
-                                var yPos = (my > ($(window).height() - 60)) ? d3.event.pageY - 55 : d3.event.pageY + 15;
-
-                                var ttText = "Chromosome: " + chromosomes1[i].id + ":" + chromosomes2[d.row].id;
-                                ttText += "<br>Value: " + d.value;
-                                div.transition()
-                                    .duration(50)
-                                    .style("opacity", .9);
-                                div.html(ttText)
-                                    .style("left", xPos + "px")
-                                    .style("top", yPos + "px");
-                                })
-                                .on("mouseout", function (d) {
-                                    div.transition()
-                                        .duration(100)
-                                        .style("opacity", 0);
-                                })
-
-                        // Axes
-                        var xAxisCall = d3.axisTop(x).ticks(cols).tickFormat(function (d) {
-
-                            if (chromosomes1[d] && typeof chromosomes1[d].id !== 'undefined') {
-                                return chromosomes1[d].id;
-                            }
-                        });
-
-                        var xAxis = svg.append("g")
-                            .attr("class", "x-axis")
-                            .attr("transform", "translate(" + 0 + "," + 0 + ")")
-                            .call(xAxisCall)
-                            .style("text-anchor", "start")
-                            .call(adjustTextLabelsX)
-                            .append("g")
-                            .attr("fill", "green")
-                            .attr("id", "x-axislbl");
-
-                        xAxis
-                            .append("text")
-                            .attr("class", "axis-title")
-                            .attr("y", 10 - margin.top)
-                            .style("text-anchor", "start")
-                            .attr("dx", "0")
-                            .text(genome_1);
-                        xAxis
-                            .append("text")
-                            .attr("class", "axis-title")
-                            .attr("y", 10 - margin.top)
-                            .attr("dy", "1em")
-                            .style("font-size", "13px")
-                            .attr("dx", "0")
-                            .text(genomeFullName_1);
-
-                        var yAxisCall = d3.axisLeft(y).ticks(rows).tickFormat(function (d) {
-                            if (chromosomes2[d] && typeof chromosomes2[d].id !== 'undefined') {
-                                return chromosomes2[d].id;
-                            }
-                        });
-
-                        var yAxis = svg
-                            .append("g")
-                            .attr("class", "y-axis")
-                            .call(yAxisCall)
-                            .call(adjustTextLabelsY)
-                            .append("g")
-                            .attr("transform", "rotate(-90)")
-                            .style("text-anchor", "end")
-                            .attr("fill", "green")
-                            .attr("id", "y-axislbl");
-
-                            yAxis
-                            .append("text")
-                            .attr("class", "axis-title")
-                            .attr("y", function(d){
-                                return 0 - (margin.left + 15);
-                            })
-                            .attr("dy", "1em")
-                            .attr("dx", "0")
-                            .text(genome_2);
-
-                            yAxis
-                            .append("text")
-                            .attr("class", "axis-title")
-                            .attr("y", function(d){
-                                return 0 - (margin.left + 20);
-                            })
-                            .attr("dy", "2.5em")
-                            .attr("dx", "0")
-                            .style("font-size", "13px")
-                            .text(genomeFullName_2);
-
-
-                        function adjustTextLabelsX(selection) {
-                            selection.selectAll('.x-axis text')
-                                .attr('transform', function (d) {
-                                    return 'translate(' + x(1) + ', -10) rotate(-90)'
-                                });
-                        }
-
-                        function adjustTextLabelsY(selection) {
-                            selection.selectAll('.y-axis text')
-                                .attr('transform', function (d) {
-                                    return 'translate(0, ' + y(1) / 2 + ')'
-                                });
-                        }
-
+                    var colorDomain = d3.extent(values, function (d) {
+                        return d;
                     });
 
-                }).fail(function() {
-                  changeMessage("Sorry, could not load pair data.", false);;
+                    var colorScale = d3.scaleLinear()
+                        .domain(colorDomain)
+                        .range(["white", "green"]);
+
+                    d3.select("#heatmap").remove();
+
+                    var svg = d3.select("#hm").append("svg")
+                        .attr("id", "heatmap")
+                        //.attr("width", width + margin.left + margin.right)
+                        .attr("width", fullWidth)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .style("margin-top", "10px")
+                        .append("g")
+                        .attr("transform", "translate(" + (margin.left + 20) + "," + (margin.top + 20) + ")");
+
+                    var div = d3.select("body")
+                        .append("div")
+                        .attr("class", "tooltip")
+                        .style("opacity", 0);
+
+                    var row = svg.selectAll(".row")
+                        .data(data, function (d, i) {
+                            return i;
+                        })
+                        .enter().append("svg:g")
+                        .attr("class", "row");
+
+                    var col = row.selectAll(".cell")
+                        .data(function (d, i) {
+                            return d.map(function (a) {
+                                return {value: a, row: i};
+                            })
+                        })
+                        .enter()
+                        .append("svg:rect")
+                        .attr("class", "cell")
+                        .attr("x", function (d, i) {
+                            return x(i);
+                        })
+                        .attr("y", function (d) {
+                            return y(d.row);
+                        })
+                        .attr("width", x(1))
+                        .attr("height", y(1))
+                        .style("fill", function (d) {
+                            return colorScale(d.value);
+                        })
+
+                        .on("click", function (d, i) {
+                            if (clickTimeout != null) {
+                                clearTimeout(clickTimeout);
+                            }
+
+                            clickTimeout = setTimeout(function () {
+                                $("#selectchr1").val(chromosomes1[i].id);
+                                $("#selectchr2").val(chromosomes2[d.row].id);
+                            }, 300)
+                        })
+
+                        .on("dblclick", function (d, i) {
+                            if (clickTimeout != null) {
+                                clearTimeout(clickTimeout);
+                            }
+                            window.location =
+                                server + "/oma/dotplot/" + genome_1 + "/" + genome_2 + "/" + chromosomes1[i].id + "/" + chromosomes2[d.row].id;
+                        })
+
+                        .on("mouseover", function (d, i) {
+
+                            // normalize to browser coordinates
+                            var my = d3.event.pageY - window.scrollY;
+                            var mx = d3.event.pageX - window.scrollX;
+
+                            // move tooltip into viewport if cell is too close to the viewport edge
+                            var xPos = (mx > ($(window).width() - 140)) ? d3.event.pageX - 150 : d3.event.pageX + 15;
+                            var yPos = (my > ($(window).height() - 60)) ? d3.event.pageY - 55 : d3.event.pageY + 15;
+
+                            var ttText = "Chromosome: " + chromosomes1[i].id + ":" + chromosomes2[d.row].id;
+                            ttText += "<br>Value: " + d.value;
+                            div.transition()
+                                .duration(50)
+                                .style("opacity", .9);
+                            div.html(ttText)
+                                .style("left", xPos + "px")
+                                .style("top", yPos + "px");
+                        })
+                        .on("mouseout", function (d) {
+                            div.transition()
+                                .duration(100)
+                                .style("opacity", 0);
+                        })
+
+                    // Axes
+                    var xAxisCall = d3.axisTop(x).ticks(cols).tickFormat(function (d) {
+
+                        if (chromosomes1[d] && typeof chromosomes1[d].id !== 'undefined') {
+                            return chromosomes1[d].id;
+                        }
+                    });
+
+                    var xAxis = svg.append("g")
+                        .attr("class", "x-axis")
+                        .attr("transform", "translate(" + 0 + "," + 0 + ")")
+                        .call(xAxisCall)
+                        .style("text-anchor", "start")
+                        .call(adjustTextLabelsX)
+                        .append("g")
+                        .attr("fill", "green")
+                        .attr("id", "x-axislbl");
+
+                    xAxis
+                        .append("text")
+                        .attr("class", "axis-title")
+                        .attr("y", 10 - margin.top)
+                        .style("text-anchor", "start")
+                        .attr("dx", "0")
+                        .text(genome_1);
+                    xAxis
+                        .append("text")
+                        .attr("class", "axis-title")
+                        .attr("y", 10 - margin.top)
+                        .attr("dy", "1em")
+                        .style("font-size", "13px")
+                        .attr("dx", "0")
+                        .text(genomeFullName_1);
+
+                    var yAxisCall = d3.axisLeft(y).ticks(rows).tickFormat(function (d) {
+                        if (chromosomes2[d] && typeof chromosomes2[d].id !== 'undefined') {
+                            return chromosomes2[d].id;
+                        }
+                    });
+
+                    var yAxis = svg
+                        .append("g")
+                        .attr("class", "y-axis")
+                        .call(yAxisCall)
+                        .call(adjustTextLabelsY)
+                        .append("g")
+                        .attr("transform", "rotate(-90)")
+                        .style("text-anchor", "end")
+                        .attr("fill", "green")
+                        .attr("id", "y-axislbl");
+
+                    yAxis
+                        .append("text")
+                        .attr("class", "axis-title")
+                        .attr("y", function (d) {
+                            return 0 - (margin.left + 15);
+                        })
+                        .attr("dy", "1em")
+                        .attr("dx", "0")
+                        .text(genome_2);
+
+                    yAxis
+                        .append("text")
+                        .attr("class", "axis-title")
+                        .attr("y", function (d) {
+                            return 0 - (margin.left + 20);
+                        })
+                        .attr("dy", "2.5em")
+                        .attr("dx", "0")
+                        .style("font-size", "13px")
+                        .text(genomeFullName_2);
+
+
+                    function adjustTextLabelsX(selection) {
+                        selection.selectAll('.x-axis text')
+                            .attr('transform', function (d) {
+                                return 'translate(' + x(1) + ', -10) rotate(-90)'
+                            });
+                    }
+
+                    function adjustTextLabelsY(selection) {
+                        selection.selectAll('.y-axis text')
+                            .attr('transform', function (d) {
+                                return 'translate(0, ' + y(1) / 2 + ')'
+                            });
+                    }
+
                 });
 
-            }, 1000));
-        });
+            }).fail(function () {
+                changeMessage("Sorry, could not load pair data.", false);
+                ;
+            });
 
-        $("form").on('submit', function (e) {
+        }, 1000));
+    });
 
-            //stop form submission
-            e.preventDefault();
+    $("form").on('submit', function (e) {
 
-            var select1 = document.getElementById( "selectchr1");
-            var chr1 = select1.options[select1.selectedIndex].value;
-            if (chr1 === 'Choose a chromosome'){alert('Invalid chromosome 1.'); return false}
+        //stop form submission
+        e.preventDefault();
 
-            var select2 = document.getElementById( "selectchr2");
-            var chr2 = select2.options[select2.selectedIndex].value;
-            if (chr2 === 'Choose a chromosome'){alert('Invalid chromosome 2.'); return false}
+        var select1 = document.getElementById("selectchr1");
+        var chr1 = select1.options[select1.selectedIndex].value;
+        if (chr1 === 'Choose a chromosome') {
+            alert('Invalid chromosome 1.');
+            return false
+        }
 
-            if (genome_1 === genome_2 && chr1 === chr2){
-                alert("You cannot select twice the same chromosome and genome.");
-                return false;
-            }
+        var select2 = document.getElementById("selectchr2");
+        var chr2 = select2.options[select2.selectedIndex].value;
+        if (chr2 === 'Choose a chromosome') {
+            alert('Invalid chromosome 2.');
+            return false
+        }
 
-            var newUrl = encodeURI("/oma/dotplot/"+ genome_1 + "/" + genome_2+ "/" + chr1 + "/" + chr2);
-
-            window.location = newUrl;
+        if (genome_1 === genome_2 && chr1 === chr2) {
+            alert("You cannot select twice the same chromosome and genome.");
             return false;
+        }
 
-        });
+        var newUrl = encodeURI("/oma/dotplot/" + genome_1 + "/" + genome_2 + "/" + chr1 + "/" + chr2);
+
+        window.location = newUrl;
+        return false;
+
+    });
 
 </script>
 

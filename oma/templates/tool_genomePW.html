@@ -4,27 +4,33 @@
 {% block title %}OMA orthology database: orthologs between two genomes{% endblock %}
 {% block meta_description %}Download the list of predicted orthologs between a pair of genomes.{% endblock %}
 {% block css_hook %}
-    <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/typeaheadjs.css' %}"/>
 {% endblock css_hook %}
 {% block js_hook %}
-    <script src="{% static "js/typeahead.bundle.js" %}"></script>
+    <script src="{% static 'js/typeahead.bundle.js' %}"></script>
 {% endblock js_hook %}
 
 {% block content %}
 
-<div class="container-fluid">
-    <div class="row">
-        <div class=" col-sm-12 col-md-10 col-md-offset-1">
-            <div class="jumbotron">
-                <div class="container">
-                    <div class="page-header ">
-                        <h1 class="text-center">Genome Pair View <br>
-                            <small> Download orthologs between two species</small>
-                        </h1>
-                        <div class="well well-sm entete"></div>
-                    </div>
+<div id="oma-generic-container">
 
-                    <p>Use the following form to download the list of all predicted orthologs
+    <div class="container">
+
+        <div class="jumbotron">
+            <h1>Genome Pair View
+
+               <span> <small class="text-center text-muted h3 d-block">Download orthologs between two species
+                </small></span></h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+             <div>
+
+            <p class="text-justify">Use the following form to download the list of all predicted orthologs
                         between a pair of genomes of interest. Since orthologs are sometimes 1:many
                         or many:many relations, this download will return more orthologs than what
                         is covered by the OMA groups. The result is returned as a tab-separated
@@ -33,26 +39,29 @@
                         the OMA group containing both sequences.
                     </p>
 
-                    <form class="form-horizontal" role="form" id="genomePW" action="/cgi-bin/gateway.pl" method="get" >
+                 <br>
+
+
+             <form class="form " role="form" id="genomePW" action="/cgi-bin/gateway.pl" method="get" >
                     <INPUT TYPE="HIDDEN" NAME="f" VALUE="PairwiseOrthologs">
 
-                        <div class="form-group">
-                            <label for="textG1" class="col-sm-2 control-label">Species 1:</label>
+                        <div class="form-group row">
+                            <label for="textG1" class="col-md-2 offset-md-1 control-label">Species 1:</label>
                             <div class="col-sm-7">
                                 <input  id="textG1" type="text"  class="form-control typeahead" name="p1">
                             </div>
                             <br>
                         </div>
-                        <div class="form-group">
-                            <label for="textG2" class="col-sm-2 control-label">Species 2:
+                        <div class="form-group row">
+                            <label for="textG2" class="col-md-2 offset-md-1 control-label">Species 2:
                             </label>
                             <div class="col-sm-7">
                                 <input  id="textG2" type="text"  class="form-control typeahead" name="p2">
                             </div>
                             <br>
                         </div>
-                        <div class="form-group">
-                            <label for="textG2" class="col-xs-2 col-sm-2 control-label">Preferred ID:
+                        <div class="form-group row">
+                            <label for="textG2" class="col-md-2 offset-md-1  control-label">Preferred ID:
                             </label>
                             <div class=" col-xs-6 col-sm-2 ">
                                 <select id='selectBrowser' class="form-control " for="inputSuccess3" name="p3">
@@ -72,12 +81,15 @@
                             </div>
                         </div>
                     </form>
-                    <br>
-                    <br>
 
-                </div>
-            </div>
+
+
+
         </div>
+        </div>
+
+
+
     </div>
 </div>
 
