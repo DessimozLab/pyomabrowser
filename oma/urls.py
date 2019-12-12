@@ -74,7 +74,7 @@ urlpatterns = [
 
     # static pages that can be rendered directly to a template.
     url(r'^hogs/$', TemplateView.as_view(template_name='explore_HOG.html'), name='hogs'),
-    url(r'^synteny/$', TemplateView.as_view(template_name='tool_synteny.html'), name='synteny'),
+    url(r'^synteny/$', TemplateView.as_view(template_name='explore_synteny.html'), name='synteny'),
     url(r'^about/$', TemplateView.as_view(template_name='about_OMA.html'), name='about'),
     url(r'^export/$', TemplateView.as_view(template_name='dlOMA_exportAllAll.html'), name='export'),
     url(r'^landAnnotation/$', TemplateView.as_view(template_name='explore_Annotation.html'),

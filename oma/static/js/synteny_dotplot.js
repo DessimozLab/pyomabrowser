@@ -40,24 +40,24 @@ dotplot_theme = function () {
                 if (selected_action === 'ba-select' || selected_action === 's') {
                     brush_action = 'select';
                     d3.select('.overlay').attr("cursor", 'crosshair');
-                    d3.select('#brush_ok_zoom').classed('hidden', true);
-                    d3.select('#brush_ok_select').classed('hidden', false);
-                    d3.select('#brush_ok_pan').classed('hidden', true);
+                    d3.select('#brush_ok_zoom').classed('invisible', true);
+                    d3.select('#brush_ok_select').classed('invisible', false);
+                    d3.select('#brush_ok_pan').classed('invisible', true);
 
                 }
                 else if (selected_action === 'ba-zoom') {
                     brush_action = 'zoom';
                     d3.select('.overlay').attr("cursor", 'pointer');
-                    d3.select('#brush_ok_zoom').classed('hidden', false);
-                    d3.select('#brush_ok_select').classed('hidden', true);
-                    d3.select('#brush_ok_pan').classed('hidden', true);
+                    d3.select('#brush_ok_zoom').classed('invisible', false);
+                    d3.select('#brush_ok_select').classed('invisible', true);
+                    d3.select('#brush_ok_pan').classed('invisible', true);
                 }
                 else if (selected_action === 'ba-pan' || selected_action === 'a') {
                     brush_action = 'pan';
                     d3.select('.overlay').attr("cursor", 'move');
-                    d3.select('#brush_ok_pan').classed('hidden', false);
-                    d3.select('#brush_ok_zoom').classed('hidden', true);
-                    d3.select('#brush_ok_select').classed('hidden', true)
+                    d3.select('#brush_ok_pan').classed('invisible', false);
+                    d3.select('#brush_ok_zoom').classed('invisible', true);
+                    d3.select('#brush_ok_select').classed('invisible', true)
                 }
 
 
@@ -84,13 +84,15 @@ dotplot_theme = function () {
 
 
             relTypeSet.forEach(function (d) {
-                var li = '<li class="dropdown-reltype-li" id="' + d +'" ><a href="#" class="small" data-value="' + d +'" tabIndex="-1"><input type="checkbox" checked/>&nbsp;' + d +'</a></li>';
+
+
+                var li = '<a class="dropdown-item export_dropdown-li" id="' + d +'"  data-value="' + d +'" tabIndex="-1"><input type="checkbox" checked/>&nbsp;' + d +'</a>';
                  $('#dropdown-reltype').append(li);
             });
 
 
 
-            $( '.dropdown-reltype-li a' ).on( 'click', function( event ) {
+            $( '.dropdown-reltype-li' ).on( 'click', function( event ) {
 
                        var $target = $( event.currentTarget ),
                            val = $target.attr( 'data-value' ),
@@ -118,6 +120,7 @@ dotplot_theme = function () {
 
         //dotplot
         this.add_legend_color = function () {
+
 
             svg_dotplot.selectAll(".legend").remove();
             svg_dotplot.selectAll(".legend rect").remove();
@@ -355,7 +358,10 @@ dotplot_theme = function () {
                 image.src = imgsrc;
             }
 
-            d3.select("#export_dropdown").selectAll(".export_dropdown-li").on('click', function () {
+            d3.select("#export_dropdown").selectAll("a").on('click', function () {
+
+
+                console.log(this);
 
                 var fname = 'dotplot_' + genome1+'_chromosome' + chromosome1+'_vs_' + genome2+'_chromosome'+ chromosome2;
                 var svg_to_export = d3.select("#plot_div").select('svg');
@@ -396,7 +402,7 @@ dotplot_theme = function () {
 
         // variable for the dotplot brush action
         var brush_action = 'pan';
-        d3.select('#brush_ok_pan').classed('hidden', false);
+        d3.select('#brush_ok_pan').classed('invisible', false);
         dotplot.set_up_brush_action_setting();
 
         // selection variable
