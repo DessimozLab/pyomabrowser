@@ -122,10 +122,14 @@ dotplot_theme = function () {
         this.add_legend_color = function () {
 
 
+            console.log('start');
+
+
             svg_dotplot.selectAll(".legend").remove();
             svg_dotplot.selectAll(".legend rect").remove();
             svg_dotplot.selectAll(".legend text").remove();
             svg_dotplot.selectAll(".color_legend_text").remove();
+
 
 
             // Add a legend for the color values.

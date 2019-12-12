@@ -104,7 +104,7 @@ body {
 }
  body #oma-search-container {
 	 background: #f8f9fa;
-	 padding: 64px 0 128px;
+	 padding: 14px 0px 14px ;
 	 text-align: center;
 	 border-radius: 0 0 50% 50%;
 	 width: 120%;
@@ -877,7 +877,7 @@ body {
 }
 
 .scroll4more {
-	margin: 60px auto 0;
+	margin: 60px auto 14px;
     padding: 10px 20px;
     border-radius: 30px;
     text-align: center;
