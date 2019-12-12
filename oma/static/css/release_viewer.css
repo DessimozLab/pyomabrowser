@@ -15,14 +15,11 @@
 .section-box{
     background-color: #fff;
     padding: 16px;
-    box-shadow: 2px 2px 1px #eee;
-    border-radius: 4px;
     margin:8px;
 }
 
 /* viewer selection */
 .icon_selector{
-    margin-right:8px;
     color:#555;
 }
 .text_selector{

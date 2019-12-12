@@ -7,47 +7,63 @@
 
 
 
+<div id="oma-generic-container">
 
-<div class="container-fluid">
-    <div class="row">
-        <div class=" col-sm-12 col-md-10 col-md-offset-1">
-            <div class="jumbotron">
-                <div class="container">
-                    <div class="page-header ">
-                        <h1 class="text-center">Local synteny</h1>
-                        <div class="well well-sm entete"></div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <p>The synteny view provides an overview of the genomic context of a particular entry and its orthologs in other species. This enables to see conservation or divergence of syntenic regions across species.
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>Local synteny</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <div class="card card-header-oma">
+                <div class="card-body ">
+
+                    <p class="text-justify">The synteny view provides an overview of the genomic context of a particular entry and its orthologs in other species. This enables to see conservation or divergence of syntenic regions across species.
                             </p>
-                            <p>As synteny is computed with respect to a reference entry, please first search for a protein sequence of interest and click on the “Local Synteny” tab.
+                            <p class="text-justify">As synteny is computed with respect to a reference entry, please first search for a protein sequence of interest and click on the “Local Synteny” tab.
                             </p>
-                            <br>
-                            <form class="form-horizontal" id="searchForm" onSubmit="goSynteny(); return false;">
-                                <div class="form-group">
-                                    <label for="textID" class="col-sm-4 control-label">Member gene/protein:
-                                    </label>
-                                    <div class="col-sm-6">
-                                        <div class="input-group">
-                                            <input id='textID' type="text" class="form-control">
-                                            <span class="input-group-btn">
-                                            <button class="btn btn-default" type="submit">
-                                                <span class="glyphicon glyphicon-search "></span>
-                                            </button>
-                                        </span>
-                                        </div>
-                                    </div>
-                                    <br>
-                                    <div class="col-xs-6 col-xs-offset-4">
-                                        <h4>
-                                            <small>Examples: 
-                                                <a id='exMemb1'>ADH1A_HUMAN</a> - <a id='exMemb2'>CESA1_ARATH</a> - <a id='exMemb3'>NP_001104739</a>
-                                            </small>
-                                        </h4>
+
+
+                    <br>
+
+
+                    <form class="form-horizontal" id="searchForm" onSubmit="goSynteny(); return false;">
+                        <input type="hidden" name="f" value="DisplayGroup"/>
+                        <div class="form-group form-row">
+
+                            <label for="textID" class="col-sm-3 col-form-label control-label text-right">Member gene/protein:
+                            </label>
+                            <div class="col-sm-8 no-gutters">
+
+                                <div class="input-group col mb-2">
+                                    <input id='textID' name="p1" type="text" class="form-control">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></span></button>
                                     </div>
                                 </div>
-                            </form><br>
+
+                            </div>
+
+                            <div class="col-md-8 offset-sm-3">
+
+                                <span class="font-weight-bold">Example: </span>
+                                <a href="#"  class="text-muted" id='exMemb1'>ADH1A_HUMAN</a> - <a href="#"  class="text-muted" id='exMemb2'>CESA1_ARATH</a> - <a href="#"  class="text-muted" id='exMemb3'>NP_001104739</a>
+
+
+                            </div>
+
+                        </div>
+                    </form>
+
+
+
                             <script type="text/javascript">
                             $('#exMemb1').click( function() {
                                 $('#textID').val('ADH1A_HUMAN').focus();
@@ -65,13 +81,22 @@
                                 return false;
                             }
                             </script>
-                        </div>
-                    </div>
+
+
+
+
                 </div>
             </div>
         </div>
     </div>
+
 </div>
+
+
+
+
+
+
 
 
 {% endblock content %}

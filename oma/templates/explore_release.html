@@ -7,19 +7,27 @@
 
     <link href="{% static "css/release_viewer.css" %}" rel="stylesheet" type="text/css"/>
 
-    <div class="container-fluid" >
-
-        <div class="row">
-
-            <div class="col-sm-12 col-md-10 col-md-offset-1 master-tile">
-
-                <div class="section-tile">
 
 
-                    <p class="section-title">OMA RELEASE OF {{ rel_name }}</p>
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>OMA RELEASE OF {{ rel_name }}</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
 
 
-                    <div class="section-box">
+            <div class="card card-header-oma">
+                <div class="card-body ">
+
 
 
                         <ul class="list-unstyled">
@@ -33,32 +41,59 @@
                             </ul>
 
 
-                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="card card-header-oma">
+
+                <div class="card-body ">
+
+                    <div class="row justify-content-md-center">
+
+                        <div class="col ">
+
+                            <h4><strong>Species information</strong></h4>
+
+                        </div>
+
+                        <div class="col-md-auto ">
+       <div>
+
+           <span class="pull-right text_selector">Change the view: </span>
+
+
+                        <button type="button" id="btree" class="btn btn-default icon_selector" data-toggle="tooltip" data-placement="top" title="view as species tree" >
+                            <i class="fas fa-tree" aria-hidden="true"></i>
+                        </button>
+
+                        <button type="button" id="blist"  class="btn btn-default  icon_selector" data-toggle="tooltip" data-placement="top" title="view as species list">
+                            <i class="fas fa-list" aria-hidden="true"></i>
+                        </button>
+
+                        <button type="button" id="bhist"  class="btn btn-default icon_selector" data-toggle="tooltip" data-placement="top" title="view as species histogram">
+                            <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        </button>
+
+
+
+
+
+                            </div>
+
+
+
 
                 </div>
 
-                <div class="section-tile">
-
-                    <p class="section-title">SPECIES INFORMATION
+                    </div>
 
 
-                        <button type="button" id="btree" class="btn btn-default pull-right icon_selector" data-toggle="tooltip" data-placement="top" title="view as species tree" >
-                        <span class="glyphicon glyphicon-tree-deciduous pull-right " aria-hidden="true"></span>
-                        </button>
+                    <hr>
 
-                        <button type="button" id="blist"  class="btn btn-default pull-right icon_selector" data-toggle="tooltip" data-placement="top" title="view as species list">
-                        <span class="glyphicon glyphicon-list pull-right " aria-hidden="true"></span>
-                        </button>
 
-                        <button type="button" id="bhist"  class="btn btn-default pull-right icon_selector" data-toggle="tooltip" data-placement="top" title="view as species histogram">
-                        <span class="glyphicon  glyphicon-stats pull-right " aria-hidden="true"></span>
-                        </button>
-
-                        <span class="pull-right text_selector">Change the view: </span>
-
-                    </p>
-
-                    <div class="section-box" id="section_genome">
+                <div class="section-box" id="section_genome">
 
                         <!-- This is the part that is flushed and updated with viewer -->
                         <div class="panel-body" id="genome_panel" style="position: relative;" >
@@ -70,12 +105,14 @@
 
                 </div>
 
-
-            </div>
+                </div>
 
         </div>
-
     </div>
+</div>
+
+
+
 
     <!-- D3 and D3 Tooltip -->
     <script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>

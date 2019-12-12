@@ -4,31 +4,40 @@
 {% block title %}OMA orthology database: Accessing HOGs{% endblock %}
 {% block content %}
 
-<div class="container mt-5">
 
-	<div class="card text-center bg-light mb-3 mx-auto">
-		<div class="card-header">
-			<h1 class="display-3 mb-3">Hierarchical orthologous groups</h1>
-			<div class="entete mb-5" style="height: 10px;"></div>
+<div id="oma-generic-container">
 
-			<div class="card bg-light m-3 text-left">
+    <div class="container">
 
-				<div class="card-body">
+        <div class="jumbotron">
 
-                    <p class="lead">Hierarchical orthologous groups are sets of genes that are defined with respect to particular taxonomic ranges of interest. They group genes that have descended from a single common ancestral genes in that taxonomic range. <a href="{% url 'type'  %}#hogs" class="btn btn-light" role="button"> More info</a>
-                    </p>
+            <h1>Hierarchical orthologous groups</h1>
 
-                    <p>Currently, HOGs can be retrieved by first retrieving one of its member sequence, and then clicking on the “hierarchical orthologous groups” tab.</p>
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
 
 
-                    <h5>Search a HOG</h5>
+            <div class="card card-header-oma">
+                <div class="card-body ">
+
+                    <p class="text-justify">Hierarchical orthologous groups are sets of genes that are defined with respect to particular taxonomic ranges of interest. They group genes that have descended from a single common ancestral genes in that taxonomic range (<a href="{% url 'type'  %}#hogs" >click here  for more info</a>).</p>
+                    <strike>Currently, HOGs can be retrieved by first retrieving one of its member sequence, and then clicking on the “hierarchical orthologous groups” tab.</strike>
+                    <br>
+                    <br>
+
+                    <h5 > <strong> Search a HOG</strong></h5>
+                    <br>
+
 
                     <form class="form-horizontal" id="searchForm" onSubmit="goHOG(); return false;">
                         <div class="form-group">
 
                             <input type="hidden" name="f" value="DisplayGroup"/>
                             <div class="form-group form-row">
-                                <label for="textHOG" class="col-sm-4 col-form-label control-label text-right">Member gene/protein:
+                                <label for="textHOG" class="col-sm-3 col-form-label control-label text-right">Member gene/protein:
                                 </label>
                                 <div class="col-sm-8 no-gutters">
 
@@ -42,7 +51,7 @@
 
                                 </div>
 
-                                <div class="col-md-8 offset-sm-4">
+                                <div class="col-md-8 offset-sm-3">
                                     <span class="font-weight-bold">Example:</span>
                                         <a href="#" class="text-muted" id="exMemb3">YEAST00012</a> - <a href="#" class="text-muted" id='exMemb1'>NB5R1_HUMAN</a> - <a href="#" class="text-muted" id='exMemb2'>B1B1A8</a>
                                 </div>
@@ -53,11 +62,17 @@
                     </form>
 
 
+
+
                 </div>
             </div>
         </div>
     </div>
+
 </div>
+
+
+
 
 <script type="text/javascript">
 $('#exMemb1').click( function() {

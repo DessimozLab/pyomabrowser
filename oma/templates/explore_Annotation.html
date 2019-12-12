@@ -5,49 +5,67 @@
 
 {% block content %}
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-            <div class="jumbotron">
-                <div class="container">
-                    <div class="page-header ">
-                        <h1 class="text-center">Functional annotations<br></h1>
-                        <div class="well well-sm entete"></div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <p>In OMA, we provide Gene Ontology functional annotations retrieved from <a href="http://www.ebi.ac.uk/GOA">UniProtKB-GOA</a>  as well as functional predictions derived from evolutionary relationships inferred by OMA.
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>Functional annotations</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <div class="card card-header-oma">
+                <div class="card-body ">
+
+                    <p class="text-justify">In OMA, we provide Gene Ontology functional annotations retrieved from <a href="http://www.ebi.ac.uk/GOA">UniProtKB-GOA</a>  as well as functional predictions derived from evolutionary relationships inferred by OMA.
                             </p>
-                            <p>To view Gene Ontology functional annotations, retrieve a protein sequence and scroll down the "Information" tab.</p>
-                            <h3>Search a gene/protein</h3>
-                            <br>
-                            <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
-                                <input type="hidden" name="f" value="DisplayEntry"/>
-                                <div class="form-group">
-                                    <label for="textAnn" class="col-sm-4 control-label">Member gene/protein:
-                                    </label>
-                                    <div class="col-sm-6">
-                                        <div class="input-group">
-                                            <input id='textAnn' name="p1" type="text" class="form-control">
-                                            <span class="input-group-btn">
-                                            <button class="btn btn-default" type="submit">
-                                                <span class="glyphicon glyphicon-search "></span>
-                                            </button>
-                                        </span>
-                                        </div>
-                                    </div>
-                                    <br>
-                                    <div class="col-xs-6 col-xs-offset-4">
-                                        <h4>
-                                            <small>Examples: 
-                                                <a id='exMemb1'>Q8VYZ5</a> - <a id='exMemb2'>ARATH21939</a> - <a id='exMemb3'>NP_172998</a>
-                                            </small>
-                                        </h4>
+                    <p class="text-justify">To view Gene Ontology functional annotations, search for a protein
+                        and click on the "Information" tab.</p>
+                    <br>
+                    <br>
+
+                    <h5 > <strong> Search a gene/protein</strong></h5>
+                    <br>
+
+
+
+                    <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
+                        <input type="hidden" name="f" value="DisplayEntry"/>
+                        <div class="form-group form-row">
+
+
+                            <label for="textAnn"  class="col-sm-3 col-form-label control-label text-right">Member gene/protein:
+                            </label>
+                            <div class="col-sm-8 no-gutters">
+
+                                <div class="input-group col mb-2">
+                                    <input id='textAnn' name="p1" type="text" class="form-control">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></span></button>
                                     </div>
                                 </div>
-                                </form><br>
-                                </div>
-                                <script type="text/javascript">
+
+                            </div>
+
+                            <div class="col-md-8 offset-sm-3">
+
+                                <span class="font-weight-bold">Example:</span>
+                                <a href="#" class="text-muted"  id='exMemb1'>Q8VYZ5</a> - <a href="#"  class="text-muted" id='exMemb2'>ARATH21939</a> - <a href="#" class="text-muted"  id='exMemb3'>NP_172998</a>
+
+                            </div>
+
+
+                        </div>
+
+
+                         <script type="text/javascript">
                                 $('#exMemb1').click( function() {
                                     $('#textAnn').val('Q8VYZ5').focus();
                                 });
@@ -58,12 +76,25 @@
                                     $('#textAnn').val('NP_172998').focus();
                                 });
                                 </script>
+
+
+                    </form>
+
+
+
+
                             </div>
-                        </div>
-                    </div>
+
+
+
+
                 </div>
             </div>
         </div>
     </div>
+
+
+
+
 
     {% endblock content %}
