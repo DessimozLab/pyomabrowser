@@ -101,19 +101,22 @@
                 </div>
                 <div class="card-body ">
 
-                    <div id="loader" class="alert alert-info ">
+                    <div id="loader" class="alert alert-info text-center ">
                                         <img id="spinner" src="{% static "image/loading.gif"%}">
                                         <span id="msg"></span>
                     </div>
 
 
-                    <p class="text-justify">You have two ways to select the chromosome pair of interest:
-                       use the left matrix by clicking on the square of interest (double click directly open the synteny viewer)
-                        or use the select widget on the right to browse for each genome the chromosome to display.
-                        Once the chromosome pair is chosen, use the 'launch DotPlot' to start the visualisation.</p>
+
 
 
                     <div id="message" class="row" style="padding: 0; display:none;">
+
+
+                         <p class="text-justify">You have two ways to select the chromosome pair of interest:
+                       use the left matrix by clicking on the square of interest (double click directly open the synteny viewer)
+                        or use the select widget on the right to browse for each genome the chromosome to display.
+                        Once the chromosome pair is chosen, use the 'launch DotPlot' to start the visualisation.</p>
 
                         <div class="col-xs-12 col-lg-6">
 
@@ -139,9 +142,9 @@
                                     </div>
                                 </div>
 
-                                <div id="dotPlotSubmit" class="col-sm-4 col-push-4">
-                                    <div style="padding-right:0;">
-                                        <button class="btn btn-success greenb" type="submit" id="launch_PP">Launch
+                                <div id="dotPlotSubmit" class="">
+                                    <div >
+                                        <button class="btn btn-lg btn-block btn-primary" type="submit" id="launch_PP">Launch
                                             DotPlot
                                         </button>
                                     </div>
@@ -175,7 +178,6 @@
 
         $("#loader, #message, #spinner, #dotPlotSubmit").hide();
         $("#msg").html('Please choose both genomes first');
-        $("#message").show('slow');
         var oKeyDeferredMap = {};
 
         function fnReadData(sKey) {
@@ -272,13 +274,14 @@
             }
 
             $("#msg").html(msg);
-            $("#loader, #message").show('slow');
+            $("#loader, #message").show();
 
         }
 
     }
 
     changeMessage('Please choose both genomes first', false);
+    $("#message").hide();
 
     function remove_chromosome_select(id_select) {
 
@@ -592,7 +595,7 @@
                         }
 
                     }
-                    changeMessage("Now you can select the pair of chromosome to visualise", false);
+                    changeMessage("Use the matrix or select boxes to chose the pair of chromosome to visualise", false);
 
                     $("#fg_first_chr").removeClass('hidden');
                     $("#fg_second_chr").removeClass('hidden');

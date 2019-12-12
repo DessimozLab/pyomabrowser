@@ -42,7 +42,14 @@
                  <br>
 
 
-             <form class="form " role="form" id="genomePW" action="/cgi-bin/gateway.pl" method="get" >
+
+
+                 <div class="card card-header-oma">
+                <div class="card-header">
+                    <h4>Download orthologs between two species</h4>
+                </div>
+                <div class="card-body">
+                     <form class="form " role="form" id="genomePW" action="/cgi-bin/gateway.pl" method="get" >
                     <INPUT TYPE="HIDDEN" NAME="f" VALUE="PairwiseOrthologs">
 
                         <div class="form-group row">
@@ -75,12 +82,21 @@
                                 <OPTION value="EntrezGene">Entrez Gene IDs</OPTION>
                                 <OPTION value="EnsemblGene">Ensembl Gene IDs</OPTION>
                                 </select>
-                            </div>
-                            <div class="col-xs-2  col-sm-2 col-sm-offset-3  ">
-                                <button type="submit" class="btn btn-success greenb ">Get pairs</button>
-                            </div>
+
+                                </div>
+
+
+
                         </div>
+
+                         <button type="submit" class="btn btn-lg btn-block btn-primary ">Get pairs</button>
+
                     </form>
+                </div>
+            </div>
+
+
+
 
 
 

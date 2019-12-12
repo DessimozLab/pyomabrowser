@@ -11,14 +11,24 @@
 {% endblock meta_hook %}
 
 {% block content %}
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-sm-12 col-md-10 col-md-offset-1">
-			<div class="jumbotron">
-				<div class="container">
-					<h1 class="text-center">Predicting Gene Ontology function to your sequences</h1>
-					<div class="well well-sm entete"></div>
-					<br>
+
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+            <h1>Predicting Gene Ontology function to your sequences</h1>
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+
+
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<p>The service identifies the closest sequence in a very quick manner
@@ -69,6 +79,5 @@
 		        </div>
 	        </div>
         </div>
-    </div>
-</div>
+
 {% endblock content %}

@@ -993,7 +993,7 @@ def function_projection(request):
             return HttpResponseRedirect(result_page)
     else:
         form = forms.FunctionProjectionUploadForm()
-    return render(request, "function_projection_upload.html",
+    return render(request, "tool_function_prediction_upload.html",
                   {'form': form, 'max_upload_size': form.fields['file'].max_upload_size / (2**20)})
 
 
