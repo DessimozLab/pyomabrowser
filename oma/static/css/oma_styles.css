@@ -314,7 +314,6 @@ body {
  body .oma-details-container .oma-details-nav-left ul {
 	 padding: 0;
 	 overflow-y: auto;
-	 overflow-y: auto;
 }
  body .oma-details-container .oma-details-nav-left ul li {
 	 list-style: none;
@@ -331,7 +330,13 @@ body {
  body .oma-details-container .oma-details-nav-left ul li:nth-child(odd):hover {
 	 background: #ccc;
 }
- body .oma-details-container .oma-details-nav-left ul li.active {
+ body .oma-details-container .oma-details-nav-left ul.genome li.active {
+	 background: #ee3a39;
+	 border-top:    2px solid  #f8f9fa;
+	 border-bottom: 2px solid #f8f9fa;}
+
+
+body .oma-details-container .oma-details-nav-left ul.gene-orthology  li.active {
 	 background: #369;
 	 border-top:    2px solid  #f8f9fa;
 	 border-bottom: 2px solid #f8f9fa;
@@ -892,13 +897,12 @@ body {
     background-color: #FFF49D;
 }
 .genome, .genome .selected {
-    background-color: #FFAB91;
+    background-color: #ee3a39;
 }
 
 .content-section-title-entry{
 	border-bottom: 2px solid #90CAF9;
 }
-
 
 .card-header-oma{
     border-radius: 16px !important;

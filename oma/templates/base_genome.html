@@ -6,7 +6,16 @@
 
 {% block header_body %}
 
-                    <h5 class="card-title"> Genome {{ genome.sciname }} [{{  genome.uniprot_species_code }}] </h5>
+
+<div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
+
+    <div class="oma-details-title">
+
+        <h2>Genome {{ genome.sciname }} [{{  genome.uniprot_species_code }}]</h2>
+        <p>Sub text here</p>
+    </div>
+</div>
+
 
 
 {% endblock %}
@@ -17,11 +26,12 @@
         {% include "includes/sidebar_genome.html" with tab=tab %}
 
 
-        <div id="content-column" class="col-xs-12 col-9" style="background-color: #edf"> <!-- content col -->
+<div class="oma-details-content">
 
-            {% block contentTab %} {% endblock contentTab %}
+    {% block contentTab %} {% endblock contentTab %}
 
-        </div> <!-- content col -->
+</div>
+
 
 {% endblock data_content %}
 

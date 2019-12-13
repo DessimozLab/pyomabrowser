@@ -9,7 +9,7 @@
 
 <div class="oma-details-nav-left" id="sideNavMobile">
 
-    <ul>
+    <ul class="gene-orthology">
         <li class="{% if tab == 'orthologs' %} active selected {%endif%}" {% if tab != 'orthologs' %}
              onclick="window.location='{% url 'pairs' entry.omaid %}'" {%endif%}>
             <a href="{% url 'pairs' entry.omaid %}" {% if tab == 'orthologs' %}data-toggle="collapse" data-target="#filterOrthologs"{%endif%}>
@@ -83,7 +83,6 @@
             </a>
 
         </li>
-
 
         <li class="{% if tab == 'isoform' %} active selected {%endif%}">
             <a href="{% url 'entry_isoform' entry.omaid %}">

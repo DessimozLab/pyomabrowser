@@ -1,52 +1,59 @@
-<!-- Sidebar / menu -->
+{% load staticfiles %}
 
-<div id="sidebar-container" class="col-sm-12 col-md-3 genome full-height" > <!-- #sidebar-container -->
+<div id="oma-details-sideNav-mobile">
+    <a href="#" id="toggleSidenav">
+        <span>Select a Tab</span><img src="{% static 'image/icon-arrow.png' %}" alt="Arrow" />
+    </a>
+</div>
 
-<button href="#accordion" class="btn btn-primary d-md-none tn-lg btn-block" data-toggle="collapse">Select a tab <i class="fa chevron_alias" aria-hidden="true"> </i> </button>
+<div class="oma-details-nav-left" id="sideNavMobile">
+
+     <ul class="genome">
+         <li class="{% if tab == 'information' %}  active selected {%endif%}">
+            <a href="{% url 'genome_info' genome.uniprot_species_code %}">
+                <span> Genome information</span>
+            </a>
+        </li>
 
 
-    <div class="" id="accordion">
 
 
-            <div  class="menu-tab col-6 col-sm-12 {% if tab == 'information' %} active selected {%endif%}"
-              style="cursor: pointer;"  {% if tab != 'information' %}
-              onclick="window.location='{% url 'genome_info' genome.uniprot_species_code %}'" {%endif%}
-              >
 
-            <span class="">
-                <a href="{% url 'genome_info' genome.uniprot_species_code %}" >Information</a>
-            </span>
-        </div>
 
-            <div  class="menu-tab col-6 col-sm-12 {% if tab == 'genes' %} active selected {%endif%}"
-              style="cursor: pointer;"  {% if tab != 'genes' %}
-              onclick="window.location='{% url 'genome_genes' genome.uniprot_species_code %}'" {%endif%}
-              >
+         <li class="{% if tab == 'genes' %} active selected {%endif%}">
+            <a href="{% url 'genome_genes' genome.uniprot_species_code %}">
+                <span> List genes</span>
+            </a>
+        </li>
 
-            <span class="">
-                <a href="{% url 'genome_genes' genome.uniprot_species_code %}" >List genes</a>
-            </span>
-        </div>
 
-            <div  class="menu-tab col-6 col-sm-12 {% if tab == 'closest' %} active selected {%endif%}"
-              style="cursor: pointer;"  {% if tab != 'closest' %}
-              onclick="window.location='{% url 'genome_closest' genome.uniprot_species_code %}'" {%endif%}
-              >
 
-            <span class="">
-                <a href="{% url 'genome_closest' genome.uniprot_species_code %}" >Closest species</a>
-            </span>
-        </div>
 
-            <div  class="menu-tab col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}"
-              style="cursor: pointer;"  {% if tab != 'synteny' %}
-              onclick="window.location='{% url 'genome_synteny' genome.uniprot_species_code %}'" {%endif%}
-              >
 
-            <span class="">
-                <a href="{% url 'genome_synteny' genome.uniprot_species_code %}" >Synteny</a>
-            </span>
-        </div>
- </div>
 
-    </div> <!-- #sidebar-container -->
+         <li class="{% if tab == 'closest' %} active selected {%endif%}">
+            <a href="{% url 'genome_closest' genome.uniprot_species_code %}">
+                <span> Closest species</span>
+            </a>
+        </li>
+
+
+
+
+
+
+
+         <li class="{% if tab == 'synteny' %} active selected {%endif%}">
+            <a href="{% url 'genome_synteny' genome.uniprot_species_code %}">
+                <span> Synteny</span>
+            </a>
+        </li>
+
+
+     </ul>
+</div>
+
+
+
+
+

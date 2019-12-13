@@ -8,10 +8,9 @@
     <div class="" id="accordion">
 
         <div class="menu-tab col-6 col-sm-12 {% if tab == 'orthologs' %} active selected {%endif%}"
-             style="cursor: pointer;" {% if tab != 'orthologs' %}
-             onclick="window.location='{% url 'pairs' entry.omaid %}'" {%endif%}
-             {% if tab == 'orthologs' %} data-toggle="collapse" data-target="#collapseOrthology" aria-expanded="true" aria-controls="#collapseOrthology"{%endif%}
-        >
+             style="cursor: pointer;" {% if tab != 'orthologs' %} onclick="window.location='{% url "pairs" entry.omaid %}'" {%endif%}
+
+        {% if tab == 'orthologs' %} data-toggle="collapse" data-target="#collapseOrthology" aria-expanded="true" aria-controls="#collapseOrthology"{%endif%}>
             <span class="">
                 <a href="{% url 'pairs' entry.omaid %}" >Orthologs
                     {% if entry.number_vps %}<span class="badge badge-info">{{entry.number_vps}}</span>{% endif %}
@@ -19,6 +18,8 @@
                 <i class="fa chevron_alias float-right" aria-hidden="true"> </i>
             </span>
         </div>
+
+
         <div id="collapseOrthology"
              class="collapse pt-0{% if tab == 'orthologs' %} show{%endif%}"
              aria-labelledby="headingOne" data-parent="#accordion">
@@ -67,11 +68,8 @@
             </div>
         </div>
 
-    <div class="menu-tab col-6 col-sm-12 {% if tab == 'paralogs' %} active selected {%endif%}"
-             style="cursor: pointer;" {% if tab != 'paralogs' %}
-             onclick="window.location='{% url 'pair_paralogs' entry.omaid %}'" {%endif%}
-             {% if tab == 'paralogs' %} data-toggle="collapse" data-target="#collapseParalogy" aria-expanded="true" aria-controls="#collapseParalogy"{%endif%}
-        >
+    <div class="menu-tab col-6 col-sm-12 {% if tab == 'paralogs' %} active selected {%endif%}" style="cursor: pointer;" {% if tab != "paralogs" %}  onclick="window.location='{% url 'pair_paralogs' entry.omaid %}'" {%endif%}
+             {% if tab == 'paralogs' %} data-toggle="collapse" data-target="#collapseParalogy" aria-expanded="true" aria-controls="#collapseParalogy"{%endif%}>
             <span class="">
                 <a href="{% url 'pair_paralogs' entry.omaid %}" >Paralogs
                     {% if nr_pps %}<span class="badge badge-info">{{nr_pps}}</span>{% endif %}
@@ -79,6 +77,8 @@
                 <i class="fa chevron_alias float-right" aria-hidden="true"> </i>
             </span>
         </div>
+
+
         <div id="collapseParalogy"
              class="collapse pt-0{% if tab == 'paralogs' %} show{%endif%}"
              aria-labelledby="headingOne" data-parent="#accordion">
@@ -152,8 +152,6 @@
             </span>
         </div>
 
-
-
         <div  class="menu-tab col-6 col-sm-12 {% if tab == 'goa' %} active selected {%endif%}"
               style="cursor: pointer;"  {% if tab != 'goa' %}
               onclick="window.location='{% url 'entry_goa' entry.omaid %}'" {%endif%}
@@ -164,7 +162,7 @@
             </span>
         </div>
 
-    <div  class="menu-tab col-6 col-sm-12 {% if tab == 'sequences' %} active selected {%endif%}"
+        <div  class="menu-tab col-6 col-sm-12 {% if tab == 'sequences' %} active selected {%endif%}"
               style="cursor: pointer;"  {% if tab != 'sequences' %}
               onclick="window.location='{% url 'entry_sequences' entry.omaid %}'" {%endif%}
               >
