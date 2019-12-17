@@ -49,46 +49,6 @@
 </div>
 
 
-<script>
-
-
-    $(document).ready(function () {
-        $("#toggleSidenav").click(function () {
-            $('#sideNavMobile').toggle();
-            $('#oma-details-sideNav-mobile').toggleClass('sideNavMobile-opened');
-        });
-    });
-
-
-
-    var resizeTimer;
-
-    $(window).on('resize', function (e) {
-
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function () {
-
-            if ( $(window).width() > 1024) {
-
-                $('#sideNavMobile').toggle(true);
-                $('#oma-details-sideNav-mobile').removeClass('sideNavMobile-opened');
-                $('#oma-details-sideNav-mobile').addClass('sideNavMobile-opened');
-
-            }
-
-            else {$('#sideNavMobile').toggle(false);
-            $('#oma-details-sideNav-mobile').removeClass('sideNavMobile-opened');
-                }
-
-        }, 50);
-
-    });
-
-
-
-
-</script>
-
 
 {% endblock data_content %}
 

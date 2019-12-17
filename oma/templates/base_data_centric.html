@@ -2,37 +2,6 @@
 
 {% block content %}
 
-<script>
-
-$(window).on('resize', function() {
-    if($(window).width() < 768) {
-        $('#accordion').addClass('collapse');
-        //$('#sidebar-container').addClass('col-12');
-        $('#content-column').addClass('col-12');
-       // $('#sidebar-container').removeClass('col-3');
-        $('#content-column').removeClass('col-9');
-        $('#sidebar-container').removeClass('full-height');
-        /*$('#collapseOne').collapse('hide');*/
-        console.log("< 768");
-    } else {
-        $('#accordion').removeClass('collapse');
-        //$('#sidebar-container').addClass('col-3');
-        $('#content-column').addClass('col-9');
-        $('#sidebar-container').addClass('full-height');
-        //$('#sidebar-container').removeClass('col-12');
-        $('#content-column').removeClass('col-12');
-        /*$('#collapseOne').collapse('show');*/
-        console.log("> 768");
-    }
-})
-
-
-$(window).on('load', function () {
-    $(window).resize();
-});
-
-</script>
-
 <div class="oma-details-header {% block header_color_class %} gene-orthology {% endblock %}">
 
     {% block header_body %} {% endblock%}
@@ -45,6 +14,50 @@ $(window).on('load', function () {
     {% block data_content %} {% endblock data_content%}
 
 </div>
+
+
+<script>
+
+
+
+
+    $(document).ready(function () {
+        $("#toggleSidenav").click(function () {
+            $('#sideNavMobile').toggle();
+            $('#oma-details-sideNav-mobile').toggleClass('sideNavMobile-opened');
+        });
+    });
+
+
+
+    var resizeTimer;
+
+    $(window).on('resize', function (e) {
+
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+
+            if ( $(window).width() > 1024) {
+
+                $('#sideNavMobile').toggle(true);
+                $('#oma-details-sideNav-mobile').removeClass('sideNavMobile-opened');
+                $('#oma-details-sideNav-mobile').addClass('sideNavMobile-opened');
+
+            }
+
+            else {
+                $('#sideNavMobile').toggle(false);
+                $('#oma-details-sideNav-mobile').removeClass('sideNavMobile-opened');
+                }
+
+        }, 50);
+
+    });
+
+
+
+
+</script>
 
 
 
