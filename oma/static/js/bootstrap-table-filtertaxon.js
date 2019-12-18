@@ -276,11 +276,11 @@
 
         if (!custom){
 
-        return '<div> <input type="checkbox" class="form-check-input checkbox_taxa" id="'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+'</label> </div>';
+        return '<div> <input type="radio" class="form-check-input checkbox_taxa" id="'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+'</label> </div>';
         }
 
         else {
-           return '<div> <input type="checkbox" class="form-check-input checkbox_taxa" id="custom_'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+' <a href="javascript:void(0);" class="edit" id="edit_' + id_input + '">(edit)</a> </label> </div>';
+           return '<div> <input type="radio" class="form-check-input checkbox_taxa" id="custom_'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+' <a href="javascript:void(0);" class="edit" id="edit_' + id_input + '">(edit)</a> </label> </div>';
         }
     };
 
@@ -404,7 +404,6 @@
             }
 
 
-
             html.push('<div id="div_add" class="text-center" ><button type="button" id="li_add" class="btn btn-outline-secondary  ">Add custom filter</button> </div>');
 
             container_filter_taxon.prepend(html.join(''));
@@ -442,7 +441,7 @@
 
                 // add the new item after last customfilter
                 var new_item = document.createElement('div');
-                new_item.innerHTML = ' <input type="checkbox" class="form-check-input checkbox_taxa" id="custom_' + empty_filter.Uid + '" <label class="form-check-label" for="custom_' + empty_filter.Uid + '">' + empty_filter.name + ' <a href="javascript:void(0);" class="edit" id="edit_' + empty_filter.Uid + '"> (edit)</a></label>';
+                new_item.innerHTML = ' <input type="radio" class="form-check-input checkbox_taxa" id="custom_' + empty_filter.Uid + '" <label class="form-check-label" for="custom_' + empty_filter.Uid + '">' + empty_filter.name + ' <a href="javascript:void(0);" class="edit" id="edit_' + empty_filter.Uid + '"> (edit)</a></label>';
 
                 $(new_item).insertBefore($("#div_add")[0]);
 

@@ -367,17 +367,75 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 class PairsBase(ContextMixin, EntryCentricMixin):
     """Base class to collect data for pairwise orthologs."""
     def get_context_data(self, entry_id, **kwargs):
+
         context = super(PairsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
+
+        # Get orthologs
+        # /!\ in order to not refactor and introduce mistake, we keep the var vps and nr_vps. Nevertheless, this object will contain vps, HOG pairs and GO pair.
+        orthologs_dict = {}
+        entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
+
+        ## Get VPS
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
         close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
-        vps = []
         for rel in itertools.chain(vps_raw, close_paralogs):
             pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
             pw_relation.reltype = rel['RelType']
             if len(rel['RelType']) == 3:
                 pw_relation.reltype += " ortholog"
-            vps.append(pw_relation)
+
+            if not hasattr(pw_relation, 'type'):
+                pw_relation.type = []
+            pw_relation.type.append('PO')
+
+            orthologs_dict[rel['EntryNr2']] = pw_relation
+
+        ## Get HOG orthologs
+        hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
+        for en in hog_pair:
+
+            if en[0] in orthologs_dict.keys():
+                pw_relation = orthologs_dict[en[0]]
+            else:
+                pw_relation = models.ProteinEntry.from_entry_nr(utils.db, en[0])
+
+            if not hasattr(pw_relation, 'reltype'):
+                pw_relation.reltype = None
+
+            if not hasattr(pw_relation, 'type'):
+                pw_relation.type = []
+            pw_relation.type.append('HOG')
+
+
+            orthologs_dict[en[0]] = pw_relation
+
+        ## Get OG orthologs
+
+        if entry.oma_group != 0:
+
+            OG_pair = list(utils.db.oma_group_members(entry.oma_group))
+            OG_pair.remove(entry_db)
+
+            for ent in OG_pair:
+
+                if ent[0] in orthologs_dict.keys():
+                    pw_relation = orthologs_dict[ent[0]]
+                else:
+                    pw_relation = models.ProteinEntry.from_entry_nr(utils.db, ent[0])
+
+                if not hasattr(pw_relation, 'reltype'):
+                    pw_relation.reltype = None
+
+                if not hasattr(pw_relation, 'type'):
+                    pw_relation.type = []
+                pw_relation.type.append('OG')
+
+                orthologs_dict[ent[0]] = pw_relation
+
+        vps = orthologs_dict.values()
+
+
 
         entry.reltype = 'self'
         if entry._entry['AltSpliceVariant'] in (0, entry.entry_nr):
@@ -391,10 +449,12 @@ class PairsBase(ContextMixin, EntryCentricMixin):
 
         context.update(
             {'entry': entry, 'nr_pps': 666,  # TODO: compute real number of paralogs
-             'vps': vps, 'nr_vps': len(vps_raw), 'tab': 'orthologs',
+             'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs',
              'longest_seq': longest_seq,
-             'table_data_url': reverse('pairs_json', args=(entry.omaid,))
+             'table_data_url': reverse('pairs_support_json', args=(entry.omaid,))
              })
+
+
         return context
 
 
@@ -406,6 +466,20 @@ class PairsJson(PairsBase, JsonModelMixin, View):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         data = list(self.to_json_dict(context['vps']))
+        return JsonResponse(data, safe=False)
+
+# With information if the pair is supported by PO, HOGS and/or OMA groups
+class PairsJson_Support(PairsBase, JsonModelMixin, View):
+
+
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'reltype': None, 'type':'type'}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['vps']))
+
         return JsonResponse(data, safe=False)
 
 
