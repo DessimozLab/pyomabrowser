@@ -20,5 +20,5 @@ pyyaml
 
 
 -e git+https://github.com/alpae/django-google-analytics.git@master#egg=django-google-analytics-app
--e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@0.7.2#egg=pyoma
+-e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@develop#egg=pyoma
 -e git+ssh://gitolite@lab.dessimoz.org:2222/zoo@master#egg=zoo
