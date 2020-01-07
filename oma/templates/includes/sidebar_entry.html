@@ -34,30 +34,32 @@
 
                 <div class="dropdown-divider pl-0"></div>
 
-                <h5>Display only:</h5>
+                <h5>Filter by inference types:</h5>
 
                 <div class="form-check pl-4">
+
+                    <div >
+                        <input type="checkbox" class="form-check-input" id="pairwiseFilter">
+                        <label class="form-check-label" for="pairwiseFilter" >
+                            OMA pairs <br> <span class="small">(inferred using OMA algorithm)</span>
+                        </label>
+                    </div>
 
                     <div>
                         <input type="checkbox" class="form-check-input" id="hogFilter">
                         <label class="form-check-label" for="hogFilter">
-                            HOG
+                            HOG <br> <span class="small">(inferred from clustering)</span>
                         </label>
                     </div>
 
                     <div>
                         <input type="checkbox" class="form-check-input" id="omagroupFilter">
                         <label class="form-check-label" for="omagroupFilter">
-                            OMA Group
+                            OMA Group <br>  <span class="small">(inferred from clustering)</span>
                         </label>
                     </div>
 
-                    <div>
-                        <input type="checkbox" class="form-check-input" id="pairwiseFilter">
-                        <label class="form-check-label" for="pairwiseFilter">
-                            Pairwise
-                        </label>
-                    </div>
+
 
                 </div>
 

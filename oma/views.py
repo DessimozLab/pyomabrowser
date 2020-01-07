@@ -436,7 +436,6 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         vps = orthologs_dict.values()
 
 
-
         entry.reltype = 'self'
         if entry._entry['AltSpliceVariant'] in (0, entry.entry_nr):
             entry.alt_splicing_variant = entry.omaid
@@ -1443,12 +1442,95 @@ class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
 
 #<editor-fold desc="Group Centric">
 
+class OgCentricMixin(object):
+    def get_og(self, group_id):
+        og = utils.db.oma_group_metadata(int(group_id))
+        return models.OmaGroup(utils.db, og)
+
+
+class GroupBase(ContextMixin, OgCentricMixin):
+    def get_context_data(self, group_id, **kwargs):
+        context = super(GroupBase, self).get_context_data(**kwargs)
+
+        og = self.get_og(group_id)
+        context.update({'omagroup': og})
+        return context
+
+
+class OMAGroup_members(TemplateView, GroupBase):
+    template_name = "omagroup_members.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup_members, self).get_context_data(group_id, **kwargs)
+
+        context.update(
+            {'tab': 'members'})
+
+        print(context['omagroup'])
+        return context
+
+
+class OMAGroup_close(TemplateView, GroupBase):
+    template_name = "omagroup_close.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup_close, self).get_context_data(group_id, **kwargs)
+
+        context.update(
+            {'tab': 'members'})
+
+        print(context['omagroup'])
+        return context
+
+
+class OMAGroup_ontology(TemplateView, GroupBase):
+    template_name = "omagroup_ontology.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup_ontology, self).get_context_data(group_id, **kwargs)
+
+        context.update(
+            {'tab': 'members'})
+
+        print(context['omagroup'])
+        return context
+
+
+class OMAGroup_align(TemplateView, GroupBase):
+    template_name = "omagroup_align.html"
+
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup_align, self).get_context_data(group_id, **kwargs)
+
+        context.update(
+            {'tab': 'members'})
+
+        print(context['omagroup'])
+        return context
+
+class OMAGroup_info(TemplateView, GroupBase):
+    template_name = "omagroup_info.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup_info, self).get_context_data(group_id, **kwargs)
+
+        context.update(
+            {'tab': 'members'})
+
+        print(context['omagroup'])
+        return context
+
+
+## TODO: either remove or properly implement the following classes for OMAGroup sub-stuff
+
 class OMAGroupBase(ContextMixin):
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroupBase, self).get_context_data(**kwargs)
         try:
             context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
-            context.update(utils.db.oma_group_metadata(context['members'][0].oma_group))
+            #context.update(utils.db.oma_group_metadata(context['members'][0].oma_group))
+
         except db.InvalidId as e:
             raise Http404(e)
         return context
@@ -1489,18 +1571,6 @@ class OMAGroup(OMAGroupBase, TemplateView):
                         })
         return context
 
-## TODO: either remove or properly implement the following classes for OMAGroup sub-stuff
-class OMAGroup_members(OMAGroup):
-    template_name = "omagroup_members.html"
-
-class OMAGroup_close(OMAGroup):
-    template_name = "omagroup_close.html"
-
-class OMAGroup_ontology(OMAGroup):
-    template_name = "omagroup_ontology.html"
-
-class OMAGroup_info(OMAGroup):
-    template_name = "omagroup_info.html"
 
 class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
     template_name = "omagroup_entry.html"
