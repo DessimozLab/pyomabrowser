@@ -341,6 +341,11 @@ body .oma-details-container .oma-details-nav-left ul.gene-orthology  li.active {
 	 border-top:    2px solid  #f8f9fa;
 	 border-bottom: 2px solid #f8f9fa;
 }
+body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
+	 background: #369;
+	 border-top:    2px solid  #f8f9fa;
+	 border-bottom: 2px solid #f8f9fa;
+}
  body .oma-details-container .oma-details-nav-left ul li.active > a {
 	 font-weight: 700;
 	 color: #fff;
@@ -894,10 +899,10 @@ body .oma-details-container .oma-details-nav-left ul.gene-orthology  li.active {
     background-color: #369;
 }
 .oma-group, .oma-group .selected {
-    background-color: #FFF49D;
+    background-color: #64c7cd !important;
 }
 .genome, .genome .selected {
-    background-color: #ee3a39;
+    background-color: #ee3a39 !important;
 }
 
 .content-section-title-entry{

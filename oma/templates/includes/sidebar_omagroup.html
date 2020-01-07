@@ -1,9 +1,84 @@
-<!-- Sidebar / menu -->
+{% load staticfiles %}
 
-<div id="sidebar-container" class="col-sm-12 col-md-3 oma-group full-height" > <!-- #sidebar-container -->
+<div id="oma-details-sideNav-mobile">
+    <a href="#" id="toggleSidenav">
+        <span>Select a Tab</span><img src="{% static "image/icon-arrow.png" %}" alt="Arrow" />
+    </a>
+</div>
+
+
+<div class="oma-details-nav-left" id="sideNavMobile">
+
+    <ul class="oma-group">
+        <li class="{% if tab == 'members' %} active selected {%endif%}" {% if tab != 'members' %}
+             onclick="window.location='{% url 'omagroup_members' omagroup.group_nbr %}'" {%endif%}>
+            <a href="{% url 'omagroup_members' omagroup.group_nbr %}" {% if tab == 'members' %}data-toggle="collapse" data-target="#filterOrthologs"{%endif%}>
+
+                <span>Members
+
+                {% if nr_member %}
+
+                <span class="badge badge-info">{{nr_member}}</span>
+                {% endif %}
+                    </span>
+                {% if tab == 'members' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
+
+
+            </a>
+
+            <div id="filterOrthologs" class="collapse">
+
+                <div id="filter-taxon-container"></div>
+                <div>
+
+            </div>
+
+        </li>
+
+         <li class="{% if tab == 'align' %} active selected {%endif%}">
+            <a href="{% url 'omagroup_align' omagroup.group_nbr %}">
+                <span>Alignment</span>
+
+            </a>
+
+        </li>
+
+         <li class="{% if tab == 'close' %} active selected {%endif%}">
+            <a href="{% url 'omagroup_close' omagroup.group_nbr %}">
+                <span>Close groups</span>
+
+            </a>
+
+        </li>
+
+         <li class="{% if tab == 'goa' %} active selected {%endif%}">
+            <a href="{% url 'omagroup_ontology' omagroup.group_nbr %}">
+                <span>Ontology</span>
+
+            </a>
+
+        </li>
+
+         <li class="{% if tab == 'info' %} active selected {%endif%}">
+            <a href="{% url 'omagroup_info' omagroup.group_nbr %}">
+                <span>Information</span>
+
+            </a>
+
+        </li>
+
+
+    </ul>
+
+</div>
 
 
 
-</div> <!-- #sidebar-container -->
+
+
+
+
 
 

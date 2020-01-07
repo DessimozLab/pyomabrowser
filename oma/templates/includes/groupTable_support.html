@@ -15,16 +15,21 @@
 
 
              <tr>
+        <th colspan="3" data-halign="center" >Orthology supported in</th>
 
-                 <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                 <th rowspan="2" data-field="kingdom" data-sortable="true" data-filter-control="select"
                     data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.</th>
-                <th  data-field="taxon" data-sortable="true" data-filter-control="input"
+                <th rowspan="2" data-field="taxon" data-sortable="true" data-filter-control="input"
                     data-formatter="tablehooks.format_sciname">Taxon</th>
-                <th  data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
-                <th  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
-                <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
+                <th rowspan="2" data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                <th rowspan="2" data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                <th rowspan="2" data-sortable="false" class="domain_vis">Domain Architectures</th>
     </tr>
-
+    <tr>
+        <th data-field="type" data-switchable="false" data-align="center" data-halign="center" data-sortable="true"  data-formatter="stateFormatterPO">Pair</th>
+                <th data-field="type"  data-switchable="false" data-align="center" data-halign="center" data-sortable="true"  data-formatter="stateFormatterH">HOG</th>
+                <th data-field="type"  data-switchable="false" data-align="center" data-halign="center" data-sortable="true"  data-formatter="stateFormatterOG">OMA group </th>
+    </tr>
 
 
 
@@ -36,6 +41,49 @@
 
         </table>
 
+
+<script>
+
+
+    // Add header
+
+  function stateFormatterPO(value, row, index) {
+
+
+
+
+    if (row['type'].indexOf('PO') >= 0) {
+      return '<i class="fas fa-check " style="color:green"></i>'
+    }
+    else {
+      return ' '
+    }
+  }
+
+  function stateFormatterH(value, row, index) {
+
+
+    if (row['type'].indexOf('HOG') >= 0) {
+      return '<i class="fas fa-check " style="color:green"></i>';
+    }
+    else {
+      return ' '
+    }
+  }
+
+  function stateFormatterOG(value, row, index) {
+
+
+    if (row['type'].indexOf('OG') >= 0) {
+      return '<i class="fas fa-check " style="color:green"></i> ';
+    }
+    else {
+      return ' '
+    }
+  }
+
+
+</script>
 
 
 

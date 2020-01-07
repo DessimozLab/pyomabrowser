@@ -1450,11 +1450,20 @@ class OgCentricMixin(object):
 
 class GroupBase(ContextMixin, OgCentricMixin):
     def get_context_data(self, group_id, **kwargs):
-        context = super(GroupBase, self).get_context_data(**kwargs)
 
-        og = self.get_og(group_id)
-        context.update({'omagroup': og})
+        context = super(GroupBase, self).get_context_data(**kwargs)
+        try:
+            context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
+            og = self.get_og(group_id)
+            context.update({'omagroup': og,
+                            'nr_member': len(context['members'])})
+
+        except db.InvalidId as e:
+            raise Http404(e)
         return context
+
+
+
 
 
 class OMAGroup_members(TemplateView, GroupBase):
@@ -1464,9 +1473,12 @@ class OMAGroup_members(TemplateView, GroupBase):
         context = super(OMAGroup_members, self).get_context_data(group_id, **kwargs)
 
         context.update(
-            {'tab': 'members'})
+            {'tab': 'members',
+             'table_data_url': reverse('omagroup-json', args=(group_id,)),
+            'longest_seq': max([len(z.sequence) for z in context['members']])
+        })
 
-        print(context['omagroup'])
+
         return context
 
 
@@ -1477,9 +1489,8 @@ class OMAGroup_close(TemplateView, GroupBase):
         context = super(OMAGroup_close, self).get_context_data(group_id, **kwargs)
 
         context.update(
-            {'tab': 'members'})
+            {'tab': 'close'})
 
-        print(context['omagroup'])
         return context
 
 
@@ -1490,9 +1501,8 @@ class OMAGroup_ontology(TemplateView, GroupBase):
         context = super(OMAGroup_ontology, self).get_context_data(group_id, **kwargs)
 
         context.update(
-            {'tab': 'members'})
+            {'tab': 'goa'})
 
-        print(context['omagroup'])
         return context
 
 
@@ -1504,10 +1514,10 @@ class OMAGroup_align(TemplateView, GroupBase):
         context = super(OMAGroup_align, self).get_context_data(group_id, **kwargs)
 
         context.update(
-            {'tab': 'members'})
+            {'tab': 'align'})
 
-        print(context['omagroup'])
         return context
+
 
 class OMAGroup_info(TemplateView, GroupBase):
     template_name = "omagroup_info.html"
@@ -1516,35 +1526,21 @@ class OMAGroup_info(TemplateView, GroupBase):
         context = super(OMAGroup_info, self).get_context_data(group_id, **kwargs)
 
         context.update(
-            {'tab': 'members'})
+            {'tab': 'info'})
 
-        print(context['omagroup'])
         return context
 
 
-## TODO: either remove or properly implement the following classes for OMAGroup sub-stuff
-
-class OMAGroupBase(ContextMixin):
-    def get_context_data(self, group_id, **kwargs):
-        context = super(OMAGroupBase, self).get_context_data(**kwargs)
-        try:
-            context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
-            #context.update(utils.db.oma_group_metadata(context['members'][0].oma_group))
-
-        except db.InvalidId as e:
-            raise Http404(e)
-        return context
-
-
-class OMAGroupFasta(FastaView, OMAGroupBase):
+class OMAGroupFasta(FastaView, GroupBase):
     def get_fastaheader(self, memb):
-        return ' | '.join([memb.omaid, memb.canonicalid, "OMAGroup:{:05d}".format(memb.oma_group), '[{}]'.format(memb.genome.sciname)])
+        return ' | '.join([memb.omaid, memb.canonicalid, "OMAGroup:{:05d}".format(memb.oma_group),
+                           '[{}]'.format(memb.genome.sciname)])
 
     def render_to_response(self, context):
         return self.render_to_fasta_response(context['members'])
 
 
-class OMAGroupJson(OMAGroupBase, JsonModelMixin, View):
+class OMAGroupJson(GroupBase, JsonModelMixin, View):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'description': None}
@@ -1555,7 +1551,7 @@ class OMAGroupJson(OMAGroupBase, JsonModelMixin, View):
         return JsonResponse(data, safe=False)
 
 
-class OMAGroup(OMAGroupBase, TemplateView):
+class OMAGroup(GroupBase, TemplateView):
     template_name = "omagroup_members.html"
 
     def get_context_data(self, group_id, **kwargs):
@@ -1571,6 +1567,19 @@ class OMAGroup(OMAGroupBase, TemplateView):
                         })
         return context
 
+
+## TODO: either remove or properly implement the following classes for OMAGroup sub-stuff
+
+class OMAGroupBase(ContextMixin):
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroupBase, self).get_context_data(**kwargs)
+        try:
+            context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
+            #context.update(utils.db.oma_group_metadata(context['members'][0].oma_group))
+
+        except db.InvalidId as e:
+            raise Http404(e)
+        return context
 
 class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
     template_name = "omagroup_entry.html"
