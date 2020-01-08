@@ -13,7 +13,7 @@
 
 
          <li class="{% if tab == 'iham' %} active selected {%endif%}">
-            <a href="{% url 'hog_viewer' hog_id %}" >
+                <a href="{% if level != None %}  {% url 'hog_viewer' hog_id  level%}  {%else%}  {% url 'hog_viewer' hog_id  %} {%endif%} " >
                 <span>Graphical viewer</span>
 
             </a>
@@ -21,7 +21,7 @@
         </li>
 
         <li class="{% if tab == 'table' %} active selected {%endif%}">
-            <a href="{% url 'hog_table' hog_id %}" >
+                <a href="{% if level != None %}  {% url 'hog_table' hog_id  level%}  {%else%}  {% url 'hog_table' hog_id  %} {%endif%} " >
                 <span>Table view</span>
 
             </a>
@@ -29,7 +29,7 @@
         </li>
 
         <li class="{% if tab == 'similar' %} active selected {%endif%}">
-            <a href="{% url 'hog_similar' hog_id %}" >
+                <a href="{% if level != None %}  {% url 'hog_similar' hog_id  level%}  {%else%}  {% url 'hog_similar' hog_id  %} {%endif%} " >
                 <span>Similar HOGs</span>
 
             </a>
@@ -38,7 +38,7 @@
 
 
         <li class="{% if tab == 'info' %} active selected {%endif%}">
-            <a href="{% url 'hog_info' hog_id %}" >
+            <a href="{% if level != None %}  {% url 'hog_info' hog_id  level%}  {%else%}  {% url 'hog_info' hog_id  %} {%endif%} " >
                 <span>Information</span>
 
             </a>

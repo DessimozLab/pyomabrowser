@@ -726,41 +726,48 @@ class GenomeCentricSynteny(GenomeBase, TemplateView):
 
 
 class HOG_Base(ContextMixin):
-    def get_context_data(self, hog_id, **kwargs):
+    def get_context_data(self, hog_id, level=None, **kwargs):
         context = super(HOG_Base, self).get_context_data(**kwargs)
 
         try:
+
             # dirty check to verify hog id is correct
             members = [x for x in utils.db.member_of_hog_id(hog_id)]
-            if not members:
-                raise ValueError
-            context['members'] = members
+            if not members :
+                raise ValueError('requested hog id is unknown')
 
             # check if sub hog or not
-            fam = utils.db.parse_hog_id(hog_id)
-            members_top = [x for x in utils.db.member_of_fam(fam)]
-            if members_top == members :
-                is_subhog = False
-            else:
+            if len(hog_id.split('.')) > 1:
                 is_subhog = True
+            else:
+                is_subhog = False
             context['is_subhog'] = is_subhog
 
             # add hog ids
+            fam = utils.db.parse_hog_id(hog_id)
             context['hog_id'] = hog_id
-            context['root_id'] = hog_id.split('.')[0] #todo not good
+            context['root_id'] = hog_id.split('.')[0]  # todo not good
             context['hog_fam'] = fam
 
-            # get the hog level
-
             if is_subhog:
-                context['root'] = "TODO"
+                if level:
+                    # dirty check to verify level is correct
+                    members_sub = [x for x in utils.db.member_of_hog_id(hog_id, level=level)]
+                    if not members_sub:
+                        raise ValueError('requested level is unknown')
+                    context['members'] = members_sub
+                    context['level'] = level
+                else:
+                    context['members'] = members
+                    context['level'] = None
+
             else:
                 levs_of_fam = [z.decode() for z in utils.db.hog_levels_of_fam(fam)]
-                context['root'] = levs_of_fam[0]
-
+                context['level'] = levs_of_fam[0]
+                context['members'] = members
 
         except ValueError as e:
-            raise Http404('requested hog id is unknown')
+            raise Http404(e)
         return context
 
 
@@ -784,10 +791,26 @@ class HOGSimilar(HOG_Base, TemplateView):
 
 class HOGviewer(HOG_Base, TemplateView):
     template_name = "hog_ihamviewer.html"
+    show_internal_labels = True
 
-    def get_context_data(self, hog_id, **kwargs):
-        context = super(HOGviewer, self).get_context_data(hog_id, **kwargs)
-        context.update({'tab': 'iham'})
+
+    def get_context_data(self, hog_id, idtype='OMA', **kwargs):
+        context = super(HOGviewer, self).get_context_data(hog_id,**kwargs)
+
+        entry = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(context['members'][0][0]))
+
+        context.update({'tab': 'iham',
+                        'entry': entry,
+                        })
+        try:
+            fam_nr = entry.hog_family_nr
+            context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
+                            'show_internal_labels': self.show_internal_labels,
+                            })
+            if fam_nr == 0:
+                context['isSingleton'] = True
+        except db.Singleton:
+            context['isSingleton'] = True
         return context
 
 
@@ -798,28 +821,6 @@ class HOGtable(HOG_Base, TemplateView):
         context = super(HOGtable, self).get_context_data(hog_id, **kwargs)
         context.update({'tab': 'table'})
         return context
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #  OLD STUFF
