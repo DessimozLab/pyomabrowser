@@ -1,24 +1,78 @@
 {% extends  "base_data_centric.html" %}
+{% load staticfiles %}
+
+{% block title %}xxxx{% endblock %}
 
 {% block header_color_class %} oma-group {% endblock %}
 
 {% block header_body %}
 
-                    <h5 class="card-title">{{ fam.id }}</h5>
-                    <div class="d-flex">
-                        <p class="card-subtitle text-muted mr-auto">Root: Mammals</p>
-                    </div>
+
+<div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
+ {% if is_subhog %}
+
+
+
+
+        <div class="oma-details-title">
+
+        <h2> Sub-HOG {{ hog_id }} with {{ members|length }} members   </h2>
+
+        <p>Level of Emergence: {{root}} </p>
+
+    </div>
+
+    <div class="ml-auto oma-details-title-buttons">
+        <button class="btn btn-default "><a href="{% url 'hog_info' root_id %}">Go to root HOG {{root_id}}</a>
+        </button>
+    </div>
+
+
+
+
+
+        {% else %}
+
+     <div class="oma-details-title">
+
+        <h2>Root-HOG {{ hog_id }} with {{ members|length }} members   </h2>
+
+        <p>Root level: {{root}} </p>
+
+     </div>
+
+        {% endif %}
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
 
 {% endblock %}
 
 {% block data_content %}
 
-        {% include "includes/hogs_menu.html" with tab=tab %}
+{% include "includes/sidebar_hog.html" with tab=tab %}
 
-        <div id="content-column" class="col-xs-12 col-9" style="background-color: #edf">
-           {% block contentTab %} {% endblock contentTab %}
-        </div>
+<div class="oma-details-content">
+
+    {% block contentTab %} {% endblock contentTab %}
+
+</div>
+
+
 
 {% endblock data_content %}
+
+
+
+
+
 
 

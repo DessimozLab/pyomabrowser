@@ -146,6 +146,7 @@ class EntryCentricMixin(object):
         except (db.InvalidId, db.AmbiguousID):
             raise Http404('requested id is unknown')
         entry = utils.db.entry_by_entry_nr(entry_nr)
+
         return models.ProteinEntry(utils.db, entry)
 
 
@@ -722,6 +723,108 @@ class GenomeCentricSynteny(GenomeBase, TemplateView):
 #</editor-fold >
 
 #<editor-fold desc="HOGs Centric">
+
+
+class HOG_Base(ContextMixin):
+    def get_context_data(self, hog_id, **kwargs):
+        context = super(HOG_Base, self).get_context_data(**kwargs)
+
+        try:
+            # dirty check to verify hog id is correct
+            members = [x for x in utils.db.member_of_hog_id(hog_id)]
+            if not members:
+                raise ValueError
+            context['members'] = members
+
+            # check if sub hog or not
+            fam = utils.db.parse_hog_id(hog_id)
+            members_top = [x for x in utils.db.member_of_fam(fam)]
+            if members_top == members :
+                is_subhog = False
+            else:
+                is_subhog = True
+            context['is_subhog'] = is_subhog
+
+            # add hog ids
+            context['hog_id'] = hog_id
+            context['root_id'] = hog_id.split('.')[0] #todo not good
+            context['hog_fam'] = fam
+
+            # get the hog level
+
+            if is_subhog:
+                context['root'] = "TODO"
+            else:
+                levs_of_fam = [z.decode() for z in utils.db.hog_levels_of_fam(fam)]
+                context['root'] = levs_of_fam[0]
+
+
+        except ValueError as e:
+            raise Http404('requested hog id is unknown')
+        return context
+
+
+class HOGInfo(HOG_Base, TemplateView):
+    template_name = "hog_info.html"
+
+    def get_context_data(self, hog_id, **kwargs):
+        context = super(HOGInfo, self).get_context_data(hog_id, **kwargs)
+        context.update({'tab': 'info'})
+        return context
+
+
+class HOGSimilar(HOG_Base, TemplateView):
+    template_name = "hog_similar.html"
+
+    def get_context_data(self, hog_id, **kwargs):
+        context = super(HOGSimilar, self).get_context_data(hog_id, **kwargs)
+        context.update({'tab': 'similar'})
+        return context
+
+
+class HOGviewer(HOG_Base, TemplateView):
+    template_name = "hog_ihamviewer.html"
+
+    def get_context_data(self, hog_id, **kwargs):
+        context = super(HOGviewer, self).get_context_data(hog_id, **kwargs)
+        context.update({'tab': 'iham'})
+        return context
+
+
+class HOGtable(HOG_Base, TemplateView):
+    template_name = "hog_table.html"
+
+    def get_context_data(self, hog_id, **kwargs):
+        context = super(HOGtable, self).get_context_data(hog_id, **kwargs)
+        context.update({'tab': 'table'})
+        return context
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#  OLD STUFF
+
+
 
 class HOGsBase(ContextMixin, EntryCentricMixin):
 
@@ -1442,9 +1545,13 @@ class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
 
 #<editor-fold desc="Group Centric">
 
+
 class OgCentricMixin(object):
     def get_og(self, group_id):
-        og = utils.db.oma_group_metadata(int(group_id))
+        try:
+            og = utils.db.oma_group_metadata(int(group_id))
+        except db.InvalidId as e:
+            raise Http404(e)
         return models.OmaGroup(utils.db, og)
 
 
@@ -1453,17 +1560,14 @@ class GroupBase(ContextMixin, OgCentricMixin):
 
         context = super(GroupBase, self).get_context_data(**kwargs)
         try:
-            context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
             og = self.get_og(group_id)
+            context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
             context.update({'omagroup': og,
                             'nr_member': len(context['members'])})
 
         except db.InvalidId as e:
             raise Http404(e)
         return context
-
-
-
 
 
 class OMAGroup_members(TemplateView, GroupBase):

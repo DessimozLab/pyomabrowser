@@ -25,9 +25,15 @@
             aria-haspopup="true" aria-expanded="false"> Groups
     </button>
 
+
     <div class="dropdown-menu">
-        <a class="dropdown-item" href="{% url 'hog_iham' entry.hog_family_nr %}">HOG</a>
-        <a class="dropdown-item" href="{% url 'omagroup_members' entry.oma_group %}">Oma Group</a>
+
+
+        <a class="dropdown-item" {% if entry.oma_hog %} href="{% url 'hog_info' entry.oma_hog %}" > HOG {% else %} disabled > No related HOG {% endif %} </a>
+        <a class="dropdown-item" {% if entry.oma_group %} href="{% url 'omagroup_members' entry.oma_group %}" > Oma Group {% else %} disabled > No related Oma Group {% endif %} </a>
+
+
+
     </div>
 
     <button class="btn btn-default "><a href="{% url 'genome_info' entry.genome.uniprot_species_code %}">Genome</a>

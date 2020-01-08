@@ -1,0 +1,60 @@
+{% load staticfiles %}
+
+<div id="oma-details-sideNav-mobile">
+    <a href="#" id="toggleSidenav">
+        <span>Select a Tab</span><img src="{% static "image/icon-arrow.png" %}" alt="Arrow" />
+    </a>
+</div>
+
+
+<div class="oma-details-nav-left" id="sideNavMobile">
+
+    <ul class="oma-group">
+
+
+         <li class="{% if tab == 'iham' %} active selected {%endif%}">
+            <a href="{% url 'hog_viewer' hog_id %}" >
+                <span>Graphical viewer</span>
+
+            </a>
+
+        </li>
+
+        <li class="{% if tab == 'table' %} active selected {%endif%}">
+            <a href="{% url 'hog_table' hog_id %}" >
+                <span>Table view</span>
+
+            </a>
+
+        </li>
+
+        <li class="{% if tab == 'similar' %} active selected {%endif%}">
+            <a href="{% url 'hog_similar' hog_id %}" >
+                <span>Similar HOGs</span>
+
+            </a>
+
+        </li>
+
+
+        <li class="{% if tab == 'info' %} active selected {%endif%}">
+            <a href="{% url 'hog_info' hog_id %}" >
+                <span>Information</span>
+
+            </a>
+
+        </li>
+
+
+    </ul>
+
+</div>
+
+
+
+
+
+
+
+
+

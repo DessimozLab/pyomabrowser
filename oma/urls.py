@@ -26,6 +26,10 @@ urlpatterns = [
 
     # HOG
     url(r'^hog/(?P<group_id>[A-Z0-9]+)/iham/$', views.HOGiHam.as_view(), name='hog_iham'),
+    url(r'^hog/(?P<hog_id>[\w.-:]+)/information/$', views.HOGInfo.as_view(), name='hog_info'),
+    url(r'^hog/(?P<hog_id>[\w.-:]+)/similar/$', views.HOGSimilar.as_view(), name='hog_similar'),
+    url(r'^hog/(?P<hog_id>[\w.-:]+)/ihamviewer/$', views.HOGviewer.as_view(), name='hog_viewer'),
+    url(r'^hog/(?P<hog_id>[\w.-:]+)/table/$', views.HOGtable.as_view(), name='hog_table'),
 
     # OMA Group
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/members/$', views.OMAGroup_members.as_view(), name='omagroup_members'),
