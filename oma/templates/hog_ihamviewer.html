@@ -44,7 +44,8 @@
 
                             <button id='btn_display_settings' class="btn btn-default" style="float: right; margin: 0 0 10px 10px;" aria-label="Left Align"  data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings" type="button"  >
                                 OPTIONS
-                                <span id="icon_settings" class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                                <i id="icon_settings" class="fas fa-caret-down"></i>
+
                             </button>
 
                             <h3 >Hierarchical group {{ fam.id }} <span id="open_txt">open at level of </span><span id="current_level_text" style="font-weight:bold;"></span></h3>
@@ -104,8 +105,8 @@
                         (function(){
                             document.getElementById("btn_display_settings").addEventListener("click", function(){
                                 var ico = document.getElementById("icon_settings");
-                                if (ico.getAttribute("class") === "glyphicon glyphicon-triangle-top") {ico.setAttribute("class","glyphicon glyphicon-triangle-bottom")}
-                                else ico.setAttribute("class","glyphicon glyphicon-triangle-top");
+                                if (ico.getAttribute("class") === "fas fa-caret-up") {ico.setAttribute("class","fas fa-caret-down")}
+                                else ico.setAttribute("class","fas fa-caret-up");
                             });
                         }) ();
                     </script>

@@ -147,7 +147,11 @@ class EntryCentricMixin(object):
             raise Http404('requested id is unknown')
         entry = utils.db.entry_by_entry_nr(entry_nr)
 
-        return models.ProteinEntry(utils.db, entry)
+        # this need to be added to have root level hog id
+        model_entry  = models.ProteinEntry(utils.db, entry)
+        model_entry.oma_hog_root = model_entry.oma_hog.split(".")[0]
+
+        return model_entry
 
 
 # Information
@@ -798,6 +802,7 @@ class HOGviewer(HOG_Base, TemplateView):
         context = super(HOGviewer, self).get_context_data(hog_id,**kwargs)
 
         entry = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(context['members'][0][0]))
+
 
         context.update({'tab': 'iham',
                         'entry': entry,
