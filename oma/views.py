@@ -741,14 +741,25 @@ class HOG_Base(ContextMixin):
                 raise ValueError('requested hog id is unknown')
 
             # check if sub hog or not
+            fam = utils.db.parse_hog_id(hog_id)
+            levs_of_fam = [z.decode() for z in utils.db.hog_levels_of_fam(fam)]
             if len(hog_id.split('.')) > 1:
                 is_subhog = True
             else:
-                is_subhog = False
+                if level == None:
+                    is_subhog = False
+                else:
+                    if level == levs_of_fam[0]:
+                        is_subhog = False
+                    elif level in levs_of_fam:
+                        is_subhog = True
+                    else:
+                        raise ValueError('requested level is unknown')
+
+
             context['is_subhog'] = is_subhog
 
             # add hog ids
-            fam = utils.db.parse_hog_id(hog_id)
             context['hog_id'] = hog_id
             context['root_id'] = hog_id.split('.')[0]  # todo not good
             context['hog_fam'] = fam
