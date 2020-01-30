@@ -226,16 +226,7 @@
 </nav>
 
 <script type="text/javascript">
-    function update_autocomplete_enableing(form_elem_id) {
-        var form_elem = document.getElementById(form_elem_id);
-        var sel = form_elem.querySelector("select[name='type']");
-        var txt = $(form_elem.querySelector("input[name='query']"));
-        if (sel.value === "id"){
-            txt.autocomplete('enable');
-        } else {
-            txt.autocomplete('disable');
-        }
-    }
+
     function update_autocomplete_enableing(form_elem_id) {
         var form_elem = document.getElementById(form_elem_id);
         var sel = form_elem.querySelector("select[name='type']");
@@ -297,6 +288,7 @@
         }
     };
     $('#textNav').autocomplete(autocomplete_opts);
+    $('#inputBrowser').autocomplete(autocomplete_opts);
     update_autocomplete_enableing('searchNavForm');
 </script>
 

@@ -922,3 +922,40 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
     border-bottom-right-radius: 0px!important;
     border-bottom-left-radius: 0px!important;
 }
+
+
+.autocomplete-suggestions { border: 1px solid #999; background: #FFF; overflow: auto; }
+
+.autocomplete-suggestion {
+	padding: 2px 5px;
+	/*white-space: nowrap; */
+	overflow: hidden;
+	cursor:  pointer;
+	}
+
+.autocomplete-suggestion span.auto-xref{
+	display: inline-block;
+	width: 70%;
+	color: black;
+}
+
+.autocomplete-suggestion span.auto-omaid{
+	display: inline-block;
+	width: 30%;
+	font-size: 75%;
+}
+
+.autocomplete-suggestion span.auto-species{
+	display: inline-block;
+	width: 100%;
+	font-size: 75%;
+	font-style: italic;
+	color: #bbb;
+}
+
+.autocomplete-selected { background: #F0F0F0; }
+.autocomplete-suggestion strong { font-weight: bold; color: black;border-bottom: 2px solid #307C3B }
+
+/* Database label */
+.autocomplete-group { padding: 3px 20px; text-align: right; border-bottom: 1px solid #ddd}
+.autocomplete-group strong {display: block;; color: #777; }
