@@ -2,8 +2,34 @@
 
 {% block contentTab %}
 
-    INFO
+<dl class="">
 
-<a href="{% url 'entry_info' 12 %}">go to entry</a>
+    <dt class="col-sm-3">Common name:</dt><dd class="col-sm-6">{{ genome.common_name }}</dd>
+
+    <dt class="col-sm-3">UniProt identifier:</dt><dd class="col-sm-6">{{ genome.uniprot_species_code }}</dd>
+
+    <dt class="col-sm-3">NCBI Taxonomy ID:</dt><dd class="col-sm-6">{{ genome.ncbi_taxon_id }}</dd>
+
+    <dt class="col-sm-3">DB Name:</dt>
+    <dd class="col-sm-6">???</dd>
+
+    <dt class="col-sm-3">DB Release:</dt><dd class="col-sm-6">{{ genome.release }}</dd>
+
+    <dt class="col-sm-3">Web link:</dt><dd class="col-sm-6">???</dd>
+
+     <dt class="col-sm-3">Taxonomy:</dt><dd class="col-sm-6">{{ genome.lineage }}</dd>
+
+    <dt class="col-sm-3">Number of sequences:</dt><dd class="col-sm-6">???</dd>
+
+    <dt class="col-sm-3">Proteins in matrix:</dt><dd class="col-sm-6">???</dd>
+
+     <dt class="col-sm-3">Million amino acids:</dt><dd class="col-sm-6">???</dd>
+
+    <dt class="col-sm-3">Average protein lengths: </dt><dd class="col-sm-6">???</dd>
+
+
+</dl>
+
+
 
 {% endblock contentTab %}

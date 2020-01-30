@@ -53,7 +53,7 @@
 
 
     if (row['type'].indexOf('PO') >= 0) {
-      return '<i class="fas fa-check " style="color:green"></i>'
+      return '<i class="fas fa-check " style="color:green" ></i>'
     }
     else {
       return ' '
@@ -64,7 +64,7 @@
 
 
     if (row['type'].indexOf('HOG') >= 0) {
-      return '<i class="fas fa-check " style="color:green"></i>';
+      return '<a href="{% url 'hog_info' entry.oma_hog_root %}"><i class="fas fa-check " style="color:green"></i></a>';
     }
     else {
       return ' '
@@ -75,7 +75,7 @@
 
 
     if (row['type'].indexOf('OG') >= 0) {
-      return '<i class="fas fa-check " style="color:green"></i> ';
+      return '<a href="{% url 'omagroup_members' entry.oma_group %}"><i class="fas fa-check " style="color:green"></i></a>';
     }
     else {
       return ' '

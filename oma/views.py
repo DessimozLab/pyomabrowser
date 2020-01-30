@@ -159,8 +159,37 @@ class InfoBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
+
+
+        # to compute the number of orthologs (PO, HOG-based, OG-based) for the badge  we need to do this..
+        orthologs_list = []
+        entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
+
+        ## Get VPS
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-        context.update({'entry': entry, 'tab': 'geneinformation','nr_vps': len(vps_raw),
+        close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
+
+        for rel in itertools.chain(vps_raw, close_paralogs):
+            orthologs_list.append(rel[1]) ## TODO orthologs always position 2 ??
+
+        ## Get HOG orthologs
+        hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
+        for en in hog_pair:
+            orthologs_list.append(en[0])
+
+        ## Get OG orthologs
+
+        if entry.oma_group != 0:
+
+            OG_pair = list(utils.db.oma_group_members(entry.oma_group))
+            OG_pair.remove(entry_db)
+
+            for ent in OG_pair:
+                orthologs_list.append(ent[0])
+
+        vps_ = list(set(orthologs_list))
+
+        context.update({'entry': entry, 'tab': 'geneinformation', 'nr_vps': len(vps_),
                         'nr_pps': 666})
         return context
 
@@ -194,6 +223,8 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
         raise Http404('requested id unknown')
     entry = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
     genome = utils.id_mapper['OMA'].genome_of_entry_nr(entry_nr)
+    # this need to be added to have root level hog id
+    entry.oma_hog_root = entry.oma_hog.split(".")[0]
     try:
         taxa = entry.genome.lineage
     except db.InvalidTaxonId:
@@ -358,9 +389,37 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
         sorted(list(o_md_geneinfos.items()),
                key=lambda t: t[1]['row_number']))
 
+    # to compute the number of orthologs (PO, HOG-based, OG-based) for the badge  we need to do this..
+    orthologs_list = []
+    entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
+
+    ## Get VPS
+    vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
+    close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
+
+    for rel in itertools.chain(vps_raw, close_paralogs):
+        orthologs_list.append(rel[2])  ## TODO orthologs always position 2 ??
+
+    ## Get HOG orthologs
+    hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
+    for en in hog_pair:
+        orthologs_list.append(en[0])
+
+    ## Get OG orthologs
+
+    if entry.oma_group != 0:
+
+        OG_pair = list(utils.db.oma_group_members(entry.oma_group))
+        OG_pair.remove(entry_db)
+
+        for ent in OG_pair:
+            orthologs_list.append(ent[0])
+
+    vps_ = list(set(orthologs_list))
+
     context = {'positions': positions, 'windows': windows,
                'md': md_geneinfos, 'o_md': o_md_geneinfos, 'colors': colors,
-               'stripes': stripes, 'nr_vps': len(orthologs),
+               'stripes': stripes, 'nr_vps': len(vps_),
                'nr_pps': 666,  # TODO: compute real number of paralogs
                'entry': entry,
                'tab': 'synteny', 'xrefs': xrefs
@@ -514,10 +573,37 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
     def get_context_data(self, entry_id, **kwargs):
         context = super(Entry_Paralogy, self).get_context_data(entry_id, **kwargs)
         entry = self.get_entry(entry_id)
+
+        # to compute the number of orthologs (PO, HOG-based, OG-based) for the badge  we need to do this..
+        orthologs_list = []
+        entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
+
+        ## Get VPS
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
+        close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
+
+        for rel in itertools.chain(vps_raw, close_paralogs):
+            orthologs_list.append(rel[1])  ## TODO orthologs always position 2 ??
+
+        ## Get HOG orthologs
+        hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
+        for en in hog_pair:
+            orthologs_list.append(en[0])
+
+        ## Get OG orthologs
+
+        if entry.oma_group != 0:
+
+            OG_pair = list(utils.db.oma_group_members(entry.oma_group))
+            OG_pair.remove(entry_db)
+
+            for ent in OG_pair:
+                orthologs_list.append(ent[0])
+
+        vps_ = list(set(orthologs_list))
 
         context.update(
-            {'entry': entry, 'nr_pps': 666,'nr_vps': len(vps_raw),
+            {'entry': entry, 'nr_pps': 666,'nr_vps': len(vps_),
               'tab': 'paralogs'})
         return context
 
@@ -528,10 +614,9 @@ class Entry_Isoform(TemplateView, InfoBase):
     def get_context_data(self, entry_id, **kwargs):
         context = super(Entry_Isoform, self).get_context_data(entry_id, **kwargs)
         entry = self.get_entry(entry_id)
-        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
 
         context.update(
-            {'entry': entry, 'nr_pps': 666, 'nr_vps': len(vps_raw),
+            {'entry': entry, 'nr_pps': 666,
              'tab': 'isoform'})
         return context
 
@@ -542,10 +627,9 @@ class Entry_GOA(TemplateView, InfoBase):
     def get_context_data(self, entry_id, **kwargs):
         context = super(Entry_GOA, self).get_context_data(entry_id, **kwargs)
         entry = self.get_entry(entry_id)
-        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
 
         context.update(
-            {'entry': entry, 'nr_pps': 666, 'nr_vps': len(vps_raw),
+            {'entry': entry, 'nr_pps': 666,
               'tab': 'goa'})
         return context
 
@@ -557,10 +641,9 @@ class Entry_sequences(TemplateView, InfoBase):
     def get_context_data(self, entry_id, **kwargs):
         context = super(Entry_sequences, self).get_context_data(entry_id, **kwargs)
         entry = self.get_entry(entry_id)
-        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
 
         context.update(
-            {'entry': entry, 'nr_pps': 666, 'nr_vps': len(vps_raw),
+            {'entry': entry, 'nr_pps': 666,
               'tab': 'sequences'})
         return context
 
@@ -678,6 +761,7 @@ class HomoeologJson(HomoeologBase, JsonModelMixin, View):
 # //</editor-fold>
 
 #<editor-fold desc="Genome Centric">
+
 class GenomeBase(ContextMixin):
     def get_context_data(self, specie_id, **kwargs):
         context = super(GenomeBase, self).get_context_data(**kwargs)
@@ -703,7 +787,7 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
 
     def get_context_data(self, specie_id, **kwargs):
         context = super(GenomeCentricGenes, self).get_context_data(specie_id, **kwargs)
-        context.update({'tab': 'genes'})
+        context.update({'tab': 'genes', 'api_base': 'genome', 'api_url': '/api/genome/{}/proteins/'.format(specie_id)})
         return context
 
 
@@ -735,51 +819,44 @@ class HOG_Base(ContextMixin):
 
         try:
 
-            # dirty check to verify hog id is correct
+            # "dirty" check to verify hog id is correct
             members = [x for x in utils.db.member_of_hog_id(hog_id)]
-            if not members :
+            if not members:
                 raise ValueError('requested hog id is unknown')
 
-            # check if sub hog or not
+            subhogs_list = utils.db.get_subhogs(hog_id)
             fam = utils.db.parse_hog_id(hog_id)
-            levs_of_fam = [z.decode() for z in utils.db.hog_levels_of_fam(fam)]
+
+
+            # Check if level is valid
+            if level is None:
+                hog = next((x for x in subhogs_list if x.IsRoot == True), None)
+            else:
+                hog = next((x for x in subhogs_list if x.level == level), None)
+
+            if hog is None:
+                raise ValueError('requested hog cannot be found at level {}'.format(level))
+
+
+            # check if sub hog or not
             if len(hog_id.split('.')) > 1:
                 is_subhog = True
             else:
-                if level == None:
+                if hog.IsRoot:
                     is_subhog = False
                 else:
-                    if level == levs_of_fam[0]:
-                        is_subhog = False
-                    elif level in levs_of_fam:
-                        is_subhog = True
-                    else:
-                        raise ValueError('requested level is unknown')
+                    is_subhog = True
 
+            # get members:
+            members_sub = [x for x in utils.db.member_of_hog_id(hog_id, level=level)]
 
-            context['is_subhog'] = is_subhog
-
-            # add hog ids
+            #update context
             context['hog_id'] = hog_id
-            context['root_id'] = hog_id.split('.')[0]  # todo not good
+            context['root_id'] = hog_id.split('.')[0]
             context['hog_fam'] = fam
-
-            if is_subhog:
-                if level:
-                    # dirty check to verify level is correct
-                    members_sub = [x for x in utils.db.member_of_hog_id(hog_id, level=level)]
-                    if not members_sub:
-                        raise ValueError('requested level is unknown')
-                    context['members'] = members_sub
-                    context['level'] = level
-                else:
-                    context['members'] = members
-                    context['level'] = None
-
-            else:
-                levs_of_fam = [z.decode() for z in utils.db.hog_levels_of_fam(fam)]
-                context['level'] = levs_of_fam[0]
-                context['members'] = members
+            context['level'] = hog.level
+            context['members'] = members_sub
+            context['is_subhog'] = is_subhog
 
         except ValueError as e:
             raise Http404(e)
@@ -808,12 +885,10 @@ class HOGviewer(HOG_Base, TemplateView):
     template_name = "hog_ihamviewer.html"
     show_internal_labels = True
 
-
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGviewer, self).get_context_data(hog_id,**kwargs)
 
         entry = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(context['members'][0][0]))
-
 
         context.update({'tab': 'iham',
                         'entry': entry,
@@ -835,13 +910,11 @@ class HOGtable(HOG_Base, TemplateView):
 
     def get_context_data(self, hog_id, **kwargs):
         context = super(HOGtable, self).get_context_data(hog_id, **kwargs)
-        context.update({'tab': 'table'})
+        context.update({'tab': 'table', 'api_base': 'hog', 'api_url': '/api/hog/{}/members/'.format(hog_id)})
         return context
 
 
 #  OLD STUFF
-
-
 
 class HOGsBase(ContextMixin, EntryCentricMixin):
 
@@ -1627,19 +1700,6 @@ class OMAGroup_ontology(TemplateView, GroupBase):
         return context
 
 
-class OMAGroup_align(TemplateView, GroupBase):
-    template_name = "omagroup_align.html"
-
-
-    def get_context_data(self, group_id, **kwargs):
-        context = super(OMAGroup_align, self).get_context_data(group_id, **kwargs)
-
-        context.update(
-            {'tab': 'align'})
-
-        return context
-
-
 class OMAGroup_info(TemplateView, GroupBase):
     template_name = "omagroup_info.html"
 
@@ -1686,6 +1746,17 @@ class OMAGroup(GroupBase, TemplateView):
                         'table_data_url': reverse('omagroup-json', args=(grp_nr,)),
                         'longest_seq': max([len(z.sequence) for z in context['members']])
                         })
+        return context
+
+@method_decorator(never_cache, name='dispatch')
+class OMAGroup_align(AsyncMsaMixin, OMAGroup):
+    template_name = "omagroup_align.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup_align, self).get_context_data(group_id)
+        context.update(self.get_msa_results('og', group_id))
+        context.update(
+            {'tab': 'align'})
         return context
 
 

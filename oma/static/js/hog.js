@@ -314,7 +314,7 @@ hog_theme = function () {
 
                 // create div for icons
                 var header_div = document.createElement("div");
-                header_div.innerHTML = '<span id="head_button_' + i + '" class="fas fa-caret-down" aria-hidden="true"></span>';
+                header_div.innerHTML = '<span id="head_button_' + i + '" class="fas fa-ellipsis-v" aria-hidden="true"></span>';
                 header_div.setAttribute("class", "header_div");
                 header_div.setAttribute("id", "header_div_" + i);
                 header_div.style.top = relativePos.top - 16 + "px";
@@ -343,6 +343,8 @@ hog_theme = function () {
                 toolt_div.setAttribute("id", "header_menu_" + i);
                 toolt_div.style.top = relative_menuPos.top  + "px";
                 toolt_div.style.left = relative_menuPos.left  + "px";
+
+                console.log(hog);
 
                 // add menu table
                 toolt_div.innerHTML += '<ul class="list-group ">';

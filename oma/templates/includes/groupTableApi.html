@@ -21,7 +21,7 @@
                 <!--<th  data-field="taxon" data-sortable="true" data-filter-control="input"
                     data-formatter="tablehooks.format_sciname">Taxon</th>-->
                 <th  data-field="omaid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
-                <!--<th  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>-->
+                <th  data-field="canonicalid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
                 <!--<th  data-sortable="false" class="domain_vis">Domain Architectures</th>-->
     </tr>
 
@@ -76,15 +76,26 @@
 
 <script>
 
-    $.getJSON("/api/hog/{{hog_id}}/members/", function (jsonData) {
+    $.getJSON("{{api_url}}", function (jsonData) {
+
+
+        var data;
+
+        if ( "{{api_base}}" == 'genome') {
+            data = jsonData;
+        }
+
+        else if ("{{api_base}}" == 'hog' ){
+            data = jsonData["members"];
+        }
 
         console.log(jsonData)
 
-                var tab = $("#grpTable");
-    var icons = tab.bootstrapTable('getOptions').icons;
-    $.extend(icons, {export: 'fa-download'});
-    tab.bootstrapTable({
-        data : jsonData["members"],
+        var tab = $("#grpTable");
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'fa-download'});
+        tab.bootstrapTable({
+        data : data,
         reorderableColumns: true,
         clickToSelect: false,
         showMultiSort: true,
