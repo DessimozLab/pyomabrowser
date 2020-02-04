@@ -35,6 +35,10 @@
         return {id: rowdata.protid, 'class': "protein"};
     };
 
+    exports.add_proteinrow_attrs_omaid = function(rowdata, index) {
+        return {id: rowdata.omaid, 'class': "protein"};
+    };
+
     exports.format_hogid = function(value, row) {
         return '<a href="/oma/hogs/' + row.ReprEntryNr 
                                       + '/">HOG:'

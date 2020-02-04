@@ -30,13 +30,14 @@ urlpatterns = [
     url(r'^hog/information/(?P<hog_id>[\w.-:]+)/$', views.HOGInfo.as_view(),
         name='hog_info'),
 
+    url(r'^hog/similar/domains/(?P<hog_id>[\w.-:]+)/json/$', views.HOGDomainsJson.as_view(), name='hog_domains_json'),
     url(r'^hog/similar/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilar.as_view(), name='hog_similar'),
     url(r'^hog/similar/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilar.as_view(), name='hog_similar'),
 
     url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
     url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
 
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGtable.as_view(), name='hog_table'),
+    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-]+)/$', views.HOGtable.as_view(), name='hog_table'),
     url(r'^hog/table/(?P<hog_id>[\w.-:]+)/$', views.HOGtable.as_view(), name='hog_table'),
 
 
@@ -67,9 +68,9 @@ url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/alignment/$', views.OMAGroup_align.as_vi
     url(r'^hogs/(?P<entry_id>\w+)/vis0/$', views.HogVisWithoutInternalLabels.as_view(),
         name='hog_vis_no_internal_labels'),
     url(r'^hogs/(?P<entry_id>\w+)/domains/$',
-        views.HOGDomainsView.as_view(), name='hog_domains'),
+        views.HOGDomainsView.as_view(), name='hog_domains_'),
     url(r'^hogs/(?P<entry_id>\w+)/domains/json$',
-        views.HOGDomainsJson.as_view(), name='hog_domains_json'),
+        views.HOGDomainsJson.as_view(), name='hog_domains_json_'),
     url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/$', views.HOGsView.as_view(),
         name='hogs'),
     url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/fasta/$',

@@ -149,7 +149,11 @@ class EntryCentricMixin(object):
 
         # this need to be added to have root level hog id
         model_entry  = models.ProteinEntry(utils.db, entry)
-        model_entry.oma_hog_root = model_entry.oma_hog.split(".")[0]
+
+        if model_entry.oma_hog:
+            model_entry.oma_hog_root = model_entry.oma_hog.split(".")[0]
+        else:
+            model_entry.oma_hog_root = None
 
         return model_entry
 
@@ -510,6 +514,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         if len(vps) > 0:
             longest_seq = max(e.sequence_length for e in vps)
 
+
         context.update(
             {'entry': entry, 'nr_pps': 666,  # TODO: compute real number of paralogs
              'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs',
@@ -787,6 +792,7 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
 
     def get_context_data(self, specie_id, **kwargs):
         context = super(GenomeCentricGenes, self).get_context_data(specie_id, **kwargs)
+
         context.update({'tab': 'genes', 'api_base': 'genome', 'api_url': '/api/genome/{}/proteins/'.format(specie_id)})
         return context
 
@@ -857,6 +863,9 @@ class HOG_Base(ContextMixin):
             context['level'] = hog.level
             context['members'] = members_sub
             context['is_subhog'] = is_subhog
+            context['api_base'] = 'hog'
+
+
 
         except ValueError as e:
             raise Http404(e)
@@ -875,10 +884,50 @@ class HOGInfo(HOG_Base, TemplateView):
 class HOGSimilar(HOG_Base, TemplateView):
     template_name = "hog_similar.html"
 
-    def get_context_data(self, hog_id, **kwargs):
+    def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilar, self).get_context_data(hog_id, **kwargs)
-        context.update({'tab': 'similar'})
+
+
+        (fam_row, sim_fams) = utils.db.get_prevalent_domains(context["hog_fam"])
+
+        longest_seq = fam_row['repr_entry_length'] if fam_row is not None else -1
+        if fam_row is not None:
+            fam_row['repr_entry_omaid'] = utils.db.id_mapper['Oma'].map_entry_nr(fam_row['repr_entry_nr'])
+
+        if sim_fams is not None:
+            longest_seq = max(longest_seq, max(sim_fams['ReprEntryLength']))
+
+            # Map entry numbers
+            sim_fams['ReprEntryNr'] = sim_fams['ReprEntryNr'].apply(
+                utils.db.id_mapper['Oma'].map_entry_nr)
+
+        context.update({#'hog': 'HOG:{:07d}'.format(fam),
+                        #'fam_nr': fam,
+                        'hog_row': fam_row,
+                        'sim_hogs': sim_fams,
+                        'longest_seq': longest_seq,
+            'tab': 'similar'})
         return context
+
+
+class HOGDomainsJson(HOGSimilar, View):
+
+    json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
+                   'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
+                   'sim': 'Similarity', 'TopLevel': 'TopLevel',
+                   'Prev': 'PrevFrac'}
+
+    def get(self, request, hog_id, *args, **kwargs):
+        context = self.get_context_data(hog_id, **kwargs)
+        df = context['sim_hogs']
+        df = df[df.Fam != context['hog_row']['fam']]
+        if len(df) == 0:  #len(context['sim_hogs']) == 0:
+            data = ''
+        else:
+            data = df[list(self.json_fields.keys())] \
+                .rename(columns=self.json_fields) \
+                .to_json(orient='records')
+        return HttpResponse(data, content_type='application/json')
 
 
 class HOGviewer(HOG_Base, TemplateView):
@@ -1065,7 +1114,7 @@ class HOGDomainsView(HOGDomainsBase, TemplateView):
     template_name = "hog-domains.html"
 
 
-class HOGDomainsJson(HOGDomainsBase, View):
+class HOGDomainsJson_old(HOGDomainsBase, View):
     json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
                    'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
                    'sim': 'Similarity', 'TopLevel': 'TopLevel',

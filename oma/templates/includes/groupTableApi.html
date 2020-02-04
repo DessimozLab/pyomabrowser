@@ -1,6 +1,5 @@
 {% load staticfiles %}
 
-
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
                data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
@@ -9,7 +8,8 @@
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
                data-checkbox-header="true"
-               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+               data-side-pagination="server"
+               data-id-field="omaid" data-row-attributes="tablehooks.add_proteinrow_attrs_omaid">
 
             <thead>
 
@@ -22,7 +22,7 @@
                     data-formatter="tablehooks.format_sciname">Taxon</th>-->
                 <th  data-field="omaid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
                 <th  data-field="canonicalid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
-                <!--<th  data-sortable="false" class="domain_vis">Domain Architectures</th>-->
+                <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
     </tr>
 
 
@@ -89,7 +89,7 @@
             data = jsonData["members"];
         }
 
-        console.log(jsonData)
+        console.log(data)
 
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
@@ -101,7 +101,10 @@
         showMultiSort: true,
         showLoading: true,
         onPostBody: function () {
-            domains.visualize_all(".protein", {{ longest_seq }});
+
+            var longest_seq = Math.max.apply(Math, data.map(function(o) { return o.locus.end - o.locus.start; }))
+            console.log(longest_seq);
+            domains.visualize_all(".protein", longest_seq);
         },
         onLoadSuccess: function (data) {
             tab.bootstrapTable('hideLoading');
