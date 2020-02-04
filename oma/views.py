@@ -1773,6 +1773,7 @@ class OMAGroupBase(ContextMixin):
             raise Http404(e)
         return context
 
+
 class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
     template_name = "omagroup_entry.html"
 
