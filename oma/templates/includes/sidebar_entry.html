@@ -26,13 +26,13 @@
                 {%endif%}
             </a>
 
-            <div id="filterOrthologs" class="collapse">
+            <div id="filterOrthologs" class="collapse {% if tab == 'orthologs'%} show {%endif%}">
 
 
                 {% if tab == 'orthologs' %}
 
                 <div id="filter-taxon-container"></div>
-                <div>
+
 
 
                     {%endif%}
@@ -87,7 +87,7 @@
             </a>
 
 
-             <div id="filterParalogs" class="collapse">
+             <div id="filterParalogs" class="collapse {% if tab == 'paralogs'%} show {%endif%}">
 
 
                  {% if tab == 'paralogs' %}
