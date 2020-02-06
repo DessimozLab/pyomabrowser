@@ -64,7 +64,7 @@
 
 
     if (row['type'].indexOf('HOG') >= 0) {
-      return '<a href="{% url 'hog_info' entry.oma_hog_root %}"><i class="fas fa-check " style="color:green"></i></a>';
+      return '<a href="{% url 'hog_viewer' entry.oma_hog_root %}"><i class="fas fa-check " style="color:green"></i></a>';
     }
     else {
       return ' '

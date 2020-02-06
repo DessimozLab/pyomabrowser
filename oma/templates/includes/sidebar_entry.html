@@ -28,8 +28,14 @@
 
             <div id="filterOrthologs" class="collapse">
 
+
+                {% if tab == 'orthologs' %}
+
                 <div id="filter-taxon-container"></div>
                 <div>
+
+
+                    {%endif%}
 
 
                 <div class="dropdown-divider pl-0"></div>
@@ -67,14 +73,31 @@
 
         </li>
 
-        <li class="{% if tab == 'paralogs' %} active selected {%endif%}">
-            <a href="{% url 'pair_paralogs' entry.omaid %}">
+        <li class="{% if tab == 'paralogs' %} active selected {%endif%}" {% if tab != 'paralogs' %}
+             onclick="window.location='{% url 'pair_paralogs' entry.omaid %}'" {%endif%}>
+            <a href="{% url 'pair_paralogs' entry.omaid %}" {% if tab == 'paralogs' %}data-toggle="collapse" data-target="#filterParalogs"{%endif%}>
                 <span>Paralogs
                 {% if nr_pps %}
                 <span class="badge badge-info">{{nr_pps}}</span>
                 {% endif %}
                     </span>
+            {% if tab == 'paralogs' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
             </a>
+
+
+             <div id="filterParalogs" class="collapse">
+
+
+                 {% if tab == 'paralogs' %}
+
+                <div id="filter-taxon-container"></div>
+                <div>
+
+                    {%endif%}
+
+            </div>
 
         </li>
 

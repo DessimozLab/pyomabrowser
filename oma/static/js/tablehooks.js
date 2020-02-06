@@ -47,7 +47,7 @@
     };
     exports.format_roothog = function(value, row) {
         if (value > 0) {
-            return '<a href="/oma/hogs/' + row.protid + '/vis/">HOG:' + ('0000000' + value).slice(-7) + "</a>";
+            return '<a href="/oma/hog/ihamviewer/HOG:' + ('0000000' + value).slice(-7) + '/">HOG:' + ('0000000' + value).slice(-7) + "</a>";
         } else {
             return "n/a";
         }
@@ -64,6 +64,12 @@
     exports.format_omagroup = function(value){
         if (value > 0 || (value !== 'n/a') ){
             return '<a href="/oma/omagroup/'+value+'/">' + value + '</a>';
+        } else {return 'n/a';}
+    };
+
+    exports.format_omagroup_members = function(value){
+        if (value > 0 ){
+            return '<a href="/oma/omagroup/'+value+'/members/">' + value + '</a>';
         } else {return 'n/a';}
     };
 

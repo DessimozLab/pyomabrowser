@@ -173,8 +173,8 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
         close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
 
-        for rel in itertools.chain(vps_raw, close_paralogs):
-            orthologs_list.append(rel[1]) ## TODO orthologs always position 2 ??
+        for rel in itertools.chain(vps_raw):
+            orthologs_list.append(rel[1])
 
         ## Get HOG orthologs
         hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
@@ -194,7 +194,7 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         vps_ = list(set(orthologs_list))
 
         context.update({'entry': entry, 'tab': 'geneinformation', 'nr_vps': len(vps_),
-                        'nr_pps': 666})
+                        'nr_pps': len(close_paralogs)})
         return context
 
 
@@ -401,8 +401,8 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
     close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
 
-    for rel in itertools.chain(vps_raw, close_paralogs):
-        orthologs_list.append(rel[2])  ## TODO orthologs always position 2 ??
+    for rel in itertools.chain(vps_raw):
+        orthologs_list.append(rel[2])
 
     ## Get HOG orthologs
     hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
@@ -424,7 +424,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     context = {'positions': positions, 'windows': windows,
                'md': md_geneinfos, 'o_md': o_md_geneinfos, 'colors': colors,
                'stripes': stripes, 'nr_vps': len(vps_),
-               'nr_pps': 666,  # TODO: compute real number of paralogs
+               'nr_pps': len(close_paralogs),
                'entry': entry,
                'tab': 'synteny', 'xrefs': xrefs
     }
@@ -447,7 +447,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         ## Get VPS
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
         close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
-        for rel in itertools.chain(vps_raw, close_paralogs):
+        for rel in itertools.chain(vps_raw):
             pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
             pw_relation.reltype = rel['RelType']
             if len(rel['RelType']) == 3:
@@ -516,7 +516,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
 
 
         context.update(
-            {'entry': entry, 'nr_pps': 666,  # TODO: compute real number of paralogs
+            {'entry': entry, 'nr_pps': len(close_paralogs),
              'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs',
              'longest_seq': longest_seq,
              'table_data_url': reverse('pairs_support_json', args=(entry.omaid,))
@@ -537,7 +537,7 @@ class PairsJson(PairsBase, JsonModelMixin, View):
         return JsonResponse(data, safe=False)
 
 # With information if the pair is supported by PO, HOGS and/or OMA groups
-class PairsJson_Support(PairsBase, JsonModelMixin, View):
+class PairsJson_Support(PairsBase, JsonModelMixin, View, ):
 
 
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
@@ -570,7 +570,6 @@ class PairsViewFasta(FastaView, PairsBase):
 class ParalogyBase(PairsBase):
     pass
 
-
 class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
     template_name = "entry_paralogy.html"
 
@@ -585,10 +584,10 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
 
         ## Get VPS
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-        close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
 
-        for rel in itertools.chain(vps_raw, close_paralogs):
-            orthologs_list.append(rel[1])  ## TODO orthologs always position 2 ??
+
+        for rel in itertools.chain(vps_raw):
+            orthologs_list.append(rel[1])
 
         ## Get HOG orthologs
         hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
@@ -607,10 +606,47 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
 
         vps_ = list(set(orthologs_list))
 
+
+        ## GET PARALOGS
+
+        close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
+
+        orthologs_dict = {}
+
+        for rel in itertools.chain(close_paralogs):
+            pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
+            pw_relation.reltype = rel['RelType']
+            if not hasattr(pw_relation, 'type'):
+                pw_relation.type = []
+            pw_relation.type.append('PO')
+            orthologs_dict[rel['EntryNr2']] = pw_relation
+
+        pps = orthologs_dict.values()
+
+        longest_seq = 0
+        if len(pps) > 0:
+            longest_seq = max(e.sequence_length for e in pps)
+
+
         context.update(
-            {'entry': entry, 'nr_pps': 666,'nr_vps': len(vps_),
+            {'entry': entry, 'nr_pps': len(close_paralogs),'nr_vps': len(vps_), 'pps':pps,
+             'longest_seq': longest_seq,
+             'table_data_url': reverse('pairspara_support_json', args=(entry.omaid,)),
               'tab': 'paralogs'})
         return context
+
+# With information if the pair is supported by PO, HOGS and/or OMA groups
+class PairsParalogsJson_Support(Entry_Paralogy, JsonModelMixin, View,):
+
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'reltype': None, 'type': 'type'}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['pps']))
+
+        return JsonResponse(data, safe=False)
 
 # Isoform
 class Entry_Isoform(TemplateView, InfoBase):
@@ -621,7 +657,7 @@ class Entry_Isoform(TemplateView, InfoBase):
         entry = self.get_entry(entry_id)
 
         context.update(
-            {'entry': entry, 'nr_pps': 666,
+            {'entry': entry,
              'tab': 'isoform'})
         return context
 
@@ -634,7 +670,7 @@ class Entry_GOA(TemplateView, InfoBase):
         entry = self.get_entry(entry_id)
 
         context.update(
-            {'entry': entry, 'nr_pps': 666,
+            {'entry': entry,
               'tab': 'goa'})
         return context
 
@@ -648,7 +684,7 @@ class Entry_sequences(TemplateView, InfoBase):
         entry = self.get_entry(entry_id)
 
         context.update(
-            {'entry': entry, 'nr_pps': 666,
+            {'entry': entry,
               'tab': 'sequences'})
         return context
 
