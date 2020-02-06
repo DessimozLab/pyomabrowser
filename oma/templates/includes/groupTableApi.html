@@ -22,6 +22,16 @@
                 <th  data-field="omaid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
                 <th  data-field="canonicalid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
                 <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
+
+                  {% if api_base == 'hog' %}
+
+
+                         <!-- Taxon information in table -->
+                <script src="{% static 'js/taxinfo_table.js' %}" type="text/javascript"></script>
+
+                 <th  data-sortable="false" class="taxinfo_table">Taxon</th>
+
+                  {% endif %}
     </tr>
 
 
@@ -45,6 +55,9 @@
 <!-- Domain Visualisation -->
 <script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
 <link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+
+
+
 
 <!-- bootstrap-table -->
 <script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
@@ -102,8 +115,8 @@
         onPostBody: function () {
 
             var longest_seq = Math.max.apply(Math, data.map(function(o) { return o.locus.end - o.locus.start; }))
-            console.log(longest_seq);
             domains.visualize_all(".protein", longest_seq);
+            taxinfo.load_all(".protein");
         },
         onLoadSuccess: function (data) {
             tab.bootstrapTable('hideLoading');

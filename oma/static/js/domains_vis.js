@@ -65,7 +65,8 @@
     exports.load_and_visualize_domain = function(container, entry_id, longest_seq) {
         // Grab the domain annotations
         cachedAjaxPromise("/oma/domains/" + entry_id + "/json/")
-            .done(function (data) {
+            .done(function (data)
+            {
                 if (!data) return;
                 // Draw the sequence with domain annotations
                 var svg_container = d3.select(container).append("svg:svg");

@@ -402,7 +402,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
 
     for rel in itertools.chain(vps_raw):
-        orthologs_list.append(rel[2])
+        orthologs_list.append(rel[1])
 
     ## Get HOG orthologs
     hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
@@ -913,7 +913,26 @@ class HOGInfo(HOG_Base, TemplateView):
 
     def get_context_data(self, hog_id, **kwargs):
         context = super(HOGInfo, self).get_context_data(hog_id, **kwargs)
-        context.update({'tab': 'info'})
+
+
+        sh = []
+
+        print(context['hog_fam'])
+
+        all_levels = utils.db.hog_levels_of_fam(context['hog_fam'],deduplicate_and_decode=True)
+
+        print(all_levels)
+
+        for l in all_levels:
+
+            print(l)
+            ids = utils.db.get_subhogids_at_level(context['hog_fam'],l)
+            print(ids)
+
+            for i in ids:
+                sh.append([i, l])
+
+        context.update({'tab': 'info', 'sub-hog':sh})
         return context
 
 
@@ -1363,7 +1382,7 @@ class Searcher(View):
         context = {'query': query, 'search_method': 'id'}
         try:
             entry_nr = utils.id_resolver.resolve(query)
-            return redirect('entry_info', entry_nr)
+            return redirect('pairs', entry_nr)
         except db.AmbiguousID as ambiguous:
             logger.info("query {} maps to {} entries".format(query, len(ambiguous.candidates)))
             entries = [models.ProteinEntry.from_entry_nr(utils.db, entry) for entry in ambiguous.candidates]
@@ -1376,7 +1395,7 @@ class Searcher(View):
     def search_group(self, request, query):
         try:
             group_nr = utils.db.resolve_oma_group(query)
-            return redirect('omagroup', group_nr)
+            return redirect('omagroup_members', group_nr)
         except db.AmbiguousID as ambiguous:
             logger.info('search_group results in ambiguous match: {}'.format(ambiguous))
             context = {'query': query, 'search_method': 'group',
@@ -1386,8 +1405,7 @@ class Searcher(View):
     def search_species(self, request, query):
         try:
             species = utils.id_mapper['OMA'].identify_genome(query)
-            return redirect('/cgi-bin/gateway.pl?f=DisplayOS&p1={}'
-                            .format(species['UniProtSpeciesCode'].decode()))
+            return redirect('genome_info', species['UniProtSpeciesCode'].decode())
         except db.UnknownSpecies:
             pass
         # search in taxonomy

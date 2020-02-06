@@ -186,9 +186,7 @@ body {
 }
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card {
 	 text-align: center;
-	 background: #f1f3f4;
-	 padding: 18px 10px 10px 10px;
-	 border-radius: 10px;
+	 background: #fff;
 	 height:100%;
 	 /*min-height: 500px;
 	 font-size: 0.8rem;*/
@@ -200,18 +198,27 @@ body {
 	 color: #317d3d;
 }
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card svg {
-	 width: 62px;
-	 max-height: 62px;
+	 width: 52px;
+	max-height: 52px;
+	margin: 0 10px;
 }
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul {
 	 text-align: left;
 	 padding: 0;
 }
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul li {
-	 margin-bottom: 8px;
-	 list-style: none;
-	 text-align: justify !important;
+	 margin-bottom: -1px;
+    list-style: none;
+    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    padding: 10px 0;
 }
+
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul li p {
+margin-bottom: 0;
+}
+
+
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .oma-mobile-accordion i {
 	 display: none;
 }
@@ -458,6 +465,20 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
  #oma-generic-container .container .jumbotron h4 {
 	 margin: 0;
 }
+
+.oma-mobile-accordion{
+ padding: 20px 0;
+display: flex;
+justify-content: center;
+align-items: center;
+border-bottom: 1px solid #eee;
+ }
+
+
+.oma-card-content{
+	padding: 0 20px;
+}
+
  @media (max-width: 1366px) {
 	 .col-md-6 {
 		 -ms-flex: 0 0 50%;
@@ -724,6 +745,7 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
 		 padding: 10px;
 		 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 		 cursor: pointer;
+
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion i {
 		 display: block;
@@ -756,7 +778,7 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content {
 		 display: none;
-		 padding: 10px;
+		 padding: 0 20px;
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content h1 {
 		 border-top: 1px solid rgba(0, 0, 0, 0.1);
@@ -959,3 +981,36 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
 /* Database label */
 .autocomplete-group { padding: 3px 20px; text-align: right; border-bottom: 1px solid #ddd}
 .autocomplete-group strong {display: block;; color: #777; }
+
+
+
+ .mouse-icon {
+      width: 24px;
+    }
+    .scroll-wheel {
+      stroke:#231f20;
+      stroke-miterlimit:10;
+      stroke-width:3px;
+    }
+    .mouse-rect {
+      fill:transparent;
+      stroke: #222;
+      stroke-width: 3px;
+    }
+    .mouse-arrow-down {
+      animation-name: pulsate;
+      animation-duration: 2s;
+      animation-iteration-count: infinite;
+    }
+
+@keyframes pulsate {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
