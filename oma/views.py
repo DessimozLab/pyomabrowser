@@ -847,7 +847,8 @@ class GenomeCentricSynteny(GenomeBase, TemplateView):
 
     def get_context_data(self, specie_id, **kwargs):
         context = super(GenomeCentricSynteny, self).get_context_data(specie_id, **kwargs)
-        context.update({'tab': 'synteny'})
+        genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(specie_id))
+        context.update({'tab': 'synteny', 'genome_obj':genome_obj})
         return context
 
 #</editor-fold >
