@@ -8,7 +8,98 @@
 
 <div class="oma-details-nav-left" id="sideNavMobile">
 
+
+
+
      <ul class="genome">
+
+
+          <li class="{% if tab == 'synteny' %} active selected {%endif%}" {% if tab != 'synteny' %}
+             onclick="window.location='{% url 'genome_synteny' genome.uniprot_species_code %}'" {%endif%}>
+            <a href="{% url 'genome_synteny' genome.uniprot_species_code %}" {% if tab == 'synteny' %}data-toggle="collapse" data-target="#filterSynteny"{%endif%}>
+
+                <span>Synteny
+
+                    </span>
+                {% if tab == 'synteny' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
+            </a>
+
+            <div id="filterSynteny" class="collapse {% if tab == 'synteny'%} show {%endif%}">
+
+
+                 {% if tab == 'synteny' %}
+
+                <form id="form_GP">
+                        <div class="form-group row hide d-none">
+                            <label for="g1_name" class="col-md-2 offset-md-1 control-label">Genome 1</label>
+                            <div class="col-sm-7">
+                                <input id="g1_name" type="text" class="form-control typeahead" name="g1_name">
+
+                            </div>
+                        </div>
+
+                        <div class="form-group ">
+                            <label for="g2_name" class=" control-label">Select a second genome: </label>
+                            <div class="">
+                                <input id="g2_name" type="text" class="form-control typeahead" name="g2_name">
+                            </div>
+                        </div>
+
+
+                    </form>
+
+                <hr>
+
+
+                <form id="form_DP">
+
+
+                                <div class="form-row">
+                                    <div class="form-group col-md-12" id="fg_first_chr">
+                                        <label class="col-sm-12" for="selectchr1"></label>
+                                        <select style="margin-left: 15px;" id="selectchr1"></select>
+                                    </div>
+                                    <div class="form-group col-md-12" id="fg_second_chr">
+                                        <label class="col-sm-12" for="selectchr2"></label>
+                                        <select style="margin-left: 15px;" id="selectchr2"></select>
+                                    </div>
+                                </div>
+
+
+                            </form>
+
+
+                <button  class="btn btn-primary" form="form_DP" type="submit"  value="Submit" id="launch_PP2" >Launch
+                                            DotPlot
+                                        </button>
+
+
+
+
+
+
+
+
+
+
+
+                    {%endif%}
+
+
+
+
+
+
+
+
+            </div>
+
+        </li>
+
+
+
          <li class="{% if tab == 'information' %}  active selected {%endif%}">
             <a href="{% url 'genome_info' genome.uniprot_species_code %}">
                 <span> Genome information</span>
@@ -43,11 +134,9 @@
 
 
 
-         <li class="{% if tab == 'synteny' %} active selected {%endif%}">
-            <a href="{% url 'genome_synteny' genome.uniprot_species_code %}">
-                <span> Synteny</span>
-            </a>
-        </li>
+
+
+
 
 
      </ul>

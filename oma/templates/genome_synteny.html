@@ -38,119 +38,19 @@
 {% endblock js_hook %}
 
 {% block contentTab %}
+
+
 <div id="oma-generic-container">
 
     <div class="container">
 
-
-
-
-            <div class="card card-header-oma">
-                <div class="card-header">
-                    <strong>Step 1: Select a second genome </strong>
-                </div>
-                <div class="card-body ">
-
-
-
-                    <form id="form_GP">
-                        <div class="form-group row hide d-none">
-                            <label for="g1_name" class="col-md-2 offset-md-1 control-label">Genome 1</label>
-                            <div class="col-sm-7">
-                                <input id="g1_name" type="text" class="form-control typeahead" name="g1_name">
-
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="g2_name" class="col-md-2 offset-md-1 control-label">Genome 2</label>
-                            <div class="col-sm-7">
-                                <input id="g2_name" type="text" class="form-control typeahead" name="g2_name">
-                            </div>
-                        </div>
-
-
-                    </form>
-
-                </div>
-            </div>
-
-
-            <br>
-
-
-            <div class="card card-header-oma" id="step2">
-
-
-                <div class="card-header">
-                    <strong>Step 2: Select a chromosome in each genome</strong>
-                </div>
-                <div class="card-body ">
-
-                    <div id="loader" class="alert alert-info text-center ">
-                                        <img id="spinner" src="{% static "image/loading.gif"%}">
-                                        <span id="msg"></span>
-                    </div>
-
-
-
-
-
-                    <div id="message" class="row" style="padding: 0; display:none;">
-
-
-                         <p class="text-justify">You have two ways to select the chromosome pair of interest:
-                       use the left matrix by clicking on the square of interest (double click directly open the synteny viewer)
-                        or use the select widget on the right to browse for each genome the chromosome to display.
-                        Once the chromosome pair is chosen, use the 'launch DotPlot' to start the visualisation.</p>
-
-                        <div class="col-xs-12 col-lg-6">
-
-                            <div id="hm" style="width: 100%;">
-                            </div>
-
-                        </div>
-
-                        <div class="col-xs-12 col-md-6">
-
-
-                            <form id="form_DP">
-
-
-                                <div class="form-row">
-                                    <div class="form-group col-md-12" id="fg_first_chr">
-                                        <label class="col-sm-12" for="selectchr1"></label>
-                                        <select style="margin-left: 15px;" id="selectchr1"></select>
-                                    </div>
-                                    <div class="form-group col-md-12" id="fg_second_chr">
-                                        <label class="col-sm-12" for="selectchr2"></label>
-                                        <select style="margin-left: 15px;" id="selectchr2"></select>
-                                    </div>
-                                </div>
-
-                                <div id="dotPlotSubmit" class="">
-                                    <div >
-                                        <button class="btn btn-lg btn-block btn-primary" type="submit" id="launch_PP">Launch
-                                            DotPlot
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </form>
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-            </div>
-
-
-
         <div class="jumbotron">
 
                 <div id="dotplot_container" class="tile">
+
+
+                    <button type="button" class="btn btn-dark btn-sm float-left" data-toggle="modal" data-target="#exampleModal"> Change Chromosome pair
+                    </button>
 
 
                     <div class="text-center">
@@ -159,13 +59,14 @@
                             <em> versus </em>{{ genome2 }} chromosome {{ chromosome2 }}</h5>
 
 
-            </div>
+                    </div>
 
 
                     <div class="row justify-content-md-center">
     <div class="col ">
         <hr>
     </div>
+
     <div class="col-md-auto ">
        <div>
 
@@ -277,8 +178,6 @@
   </div>
 
 
-
-
                    <!-- <div id="loader2"><img src="{% static "image/loading.gif"%}"></div> -->
 
                     <div id="plot_div" style="width: 100%">
@@ -301,10 +200,111 @@
             </div>
 
 
+        <!-- Modal for chromosome selection -->
+        <div class="modal" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+
+        <h5 class="modal-title" id="exampleModalLabel">Select a chromosome in each genome to visualize</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+
+      </div>
+      <div class="modal-body">
+
+
+          <div class="card-body" id="step2">
+
+                    <div id="loader" class="alert alert-info text-center ">
+                                        <img id="spinner" src="{% static "image/loading.gif"%}">
+                                        <span id="msg"></span>
+                    </div>
+
+
+                     <div id="message" class="row" style="padding: 0; display:none;">
+
+
+                         <p class="text-justify">You have two ways to select the chromosome pair of interest:
+                       use the left matrix by clicking on the square of interest (double click directly open the synteny viewer)
+                        or use the select widget on the right to browse for each genome the chromosome to display.
+                        Once the chromosome pair is chosen, use the 'launch DotPlot' to start the visualisation.</p>
+
+                        <div class="col-xs-12 col-lg-6">
+
+
+                            <div id="hm" style="width: 100%;">
+                            </div>
+
+
+
+
+                        </div>
+
+                        <div class="col-xs-12 col-md-6">
+
+
+
+
+                        </div>
+
+                    </div>
+
+          </div>
+
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <div id="dotPlotSubmit">
+        <button  class="btn btn-primary" form="form_DP" type="submit"  value="Submit" id="launch_PP" >Launch
+                                            DotPlot
+                                        </button>
+
+              </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
     </div>
 
-
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -599,6 +599,9 @@
             return false;
         }
 
+
+
+
         genome_1 =  "{{genome_obj.uniprot_species_code}}"//genomeIDs[$('#g1_name').val()];
         genome_2 = genomeIDs[$('#g2_name').val()];
         genomeFullName_1 = "{{genome_obj.sciname}}"// genomeSpecies[$('#g1_name').val()];
@@ -615,6 +618,9 @@
         // Clear any previously set timer before setting a fresh one
         window.clearTimeout($(this).data("timeout"));
         $(this).data("timeout", setTimeout(function () {
+
+
+            $('#exampleModal').modal('show')
 
             var clickTimeout = null;
 
@@ -975,6 +981,13 @@
 
     $("form").on('submit', function (e) {
 
+
+        $('#exampleModal').modal('hide');
+
+
+
+
+
         //stop form submission
         e.preventDefault();
 
@@ -996,10 +1009,6 @@
             alert("You cannot select twice the same chromosome and genome.");
             return false;
         }
-
-
-
-
 
 
 
