@@ -198,7 +198,7 @@
 
             </div>
 
-                    <!--div id="loader2"><img src="{% static "image/loading.gif"%}"></div-->
+
 
                     <div id="plot_div" style="width: 100%">
 
@@ -302,7 +302,7 @@
 <script type="text/javascript">
     (function ($) {
 
-        $("#loader2").hide();
+        //$("#loader2").hide();
 
         var genome_1, genome_2, genomeFullName_1, genomeFullName_2 = "";
 
@@ -1003,7 +1003,7 @@
 
 
             load_paginated_api(url_json, 1000, function (error, data_parts) {
-                $("#loader2").hide();
+                //$("#loader2").hide();
                 if (error){
                     console.log("cannot load data. \n URL: "+error.currentTarget.responseURL
                         + "\n Response: "+error.currentTarget.responseText);
@@ -1012,7 +1012,7 @@
                 }
                 var data = d3.merge(data_parts);
                 console.log(data_parts);
-                $("#loader2").hide();
+                //$("#loader2").hide();
                 launch_dotplot();
 
                 var t = null;
