@@ -57,6 +57,8 @@
             // Retreive the entry ID
             var entry_id = $(this).attr(attr_name),
                 container = $(this).find('.taxinfo_table')[0];
+
+
             exports.load_species(container, entry_id);
         });
     };
@@ -67,7 +69,16 @@
             .done(function (data){
                 if (!data) return;
 
-                container.innerHTML =  '<a href="/oma/genome/'+data.code+'/info">' +  +'</a>';
+
+
+
+
+                 container.innerHTML =  '<a href="/oma/genome/'+data.code+'/info">' + data.species  +'</a>';
+
+
+                 console.log(data);
+
+
 
             });
 

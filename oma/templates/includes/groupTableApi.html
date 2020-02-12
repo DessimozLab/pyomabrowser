@@ -23,10 +23,10 @@
                 <th  data-field="canonicalid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
                 <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
 
-                  {% if api_base == 'hog' %}
+                  {% if api_base != 'genome' %}
 
 
-                         <!-- Taxon information in table -->
+                 <!-- Taxon information in table -->
                 <script src="{% static 'js/taxinfo_table.js' %}" type="text/javascript"></script>
 
                  <th  data-sortable="false" class="taxinfo_table">Taxon</th>
@@ -116,7 +116,9 @@
         showMultiSort: true,
         showLoading: true,
         onPostBody: function () {
+
             domains.visualize_all(".protein");
+
             if ( "{{api_base}}" != 'genome') {
                 taxinfo.load_all(".protein");
             }
