@@ -67,7 +67,7 @@
             .done(function (data){
                 if (!data) return;
 
-                container.innerHTML =  '<a href="/oma/genome/'+data.code+'/info">' + data.species +'</a>';
+                container.innerHTML =  '<a href="/oma/genome/'+data.code+'/info">' +  +'</a>';
 
             });
 

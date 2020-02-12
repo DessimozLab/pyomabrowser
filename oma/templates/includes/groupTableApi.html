@@ -88,6 +88,8 @@
 
 <script>
 
+    var first_time = true;
+
     $.getJSON("{{api_url}}", function (jsonData) {
 
 
@@ -102,6 +104,8 @@
         }
 
 
+
+
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
         $.extend(icons, {export: 'fa-download'});
@@ -112,18 +116,40 @@
         showMultiSort: true,
         showLoading: true,
         onPostBody: function () {
+            //console.log(data);
 
-            var longest_seq = Math.max.apply(Math, data.map(function(o) { return o.locus.end - o.locus.start; }))
+        },
+        onResetView: function () {
+
+
+            data2 = tab.bootstrapTable('getData', {useCurrentPage:true});
+
+            if (data2[0]['entry_nr'] == undefined){return;}
+
+            console.log(data2);
+
+            var longest_seq = Math.max.apply(Math, data2.map(function(o) { return o.locus.end - o.locus.start;}))
+
+            console.log(longest_seq);
             domains.visualize_all(".protein", longest_seq);
-            taxinfo.load_all(".protein");
+            if ( "{{api_base}}" != 'genome') {
+                taxinfo.load_all(".protein");
+            }
+
         },
         onLoadSuccess: function (data) {
             tab.bootstrapTable('hideLoading');
+
         },
         refreshOptions: {'icons': icons}
     });
 
+       tab.bootstrapTable('resetView');
+
 });
+
+
+
 
 
 

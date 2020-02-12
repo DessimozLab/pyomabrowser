@@ -75,6 +75,8 @@
                 var svg_height = parseInt(svg_container.style('height'));
 
                 // Line length (in %) is relative to the longest sequence.
+
+                console.log(data)
                 var line_length = String((data.length / longest_seq) * 100) + "%";
                 var line_weight = 3;
 

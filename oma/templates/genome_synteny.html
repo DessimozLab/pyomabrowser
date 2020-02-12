@@ -198,7 +198,7 @@
 
             </div>
 
-
+                    <!--div id="loader2"><img src="{% static "image/loading.gif"%}"></div-->
 
                     <div id="plot_div" style="width: 100%">
 
@@ -302,7 +302,7 @@
 <script type="text/javascript">
     (function ($) {
 
-        //$("#loader2").hide();
+        $("#loader2").hide();
 
         var genome_1, genome_2, genomeFullName_1, genomeFullName_2 = "";
 
@@ -584,7 +584,7 @@
         window.clearTimeout($(this).data("timeout"));
         $(this).data("timeout", setTimeout(function () {
 
-            $('#alert_help').alert('close');
+            $('#alert_help').alert('close')
 
 
             $('#exampleModal').modal('show');
