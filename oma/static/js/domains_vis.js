@@ -53,7 +53,27 @@
     }
 
     exports.visualize_all = function (class_of_entries, longest_seq, attr_name) {
+
         if(attr_name === undefined){ attr_name = 'id'; }
+
+        if(longest_seq === undefined){
+
+
+            var longest_seq = 0;
+            var ls;
+
+            $.each($(class_of_entries), function (each, value) {
+                // Retreive the entry ID
+                var entry_id = $(this).attr(attr_name);
+                ls = exports.get_length(entry_id);
+
+                if (ls > longest_seq){
+                    longest_seq= ls;}
+            });
+
+        }
+
+
         $.each($(class_of_entries), function (each, value) {
             // Retreive the entry ID
             var entry_id = $(this).attr(attr_name),
@@ -76,7 +96,6 @@
 
                 // Line length (in %) is relative to the longest sequence.
 
-                console.log(data)
                 var line_length = String((data.length / longest_seq) * 100) + "%";
                 var line_weight = 3;
 
@@ -189,4 +208,19 @@
 
 
     };
+
+    exports.get_length = function(entry_id) {
+
+        var ls2;
+        // Grab the domain annotations
+        cachedAjaxPromise("/oma/domains/" + entry_id + "/json/")
+            .done(function (data)
+            {
+                if (!data) {ls2=0;}
+                ls2 = data.length;
+
+            });
+        return ls2;
+    };
+
 })(this.domains={});
