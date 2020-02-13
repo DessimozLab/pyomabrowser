@@ -833,12 +833,21 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
         return context
 
 
-class GenomeCentricClosest(GenomeBase, TemplateView):
-    template_name = "genome_closest.html"
+class GenomeCentricClosestGroups(GenomeBase, TemplateView):
+    template_name = "genome_closest_groups.html"
 
     def get_context_data(self, specie_id, **kwargs):
-        context = super(GenomeCentricClosest, self).get_context_data(specie_id, **kwargs)
-        context.update({'tab': 'closest'})
+        context = super(GenomeCentricClosestGroups, self).get_context_data(specie_id, **kwargs)
+        context.update({'tab': 'closest', 'subtab':'groups'})
+        return context
+
+
+class GenomeCentricClosestHOGs(GenomeBase, TemplateView):
+    template_name = "genome_closest_hogs.html"
+
+    def get_context_data(self, specie_id, **kwargs):
+        context = super(GenomeCentricClosestHOGs, self).get_context_data(specie_id, **kwargs)
+        context.update({'tab': 'closest', 'subtab':'hogs'})
         return context
 
 
@@ -937,11 +946,22 @@ class HOGInfo(HOG_Base, TemplateView):
         return context
 
 
-class HOGSimilar(HOG_Base, TemplateView):
-    template_name = "hog_similar.html"
+class HOGSimilarProfile(HOG_Base, TemplateView):
+    template_name = "hog_similar_profile.html"
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
-        context = super(HOGSimilar, self).get_context_data(hog_id, **kwargs)
+        context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
+
+        context.update({
+            'tab': 'similar', 'subtab': 'profile'})
+        return context
+
+
+class HOGSimilarDomain(HOG_Base, TemplateView):
+    template_name = "hog_similar_domain.html"
+
+    def get_context_data(self, hog_id, idtype='OMA', **kwargs):
+        context = super(HOGSimilarDomain, self).get_context_data(hog_id, **kwargs)
 
 
         (fam_row, sim_fams) = utils.db.get_prevalent_domains(context["hog_fam"])
@@ -962,11 +982,26 @@ class HOGSimilar(HOG_Base, TemplateView):
                         'hog_row': fam_row,
                         'sim_hogs': sim_fams,
                         'longest_seq': longest_seq,
-            'tab': 'similar'})
+            'tab': 'similar',
+            'subtab': 'domain'})
         return context
 
 
-class HOGDomainsJson(HOGSimilar, View):
+class HOGSimilarPairwise(HOG_Base, TemplateView):
+    template_name = "hog_similar_pairwise.html"
+
+    def get_context_data(self, hog_id, idtype='OMA', **kwargs):
+        context = super(HOGSimilarPairwise, self).get_context_data(hog_id, **kwargs)
+
+
+
+        context.update({
+            'tab': 'similar',
+            'subtab': 'pairwise'})
+        return context
+
+
+class HOGDomainsJson(HOGSimilarDomain, View):
 
     json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
                    'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
@@ -1780,28 +1815,45 @@ class OMAGroup_members(TemplateView, GroupBase):
         return context
 
 
-class OMAGroup_close(TemplateView, GroupBase):
-    template_name = "omagroup_close.html"
+class OMAGroup_similar_profile(TemplateView, GroupBase):
+    template_name = "omagroup_similar_profile.html"
 
     def get_context_data(self, group_id, **kwargs):
-        context = super(OMAGroup_close, self).get_context_data(group_id, **kwargs)
+        context = super(OMAGroup_similar_profile, self).get_context_data(group_id, **kwargs)
 
         context.update(
-            {'tab': 'close'})
+            {'tab': 'similar', 'subtab': 'profile'})
 
         return context
 
 
-class OMAGroup_ontology(TemplateView, GroupBase):
-    template_name = "omagroup_ontology.html"
+
+class OMAGroup_similar_pairwise(TemplateView, GroupBase):
+    template_name = "omagroup_similar_pairwise.html"
 
     def get_context_data(self, group_id, **kwargs):
-        context = super(OMAGroup_ontology, self).get_context_data(group_id, **kwargs)
+        context = super(OMAGroup_similar_pairwise, self).get_context_data(group_id, **kwargs)
 
         context.update(
-            {'tab': 'goa'})
+            {'tab': 'similar', 'subtab': 'pairwise'})
 
         return context
+
+
+
+class OMAGroup_similar_ontology(TemplateView, GroupBase):
+    template_name = "omagroup_similar_ontology.html"
+
+    def get_context_data(self, group_id, **kwargs):
+        context = super(OMAGroup_similar_ontology, self).get_context_data(group_id, **kwargs)
+
+        context.update(
+            {'tab': 'similar', 'subtab': 'ontology'})
+
+        return context
+
+
+
 
 
 class OMAGroup_info(TemplateView, GroupBase):

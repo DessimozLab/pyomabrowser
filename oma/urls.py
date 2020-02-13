@@ -32,8 +32,12 @@ urlpatterns = [
         name='hog_info'),
 
     url(r'^hog/similar/domains/(?P<hog_id>[\w.-:]+)/json/$', views.HOGDomainsJson.as_view(), name='hog_domains_json'),
-    url(r'^hog/similar/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilar.as_view(), name='hog_similar'),
-    url(r'^hog/similar/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilar.as_view(), name='hog_similar'),
+    url(r'^hog/similar/domain/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
+    url(r'^hog/similar/domain/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
+    url(r'^hog/similar/profile/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
+    url(r'^hog/similar/profile/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
+    url(r'^hog/similar/pairwise/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
+    url(r'^hog/similar/pairwise/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
 
     url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
     url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
@@ -46,8 +50,9 @@ urlpatterns = [
 
     # OMA Group
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/members/$', views.OMAGroup_members.as_view(), name='omagroup_members'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/close/$', views.OMAGroup_close.as_view(), name='omagroup_close'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/ontology/$', views.OMAGroup_ontology.as_view(), name='omagroup_ontology'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/similar/profile/$', views.OMAGroup_similar_profile.as_view(), name='omagroup_similar_profile'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/similar/ontology/$', views.OMAGroup_similar_ontology.as_view(), name='omagroup_similar_ontology'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/similar/pairwise/$', views.OMAGroup_similar_pairwise.as_view(), name='omagroup_similar_pairwise'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/info/$', views.OMAGroup_info.as_view(), name='omagroup_info'),
 url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/alignment/$', views.OMAGroup_align.as_view(), name='omagroup_align'),
     #url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/$', views.OMAGroup.as_view(), name='omagroup'),
@@ -58,7 +63,8 @@ url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/alignment/$', views.OMAGroup_align.as_vi
     # Genome
     url(r'^genome/(?P<specie_id>\w+)/info/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
     url(r'^genome/(?P<specie_id>\w+)/genes/$', views.GenomeCentricGenes.as_view(), name='genome_genes'),
-    url(r'^genome/(?P<specie_id>\w+)/closest/$', views.GenomeCentricClosest.as_view(), name='genome_closest'),
+    url(r'^genome/(?P<specie_id>\w+)/closest/groups/$', views.GenomeCentricClosestGroups.as_view(), name='genome_closest_og'),
+    url(r'^genome/(?P<specie_id>\w+)/closest/hogs/$', views.GenomeCentricClosestHOGs.as_view(), name='genome_closest_hog'),
     url(r'^genome/(?P<specie_id>\w+)/synteny/$', views.GenomeCentricSynteny.as_view(), name='genome_synteny'),
 
     # HOG via Entry

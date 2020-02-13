@@ -112,15 +112,42 @@
         </li>
 
 
+          <li class="{% if tab == 'closest' %} active selected {%endif%}" {% if tab != 'closest' %}
+             onclick="window.location='{% url 'genome_closest_og' genome.uniprot_species_code %}'" {%endif%}>
+            <a href="{% url 'genome_closest_og' genome.uniprot_species_code %}" {% if tab == 'closest' %}data-toggle="collapse" data-target="#filterSimilar"{%endif%}>
 
+                <span>Similar Species
 
-
-
-         <li class="{% if tab == 'closest' %} active selected {%endif%}">
-            <a href="{% url 'genome_closest' genome.uniprot_species_code %}">
-                <span> Closest species</span>
+                    </span>
+                {% if tab == 'closest' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
             </a>
-        </li>
+
+
+
+          <div id="filterSimilar" class="collapse {% if tab == 'closest'%} show {%endif%}">
+
+
+              <div class="card">
+
+                  Show closest species based on:
+
+                  <a class="btn btn-outline-dark btn-sm" href="{% url 'genome_closest_og' genome.uniprot_species_code %}" role="button">Shared OG</a>
+                  <br>
+                  <a class="btn btn-outline-dark btm-sm" href="{% url 'genome_closest_hog' genome.uniprot_species_code %}" role="button">Shared HOGs</a>
+
+
+
+              </div>
+
+
+          </div>
+
+          </li>
+
+
+
 
 
 

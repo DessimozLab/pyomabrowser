@@ -45,21 +45,45 @@
 
         </li>
 
-         <li class="{% if tab == 'close' %} active selected {%endif%}">
-            <a href="{% url 'omagroup_close' omagroup.group_nbr %}">
-                <span>Close groups</span>
 
-            </a>
+           </a>
 
         </li>
 
-         <li class="{% if tab == 'goa' %} active selected {%endif%}">
-            <a href="{% url 'omagroup_ontology' omagroup.group_nbr %}">
-                <span>Ontology</span>
 
+         <li class="{% if tab == 'similar' %} active selected {%endif%}" {% if tab != 'similar' %}
+             onclick="window.location='{% url 'omagroup_similar_ontology' omagroup.group_nbr %}'" {%endif%}>
+            <a href="{% url 'omagroup_similar_ontology' omagroup.group_nbr %}" {% if tab == 'similar' %}data-toggle="collapse" data-target="#filterSimilar"{%endif%}>
+
+                <span>Similar OMA GROUPs
+
+                    </span>
+                {% if tab == 'similar' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
             </a>
 
-        </li>
+
+
+          <div id="filterSimilar" class="collapse {% if tab == 'similar'%} show {%endif%}">
+
+
+              <div class="card">
+
+                  Show closest oma groups based on:
+
+                  <a class="btn btn-outline-dark btn-sm" href="{% url 'omagroup_similar_ontology' omagroup.group_nbr %}" role="button">Shared GO annotations</a>
+                  <br>
+                  <a class="btn btn-outline-dark btm-sm" href="{% url 'omagroup_similar_profile' omagroup.group_nbr %}" role="button">Shared Species</a>
+                  <br>
+                  <a class="btn btn-outline-dark btm-sm" href="{% url 'omagroup_similar_pairwise' omagroup.group_nbr %}" role="button">Share orthologs</a>
+
+              </div>
+
+
+          </div>
+
+          </li>
 
 
 
