@@ -15,22 +15,23 @@
 
 
              <tr>
-        <th colspan="3" data-halign="center" >Orthology supported in</th>
 
-                 <th rowspan="2" data-field="kingdom" data-sortable="true" data-filter-control="select"
+
+                   <th data-field="type_p"  data-align="center" data-halign="center"   data-formatter="stateFormatterPO">PO</th>
+                <th data-field="type_h"   data-align="center" data-halign="center"   data-formatter="stateFormatterH">H</th>
+                <th data-field="type_g"   data-align="center" data-halign="center"   data-formatter="stateFormatterOG">OG </th>
+
+
+
+                 <th  data-field="kingdom" data-sortable="true" data-filter-control="select"
                     data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.</th>
-                <th rowspan="2" data-field="taxon" data-sortable="true" data-filter-control="input"
+                <th  data-field="taxon" data-sortable="true" data-filter-control="input"
                     data-formatter="tablehooks.format_sciname">Taxon</th>
-                <th rowspan="2" data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
-                <th rowspan="2" data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
-                <th rowspan="2" data-sortable="false" class="domain_vis">Domain Architectures</th>
-    </tr>
-    <tr>
-        <th data-field="type" data-switchable="false" data-align="center" data-halign="center" data-sortable="true"  data-formatter="stateFormatterPO">Pair</th>
-                <th data-field="type"  data-switchable="false" data-align="center" data-halign="center" data-sortable="true"  data-formatter="stateFormatterH">HOG</th>
-                <th data-field="type"  data-switchable="false" data-align="center" data-halign="center" data-sortable="true"  data-formatter="stateFormatterOG">OMA group </th>
-    </tr>
+                <th  data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                <th  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
 
+ </tr>
 
 
             </thead>
@@ -52,8 +53,8 @@
 
 
 
-    if (row['type'].indexOf('PO') >= 0) {
-      return '<i class="fas fa-check " style="color:green" ></i>'
+    if (row['type_p'] === 1) {
+      return '<i class="fas fa-check " style="color:green"></i>';
     }
     else {
       return ' '
@@ -63,7 +64,7 @@
   function stateFormatterH(value, row, index) {
 
 
-    if (row['type'].indexOf('HOG') >= 0) {
+    if (row['type_h'] === 1) {
       return '<a href="{% url 'hog_viewer' entry.oma_hog_root %}"><i class="fas fa-check " style="color:green"></i></a>';
     }
     else {
@@ -74,7 +75,7 @@
   function stateFormatterOG(value, row, index) {
 
 
-    if (row['type'].indexOf('OG') >= 0) {
+    if (row['type_g'] === 1) {
       return '<a href="{% url 'omagroup_members' entry.oma_group %}"><i class="fas fa-check " style="color:green"></i></a>';
     }
     else {

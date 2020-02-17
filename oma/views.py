@@ -453,9 +453,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
             if len(rel['RelType']) == 3:
                 pw_relation.reltype += " ortholog"
 
-            if not hasattr(pw_relation, 'type'):
-                pw_relation.type = []
-            pw_relation.type.append('PO')
+            pw_relation.type_p = 1
 
             orthologs_dict[rel['EntryNr2']] = pw_relation
 
@@ -471,10 +469,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
             if not hasattr(pw_relation, 'reltype'):
                 pw_relation.reltype = None
 
-            if not hasattr(pw_relation, 'type'):
-                pw_relation.type = []
-            pw_relation.type.append('HOG')
-
+            pw_relation.type_h = 1
 
             orthologs_dict[en[0]] = pw_relation
 
@@ -495,13 +490,24 @@ class PairsBase(ContextMixin, EntryCentricMixin):
                 if not hasattr(pw_relation, 'reltype'):
                     pw_relation.reltype = None
 
-                if not hasattr(pw_relation, 'type'):
-                    pw_relation.type = []
-                pw_relation.type.append('OG')
+                pw_relation.type_g = 1
 
                 orthologs_dict[ent[0]] = pw_relation
 
         vps = orthologs_dict.values()
+
+
+        # populate with inference evidence missing attribute
+        for rel in vps:
+
+            if not hasattr(rel, 'type_p'):
+                rel.type_p = 0
+
+            if not hasattr(rel, 'type_h'):
+                rel.type_h = 0
+
+            if not hasattr(rel, 'type_g'):
+                rel.type_g = 0
 
 
         entry.reltype = 'self'
@@ -542,7 +548,7 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View, ):
 
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'reltype': None, 'type':'type'}
+                   'canonicalid': 'xrefid', 'reltype': None, 'type_p': 'type_p','type_h':'type_h','type_g':'type_g'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -1827,7 +1833,6 @@ class OMAGroup_similar_profile(TemplateView, GroupBase):
         return context
 
 
-
 class OMAGroup_similar_pairwise(TemplateView, GroupBase):
     template_name = "omagroup_similar_pairwise.html"
 
@@ -1840,20 +1845,16 @@ class OMAGroup_similar_pairwise(TemplateView, GroupBase):
         return context
 
 
-
-class OMAGroup_similar_ontology(TemplateView, GroupBase):
-    template_name = "omagroup_similar_ontology.html"
+class OMAGroup_ontology(TemplateView, GroupBase):
+    template_name = "omagroup_ontology.html"
 
     def get_context_data(self, group_id, **kwargs):
-        context = super(OMAGroup_similar_ontology, self).get_context_data(group_id, **kwargs)
+        context = super(OMAGroup_ontology, self).get_context_data(group_id, **kwargs)
 
         context.update(
-            {'tab': 'similar', 'subtab': 'ontology'})
+            {'tab': 'ontology'})
 
         return context
-
-
-
 
 
 class OMAGroup_info(TemplateView, GroupBase):
