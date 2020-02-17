@@ -387,7 +387,6 @@
             html.push('<div class="form-check pl-4">');
 
             //  ADD CHECKBOX FOR EACH DEFAULT TAXA
-            html.push('<h6 class="float-right">Default Taxon</h6> <br>');
              html.push(add_input_div( 'all', 'All Taxon', false ));
 
             for (var tax in this.tax_converter) {
@@ -397,7 +396,6 @@
             }
 
             //  ADD CHECKBOX FOR EACH CUSTOM TAXA
-            html.push('<h6 class="float-right" >Custom Filter</h6> <br>');
             for (var tax in this.tax_converter['custom']) {
                 var custom_item = this.tax_converter['custom'][tax];
                 html.push(add_input_div(custom_item.Uid, custom_item.name, true ));

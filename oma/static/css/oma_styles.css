@@ -60,7 +60,7 @@ body {
 }
  body .search form .oma-search-select, body .oma-search form .oma-search-select, body .oma-main-search-header form .oma-search-select {
 	 width: 220px;
-	 border-radius: 20px 0 0 20px;
+	 border-radius: 5px 0 0 5px;
 	 padding: 8px;
 	 overflow: hidden;
 	 background: #e9e5e5 url("../image/select-arrows.png") no-repeat 95% 50%;
@@ -178,7 +178,7 @@ body {
 	 text-align: center;
 }
  body #oma-statistics .row .col-md-2 h1 {
-	 color: #d8d82a;
+	 color: #ddd;
 	 margin: 0;
 }
  body #oma-landing-cards {
@@ -217,6 +217,9 @@ body {
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul li p {
 margin-bottom: 0;
 }
+
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .oma-mobile-accordion { border-bottom: none;
+background: #f7f7f7; }
 
 
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .oma-mobile-accordion i {
@@ -312,7 +315,7 @@ margin-bottom: 0;
 	 display: none;
 }
  body .oma-details-container .oma-details-nav-left {
-	 position: fixed;
+	 position:absolute ;
 	 width: 300px;
 	 height: 100%;
 	 background: #f8f9fa;
@@ -377,10 +380,32 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
 	 color: #333;
 }
 
+
+
+
  body .oma-details-container .oma-details-nav-left ul li div {
-	 background-color:#f8f9fa;
-	 padding: 4px;
+
+    background-color: #f8f9fa;
+
+    padding: 4px;
+
+    margin-top: 0px;
+
+    padding-left: 10px;
+
 }
+
+.h5, h5 {
+
+    font-size: 1rem;
+
+    text-transform: uppercase;
+
+    font-weight: 700;
+}
+
+
+
  body .oma-details-container .oma-details-nav-left ul li a:hover {
 	 text-decoration: none;
 }
@@ -472,6 +497,7 @@ display: flex;
 justify-content: center;
 align-items: center;
 border-bottom: 1px solid #eee;
+	background: transparent;
  }
 
 
@@ -868,7 +894,7 @@ border-bottom: 1px solid #eee;
 	 body .search form, body .oma-search form, body .oma-main-search-header form {
 		 font-size: 1rem;
 		 display: block;
-		 box-shadow: none;
+		 box-shadow: 2px 2px 10px -6px rgba(0,0,0,0.1);
 		 position: relative;
 	}
 	 body .search form .oma-search-select, body .oma-search form .oma-search-select, body .oma-main-search-header form .oma-search-select {
@@ -879,7 +905,7 @@ border-bottom: 1px solid #eee;
 	}
 	 body .search form input[type=text], body .oma-search form input[type=text], body .oma-main-search-header form input[type=text] {
 		 padding: 12px;
-		 border-radius: 10px;
+		 border-radius: 0 5px 5px 0;
 	}
 	 body .search form.oma-search-mobile button, body .oma-search form.oma-search-mobile button, body .oma-main-search-header form.oma-search-mobile button {
 		 z-index: 1100;
@@ -918,11 +944,18 @@ border-bottom: 1px solid #eee;
 }
 
 .gene-orthology, .gene-orthology .selected {
-    background-color: #369;
+    background-color: #369  !important;
 }
+
+
+
 .oma-group, .oma-group .selected {
-    background-color: #64c7cd !important;
+background-color: #64c7cd !important;
+color: #222 !important;
 }
+
+.oma-group li a span { color: #222 !important; }
+
 .genome, .genome .selected {
     background-color: #ee3a39 !important;
 }
@@ -1013,4 +1046,9 @@ border-bottom: 1px solid #eee;
       100% {
         opacity: 1;
       }
+
     }
+
+.micro-header{
+	font-size: xx-small !important;
+}

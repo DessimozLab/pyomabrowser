@@ -17,10 +17,23 @@
              <tr>
 
 
-                   <th data-field="type_p"  data-align="center" data-halign="center"   data-formatter="stateFormatterPO">PO</th>
-                <th data-field="type_h"   data-align="center" data-halign="center"   data-formatter="stateFormatterH">H</th>
-                <th data-field="type_g"   data-align="center" data-halign="center"   data-formatter="stateFormatterOG">OG </th>
+                   <th class="micro-header" data-field="type_p"  data-align="center" data-halign="center"   data-formatter="stateFormatterPO" >
 
+                    P
+                       <span class="badge badge-pill badge-dark"  data-toggle="tooltip" data-placement="top" title="Inferred using the OMA algorithm">?</span>
+
+                   </th>
+
+
+                <th class="micro-header" data-field="type_h"   data-align="center" data-halign="center"   data-formatter="stateFormatterH" >
+                 H <span class="badge badge-pill badge-dark"  data-toggle="tooltip" data-placement="top" title="Inferred from HOGs">?</span>
+
+                   </th>
+
+
+                <th class="micro-header" data-field="type_g"   data-align="center" data-halign="center"   data-formatter="stateFormatterOG" >P <span class="badge badge-pill badge-dark"  data-toggle="tooltip" data-placement="top" title="Inferred from OMA groups">?</span>
+
+                   </th>
 
 
                  <th  data-field="kingdom" data-sortable="true" data-filter-control="select"

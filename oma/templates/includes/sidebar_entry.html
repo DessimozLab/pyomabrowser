@@ -206,6 +206,11 @@
 
     function apply_filter(){
 
+        $('#filter-taxon-container').find('.form-check').find('input[type=radio]:checked').prop('checked', false);
+
+        document.getElementById("all").checked = true;
+
+
         var filter_parameters = {};
 
         if (apply_filter_pair){
