@@ -59,11 +59,14 @@
         <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
                 <div class="oma-search-select">
                     <select id="selectBrowser" class=" btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
-                        <option value="id" selected="selected">Identifier</option>
-                        <option value="sequence">Protein sequence</option>
-                        <option value="group">OMA group</option>
-                        <option value="fulltext">Full-text search</option>
-                        <option value="species">Species</option>
+                         <option  class="float-right" disabled>Protein</option>
+                        <option value="id" selected="selected"> &nbsp; Identifier</option>
+                        <option value="sequence">&nbsp; Protein sequence</option>
+                        <option value="fulltext">&nbsp; Full-text search</option>
+                        <option  class="float-right" disabled>     OMA group</option>
+                        <option value="group">&nbsp; Group number</option>
+                        <option  class="float-right" disabled>Species</option>
+                        <option value="species">&nbsp; Name</option>
                     </select>
                 </div>
                 <input id='inputBrowser' name="query" type="text" class="" placeholder="Please enter a value"/>
@@ -92,11 +95,14 @@
                 <form class="oma-search-mobile" id="searchNavForm" role="search" action="{% url 'search' %}" method="POST">
                     <div class="oma-search-select">
                         <select id="selectNav" class=" btn-mini" name="type" onchange="update_autocomplete_enableing('searchNavForm')">
-                            <option value="id" selected="selected">Identifier</option>
-                            <option value="sequence">Protein sequence</option>
-                            <option value="group">OMA group</option>
-                            <option value="fulltext">Full-text search</option>
-                            <option value="species">Species</option>
+                             <option  class="float-right" disabled>Protein</option>
+                        <option value="id" selected="selected"> &nbsp; Identifier</option>
+                        <option value="sequence">&nbsp; Protein sequence</option>
+                        <option value="fulltext">&nbsp; Full-text search</option>
+                        <option  class="float-right" disabled>     OMA group</option>
+                        <option value="group">&nbsp; Group number</option>
+                        <option  class="float-right" disabled>Species</option>
+                        <option value="species">&nbsp; Name</option>
                         </select>
                     </div>
                     <input type="text" id="textNav" class="" name="query" placeholder="Please enter a value"/>
