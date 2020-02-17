@@ -497,7 +497,7 @@ display: flex;
 justify-content: center;
 align-items: center;
 border-bottom: 1px solid #eee;
-	background: transparent;
+	background: inherit !important;
  }
 
 
@@ -941,6 +941,20 @@ border-bottom: 1px solid #eee;
     text-align: center;
     display: inline-flex;
     align-items: center;
+
+}
+
+.scroll4more svg {
+width: 48px;
+animation-name: pulsate;
+      animation-duration: 5s;
+      animation-iteration-count: infinite;
+}
+
+.scroll4more h5 {
+font-family: "Ropa Sans”, sans-serif;
+text-transform: uppercase;
+font-size: .9rem;
 }
 
 .gene-orthology, .gene-orthology .selected {

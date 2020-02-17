@@ -18,11 +18,14 @@
             <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
                 <div class="oma-search-select">
                     <select id="selectBrowser" class="btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
-                        <option value="id" selected="selected">Identifier</option>
-                        <option value="sequence">Protein sequence</option>
-                        <option value="group">OMA group</option>
-                        <option value="fulltext">Full-text search</option>
-                        <option value="species">Species</option>
+                       <option  class="float-right" disabled>Protein</option>
+                        <option value="id" selected="selected"> &nbsp; Identifier</option>
+                        <option value="sequence">&nbsp; Protein sequence</option>
+                        <option value="fulltext">&nbsp; Full-text search</option>
+                        <option  class="float-right" disabled>     OMA group</option>
+                        <option value="roup">&nbsp; Group number</option>
+                        <option  class="float-right" disabled>Species</option>
+                        <option value="species">&nbsp; Name</option>
                     </select>
                 </div>
                 <input id='inputBrowser' name="query" type="text" class="" placeholder="Please enter a value"/>
@@ -77,14 +80,17 @@
 
         <div class="d-none d-lg-block scroll4more">
 
+            <h5>Scroll to discover more</h5>
 
-            <svg class="mouse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43 92.13">
-  <title>ic-scroll-down</title>
-  <g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1">
-  <rect class="mouse-rect" x="1.5" y="1.5" width="40" height="72.92" rx="20" ry="20"></rect>
-  <rect class="scroll-wheel" x="20.03" y="17" width="2.93" height="9.67" rx="0.83" ry="0.83"></rect>
-  <polygon class="mouse-arrow-down" points="21.5 92.13 28.02 80.83 14.98 80.83 21.5 92.13"></polygon>
-  </g></g></svg>
+
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 258.97" >
+  <title>chevronDown</title>
+  <g id="Layer_2" data-name="Layer 2">
+    <g id="Capa_1" data-name="Capa 1">
+      <path d="M298.41,241.44,506.13,34.16A20,20,0,0,0,477.87,5.84L270.14,213.14a20,20,0,0,1-28.3,0L34.13,5.84A20,20,0,0,0,5.87,34.16l207.7,207.27A60.07,60.07,0,0,0,298.41,241.44Z"/>
+    </g>
+  </g>
+</svg>
         </div>
 
 
@@ -161,6 +167,9 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
  <div id="oma-landing-cards">
         <div class="container-fluid">
             <div class="row ">
+
+
+
                 <div class="col-lg-3 col-md-6">
                     <div class="oma-card">
                         <div class="oma-mobile-accordion">
@@ -178,8 +187,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                             <br>
                             <ul>
                                 <li><p>
-                                    Read our
-                                        <a href="{% url 'about'  %}">brief introduction to OMA</a>.</p>
+                                    If you have not done it yet, read our brief <a href="{% url 'about'  %}"> introduction to OMA</a>.</p>
                                 </li>
                                 <li><p>
                                     Familiarise yourself with the
@@ -188,6 +196,10 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                 <li><p>
                                     Get ideas about
                                     <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.</p>
+                                </li>
+
+                                <li style="border-bottom: none;">
+                                    <button type="button" class="btn btn-outline-dark" style="display:block;margin: 0 auto;" >More help here!</button>
                                 </li>
                             </ul>
                         </div>
@@ -202,7 +214,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                 <path d="M47.000,18.909 L44.000,18.909 C43.447,18.909 43.000,18.507 43.000,17.956 C43.000,17.405 43.447,16.909 44.000,16.909 L47.000,16.909 C47.553,16.909 48.000,17.405 48.000,17.956 C48.000,18.507 47.553,18.909 47.000,18.909 ZM41.707,5.687 C41.512,5.882 41.256,5.980 41.000,5.980 C40.744,5.980 40.488,5.882 40.293,5.687 C39.902,5.298 39.902,4.666 40.293,4.276 L44.293,0.284 C44.684,-0.106 45.316,-0.106 45.707,0.284 C46.098,0.674 46.098,1.306 45.707,1.695 L41.707,5.687 ZM31.898,31.677 C31.164,32.339 30.997,33.765 30.997,34.212 L30.997,42.479 C30.997,42.530 30.993,42.581 30.985,42.631 C30.703,44.454 28.880,47.898 23.998,47.898 C19.117,47.898 17.293,44.454 17.011,42.631 C17.003,42.581 16.999,42.530 16.999,42.479 L16.999,34.215 C16.995,33.741 16.824,32.366 16.089,31.668 C11.453,28.178 8.998,23.628 8.998,18.498 C8.998,9.945 15.727,2.986 23.998,2.986 C32.269,2.986 38.998,9.945 38.998,18.498 C38.998,23.633 36.540,28.186 31.898,31.677 ZM23.998,45.902 C28.082,45.902 28.878,42.977 28.997,42.388 L28.997,37.981 C27.333,38.667 25.706,38.925 24.224,38.925 C22.051,38.925 20.210,38.395 18.999,37.930 L18.999,42.390 C19.114,42.961 19.904,45.902 23.998,45.902 ZM23.998,4.982 C16.830,4.982 10.998,11.045 10.998,18.498 C10.998,24.190 14.459,27.966 17.363,30.131 C17.380,30.144 17.388,30.162 17.403,30.176 C17.417,30.188 17.435,30.191 17.448,30.204 C18.954,31.612 18.999,33.949 18.999,34.212 L18.999,35.772 C20.422,36.432 24.653,37.986 28.997,35.777 L28.997,34.212 C28.997,33.943 29.042,31.553 30.564,30.189 C30.576,30.179 30.590,30.176 30.602,30.167 C30.615,30.156 30.620,30.141 30.634,30.131 C33.537,27.966 36.998,24.190 36.998,18.498 C36.998,11.045 31.166,4.982 23.998,4.982 ZM3.707,35.629 C3.512,35.824 3.256,35.922 3.000,35.922 C2.744,35.922 2.488,35.824 2.293,35.629 C1.902,35.239 1.902,34.607 2.293,34.218 L6.293,30.226 C6.684,29.836 7.316,29.836 7.707,30.226 C8.098,30.615 8.098,31.247 7.707,31.636 L3.707,35.629 ZM6.999,5.980 C6.743,5.980 6.487,5.882 6.292,5.687 L2.292,1.695 C1.901,1.306 1.901,0.674 2.292,0.284 C2.683,-0.106 3.315,-0.106 3.706,0.284 L7.706,4.276 C8.097,4.666 8.097,5.298 7.706,5.687 C7.511,5.882 7.255,5.980 6.999,5.980 ZM5.000,17.956 C5.000,18.507 4.553,18.909 4.000,18.909 L1.000,18.909 C0.447,18.909 0.000,18.507 0.000,17.956 C0.000,17.405 0.447,16.909 1.000,16.909 L4.000,16.909 C4.553,16.909 5.000,17.405 5.000,17.956 ZM41.708,30.226 L45.708,34.218 C46.099,34.607 46.099,35.239 45.708,35.629 C45.513,35.824 45.257,35.922 45.001,35.922 C44.745,35.922 44.489,35.824 44.294,35.629 L40.294,31.636 C39.903,31.247 39.903,30.615 40.294,30.226 C40.685,29.836 41.317,29.836 41.708,30.226 Z"
                                       class="cls-1"/>
                             </svg>
-                            <h1>Online tools</h1>
+                            <h1>OMA tools</h1>
                             <i class="material-icons">
                                 keyboard_arrow_right
                             </i>
@@ -210,17 +222,18 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                         <div class="oma-card-content">
                              <br>
                             <ul>
-                                <li><a href="{% url 'home' %}">Fast mapping</a></li>
-                                <li> <a  href="{% url 'function-projection-input' %}">Functional prediction</a></li>
-                                <li> <a  href="{% url 'land_syntenyDP' %}">Synteny dotplot</a></li>
-                                <li><a href="{% url 'genomePW' %}">Genome pair orthology</a></li>
-
-
-
-
-
+                                <li> <a  href="/standalone">OMA StandAlone <span class="badge badge-pill badge-dark">Software</span></a> </li>
+                                <li> <a  href="https://github.com/dessimozlab/pyham">pyHam <span class="badge badge-pill badge-dark">Python library</span></a> </li>
+                                <li> <a  href="{% url 'function-projection-input' %}">Functional prediction <span class="badge badge-pill badge-success">Online</span></a></li>
+                                <li> <a  href="{% url 'land_syntenyDP' %}">Synteny dotplot <span class="badge badge-pill badge-success">Online</span></a></li>
+<li style="border-bottom: none;">
+                                    <button type="button" class="btn btn-outline-dark" style="display:block;margin: 0 auto;" >Discover more tools</button>
+                                </li>
                             </ul>
+
                         </div>
+
+
                     </div>
                 </div>
 
@@ -244,19 +257,31 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                     All data is available for downloading in a variety of formats.
                                 </li>
 
-                                <li><b><a href="/standalone">OMA Standalone</a>:</b>
-                                    OMA standalone allows you to infer orthologs on your own set of genomes.
+                                <li><b><a href="{% url 'api-docs:docs-index' %}">API</a>:</b>
+                                    The OMA Browser now supports its own REST API !
                                 </li>
 
                                 <li><b><a href="{% url 'export' %}">Export All-All</a>:</b>
                                     Export a set of genomes and their precomputed all-against-all comparisons for OMA standalone.
                                 </li>
 
-                                <li><b><a href="{% url 'archives'  %}">Archives</a>:</b>
-                                    Previous OMA releases remain available in this section.
+
+
+                                <li style="border-bottom: none;">
+                                    <button type="button" class="btn btn-outline-dark" style="display:block;margin: 0 auto;" >See more download options</button>
                                 </li>
+
                             </ul>
+
+
+
+
+
+
                         </div>
+
+
+
                     </div>
                 </div>
 
