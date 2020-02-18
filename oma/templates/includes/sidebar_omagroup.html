@@ -57,10 +57,10 @@
 
 
          <li class="{% if tab == 'similar' %} active selected {%endif%}" {% if tab != 'similar' %}
-             onclick="window.location='{% url 'omagroup_similar_profile' omagroup.group_nbr %}'" {%endif%}>
-            <a href="{% url 'omagroup_similar_profile' omagroup.group_nbr %}" {% if tab == 'similar' %}data-toggle="collapse" data-target="#filterSimilar"{%endif%}>
+             onclick="window.location='{% url 'omagroup_similar_pairwise' omagroup.group_nbr %}'" {%endif%}>
+            <a href="{% url 'omagroup_similar_pairwise' omagroup.group_nbr %}" {% if tab == 'similar' %}data-toggle="collapse" data-target="#filterSimilar"{%endif%}>
 
-                <span>Similar OMA GROUPs
+                <span>Similar OMA groups
 
                     </span>
                 {% if tab == 'similar' %}
@@ -73,16 +73,36 @@
           <div id="filterSimilar" class="collapse {% if tab == 'similar'%} show {%endif%}">
 
 
-              <div class="card">
 
-                  Show closest oma groups based on:
+              <h5>Based on number of:</h5>
+
+              <div class="form-group">
 
 
-                  <a class="btn btn-outline-dark btm-sm" href="{% url 'omagroup_similar_profile' omagroup.group_nbr %}" role="button">Shared Species</a>
-                  <br>
-                  <a class="btn btn-outline-dark btm-sm" href="{% url 'omagroup_similar_pairwise' omagroup.group_nbr %}" role="button">Share orthologs</a>
+                    <div class="form-check">
+  <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2"
+         onclick="window.location='{% url 'omagroup_similar_pairwise' omagroup.group_nbr %}';"
+         value="option2" {% if subtab == 'pairwise' %} checked {%endif%}>
+  <label class="form-check-label" for="exampleRadios2">
+   Shared orthologs
+  </label>
+</div>
+
+              <div class="form-check">
+  <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1"
+         onclick="window.location='{% url 'omagroup_similar_profile' omagroup.group_nbr %}';"
+         value="option1"   {% if subtab == 'profile' %} checked {%endif%}>
+  <label class="form-check-label" for="exampleRadios1">
+    Shared species
+  </label>
+</div>
+
 
               </div>
+
+
+
+
 
 
           </div>

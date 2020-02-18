@@ -5,6 +5,8 @@
 <dl class="">
 
 
+
+
     {% if genome.common_name %} <dt class="col-sm-3">Common name:</dt><dd class="col-sm-6">{{ genome.common_name }}</dd> {% endif %}
 
      {% if genome.uniprot_species_code %}  <dt class="col-sm-3">UniProt identifier:</dt><dd class="col-sm-6">{{ genome.uniprot_species_code }}</dd> {% endif %}
@@ -18,6 +20,10 @@
      {% if genome %} <dt class="col-sm-3">Web link:</dt><dd class="col-sm-6">TODO</dd> {% endif %}
 
      {% if genome.lineage %}  <dt class="col-sm-3">Taxonomy:</dt><dd class="col-sm-6">{{ genome.lineage }}</dd> {% endif %}
+
+     {% if prot_in_group %}  <dt class="col-sm-3">Proteins in OMA groups:</dt><dd class="col-sm-6">{{ prot_in_group}}</dd> {% endif %}
+
+     {% if prot_in_hogs %}  <dt class="col-sm-3">Proteins in HOGs:</dt><dd class="col-sm-6">{{ prot_in_hogs }}</dd> {% endif %}
 
 </dl>
 

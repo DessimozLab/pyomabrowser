@@ -454,6 +454,12 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
      background: none;
     padding: 2rem 1rem;
 }
+
+  #oma-generic-container .container-fluid .jumbotron {
+	 position: relative;
+     background: none;
+    padding: 2rem 1rem;
+}
  #oma-generic-container .container .jumbotron .oma-seperator {
 	 position: relative;
 	 width: 100%;

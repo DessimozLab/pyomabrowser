@@ -14,7 +14,70 @@
      <ul class="genome">
 
 
-          <li class="{% if tab == 'synteny' %} active selected {%endif%}" {% if tab != 'synteny' %}
+
+
+
+         <li class="{% if tab == 'information' %}  active selected {%endif%}">
+            <a href="{% url 'genome_info' genome.uniprot_species_code %}">
+                <span> Genome information</span>
+            </a>
+        </li>
+
+
+         <li class="{% if tab == 'genes' %} active selected {%endif%}">
+            <a href="{% url 'genome_genes' genome.uniprot_species_code %}">
+                <span> List genes</span>
+            </a>
+        </li>
+
+
+          <li class="{% if tab == 'closest' %} active selected {%endif%}" {% if tab != 'closest' %}
+             onclick="window.location='{% url 'genome_closest_og' genome.uniprot_species_code %}'" {%endif%}>
+            <a href="{% url 'genome_closest_og' genome.uniprot_species_code %}" {% if tab == 'closest' %}data-toggle="collapse" data-target="#filterSimilar"{%endif%}>
+
+
+              <span>Related Species
+
+                    </span>
+                {% if tab == 'closest' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
+            </a>
+
+
+
+          <div id="filterSimilar" class="collapse {% if tab == 'closest'%} show {%endif%}">
+
+
+              <h5>Based on number of:</h5>
+
+              <div class="form-group">
+
+              <div class="form-check">
+  <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1"
+         onclick="window.location='{% url 'genome_closest_og' genome.uniprot_species_code %}';"
+         value="option1"   {% if subtab == 'groups' %} checked {%endif%}>
+  <label class="form-check-label" for="exampleRadios1">
+    Shared OMA groups
+  </label>
+</div>
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2"
+         onclick="window.location='{% url 'genome_closest_hog' genome.uniprot_species_code %}';"
+         value="option2" {% if subtab == 'hogs' %} checked {%endif%}>
+  <label class="form-check-label" for="exampleRadios2">
+    Shared HOGs
+  </label>
+</div>
+
+              </div>
+
+          </div>
+
+          </li>
+
+
+         <li class="{% if tab == 'synteny' %} active selected {%endif%}" {% if tab != 'synteny' %}
              onclick="window.location='{% url 'genome_synteny' genome.uniprot_species_code %}'" {%endif%}>
             <a href="{% url 'genome_synteny' genome.uniprot_species_code %}" {% if tab == 'synteny' %}data-toggle="collapse" data-target="#filterSynteny"{%endif%}>
 
@@ -91,71 +154,6 @@
             </div>
 
         </li>
-
-
-
-         <li class="{% if tab == 'information' %}  active selected {%endif%}">
-            <a href="{% url 'genome_info' genome.uniprot_species_code %}">
-                <span> Genome information</span>
-            </a>
-        </li>
-
-
-
-
-
-
-         <li class="{% if tab == 'genes' %} active selected {%endif%}">
-            <a href="{% url 'genome_genes' genome.uniprot_species_code %}">
-                <span> List genes</span>
-            </a>
-        </li>
-
-
-          <li class="{% if tab == 'closest' %} active selected {%endif%}" {% if tab != 'closest' %}
-             onclick="window.location='{% url 'genome_closest_og' genome.uniprot_species_code %}'" {%endif%}>
-            <a href="{% url 'genome_closest_og' genome.uniprot_species_code %}" {% if tab == 'closest' %}data-toggle="collapse" data-target="#filterSimilar"{%endif%}>
-
-                <span>Similar Species
-
-                    </span>
-                {% if tab == 'closest' %}
-                <i class="material-icons">keyboard_arrow_right</i>
-                {%endif%}
-            </a>
-
-
-
-          <div id="filterSimilar" class="collapse {% if tab == 'closest'%} show {%endif%}">
-
-
-              <div class="card">
-
-                  Show closest species based on:
-
-                  <a class="btn btn-outline-dark btn-sm" href="{% url 'genome_closest_og' genome.uniprot_species_code %}" role="button">Shared OG</a>
-                  <br>
-                  <a class="btn btn-outline-dark btm-sm" href="{% url 'genome_closest_hog' genome.uniprot_species_code %}" role="button">Shared HOGs</a>
-
-
-
-              </div>
-
-
-          </div>
-
-          </li>
-
-
-
-
-
-
-
-
-
-
-
 
 
 

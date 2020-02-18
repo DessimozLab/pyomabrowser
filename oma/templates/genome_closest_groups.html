@@ -2,6 +2,79 @@
 
 {% block contentTab %}
 
-    CLOSEST GROUPS
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+      <div class="card">
+  <div class="card-header">
+    Species with most common OMA groups
+  </div>
+  <div class="card-body">
+
+
+      <table class="table table-borderless">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Code</th>
+      <th scope="col">Scientific Name</th>
+      <th scope="col">OMA groups</th>
+    </tr>
+  </thead>
+  <tbody>
+
+  {% for close in closest %}
+    <tr>
+        <th scope="row">{{forloop.counter}}</th>
+         <td ><a href="{% url 'genome_info' close.genome.uniprot_species_code %}">{{close.genome.uniprot_species_code}}</a></td>
+        <td >{{close.genome.sciname}}</td>
+        <td>{{close.nbr}}</td>
+    </tr>
+{% endfor %}
+
+  </tbody>
+</table>
+
+
+
+  </div>
+</div>
+    </div>
+    <div class="col">
+      <div class="card">
+  <div class="card-header">
+    Species with least common OMA groups
+  </div>
+  <div class="card-body">
+       <table class="table table-borderless">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Code</th>
+      <th scope="col">Scientific Name</th>
+      <th scope="col">OMA groups</th>
+    </tr>
+  </thead>
+  <tbody>
+
+  {% for close in least %}
+    <tr>
+        <th scope="row">{{forloop.counter}}</th>
+         <td ><a href="{% url 'genome_info' close.genome.uniprot_species_code %}">{{close.genome.uniprot_species_code}}</a></td>
+        <td >{{close.genome.sciname}}</td>
+        <td>{{close.nbr}}</td>
+    </tr>
+{% endfor %}
+
+  </tbody>
+</table>
+  </div>
+</div>
+    </div>
+  </div>
+</div>
+
+
 
 {% endblock contentTab %}

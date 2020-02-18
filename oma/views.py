@@ -814,7 +814,9 @@ class GenomeBase(ContextMixin):
         context = super(GenomeBase, self).get_context_data(**kwargs)
         try:
             genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(specie_id))
+            meta = utils.db.per_species_metadata_retriever(specie_id)
             context['genome'] = genome_obj
+            context['genome_meta'] = meta
         except db.InvalidId as e:
             raise Http404(e)
         return context
@@ -825,7 +827,11 @@ class GenomeCentricInfo(GenomeBase, TemplateView):
 
     def get_context_data(self, specie_id, **kwargs):
         context = super(GenomeCentricInfo, self).get_context_data(specie_id, **kwargs)
-        context.update({'tab': 'information'})
+
+        prot_in_group = context['genome_meta'].get_nr_genes_in_group(group_type="OMAGroup")
+        prot_in_hogs = context['genome_meta'].get_nr_genes_in_group(group_type="HOG")
+
+        context.update({'tab': 'information', "prot_in_group":prot_in_group, "prot_in_hogs" :prot_in_hogs })
         return context
 
 
@@ -844,7 +850,15 @@ class GenomeCentricClosestGroups(GenomeBase, TemplateView):
 
     def get_context_data(self, specie_id, **kwargs):
         context = super(GenomeCentricClosestGroups, self).get_context_data(specie_id, **kwargs)
-        context.update({'tab': 'closest', 'subtab':'groups'})
+        gr_close_raw = context['genome_meta'].get_most_similar_species(limit=10, group_type='OMAGroup')
+        gr_close = []
+        for g in gr_close_raw:
+            gr_close.append({'genome':models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr':g[1]})
+        gr_least_raw = context['genome_meta'].get_least_similar_species(limit=10, group_type='OMAGroup')
+        gr_least = []
+        for g in gr_least_raw:
+            gr_least.append({'genome': models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])) , 'nbr': g[1]})
+        context.update({'tab': 'closest', 'subtab':'groups', 'closest':gr_close, 'least':gr_least })
         return context
 
 
@@ -853,7 +867,19 @@ class GenomeCentricClosestHOGs(GenomeBase, TemplateView):
 
     def get_context_data(self, specie_id, **kwargs):
         context = super(GenomeCentricClosestHOGs, self).get_context_data(specie_id, **kwargs)
-        context.update({'tab': 'closest', 'subtab':'hogs'})
+        hog_closest_raw = context['genome_meta'].get_most_similar_species(limit=10, group_type='HOG')
+        hog_least_raw = context['genome_meta'].get_least_similar_species(limit=10, group_type='HOG')
+
+        hog_closest = []
+        for g in hog_closest_raw:
+            hog_closest.append({'genome':models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr':g[1]})
+
+        hog_least = []
+        for g in hog_least_raw:
+            hog_least.append({'genome':models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr':g[1]})
+
+
+        context.update({'tab': 'closest', 'subtab':'hogs', 'closest':hog_closest, 'least':hog_least })
         return context
 
 

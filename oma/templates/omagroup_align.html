@@ -11,12 +11,15 @@
 {% endblock %}
 
 {% block js_hook %}
-<script src='{% static "js/msa.js"%}'></script>
+<script src="{% static 'js/msa.js'%}"></script>
 {% endblock %}
 
 
 
 {% block contentTab %}
+
+
+<!--
 
 
 <div class="panel panel-default">
@@ -29,6 +32,15 @@
     <div class="panel-body">
         {% include "includes/msa.html" %}
     </div>
+</div>
+
+
+-->
+
+
+
+    <div class="alert alert-danger" role="alert">
+  THE PAGE IS UNDER CONSTRUCTION !
 </div>
 
 {% endblock contentTab %}
