@@ -172,8 +172,7 @@ class InfoBase(ContextMixin, EntryCentricMixin):
 
         ## Get VPS
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-        close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
-
+        pps = utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr)
         for rel in itertools.chain(vps_raw):
             orthologs_list.append(rel[1])
 
@@ -195,7 +194,7 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         vps_ = list(set(orthologs_list))
 
         context.update({'entry': entry, 'tab': 'geneinformation', 'nr_vps': len(vps_),
-                        'nr_pps': len(close_paralogs)})
+                        'nr_pps': len(pps)})
         return context
 
 
@@ -400,8 +399,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
     ## Get VPS
     vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-    close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
-
+    pps = utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr)
     for rel in itertools.chain(vps_raw):
         orthologs_list.append(rel[1])
 
@@ -425,7 +423,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
     context = {'positions': positions, 'windows': windows,
                'md': md_geneinfos, 'o_md': o_md_geneinfos, 'colors': colors,
                'stripes': stripes, 'nr_vps': len(vps_),
-               'nr_pps': len(close_paralogs),
+               'nr_pps': len(pps),
                'entry': entry,
                'tab': 'synteny', 'xrefs': xrefs
     }
@@ -447,7 +445,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
 
         ## Get VPS
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-        close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
+        pps = utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr)
         for rel in itertools.chain(vps_raw):
             pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
             pw_relation.reltype = rel['RelType']
@@ -523,7 +521,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
 
 
         context.update(
-            {'entry': entry, 'nr_pps': len(close_paralogs),
+            {'entry': entry, 'nr_pps': len(pps),
              'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs',
              'longest_seq': longest_seq,
              'table_data_url': reverse('pairs_support_json', args=(entry.omaid,))
@@ -592,7 +590,6 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
         ## Get VPS
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
 
-
         for rel in itertools.chain(vps_raw):
             orthologs_list.append(rel[1])
 
@@ -616,19 +613,12 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
 
         ## GET PARALOGS
 
-        close_paralogs = utils.db.get_within_species_paralogs(entry.entry_nr)
+        pps = []
 
-        orthologs_dict = {}
-
-        for rel in itertools.chain(close_paralogs):
-            pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
-            pw_relation.reltype = rel['RelType']
-            if not hasattr(pw_relation, 'type'):
-                pw_relation.type = []
-            pw_relation.type.append('PO')
-            orthologs_dict[rel['EntryNr2']] = pw_relation
-
-        pps = orthologs_dict.values()
+        for p in utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr):
+            pm = models.ProteinEntry.from_entry_nr(utils.db, p[0])
+            pm.DivergenceLevel = p["DivergenceLevel"].decode('utf-8')
+            pps.append(pm)
 
         longest_seq = 0
         if len(pps) > 0:
@@ -636,18 +626,18 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
 
 
         context.update(
-            {'entry': entry, 'nr_pps': len(close_paralogs),'nr_vps': len(vps_), 'pps':pps,
+            {'entry': entry, 'nr_pps': len(pps),'nr_vps': len(vps_), 'pps':pps,
              'longest_seq': longest_seq,
-             'table_data_url': reverse('pairspara_support_json', args=(entry.omaid,)),
+             'table_data_url': reverse('pairs_para_json', args=(entry.omaid,)),
               'tab': 'paralogs'})
         return context
 
 # With information if the pair is supported by PO, HOGS and/or OMA groups
-class PairsParalogsJson_Support(Entry_Paralogy, JsonModelMixin, View,):
+class PairsParalogsJson(Entry_Paralogy, JsonModelMixin, View,):
 
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'reltype': None, 'type': 'type'}
+                   'canonicalid': 'xrefid', 'DivergenceLevel': 'DivergenceLevel'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
