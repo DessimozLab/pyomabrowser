@@ -4,6 +4,45 @@
 {% block contentTab %}
 
 
-<p>PAIRWISE</p>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+      <div class="card">
+  <div class="card-header">
+    OMA groups with shared orthologs relations
+  </div>
+  <div class="card-body">
+
+
+      <table class="table table-borderless">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">OMA groups</th>
+      <th scope="col">Orthologous relations</th>
+
+    </tr>
+  </thead>
+  <tbody>
+
+  {% for close in similar_groups %}
+    <tr>
+        <th scope="row">{{forloop.counter}}</th>
+        <td ><a href="{% url 'omagroup_members' close.1 %}">{{close.1}}</a></td>
+        <th scope="row">{{close.0}}</th>
+    </tr>
+{% endfor %}
+
+  </tbody>
+</table>
+
+
+
+  </div>
+</div>
+    </div>
+
+  </div>
+</div>
 
 {% endblock contentTab %}

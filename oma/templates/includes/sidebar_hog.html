@@ -22,7 +22,7 @@
 
         <li class="{% if tab == 'table' %} active selected {%endif%}">
                 <a href="{% if level != None %}  {% url 'hog_table' hog_id  level%}  {%else%}  {% url 'hog_table' hog_id  %} {%endif%} " >
-                <span>Table view</span>
+                <span>Members</span>
 
             </a>
 
@@ -46,35 +46,50 @@
           <div id="filterSimilar" class="collapse {% if tab == 'similar'%} show {%endif%}">
 
 
-              <div class="card">
 
-                  Show closest HOGs based on:
+              <h5>Based on:</h5>
 
-                  <a class="btn btn-outline-dark btn-sm" href="{% if level != None %}  {% url 'hog_similar_domain' hog_id  level%}  {%else%}  {% url 'hog_similar_domain' hog_id  %} {%endif%}" role="button">Shared domains</a>
-                  <br>
-                  <a class="btn btn-outline-dark btm-sm" href="{% if level != None %}  {% url 'hog_similar_profile' hog_id  level%}  {%else%}  {% url 'hog_similar_profile' hog_id  %} {%endif%}" role="button">Shared Species</a>
-                  <br>
-                  <a class="btn btn-outline-dark btm-sm" href="{% if level != None %}  {% url 'hog_similar_pairwise' hog_id  level%}  {%else%}  {% url 'hog_similar_pairwise' hog_id  %} {%endif%}" role="button">Share orthologs</a>
+              <div class="form-group">
+
+
+                  <div class="form-check">
+  <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3"
+         onclick="window.location='{% if level != None %}  {% url 'hog_similar_domain' hog_id  level%}  {%else%}  {% url 'hog_similar_domain' hog_id  %} {%endif%}';"
+         value="option3" {% if subtab == 'domain' %} checked {%endif%}>
+  <label class="form-check-label" for="exampleRadios3">
+   Shared Domains
+  </label>
+</div>
+
+
+
+                  <div class="form-check">
+  <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1"
+         onclick="window.location='{% if level != None %}  {% url 'hog_similar_pairwise' hog_id  level%}  {%else%}  {% url 'hog_similar_pairwise' hog_id  %} {%endif%}';"
+         value="option1"   {% if subtab == 'pairwise' %} checked {%endif%}>
+  <label class="form-check-label" for="exampleRadios1">
+     Shared orthologs
+  </label>
+</div>
+
+
+                  <div class="form-check">
+  <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2"
+         onclick="window.location='{% if level != None %}  {% url 'hog_similar_profile' hog_id  level%}  {%else%}  {% url 'hog_similar_profile' hog_id  %} {%endif%}';"
+         value="option2" {% if subtab == 'profile' %} checked {%endif%}>
+  <label class="form-check-label" for="exampleRadios2">
+   Shared species
+  </label>
+</div>
+
+
+
 
               </div>
-
 
           </div>
 
           </li>
-
-
-
-
-
-
-        <li class="{% if tab == 'info' %} active selected {%endif%}">
-            <a href="{% if level != None %}  {% url 'hog_info' hog_id  level%}  {%else%}  {% url 'hog_info' hog_id  %} {%endif%} " >
-                <span>Sub HOG (debug)</span>
-
-            </a>
-
-        </li>
 
 
     </ul>

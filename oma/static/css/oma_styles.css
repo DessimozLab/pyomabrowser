@@ -55,8 +55,8 @@ body {
 }
  body .search form, body .oma-search form, body .oma-main-search-header form {
 	 display: flex;
-	 box-shadow: 2px 2px 10px -6px;
-	 border-radius: 20px;
+	 box-shadow: 2px 2px 10px -6px rgba(0,0,0,0.5);
+	 border-radius: 5px;
 }
  body .search form .oma-search-select, body .oma-search form .oma-search-select, body .oma-main-search-header form .oma-search-select {
 	 width: 220px;
@@ -87,7 +87,7 @@ body {
 	 width: 100%;
 	 border: 1px solid #e9e5e5;
 	 box-shadow: none;
-	 border-radius: 0 20px 20px 0;
+	 border-radius: 0 5px 5px 0;
 	 padding: 8px;
 	 background: #fff;
 }
@@ -404,8 +404,6 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
     font-weight: 700;
 }
 
-
-
  body .oma-details-container .oma-details-nav-left ul li a:hover {
 	 text-decoration: none;
 }
@@ -460,6 +458,7 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
      background: none;
     padding: 2rem 1rem;
 }
+
  #oma-generic-container .container .jumbotron .oma-seperator {
 	 position: relative;
 	 width: 100%;
@@ -503,12 +502,20 @@ display: flex;
 justify-content: center;
 align-items: center;
 border-bottom: 1px solid #eee;
-	background: inherit !important;
  }
 
 
 .oma-card-content{
 	padding: 0 20px;
+	min-height: 350px;
+}
+
+.btn-more-container {
+position: absolute !important;
+left: 50% !important;
+bottom: 0px !important;
+transform: translate(-50%, -10%) !important;
+border: none !important;
 }
 
  @media (max-width: 1366px) {
@@ -518,6 +525,13 @@ border-bottom: 1px solid #eee;
 		 max-width: 50%;
 		 margin: 10px 0;
 	}
+
+	 .btn-more-container {
+position: relative !important;
+left: initial !important;
+bottom: initial !important;
+transform: none !important;
+}
 }
  @media screen and (max-width: 1200px) {
 	 body {
@@ -617,6 +631,12 @@ border-bottom: 1px solid #eee;
 	 body #oma-statistics .container {
 		 max-width: 100%;
 	}
+	 .btn-more-container {
+position: relative !important;
+left: initial !important;
+bottom: initial !important;
+transform: none !important;
+}
 }
  @media screen and (max-width: 1024px) {
 	 body {
@@ -732,8 +752,19 @@ border-bottom: 1px solid #eee;
 	 body .oma-details-container .oma-details-nav-left ul li a {
 		 padding: 10px 0;
 	}
+	 .btn-more-container {
+position: relative !important;
+left: initial !important;
+bottom: initial !important;
+transform: none !important;
+}
 }
  @media screen and (max-width: 768px) {
+
+
+
+
+
 	 body.landing {
 		 background: none;
 	}
@@ -777,6 +808,8 @@ border-bottom: 1px solid #eee;
 		 padding: 10px;
 		 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 		 cursor: pointer;
+		 	background: inherit !important;
+
 
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion i {
@@ -811,6 +844,7 @@ border-bottom: 1px solid #eee;
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content {
 		 display: none;
 		 padding: 0 20px;
+		 min-height: auto
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content h1 {
 		 border-top: 1px solid rgba(0, 0, 0, 0.1);
@@ -849,6 +883,14 @@ border-bottom: 1px solid #eee;
 	 body #oma-generic-container .container .jumbotron h1 {
 		 font-size: 2.5rem;
 	}
+
+
+	 	 .btn-more-container button {
+background-color: #343a40 !important;
+color: #fff !important;
+border-color: #343a40 !important;
+margin: 0 0 10px !important;
+}
 }
  @media screen and (max-width: 575px) {
 	 body {
@@ -967,8 +1009,6 @@ font-size: .9rem;
     background-color: #369  !important;
 }
 
-
-
 .oma-group, .oma-group .selected {
 background-color: #64c7cd !important;
 color: #222 !important;
@@ -1072,3 +1112,8 @@ color: #222 !important;
 .micro-header{
 	font-size: xx-small !important;
 }
+
+
+
+
+

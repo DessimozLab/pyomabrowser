@@ -21,7 +21,8 @@ from django.core.mail import EmailMessage
 from django.template import Context
 from django.template.loader import render_to_string, get_template
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
+
 import tweepy
 import logging
 import itertools
@@ -1025,11 +1026,38 @@ class HOGSimilarPairwise(HOG_Base, TemplateView):
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarPairwise, self).get_context_data(hog_id, **kwargs)
 
+        members_models = [models.ProteinEntry.from_entry_nr(utils.db, e[0]) for e in context['members']]
+        gene_ids = [en.entry_nr for en in members_models]
+
+        print(gene_ids)
+
+
+        # get orthologs of the HOGs members
+        gene_outside = []
+
+        for m in members_models:
+            vps_raw = sorted(utils.db.get_vpairs(m.entry_nr), key=lambda x: x['RelType'])
+            print(vps_raw)
+            gene_outside += [models.ProteinEntry.from_entry_nr(utils.db, rel[1]) for rel in vps_raw if
+                             rel[1] not in gene_ids]
+
+
+        print(gene_outside)
+        # count for each HOG orthologs the numbers of relations
+        count_HOGs = defaultdict(int)
+
+        for gene in gene_outside:
+            if gene.oma_hog > 0:
+                count_HOGs[gene.oma_hog] += 1
+
+        # sorted the groups by number of orthologous relations
+        sorted_HOGs = sorted([(value, key) for (key, value) in count_HOGs.items()], reverse=True)
+
 
 
         context.update({
             'tab': 'similar',
-            'subtab': 'pairwise'})
+            'subtab': 'pairwise', 'similar_hogs': sorted_HOGs})
         return context
 
 
@@ -1864,9 +1892,29 @@ class OMAGroup_similar_pairwise(TemplateView, GroupBase):
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup_similar_pairwise, self).get_context_data(group_id, **kwargs)
+        gene_ids = [e.entry_nr for e in context['members']]
+
+        # get orthologs of the group members
+        gene_outside = []
+
+        for m in context['members']:
+            vps_raw = sorted(utils.db.get_vpairs(m.entry_nr), key=lambda x: x['RelType'])
+            gene_outside += [models.ProteinEntry.from_entry_nr(utils.db, rel[1]) for rel in vps_raw if rel[1] not in gene_ids ]
+
+
+        # count for each group orthologs the numbers of relations
+        count_groups = defaultdict(int)
+
+        for gene in gene_outside:
+            if gene.oma_group > 0 :
+                count_groups[gene.oma_group] +=1
+
+
+        # sorted the groups by number of orthologous relations
+        sorted_groups = sorted([(value, key) for (key, value) in count_groups.items()],reverse=True)
 
         context.update(
-            {'tab': 'similar', 'subtab': 'pairwise'})
+            {'tab': 'similar', 'subtab': 'pairwise', 'similar_groups': sorted_groups })
 
         return context
 
