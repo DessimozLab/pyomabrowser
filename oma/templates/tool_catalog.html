@@ -1,0 +1,263 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+
+            <h1>Catalogs of OMA tools</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <p class="text-justify">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+            <br>
+            <h2 class="display-4">Online tools
+                <hr></h2>
+            <br>
+
+
+            <div class="row" >
+
+    <div class="col">
+
+
+<img src="{% static "image/tool_dotplot.png" %}"  class="img-fluid" alt="Dotplot">
+
+
+    </div>
+
+    <div class="col my-auto">
+
+        <div class="card w-auto h-100 " style="width: 18rem;border:none">
+  <div class="card-body ">
+    <h5 class="card-title">Synteny viewer</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Online tool</h6>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    <a href="{% url 'land_syntenyDP' %}" class="card-link">Take me there</a>
+
+  </div>
+</div>
+
+    </div>
+
+</div>
+
+            <br>
+            <br>
+
+
+            <div class="row" >
+
+
+
+    <div class="col my-auto">
+
+        <div class="card w-auto h-100 " style="width: 18rem;border:none">
+  <div class="card-body ">
+    <h5 class="card-title">Functional prediction</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Online tool</h6>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    <a href="{% url 'function-projection-input' %}" class="card-link">Take me there</a>
+
+  </div>
+</div>
+
+    </div>
+
+                    <div class="col">
+
+
+<img src="{% static "image/tool_prediction.png" %}"  class="img-fluid" alt="Functional prediction">
+
+
+    </div>
+
+</div>
+
+            <br>
+            <br>
+
+
+            <div class="row" >
+
+    <div class="col">
+
+
+<img src="{% static "image/tool_genomepair.png" %}"  class="img-fluid" alt="Genome pair">
+
+
+    </div>
+
+    <div class="col my-auto">
+
+        <div class="card w-auto h-100 " style="width: 18rem;border:none">
+  <div class="card-body ">
+    <h5 class="card-title">Genome pair orthology</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Online tool</h6>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    <a href="{% url 'genomePW' %}" class="card-link">Take me there</a>
+
+  </div>
+</div>
+
+    </div>
+
+</div>
+
+
+            <br>
+            <br>
+
+
+            <h2 class="display-4">Softwares
+                <hr></h2>
+            <br>
+
+
+            <div class="row" >
+
+    <div class="col">
+
+
+<img src="{% static "image/soft_std.png" %}"  class="img-fluid" alt="OMA STANDALONE">
+
+
+    </div>
+
+    <div class="col my-auto">
+
+        <div class="card w-auto h-100 " style="width: 18rem;border:none">
+  <div class="card-body ">
+    <h5 class="card-title">OMA standalone</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Software (CLI)</h6>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    <a href="/standalone" class="card-link">Take me there</a>
+
+  </div>
+</div>
+
+    </div>
+
+</div>
+
+            <br>
+            <br>
+
+
+            <div class="row" >
+
+
+
+    <div class="col my-auto">
+
+        <div class="card w-auto h-100 " style="width: 18rem;border:none">
+  <div class="card-body ">
+    <h5 class="card-title">pyHam</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Python library</h6>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    <a href="https://github.com/dessimozlab/pyham" class="card-link">Take me there</a>
+
+  </div>
+</div>
+
+    </div>
+
+
+                    <div class="col">
+
+
+<img src="{% static "image/soft_pyham.png" %}"  class="img-fluid" alt="Pyham">
+
+
+    </div>
+
+</div>
+
+
+            <br>
+
+            <br>
+            <h2 class="display-4">Visualisation tools
+                <hr></h2>
+            <br>
+            <br>
+
+
+            <div class="row" >
+
+    <div class="col">
+
+
+<img src="{% static "image/vis_phylo.png" %}"  class="img-fluid" alt="Phylo.io">
+
+
+    </div>
+
+    <div class="col my-auto">
+
+        <div class="card w-auto h-100 " style="width: 18rem;border:none">
+  <div class="card-body ">
+    <h5 class="card-title">Phylo.io</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Tree visualisation</h6>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    <a  href="https://phylo.io/" class="card-link">Take me there</a>
+
+  </div>
+</div>
+
+    </div>
+
+</div>
+
+            <br>
+            <br>
+
+
+            <div class="row" >
+
+
+
+    <div class="col my-auto">
+
+        <div class="card w-auto h-100 " style="width: 18rem;border:none">
+  <div class="card-body ">
+    <h5 class="card-title">iHam</h5>
+    <h6 class="card-subtitle mb-2 text-muted">HOG viewer</h6>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    <a href="https://github.com/dessimozlab/iham" class="card-link">Take me there</a>
+
+  </div>
+</div>
+
+    </div>
+
+                    <div class="col">
+
+
+<img src="{% static "image/vis_iham.png" %}"  class="img-fluid" alt="iHam">
+
+
+    </div>
+
+</div>
+
+
+
+        </div>
+    </div>
+
+
+</div>
+
+{% endblock content %}

@@ -228,7 +228,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                 <li> <a  href="{% url 'function-projection-input' %}">Functional prediction <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
                                 <li> <a  href="{% url 'land_syntenyDP' %}">Synteny dotplot <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
                                 <li class="btn-more-container" >
-                                    <button type="button" class="btn btn-outline-dark " >Discover more tools</button>
+                                    <button type="button" class="btn btn-outline-dark " onclick="location.href='{% url 'tool_catalog' %}'" >Discover more tools</button>
                                 </li>
                             </ul>
 
