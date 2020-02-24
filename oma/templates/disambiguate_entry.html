@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {% load oma_extras %}
 
-{% block title %}{% block titleTab %}OMA orthology database: Disambiguate {% endblock titleTab %}{% endblock %}
+{% block title %}{% block titleTab %}Results for "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}"  {% endblock titleTab %}{% endblock %}
 {% block meta_description %}Disambiguate result page for OMA Browser query "{{ query }}"{% endblock %}
 {% block content %}
 

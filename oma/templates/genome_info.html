@@ -1,31 +1,41 @@
 {% extends  "base_genome.html" %}
 
+{% block title %}Information of genome {{genome.uniprot_species_code}}{% endblock %}
+
+
 {% block contentTab %}
 
-<dl class="">
 
 
 
+ <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
 
-    {% if genome.common_name %} <dt class="col-sm-3">Common name:</dt><dd class="col-sm-6">{{ genome.common_name }}</dd> {% endif %}
 
-     {% if genome.uniprot_species_code %}  <dt class="col-sm-3">UniProt identifier:</dt><dd class="col-sm-6">{{ genome.uniprot_species_code }}</dd> {% endif %}
+   {% for o in genome.lineage reversed %}
+    <li class="breadcrumb-item active" aria-current="page">{{o}}</li>
+{% endfor %}
 
-     {% if genome.ncbi_taxon_id %} <dt class="col-sm-3">NCBI Taxonomy ID:</dt><dd class="col-sm-6">{{ genome.ncbi_taxon_id }}</dd> {% endif %}
+  </ol>
+</nav>
 
-     {% if genome.common_name %}  <dt class="col-sm-3">DB Name:</dt>  <dd class="col-sm-6">???</dd> {% endif %}
 
-     {% if genome.release %} <dt class="col-sm-3">DB Release:</dt><dd class="col-sm-6">{{ genome.release }}</dd> {% endif %}
+<table class="table">
 
-     {% if genome %} <dt class="col-sm-3">Web link:</dt><dd class="col-sm-6">TODO</dd> {% endif %}
 
-     {% if genome.lineage %}  <dt class="col-sm-3">Taxonomy:</dt><dd class="col-sm-6">{{ genome.lineage }}</dd> {% endif %}
+    {% if genome.common_name %} <tr><td>Common name:</td><td>{{ genome.common_name }}</td></tr> {% endif %}
 
-     {% if prot_in_group %}  <dt class="col-sm-3">Proteins in OMA groups:</dt><dd class="col-sm-6">{{ prot_in_group}}</dd> {% endif %}
+     {% if genome.uniprot_species_code %} <tr><td>UniProt identifier:</td><td>{{ genome.uniprot_species_code }}</td></tr> {% endif %}
 
-     {% if prot_in_hogs %}  <dt class="col-sm-3">Proteins in HOGs:</dt><dd class="col-sm-6">{{ prot_in_hogs }}</dd> {% endif %}
+     {% if genome.ncbi_taxon_id %}  <tr><td>NCBI Taxonomy ID:</td><td>{{ genome.ncbi_taxon_id }}</td></tr> {% endif %}
 
-</dl>
+     {% if genome.release %} <tr><td>DB Release:</td><td>{{ genome.release }}</td></tr> {% endif %}
+
+     {% if prot_in_group %}  <tr><td>Proteins in OMA groups:</td><td>{{ prot_in_group}}</td></tr> {% endif %}
+
+     {% if prot_in_hogs %}  <tr><td>Proteins in HOGs:</td><td>{{ prot_in_hogs }}</td></tr> {% endif %}
+
+  </table>
 
 
 

@@ -1,7 +1,7 @@
 {% extends  "base_template.html" %}
 {% load staticfiles %}
 
-{% block title %}Matrix specifications{% endblock %}
+{% block title %}Release information{% endblock %}
 
 {% block content %}
 
@@ -25,24 +25,16 @@
             </div>
 
 
-            <div class="card card-header-oma">
-                <div class="card-body ">
 
+            <table class="table">
+    <tr><td>Number of species:</td><td> {{ nr_genome }}</td></tr>
+    <tr><td>Number of proteins:</td><td>{{ nr_proteins }}</td></tr>
+    <tr><td>Number of OMA groups:</td><td>962065</td></tr>
+    <tr><td>Number of proteins in an OMA Group:</td><td>{{ nr_protein_in_oma }} ({{ percent_in_oma | floatformat }}%)</td></tr>
+    <tr><td>Number of deepest level HOGs:</td><td>{{ nr_roothogs }}</td></tr>
+    <tr><td>Number of proteins in a HOG:</td><td>{{ nr_protein_in_hog }} ({{ percent_in_hog | floatformat }}%)</td></tr>
+  </table>
 
-
-                        <ul class="list-unstyled">
-                            <li><b>Number of species: </b> <span class="number-span"> {{ nr_genome }}</span></li>
-                            <li><b>Number of proteins: </b> <span class="number-span">{{ nr_proteins }}</span></li>
-                            <li><b>Number of OMA groups: </b> <span class="number-span">{{ nr_oma_groups }}</span></li>
-                            <li><b>Number of proteins in an OMA Group:</b><span class="number-span">{{ nr_protein_in_oma }} ({{ percent_in_oma | floatformat }}%)</span></li>
-                            <li><b>Number of deepest level HOGs:</b> <span class="number-span">{{ nr_roothogs }}</span></li>
-                            <li><b>Number of proteins in a HOG:</b><span class="number-span">{{ nr_protein_in_hog }} ({{ percent_in_hog | floatformat }}%)</span></li>
-
-                            </ul>
-
-
-                </div>
-            </div>
 
             <br>
 
@@ -75,9 +67,6 @@
                         <button type="button" id="bhist"  class="btn btn-default icon_selector" data-toggle="tooltip" data-placement="top" title="view as species histogram">
                             <i class="fas fa-chart-bar" aria-hidden="true"></i>
                         </button>
-
-
-
 
 
                             </div>

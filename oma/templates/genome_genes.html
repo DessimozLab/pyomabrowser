@@ -1,5 +1,8 @@
 {% extends  "base_genome.html" %}
 
+{% block title %}Genes of genome {{genome.uniprot_species_code}}{% endblock %}
+
+
 {% block contentTab %}
 
 {% include "includes/groupTableApi.html" %}

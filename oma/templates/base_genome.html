@@ -1,6 +1,6 @@
 {% extends  "base_data_centric.html" %}
 
-{% block title %}xxxx{% endblock %}
+{% block title %}Genome {{genome.uniprot_species_code}}{% endblock %}
 
 {% block header_color_class %} genome {% endblock %}
 
@@ -12,7 +12,7 @@
     <div class="oma-details-title">
 
         <h2> {{  genome.uniprot_species_code }} - {{ genome.sciname }} </h2>
-        <p> This proteome contains {{ genome.nr_entries }} proteins (Release: {{ genome.release }}). </p>
+        <p> <b>Proteome version: </b>{{ genome.release }} with <strong>{{ genome.nr_entries }} proteins.</strong> </p>
     </div>
 </div>
 

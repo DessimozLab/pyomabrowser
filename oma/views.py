@@ -1019,15 +1019,11 @@ class HOGSimilarPairwise(HOG_Base, TemplateView):
         members_models = [models.ProteinEntry.from_entry_nr(utils.db, e[0]) for e in context['members']]
         gene_ids = [en.entry_nr for en in members_models]
 
-        print(gene_ids)
-
-
         # get orthologs of the HOGs members
         gene_outside = []
 
         for m in members_models:
             vps_raw = sorted(utils.db.get_vpairs(m.entry_nr), key=lambda x: x['RelType'])
-            print(vps_raw)
             gene_outside += [models.ProteinEntry.from_entry_nr(utils.db, rel[1]) for rel in vps_raw if
                              rel[1] not in gene_ids]
 
