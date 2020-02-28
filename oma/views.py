@@ -1028,7 +1028,6 @@ class HOGSimilarPairwise(HOG_Base, TemplateView):
                              rel[1] not in gene_ids]
 
 
-        print(gene_outside)
         # count for each HOG orthologs the numbers of relations
         count_HOGs = defaultdict(int)
 
