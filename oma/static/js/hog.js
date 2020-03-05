@@ -892,10 +892,10 @@ hog_theme = function () {
                             .barlength(~~(tot_width * 0.8));
                         bar.call(colorbar);
                         barText.innerHTML = d.name;
-                       d3.select('#scale-settings-div').classed('hidden',false)
+                        d3.select('#scale-settings-div').classed('hidden',false);
 
                     } else {
-                        d3.select('#scale-settings-div').classed('hidden', true)
+                        d3.select('#scale-settings-div').classed('hidden', true);
                         bar.selectAll("svg").remove();
                         barText.innerHTML = null;
                     }
@@ -904,7 +904,7 @@ hog_theme = function () {
 
             d3.select('#ok_icon_colorscale_QueryGene').classed('hidden', false)
 
-        }
+        };
         this.add_hogvis_container = function () {
             hogvis_container = document.createElement("div");
             hogvis_container.id = "hogvis_container";
