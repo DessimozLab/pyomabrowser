@@ -1,17 +1,18 @@
 function Colorbar() {
     var scale, // the input scale this represents;
-        margin = {top: 5, right: 15, bottom: 25, left: 10}
+        margin = {top: 5, right: 15, bottom: 25, left: 10},
     orient = "vertical",
     origin = {
         x: 0,
         y: 0
     }, // where on the parent to put it
-    maxValue = 50000, // larger values are not shown with pointer
+    maxValue = null, // larger values are not shown with pointer
     barlength = 100, // how long is the bar
     thickness = 40, // how thick is the bar
     title = "", // title for the colorbar
+    tickValues = null, // tickValues of scale, null --> inferred,
+                       // an int --> nr of values, an array --> tick values
     scaleType = "linear";
-
 
     checkScaleType = function (scale) {
         // AFAIK, d3 scale types aren't easily accessible from the scale itself.
@@ -41,7 +42,7 @@ function Colorbar() {
     function chart(selection) {
         var fillLegend, fillLegendScale;
         selection.pointTo = function(inputNumbers) {
-            inputNumbers = maxValue < inputNumbers ? maxValue : inputNumbers;
+            inputNumbers = (maxValue && maxValue < inputNumbers) ? maxValue : inputNumbers;
             var pointer = fillLegend.selectAll(".pointer");
             var pointerWidth = Math.round(thickness*3/4);
 
@@ -51,12 +52,12 @@ function Colorbar() {
                 .data([inputNumbers]);
 
             pointerSVGdef = function() {
-                return (orient=="horizontal" ?
+                return (orient === "horizontal" ?
                 'M ' + 0 +' '+ thickness + ' l -' +  pointerWidth + ' -' + pointerWidth + ' l ' + 2*pointerWidth + ' -' + 0 + ' z' :
                 'M ' + thickness +' '+ 0 + ' l -' +  pointerWidth + ' -' + pointerWidth + ' l ' + 0 + ' ' +  2*pointerWidth + ' z'
 
                 )
-            }
+            };
 
             pointers
                 .enter()
@@ -76,7 +77,7 @@ function Colorbar() {
                 .duration(1000)
                 .attr('opacity',1)
                 .attr('transform',
-              orient=="vertical" ?
+              orient === "vertical" ?
               "translate(0," + (fillLegendScale(inputNumbers))+ ')':
               "translate(" + (fillLegendScale(inputNumbers))+ ',0)'
              )
@@ -87,7 +88,7 @@ function Colorbar() {
             .attr('opacity',0)
             .remove();
 
-        }
+        };
 
         selection.each(function(data) {
 
@@ -100,25 +101,25 @@ function Colorbar() {
 
             if (orient === "horizontal") {
                 var tmp = [margin.left, margin.right, margin.top, margin.bottom]
-                margin.top = tmp[0]
-                margin.bottom = tmp[1]
-                margin.left = tmp[2]
-                margin.right = tmp[3]
-                thickness_attr = "height"
-                length_attr = "width"
-                axis_orient = "bottom"
-                position_variable = "x"
-		        non_position_variable = "y"
-                axis_transform = "translate (0," + thickness + ")"
+                margin.top = tmp[0];
+                margin.bottom = tmp[1];
+                margin.left = tmp[2];
+                margin.right = tmp[3];
+                thickness_attr = "height";
+                length_attr = "width";
+                axis_orient = "bottom";
+                position_variable = "x";
+		        non_position_variable = "y";
+                axis_transform = "translate (0," + thickness + ")";
             }
 
             else {
-                thickness_attr = "width"
-                length_attr = "height"
-                axis_orient = "right"
-                position_variable = "y"
-                non_position_variable = "x"
-                axis_transform = "translate (" + thickness + "," + 0 + ")"
+                thickness_attr = "width";
+                length_attr = "height";
+                axis_orient = "right";
+                position_variable = "y";
+                non_position_variable = "x";
+                axis_transform = "translate (" + thickness + "," + 0 + ")";
             }
 
             // select the svg if it exists
@@ -137,19 +138,19 @@ function Colorbar() {
             offsetGroup = new_colorbars
                 .append("g")
                 .classed("colorbar", true)
-                .attr("transform","translate(" + margin.left + "," + margin.top + ")")
+                .attr("transform","translate(" + margin.left + "," + margin.top + ")");
 
             offsetGroup.append("g")
-                .attr("class","legend rectArea")
+                .attr("class","legend rectArea");
 
             offsetGroup.append("g")
-                .attr("class","axis color")
+                .attr("class","axis color");
 
             svg
                 .attr(thickness_attr, thickness + margin.left + margin.right)
                 .attr(length_attr, barlength + margin.top + margin.bottom)
                 .style("margin-top", origin.y - margin.top + "px")
-                .style("margin-left", origin.x - margin.left + "px")
+                .style("margin-left", origin.x - margin.left + "px");
 
 
             // This either creates, or updates, a fill legend, and drops it
@@ -175,10 +176,10 @@ function Colorbar() {
 
             legendRange.push(barlength);
 
-            if (orient=="vertical") {
+            if (orient === "vertical") {
                 //Vertical should go bottom to top, horizontal from left to right.
                 //This should be changeable in the options, ideally.
-                legendRange.reverse()
+                legendRange.reverse();
             }
 
             fillLegendScale.range(legendRange);
@@ -195,7 +196,7 @@ function Colorbar() {
                 .style("stroke-thickness", 0)
                 .style("fill", function(d) {
                     return scale(fillLegendScale.invert(d));
-                })
+                });
 
             colorScaleRects
                 .exit()
@@ -211,19 +212,22 @@ function Colorbar() {
                     .attr(non_position_variable, 0)
                     .style("fill", function(d) {
                         return scale(fillLegendScale.invert(d));
-                    })
+                    });
 
             // format the ticks to not take too much space
             colorAxisFunction = d3.svg.axis()
                 .scale(fillLegendScale)
-                .orient(axis_orient).ticks(5).tickFormat(d3.format("s"));
-
-            // "nice" looking scale, although hardcoded
-            colorAxisFunction.tickValues([1, 1000, 3000, 5000, 10000, 15000, 20000, 30000, 40000, 50000]);
+                .orient(axis_orient);
+            if (tickValues && tickValues === parseInt(tickValues, 10)){
+                colorAxisFunction.ticks(tickValues);
+            } else if (tickValues && tickValues.constructor === Array ){
+                colorAxisFunction
+                    .tickValues(tickValues)
+                    .tickFormat(d3.format("s"));
+            }
 
             if (typeof(scale.quantiles) != "undefined") {
-                //quantileScaleMarkers = scale.quantiles().concat( d3.extent(scale.domain()))
-                quantileScaleMarkers = scale.quantiles().concat( [1, 50000])
+                quantileScaleMarkers = scale.quantiles().concat( d3.extent(scale.domain()))
                 console.log(quantileScaleMarkers);
                 colorAxisFunction.tickValues(quantileScaleMarkers)
             }
@@ -253,20 +257,20 @@ function Colorbar() {
 
         var comparisontype = comparisontype || function() {return ""}
 
-        if (comparisontype()!='comparison') {
-            suffix = ''
+        if (comparisontype() !== 'comparison') {
+            suffix = '';
             switch(true) {
             case number>=1000000000:
-                number = number/1000000000
-                suffix = 'B'
+                number = number/1000000000;
+                suffix = 'B';
                 break;
             case number>=1000000:
-                number = number/1000000
-                suffix = 'M'
+                number = number/1000000;
+                suffix = 'M';
                 break;
             case number>=1000:
-                number = number/1000
-                suffix = 'K'
+                number = number/1000;
+                suffix = 'K';
                 break;
             }
             if (number < .1) {
@@ -274,7 +278,7 @@ function Colorbar() {
             }
             return(Math.round(number*10)/10+suffix)
         }
-        if (comparisontype()=='comparison') {
+        if (comparisontype() === 'comparison') {
             if (number >= 1) {return(Math.round(number)) + ":1"}
             if (number < 1) {return("1:" + Math.round(1/number))}
         }
@@ -286,37 +290,37 @@ function Colorbar() {
         if (!arguments.length) return origin;
         origin = value;
         return chart;
-    }
+    };
 
     chart.margin = function(value) {
         if (!arguments.length) return margin;
         margin = value;
         return chart;
-    }
+    };
 
     chart.thickness = function(value) {
         if (!arguments.length) return thickness;
         thickness = value;
         return chart;
-    }
+    };
 
     chart.barlength = function(value) {
         if (!arguments.length) return barlength;
         barlength = value;
         return chart;
-    }
+    };
 
     chart.title = function(value) {
         if (!arguments.length) return title;
         title = value;
         return chart;
-    }
+    };
 
     chart.scale = function(value) {
         if (!arguments.length) return scale;
         scale = value;
         return chart;
-    }
+    };
 
     chart.orient = function(value) {
         if (!arguments.length) return orient;
@@ -326,7 +330,19 @@ function Colorbar() {
             console.warn("orient can be only vertical or horizontal, not", value);
         orient = value;
         return chart;
-    }
+    };
+
+    chart.maxValue = function(value){
+        if (!arguments.length) return maxValue;
+        maxValue = value;
+        return chart;
+    };
+
+    chart.tickValues = function(value){
+        if (!arguments.length) return tickValues;
+        tickValues = value;
+        return chart;
+    };
 
     return chart;
 }

@@ -44,11 +44,13 @@ function sb() {
         // init and display legend
         if(scaleName == 'avg_nr_proteins'){
             var colorbar = Colorbar()
-	        .origin([15,0])
-	        .scale(sqrt_color)
-	        .orient("horizontal")
-            .barlength(sbWidth / 3)
-            .thickness(20);
+                .origin([15,0])
+                .scale(sqrt_color)
+                .orient("horizontal")
+                .barlength(sbWidth / 3)
+                .thickness(20)
+                .maxValue(50000)
+                .tickValues([1, 1000, 3000, 5000, 10000, 15000, 20000, 30000, 40000, 50000]);
             colorbarObject = d3.select(placeholder).call(colorbar);
             $(placeholder).css('visibility','visible');
         } else {
