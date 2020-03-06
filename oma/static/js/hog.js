@@ -53,17 +53,32 @@ hog_theme = function () {
 
             // this was hardcoded with oma data (just thinking for possible embedded)
             var get_fam_gene_data_default = function (target) {
-                //console.log('loading gene data...');
-                $.getJSON("/oma/hogdata/" + query_gene.id + "/json", function (data) {
-                    data.forEach(function (gene) {
-                        target[gene.id] = gene;
+                var nr_genes_in_fam = Object.keys(per_species3).reduce(
+                    function(sum, key) {
+                        return sum + (per_species3[key][Object.keys(per_species3[key])[0]]).length;
+                    }, 0);
+                var per_call = 10000;
+                var nr_calls_needed = Math.ceil(nr_genes_in_fam / per_call);
+                var nr_calls_finished = 0;
+                for (var i=0; i<nr_calls_needed; i++){
+                    $.ajax({
+                        url: "/oma/hogdata/" + query_gene.id + "/json",
+                        data: {offset: i * per_call, limit: per_call},
+                        success: function(data){
+                            data.forEach(function (gene) {
+                              target[gene.id] = gene;
+                            });
+                            nr_calls_finished += 1;
+                            if (nr_calls_needed === nr_calls_finished){
+                                console.log("loaded all family data")
+                            }
+                        }
                     });
-                    //console.log('gene data loaded');
-                });
+                }
             };
 
             options.get_fam_gene_data = options.hasOwnProperty('get_fam_gene_data') ? options.get_fam_gene_data : get_fam_gene_data_default;
-        }
+        };
 
         // Tree related methods
         this.set_node_display = function () {
@@ -307,10 +322,10 @@ hog_theme = function () {
                 var childrenPos = hog_head.getBoundingClientRect();
 
                 // compute the relative position of anchor
-                relativePos.top = childrenPos.top - parentPos.top,
-                    relativePos.right = childrenPos.right - parentPos.right,
-                    relativePos.bottom = childrenPos.bottom - parentPos.bottom,
-                    relativePos.left = childrenPos.left - parentPos.left;
+                relativePos.top = childrenPos.top - parentPos.top;
+                relativePos.right = childrenPos.right - parentPos.right;
+                relativePos.bottom = childrenPos.bottom - parentPos.bottom;
+                relativePos.left = childrenPos.left - parentPos.left;
 
                 // create div for icons
                 var header_div = document.createElement("div");
