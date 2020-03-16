@@ -10,6 +10,7 @@ services:
       - static_volume:/data/static
       - media_volume:/data/media
       - release_volume:/data/release
+      - .:/usr/src/pyomabrowser
       #- type: bind
       #  source: "/Volumes/TOSHIBA EXT/browser/All.Jun2019/data"
       #  target: "/data/release"
@@ -44,6 +45,7 @@ services:
       - static_volume:/data/static
       - media_volume:/data/media
       - release_volume:/data/release
+      - .:/usr/src/pyomabrowser
       # - type: bind
       #   source: "/Volumes/TOSHIBA EXT/browser/All.Jun2019/data"
       #   target: "/data/release"
