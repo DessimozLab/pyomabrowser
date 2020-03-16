@@ -262,7 +262,7 @@ MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, 'media
 
 # some jenkins specific modifications
 if DEPLOYMENT == "CI-JENKINS":
-    INSTALLED_APPS = INSTALLED_APPS + ('django_jenkins',)
+    INSTALLED_APPS = INSTALLED_APPS + ['django_jenkins',]
     JENKINS_TASKS = (
         'django_jenkins.tasks.run_pep8',
         'django_jenkins.tasks.run_pyflakes',
