@@ -118,11 +118,33 @@
 
         </li>
 
-        <li class="{% if tab == 'goa' %} active selected {%endif%}">
-            <a href="{% url 'entry_goa' entry.omaid %}">
-                <span>GO Annotations</span>
-
+        <li class="{% if tab == 'goa' %} active selected {%endif%}" {% if tab != 'goa' %}
+             onclick="window.location='{% url 'entry_goa' entry.omaid %}'" {%endif%}>
+            <a href="{% url 'entry_goa' entry.omaid %}" {% if tab == 'goa' %}data-toggle="collapse" data-target="#subgoa"{%endif%}>
+                <span>GO Annotations
+                    </span>
+            {% if tab == 'goa' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
             </a>
+
+
+             <div id="subgoa" class="collapse {% if tab == 'goa'%} show {%endif%}">
+
+
+                 {% if tab == 'goa' %}
+
+                 <h5 style="padding: 4px !important; padding-left: 8px !important">Jump to:</h5>
+
+
+                 <h6 ><a href="#molecular_function" style="color:#007bff !important; padding: 4px !important; padding-left: 25px !important"> Molecular function</a></h6>
+                 <h6 ><a href="#cellular_component" style="color:#007bff !important; padding: 4px !important; padding-left: 25px !important"> Cellular component</a></h6>
+                 <h6 ><a href="#biological_process" style="color:#007bff !important; padding: 4px !important; padding-left: 25px !important"> Biological process</a></h6>
+
+
+                    {%endif%}
+
+            </div>
 
         </li>
 

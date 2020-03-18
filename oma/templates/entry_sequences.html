@@ -8,35 +8,27 @@
 {% block contentTab %}
 
 
+<div>
 
-<div class="d-flex ">
-      <div >
-         <h4 >Protein Sequence </h4>
-      </div>
-      <div class="ml-auto">
-         <h6 >
-                    Download:
-                    <a href="{% url 'entry_fasta' entry.omaid %}"><i class="fas fa-download"></i> Fasta</a>
-                </h6>
-      </div>
- </div>
+    <h4 >Protein Sequence </h4>
+    <h6 >Download:<a href="{% url 'entry_fasta' entry.omaid %}"><i class="fas fa-download"></i> Fasta</a></h6>
+
+    <div class="card " style="display: inline-block">
 
 
-
-<div class="card">
-
-
-            <div id="ontology-panel" class="card-body">
-                <pre>{{ entry.sequence|uniprot_seq_repr }}</pre>
+            <div id="ontology-panel" class="card-body" >
+                <pre >{{ entry.sequence|uniprot_seq_repr }}</pre>
             </div>
 
     </div>
+
+</div>
 
 
 <br>
 
 
-<div class="d-flex ">
+<div class=" ">
       <div >
          <h4 >Protein Sequence </h4>
       </div>
@@ -47,20 +39,14 @@
                 </h6>
       </div>
  </div>
+<div class="card" style="display: inline-block;">
 
 
-
-<div class="card">
-
-
-            <div  class="card-body">
-               <pre>{{ entry.cdna|uniprot_seq_repr}}</pre>
+            <div  class="card-body" >
+               <pre >{{ entry.cdna|uniprot_seq_repr}}</pre>
             </div>
 
     </div>
-
-
-
 
 
 {% endblock contentTab %}
