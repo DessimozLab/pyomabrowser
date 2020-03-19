@@ -5,21 +5,66 @@
 {% block title %}OMA: Hierarchical Orthologous Groups for {{ fam.id }}{% endblock %}
 {% block meta_description %}Hierarchical orthologous groups (HOGs) provide a set of genes that have all started diverging from a single ancestral gene at the taxonomic range of interest.{% endblock %}
 {% block js_hook %}
-    <!-- D3 -->
-    <script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>
-    <script src="{% static "js/colorbar.js" %}" charset="utf-8"></script>
 
-    <!-- Underscore -->
-    <script src="{% static "js/underscore-min.js" %}"></script>
 
-    <!-- TnT -->
-    <link rel="stylesheet" href='{% static "css/tnt.css" %}' type="text/css" />
-    <link rel="stylesheet" href='{% static "css/hog.css" %}' type="text/css" />
-    <link rel="stylesheet" href='{% static "css/tnt.tooltip.css" %}' type="text/css" />
-    <script src="{% static 'js/tnt.min.js' %}" charset="utf-8"></script>
-    <script src="{% static 'js/tnt.tooltip.min.js' %}" charset="UTF-8"></script>
-    <script src="{% static 'js/hog.js' %}" charset="UTF-8"></script>
-    <script src="{% static 'js/orthoxml-hogvis.min.js' %}" charset="UTF-8"></script>
+
+<!-- d3 -->
+<script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>
+
+<!-- TnT -->
+<link rel="stylesheet" href="http://tntvis.github.io/tnt/build/tnt.css" type="text/css"/>
+    <script src="http://tntvis.github.io/tnt/build/tnt.js" charset="utf-8"></script>
+
+<!-- TnT Tooltip-->
+<link rel="stylesheet" href='{% static "css/tnt.css" %}' type="text/css" />
+<link rel="stylesheet" href='{% static "css/hog.css" %}' type="text/css" />
+<link rel="stylesheet" href='{% static "css/tnt.tooltip.css" %}' type="text/css" />
+<script src="{% static 'js/tnt.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'js/tnt.tooltip.min.js' %}" charset="UTF-8"></script>
+
+<!-- Load the javascript -->
+<script src="{% static 'js/iHam_latest.js' %}" charset="UTF-8"></script>
+
+<!-- Load the stylesheet -->
+<link rel="stylesheet" href="https://dessimozlab.github.io/iHam/iHam.css"/>
+
+<script src="{% static 'js/orthoxml-hogvis.min.js' %}" charset="UTF-8"></script>
+
+
+<style>
+
+    .alert_remove {
+        margin-bottom: 0px;
+        padding: 4px;
+        display: none;
+    }
+
+    .alert-link {
+        cursor: pointer;
+    }
+
+
+    #menu-bar > div {
+        display: inline-block;
+    }
+
+    .dropdown-toggle {
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: black;
+        shape-rendering: crispEdges;
+    }
+
+    .axis text {
+        font-family: sans-serif;
+        font-size: 11px;
+    }
+</style>
 
 {% endblock %}
 
@@ -28,144 +73,285 @@
 
 <div  style="background-color: white; padding:10px;">
 
-        {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
+    {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
 
-        {% else %}
+    {% else %}
 
-            <div id="hogvis">
+    <div id="hogvis">
 
-                <div id="header">
+        <div id="header">
 
-                    <div id="gap_conpenser"> </div>
+            <div id="gap_conpenser"> </div>
 
-                    <div id="hogvisheader">
+            <div id="hogvisheader">
 
-                        <div>
+                <div>
 
-                            <button id='btn_display_settings' class="btn btn-default" style="float: right; margin: 0 0 10px 10px;" aria-label="Left Align"  data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings" type="button"  >
-                                OPTIONS
-                                <i id="icon_settings" class="fas fa-caret-down"></i>
+                    <button id='btn_display_settings' class="btn btn-default" style="float: right; margin: 0 0 10px 10px;" aria-label="Left Align"  data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings" type="button"  >
+                        OPTIONS
+                        <i id="icon_settings" class="fas fa-caret-down"></i>
 
-                            </button>
+                    </button>
 
-                            <h3 >Hierarchical group {{ fam.id }} <span id="open_txt">open at level of </span><span id="current_level_text" style="font-weight:bold;"></span></h3>
+                    <h3 >Hierarchical group {{ fam.id }} <span id="open_txt">open at level of </span><span id="current_level_text" style="font-weight:bold;">Root</span></h3>
 
-                        </div>
+                </div>
 
-                        <div id="hogvis_settings">
-
-
-                            <div class="collapse" id="collapseSettings">
-
-                                <div id="button-settings-div">
-
-                                    <div class="btn-group">
-                                        <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <b>Select Color Scheme </b> <span class="caret"></span>
-                                        </button>
-
-                                        <ul id="genedata-vis" class="dropdown-menu">
-                                        </ul>
-
-                                    </div>
-
-                                    <div class="btn-group">
-                                        <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <b>Show gene tooltips on</b> <span class="caret"></span>
-                                        </button>
-
-                                        <ul id="tooltip_dropdown" class="dropdown-menu">
-                                            <li class="tooltip_dropdown-li" id="gt-click"><a> Click <span id='setting_ok_click' class="glyphicon glyphicon-ok pull-right " aria-hidden="true"></span> </a> </li>
-                                            <li class="tooltip_dropdown-li" id="gt-mousover"><a> Mouseover <span id='setting_ok_mouseover' class="glyphicon glyphicon-ok pull-right hidden" aria-hidden="true"></span>  </a> </li>
-                                        </ul>
-                                    </div>
-
-                                    <div class="fakebutton"> <b>Remove columns under
-                                        <input id="min_column_setting_id" class='min_column_setting'type="number" step="10" value="0" min="0" max="100"> % of species coverage</b> </div>
+                <div id="hogvis_settings">
 
 
+                    <div class="collapse" id="collapseSettings">
 
+                        <div id="menu-bar">
+                            <div id="color-schema-dropdown" class="dropdown">
+                                <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    Set color scheme
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item active" href="#">Query Gene</a>
+                                    <a class="dropdown-item" href="#">Gene Length</a>
+                                    <a class="dropdown-item" href="#">GC Content</a>
                                 </div>
-
-                                <div class='hidden' id="scale-settings-div">
-                                    <div class="scale-item" id="colorbarText" > </div>
-                                    <div class="scale-item" id="colorbar" > </div>
-                                </div>
-
-
-
                             </div>
+
+                            <div id="gene-tooltips-dropdown" class="dropdown">
+                                <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    Show gene tooltips on
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item active" href="#">Click</a>
+                                    <a class="dropdown-item" href="#">Mouseover</a>
+                                </div>
+                            </div>
+
+                            <div id="percentage-coverage-selector">
+                                <button class="btn btn-sm btn-outline-dark" type="button"
+                                        aria-haspopup="true" aria-expanded="false">Remove columns under <input id="set_min_coverage"
+                                                                                                               type="number" step="10" value="0"
+                                                                                                               min="0" max="100">% of species coverage
+                                </button>
+                            </div>
+
+
+
+
                         </div>
 
-                        <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display: none">Lowly supported hogs have been removed as per settings. <a  class="alert-link" id='reset_column_filter' > Click here to reset.</a></div>
+                        <div id="color-legend" style=""></div>
+
 
                     </div>
 
 
-                    <script>
-
-                        (function(){
-                            document.getElementById("btn_display_settings").addEventListener("click", function(){
-                                var ico = document.getElementById("icon_settings");
-                                if (ico.getAttribute("class") === "fas fa-caret-up") {ico.setAttribute("class","fas fa-caret-down")}
-                                else ico.setAttribute("class","fas fa-caret-up");
-                            });
-                        }) ();
-                    </script>
 
                 </div>
-
-                <div id="loader"><img src="{% static "image/loading.gif"%}"></div>
-
             </div>
 
-            <script>
+            <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display: none">Lowly supported hogs have been removed as per settings. <a  class="alert-link" id='reset_column_filter' > Click here to reset.</a></div>
 
-                (function () {
-                    $('#open_txt').hide();
-                    var Hogvis = hog_theme();
+        </div>
 
-                    var query = {'id': {{ entry.entry_nr }} };
-                    var tooltip_data = undefined
-                    var hogvis_container_id = "hogvis";
-                    var genedatavis = [
-                        {
-                            name: 'Query Gene',
-                            scale: 'on_off'
-                        }, {
-                            name: "Gene Length",
-                            scale: "linear",
-                            field: "sequence_length",
-                            func: "color1d"
-                        },{
-                            name: "GC Content",
-                            scale: "linear",
-                            field: "gc_content",
-                            func: "color1d"
-                        }];
+        <script>
 
-                    var default_options = {
-                        label_height: 20,
-                        genedatavis: genedatavis,
-                        show_internal_labels: {{ show_internal_labels|yesno:"true,false" }},
-                        post_init: function(){
-                            $("#open_txt").show();
-                            $("#loader").hide();
-                        }
-                    };
-
-                    $.when(
-                        $.ajax({url: "/oma/hogs/{{ entry.omaid }}/orthoxml/",
-                                dataType: "text"}),
-                        $.ajax({url: "/All/speciestree.nwk"})
-                    ).then(function(orthoxml, speciestree) {
-                        var hog_data = parse_xml.parse_orthoxml(speciestree[0], orthoxml[0]);
-                        var hogvis_obj = new Hogvis(hogvis_container_id, query, hog_data.per_species,
-                            hog_data.tree, tooltip_data, default_options, document.getElementById("genedata-vis"));
-                    });
-                }) ();
-            </script>
-
-        {% endif %}
+            (function(){
+                document.getElementById("btn_display_settings").addEventListener("click", function(){
+                    var ico = document.getElementById("icon_settings");
+                    if (ico.getAttribute("class") === "fas fa-caret-up") {ico.setAttribute("class","fas fa-caret-down")}
+                    else ico.setAttribute("class","fas fa-caret-up");
+                });
+            }) ();
+        </script>
 
     </div>
+
+    <div id="loader"><img src="{% static "image/loading.gif"%}"></div>
+
+</div>
+
+<script>
+
+
+
+
+    (function () {
+
+        $.when(
+            $.ajax({url: "/oma/hogs/{{ entry.omaid }}/orthoxml/",
+                dataType: "text"}),
+            $.ajax({url: "/All/speciestree.nwk"}),
+            $.ajax({url: "/oma/hogdata/{{ entry.omaid }}/json",dataType: "text"})
+        ).then(function(orthoxml, speciestree, fam_data) {
+
+
+            fam_data = JSON.parse(fam_data[0]);
+
+
+            var iham = iHam()
+                .newick(speciestree[0])
+                .orthoxml(orthoxml[0])
+                .fam_data(fam_data)
+                .on('node_selected', function (node) {
+                    d3.select('#current_level_text')
+                        .text(node.node_name());
+                })
+                //.show_oma_link(true)
+                .tree_width(330)
+                .board_width(530)
+                .on("updating", function() {
+                })
+                .on("updated", function () {
+                })
+                .on("hogs_removed", function (what) {
+                    if (what.length) {
+                        d3.select(".alert_remove")
+                            .style("display", "block")
+                    } else {
+                        d3.select(".alert_remove")
+                            .style("display", "none");
+                    }
+                });
+
+            var container = document.getElementById("hogvis");
+
+            iham(container);
+
+            d3.select("#loader").style("display", "none");
+
+
+            function removeLegend() {
+                d3.select('#color-legend')
+                    .selectAll('*')
+                    .remove();
+
+            }
+
+
+            function legend(colorScale, label) {
+                var n = 30;
+
+                removeLegend();
+
+                d3.select('#color-legend')
+                    .append('div')
+                    .text(label);
+
+                var domain = colorScale.domain();
+                d3.select('#color-legend')
+                    .selectAll('div')
+                    .data(Array.apply(0, Array(n)).map(function(d, i) { return i + 1; }))
+                    .enter()
+                    .append('div')
+                    .style('display', 'inline-block')
+                    .style('width', '5px')
+                    .style('height', '15px')
+                    .style('background-color', function (d, i) {
+                        return colorScale(domain[0] + ((domain[1] - domain[0]) * i) / n);
+                    });
+
+                var legendAxis = d3.svg.axis().scale(d3.scale.linear().domain(domain).range([1, (n-1) * 5])).orient('bottom').ticks(3);
+
+                d3.select('#color-legend')
+                    .append('div')
+                    .append('svg')
+                    .attr('width', (n * 5)+15)
+                    .attr('height', 30)
+                    .append('g')
+                    .attr('class', 'axis')
+                    .call(legendAxis);
+
+            }
+
+
+
+            // Update the color schemas
+            d3.select("#color-schema-dropdown")
+                .selectAll("a")
+                .on("click", function () {
+                    removeLegend();
+                    // Manage state of menu itself
+                    d3.select(this.parentNode).selectAll("a").classed("active", false);
+                    d3.select(this)
+                        .classed("active", true);
+
+                    if (d3.select(this).text() === "Query Gene") {
+                        iham.gene_colors(function (d) {
+                            return (d.id === 3965 ? "#27ae60" : "#95a5a6");
+                        });
+                    }
+
+                    if (d3.select(this).text() === "Gene Length") {
+                        var data = iham.fam_data();
+                        var domain = d3.extent(data, function (d) {
+                            return d.sequence_length
+                        });
+                        var colorScale = d3.scale.linear()
+                            .domain(domain)
+                            .range(["red", "blue"]);
+                        iham.gene_colors(function (d) {
+                            console.log(d);
+                            return colorScale(d.gene.sequence_length);
+                        });
+                        legend(colorScale, 'Gene Length');
+                    }
+
+                    if (d3.select(this).text() === "GC Content") {
+                        var data = iham.fam_data();
+                        var domain = d3.extent(data, function (d) {
+                            return d.gc_content
+                        });
+                        var colorScale = d3.scale.linear()
+                            .domain(domain)
+                            .range(["red", "blue"]);
+                        iham.gene_colors(function (d) {
+                            return colorScale(d.gene.gc_content);
+                        });
+                        legend(colorScale, 'GC Content');
+                    }
+                });
+
+            // Update event for gene tooltips
+            d3.select("#gene-tooltips-dropdown")
+                .selectAll("a")
+                .on("click", function () {
+                    // Manage state of menu itself
+                    d3.select(this.parentNode).selectAll("a").classed("active", false);
+                    d3.select(this)
+                        .classed("active", true);
+
+                    if (d3.select(this).text() === "Click") {
+                        iham.gene_tooltips_on("click");
+                    }
+                    if (d3.select(this).text() === "Mouseover") {
+                        iham.gene_tooltips_on("mouseover");
+                    }
+                });
+
+            // Set minimum species coverage
+            d3.select("#percentage-coverage-selector").select("input")
+                .on("input", function () {
+                    iham.coverage_threshold(d3.select(this).property("value"));
+                });
+
+            // Reset the coverage
+            d3.select("#reset_column_filter")
+                .on("click", function () {
+                    d3.select("#percentage-coverage-selector").select("input").property("value", 0);
+                    iham.coverage_threshold(0);
+                })
+
+
+
+
+
+        });
+    }) ();
+</script>
+
+{% endif %}
+
+</div>
 
 {% endblock %}
