@@ -1036,8 +1036,8 @@ class HOGSimilarPairwise(HOG_Base, TemplateView):
         count_HOGs = defaultdict(int)
 
         for gene in gene_outside:
-            if gene.oma_hog > 0:
-                count_HOGs[gene.oma_hog] += 1
+            if int(gene.oma_hog) > 0:
+                count_HOGs[int(gene.oma_hog)] += 1
 
         # sorted the groups by number of orthologous relations
         sorted_HOGs = sorted([(value, key) for (key, value) in count_HOGs.items()], reverse=True)
