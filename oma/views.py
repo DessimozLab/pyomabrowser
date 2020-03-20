@@ -653,6 +653,8 @@ class Entry_Isoform(TemplateView, InfoBase):
         context = super(Entry_Isoform, self).get_context_data(entry_id, **kwargs)
         entry = self.get_entry(entry_id)
 
+
+
         context.update(
             {'entry': entry,
              'tab': 'isoform'})

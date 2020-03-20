@@ -188,7 +188,6 @@
 
             fam_data = JSON.parse(fam_data[0]);
 
-
             var iham = iHam()
                 .newick(speciestree[0])
                 .orthoxml(orthoxml[0])
@@ -220,14 +219,12 @@
 
             d3.select("#loader").style("display", "none");
 
-
             function removeLegend() {
                 d3.select('#color-legend')
                     .selectAll('*')
                     .remove();
 
             }
-
 
             function legend(colorScale, label) {
                 var n = 30;
@@ -263,8 +260,6 @@
                     .call(legendAxis);
 
             }
-
-
 
             // Update the color schemas
             d3.select("#color-schema-dropdown")
@@ -341,8 +336,6 @@
                     d3.select("#percentage-coverage-selector").select("input").property("value", 0);
                     iham.coverage_threshold(0);
                 })
-
-
 
 
 
