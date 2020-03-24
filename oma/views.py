@@ -653,11 +653,17 @@ class Entry_Isoform(TemplateView, InfoBase):
         context = super(Entry_Isoform, self).get_context_data(entry_id, **kwargs)
         entry = self.get_entry(entry_id)
 
+        isoforms = entry.alternative_isoforms
+
+        for iso in isoforms:
+            if iso.is_main_isoform == true:
+                main_isoform = iso.omaid
 
         context.update(
             {'entry': entry,
              'tab': 'isoform',
-             'isoforms': entry.alternative_isoforms,
+             'isoforms': iso ,
+             'main_isoform': main_isoform,
              'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
         return context
 

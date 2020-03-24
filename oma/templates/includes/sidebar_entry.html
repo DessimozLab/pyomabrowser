@@ -112,7 +112,8 @@
 
         <li class="{% if tab == 'isoform' %} active selected {%endif%}">
             <a href="{% url 'entry_isoform' entry.omaid %}">
-                <span>Isoforms</span>
+                <span>Isoforms  <span class="badge badge-info">{{entry.alternative_isoforms|length}}</span></span>
+
 
             </a>
 
