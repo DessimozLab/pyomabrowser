@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^info/(?P<entry_id>\w+)/go/$', views.Entry_GOA.as_view(), name="entry_goa"),
     url(r'^paralogs/(?P<entry_id>\w+)/$', views.Entry_Paralogy.as_view(), name="pair_paralogs"),
     url(r'^isoform/(?P<entry_id>\w+)/$', views.Entry_Isoform.as_view(), name="entry_isoform"),
+    url(r'^isoform/(?P<entry_id>\w+)/json/$', views.IsoformsJson.as_view(), name="isoforms_json"),
     url(r'^sequences/(?P<entry_id>\w+)/$', views.Entry_sequences.as_view(), name="entry_sequences"),
 
     # HOG

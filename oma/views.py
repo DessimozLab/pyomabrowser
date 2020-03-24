@@ -654,11 +654,20 @@ class Entry_Isoform(TemplateView, InfoBase):
         entry = self.get_entry(entry_id)
 
 
-
         context.update(
             {'entry': entry,
-             'tab': 'isoform'})
+             'tab': 'isoform',
+             'isoforms': entry.alternative_isoforms,
+             'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
         return context
+
+class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
+    json_fields = {'omaid': 'protid', 'canonicalid': 'xrefid'}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['isoforms']))
+        return JsonResponse(data, safe=False)
 
 # GOA
 class Entry_GOA(TemplateView, InfoBase):
