@@ -100,18 +100,12 @@
     };
     exports.format_vps_link_isoforms = function(value, row){
 
-        if (value == "{{main_isoform}}") {
 
-            var badge = "MAIN"
-        }
+        console.log(value,row);
 
-        else {
 
-            var badge = "{{main_isoform}}"
 
-        }
-
-        return '<a href="/oma/vps/' + value + '">' + value + badge + '</a>';
+        return '<a href="/oma/vps/' + value + '">' + value + '</a>';
     };
     exports.seq_search_alignment_formatter = function(value, row){
         var seq = row.sequence;
