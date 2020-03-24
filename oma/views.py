@@ -656,7 +656,7 @@ class Entry_Isoform(TemplateView, InfoBase):
         isoforms = entry.alternative_isoforms
 
         for iso in isoforms:
-            if iso.is_main_isoform == true:
+            if iso.is_main_isoform == True:
                 main_isoform = iso.omaid
 
         context.update(
