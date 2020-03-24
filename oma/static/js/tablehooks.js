@@ -98,6 +98,10 @@
     exports.format_vps_link = function(value, row){
         return '<a href="/oma/vps/' + value + '">' + value + '</a>';
     };
+    exports.format_vps_link_isoforms = function(value, row){
+
+        return '<a href="/oma/vps/' + value + '">' + value + row.is_main_isoform + '</a>';
+    };
     exports.seq_search_alignment_formatter = function(value, row){
         var seq = row.sequence;
         var alignment = row.alignment;
