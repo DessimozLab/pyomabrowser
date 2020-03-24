@@ -654,6 +654,7 @@ class Entry_Isoform(TemplateView, InfoBase):
         entry = self.get_entry(entry_id)
 
         isoforms = entry.alternative_isoforms
+        main_isoform = None
 
         for iso in isoforms:
             if iso.is_main_isoform == True:
@@ -662,7 +663,7 @@ class Entry_Isoform(TemplateView, InfoBase):
         context.update(
             {'entry': entry,
              'tab': 'isoform',
-             'isoforms': iso ,
+             'isoforms': isoforms ,
              'main_isoform': main_isoform,
              'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
         return context
