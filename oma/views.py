@@ -662,8 +662,7 @@ class Entry_Isoform(TemplateView, InfoBase):
         return context
 
 class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
-    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
-                   'genome.species_and_strain_as_dict': 'taxon',
+    json_fields = {'omaid': 'protid', 'is_main_isoform': 'main',
                    'canonicalid': 'xrefid'}
 
     def get(self, request, *args, **kwargs):
