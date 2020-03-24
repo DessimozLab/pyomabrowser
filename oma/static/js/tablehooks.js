@@ -107,7 +107,7 @@
 
         else {
 
-            var badge = ""
+            var badge = "{{main_isoform}}"
 
         }
 
