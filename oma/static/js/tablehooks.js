@@ -100,7 +100,18 @@
     };
     exports.format_vps_link_isoforms = function(value, row){
 
-        return '<a href="/oma/vps/' + value + '">' + value + row.is_main_isoform + '</a>';
+        if (value == "{{main_isoform}}") {
+
+            var badge = "MAIN"
+        }
+
+        else {
+
+            var badge = ""
+
+        }
+
+        return '<a href="/oma/vps/' + value + '">' + value + badge + '</a>';
     };
     exports.seq_search_alignment_formatter = function(value, row){
         var seq = row.sequence;

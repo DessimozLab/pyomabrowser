@@ -654,7 +654,7 @@ class Entry_Isoform(TemplateView, InfoBase):
         entry = self.get_entry(entry_id)
 
         isoforms = entry.alternative_isoforms
-        main_isoform = None
+        main_isoform = entry.is_main_isoform
 
         for iso in isoforms:
             if iso.is_main_isoform == True:
