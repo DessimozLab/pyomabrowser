@@ -7,6 +7,38 @@
 
 {% block contentTab %}
 
+{% if nr_vps > 0 %}
+
     {% include "includes/groupTable_support.html" %}
+
+{% else %}
+
+    {% if entry.get_main_isoform == entry %}
+
+<div class="alert alert-secondary" role="alert">
+  This entry does not have ortholgs
+</div>
+
+
+
+{% else %}
+
+<div class="alert alert-secondary" role="alert">
+  This entry is not the isoforms use for orthologs inferences,
+    please check entry <a href="{% url 'pairs' entry.get_main_isoform.omaid %}">{{entry.get_main_isoform.omaid}}</a>  for orthology.
+</div>
+
+
+
+{% endif %}
+
+
+
+
+{% endif %}
+
+
+
+
 
 {% endblock contentTab %}
