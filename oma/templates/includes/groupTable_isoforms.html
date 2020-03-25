@@ -35,26 +35,6 @@
         </table>
 
 
-
-<script>
-
-    console.log("{{ main_isoform.omaid }}");
-
-     row_main = document.getElementById("{{ main_isoform.omaid }}");
-     console.log(row_main);
-     a_main = row_main.getElementsByClassName("tagcontainer").getElementsByTagName('a')[0];
-     console.log(a_main);
-     a_main.innerHTML += "bite";
-    console.log(a_main);
-
-
-
-</script>
-
-
-
-
-
 <!-- D3 and D3 Tooltip -->
 <script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
 <script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
