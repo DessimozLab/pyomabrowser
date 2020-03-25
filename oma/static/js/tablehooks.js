@@ -102,6 +102,16 @@
 
         return '<a href="/oma/vps/' + value + '">' + value  + '</a>';
     };
+
+      exports.format_seqlen = function(value, row){
+
+        return value.length;
+    };
+
+
+
+
+
     exports.seq_search_alignment_formatter = function(value, row){
         var seq = row.sequence;
         var alignment = row.alignment;

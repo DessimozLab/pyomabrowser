@@ -671,7 +671,7 @@ class Entry_Isoform(TemplateView, InfoBase):
 class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
     json_fields = {'omaid': 'protid',
                    'canonicalid': 'xrefid',
-                   }
+                   'sequence': 'sequence'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
