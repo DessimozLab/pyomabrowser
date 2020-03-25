@@ -105,7 +105,7 @@
 
       exports.format_seqlen = function(value, row){
 
-        return value.length;
+        return parseInt(value.length);
     };
 
 
