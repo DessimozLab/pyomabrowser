@@ -103,11 +103,6 @@
         return '<a href="/oma/vps/' + value + '">' + value  + '</a>';
     };
 
-      exports.format_seqlen = function(value, row){
-
-        return parseInt(value.length);
-    };
-
 
 
 
