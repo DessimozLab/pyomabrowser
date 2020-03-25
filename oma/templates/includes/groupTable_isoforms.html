@@ -17,7 +17,7 @@
 
 
              <tr>
-                <th  data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link_isoforms">Protein ID</th>
+                <th  data-field="protid" class="tagcontainer" data-sortable="true" data-formatter="tablehooks.format_vps_link_isoforms">Protein ID</th>
                 <th  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
                  <th  data-field="seqlen" data-sortable="true" >Sequence length</th>
                 <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
@@ -33,6 +33,23 @@
             </div>
 
         </table>
+
+
+
+<script>
+
+    console.log("{{ main_isoform.omaid }}");
+
+     row_main = document.getElementById("{{ main_isoform.omaid }}");
+     console.log(row_main;
+     a_main = row_main.getElementsByClassName("tagcontainer").getElementsByTagName('a')[0];
+     console.log(a_main);
+     a_main.innerHTML += "bite";
+    console.log(a_main);
+
+
+
+</script>
 
 
 
