@@ -673,9 +673,14 @@ class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
                    'canonicalid': 'xrefid',
                    'sequence': 'sequence'}
 
+
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         data = list(self.to_json_dict(context['isoforms']))
+
+        for p in data:
+            p['seqlen'] = len(p['sequence'])
+
         return JsonResponse(data, safe=False)
 
 # GOA
