@@ -20,6 +20,7 @@ from django.urls import reverse
 from django.core.mail import EmailMessage
 from django.template import Context
 from django.template.loader import render_to_string, get_template
+from django.contrib.staticfiles.templatetags.staticfiles import static
 
 from collections import OrderedDict, defaultdict
 
@@ -911,6 +912,77 @@ class GenomeCentricSynteny(GenomeBase, TemplateView):
         genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(specie_id))
         context.update({'tab': 'synteny', 'genome_obj':genome_obj})
         return context
+
+#</editor-fold >
+
+#<editor-fold desc="Ancestral Genome Centric">
+
+class AncestralGenomeBase(ContextMixin):
+
+    def get_context_data(self, specie_id, **kwargs):
+        context = super(AncestralGenomeBase, self).get_context_data(**kwargs)
+        try:
+
+            url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
+
+            def iterdict(d, search, query):
+                for k, v in d.items():
+                    if k == 'taxid' or  k == 'name':
+                        if str(v).lower() == str(query).lower():
+                            search = d
+                    if k == 'children':
+                        for c in v:
+                            search = iterdict(c, search, query)
+                return search
+
+
+            def count_species(d, cpt):
+                for k, v in d.items():
+                    cpt +=1
+                    if k == 'children':
+                        for c in v:
+                            cpt = count_species(c, cpt)
+                return cpt
+
+            search = iterdict(json.load(open(url, 'r')), False, specie_id)
+
+
+            if search:
+
+                context['taxid'] = search['taxid']
+                context['genome_name'] = search['name']
+                context['nr_hogs'] = search['nr_hogs']
+                context['nbr_species'] = count_species(search, 0)
+
+
+
+            else:
+                raise ValueError
+        except ValueError as e:
+            raise Http404(e)
+        return context
+
+
+class AncestralGenomeCentricInfo(AncestralGenomeBase, TemplateView):
+    template_name = "ancestralgenome_info.html"
+
+    def get_context_data(self, specie_id, **kwargs):
+        context = super(AncestralGenomeCentricInfo, self).get_context_data(specie_id, **kwargs)
+
+        context.update({'tab': 'information'})
+        return context
+
+
+class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
+    template_name = "ancestralgenome_genes.html"
+
+    def get_context_data(self, specie_id, **kwargs):
+        context = super(AncestralGenomeCentricGenes, self).get_context_data(specie_id, **kwargs)
+
+        context.update({'tab': 'genes', 'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name'])})
+        return context
+
+
 
 #</editor-fold >
 

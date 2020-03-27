@@ -45,6 +45,11 @@
                                       + ('0000000' + value).slice(-7) // Format with leading 0s
                                       + '</a>';
     };
+    exports.format_hog_api = function(value, row) {
+
+        return '<a href="/oma/hog/ihamviewer/' + value + '/">' + value + "</a>";
+
+    };
     exports.format_roothog = function(value, row) {
         if (value > 0) {
             return '<a href="/oma/hog/ihamviewer/HOG:' + ('0000000' + value).slice(-7) + '/">HOG:' + ('0000000' + value).slice(-7) + "</a>";
