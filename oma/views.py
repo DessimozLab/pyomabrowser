@@ -3,6 +3,7 @@
 from __future__ import print_function, division
 
 import shlex
+import types
 from builtins import map
 from builtins import str
 from builtins import range
@@ -70,7 +71,7 @@ class JsonModelMixin(object):
                 try:
                     for attr in accessor.split('.'):
                         obj = getattr(obj, attr)
-                        if isinstance(obj, classmethod):
+                        if isinstance(obj, (classmethod, types.MethodType)):
                             obj = obj()
                 except AttributeError as e:
                     logger.warning('cannot access ' + accessor + ": " + str(e))
@@ -646,6 +647,7 @@ class PairsParalogsJson(Entry_Paralogy, JsonModelMixin, View,):
 
         return JsonResponse(data, safe=False)
 
+
 # Isoform
 class Entry_Isoform(TemplateView, InfoBase):
     template_name = "entry_isoform.html"
@@ -658,29 +660,29 @@ class Entry_Isoform(TemplateView, InfoBase):
         main_isoform = entry.is_main_isoform
 
         for iso in isoforms:
-            if iso.is_main_isoform == True:
+            if iso.is_main_isoform:
                 main_isoform = iso
 
         context.update(
             {'entry': entry,
              'tab': 'isoform',
-             'isoforms': isoforms ,
+             'isoforms': isoforms,
              'main_isoform': main_isoform,
              'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
         return context
 
+
 class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
     json_fields = {'omaid': 'protid',
                    'canonicalid': 'xrefid',
-                   'sequence': 'sequence'}
+                   'sequence_length': 'seqlen',
+                   'is_main_isoform': None,
+                   'exons.as_list_of_dict': 'exons'}
 
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         data = list(self.to_json_dict(context['isoforms']))
-
-        for p in data:
-            p['seqlen'] = len(p['sequence'])
 
         return JsonResponse(data, safe=False)
 
