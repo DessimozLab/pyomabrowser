@@ -47,7 +47,7 @@
     };
     exports.format_hog_api = function(value, row) {
 
-        return '<a href="/oma/hog/ihamviewer/' + value + '/">' + value + "</a>";
+        return '<a href="/oma/hog/ihamviewer/' + value + '/' +  row.level+'/">' + value + "</a>";
 
     };
     exports.format_roothog = function(value, row) {
