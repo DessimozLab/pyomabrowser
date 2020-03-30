@@ -105,13 +105,25 @@
     };
     exports.format_vps_link_isoforms = function(value, row){
 
-        console.log(row);
+        badge = '';
+        badge2 = '';
 
-        return '<a href="/oma/vps/' + value + '">' + value  + '</a>';
+        if (row.is_main_isoform) {
+
+            badge = '<span class="badge badge-secondary">Main</span>'
+
+        }
+
+        if (row.seqlen == {{maxlen}}) {
+
+            badge2 = '<span class="badge badge-secondary">Longest</span>'
+
+        }
+
+
+
+        return '<a href="/oma/vps/' + value + '">' + value  + badge +  badge2 +  '</a>';
     };
-
-
-
 
 
     exports.seq_search_alignment_formatter = function(value, row){
