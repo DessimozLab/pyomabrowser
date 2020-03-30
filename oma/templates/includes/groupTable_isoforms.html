@@ -71,15 +71,6 @@
 <script src="{% static "js/bootstrap-editable.js" %}"></script>
 
 
- {% if tab == 'paralogs' %}
-
-
-<link href="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/group-by-v2/bootstrap-table-group-by.css" rel="stylesheet">
-<script src="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/group-by-v2/bootstrap-table-group-by.js"></script>
-
-
-{%endif%}
-
 <script>
     var tab = $("#grpTable");
     var icons = tab.bootstrapTable('getOptions').icons;
@@ -91,8 +82,10 @@
         showLoading: true,
         onPostBody: function () {
             domains.visualize_all(".protein", {{ longest_seq }});
+
         },
-        onLoadSuccess: function (data) {
+        onLoadSuccess: function () {
+
             tab.bootstrapTable('hideLoading');
         },
         refreshOptions: {'icons': icons}

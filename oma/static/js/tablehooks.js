@@ -105,6 +105,8 @@
     };
     exports.format_vps_link_isoforms = function(value, row){
 
+        console.log(row);
+
         return '<a href="/oma/vps/' + value + '">' + value  + '</a>';
     };
 

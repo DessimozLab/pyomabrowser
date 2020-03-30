@@ -628,7 +628,7 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
 
 
         context.update(
-            {'entry': entry, 'nr_pps': len(pps),'nr_vps': len(vps_), 'pps':pps,
+            {'entry': entry, 'nr_pps': len(pps), 'nr_vps': len(vps_), 'pps':pps,
              'longest_seq': longest_seq,
              'table_data_url': reverse('pairs_para_json', args=(entry.omaid,)),
               'tab': 'paralogs'})
