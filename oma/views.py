@@ -664,18 +664,12 @@ class Entry_Isoform(TemplateView, InfoBase):
                 main_isoform = iso
 
 
-        maxlen = 0
-
-        for i in isoforms:
-            if i.sequence_length > maxlen:
-                maxlen = i.sequence_length
 
         context.update(
             {'entry': entry,
              'tab': 'isoform',
              'isoforms': isoforms,
              'main_isoform': main_isoform,
-             'maxlen':maxlen,
              'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
         return context
 

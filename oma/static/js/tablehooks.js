@@ -114,15 +114,8 @@
 
         }
 
-        if (row.seqlen == {{maxlen}}) {
 
-            badge2 = '<span class="badge badge-secondary">Longest</span>'
-
-        }
-
-
-
-        return '<a href="/oma/vps/' + value + '">' + value  + badge +  badge2 +  '</a>';
+        return '<a href="/oma/vps/' + value + '">' + value  + badge+  '</a>';
     };
 
 
