@@ -15,7 +15,7 @@
 
     <p>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} {{entry.genome.species}}
         {{entry.genome.strain}}
-        {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %}</p>
+        {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %} within Chromosome {{entry.chromosome}}.</p>
 
 
     </div>

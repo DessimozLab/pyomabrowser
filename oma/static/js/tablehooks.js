@@ -118,6 +118,12 @@
         return '<a href="/oma/vps/' + value + '">' + value  + badge+  '</a>';
     };
 
+    exports.format_exons_isoforms = function(value, row){return value.length};
+
+
+
+
+
 
     exports.seq_search_alignment_formatter = function(value, row){
         var seq = row.sequence;

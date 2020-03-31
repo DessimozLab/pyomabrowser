@@ -11,7 +11,7 @@
                data-group-by="true"
                data-group-by-field="DivergenceLevel"
                data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
-                data-url="{{ table_data_url }}" >
+               data-url="{{ table_data_url }}" >
 
             <thead>
 
@@ -20,6 +20,7 @@
                 <th  data-field="protid" class="tagcontainer" data-sortable="true" data-formatter="tablehooks.format_vps_link_isoforms">Protein ID</th>
                   <th  data-field="seqlen" data-sortable="true" >Sequence length</th>
                  <th  data-sortable="false" class="exon_vis">Exons</th>
+                 <th  data-field="exons"  data-sortable="true" data-formatter="tablehooks.format_exons_isoforms">Number exons</th>
                  <th  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
                 <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
 

@@ -43,7 +43,7 @@
                 // Create svg container
                 var svg_container = d3.select(container).append("svg:svg");
                 var svg_height = parseInt(svg_container.style('height'));
-                var line_weight = 20;
+                var line_weight = 4;
 
                 var line = svg_container.append("rect")
                     .classed("sequence", true)
