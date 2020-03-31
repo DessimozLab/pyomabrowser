@@ -110,7 +110,7 @@
 
         if (row.is_main_isoform) {
 
-            badge = '<span class="badge badge-secondary">Main</span>'
+            badge = ' <span class="badge badge-secondary">Main isoform</span>'
 
         }
 

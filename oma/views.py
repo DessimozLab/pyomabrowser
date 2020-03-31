@@ -679,6 +679,8 @@ class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
                    'canonicalid': 'xrefid',
                    'sequence_length': 'seqlen',
                    'is_main_isoform': None,
+                   'locus_start': 'locus_start',
+                   'locus_end' : 'locus_end',
                    'exons.as_list_of_dict': 'exons'}
 
 
