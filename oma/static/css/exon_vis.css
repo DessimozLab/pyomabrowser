@@ -1,7 +1,3 @@
-/* CSS style file for domains visualisation.
- *
- * -- Alex Warwick Vesztrocy 2015
- */
 
 .exon_vis svg {
   height: 30px; /* This can be changed. */
@@ -10,80 +6,30 @@
 }
 
   /* Colour of sequnce line */
-  .exon_vis svg .sequence { fill: #4F4F4F; }
+  .exon_vis svg .sequence { fill: #ccc; }
 
-  /* Border colour for CATH domains */
-  .exon_vis svg .cath_domain {
-    stroke-width: 1.5px;
-    stroke: #4F4F4F;
+  /* Border colour for exon  */
+  .exon_vis svg .rect_exon {
+    fill:#666;
     cursor: pointer;
   }
 
-  /* Colours for CATH domain annotations */
-  /* Mainly Alpha */
-  .exon_vis svg ._1_10  { fill: #FFB2B2; }
-  .exon_vis svg ._1_20  { fill: #FF8080; }
-  .exon_vis svg ._1_25  { fill: #FF4D4D; }
-  .exon_vis svg ._1_40  { fill: #FF1919; }
-  .exon_vis svg ._1_50  { fill: #E60000; }
-  /* Mainly Beta */
-  .exon_vis svg ._2_10  { fill: #E6E6FF; }
-  .exon_vis svg ._2_20  { fill: #B2B2FF; }
-  .exon_vis svg ._2_30  { fill: #8080FF; }
-  .exon_vis svg ._2_40  { fill: #4D4DFF; }
-  .exon_vis svg ._2_50  { fill: #1919FF; }
-  .exon_vis svg ._2_60  { fill: #0000E6; }
-  .exon_vis svg ._2_70  { fill: #008AB8; }
-  .exon_vis svg ._2_80  { fill: #19A3D1; }
-  .exon_vis svg ._2_90  { fill: #4DB8DB; }
-  .exon_vis svg ._2_100 { fill: #80CCE6; }
-  .exon_vis svg ._2_102 { fill: #70DBDB; }
-  .exon_vis svg ._2_105 { fill: #33CCCC; }
-  .exon_vis svg ._2_110 { fill: #29A3A3; }
-  .exon_vis svg ._2_115 { fill: #00B85C; }
-  .exon_vis svg ._2_120 { fill: #19D175; }
-  .exon_vis svg ._2_130 { fill: #4DDB94; }
-  .exon_vis svg ._2_140 { fill: #80E6B2; }
-  .exon_vis svg ._2_150 { fill: #B2F0D1; }
-  .exon_vis svg ._2_160 { fill: #B2CC80; }
-  .exon_vis svg ._2_170 { fill: #94B84D; }
-  /* Alpha Beta */
-  .exon_vis svg ._3_10  { fill: #FFFF80; }
-  .exon_vis svg ._3_15  { fill: #FFFF19; }
-  .exon_vis svg ._3_20  { fill: #E6E600; }
-  .exon_vis svg ._3_30  { fill: #B2B200; }
-  .exon_vis svg ._3_40  { fill: #E68A00; }
-  .exon_vis svg ._3_50  { fill: #FFA319; }
-  .exon_vis svg ._3_55  { fill: #FFB84D; }
-  .exon_vis svg ._3_60  { fill: #FFCC80; }
-  .exon_vis svg ._3_65  { fill: #FFE0B2; }
-  .exon_vis svg ._3_70  { fill: #FFF5E6; }
-  .exon_vis svg ._3_75  { fill: #F5D6CC; }
-  .exon_vis svg ._3_80  { fill: #EBAD99; }
-  .exon_vis svg ._3_90  { fill: #E08566; }
-  .exon_vis svg ._3_100 { fill: #D14719; }
-  /* Few Secondary Structures */
-  .exon_vis svg ._4_10  { fill: #CC00FF; }
-  /* n/a */
-  .exon_vis svg ._n_a  { fill: #ABABAB;}
-  .exon_vis svg ._pfam { fill: #A47291; rx: 8px; ry: 8px;}
-
-
-/* Tool tips */
-.domain-info {
+  
+  /* Tool tips */
+.exon-info {
   font-size: 0.8em;
   line-height: 1;
-  padding: 12px;
+  padding: 8px;
   background: rgba(255,255,255,0.99);
   color: #000000;
-  border: 3px solid #4F4F4F;
-  border-radius: 10px;
+  border: 2px solid #4F4F4F;
+  border-radius: 8px;
   pointer-events: none;
   width: 150px;
 }
 
   /* Creates a small triangle extender for the tooltip */
-  .domain-info:after {
+  .exon-info:after {
     box-sizing: border-box;
     display: inline;
     font-size: 15px;
@@ -93,35 +39,30 @@
     position: absolute;
     pointer-events: none;
   }
-    .domain-info.n:after {
+    .exon-info.n:after {
       content: "\25BC";
       margin: -1px 0 0 0;
       top: 100%;
       left: 0;
       text-align: center;
     }
-    .domain-info.e:after {
+    .exon-info.e:after {
       content: "\25C0";
       margin: -7px 0 0 0;
       top: 50%;
       left: -8px;
     }
-    .domain-info.s:after {
+    .exon-info.s:after {
       content: "\25B2";
       margin: 0 0 1px 0;
       top: -8px;
       left: 0;
       text-align: center;
     }
-    .domain-info.w:after {
+    .exon-info.w:after {
       content: "\25B6";
       margin: -7px 0 0 -1px;
       top: 50%;
       left: 100%;
     }
 
-  /* Heading size */
-  .domain-info h1 {
-    margin: 0 0 10px 0;
-    font-size: 1.5em;
-  }

@@ -11,7 +11,7 @@
                data-group-by="true"
                data-group-by-field="DivergenceLevel"
                data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
-               data-url="{{ table_data_url }} " >
+                data-url="{{ table_data_url }} " >
 
             <thead>
 
@@ -83,13 +83,13 @@
     var icons = tab.bootstrapTable('getOptions').icons;
     $.extend(icons, {export: 'fa-download'});
     tab.bootstrapTable({
-        //data: [{"protid": "MOUSE04051", "xrefid": "Q80ZA1", "seqlen": 381, "is_main_isoform": false, "exons": [{"start": 69586891, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591254, "end": 69591308, "strand": "+"}]}, {"protid": "MOUSE04052", "xrefid": "P53_MOUSE", "seqlen": 390, "is_main_isoform": false, "exons": [{"start": 69586891, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591350, "end": 69591431, "strand": "+"}]}, {"protid": "MOUSE04053", "xrefid": "ENSMUSG00000059552.1", "seqlen": 378, "is_main_isoform": false, "exons": [{"start": 69586900, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591254, "end": 69591308, "strand": "+"}]}],
+        //data: [{"protid": "MOUSE04051", "xrefid": "Q80ZA1", "seqlen": 381, "is_main_isoform": false, "locus_start": 69586891, "locus_end": 69591308, "exons": [{"start": 69586891, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591254, "end": 69591308, "strand": "+"}]}, {"protid": "MOUSE04052", "xrefid": "P53_MOUSE", "seqlen": 390, "is_main_isoform": false, "locus_start": 69586891, "locus_end": 69591431, "exons": [{"start": 69586891, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591350, "end": 69591431, "strand": "+"}]}, {"protid": "MOUSE04053", "xrefid": "ENSMUSG00000059552.1", "seqlen": 378, "is_main_isoform": false, "locus_start": 69586900, "locus_end": 69591308, "exons": [{"start": 69586900, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591254, "end": 69591308, "strand": "+"}]}],
         reorderableColumns: true,
         clickToSelect: false,
         showMultiSort: true,
         showLoading: true,
         onPostBody: function (data) {
-            domains.visualize_all(".protein", {{ longest_seq }});
+           domains.visualize_all(".protein", {{ longest_seq }});
             exon.visualize_all(".protein", data);
 
         },
