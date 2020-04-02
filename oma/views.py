@@ -450,9 +450,9 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         pps = utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr)
         for rel in itertools.chain(vps_raw):
             pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
-            pw_relation.reltype = rel['RelType']
-            if len(rel['RelType']) == 3:
-                pw_relation.reltype += " ortholog"
+            #pw_relation.RelType = rel['RelType']
+            #if len(rel['RelType']) == 3:
+            #    pw_relation.RelType += " ortholog"
 
             pw_relation.type_p = 1
 
@@ -467,8 +467,10 @@ class PairsBase(ContextMixin, EntryCentricMixin):
             else:
                 pw_relation = models.ProteinEntry.from_entry_nr(utils.db, en[0])
 
-            if not hasattr(pw_relation, 'reltype'):
-                pw_relation.reltype = None
+            if not hasattr(pw_relation, 'RelType'):
+                pw_relation.RelType = en[-1].decode()
+
+
 
             pw_relation.type_h = 1
 
@@ -488,8 +490,8 @@ class PairsBase(ContextMixin, EntryCentricMixin):
                 else:
                     pw_relation = models.ProteinEntry.from_entry_nr(utils.db, ent[0])
 
-                if not hasattr(pw_relation, 'reltype'):
-                    pw_relation.reltype = None
+                #if not hasattr(pw_relation, 'RelType'):
+                #    pw_relation.RelType = None
 
                 pw_relation.type_g = 1
 
@@ -501,6 +503,9 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         # populate with inference evidence missing attribute
         for rel in vps:
 
+            if not hasattr(rel, 'RelType'):
+                rel.RelType = None
+
             if not hasattr(rel, 'type_p'):
                 rel.type_p = 0
 
@@ -511,7 +516,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
                 rel.type_g = 0
 
 
-        entry.reltype = 'self'
+        entry.RelType = 'self'
         if entry._entry['AltSpliceVariant'] in (0, entry.entry_nr):
             entry.alt_splicing_variant = entry.omaid
         else:
@@ -536,7 +541,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
 class PairsJson(PairsBase, JsonModelMixin, View):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'reltype': None}
+                   'canonicalid': 'xrefid', 'RelType': 'RelType'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -549,7 +554,7 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View, ):
 
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'reltype': None, 'type_p': 'type_p','type_h':'type_h','type_g':'type_g'}
+                   'canonicalid': 'xrefid', 'RelType': 'RelType', 'type_p': 'type_p','type_h':'type_h','type_g':'type_g'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -663,7 +668,7 @@ class Entry_Isoform(TemplateView, InfoBase):
             if iso.is_main_isoform:
                 main_isoform = iso
 
-
+        isoforms = isoforms.append(entry)
 
         context.update(
             {'entry': entry,
