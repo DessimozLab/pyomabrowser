@@ -33,6 +33,7 @@ import re
 import time
 import glob
 import json
+import numpy
 
 from . import tasks
 from . import utils
@@ -1568,184 +1569,7 @@ class EntrySearchJson(JsonModelMixin):
                    'description': None}
 
 
-class Searcher(View):
-    _allowed_functions = ['id', 'group', 'sequence', 'species', 'fulltext']
 
-    def search_id(self, request, query):
-        context = {'query': query, 'search_method': 'id'}
-        try:
-            entry_nr = utils.id_resolver.resolve(query)
-            return redirect('pairs', entry_nr)
-        except db.AmbiguousID as ambiguous:
-            logger.info("query {} maps to {} entries".format(query, len(ambiguous.candidates)))
-            entries = [models.ProteinEntry.from_entry_nr(utils.db, entry) for entry in ambiguous.candidates]
-        except db.InvalidId as e:
-            entries = []
-            context['message'] = "Could not find any protein matching '{}'".format(query)
-        context['data'] = json.dumps(EntrySearchJson().as_json(entries))
-        return render(request, 'disambiguate_entry.html', context=context)
-
-    def search_group(self, request, query):
-        try:
-            group_nr = utils.db.resolve_oma_group(query)
-            return redirect('omagroup_members', group_nr)
-        except db.AmbiguousID as ambiguous:
-            logger.info('search_group results in ambiguous match: {}'.format(ambiguous))
-            context = {'query': query, 'search_method': 'group',
-                       'data': json.dumps([utils.db.oma_group_metadata(grp) for grp in ambiguous.candidates])}
-            return render(request, "disambiguate_group.html", context=context)
-
-    def search_species(self, request, query):
-        try:
-            species = utils.id_mapper['OMA'].identify_genome(query)
-            return redirect('genome_info', species['UniProtSpeciesCode'].decode())
-        except db.UnknownSpecies:
-            pass
-        # search in taxonomy
-        try:
-            cand_species = self._genomes_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(query))
-        except ValueError:
-            # here we will only end up if species is ambiguous
-            cand_species = utils.id_mapper['OMA'].approx_search_genomes(query)
-
-        context = {'query': query, 'search_method': 'species'}
-        if len(cand_species) == 0:
-            context['message'] = 'Could not find any species that is similar to your query'
-        else:
-            context['data'] = json.dumps(GenomeModelJsonMixin().as_json(cand_species))
-
-        return render(request, "disambiguate_species.html", context=context)
-
-    def search_sequence(self, request, query, strategy='mixed'):
-        strategy = strategy.lower()[:5]
-        if strategy not in ('exact', 'mixed', 'approx'):
-            raise ValueError("invalid search strategy parameter")
-        seq_searcher = utils.db.seq_search
-        seq = seq_searcher._sanitise_seq(query)
-        if len(seq) < 5:
-            raise ValueError('query sequence is too short')
-        context = {'query': seq.decode(), 'search_method': 'sequence'}
-        targets = []
-        json_encoder = EntrySearchJson()
-
-        if strategy[:5] in ('exact', 'mixed'):
-            exact_matches = seq_searcher.exact_search(seq,
-                                                      only_full_length=False,
-                                                      is_sanitised=True)
-            if len(exact_matches) == 1:
-                return redirect('entry_info', exact_matches[0])
-
-            context['identified_by'] = 'exact match'
-            targets = [models.ProteinEntry.from_entry_nr(utils.db, enr) for enr in exact_matches]
-
-        if strategy == 'approx' or (strategy == 'mixed' and len(targets) == 0):
-            approx = seq_searcher.approx_search(seq, is_sanitised=True)
-            for enr, align_results in approx:
-                if align_results['score'] < 50:
-                    break
-                protein = models.ProteinEntry.from_entry_nr(utils.db, enr)
-                protein.alignment_score = align_results['score']
-                protein.alignment = [x[0] for x in align_results['alignment']]
-                protein.alignment_range = align_results['alignment'][1][1]
-                targets.append(protein)
-            json_encoder.json_fields = dict(EntrySearchJson.json_fields)
-            json_encoder.json_fields.update({'sequence': None, 'alignment': None,
-                                             'alignment_score': None, 'alignment_range': None})
-            context['identified_by'] = 'approximate match'
-        context['data'] = json.dumps(json_encoder.as_json(targets))
-        return render(request, "disambiguate_sequence.html", context=context)
-
-    def _genome_entries_from_taxonomy(self, tax):
-        genomes = self._genomes_from_taxonomy(tax)
-        return set(enr for enr in itertools.chain.from_iterable(
-            range(g.entry_nr_offset+1, g.entry_nr_offset+g.nr_entries+1) for g in genomes))
-
-    def _genomes_from_taxonomy(self, tax):
-        taxids = tax.get_taxid_of_extent_genomes()
-        if len(tax.genomes) > 0:
-            genomes = [tax.genomes[taxid] for taxid in taxids]
-        else:
-            genomes = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_taxid(taxid)) for taxid in taxids]
-        return genomes
-
-    def check_term_for_entry_nr(self, term):
-        try:
-            prefix, id_ = term.split(':', maxsplit=1)
-            if prefix == "GO":
-                return utils.db.entrynrs_with_go_annotation(id_)
-            elif prefix == "EC":
-                return utils.db.entrynrs_with_ec_annotation(id_)
-            elif prefix.lower() in ('cathdb', 'cath', 'gene3d', 'pfam', 'cath/gene3d'):
-                return utils.db.entrynrs_with_domain_id(id_)
-            elif prefix == "HOG":
-                return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
-            elif prefix.lower() in ('oma', 'omagrp', 'omagroup'):
-                return {e['EntryNr'] for e in utils.db.oma_group_members(id_)}
-            elif prefix.lower() in ("tax", "ncbitax", "taxid", "species"):
-                try:
-                    return self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(id_))
-                except ValueError:
-                    return set([])
-        except ValueError:
-            entry_nrs = set()
-            try:
-                entry_nrs.add(utils.id_resolver.resolve(term))
-            except db.AmbiguousID as e:
-                entry_nrs.update(e.candidates)
-            except db.InvalidId:
-                pass
-
-            if len(term) >= 7 and utils.db.seq_search.contains_only_valid_chars(term):
-                # check if valid AA sequence
-                entry_nrs.update(utils.db.seq_search.exact_search(term))
-            return entry_nrs
-
-    def search_fulltext(self, request, query):
-        terms = shlex.split(query)
-        logger.info(terms)
-        entry_cands = collections.Counter()
-        species_cands = collections.Counter()
-        missing_terms = []
-        for term in terms:
-            enr = self.check_term_for_entry_nr(term)
-            if len(enr) == 0:
-                missing_terms.append(term)
-            entry_cands.update(enr)
-            logger.info("term: '{}' matched {} entries".format(term, len(enr)))
-        context = {'query': query, 'tokens': terms, 'missing_terms': missing_terms,
-                   'total_candidates': len(entry_cands), 'search_method': 'fulltext'}
-        if len(entry_cands) == 0:
-            context['message'] = 'Could not find any protein matching your search pattern'
-        else:
-            _, top_cnt = entry_cands.most_common(1)[0]
-            candidates = (models.ProteinEntry(utils.db, enr) for enr, cnts in entry_cands.most_common()
-                          if cnts >= top_cnt-2)
-            candidates = list(itertools.islice(candidates, 0, 1000))
-            context['data'] = json.dumps(EntrySearchJson().as_json(candidates))
-            context['total_shown'] = len(candidates)
-        return render(request, 'disambiguate_entry.html', context=context)
-
-    def get(self, request):
-        try:
-            func = request.GET.get('type', 'id').lower()
-            query = request.GET.get('query', '')
-            if func not in self._allowed_functions:
-                raise ValueError('invalid query type')
-            meth = getattr(self, "search_"+func)
-            return meth(request, query)
-        except ValueError as e:
-            return HttpResponseBadRequest(str(e))
-
-    def post(self, request):
-        try:
-            func = request.POST.get('type', 'id').lower()
-            query = request.POST.get('query', '')
-            if func not in self._allowed_functions:
-                return HttpResponseBadRequest()
-            meth = getattr(self, "search_"+func)
-            return meth(request, query)
-        except ValueError as e:
-            return HttpResponseBadRequest(str(e))
 
 
 @method_decorator(never_cache, name='dispatch')
@@ -2138,5 +1962,478 @@ class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
         context.update({'sub_tab': 'msa', 'entry': entry})
         return context
 
+
+# //</editor-fold>
+
+#<editor-fold desc="Search Widget">
+
+class Searcher(View):
+
+    def analyse_search(self, request, type, query):
+
+        context = {'query': query, 'type': type}
+
+
+        # if specific selector chosen (entry by protId) try to instant redirection if correct query
+        if type!='all':
+
+            data_type = type.split("_")[0]  # Entry, OG, HOG, Genome, Ancestral genome
+            selector = [type.split("_")[1]]  # ID, sequence, Fingerprint, etc...
+
+            meth = getattr(self, "search_" + data_type )
+            return meth(request, query, selector=selector, redirect_valid=True)
+
+        # Otherwise apply the "All" Strategy with non redundant query
+
+        meth = getattr(self, "search_entry")
+        context['data_entry']= meth(request, query)
+
+        meth2 = getattr(self, "search_group")
+        context['data_group'] = meth2(request, query, loaded_entries=context['data_entry'])
+
+        meth3 = getattr(self, "search_genome")
+        context['data_genome'] = meth3(request, query)
+
+        return render(request, 'search_test.html', context=context)
+
+    def search_entry(self, request, query, selector=None, redirect_valid=False):
+
+        """
+        data = entry found with different selector
+        
+        
+        if selector apply only the search of select
+        
+        
+        if redirect dont return data
+        
+        """
+
+        data = []
+
+        #json_encoder = EntrySearchJson()
+        #json_encoder.json_fields = dict(EntrySearchJson.json_fields)
+        #json_encoder.json_fields.update({'sequence': None, 'alignment': None,
+                                         #'alignment_score': None, 'alignment_range': None})
+
+        # set selector to perform
+        if selector:
+            todo = selector
+        else:
+            todo = ["id", "sequence"]
+
+        if "id" in todo:
+            try:
+                entry_nr = utils.id_resolver.resolve(query)
+                if redirect_valid:
+                    return redirect('pairs', entry_nr)
+                else:
+                    p = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
+                    p.alignment_score = None
+                    p.alignment = None
+                    p.alignment_range = None
+                    data.append(p)
+
+            except db.AmbiguousID as ambiguous:
+                logger.info("query {} maps to {} entries".format(query, len(ambiguous.candidates)))
+                for entry in ambiguous.candidates:
+                    p = models.ProteinEntry.from_entry_nr(utils.db, entry)
+                    p.alignment_score = None
+                    p.alignment = None
+                    p.alignment_range = None
+                    data.append(p)
+
+            except db.InvalidId as e:
+                data += []
+                #context['message'] = "Could not find any protein matching '{}'".format(query)
+
+        if "sequence" in todo:
+
+
+            seq_searcher = utils.db.seq_search
+            seq = seq_searcher._sanitise_seq(query)
+            if len(seq) >= 5:
+
+                context = {'searched_sequence': seq.decode(), 'search_method': 'sequence'}
+                targets = []
+
+                exact_matches = seq_searcher.exact_search(seq,only_full_length=False,is_sanitised=True)
+                if len(exact_matches) == 1:
+                    if redirect_valid:
+                        redirect('pairs', exact_matches[0])
+
+                context['identified_by'] = 'exact match'
+                for enr in exact_matches:
+                    p = models.ProteinEntry.from_entry_nr(utils.db, enr)
+                    p.alignment_score = None
+                    p.alignment = None
+                    p.alignment_range = None
+                    data.append(p)
+
+
+                if len(targets) == 0:
+                    approx = seq_searcher.approx_search(seq, is_sanitised=True)
+                    for enr, align_results in approx:
+                        if align_results['score'] < 50:
+                            break
+                        protein = models.ProteinEntry.from_entry_nr(utils.db, enr)
+                        protein.alignment_score = align_results['score']
+                        protein.alignment = [x[0] for x in align_results['alignment']]
+                        protein.alignment_range = align_results['alignment'][1][1]
+                        data.append(protein)
+
+                    context['identified_by'] = 'approximate match'
+
+        return data #json.dumps(json_encoder.as_json(data))
+
+    def search_group(self, request, query, selector=None, redirect_valid=False, loaded_entries=None):
+
+
+
+        def _check_group_number(gn):
+            if isinstance(gn, int) and 0 < gn <= utils.db.get_nr_oma_groups():
+                return gn
+            elif isinstance(gn, numpy.integer):
+                return int(gn)
+            elif isinstance(gn, (bytes, str)) and gn.isdigit():
+                return int(gn)
+            return None
+
+
+        """
+        
+        :param request: 
+        :param query: 
+        :param selector: array of restricted search to perform
+        :param redirect_valid: if a perfect matched if founded we directly goes to the related page
+        :param loaded_entries: array of entries already searched for this query, shortcut all entries search module 
+        :return: 
+        """
+
+        data = []
+        potential_group_nbr = []
+
+        todo = selector if selector else ["entryid", "groupid", "fingerprint", "protsequence"]
+
+        if loaded_entries:
+            entries = loaded_entries
+            for e in entries:
+                potential_group_nbr.append(e.oma_group)
+
+            if redirect_valid and len(entries)==0:
+                group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
+                return redirect('omagroup_members', group_nr)
+
+        else:
+            if "entryid" in todo:
+                entries = getattr(self, "search_entry")(request, query, selector=["id"])
+                for e in entries:
+                    potential_group_nbr.append(e.oma_group)
+
+                if redirect_valid and len(entries) == 0:
+                    group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
+                    return redirect('omagroup_members', group_nr)
+
+            if "protsequence" in todo:
+                entries = getattr(self, "search_entry")(request, query, selector=["sequence"])
+                for e in entries:
+                    potential_group_nbr.append(e.oma_group)
+
+                if redirect_valid and len(entries) == 0:
+                    group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
+                    return redirect('omagroup_members', group_nr)
+
+        if "fingerprint" in todo:
+
+
+            fingerprint = query
+
+            if isinstance(fingerprint, (bytes, str)):
+
+                if isinstance(fingerprint, str):
+                    fingerprint = fingerprint.encode("utf-8")
+
+                if fingerprint != b"n/a":
+                    if utils.db.seq_search.contains_only_valid_chars(fingerprint):
+                        if len(fingerprint) == 7:
+
+                            group_meta_tab = utils.db.db.get_node("/OmaGroups/MetaData")
+                            try:
+                                e = next(
+                                    group_meta_tab.where("(Fingerprint == {!r})".format(fingerprint))
+                                )
+                                data.append(int(e["GroupNr"]))
+
+                                nbr = _check_group_number(int(e["GroupNr"]))
+                                if nbr != None and redirect_valid:
+                                    return redirect('omagroup_members', nbr)
+
+                            except StopIteration:
+                                pass
+
+
+        if "groupid" in todo:
+            nbr = _check_group_number(query)
+
+            if nbr != None and redirect_valid:
+                return redirect('omagroup_members', nbr)
+
+
+        # Check all Ids and add to data correct one:
+        for gn in list(set(potential_group_nbr)):
+            nbr = _check_group_number(gn)
+            if nbr != None:
+                data.append(nbr)
+
+        return data
+
+    def search_genome(self, request, query, selector=None,redirect_valid=False):
+
+
+        data = []
+
+        todo = selector if selector else ["name", "taxid"]
+
+        if "name" in todo:
+            try:
+
+                if len(query) == 5:
+                    genome = utils.id_mapper['OMA'].genome_from_UniProtCode(query)
+                else:
+                    genome = utils.id_mapper['OMA'].genome_from_SciName(query)
+
+                if redirect_valid:
+                    return redirect('genome_info', genome['UniProtSpeciesCode'].decode())
+
+                data.append(genome)
+            except db.UnknownSpecies:
+
+                data +=  utils.id_mapper['OMA'].approx_search_genomes(query)
+
+        if "taxid" in todo:
+
+            if isinstance(query, int) or query.isdigit():
+                try:
+                    genome = utils.id_mapper['OMA'].genome_from_taxid(query)
+
+                    if redirect_valid:
+                        return redirect('genome_info', genome['UniProtSpeciesCode'].decode())
+
+                    data.append(genome)
+
+                except UnknownSpecies:
+                    pass
+
+
+        return data
+
+    def get(self, request):
+
+        type = request.GET.get('type', 'id').lower()
+        query = request.GET.get('query', '')
+        meth = getattr(self, "analyse_search")
+
+        return meth(request, type, query)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def search_id(self, request, query):
+        context = {'query': query, 'search_method': 'id'}
+        try:
+            entry_nr = utils.id_resolver.resolve(query)
+            return redirect('pairs', entry_nr)
+        except db.AmbiguousID as ambiguous:
+            logger.info("query {} maps to {} entries".format(query, len(ambiguous.candidates)))
+            entries = [models.ProteinEntry.from_entry_nr(utils.db, entry) for entry in ambiguous.candidates]
+        except db.InvalidId as e:
+            entries = []
+            context['message'] = "Could not find any protein matching '{}'".format(query)
+        context['data'] = json.dumps(EntrySearchJson().as_json(entries))
+        return render(request, 'disambiguate_entry.html', context=context)
+
+    def search_group2(self, request, query):
+        try:
+            group_nr = utils.db.resolve_oma_group(query)
+            return redirect('omagroup_members', group_nr)
+        except db.AmbiguousID as ambiguous:
+            logger.info('search_group results in ambiguous match: {}'.format(ambiguous))
+            context = {'query': query, 'search_method': 'group',
+                       'data': json.dumps([utils.db.oma_group_metadata(grp) for grp in ambiguous.candidates])}
+            return render(request, "disambiguate_group.html", context=context)
+
+    def search_species(self, request, query):
+        try:
+            species = utils.id_mapper['OMA'].identify_genome(query)
+            return redirect('genome_info', species['UniProtSpeciesCode'].decode())
+        except db.UnknownSpecies:
+            pass
+        # search in taxonomy
+        try:
+            cand_species = self._genomes_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(query))
+        except ValueError:
+            # here we will only end up if species is ambiguous
+            cand_species = utils.id_mapper['OMA'].approx_search_genomes(query)
+
+        context = {'query': query, 'search_method': 'species'}
+        if len(cand_species) == 0:
+            context['message'] = 'Could not find any species that is similar to your query'
+        else:
+            context['data'] = json.dumps(GenomeModelJsonMixin().as_json(cand_species))
+
+        return render(request, "disambiguate_species.html", context=context)
+
+    def search_sequence(self, request, query, strategy='mixed'):
+        strategy = strategy.lower()[:5]
+        if strategy not in ('exact', 'mixed', 'approx'):
+            raise ValueError("invalid search strategy parameter")
+        seq_searcher = utils.db.seq_search
+        seq = seq_searcher._sanitise_seq(query)
+        if len(seq) < 5:
+            raise ValueError('query sequence is too short')
+        context = {'query': seq.decode(), 'search_method': 'sequence'}
+        targets = []
+        json_encoder = EntrySearchJson()
+
+        if strategy[:5] in ('exact', 'mixed'):
+            exact_matches = seq_searcher.exact_search(seq,
+                                                      only_full_length=False,
+                                                      is_sanitised=True)
+            if len(exact_matches) == 1:
+                return redirect('entry_info', exact_matches[0])
+
+            context['identified_by'] = 'exact match'
+            targets = [models.ProteinEntry.from_entry_nr(utils.db, enr) for enr in exact_matches]
+
+        if strategy == 'approx' or (strategy == 'mixed' and len(targets) == 0):
+            approx = seq_searcher.approx_search(seq, is_sanitised=True)
+            for enr, align_results in approx:
+                if align_results['score'] < 50:
+                    break
+                protein = models.ProteinEntry.from_entry_nr(utils.db, enr)
+                protein.alignment_score = align_results['score']
+                protein.alignment = [x[0] for x in align_results['alignment']]
+                protein.alignment_range = align_results['alignment'][1][1]
+                targets.append(protein)
+            json_encoder.json_fields = dict(EntrySearchJson.json_fields)
+            json_encoder.json_fields.update({'sequence': None, 'alignment': None,
+                                             'alignment_score': None, 'alignment_range': None})
+            context['identified_by'] = 'approximate match'
+        context['data'] = json.dumps(json_encoder.as_json(targets))
+        return render(request, "disambiguate_sequence.html", context=context)
+
+    def _genome_entries_from_taxonomy(self, tax):
+        genomes = self._genomes_from_taxonomy(tax)
+        return set(enr for enr in itertools.chain.from_iterable(
+            range(g.entry_nr_offset+1, g.entry_nr_offset+g.nr_entries+1) for g in genomes))
+
+    def _genomes_from_taxonomy(self, tax):
+        taxids = tax.get_taxid_of_extent_genomes()
+        if len(tax.genomes) > 0:
+            genomes = [tax.genomes[taxid] for taxid in taxids]
+        else:
+            genomes = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_taxid(taxid)) for taxid in taxids]
+        return genomes
+
+    def check_term_for_entry_nr(self, term):
+        try:
+            prefix, id_ = term.split(':', maxsplit=1)
+            if prefix == "GO":
+                return utils.db.entrynrs_with_go_annotation(id_)
+            elif prefix == "EC":
+                return utils.db.entrynrs_with_ec_annotation(id_)
+            elif prefix.lower() in ('cathdb', 'cath', 'gene3d', 'pfam', 'cath/gene3d'):
+                return utils.db.entrynrs_with_domain_id(id_)
+            elif prefix == "HOG":
+                return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
+            elif prefix.lower() in ('oma', 'omagrp', 'omagroup'):
+                return {e['EntryNr'] for e in utils.db.oma_group_members(id_)}
+            elif prefix.lower() in ("tax", "ncbitax", "taxid", "species"):
+                try:
+                    return self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(id_))
+                except ValueError:
+                    return set([])
+        except ValueError:
+            entry_nrs = set()
+            try:
+                entry_nrs.add(utils.id_resolver.resolve(term))
+            except db.AmbiguousID as e:
+                entry_nrs.update(e.candidates)
+            except db.InvalidId:
+                pass
+
+            if len(term) >= 7 and utils.db.seq_search.contains_only_valid_chars(term):
+                # check if valid AA sequence
+                entry_nrs.update(utils.db.seq_search.exact_search(term))
+            return entry_nrs
+
+    def search_fulltext(self, request, query):
+        terms = shlex.split(query)
+        logger.info(terms)
+        entry_cands = collections.Counter()
+        species_cands = collections.Counter()
+        missing_terms = []
+        for term in terms:
+            enr = self.check_term_for_entry_nr(term)
+            if len(enr) == 0:
+                missing_terms.append(term)
+            entry_cands.update(enr)
+            logger.info("term: '{}' matched {} entries".format(term, len(enr)))
+        context = {'query': query, 'tokens': terms, 'missing_terms': missing_terms,
+                   'total_candidates': len(entry_cands), 'search_method': 'fulltext'}
+        if len(entry_cands) == 0:
+            context['message'] = 'Could not find any protein matching your search pattern'
+        else:
+            _, top_cnt = entry_cands.most_common(1)[0]
+            candidates = (models.ProteinEntry(utils.db, enr) for enr, cnts in entry_cands.most_common()
+                          if cnts >= top_cnt-2)
+            candidates = list(itertools.islice(candidates, 0, 1000))
+            context['data'] = json.dumps(EntrySearchJson().as_json(candidates))
+            context['total_shown'] = len(candidates)
+        return render(request, 'disambiguate_entry.html', context=context)
+
+    def post(self, request):
+        try:
+            func = request.POST.get('type', 'id').lower()
+            query = request.POST.get('query', '')
+            if func not in self._allowed_functions:
+                return HttpResponseBadRequest()
+            meth = getattr(self, "search_"+func)
+            return meth(request, query)
+        except ValueError as e:
+            return HttpResponseBadRequest(str(e))
 
 # //</editor-fold>

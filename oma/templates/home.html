@@ -18,15 +18,7 @@
             <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
                 <div class="oma-search-select">
                     <select id="selectBrowser" class="btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
-                       <option  class="float-right" disabled>Protein</option>
-                        <option value="id" selected="selected"> &nbsp; Identifier</option>
-                        <option value="sequence">&nbsp; Protein sequence</option>
-                        <option value="fulltext">&nbsp; Full-text search</option>
-                        <option  class="float-right" disabled>     OMA group</option>
-                        <option value="group">&nbsp; Group number</option>
-                        <option value="group">&nbsp; Fingerprint</option>
-                        <option  class="float-right" disabled>Species</option>
-                        <option value="species">&nbsp; Name</option>
+                       {% include "includes/search_select.html" %}
                     </select>
                 </div>
                 <input id='inputBrowser' name="query" type="text" class="" placeholder="Please enter a value"/>
@@ -50,11 +42,7 @@
                         <form class="search-long-string" role="search" id="searchFormModal" action="{% url 'search' %}" method="POST">{% csrf_token %}
                             <div class="oma-search-select">
                                  <select id="selectBrowserModal" class="btn-mini" name="type" onchange="update_autocomplete_enableing('searchFormModal')">
-                                    <option value="id" selected="selected">Identifier</option>
-                                    <option value="sequence">Protein sequence</option>
-                                    <option value="group">OMA group</option>
-                                    <option value="fulltext">Full-text search</option>
-                                    <option value="species">Species</option>
+                                    {% include "includes/search_select.html" %}
                                 </select>
                             </div>
                             <textarea id='inputBrowserModal' name="query" type="text" class="" placeholder="Please enter a value"></textarea>
