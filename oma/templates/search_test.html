@@ -1,32 +1,246 @@
-<p>TEST</p>
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+{% load oma_extras %}
+
+{% block title %}{% block titleTab %}Results for "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}"  {% endblock titleTab %}{% endblock %}
+{% block meta_description %}Disambiguate result page for OMA Browser query "{{ query }}"{% endblock %}
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+                <div class="card-body ">
+
+                     <div class="pull-left">
+
+                         <h3><strong>Search results matching "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}" </strong></h3>
 
 
-{{type}}
+                         <div class="card search_entry" >
+                          <div class="card-body">
+                            <h5 class="card-title">Proteins </h5>
 
-<br>
+                              <table class="table table-hover" id="matchTable_entry"
+                                     data-mobile-responsive="true" data-check-on-init="true"
+                                     data-undefined-text=""
+                                     data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                                <thead>
+                                    <tr>
+
+                                        <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
+                                        </th>
+                                        <th data-field="taxon" data-sortable="true" data-filter-control="input"
+                                            data-formatter="tablehooks.format_sciname">Taxon
+                                        </th>
+                                        <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                                        <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                                        <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
+                                        <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
+                                        <th data-field="description" data-sortable="true">Description</th>
+
+                                        <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
+
+                                    </tr>
+                                </thead>
+                              </table>
+                          </div>
+                         </div>
+
+                         <br>
+
+                         <div class="card search_group" >
+                          <div class="card-body">
+                            <h5 class="card-title">OMA groups</h5>
+
+                               <table class="table table-hover" id="matchTable_group"
+                   data-mobile-responsive="true" data-check-on-init="true"
+                   data-undefined-text=""
+                   data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                <thead>
+                    <tr>
+                        <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
+                        </th>
+                        <!-- <th data-field="taxon" data-sortable="true" data-filter-control="input"
+                            data-formatter="tablehooks.format_sciname">Taxon
+                        </th> -->
+                        <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_omagroup">OMA Group</th>
+                        <th data-field="fingerprint" data-sortable="true" data-formatter="tablehooks.format_omagroup">Fingerprint</th>
+                        <th data-field="keywords" data-sortable="true">Group description</th>
+                        <th data-field="size" data-sortable="true" >Nr genes in OMA Group</th>
+                    </tr>
+                </thead>
+
+                <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">Genes not present in selected taxon have been filtered out as per settings. <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a></div>
+            </table>
+                          </div>
+                         </div>
+
+                         <br>
+
+                         <div class="card search_genome" >
+                          <div class="card-body">
+                            <h5 class="card-title">Genomes</h5>
+
+                               <table class="table table-hover" id="matchTable_genome"
+
+                   data-mobile-responsive="true" data-check-on-init="true"
+                   data-undefined-text=""
+                   data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                <thead>
+                    <tr>
+                        <th data-field="kingdom" data-sortable="true" data-formatter="tablehooks.format_as_kingdom_tag" title="Domain of Life">D.</th>
+    <th data-field="uniprot_species_code" data-sortable="true" data-formatter="tablehooks.format_species_code">Code</th>
+    <th data-field="ncbi" data-sortable="true" data-formatter="tablehooks.format_taxonid_as_link">NCBI Taxon ID</th>
+    <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname">Scientific Name</th>
+    <th data-field="common_name" data-sortable="true">Common Name</th>
+    <th data-field="last_modified" data-sortable="true">Last Update</th>
+    <th data-field="prots" data-sortable="true"># of Sequences</th>
+                    </tr>
+                </thead>
+
+                   </table>
+                          </div>
+                         </div>
+
+                         <br>
+
+                     </div>
+
+                </div>
+        </div>
+    </div>
+</div>
 
 
-{{query}}
+
+    <script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+    <script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+
+    <!-- bootstrap-table -->
+    <script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+    <script src="{% static "js/bootstrap-table.min.js" %}"></script>
+    <link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+    <script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+    <script src="{% static "js/tableExport.min.js" %}"></script>
+
+    <!-- taxon filter import: Core -->
+    <script src="{% static "js/tnt.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-table-filtertaxon.js" %}"></script>
+    <link type="text/css" rel="stylesheet" href="{% static "css/filtertaxon.css" %}"/>
+
+    <!-- taxon filter import: phyloIo -->
+    <script src="{% static "js/underscore-min.js" %}"></script>
+    <script src="{% static "js/treecompare.js" %}"></script>
+    <link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
+    <link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
+    <link type="text/css" rel="stylesheet" href="{% static "css/treecompare.css" %}"/>
+    <!-- taxon filter import: Editable field -->
+    <link type="text/css" rel="stylesheet" href="{% static "css/bootstrap-editable.css" %}"/>
+    <script src="{% static "js/bootstrap-editable.js" %}"></script>
+    <script src="{% static "js/highlight.js" %}"></script>
+
+    <script>
+
+        format_result_refs = function(value, row){
+            var qterms = "{{ query }}".split('\s+');
+            var all_evids = [];
+            if (row.hasOwnProperty('xrefs')){
+                all_evids = row.xrefs.map(x => x['source'] + ": " + x['xref']);
+            }
+            var keep = all_evids.filter(function(token){
+                return qterms.some(term => token.match(term));
+            });
+            return keep.join('<br>');
+        };
 
 
-<br>
+        // ENTRY RESULT TABLE
 
-{{data_genome}}
+        var myHilitor = new Hilitor("matchTable_entry");
+        myHilitor.setMatchType("open");
 
-<br>
-<br>
-<br>
-<br>
-<br>
+        var data = {{ data_entry | safe }};
 
-{{data_entry}}
-<br>
+        var tab = $("#matchTable_entry");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data ,
+            onPostBody: function(d){
+                myHilitor.apply("{{ query }}");
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+        // GROUP RESULT TABLE
+
+        var myHilitor = new Hilitor("matchTable_entry");
+        myHilitor.setMatchType("open");
+
+        var data = {{ data_group | safe }};
+
+        var tab = $("#matchTable_group");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data ,
+            onPostBody: function(d){
+                myHilitor.apply("{{ query }}");
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
 
 
-<br>
-<br>
-<br>
-<br>
-<br>
+        // GENOME RESULT TABLE
 
-{{data_group}}
+        var myHilitor = new Hilitor("matchTable_entry");
+        myHilitor.setMatchType("open");
+
+        var data = {{ data_genome | safe }};
+
+        var tab = $("#matchTable_genome");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data ,
+            onPostBody: function(d){
+                myHilitor.apply("{{ query }}");
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+    </script>
+    {% block js_formatter_hooks %}{% endblock %}
+
+
+<style>
+
+
+    .fixed-table-body{
+        max-height: 400px;
+    }
+
+
+.bootstrap-table {
+	padding: 24px;
+}
+
+</style>
+
+
+{% endblock content %}

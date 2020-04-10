@@ -1981,7 +1981,7 @@ class Searcher(View):
             selector = [type.split("_")[1]]  # ID, sequence, Fingerprint, etc...
 
             meth = getattr(self, "search_" + data_type )
-            return meth(request, query, selector=selector, redirect_valid=True)
+            return meth(request, query, selector=selector, redirect_valid=True) # deal return if error
 
         # Otherwise apply the "All" Strategy with non redundant query
 
@@ -1993,6 +1993,18 @@ class Searcher(View):
 
         meth3 = getattr(self, "search_genome")
         context['data_genome'] = meth3(request, query)
+
+        # encode entry data to json
+        json_encoder = EntrySearchJson()
+        json_encoder.json_fields = dict(EntrySearchJson.json_fields)
+        json_encoder.json_fields.update({'sequence': None, 'alignment': None, 'alignment_score': None, 'alignment_range': None})
+        context['data_entry'] = json.dumps(json_encoder.as_json(context['data_entry']))
+
+        # encode group data to json
+        context['data_group'] = json.dumps([utils.db.oma_group_metadata(grp) for grp in context['data_group'] ])
+
+        # encode genome data to json
+        context['data_genome'] = json.dumps(GenomeModelJsonMixin().as_json(context['data_genome']))
 
         return render(request, 'search_test.html', context=context)
 
@@ -2011,12 +2023,7 @@ class Searcher(View):
 
         data = []
 
-        #json_encoder = EntrySearchJson()
-        #json_encoder.json_fields = dict(EntrySearchJson.json_fields)
-        #json_encoder.json_fields.update({'sequence': None, 'alignment': None,
-                                         #'alignment_score': None, 'alignment_range': None})
-
-        # set selector to perform
+      # set selector to perform
         if selector:
             todo = selector
         else:
@@ -2025,6 +2032,7 @@ class Searcher(View):
         if "id" in todo:
             try:
                 entry_nr = utils.id_resolver.resolve(query)
+
                 if redirect_valid:
                     return redirect('pairs', entry_nr)
                 else:
@@ -2084,7 +2092,7 @@ class Searcher(View):
 
                     context['identified_by'] = 'approximate match'
 
-        return data #json.dumps(json_encoder.as_json(data))
+        return data
 
     def search_group(self, request, query, selector=None, redirect_valid=False, loaded_entries=None):
 

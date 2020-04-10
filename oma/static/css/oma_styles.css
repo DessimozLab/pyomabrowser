@@ -882,7 +882,7 @@ transform: none !important;
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content {
 		 display: none;
 		 padding: 0 20px;
-		 min-height: auto
+		 min-height: auto;
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content h1 {
 		 border-top: 1px solid rgba(0, 0, 0, 0.1);
@@ -1173,6 +1173,44 @@ body .oma-details-container .oma-details-nav-left .gene-orthology li #filterOrth
 body .oma-details-container .oma-details-nav-left .gene-orthology li #filterOrthologs div { background: transparent !important; }
 body .oma-details-container .oma-details-nav-left .gene-orthology li #filterParalogs { background: #e9fafb; }
 body .oma-details-container .oma-details-nav-left .gene-orthology li #filterParalogs div { background: transparent !important; }
+
+
+
+.search_entry {
+	border: none !important;
+}
+
+
+
+.search_entry h5 {
+	background-color: #e9fafb;
+    padding: 8px;
+	border-radius: 16px;
+	text-indent: 8px;
+}
+
+
+.search_group h5 {
+	background-color: #d7fdff;
+    padding: 8px;
+	border-radius: 16px;
+	text-indent: 8px;
+}
+
+.search_group {
+	border: none !important;
+}
+
+.search_genome h5 {
+	background-color: #faebeb;
+    padding: 8px;
+	border-radius: 16px;
+	text-indent: 8px;
+}
+
+.search_genome {
+	border: none !important;
+}
 
 
 
