@@ -1488,21 +1488,7 @@ class Release(TemplateView):
         return ctx
 
 
-class GenomeModelJsonMixin(JsonModelMixin):
-    json_fields = {'uniprot_species_code': None,
-                   "species_and_strain_as_dict": 'sciname',
-                   'ncbi_taxon_id': "ncbi",
-                   "common_name": None,
-                   "nr_entries": "prots", "kingdom": None,
-                   "last_modified": None}
 
-
-class GenomesJson(GenomeModelJsonMixin, View):
-    def get(self, request, *args, **kwargs):
-        genome_key = utils.id_mapper['OMA']._genome_keys
-        lg = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_table[utils.db.id_mapper['OMA']._entry_off_keys[e - 1]]) for e in genome_key]
-        data = list(self.to_json_dict(lg))
-        return JsonResponse(data, safe=False)
 
 
 def export_marker_genes(request):
@@ -1559,18 +1545,6 @@ def function_projection(request):
         form = forms.FunctionProjectionUploadForm()
     return render(request, "tool_function_prediction_upload.html",
                   {'form': form, 'max_upload_size': form.fields['file'].max_upload_size / (2**20)})
-
-
-class EntrySearchJson(JsonModelMixin):
-    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
-                   'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'oma_group': None,
-                   'hog_family_nr': 'roothog', 'xrefs': None,
-                   'description': None}
-
-
-
-
 
 @method_decorator(never_cache, name='dispatch')
 class AbstractFileResultDownloader(TemplateView):
@@ -1967,6 +1941,42 @@ class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
 
 #<editor-fold desc="Search Widget">
 
+
+class EntrySearchJson(JsonModelMixin):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'oma_group': None,
+                   'hog_family_nr': 'roothog', 'xrefs': None,
+                   'description': None}
+
+
+class GenomeModelJsonMixin(JsonModelMixin):
+    json_fields = {'uniprot_species_code': None,
+                   "species_and_strain_as_dict": 'sciname',
+                   'ncbi_taxon_id': "ncbi",
+                   "common_name": None,
+                   "nr_entries": "prots", "kingdom": None,
+                   "last_modified": None}
+
+
+class GenomesJson(GenomeModelJsonMixin, View):
+    def get(self, request, *args, **kwargs):
+        genome_key = utils.id_mapper['OMA']._genome_keys
+        lg = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_table[utils.db.id_mapper['OMA']._entry_off_keys[e - 1]]) for e in genome_key]
+        data = list(self.to_json_dict(lg))
+        return JsonResponse(data, safe=False)
+
+
+class HOGSearchJson(JsonModelMixin):
+
+    json_fields = {
+        'hog_id': 'group_nr',
+        'level': 'level',
+        'nr_member_genes': 'size',
+        'type':'type',
+        'fingerprint': 'fingerprint' }
+
+
 class Searcher(View):
 
     def analyse_search(self, request, type, query):
@@ -1986,25 +1996,40 @@ class Searcher(View):
         # Otherwise apply the "All" Strategy with non redundant query
 
         meth = getattr(self, "search_entry")
-        context['data_entry']= meth(request, query)
+        data_entry = meth(request, query)
 
         meth2 = getattr(self, "search_group")
-        context['data_group'] = meth2(request, query, loaded_entries=context['data_entry'])
+        data_og = meth2(request, query, loaded_entries=data_entry)
+
+        meth2bis = getattr(self, "search_hog")
+        data_hog = meth2bis(request, query, loaded_entries=data_entry)
 
         meth3 = getattr(self, "search_genome")
-        context['data_genome'] = meth3(request, query)
+        data_extant_genome = meth3(request, query)
 
         # encode entry data to json
         json_encoder = EntrySearchJson()
         json_encoder.json_fields = dict(EntrySearchJson.json_fields)
         json_encoder.json_fields.update({'sequence': None, 'alignment': None, 'alignment_score': None, 'alignment_range': None})
-        context['data_entry'] = json.dumps(json_encoder.as_json(context['data_entry']))
+        context['data_entry'] = json.dumps(json_encoder.as_json(data_entry))
 
         # encode group data to json
-        context['data_group'] = json.dumps([utils.db.oma_group_metadata(grp) for grp in context['data_group'] ])
+        json_encoder_hog = HOGSearchJson()
+        json_hog = []
+        for nbr in data_hog:
+            h = models.HOG(utils.db, nbr)
+            h.fingerprint = None
+            h.type= 'HOG'
+            json_hog.append(h)
+        json_hog = json_encoder_hog.as_json(json_hog)
+        json_og = [utils.db.oma_group_metadata(grp) for grp in data_og]
+        for og in json_og:
+            og["type"] = 'OMA group'
+
+        context['data_group'] = json.dumps(json_hog+json_og)
 
         # encode genome data to json
-        context['data_genome'] = json.dumps(GenomeModelJsonMixin().as_json(context['data_genome']))
+        context['data_genome'] = json.dumps(GenomeModelJsonMixin().as_json(data_extant_genome))
 
         return render(request, 'search_test.html', context=context)
 
@@ -2192,6 +2217,75 @@ class Searcher(View):
             nbr = _check_group_number(gn)
             if nbr != None:
                 data.append(nbr)
+
+        return data
+
+    def search_hog(self, request, query, selector=None, redirect_valid=False, loaded_entries=None):
+
+
+
+        """
+
+        :param request: 
+        :param query: 
+        :param selector: array of restricted search to perform
+        :param redirect_valid: if a perfect matched if founded we directly goes to the related page
+        :param loaded_entries: array of entries already searched for this query, shortcut all entries search module 
+        :return: 
+        """
+
+        data = []
+        potential_group_nbr = []
+
+        todo = selector if selector else ["entryid", "groupid", "protsequence"]
+
+        if loaded_entries:
+            entries = loaded_entries
+            for e in entries:
+
+                potential_group_nbr.append(e.oma_hog)
+
+
+            if redirect_valid and len(entries) == 0:
+
+                group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
+                return redirect('hog_viewer', group_nr)
+
+        else:
+            if "entryid" in todo:
+                entries = getattr(self, "search_entry")(request, query, selector=["id"])
+                for e in entries:
+                    potential_group_nbr.append(e.oma_hog)
+
+                if redirect_valid and len(entries) == 0:
+                    group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
+                    return redirect('hog_viewer', group_nr)
+
+            if "protsequence" in todo:
+                entries = getattr(self, "search_entry")(request, query, selector=["sequence"])
+                for e in entries:
+                    potential_group_nbr.append(e.oma_hog)
+
+                if redirect_valid and len(entries) == 0:
+                    group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
+                    return redirect('hog_viewer', group_nr)
+
+
+        if "groupid" in todo:
+            try:
+                nbr = utils.db.parse_hog_id(query)
+                if redirect_valid:
+                    return redirect('hog_viewer', nbr)
+            except ValueError:
+                pass
+
+        # Check all Ids and add to data correct one:
+        for gn in list(set(potential_group_nbr)):
+            try:
+                nbr = utils.db.parse_hog_id(gn)
+                data.append(nbr)
+            except ValueError:
+                pass
 
         return data
 

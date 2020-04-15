@@ -18,6 +18,7 @@
 
                          <h3><strong>Search results matching "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}" </strong></h3>
 
+                         {{data_hog}}
 
                          <div class="card search_entry" >
                           <div class="card-body">
@@ -54,7 +55,7 @@
 
                          <div class="card search_group" >
                           <div class="card-body">
-                            <h5 class="card-title">OMA groups</h5>
+                            <h5 class="card-title">Orthologous Groups</h5>
 
                                <table class="table table-hover" id="matchTable_group"
                    data-mobile-responsive="true" data-check-on-init="true"
@@ -62,16 +63,12 @@
                    data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
                 <thead>
                     <tr>
-                        <th data-field="kingdom" data-sortable="true" data-filter-control="select"
-                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
-                        </th>
-                        <!-- <th data-field="taxon" data-sortable="true" data-filter-control="input"
-                            data-formatter="tablehooks.format_sciname">Taxon
-                        </th> -->
-                        <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_omagroup">OMA Group</th>
-                        <th data-field="fingerprint" data-sortable="true" data-formatter="tablehooks.format_omagroup">Fingerprint</th>
-                        <th data-field="keywords" data-sortable="true">Group description</th>
-                        <th data-field="size" data-sortable="true" >Nr genes in OMA Group</th>
+                        <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_generic_group_id">Group ID</th>
+                        <th data-field="type" data-sortable="true" >Type</th>
+                        <th data-field="size" data-sortable="true" >Nr genes in Group</th>
+                        <th data-field="level" data-sortable="true" >Level</th>
+                        <th data-field="fingerprint" data-sortable="true" >Fingerprint</th>
+
                     </tr>
                 </thead>
 
@@ -185,8 +182,8 @@
 
         var myHilitor = new Hilitor("matchTable_entry");
         myHilitor.setMatchType("open");
-
         var data = {{ data_group | safe }};
+
 
         var tab = $("#matchTable_group");
         tab.bootstrapTable({
@@ -201,6 +198,9 @@
         var icons = tab.bootstrapTable('getOptions').icons;
         $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
         tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+
+
 
 
         // GENOME RESULT TABLE

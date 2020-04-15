@@ -64,6 +64,8 @@ least version 18.09). Then you can:
 1) build oma:latest container:
    DOCKER_BUILDKIT=1 docker build -t oma:latest -f for_docker/oma/Dockerfile --ssh default .
 
+   You may need to run the command above with --no-cache argument if you want to update code repository e.g. pyoma folder
+
 2) run the omabrowser using composer:
    docker-compose up -d
 
@@ -85,6 +87,6 @@ least version 18.09). Then you can:
 
 5) restart docker-compose
    docker-compose down
-   docker-compose up -d 
+   docker-compose up -d
 
 6) access in your browser localhost:8080

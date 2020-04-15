@@ -85,6 +85,21 @@
                                       + '</a>';
     };
 
+
+    exports.format_generic_group_id = function(value, row) {
+
+        if (row.type === "HOG") {
+             return '<a href="/oma/hog/ihamviewer/HOG:' + ('0000000' + value).slice(-7) + '/">HOG:' + ('0000000' + value).slice(-7) + "</a>";
+
+        }
+
+        else if (row.type === "OMA group") {
+            return '<a href="/oma/omagroup/'+value+'/members/">' + value + '</a>';
+        }
+
+    };
+
+
     exports.format_domainprevalence = function(value, row) {
         return row.PrevFrac.toFixed(1) + "%";
     };
@@ -100,9 +115,11 @@
     exports.format_info_link = function (value, row) {
         return '<a href="/oma/info/' + value + '">' + value + '</a>';
     };
+
     exports.format_vps_link = function(value, row){
         return '<a href="/oma/vps/' + value + '">' + value + '</a>';
     };
+
     exports.format_vps_link_isoforms = function(value, row){
 
         badge = '';
@@ -119,11 +136,6 @@
     };
 
     exports.format_exons_isoforms = function(value, row){return value.length};
-
-
-
-
-
 
     exports.seq_search_alignment_formatter = function(value, row){
         var seq = row.sequence;
