@@ -18,7 +18,8 @@
 
                          <h3><strong>Search results matching "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}" </strong></h3>
 
-                         {{data_taxon}}
+
+                         {{h}}
 
                          <div class="card search_entry" >
                           <div class="card-body">
@@ -31,14 +32,15 @@
                                 <thead>
                                     <tr>
 
+                                        <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                                        <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                                        <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="tablehooks.format_sciname">Taxon</th>
+
                                         <th data-field="kingdom" data-sortable="true" data-filter-control="select"
                                             data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
                                         </th>
-                                        <th data-field="taxon" data-sortable="true" data-filter-control="input"
-                                            data-formatter="tablehooks.format_sciname">Taxon
-                                        </th>
-                                        <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
-                                        <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+
+
                                         <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
                                         <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
                                         <th data-field="description" data-sortable="true">Description</th>
@@ -66,8 +68,9 @@
                         <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_generic_group_id">Group ID</th>
                         <th data-field="type" data-sortable="true" >Type</th>
                         <th data-field="size" data-sortable="true" >Nr genes in Group</th>
-                        <th data-field="level" data-sortable="true" >Level</th>
-                        <th data-field="fingerprint" data-sortable="true" >Fingerprint</th>
+
+                        <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_group_aux">Auxiliary Data</th>
+
 
                     </tr>
                 </thead>
@@ -90,16 +93,14 @@
                    data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
                 <thead>
                     <tr>
+                        <th data-field="type" data-sortable="true" data-formatter="tablehooks.format_generic_genome_link">Code/Name</th>
                         <th data-field="type" data-sortable="true">Type</th>
+                        <th data-field="ncbi" data-sortable="true" data-formatter="tablehooks.format_taxonid_as_link">NCBI Taxon ID</th>
+                        <th data-field="prots" data-sortable="true"># of Sequences/Genes</th>
+                        <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname_genomes">Scientific Name</th>
                         <th data-field="common_name" data-sortable="true" data-formatter="tablehooks.format_species_common">Common Name</th>
                         <th data-field="uniprot_species_code" data-sortable="true" data-formatter="tablehooks.format_species_code">Code</th>
-
-                        <th data-field="prots" data-sortable="true"># of Sequences</th>
-                        <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname">Scientific Name</th>
-                        <th data-field="ncbi" data-sortable="true" data-formatter="tablehooks.format_taxonid_as_link">NCBI Taxon ID</th>
                         <th data-field="kingdom" data-sortable="true" data-formatter="tablehooks.format_as_kingdom_tag" title="Domain of Life">D.</th>
-
-                        <th data-field="last_modified" data-sortable="true">Last Update</th>
 
                     </tr>
                 </thead>

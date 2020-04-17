@@ -19,6 +19,29 @@
         return "<b>" + value.species + "</b> " + value.strain;
     };
 
+    exports.format_sciname_genomes = function(value, row) {
+
+        if (value === "Ancestral") {
+            return '<a href="/oma/ancestralgenome/info/'+value+'/">' + value + '</a>';
+        }
+
+        return "<b>" + value.species + "</b> " + value.strain;
+    };
+
+
+
+    exports.format_generic_genome_link = function(value, row) {
+        if (value === "Extant") {
+             return '<a href="/oma/genome/' + row.uniprot_species_code + '/info/" >' + row.uniprot_species_code + "</a>";
+
+        }
+
+        else if (value === "Ancestral") {
+            return '<a href="/oma/ancestralgenome/info/'+row.sciname+'/">' + row.sciname + '</a>';
+        }
+    };
+
+
     exports.format_species_code = function(value, row){
         return '<a href="/oma/genome/' + value + '/info/" >' + value + "</a>";
     };
@@ -109,6 +132,20 @@
 
         else if (row.type === "OMA group") {
             return '<a href="/oma/omagroup/'+value+'/members/">' + value + '</a>';
+        }
+
+    };
+
+
+    exports.format_group_aux = function(value, row) {
+
+        if (row.type === "HOG") {
+             return " <b>Root Level: </b> " +  row.level;
+
+        }
+
+        else if (row.type === "OMA group") {
+            return "<b>Fingerprint: </b> " +  row.fingerprint;
         }
 
     };

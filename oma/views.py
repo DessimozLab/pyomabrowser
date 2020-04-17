@@ -2241,20 +2241,31 @@ class Searcher(View):
         :return: 
         """
 
+        def _check_hog_number(gn):
+
+            try:
+                gn = int(gn)
+
+                if 0 < gn <= utils.db.get_nr_toplevel_hogs():
+                    return gn
+
+            except ValueError:
+
+                return None
+
         data = []
         potential_group_nbr = []
 
         todo = selector if selector else ["entryid", "groupid", "protsequence"]
 
         if "groupid" in todo:
-            try:
-                nbr = utils.db.parse_hog_id(query)
-                if redirect_valid:
-                    return redirect('hog_viewer',  models.HOG(utils.db, nbr).hog_id)
-                potential_group_nbr.append(nbr)
 
-            except ValueError:
-                pass
+            hog_nbr = _check_hog_number(query)
+
+            if hog_nbr:
+                if redirect_valid:
+                    return redirect('hog_viewer',  models.HOG(utils.db, hog_nbr).hog_id)
+                potential_group_nbr.append(hog_nbr)
 
         if loaded_entries:
             entries = loaded_entries
@@ -2285,11 +2296,9 @@ class Searcher(View):
 
         # Check all Ids and add to data correct one:
         for gn in list(set(potential_group_nbr)):
-            try:
-                nbr = utils.db.parse_hog_id(gn)
+            nbr = _check_hog_number(gn)
+            if nbr:
                 data.append(nbr)
-            except ValueError:
-                pass
 
         return data
 
@@ -2366,8 +2375,8 @@ class Searcher(View):
             search["kingdom"] =  ""
             search["uniprot_species_code"] =  ""
             search["ncbi"] =  search["taxid"]
-            search["sciname"] =  ""
-            search["common_name"] =  search["name"]
+            search["sciname"] =  search["name"]
+            search["common_name"] = ""
             search["last_modified"] =  ""
             search["prots"] =  search["nr_hogs"]
             search["type"] =  "Ancestral"
