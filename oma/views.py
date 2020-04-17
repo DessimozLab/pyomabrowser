@@ -2251,7 +2251,12 @@ class Searcher(View):
 
             except ValueError:
 
-                return None
+                try:
+                    return utils.db.parse_hog_id(gn)
+                except ValueError:
+                    return None
+
+            return None
 
         data = []
         potential_group_nbr = []
