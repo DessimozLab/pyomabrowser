@@ -23,6 +23,7 @@ from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.contrib.staticfiles.templatetags.staticfiles import static
 
+
 from collections import OrderedDict, defaultdict
 
 import tweepy
@@ -966,8 +967,6 @@ class AncestralGenomeBase(ContextMixin):
                 context['nr_hogs'] = search['nr_hogs']
                 context['nbr_species'] = count_species(search, 0)
 
-
-
             else:
                 raise ValueError
         except ValueError as e:
@@ -1018,9 +1017,9 @@ class HOG_Base(ContextMixin):
 
             # Check if level is valid
             if level is None:
-                hog = next((x for x in subhogs_list if x.IsRoot == True), None)
+                hog = next((x for x in subhogs_list if x.is_root == True), None)
             else:
-                hog = next((x for x in subhogs_list if x.level == level), None)
+                hog = next((x for x in subhogs_list if x.is_root == level), None)
 
             if hog is None:
                 raise ValueError('requested hog cannot be found at level {}'.format(level))
@@ -1030,7 +1029,7 @@ class HOG_Base(ContextMixin):
             if len(hog_id.split('.')) > 1:
                 is_subhog = True
             else:
-                if hog.IsRoot:
+                if hog.is_root:
                     is_subhog = False
                 else:
                     is_subhog = True
@@ -1991,7 +1990,10 @@ class Searcher(View):
             selector = [type.split("_")[1]]  # ID, sequence, Fingerprint, etc...
 
             meth = getattr(self, "search_" + data_type )
-            return meth(request, query, selector=selector, redirect_valid=True) # deal return if error
+            resp = meth(request, query, selector=selector, redirect_valid=True) # deal return if error
+
+            if isinstance(resp,  HttpResponseRedirect):
+                return resp
 
         # Otherwise apply the "All" Strategy with non redundant query
 
@@ -2006,6 +2008,9 @@ class Searcher(View):
 
         meth3 = getattr(self, "search_genome")
         data_extant_genome = meth3(request, query)
+
+        meth4 = getattr(self, "search_taxon")
+        data_taxon = meth4(request, query)
 
         # encode entry data to json
         json_encoder = EntrySearchJson()
@@ -2029,7 +2034,11 @@ class Searcher(View):
         context['data_group'] = json.dumps(json_hog+json_og)
 
         # encode genome data to json
-        context['data_genome'] = json.dumps(GenomeModelJsonMixin().as_json(data_extant_genome))
+        json_genome = GenomeModelJsonMixin().as_json(data_extant_genome)
+        for g in json_genome:
+            g["type"] = 'Extant'
+
+        context['data_genome'] = json.dumps(json_genome+data_taxon)
 
         return render(request, 'search_test.html', context=context)
 
@@ -2222,8 +2231,6 @@ class Searcher(View):
 
     def search_hog(self, request, query, selector=None, redirect_valid=False, loaded_entries=None):
 
-
-
         """
 
         :param request: 
@@ -2239,17 +2246,23 @@ class Searcher(View):
 
         todo = selector if selector else ["entryid", "groupid", "protsequence"]
 
+        if "groupid" in todo:
+            try:
+                nbr = utils.db.parse_hog_id(query)
+                if redirect_valid:
+                    return redirect('hog_viewer',  models.HOG(utils.db, nbr).hog_id)
+                potential_group_nbr.append(nbr)
+
+            except ValueError:
+                pass
+
         if loaded_entries:
             entries = loaded_entries
             for e in entries:
-
                 potential_group_nbr.append(e.oma_hog)
-
-
             if redirect_valid and len(entries) == 0:
-
                 group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
-                return redirect('hog_viewer', group_nr)
+                return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
 
         else:
             if "entryid" in todo:
@@ -2259,7 +2272,7 @@ class Searcher(View):
 
                 if redirect_valid and len(entries) == 0:
                     group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
-                    return redirect('hog_viewer', group_nr)
+                    return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
 
             if "protsequence" in todo:
                 entries = getattr(self, "search_entry")(request, query, selector=["sequence"])
@@ -2268,16 +2281,7 @@ class Searcher(View):
 
                 if redirect_valid and len(entries) == 0:
                     group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
-                    return redirect('hog_viewer', group_nr)
-
-
-        if "groupid" in todo:
-            try:
-                nbr = utils.db.parse_hog_id(query)
-                if redirect_valid:
-                    return redirect('hog_viewer', nbr)
-            except ValueError:
-                pass
+                    return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
 
         # Check all Ids and add to data correct one:
         for gn in list(set(potential_group_nbr)):
@@ -2300,14 +2304,18 @@ class Searcher(View):
             try:
 
                 if len(query) == 5:
-                    genome = utils.id_mapper['OMA'].genome_from_UniProtCode(query)
+                    genome1 = utils.id_mapper['OMA'].genome_from_UniProtCode(query)
+                    genome = models.Genome(utils.db, genome1)
                 else:
-                    genome = utils.id_mapper['OMA'].genome_from_SciName(query)
+                    genome1 = utils.id_mapper['OMA'].genome_from_SciName(query)
+                    genome = models.Genome(utils.db, genome1)
 
                 if redirect_valid:
-                    return redirect('genome_info', genome['UniProtSpeciesCode'].decode())
+                    return redirect('genome_info', genome1['UniProtSpeciesCode'].decode())
+
 
                 data.append(genome)
+
             except db.UnknownSpecies:
 
                 data +=  utils.id_mapper['OMA'].approx_search_genomes(query)
@@ -2316,16 +2324,56 @@ class Searcher(View):
 
             if isinstance(query, int) or query.isdigit():
                 try:
-                    genome = utils.id_mapper['OMA'].genome_from_taxid(query)
+                    genome1 = utils.id_mapper['OMA'].genome_from_taxid(query)
+                    genome = models.Genome(utils.db, genome1)
 
                     if redirect_valid:
-                        return redirect('genome_info', genome['UniProtSpeciesCode'].decode())
+                        return redirect('genome_info', genome1['UniProtSpeciesCode'].decode())
 
                     data.append(genome)
 
-                except UnknownSpecies:
+                except db.UnknownSpecies:
                     pass
 
+
+        return data
+
+    def search_taxon(self, request, query, selector=None,redirect_valid=False):
+
+        url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
+        todo = selector if selector else ["name", "taxid"]
+
+        def iterdict(d, search, query):
+            for k, v in d.items():
+                for key in todo:
+                    if k == key:
+                        if str(v).lower() == str(query).lower():
+                            search = d
+                if k == 'children':
+                    for c in v:
+                        search = iterdict(c, search, query)
+            return search
+
+        data = []
+
+        search = iterdict(json.load(open(url, 'r')), False, query)
+
+        if search:
+
+            if redirect_valid:
+                return redirect('ancestralgenome_info', search['taxid'])
+
+            search["kingdom"] =  ""
+            search["uniprot_species_code"] =  ""
+            search["ncbi"] =  search["taxid"]
+            search["sciname"] =  ""
+            search["common_name"] =  search["name"]
+            search["last_modified"] =  ""
+            search["prots"] =  search["nr_hogs"]
+            search["type"] =  "Ancestral"
+
+
+            data.append(search)
 
         return data
 

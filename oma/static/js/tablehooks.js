@@ -20,8 +20,22 @@
     };
 
     exports.format_species_code = function(value, row){
-        return '<a href="/cgi-bin/gateway.pl?f=DisplayOS&p1=' + value + '">' + value + "</a>";
+        return '<a href="/oma/genome/' + value + '/info/" >' + value + "</a>";
     };
+
+    exports.format_species_common = function(value, row) {
+
+        if (row.type === "Extant") {
+             return value;
+
+        }
+
+        else if (row.type === "Ancestral") {
+            return '<a href="/oma/ancestralgenome/'+value+'/info/">' + value + '</a>';
+        }
+
+    };
+
 
     exports.format_taxonid_as_link = function(value, row){
         return '<a class="external" href="https://uniprot.org/taxonomy/' + value +'">' + value + "</a>"
