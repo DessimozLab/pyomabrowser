@@ -19,11 +19,11 @@
                          <h3><strong>Search results matching "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}" </strong></h3>
 
 
-                         {{h}}
-
                          <div class="card search_entry" >
                           <div class="card-body">
                             <h5 class="card-title">Proteins </h5>
+                              <b class="float-right">{{nbr_entry}} match founded</b>
+                              <br>
 
                               <table class="table table-hover" id="matchTable_entry"
                                      data-mobile-responsive="true" data-check-on-init="true"
@@ -58,6 +58,8 @@
                          <div class="card search_group" >
                           <div class="card-body">
                             <h5 class="card-title">Orthologous Groups</h5>
+                              <b class="float-right">{{nbr_group}} match founded</b>
+                              <br>
 
                                <table class="table table-hover" id="matchTable_group"
                    data-mobile-responsive="true" data-check-on-init="true"
@@ -85,6 +87,8 @@
                          <div class="card search_genome" >
                           <div class="card-body">
                             <h5 class="card-title">Genomes</h5>
+                              <b class="float-right">{{nbr_genome}} match founded</b>
+                              <br>
 
                                <table class="table table-hover" id="matchTable_genome"
 

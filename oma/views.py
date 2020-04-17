@@ -2040,6 +2040,10 @@ class Searcher(View):
 
         context['data_genome'] = json.dumps(json_genome+data_taxon)
 
+        context['nbr_genome'] = len(data_taxon) + len(data_extant_genome)
+        context['nbr_entry'] = len(data_entry)
+        context['nbr_group'] = len(data_og) + len(data_hog)
+
         return render(request, 'search_test.html', context=context)
 
     def search_entry(self, request, query, selector=None, redirect_valid=False):
