@@ -255,9 +255,6 @@
         tab.bootstrapTable('refreshOptions', {'icons': icons});
 
 
-
-
-
         document.getElementById('run_full_entries').onclick=function(){
           // Remove any element-specific value, falling back to stylesheets
           document.getElementById('matchTable_entry_full_text').style.display='';
@@ -276,6 +273,9 @@
             showMultiSort: true,
             onPostBody: function(d){
                 myHilitor.apply("{{ query }}");
+                document.getElementById('nbr_full_entrie').innerHTML=  'Loading...';
+            },
+            onLoadSuccess: function(d){
                 document.getElementById('nbr_full_entrie').innerHTML= d.length + ' full text match founded';
             }
         });
