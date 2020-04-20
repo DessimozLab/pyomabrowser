@@ -1976,6 +1976,80 @@ class HOGSearchJson(JsonModelMixin):
         'fingerprint': 'fingerprint' }
 
 
+class FullTextJson(JsonModelMixin, View):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'oma_group': None,
+                   'hog_family_nr': 'roothog', 'xrefs': None,
+                   'description': None}
+
+    def get(self, request, query, *args, **kwargs):
+
+        #data = search_fulltext(query)
+        data = list(self.to_json_dict( search_fulltext(query)))
+        return JsonResponse(data, safe=False)
+
+
+def search_fulltext(query):
+
+    terms = shlex.split(query)
+    logger.info(terms)
+    entry_cands = collections.Counter()
+    missing_terms = []
+
+    for term in terms:
+        enr = check_term_for_entry_nr(term)
+        if len(enr) == 0:
+            missing_terms.append(term)
+        entry_cands.update(enr)
+        logger.info("term: '{}' matched {} entries".format(term, len(enr)))
+
+
+    if len(entry_cands) == 0:
+        return []
+    else:
+        _, top_cnt = entry_cands.most_common(1)[0]
+        candidates = (models.ProteinEntry(utils.db, enr) for enr, cnts in entry_cands.most_common()
+                      if cnts >= top_cnt-2)
+        candidates = list(itertools.islice(candidates, 0, 1000))
+        return candidates
+
+    return []
+
+
+def check_term_for_entry_nr(term):
+        try:
+            prefix, id_ = term.split(':', maxsplit=1)
+            if prefix == "GO":
+                return utils.db.entrynrs_with_go_annotation(id_)
+            elif prefix == "EC":
+                return utils.db.entrynrs_with_ec_annotation(id_)
+            elif prefix.lower() in ('cathdb', 'cath', 'gene3d', 'pfam', 'cath/gene3d'):
+                return utils.db.entrynrs_with_domain_id(id_)
+            elif prefix == "HOG":
+                return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
+            elif prefix.lower() in ('oma', 'omagrp', 'omagroup'):
+                return {e['EntryNr'] for e in utils.db.oma_group_members(id_)}
+            elif prefix.lower() in ("tax", "ncbitax", "taxid", "species"):
+                try:
+                    return set([]) ############self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(id_))
+                except ValueError:
+                    return set([])
+        except ValueError:
+            entry_nrs = set()
+            try:
+                entry_nrs.add(utils.id_resolver.resolve(term))
+            except db.AmbiguousID as e:
+                entry_nrs.update(e.candidates)
+            except db.InvalidId:
+                pass
+
+            if len(term) >= 7 and utils.db.seq_search.contains_only_valid_chars(term):
+                # check if valid AA sequence
+                entry_nrs.update(utils.db.seq_search.exact_search(term))
+            return entry_nrs
+
+
 class Searcher(View):
 
     def analyse_search(self, request, type, query):
@@ -2043,6 +2117,8 @@ class Searcher(View):
         context['nbr_genome'] = len(data_taxon) + len(data_extant_genome)
         context['nbr_entry'] = len(data_entry)
         context['nbr_group'] = len(data_og) + len(data_hog)
+
+        context['url_fulltest_entries'] = reverse('fulltext_json', args=(query,))
 
         return render(request, 'search_test.html', context=context)
 
@@ -2403,6 +2479,16 @@ class Searcher(View):
 
         return meth(request, type, query)
 
+    def post(self, request):
+
+        type = request.POST.get('type', 'id').lower()
+        query = request.POST.get('query', '')
+        meth = getattr(self, "analyse_search")
+
+        return meth(request,type, query)
+
+
+
 
 
 
@@ -2536,39 +2622,9 @@ class Searcher(View):
             genomes = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_taxid(taxid)) for taxid in taxids]
         return genomes
 
-    def check_term_for_entry_nr(self, term):
-        try:
-            prefix, id_ = term.split(':', maxsplit=1)
-            if prefix == "GO":
-                return utils.db.entrynrs_with_go_annotation(id_)
-            elif prefix == "EC":
-                return utils.db.entrynrs_with_ec_annotation(id_)
-            elif prefix.lower() in ('cathdb', 'cath', 'gene3d', 'pfam', 'cath/gene3d'):
-                return utils.db.entrynrs_with_domain_id(id_)
-            elif prefix == "HOG":
-                return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
-            elif prefix.lower() in ('oma', 'omagrp', 'omagroup'):
-                return {e['EntryNr'] for e in utils.db.oma_group_members(id_)}
-            elif prefix.lower() in ("tax", "ncbitax", "taxid", "species"):
-                try:
-                    return self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(id_))
-                except ValueError:
-                    return set([])
-        except ValueError:
-            entry_nrs = set()
-            try:
-                entry_nrs.add(utils.id_resolver.resolve(term))
-            except db.AmbiguousID as e:
-                entry_nrs.update(e.candidates)
-            except db.InvalidId:
-                pass
 
-            if len(term) >= 7 and utils.db.seq_search.contains_only_valid_chars(term):
-                # check if valid AA sequence
-                entry_nrs.update(utils.db.seq_search.exact_search(term))
-            return entry_nrs
 
-    def search_fulltext(self, request, query):
+    def search_fulltext2(self, request, query):
         terms = shlex.split(query)
         logger.info(terms)
         entry_cands = collections.Counter()
@@ -2593,7 +2649,7 @@ class Searcher(View):
             context['total_shown'] = len(candidates)
         return render(request, 'disambiguate_entry.html', context=context)
 
-    def post(self, request):
+    def post2(self, request):
         try:
             func = request.POST.get('type', 'id').lower()
             query = request.POST.get('query', '')
