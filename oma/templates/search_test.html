@@ -20,68 +20,111 @@
 
 
                          <div class="card search_entry" >
+
                           <div class="card-body">
+
                             <h5 class="card-title">Proteins </h5>
+
+
+
+
                               <b class="float-right">{{nbr_entry}} match founded</b>
                               <br>
 
-                              <table class="table table-hover" id="matchTable_entry"
-                                     data-mobile-responsive="true" data-check-on-init="true"
-                                     data-undefined-text=""
-                                     data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
-                                <thead>
-                                    <tr>
 
-                                        <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
-                                        <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
-                                        <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="tablehooks.format_sciname">Taxon</th>
-
-                                        <th data-field="kingdom" data-sortable="true" data-filter-control="select"
-                                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
-                                        </th>
+                              <div class="row">
 
 
-                                        <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
-                                        <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
-                                        <th data-field="description" data-sortable="true">Description</th>
 
-                                        <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
+                                  <div class="col-sm-2" id="filter_entry_div">
+                                       <br>
+                                      <b>Matched by </b>
+                                      <div class="form-check pl-4">
 
-                                    </tr>
-                                </thead>
-                              </table>
+                        <div >
+                            <input type="checkbox" class="form-check-input " id="f_e_id" onclick="set_filter_e_id()" checked>
+                            <label  class="form-check-label" for="f_e_id" >
+                                Protein ID
+                            </label>
+                        </div>
+
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="f_e_seq" onclick="set_filter_e_seq()" checked>
+                            <label class="form-check-label" for="f_e_seq">
+                                Sequences
+                            </label>
+                        </div>
+
+
+                    </div>
+                                  </div>
+
+                                  <div class="col-sm-10">
+                                      <table class="table table-hover" id="matchTable_entry"
+                                                                     data-mobile-responsive="true" data-check-on-init="true"
+                                                                     data-undefined-text=""
+                                                                     data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                                                                <thead>
+                                                                    <tr>
+
+                                                                        <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                                                                        <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                                                                        <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="tablehooks.format_sciname">Taxon</th>
+
+                                                                        <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                                                                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
+                                                                        </th>
+
+
+                                                                        <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
+                                                                        <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
+                                                                        <th data-field="description" data-sortable="true">Description</th>
+
+                                                                        <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
+
+                                                                    </tr>
+                                                                </thead>
+                                                              </table>
+                                      <br>
+
+                                   </div>
+
+                            </div>
+
 
                               <br>
 
-                              <button type="button" id="run_full_entries" class="btn btm-sm btn-outline-secondary btn-block mx-auto " style="width: 50%"> Use full text search to search for more proteins</button>
+
+                             <button type="button" id="run_full_entries" class="btn btm-sm btn-outline-secondary btn-block mx-auto " style="width: 50%"> Use full text search to search for more proteins</button>
 
                               <b class="float-right" id="nbr_full_entrie" ></b>
                               <br>
                                   <table class="table table-hover" style="display: none" id="matchTable_entry_full_text"
-                                     data-mobile-responsive="true" data-check-on-init="true"
-                                     data-undefined-text=""
-                                     data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
-                                <thead>
-                                    <tr>
+                                                                 data-mobile-responsive="true" data-check-on-init="true"
+                                                                 data-undefined-text=""
+                                                                 data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                                                            <thead>
+                                                                <tr>
 
-                                        <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
-                                        <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
-                                        <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="tablehooks.format_sciname">Taxon</th>
+                                                                    <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                                                                    <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                                                                    <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="tablehooks.format_sciname">Taxon</th>
 
-                                        <th data-field="kingdom" data-sortable="true" data-filter-control="select"
-                                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
-                                        </th>
+                                                                    <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                                                                        data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
+                                                                    </th>
 
 
-                                        <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
-                                        <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
-                                        <th data-field="description" data-sortable="true">Description</th>
+                                                                    <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
+                                                                    <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
+                                                                    <th data-field="description" data-sortable="true">Description</th>
 
-                                        <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
+                                                                    <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
 
-                                    </tr>
-                                </thead>
-                              </table>
+                                                                </tr>
+                                                            </thead>
+                                                          </table>
+
 
                           </div>
                          </div>
@@ -123,7 +166,35 @@
                               <b class="float-right">{{nbr_genome}} match founded</b>
                               <br>
 
-                               <table class="table table-hover" id="matchTable_genome"
+                              <div class="row">
+
+
+
+                                  <div class="col-sm-2" id="filter_genome_div">
+                                       <br>
+                                      <b>Matched by </b>
+                                      <div class="form-check pl-4">
+
+                        <div >
+                            <input type="checkbox" class="form-check-input " id="f_g_name" onclick="set_filter_g_name()" checked>
+                            <label  class="form-check-label" for="f_g_name" >
+                                Name
+                            </label>
+                        </div>
+
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="f_g_taxid" onclick="set_filter_g_tax()" checked>
+                            <label class="form-check-label" for="f_g_taxid">
+                                NCBI Taxon Id
+                            </label>
+                        </div>
+
+
+                    </div>
+                                  </div>
+
+                                  <div class="col-sm-10">
+                                      <table class="table table-hover" id="matchTable_genome"
 
                    data-mobile-responsive="true" data-check-on-init="true"
                    data-undefined-text=""
@@ -143,6 +214,13 @@
                 </thead>
 
                    </table>
+                                      <br>
+
+                                   </div>
+
+                            </div>
+
+
                           </div>
                          </div>
 
@@ -286,9 +364,125 @@
         };
 
 
+        // FILTER ENTRY
+        var keep_entry_id=true;
+        var keep_entry_seq=true;
+
+        function set_filter_e_id() {
 
 
-         </script>
+
+
+            // Get the checkbox
+            var checkBox = document.getElementById("f_e_id");
+
+              // If the checkbox is checked, display the output text
+              if (checkBox.checked == true){
+                keep_entry_id = true;
+              } else {
+                keep_entry_id = false;
+              }
+              apply_filter_entry();
+        }
+
+        function set_filter_e_seq() {
+
+            // Get the checkbox
+            var checkBox = document.getElementById("f_e_seq");
+
+              // If the checkbox is checked, display the output text
+              if (checkBox.checked == true){
+                keep_entry_seq = true;
+              } else {
+                keep_entry_seq = false;
+              }
+              apply_filter_entry();
+        }
+
+        function apply_filter_entry(){
+
+
+
+        //$('#filter_entry_div').find('.form-check').find('input[type=radio]:checked').prop('checked', true);
+
+
+        var filter_parameters = {found_by:[]};
+
+        if (keep_entry_id){
+            filter_parameters.found_by.push('id');
+        }
+
+
+        if (keep_entry_seq){
+            filter_parameters.found_by.push('seq');
+        }
+
+
+
+        $('#matchTable_entry').bootstrapTable('filterBy', filter_parameters )
+
+}
+
+
+        // FILTER Genome
+        var keep_g_name=true;
+        var keep_g_taxid=true;
+
+        function set_filter_g_name() {
+
+
+            // Get the checkbox
+            var checkBox = document.getElementById("f_g_name");
+
+              // If the checkbox is checked, display the output text
+              if (checkBox.checked == true){
+                keep_g_name = true;
+              } else {
+                keep_g_name = false;
+              }
+              apply_filter_genome();
+        }
+
+        function set_filter_g_tax() {
+
+            // Get the checkbox
+            var checkBox = document.getElementById("f_g_taxid");
+
+              // If the checkbox is checked, display the output text
+              if (checkBox.checked == true){
+                keep_g_taxid = true;
+              } else {
+                keep_g_taxid = false;
+              }
+              apply_filter_genome();
+        }
+
+        function apply_filter_genome() {
+
+
+
+
+
+            var filter_parameters = {found_by: []};
+
+            if (keep_g_name) {
+                filter_parameters.found_by.push('name');
+            }
+
+
+            if (keep_g_taxid) {
+                filter_parameters.found_by.push('taxid');
+            }
+
+            console.log('assaaassa')
+
+
+            $('#matchTable_genome').bootstrapTable('filterBy', filter_parameters)
+
+        }
+
+
+</script>
 
 
 
@@ -296,7 +490,6 @@
 
 
 <style>
-
 
     .fixed-table-body{
         max-height: 400px;

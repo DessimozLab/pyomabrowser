@@ -1946,7 +1946,8 @@ class EntrySearchJson(JsonModelMixin):
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'oma_group': None,
                    'hog_family_nr': 'roothog', 'xrefs': None,
-                   'description': None}
+                   'description': None,
+                   "found_by": "found_by"}
 
 
 class GenomeModelJsonMixin(JsonModelMixin):
@@ -1955,7 +1956,8 @@ class GenomeModelJsonMixin(JsonModelMixin):
                    'ncbi_taxon_id': "ncbi",
                    "common_name": None,
                    "nr_entries": "prots", "kingdom": None,
-                   "last_modified": None}
+                   "last_modified": None,
+                   "found_by": "found_by"}
 
 
 class GenomesJson(GenomeModelJsonMixin, View):
@@ -2154,6 +2156,7 @@ class Searcher(View):
                     p.alignment_score = None
                     p.alignment = None
                     p.alignment_range = None
+                    p.found_by = 'id'
                     data.append(p)
 
             except db.AmbiguousID as ambiguous:
@@ -2163,6 +2166,7 @@ class Searcher(View):
                     p.alignment_score = None
                     p.alignment = None
                     p.alignment_range = None
+                    p.found_by = 'id'
                     data.append(p)
 
             except db.InvalidId as e:
@@ -2190,6 +2194,7 @@ class Searcher(View):
                     p.alignment_score = None
                     p.alignment = None
                     p.alignment_range = None
+                    p.found_by = 'seq'
                     data.append(p)
 
 
@@ -2202,6 +2207,7 @@ class Searcher(View):
                         protein.alignment_score = align_results['score']
                         protein.alignment = [x[0] for x in align_results['alignment']]
                         protein.alignment_range = align_results['alignment'][1][1]
+                        protein.found_by = 'seq'
                         data.append(protein)
 
                     context['identified_by'] = 'approximate match'
@@ -2400,19 +2406,25 @@ class Searcher(View):
                 if len(query) == 5:
                     genome1 = utils.id_mapper['OMA'].genome_from_UniProtCode(query)
                     genome = models.Genome(utils.db, genome1)
+                    genome.found_by = 'name'
                 else:
                     genome1 = utils.id_mapper['OMA'].genome_from_SciName(query)
                     genome = models.Genome(utils.db, genome1)
+                    genome.found_by = 'name'
 
                 if redirect_valid:
                     return redirect('genome_info', genome1['UniProtSpeciesCode'].decode())
-
 
                 data.append(genome)
 
             except db.UnknownSpecies:
 
-                data +=  utils.id_mapper['OMA'].approx_search_genomes(query)
+                amb_genome =  utils.id_mapper['OMA'].approx_search_genomes(query)
+
+                for genome in amb_genome:
+                    genome.found_by = 'name'
+                    data.append(genome)
+
 
         if "taxid" in todo:
 
@@ -2420,6 +2432,7 @@ class Searcher(View):
                 try:
                     genome1 = utils.id_mapper['OMA'].genome_from_taxid(query)
                     genome = models.Genome(utils.db, genome1)
+                    genome.found_by = 'taxid'
 
                     if redirect_valid:
                         return redirect('genome_info', genome1['UniProtSpeciesCode'].decode())
@@ -2437,20 +2450,25 @@ class Searcher(View):
         url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
         todo = selector if selector else ["name", "taxid"]
 
-        def iterdict(d, search, query):
+
+        def iterdict(d, search, query, found_by):
             for k, v in d.items():
                 for key in todo:
                     if k == key:
                         if str(v).lower() == str(query).lower():
                             search = d
+                            if key == 'name':
+                                found_by = 'name'
+                            elif key == 'taxid':
+                                found_by = 'taxid'
                 if k == 'children':
                     for c in v:
-                        search = iterdict(c, search, query)
-            return search
+                        search, found_by = iterdict(c, search, query, found_by)
+            return search, found_by
 
         data = []
 
-        search = iterdict(json.load(open(url, 'r')), False, query)
+        search, found_by = iterdict(json.load(open(url, 'r')), False, query, None)
 
         if search:
 
@@ -2465,7 +2483,7 @@ class Searcher(View):
             search["last_modified"] =  ""
             search["prots"] =  search["nr_hogs"]
             search["type"] =  "Ancestral"
-
+            search["found_by"] = found_by
 
             data.append(search)
 
