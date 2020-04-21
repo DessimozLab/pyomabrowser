@@ -1975,7 +1975,8 @@ class HOGSearchJson(JsonModelMixin):
         'level': 'level',
         'nr_member_genes': 'size',
         'type':'type',
-        'fingerprint': 'fingerprint' }
+        'fingerprint': 'fingerprint',
+        "found_by": "found_by"}
 
 
 class FullTextJson(JsonModelMixin, View):
@@ -2077,10 +2078,10 @@ class Searcher(View):
         data_entry = meth(request, query)
 
         meth2 = getattr(self, "search_group")
-        data_og = meth2(request, query, loaded_entries=data_entry)
+        data_og, found_by_gr = meth2(request, query, loaded_entries=data_entry)
 
         meth2bis = getattr(self, "search_hog")
-        data_hog = meth2bis(request, query, loaded_entries=data_entry)
+        data_hog, found_by_hog = meth2bis(request, query, loaded_entries=data_entry)
 
         meth3 = getattr(self, "search_genome")
         data_extant_genome = meth3(request, query)
@@ -2100,12 +2101,14 @@ class Searcher(View):
         for nbr in data_hog:
             h = models.HOG(utils.db, nbr)
             h.fingerprint = None
-            h.type= 'HOG'
+            h.type = 'HOG'
+            h.found_by = found_by_hog[nbr]
             json_hog.append(h)
         json_hog = json_encoder_hog.as_json(json_hog)
         json_og = [utils.db.oma_group_metadata(grp) for grp in data_og]
         for og in json_og:
             og["type"] = 'OMA group'
+            og["found_by"] =  found_by_gr[og["group_nr"]]
 
         context['data_group'] = json.dumps(json_hog+json_og)
 
@@ -2217,7 +2220,6 @@ class Searcher(View):
     def search_group(self, request, query, selector=None, redirect_valid=False, loaded_entries=None):
 
 
-
         def _check_group_number(gn):
             if isinstance(gn, int) and 0 < gn <= utils.db.get_nr_oma_groups():
                 return gn
@@ -2239,6 +2241,7 @@ class Searcher(View):
         """
 
         data = []
+        found_by = {}
         potential_group_nbr = []
 
         todo = selector if selector else ["entryid", "groupid", "fingerprint", "protsequence"]
@@ -2247,6 +2250,7 @@ class Searcher(View):
             entries = loaded_entries
             for e in entries:
                 potential_group_nbr.append(e.oma_group)
+                found_by[e.oma_group] = e.found_by
 
             if redirect_valid and len(entries)==0:
                 group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
@@ -2257,6 +2261,7 @@ class Searcher(View):
                 entries = getattr(self, "search_entry")(request, query, selector=["id"])
                 for e in entries:
                     potential_group_nbr.append(e.oma_group)
+                    found_by[group_nr] = 'pid'
 
                 if redirect_valid and len(entries) == 0:
                     group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
@@ -2266,6 +2271,7 @@ class Searcher(View):
                 entries = getattr(self, "search_entry")(request, query, selector=["sequence"])
                 for e in entries:
                     potential_group_nbr.append(e.oma_group)
+                    found_by[group_nr] = 'seq'
 
                 if redirect_valid and len(entries) == 0:
                     group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
@@ -2293,6 +2299,7 @@ class Searcher(View):
                                 data.append(int(e["GroupNr"]))
 
                                 nbr = _check_group_number(int(e["GroupNr"]))
+                                found_by[nbr] = 'fin'
                                 if nbr != None and redirect_valid:
                                     return redirect('omagroup_members', nbr)
 
@@ -2302,6 +2309,7 @@ class Searcher(View):
 
         if "groupid" in todo:
             nbr = _check_group_number(query)
+            found_by[nbr] = 'gid'
 
             if nbr != None and redirect_valid:
                 return redirect('omagroup_members', nbr)
@@ -2313,7 +2321,7 @@ class Searcher(View):
             if nbr != None:
                 data.append(nbr)
 
-        return data
+        return data, found_by
 
     def search_hog(self, request, query, selector=None, redirect_valid=False, loaded_entries=None):
 
@@ -2345,6 +2353,7 @@ class Searcher(View):
             return None
 
         data = []
+        found_by = {}
         potential_group_nbr = []
 
         todo = selector if selector else ["entryid", "groupid", "protsequence"]
@@ -2352,6 +2361,8 @@ class Searcher(View):
         if "groupid" in todo:
 
             hog_nbr = _check_hog_number(query)
+            found_by[hog_nbr] = 'gid'
+
 
             if hog_nbr:
                 if redirect_valid:
@@ -2362,6 +2373,7 @@ class Searcher(View):
             entries = loaded_entries
             for e in entries:
                 potential_group_nbr.append(e.oma_hog)
+                found_by[_check_hog_number(e.oma_hog)] = e.found_by
             if redirect_valid and len(entries) == 0:
                 group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
                 return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
@@ -2371,6 +2383,7 @@ class Searcher(View):
                 entries = getattr(self, "search_entry")(request, query, selector=["id"])
                 for e in entries:
                     potential_group_nbr.append(e.oma_hog)
+                    found_by[_check_hog_number(e.oma_hog)] = 'id'
 
                 if redirect_valid and len(entries) == 0:
                     group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
@@ -2380,6 +2393,7 @@ class Searcher(View):
                 entries = getattr(self, "search_entry")(request, query, selector=["sequence"])
                 for e in entries:
                     potential_group_nbr.append(e.oma_hog)
+                    found_by[_check_hog_number(e.oma_hog)] = 'seq'
 
                 if redirect_valid and len(entries) == 0:
                     group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
@@ -2391,7 +2405,7 @@ class Searcher(View):
             if nbr:
                 data.append(nbr)
 
-        return data
+        return data, found_by
 
     def search_genome(self, request, query, selector=None,redirect_valid=False):
 

@@ -8,37 +8,49 @@
 
 <div id="oma-generic-container">
 
-    <div class="container">
+    <div class="container-fluid">
 
         <div class="jumbotron">
 
                 <div class="card-body ">
 
+
                      <div class="pull-left">
 
-                         <h3><strong>Search results matching "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}" </strong></h3>
 
+                         <div class="row">
 
-                         <div class="card search_entry" >
+                             <div class="col-md-8 offset-md-2">
+
+                                 <h3><strong>Search results matching "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}" </strong></h3>
+</div>
+
+                         </div>
+
+                         <div class="card search_entry " >
 
                           <div class="card-body">
 
+                              <div class="col-md-8 offset-md-2">
+
+
                             <h5 class="card-title">Proteins </h5>
 
-
-
-
-                              <b class="float-right">{{nbr_entry}} match founded</b>
+                              <b class="float-right ">{{nbr_entry}} match founded</b>
                               <br>
 
 
+
+       </div>
+
                               <div class="row">
 
+                                   <div class="col-md-1 offset-md-1">
 
-
-                                  <div class="col-sm-2" id="filter_entry_div">
                                        <br>
-                                      <b>Matched by </b>
+                                       <br>
+
+                                       <b>Matched by </b>
                                       <div class="form-check pl-4">
 
                         <div >
@@ -57,10 +69,14 @@
 
 
                     </div>
-                                  </div>
 
-                                  <div class="col-sm-10">
-                                      <table class="table table-hover" id="matchTable_entry"
+
+                                   </div>
+
+
+                                  <div class="col-md-8 ">
+
+                                       <table class="table table-hover" id="matchTable_entry"
                                                                      data-mobile-responsive="true" data-check-on-init="true"
                                                                      data-undefined-text=""
                                                                      data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
@@ -85,19 +101,20 @@
                                                                     </tr>
                                                                 </thead>
                                                               </table>
-                                      <br>
-
                                    </div>
 
-                            </div>
 
+                              </div>
 
                               <br>
 
-
                              <button type="button" id="run_full_entries" class="btn btm-sm btn-outline-secondary btn-block mx-auto " style="width: 50%"> Use full text search to search for more proteins</button>
 
-                              <b class="float-right" id="nbr_full_entrie" ></b>
+
+                             <div class="col-md-8 offset-md-2">
+
+                             <b class="float-right" id="nbr_full_entrie" ></b>
+
                               <br>
                                   <table class="table table-hover" style="display: none" id="matchTable_entry_full_text"
                                                                  data-mobile-responsive="true" data-check-on-init="true"
@@ -124,7 +141,7 @@
                                                                 </tr>
                                                             </thead>
                                                           </table>
-
+                             </div>
 
                           </div>
                          </div>
@@ -133,11 +150,73 @@
 
                          <div class="card search_group" >
                           <div class="card-body">
-                            <h5 class="card-title">Orthologous Groups</h5>
-                              <b class="float-right">{{nbr_group}} match founded</b>
+
+
+
+                              <div class="col-md-8 offset-md-2">
+
+
+                            <h5 class="card-title">Orthologous Groups </h5>
+
+                              <b class="float-right ">{{nbr_group}} match founded</b>
                               <br>
 
-                               <table class="table table-hover" id="matchTable_group"
+
+
+       </div>
+
+                              <div class="row">
+
+                                   <div class="col-md-1 offset-md-1">
+
+                                       <br>
+                                       <br>
+
+                                       <b>Matched by </b>
+                                      <div class="form-check pl-4">
+
+                        <div>
+                            <input type="checkbox" class="form-check-input " id="f_gr_id" onclick="set_filter_gr_id()" checked>
+                            <label  class="form-check-label" for="f_gr_id" >
+                                Groups Id
+                            </label>
+                        </div>
+
+                         <div>
+                            <input type="checkbox" class="form-check-input " id="f_gr_pid" onclick="set_filter_gr_pid()" checked>
+                            <label  class="form-check-label" for="f_gr_pid" >
+                                Protein Id
+                            </label>
+                        </div>
+
+                       <div>
+                            <input type="checkbox" class="form-check-input " id="f_gr_fin" onclick="set_filter_gr_fin()" checked>
+                            <label  class="form-check-label" for="f_gr_fin" >
+                                Fingerprint
+                            </label>
+                        </div>
+
+                      <div>
+                            <input type="checkbox" class="form-check-input " id="f_gr_seq" onclick="set_filter_gr_seq()" checked>
+                            <label  class="form-check-label" for="f_gr_seq" >
+                                Sequence
+                            </label>
+                        </div>
+
+
+
+
+
+
+                    </div>
+
+
+                                   </div>
+
+
+                                  <div class="col-md-8 ">
+
+                                       <table class="table table-hover" id="matchTable_group"
                    data-mobile-responsive="true" data-check-on-init="true"
                    data-undefined-text=""
                    data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
@@ -155,6 +234,12 @@
 
                 <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">Genes not present in selected taxon have been filtered out as per settings. <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a></div>
             </table>
+                                   </div>
+
+
+                              </div>
+
+
                           </div>
                          </div>
 
@@ -162,17 +247,28 @@
 
                          <div class="card search_genome" >
                           <div class="card-body">
-                            <h5 class="card-title">Genomes</h5>
-                              <b class="float-right">{{nbr_genome}} match founded</b>
+
+
+                              <div class="col-md-8 offset-md-2">
+
+
+                            <h5 class="card-title">Genomes </h5>
+
+                              <b class="float-right ">{{nbr_genome}} match founded</b>
                               <br>
+
+
+
+       </div>
 
                               <div class="row">
 
+                                   <div class="col-md-1 offset-md-1">
 
-
-                                  <div class="col-sm-2" id="filter_genome_div">
                                        <br>
-                                      <b>Matched by </b>
+                                       <br>
+
+                                       <b>Matched by </b>
                                       <div class="form-check pl-4">
 
                         <div >
@@ -185,16 +281,24 @@
                         <div>
                             <input type="checkbox" class="form-check-input" id="f_g_taxid" onclick="set_filter_g_tax()" checked>
                             <label class="form-check-label" for="f_g_taxid">
-                                NCBI Taxon Id
+                                NCBI ID
                             </label>
                         </div>
 
 
-                    </div>
-                                  </div>
 
-                                  <div class="col-sm-10">
-                                      <table class="table table-hover" id="matchTable_genome"
+
+
+
+                    </div>
+
+
+                                   </div>
+
+
+                                  <div class="col-md-8 ">
+
+                                       <table class="table table-hover" id="matchTable_genome"
 
                    data-mobile-responsive="true" data-check-on-init="true"
                    data-undefined-text=""
@@ -214,11 +318,10 @@
                 </thead>
 
                    </table>
-                                      <br>
-
                                    </div>
 
-                            </div>
+
+                              </div>
 
 
                           </div>
@@ -299,6 +402,7 @@
         var myHilitor2 = new Hilitor("matchTable_group");
         myHilitor2.setMatchType("open");
         var data = {{ data_group | safe }};
+        console.log(data);
         var tab = $("#matchTable_group");
         tab.bootstrapTable({
             reorderableColumns: true,
@@ -422,6 +526,98 @@
         $('#matchTable_entry').bootstrapTable('filterBy', filter_parameters )
 
 }
+
+
+        // FILTER Genome
+        var keep_gr_id=true;
+        var keep_gr_pid=true;
+        var keep_gr_fin=true;
+        var keep_gr_seq=true;
+
+        function set_filter_gr_id() {
+
+
+            // Get the checkbox
+            var checkBox = document.getElementById("f_gr_id");
+
+              // If the checkbox is checked, display the output text
+              if (checkBox.checked == true){
+                keep_gr_id = true;
+              } else {
+                keep_gr_id = false;
+              }
+              apply_filter_group();
+        }
+
+        function set_filter_gr_pid() {
+
+            // Get the checkbox
+            var checkBox = document.getElementById("f_gr_pid");
+
+              // If the checkbox is checked, display the output text
+              if (checkBox.checked == true){
+                keep_gr_pid = true;
+              } else {
+                keep_gr_pid = false;
+              }
+              apply_filter_group();
+        }
+
+        function set_filter_gr_fin() {
+
+            // Get the checkbox
+            var checkBox = document.getElementById("f_gr_fin");
+
+              // If the checkbox is checked, display the output text
+              if (checkBox.checked == true){
+                keep_gr_fin = true;
+              } else {
+                keep_gr_fin = false;
+              }
+              apply_filter_group();
+        }
+
+        function set_filter_gr_seq() {
+
+            // Get the checkbox
+            var checkBox = document.getElementById("f_gr_seq");
+
+              // If the checkbox is checked, display the output text
+              if (checkBox.checked == true){
+                keep_gr_seq = true;
+              } else {
+                keep_gr_seq = false;
+              }
+              apply_filter_group();
+        }
+
+        function apply_filter_group() {
+
+            var filter_parameters = {found_by: []};
+
+            if (keep_gr_id) {
+                filter_parameters.found_by.push('gid');
+            }
+
+            if (keep_gr_pid) {
+                filter_parameters.found_by.push('id');
+            }
+
+
+            if (keep_gr_fin) {
+                filter_parameters.found_by.push('fin');
+            }
+
+
+            if (keep_gr_seq) {
+                filter_parameters.found_by.push('seq');
+            }
+
+
+
+            $('#matchTable_group').bootstrapTable('filterBy', filter_parameters)
+
+        }
 
 
         // FILTER Genome
