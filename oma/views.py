@@ -2195,7 +2195,7 @@ class Searcher(View):
                 data += []
                 #context['message'] = "Could not find any protein matching '{}'".format(query)
         end = time.time()
-        logger.info("[{}] Entry id search".format(query, start - end))
+        logger.info("[{}] Entry id search {}".format(query, start - end))
 
         start = time.time()
         if "sequence" in todo:
@@ -2236,7 +2236,7 @@ class Searcher(View):
 
                     context['identified_by'] = 'approximate match'
         end = time.time()
-        logger.info("[{}] Entry sequence search".format(query, start - end))
+        logger.info("[{}] Entry sequence search {}".format(query, start - end))
 
         return data
 
@@ -2285,7 +2285,7 @@ class Searcher(View):
 
 
             end = time.time()
-            logger.info("[{}] Group loaded entry search".format(query, start - end))
+            logger.info("[{}] Group loaded entry search {}".format(query, start - end))
 
         else:
             if "entryid" in todo:
@@ -2302,7 +2302,7 @@ class Searcher(View):
                     return redirect('omagroup_members', group_nr)
 
                 end = time.time()
-                logger.info("[{}] Group entry id search".format(query, start - end))
+                logger.info("[{}] Group entry id search {}".format(query, start - end))
 
             if "protsequence" in todo:
 
@@ -2318,7 +2318,7 @@ class Searcher(View):
                     return redirect('omagroup_members', group_nr)
 
                 end = time.time()
-                logger.info("[{}] Group entry seq search".format(query, start - end))
+                logger.info("[{}] Group entry seq search {}".format(query, start - end))
 
         start = time.time()
         if "fingerprint" in todo:
@@ -2350,7 +2350,7 @@ class Searcher(View):
                             except StopIteration:
                                 pass
         end = time.time()
-        logger.info("[{}] Group fingerprint search".format(query, start - end))
+        logger.info("[{}] Group fingerprint search {}".format(query, start - end))
 
         start = time.time()
         if "groupid" in todo:
@@ -2360,7 +2360,7 @@ class Searcher(View):
             if nbr != None and redirect_valid:
                 return redirect('omagroup_members', nbr)
         end = time.time()
-        logger.info("[{}] Group id search".format(query, start - end))
+        logger.info("[{}] Group id search {}".format(query, start - end))
 
 
         # Check all Ids and add to data correct one:
@@ -2434,7 +2434,7 @@ class Searcher(View):
                 return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
 
             end = time.time()
-            logger.info("[{}] HOG loaded entry search".format(query, start - end))
+            logger.info("[{}] HOG loaded entry search {}".format(query, start - end))
 
         else:
             if "entryid" in todo:
@@ -2451,7 +2451,7 @@ class Searcher(View):
                     return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
 
                 end = time.time()
-                logger.info("[{}] HOG entry id search".format(query, start - end))
+                logger.info("[{}] HOG entry id search {}".format(query, start - end))
 
             if "protsequence" in todo:
 
@@ -2467,7 +2467,7 @@ class Searcher(View):
                     return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
 
                 end = time.time()
-                logger.info("[{}] HOG entry seq search".format(query, start - end))
+                logger.info("[{}] HOG entry seq search {}".format(query, start - end))
 
         # Check all Ids and add to data correct one:
         for gn in list(set(potential_group_nbr)):
@@ -2513,7 +2513,7 @@ class Searcher(View):
                     data.append(genome)
 
             end = time.time()
-            logger.info("[{}] genome name search".format(query, start - end))
+            logger.info("[{}] genome name search {}".format(query, start - end))
 
 
         if "taxid" in todo:
@@ -2535,7 +2535,7 @@ class Searcher(View):
                     pass
 
             end = time.time()
-            logger.info("[{}] genome taxid search".format(query, start - end))
+            logger.info("[{}] genome taxid search {}".format(query, start - end))
 
 
         return data
@@ -2566,7 +2566,7 @@ class Searcher(View):
         start = time.time()
         search, found_by = iterdict(json.load(open(url, 'r')), False, query, None)
         end = time.time()
-        logger.info("[{}] taxon search".format(query, start - end))
+        logger.info("[{}] taxon search {}".format(query, start - end))
 
         if search:
 
