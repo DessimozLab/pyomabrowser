@@ -24,6 +24,7 @@ from django.template.loader import render_to_string, get_template
 from django.contrib.staticfiles.templatetags.staticfiles import static
 
 
+
 from collections import OrderedDict, defaultdict
 
 import tweepy
@@ -2059,7 +2060,6 @@ class Searcher(View):
 
         context = {'query': query, 'type': type}
 
-
         # if specific selector chosen (entry by protId) try to instant redirection if correct query
         if type!='all':
 
@@ -2074,27 +2074,38 @@ class Searcher(View):
 
         # Otherwise apply the "All" Strategy with non redundant query
 
+        logger.info("Start Search for '{}' with '{}' selector".format(query, type))
+
+        logger.info("Start entry search")
         meth = getattr(self, "search_entry")
         data_entry = meth(request, query)
 
+        logger.info("Start group search")
         meth2 = getattr(self, "search_group")
         data_og, found_by_gr = meth2(request, query, loaded_entries=data_entry)
 
+        logger.info("Start hog search")
         meth2bis = getattr(self, "search_hog")
         data_hog, found_by_hog = meth2bis(request, query, loaded_entries=data_entry)
 
+        logger.info("Start genome search")
         meth3 = getattr(self, "search_genome")
         data_extant_genome = meth3(request, query)
 
+        logger.info("Start taxon search")
         meth4 = getattr(self, "search_taxon")
         data_taxon = meth4(request, query)
 
+        start = time.time()
         # encode entry data to json
         json_encoder = EntrySearchJson()
         json_encoder.json_fields = dict(EntrySearchJson.json_fields)
         json_encoder.json_fields.update({'sequence': None, 'alignment': None, 'alignment_score': None, 'alignment_range': None})
         context['data_entry'] = json.dumps(json_encoder.as_json(data_entry))
+        end = time.time()
+        logger.info("Entry json took {} sec.".format(start-end))
 
+        start = time.time()
         # encode group data to json
         json_encoder_hog = HOGSearchJson()
         json_hog = []
@@ -2111,7 +2122,11 @@ class Searcher(View):
             og["found_by"] =  found_by_gr[og["group_nr"]]
 
         context['data_group'] = json.dumps(json_hog+json_og)
+        end = time.time()
+        logger.info("Group json took {} sec.".format(start - end))
 
+
+        start = time.time()
         # encode genome data to json
         json_genome = GenomeModelJsonMixin().as_json(data_extant_genome)
         for g in json_genome:
@@ -2122,6 +2137,9 @@ class Searcher(View):
         context['nbr_genome'] = len(data_taxon) + len(data_extant_genome)
         context['nbr_entry'] = len(data_entry)
         context['nbr_group'] = len(data_og) + len(data_hog)
+        end = time.time()
+        logger.info("Genome json took {} sec.".format(start - end))
+
 
         context['url_fulltest_entries'] = reverse('fulltext_json', args=(query,))
 
@@ -2148,6 +2166,7 @@ class Searcher(View):
         else:
             todo = ["id", "sequence"]
 
+        start = time.time()
         if "id" in todo:
             try:
                 entry_nr = utils.id_resolver.resolve(query)
@@ -2175,7 +2194,10 @@ class Searcher(View):
             except db.InvalidId as e:
                 data += []
                 #context['message'] = "Could not find any protein matching '{}'".format(query)
+        end = time.time()
+        logger.info("[{}] Entry id search".format(query, start - end))
 
+        start = time.time()
         if "sequence" in todo:
 
 
@@ -2200,7 +2222,6 @@ class Searcher(View):
                     p.found_by = 'seq'
                     data.append(p)
 
-
                 if len(targets) == 0:
                     approx = seq_searcher.approx_search(seq, is_sanitised=True)
                     for enr, align_results in approx:
@@ -2214,6 +2235,8 @@ class Searcher(View):
                         data.append(protein)
 
                     context['identified_by'] = 'approximate match'
+        end = time.time()
+        logger.info("[{}] Entry sequence search".format(query, start - end))
 
         return data
 
@@ -2246,7 +2269,11 @@ class Searcher(View):
 
         todo = selector if selector else ["entryid", "groupid", "fingerprint", "protsequence"]
 
+
         if loaded_entries:
+            start = time.time()
+
+
             entries = loaded_entries
             for e in entries:
                 potential_group_nbr.append(e.oma_group)
@@ -2256,8 +2283,15 @@ class Searcher(View):
                 group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
                 return redirect('omagroup_members', group_nr)
 
+
+            end = time.time()
+            logger.info("[{}] Group loaded entry search".format(query, start - end))
+
         else:
             if "entryid" in todo:
+
+                start = time.time()
+
                 entries = getattr(self, "search_entry")(request, query, selector=["id"])
                 for e in entries:
                     potential_group_nbr.append(e.oma_group)
@@ -2267,7 +2301,13 @@ class Searcher(View):
                     group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
                     return redirect('omagroup_members', group_nr)
 
+                end = time.time()
+                logger.info("[{}] Group entry id search".format(query, start - end))
+
             if "protsequence" in todo:
+
+                start = time.time()
+
                 entries = getattr(self, "search_entry")(request, query, selector=["sequence"])
                 for e in entries:
                     potential_group_nbr.append(e.oma_group)
@@ -2277,6 +2317,10 @@ class Searcher(View):
                     group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
                     return redirect('omagroup_members', group_nr)
 
+                end = time.time()
+                logger.info("[{}] Group entry seq search".format(query, start - end))
+
+        start = time.time()
         if "fingerprint" in todo:
 
 
@@ -2305,14 +2349,18 @@ class Searcher(View):
 
                             except StopIteration:
                                 pass
+        end = time.time()
+        logger.info("[{}] Group fingerprint search".format(query, start - end))
 
-
+        start = time.time()
         if "groupid" in todo:
             nbr = _check_group_number(query)
             found_by[nbr] = 'gid'
 
             if nbr != None and redirect_valid:
                 return redirect('omagroup_members', nbr)
+        end = time.time()
+        logger.info("[{}] Group id search".format(query, start - end))
 
 
         # Check all Ids and add to data correct one:
@@ -2360,6 +2408,8 @@ class Searcher(View):
 
         if "groupid" in todo:
 
+            start = time.time()
+
             hog_nbr = _check_hog_number(query)
             found_by[hog_nbr] = 'gid'
 
@@ -2369,7 +2419,12 @@ class Searcher(View):
                     return redirect('hog_viewer',  models.HOG(utils.db, hog_nbr).hog_id)
                 potential_group_nbr.append(hog_nbr)
 
+            end = time.time()
+            logger.info("[{}] HOG id search".format(query, start - end))
+
         if loaded_entries:
+            start = time.time()
+
             entries = loaded_entries
             for e in entries:
                 potential_group_nbr.append(e.oma_hog)
@@ -2378,8 +2433,14 @@ class Searcher(View):
                 group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
                 return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
 
+            end = time.time()
+            logger.info("[{}] HOG loaded entry search".format(query, start - end))
+
         else:
             if "entryid" in todo:
+
+                start = time.time()
+
                 entries = getattr(self, "search_entry")(request, query, selector=["id"])
                 for e in entries:
                     potential_group_nbr.append(e.oma_hog)
@@ -2389,7 +2450,13 @@ class Searcher(View):
                     group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
                     return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
 
+                end = time.time()
+                logger.info("[{}] HOG entry id search".format(query, start - end))
+
             if "protsequence" in todo:
+
+                start = time.time()
+
                 entries = getattr(self, "search_entry")(request, query, selector=["sequence"])
                 for e in entries:
                     potential_group_nbr.append(e.oma_hog)
@@ -2398,6 +2465,9 @@ class Searcher(View):
                 if redirect_valid and len(entries) == 0:
                     group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
                     return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
+
+                end = time.time()
+                logger.info("[{}] HOG entry seq search".format(query, start - end))
 
         # Check all Ids and add to data correct one:
         for gn in list(set(potential_group_nbr)):
@@ -2414,7 +2484,10 @@ class Searcher(View):
 
         todo = selector if selector else ["name", "taxid"]
 
+
         if "name" in todo:
+
+            start = time.time()
             try:
 
                 if len(query) == 5:
@@ -2439,8 +2512,13 @@ class Searcher(View):
                     genome.found_by = 'name'
                     data.append(genome)
 
+            end = time.time()
+            logger.info("[{}] genome name search".format(query, start - end))
+
 
         if "taxid" in todo:
+
+            start = time.time()
 
             if isinstance(query, int) or query.isdigit():
                 try:
@@ -2455,6 +2533,9 @@ class Searcher(View):
 
                 except db.UnknownSpecies:
                     pass
+
+            end = time.time()
+            logger.info("[{}] genome taxid search".format(query, start - end))
 
 
         return data
@@ -2482,7 +2563,10 @@ class Searcher(View):
 
         data = []
 
+        start = time.time()
         search, found_by = iterdict(json.load(open(url, 'r')), False, query, None)
+        end = time.time()
+        logger.info("[{}] taxon search".format(query, start - end))
 
         if search:
 

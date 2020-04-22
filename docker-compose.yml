@@ -9,14 +9,14 @@ services:
     volumes:
       - static_volume:/data/static
       - media_volume:/data/media
-      - release_volume:/data/release
+      #- release_volume:/data/release
       - .:/usr/src/pyomabrowser
-      #- type: bind
-      #  source: "/Volumes/TOSHIBA EXT/browser/All.Jun2019/data"
-      #  target: "/data/release"
-      #  read_only: true
-      #  volume:
-      #    nocopy: true
+      - type: bind
+        source: "/Users/admin/Work/project/Dessimoz/Test.Jul2014/data/"
+        target: "/data/release"
+        read_only: true
+        volume:
+          nocopy: true
     ports:
       - 8000:8000
     depends_on:
@@ -44,14 +44,14 @@ services:
     volumes:
       - static_volume:/data/static
       - media_volume:/data/media
-      - release_volume:/data/release
+      #- release_volume:/data/release
       - .:/usr/src/pyomabrowser
-      # - type: bind
-      #   source: "/Volumes/TOSHIBA EXT/browser/All.Jun2019/data"
-      #   target: "/data/release"
-      #   read_only: true
-      #   volume:
-      #     nocopy: true
+      - type: bind
+        source: "/Users/admin/Work/project/Dessimoz/Test.Jul2014/data/"
+        target: "/data/release"
+        read_only: true
+        volume:
+          nocopy: true
     depends_on:
       - broker
       - db
@@ -72,4 +72,4 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
-  release_volume:
+  #release_volume:
