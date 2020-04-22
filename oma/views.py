@@ -2103,7 +2103,7 @@ class Searcher(View):
         json_encoder.json_fields.update({'sequence': None, 'alignment': None, 'alignment_score': None, 'alignment_range': None})
         context['data_entry'] = json.dumps(json_encoder.as_json(data_entry))
         end = time.time()
-        logger.info("Entry json took {} sec.".format(start-end))
+        logger.info("Entry json took {} sec for {} entry.".format(start-end,  len(data_entry)))
 
         start = time.time()
         # encode group data to json
@@ -2123,7 +2123,7 @@ class Searcher(View):
 
         context['data_group'] = json.dumps(json_hog+json_og)
         end = time.time()
-        logger.info("Group json took {} sec.".format(start - end))
+        logger.info("Group json took {} sec for {} group.".format(start - end, len(data_taxon) + len(data_extant_genome)))
 
 
         start = time.time()
@@ -2138,7 +2138,7 @@ class Searcher(View):
         context['nbr_entry'] = len(data_entry)
         context['nbr_group'] = len(data_og) + len(data_hog)
         end = time.time()
-        logger.info("Genome json took {} sec.".format(start - end))
+        logger.info("Genome json took {} sec for {} genomes.".format(start - end, len(data_og) + len(data_hog)))
 
 
         context['url_fulltest_entries'] = reverse('fulltext_json', args=(query,))
