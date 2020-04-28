@@ -1958,7 +1958,8 @@ class GenomeModelJsonMixin(JsonModelMixin):
                    "common_name": None,
                    "nr_entries": "prots", "kingdom": None,
                    "last_modified": None,
-                   "found_by": "found_by"}
+                   "found_by": "found_by",
+                   "type": "type"}
 
 
 class GenomesJson(GenomeModelJsonMixin, View):
@@ -2056,18 +2057,27 @@ def check_term_for_entry_nr(term):
 
 class Searcher(View):
 
+
+    _entry_selector = ["id", "sequence"]
+    _omagroup_selector = ["groupid", "fingerprint"]
+    _hog_selector = ["groupid"]
+    _genome_selector = ["name", "taxid"]
+    _max_results = 50
+
     def analyse_search(self, request, type, query):
 
-        context = {'query': query, 'type': type}
+        terms = shlex.split(query)
 
-        # if specific selector chosen (entry by protId) try to instant redirection if correct query
-        if type!='all':
+        context = {'query': query, 'type': type, 'terms':terms}
+
+        # if specific selector chosen (entry by protId) try to instant r`edirection if correct query
+        if type!='all' and len(terms) == 1:
 
             data_type = type.split("_")[0]  # Entry, OG, HOG, Genome, Ancestral genome
             selector = [type.split("_")[1]]  # ID, sequence, Fingerprint, etc...
 
             meth = getattr(self, "search_" + data_type )
-            resp = meth(request, query, selector=selector, redirect_valid=True) # deal return if error
+            resp = meth(request, terms[0], selector=selector, redirect_valid=True) # deal return if error
 
             if isinstance(resp,  HttpResponseRedirect):
                 return resp
@@ -2076,76 +2086,310 @@ class Searcher(View):
 
         logger.info("Start Search for '{}' with '{}' selector".format(query, type))
 
+        ## ENTRY SEARCH
         logger.info("Start entry search")
-        meth = getattr(self, "search_entry")
-        data_entry = meth(request, query)
 
-        logger.info("Start group search")
-        meth2 = getattr(self, "search_group")
-        data_og, found_by_gr = meth2(request, query, loaded_entries=data_entry)
+        # for each method to search an entry
+        entry_search = {}
+        search_entry_meta = {}  # TODO deal with overflowing results
+        total_search = 0
+        for selector in self._entry_selector:
+            raw_results = []
 
-        logger.info("Start hog search")
-        meth2bis = getattr(self, "search_hog")
-        data_hog, found_by_hog = meth2bis(request, query, loaded_entries=data_entry)
+            # for each terms we get the raw results
+            for term in terms:
+                raw_results.append(self.search_entry(request, term, selector=[selector]))
 
-        logger.info("Start genome search")
-        meth3 = getattr(self, "search_genome")
-        data_extant_genome = meth3(request, query)
+            # Get the intersection of the raw results
+            s = set(raw_results[0])
+            ss = [set(e) for e in raw_results[1:]]
+            inter = list(s.intersection(*ss))
 
-        logger.info("Start taxon search")
-        meth4 = getattr(self, "search_taxon")
-        data_taxon = meth4(request, query)
+            search_entry_meta[selector] = len(inter)
+            total_search += len(inter)
 
-        start = time.time()
+            if len(inter) <= self._max_results:
+                entry_search[selector] = inter
+            else:
+                entry_search[selector] = inter[:self._max_results]
+
+            # TODO if inter < 50 then take union
+        search_entry_meta['total'] =  total_search
+
+        # select the top best 50 results
+        sorted_results = []
+        for k in sorted(entry_search, key=lambda k: len(entry_search[k])):
+            for r in entry_search[k]:
+                sorted_results.append([r,k])
+        if len(sorted_results) <= 50:
+            filtered_entries = sorted_results
+        else:
+            filtered_entries = sorted_results[:50]
+        search_entry_meta['shown'] = len(filtered_entries)
+
         # encode entry data to json
-        json_encoder = EntrySearchJson()
-        json_encoder.json_fields = dict(EntrySearchJson.json_fields)
-        json_encoder.json_fields.update({'sequence': None, 'alignment': None, 'alignment_score': None, 'alignment_range': None})
-        context['data_entry'] = json.dumps(json_encoder.as_json(data_entry))
-        end = time.time()
-        logger.info("Entry json took {} sec for {} entry.".format(start-end,  len(data_entry)))
-
         start = time.time()
+        data_entry =  []
+        for en in filtered_entries:
+            p = models.ProteinEntry.from_entry_nr(utils.db, en[0])
+            p.found_by = en[1]
+            data_entry.append(p)
+        json_encoder = EntrySearchJson()
+        context['data_entry'] = json.dumps(json_encoder.as_json(data_entry))
+        context['meta_entry'] = search_entry_meta
+        end = time.time()
+        logger.info("Entry json took {} sec for {} entry.".format(start - end, len(data_entry)))
+
+
+        ## GROUP SEARCH
+        logger.info("Start group search")
+
+        search_group_meta = {}
+
+        # for each method to search an oma group
+        og_search = {}
+        total_search_og = 0
+        search_og_meta = {}
+        for selector in self._omagroup_selector:
+            raw_results = []
+
+            # for each terms we get the raw results
+            for term in terms:
+                raw_results.append(self.search_group(request, term, selector=[selector]))
+
+            # Get the intersection of the raw results
+            s = set(raw_results[0])
+            ss = [set(e) for e in raw_results[1:]]
+            inter = list(s.intersection(*ss))
+
+            search_og_meta[selector] = len(inter)
+            total_search_og += len(inter)
+
+            if len(inter) <= self._max_results:
+                og_search[selector] = inter
+            else:
+                og_search[selector] = inter[:self._max_results]
+                # TODO if inter < 50 then take union
+        search_og_meta['total'] = total_search_og
+        search_og_meta['og_search'] = og_search
+
+        # for each method to search an hog
+        hog_search = {}
+        search_hog_meta = {}
+        total_search_hog = 0
+        for selector in self._hog_selector:
+            raw_results = []
+
+            # for each terms we get the raw results
+            for term in terms:
+                raw_results.append(self.search_hog(request, term, selector=[selector]))
+
+            # Get the intersection of the raw results
+            s = set(raw_results[0])
+            ss = [set(e) for e in raw_results[1:]]
+            inter = list(s.intersection(*ss))
+
+            search_hog_meta[selector] = len(inter)
+            total_search_hog += len(inter)
+
+            if len(inter) <= self._max_results:
+                hog_search[selector] = inter
+            else:
+                hog_search[selector] = inter[:self._max_results]
+                # TODO if inter < 50 then take union
+        search_hog_meta['total'] = total_search_hog
+        search_group_meta['total'] = total_search_hog + total_search_og
+
+        # select the top best 50 results in og and hog
+        sorted_results_og = []
+        for k in sorted(og_search, key=lambda k: len(og_search[k])):
+            for r in og_search[k]:
+                sorted_results_og.append([r, k])
+
+        sorted_results_hog = []
+        for k in sorted(hog_search, key=lambda k: len(hog_search[k])):
+            for r in hog_search[k]:
+                sorted_results_hog.append([r, k])
+
+        filtered_og = []
+        filtered_hog = []
+
+        # Both search overflow -> 25/25
+        if len(sorted_results_og) >= 25 and len(sorted_results_hog) >= 25:
+            filtered_og = sorted_results_og[:25]
+            filtered_hog  = sorted_results_hog[:25]
+        else:
+            # Both don't have enough results
+            if len(sorted_results_og) <= 25 and len(sorted_results_hog) <= 25:
+                filtered_og = sorted_results_og
+                filtered_hog = sorted_results_hog
+            # Oma group not enough
+            elif len(sorted_results_og) < 25:
+                filtered_og  = sorted_results_og
+                filtered_hog = sorted_results_hog[:len(sorted_results_hog)-len(filtered_og)]
+            # HOG not enough
+            elif len(sorted_results_hog) < 25:
+                filtered_hog = sorted_results_hog
+                filtered_og = sorted_results_og[:len(sorted_results_og)-len(filtered_hog)]
+        search_og_meta['shown'] = len(filtered_og)
+        search_hog_meta['shown'] = len(filtered_hog)
+        search_group_meta['shown'] = len(filtered_hog) + len(filtered_og)
+
+        search_group_meta['groupid'] = search_og_meta["groupid"] + search_hog_meta["groupid"]
+        search_group_meta['fingerprint'] = search_og_meta["fingerprint"]
+
+
         # encode group data to json
+        start = time.time()
         json_encoder_hog = HOGSearchJson()
+
         json_hog = []
-        for nbr in data_hog:
-            h = models.HOG(utils.db, nbr)
+        for hd in filtered_hog:
+            h = models.HOG(utils.db, hd[0])
             h.fingerprint = None
             h.type = 'HOG'
-            h.found_by = found_by_hog[nbr]
+            h.found_by = hd[1]
             json_hog.append(h)
         json_hog = json_encoder_hog.as_json(json_hog)
-        json_og = [utils.db.oma_group_metadata(grp) for grp in data_og]
-        for og in json_og:
+
+        json_og = []
+        for ogd in filtered_og:
+            og = utils.db.oma_group_metadata(ogd[0])
             og["type"] = 'OMA group'
-            og["found_by"] =  found_by_gr[og["group_nr"]]
+            og["found_by"] = ogd[1]
+            json_og.append(og)
 
-        context['data_group'] = json.dumps(json_hog+json_og)
         end = time.time()
-        logger.info("Group json took {} sec for {} group.".format(start - end, len(data_taxon) + len(data_extant_genome)))
+        logger.info(
+            "Group json took {} sec for {} group.".format(start - end, len(filtered_hog) + len(filtered_og)))
 
+        context['data_group'] = json.dumps(json_hog + json_og)
+        context['meta_group'] = search_group_meta
+        context['meta_og'] = search_og_meta
+        context['meta_hog'] = search_hog_meta
+
+
+        ## GENOME SEARCH
+        logger.info("Start genome search")
+
+        search_genome_meta = {}
+
+        # for each method to search an extant genomes
+        ext_search = {}
+        total_search_ext = 0
+        search_ext_meta = {}
+        for selector in self._genome_selector:
+
+            raw_results = []
+
+            # for each terms we get the raw results
+            for term in terms:
+                raw_results.append(self.search_genome(request, term, selector=[selector]))
+
+            # Get the intersection of the raw results
+            s = set(raw_results[0])
+            ss = [set(e) for e in raw_results[1:]]
+            inter = list(s.intersection(*ss))
+
+            search_ext_meta[selector] = len(inter)
+            total_search_ext += len(inter)
+
+            if len(inter) <= self._max_results:
+                ext_search[selector] = inter
+            else:
+                ext_search[selector] = inter[:self._max_results]
+                # TODO if inter < 50 then take union
+            search_ext_meta['total'] = total_search_ext
+            search_ext_meta['ext_search'] = ext_search
+
+        # for each method to search a taxon
+        taxon_search = {}
+        search_taxon_meta = {}
+        total_search_taxon = 0
+        for selector in self._genome_selector:
+            raw_results = []
+
+            # for each terms we get the raw results
+            for term in terms:
+                raw_results.append(self.search_taxon(request, term, selector=[selector]))
+
+            # Get the intersection of the raw results
+            s = set(raw_results[0])
+            ss = [set(e) for e in raw_results[1:]]
+            inter = list(s.intersection(*ss))
+
+            search_taxon_meta[selector] = len(inter)
+            total_search_taxon += len(inter)
+
+            if len(inter) <= self._max_results:
+                taxon_search[selector] = inter
+            else:
+                taxon_search[selector] = inter[:self._max_results]
+                # TODO if inter < 50 then take union
+        search_taxon_meta['total'] = total_search_taxon
+        search_genome_meta['total'] = total_search_taxon + total_search_og
+
+
+        # select the top best 50 results in og and hog
+        sorted_results_genome = []
+        for k in sorted(ext_search, key=lambda k: len(ext_search[k])):
+            for r in ext_search[k]:
+                sorted_results_genome.append(r)
+
+        sorted_results_taxon = []
+        for k in sorted(taxon_search, key=lambda k: len(taxon_search[k])):
+            for r in taxon_search[k]:
+                sorted_results_taxon.append(r)
+
+        filtered_ext = []
+        filtered_tax = []
+
+        # Both search overflow -> 25/25
+        if len(sorted_results_genome) >= 25 and len(sorted_results_taxon) >= 25:
+            filtered_ext = sorted_results_genome[:25]
+            filtered_tax = sorted_results_taxon[:25]
+        else:
+            # Both don't have enough results
+            if len(sorted_results_genome) <= 25 and len(sorted_results_taxon) <= 25:
+                filtered_ext = sorted_results_genome
+                filtered_tax = sorted_results_taxon
+            # Oma group not enough
+            elif len(sorted_results_genome) < 25:
+                filtered_ext = sorted_results_genome
+                filtered_tax = sorted_results_taxon[:len(sorted_results_taxon) - len(filtered_ext)]
+            # HOG not enough
+            elif len(sorted_results_taxon) < 25:
+                filtered_tax = sorted_results_taxon
+                filtered_ext = sorted_results_genome[:len(sorted_results_genome) - len(filtered_tax)]
+
+        search_ext_meta['shown'] = len(filtered_ext)
+        search_taxon_meta['shown'] = len(filtered_tax)
+        search_genome_meta['shown'] = len(filtered_tax) + len(filtered_ext)
+
+        search_genome_meta['name'] = search_ext_meta["name"] + search_taxon_meta["name"]
+        search_genome_meta['taxid'] = search_ext_meta["taxid"] + search_taxon_meta["taxid"]
 
         start = time.time()
         # encode genome data to json
-        json_genome = GenomeModelJsonMixin().as_json(data_extant_genome)
-        for g in json_genome:
-            g["type"] = 'Extant'
 
-        context['data_genome'] = json.dumps(json_genome+data_taxon)
+        json_genome = GenomeModelJsonMixin().as_json(filtered_ext)
 
-        context['nbr_genome'] = len(data_taxon) + len(data_extant_genome)
-        context['nbr_entry'] = len(data_entry)
-        context['nbr_group'] = len(data_og) + len(data_hog)
+        context['data_genome'] = json.dumps(json_genome + filtered_tax)
+        context['meta_genome'] = search_genome_meta
+        context['meta_extant'] = search_ext_meta
+        context['taxon'] = search_taxon_meta
+
+
         end = time.time()
-        logger.info("Genome json took {} sec for {} genomes.".format(start - end, len(data_og) + len(data_hog)))
+        logger.info(
+            "Genome json took {} sec for {} genomes.".format(start - end, len(filtered_tax) + len(filtered_ext) ))
 
 
         context['url_fulltest_entries'] = reverse('fulltext_json', args=(query,))
 
         return render(request, 'search_test.html', context=context)
 
-    def search_entry(self, request, query, selector=None, redirect_valid=False):
+    def search_entry(self, request, query, selector=_entry_selector, redirect_valid=False):
 
         """
         data = entry found with different selector
@@ -2160,46 +2404,29 @@ class Searcher(View):
 
         data = []
 
-      # set selector to perform
-        if selector:
-            todo = selector
-        else:
-            todo = ["id", "sequence"]
-
         start = time.time()
-        if "id" in todo:
+        if "id" in selector:
             try:
                 entry_nr = utils.id_resolver.resolve(query)
 
                 if redirect_valid:
                     return redirect('pairs', entry_nr)
                 else:
-                    p = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
-                    p.alignment_score = None
-                    p.alignment = None
-                    p.alignment_range = None
-                    p.found_by = 'id'
-                    data.append(p)
+
+                    data.append(entry_nr)
 
             except db.AmbiguousID as ambiguous:
                 logger.info("query {} maps to {} entries".format(query, len(ambiguous.candidates)))
                 for entry in ambiguous.candidates:
-                    p = models.ProteinEntry.from_entry_nr(utils.db, entry)
-                    p.alignment_score = None
-                    p.alignment = None
-                    p.alignment_range = None
-                    p.found_by = 'id'
-                    data.append(p)
+                    data.append(entry)
 
             except db.InvalidId as e:
                 data += []
-                #context['message'] = "Could not find any protein matching '{}'".format(query)
         end = time.time()
         logger.info("[{}] Entry id search {}".format(query, start - end))
 
         start = time.time()
-        if "sequence" in todo:
-
+        if "sequence" in selector:
 
             seq_searcher = utils.db.seq_search
             seq = seq_searcher._sanitise_seq(query)
@@ -2214,25 +2441,18 @@ class Searcher(View):
                         redirect('pairs', exact_matches[0])
 
                 context['identified_by'] = 'exact match'
+
                 for enr in exact_matches:
-                    p = models.ProteinEntry.from_entry_nr(utils.db, enr)
-                    p.alignment_score = None
-                    p.alignment = None
-                    p.alignment_range = None
-                    p.found_by = 'seq'
-                    data.append(p)
+
+                    data.append(enr)
+                    targets.append(enr)
 
                 if len(targets) == 0:
                     approx = seq_searcher.approx_search(seq, is_sanitised=True)
                     for enr, align_results in approx:
                         if align_results['score'] < 50:
                             break
-                        protein = models.ProteinEntry.from_entry_nr(utils.db, enr)
-                        protein.alignment_score = align_results['score']
-                        protein.alignment = [x[0] for x in align_results['alignment']]
-                        protein.alignment_range = align_results['alignment'][1][1]
-                        protein.found_by = 'seq'
-                        data.append(protein)
+                        data.append(enr)
 
                     context['identified_by'] = 'approximate match'
         end = time.time()
@@ -2240,7 +2460,7 @@ class Searcher(View):
 
         return data
 
-    def search_group(self, request, query, selector=None, redirect_valid=False, loaded_entries=None):
+    def search_group(self, request, query, selector=_omagroup_selector, redirect_valid=False):
 
 
         def _check_group_number(gn):
@@ -2264,65 +2484,10 @@ class Searcher(View):
         """
 
         data = []
-        found_by = {}
         potential_group_nbr = []
 
-        todo = selector if selector else ["entryid", "groupid", "fingerprint", "protsequence"]
-
-
-        if loaded_entries:
-            start = time.time()
-
-
-            entries = loaded_entries
-            for e in entries:
-                potential_group_nbr.append(e.oma_group)
-                found_by[e.oma_group] = e.found_by
-
-            if redirect_valid and len(entries)==0:
-                group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
-                return redirect('omagroup_members', group_nr)
-
-
-            end = time.time()
-            logger.info("[{}] Group loaded entry search {}".format(query, start - end))
-
-        else:
-            if "entryid" in todo:
-
-                start = time.time()
-
-                entries = getattr(self, "search_entry")(request, query, selector=["id"])
-                for e in entries:
-                    potential_group_nbr.append(e.oma_group)
-                    found_by[group_nr] = 'pid'
-
-                if redirect_valid and len(entries) == 0:
-                    group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
-                    return redirect('omagroup_members', group_nr)
-
-                end = time.time()
-                logger.info("[{}] Group entry id search {}".format(query, start - end))
-
-            if "protsequence" in todo:
-
-                start = time.time()
-
-                entries = getattr(self, "search_entry")(request, query, selector=["sequence"])
-                for e in entries:
-                    potential_group_nbr.append(e.oma_group)
-                    found_by[group_nr] = 'seq'
-
-                if redirect_valid and len(entries) == 0:
-                    group_nr = utils.db.resolve_oma_group(entries[0].oma_group)
-                    return redirect('omagroup_members', group_nr)
-
-                end = time.time()
-                logger.info("[{}] Group entry seq search {}".format(query, start - end))
-
         start = time.time()
-        if "fingerprint" in todo:
-
+        if "fingerprint" in selector:
 
             fingerprint = query
 
@@ -2343,7 +2508,9 @@ class Searcher(View):
                                 data.append(int(e["GroupNr"]))
 
                                 nbr = _check_group_number(int(e["GroupNr"]))
-                                found_by[nbr] = 'fin'
+
+                                potential_group_nbr.append(nbr)
+
                                 if nbr != None and redirect_valid:
                                     return redirect('omagroup_members', nbr)
 
@@ -2353,15 +2520,15 @@ class Searcher(View):
         logger.info("[{}] Group fingerprint search {}".format(query, start - end))
 
         start = time.time()
-        if "groupid" in todo:
+        if "groupid" in selector:
             nbr = _check_group_number(query)
-            found_by[nbr] = 'gid'
 
             if nbr != None and redirect_valid:
                 return redirect('omagroup_members', nbr)
+
+            potential_group_nbr.append(nbr)
         end = time.time()
         logger.info("[{}] Group id search {}".format(query, start - end))
-
 
         # Check all Ids and add to data correct one:
         for gn in list(set(potential_group_nbr)):
@@ -2369,9 +2536,9 @@ class Searcher(View):
             if nbr != None:
                 data.append(nbr)
 
-        return data, found_by
+        return data
 
-    def search_hog(self, request, query, selector=None, redirect_valid=False, loaded_entries=None):
+    def search_hog(self, request, query, selector=_hog_selector, redirect_valid=False):
 
         """
 
@@ -2401,7 +2568,6 @@ class Searcher(View):
             return None
 
         data = []
-        found_by = {}
         potential_group_nbr = []
 
         todo = selector if selector else ["entryid", "groupid", "protsequence"]
@@ -2411,7 +2577,6 @@ class Searcher(View):
             start = time.time()
 
             hog_nbr = _check_hog_number(query)
-            found_by[hog_nbr] = 'gid'
 
 
             if hog_nbr:
@@ -2422,70 +2587,20 @@ class Searcher(View):
             end = time.time()
             logger.info("[{}] HOG id search".format(query, start - end))
 
-        if loaded_entries:
-            start = time.time()
-
-            entries = loaded_entries
-            for e in entries:
-                potential_group_nbr.append(e.oma_hog)
-                found_by[_check_hog_number(e.oma_hog)] = e.found_by
-            if redirect_valid and len(entries) == 0:
-                group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
-                return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
-
-            end = time.time()
-            logger.info("[{}] HOG loaded entry search {}".format(query, start - end))
-
-        else:
-            if "entryid" in todo:
-
-                start = time.time()
-
-                entries = getattr(self, "search_entry")(request, query, selector=["id"])
-                for e in entries:
-                    potential_group_nbr.append(e.oma_hog)
-                    found_by[_check_hog_number(e.oma_hog)] = 'id'
-
-                if redirect_valid and len(entries) == 0:
-                    group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
-                    return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
-
-                end = time.time()
-                logger.info("[{}] HOG entry id search {}".format(query, start - end))
-
-            if "protsequence" in todo:
-
-                start = time.time()
-
-                entries = getattr(self, "search_entry")(request, query, selector=["sequence"])
-                for e in entries:
-                    potential_group_nbr.append(e.oma_hog)
-                    found_by[_check_hog_number(e.oma_hog)] = 'seq'
-
-                if redirect_valid and len(entries) == 0:
-                    group_nr = utils.db.parse_hog_id(entries[0].oma_hog)
-                    return redirect('hog_viewer', models.HOG(utils.db, group_nr).hog_id)
-
-                end = time.time()
-                logger.info("[{}] HOG entry seq search {}".format(query, start - end))
-
         # Check all Ids and add to data correct one:
         for gn in list(set(potential_group_nbr)):
             nbr = _check_hog_number(gn)
             if nbr:
                 data.append(nbr)
 
-        return data, found_by
+        return data
 
-    def search_genome(self, request, query, selector=None,redirect_valid=False):
+    def search_genome(self, request, query, selector=_genome_selector,redirect_valid=False):
 
 
         data = []
 
-        todo = selector if selector else ["name", "taxid"]
-
-
-        if "name" in todo:
+        if "name" in selector:
 
             start = time.time()
             try:
@@ -2494,10 +2609,12 @@ class Searcher(View):
                     genome1 = utils.id_mapper['OMA'].genome_from_UniProtCode(query)
                     genome = models.Genome(utils.db, genome1)
                     genome.found_by = 'name'
+                    genome.type = 'Extant'
                 else:
                     genome1 = utils.id_mapper['OMA'].genome_from_SciName(query)
                     genome = models.Genome(utils.db, genome1)
                     genome.found_by = 'name'
+                    genome.type = 'Extant'
 
                 if redirect_valid:
                     return redirect('genome_info', genome1['UniProtSpeciesCode'].decode())
@@ -2510,13 +2627,14 @@ class Searcher(View):
 
                 for genome in amb_genome:
                     genome.found_by = 'name'
+                    genome.type = 'Extant'
                     data.append(genome)
 
             end = time.time()
             logger.info("[{}] genome name search {}".format(query, start - end))
 
 
-        if "taxid" in todo:
+        if "taxid" in selector:
 
             start = time.time()
 
@@ -2525,6 +2643,7 @@ class Searcher(View):
                     genome1 = utils.id_mapper['OMA'].genome_from_taxid(query)
                     genome = models.Genome(utils.db, genome1)
                     genome.found_by = 'taxid'
+                    genome.type = 'Extant'
 
                     if redirect_valid:
                         return redirect('genome_info', genome1['UniProtSpeciesCode'].decode())
@@ -2540,22 +2659,23 @@ class Searcher(View):
 
         return data
 
-    def search_taxon(self, request, query, selector=None,redirect_valid=False):
+    def search_taxon(self, request, query, selector=_genome_selector,redirect_valid=False):
 
         url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
-        todo = selector if selector else ["name", "taxid"]
 
 
         def iterdict(d, search, query, found_by):
             for k, v in d.items():
-                for key in todo:
+                for key in selector:
                     if k == key:
                         if str(v).lower() == str(query).lower():
                             search = d
                             if key == 'name':
                                 found_by = 'name'
+
                             elif key == 'taxid':
                                 found_by = 'taxid'
+
                 if k == 'children':
                     for c in v:
                         search, found_by = iterdict(c, search, query, found_by)
