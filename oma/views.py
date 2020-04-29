@@ -2086,35 +2086,64 @@ class Searcher(View):
 
         logger.info("Start Search for '{}' with '{}' selector".format(query, type))
 
-        ## ENTRY SEARCH
+        self.logic_entry(request, context, terms)
+        self.logic_group(request, context, terms)
+        self.logic_genomes(request, context, terms)
+
+        context['url_fulltest_entries'] = reverse('fulltext_json', args=(query,))
+
+        return render(request, 'search_test.html', context=context)
+
+    def logic_entry(self,request, context, terms):
+
         logger.info("Start entry search")
+
+        # store per term information
+        search_term_meta = {}
+        for term in terms:
+            search_term_meta[term] = {'id': 0, 'sequence': 0}
 
         # for each method to search an entry
         entry_search = {}
-        search_entry_meta = {}  # TODO deal with overflowing results
+        search_entry_meta = {}
         total_search = 0
+        union_entry = None
+
         for selector in self._entry_selector:
             raw_results = []
 
             # for each terms we get the raw results
             for term in terms:
-                raw_results.append(self.search_entry(request, term, selector=[selector]))
+                r = self.search_entry(request, term, selector=[selector])
+                raw_results.append(r)
+                search_term_meta[term][selector] += len(r)
 
             # Get the intersection of the raw results
             s = set(raw_results[0])
             ss = [set(e) for e in raw_results[1:]]
-            inter = list(s.intersection(*ss))
 
-            search_entry_meta[selector] = len(inter)
-            total_search += len(inter)
+            if selector == 'id':
+                result = list(s.intersection(*ss))
+                union_entry = list(s.union(*ss))
 
-            if len(inter) <= self._max_results:
-                entry_search[selector] = inter
+
             else:
-                entry_search[selector] = inter[:self._max_results]
+                result = list(s.union(*ss))
 
-            # TODO if inter < 50 then take union
+            entry_search[selector] = result
+            total_search += len(result)
+            search_entry_meta[selector] = len(result)
+
         search_entry_meta['total'] =  total_search
+
+        # Look for the intersection of sequence with ids if more than one terms
+        if len(terms) > 1:
+            s1 = set(union_entry)
+            s2 = set(entry_search['sequence'])
+
+            context['test1'] = s1
+            context['test2'] = s2
+            entry_search['sequence'] = list(s1.intersection(s2))
 
         # select the top best 50 results
         sorted_results = []
@@ -2125,6 +2154,7 @@ class Searcher(View):
             filtered_entries = sorted_results
         else:
             filtered_entries = sorted_results[:50]
+
         search_entry_meta['shown'] = len(filtered_entries)
 
         # encode entry data to json
@@ -2137,14 +2167,22 @@ class Searcher(View):
         json_encoder = EntrySearchJson()
         context['data_entry'] = json.dumps(json_encoder.as_json(data_entry))
         context['meta_entry'] = search_entry_meta
+        context['meta_term_entry'] = search_term_meta
         end = time.time()
         logger.info("Entry json took {} sec for {} entry.".format(start - end, len(data_entry)))
 
+        return
 
-        ## GROUP SEARCH
+    def logic_group(self,request, context, terms):
+
         logger.info("Start group search")
 
         search_group_meta = {}
+
+        # store per term information
+        search_term_meta = {}
+        for term in terms:
+            search_term_meta[term] = {'groupid': 0, 'fingerprint': 0}
 
         # for each method to search an oma group
         og_search = {}
@@ -2155,21 +2193,28 @@ class Searcher(View):
 
             # for each terms we get the raw results
             for term in terms:
-                raw_results.append(self.search_group(request, term, selector=[selector]))
-
+                r = self.search_group(request, term, selector=[selector])
+                raw_results.append(r)
+                search_term_meta[term][selector] += len(r)
             # Get the intersection of the raw results
             s = set(raw_results[0])
             ss = [set(e) for e in raw_results[1:]]
             inter = list(s.intersection(*ss))
 
-            search_og_meta[selector] = len(inter)
-            total_search_og += len(inter)
 
-            if len(inter) <= self._max_results:
+            if len(inter) > 0:
                 og_search[selector] = inter
+                total_search_og += len(inter)
+                search_og_meta[selector] = len(inter)
             else:
-                og_search[selector] = inter[:self._max_results]
-                # TODO if inter < 50 then take union
+                # If intersection is empty take the union
+                union = list(s.union(*ss))
+                og_search[selector] = union
+
+                total_search_og += len(union)
+                search_og_meta[selector] = len(union)
+
+
         search_og_meta['total'] = total_search_og
         search_og_meta['og_search'] = og_search
 
@@ -2217,7 +2262,7 @@ class Searcher(View):
         # Both search overflow -> 25/25
         if len(sorted_results_og) >= 25 and len(sorted_results_hog) >= 25:
             filtered_og = sorted_results_og[:25]
-            filtered_hog  = sorted_results_hog[:25]
+            filtered_hog = sorted_results_hog[:25]
         else:
             # Both don't have enough results
             if len(sorted_results_og) <= 25 and len(sorted_results_hog) <= 25:
@@ -2225,19 +2270,18 @@ class Searcher(View):
                 filtered_hog = sorted_results_hog
             # Oma group not enough
             elif len(sorted_results_og) < 25:
-                filtered_og  = sorted_results_og
-                filtered_hog = sorted_results_hog[:len(sorted_results_hog)-len(filtered_og)]
+                filtered_og = sorted_results_og
+                filtered_hog = sorted_results_hog[:len(sorted_results_hog) - len(filtered_og)]
             # HOG not enough
             elif len(sorted_results_hog) < 25:
                 filtered_hog = sorted_results_hog
-                filtered_og = sorted_results_og[:len(sorted_results_og)-len(filtered_hog)]
+                filtered_og = sorted_results_og[:len(sorted_results_og) - len(filtered_hog)]
         search_og_meta['shown'] = len(filtered_og)
         search_hog_meta['shown'] = len(filtered_hog)
         search_group_meta['shown'] = len(filtered_hog) + len(filtered_og)
 
         search_group_meta['groupid'] = search_og_meta["groupid"] + search_hog_meta["groupid"]
         search_group_meta['fingerprint'] = search_og_meta["fingerprint"]
-
 
         # encode group data to json
         start = time.time()
@@ -2267,45 +2311,59 @@ class Searcher(View):
         context['meta_group'] = search_group_meta
         context['meta_og'] = search_og_meta
         context['meta_hog'] = search_hog_meta
+        context['meta_term_group'] = search_term_meta
 
+    def logic_genomes(self,request, context, terms):
 
-        ## GENOME SEARCH
         logger.info("Start genome search")
 
+        # store general search info
         search_genome_meta = {}
+
+        # store per term information
+        search_term_meta = {}
+        for term in terms:
+            search_term_meta[term] = {'name':0, 'taxid':0}
 
         # for each method to search an extant genomes
         ext_search = {}
-        total_search_ext = 0
+
+        # store info for extant genome
         search_ext_meta = {}
+        total_search_ext = 0
+
         for selector in self._genome_selector:
 
             raw_results = []
 
             # for each terms we get the raw results
             for term in terms:
-                raw_results.append(self.search_genome(request, term, selector=[selector]))
+                r = self.search_genome(request, term, selector=[selector])
+                raw_results.append(r)
+                search_term_meta[term][selector] += len(r)
 
             # Get the intersection of the raw results
             s = set(raw_results[0])
             ss = [set(e) for e in raw_results[1:]]
             inter = list(s.intersection(*ss))
 
-            search_ext_meta[selector] = len(inter)
-            total_search_ext += len(inter)
-
-            if len(inter) <= self._max_results:
+            if len(inter) > 0:
                 ext_search[selector] = inter
+                total_search_ext += len(inter)
+                search_ext_meta[selector] = len(inter)
             else:
-                ext_search[selector] = inter[:self._max_results]
-                # TODO if inter < 50 then take union
-            search_ext_meta['total'] = total_search_ext
-            search_ext_meta['ext_search'] = ext_search
+                # If intersection is empty take the union
+                union = list(s.union(*ss))
+                ext_search[selector] = union
+
+                total_search_ext += len(union)
+                search_ext_meta[selector] = len(union)
 
         # for each method to search a taxon
         taxon_search = {}
         search_taxon_meta = {}
         total_search_taxon = 0
+
         for selector in self._genome_selector:
             raw_results = []
 
@@ -2318,17 +2376,20 @@ class Searcher(View):
             ss = [set(e) for e in raw_results[1:]]
             inter = list(s.intersection(*ss))
 
-            search_taxon_meta[selector] = len(inter)
-            total_search_taxon += len(inter)
-
-            if len(inter) <= self._max_results:
+            if len(inter) > 0:
                 taxon_search[selector] = inter
+                total_search_taxon += len(inter)
+                search_taxon_meta[selector] = len(inter)
             else:
-                taxon_search[selector] = inter[:self._max_results]
-                # TODO if inter < 50 then take union
-        search_taxon_meta['total'] = total_search_taxon
-        search_genome_meta['total'] = total_search_taxon + total_search_og
+                # If intersection is empty take the union
+                union = list(s.union(*ss))
+                taxon_search[selector] = union
 
+                total_search_taxon += len(union)
+                search_taxon_meta[selector] = len(union)
+
+        search_taxon_meta['total'] = total_search_taxon
+        search_genome_meta['total'] = total_search_taxon + total_search_ext
 
         # select the top best 50 results in og and hog
         sorted_results_genome = []
@@ -2343,6 +2404,23 @@ class Searcher(View):
 
         filtered_ext = []
         filtered_tax = []
+
+        sorted_results_genome2 = []
+        seen = []
+        for obj in sorted_results_genome:
+            if obj.uniprot_species_code not in seen:
+                sorted_results_genome2.append(obj)
+                seen.append(obj.uniprot_species_code)
+        sorted_results_genome = sorted_results_genome2
+
+        sorted_results_taxon2 = []
+        seen = []
+        for obj in sorted_results_taxon:
+            if obj.uniprot_species_code not in seen:
+                sorted_results_genome2.append(obj)
+                seen.append(obj.uniprot_species_code)
+                sorted_results_taxon = sorted_results_taxon2
+
 
         # Both search overflow -> 25/25
         if len(sorted_results_genome) >= 25 and len(sorted_results_taxon) >= 25:
@@ -2377,17 +2455,13 @@ class Searcher(View):
         context['data_genome'] = json.dumps(json_genome + filtered_tax)
         context['meta_genome'] = search_genome_meta
         context['meta_extant'] = search_ext_meta
-        context['taxon'] = search_taxon_meta
+        context['meta_term'] = search_term_meta
 
+        context['taxon'] = search_taxon_meta
 
         end = time.time()
         logger.info(
-            "Genome json took {} sec for {} genomes.".format(start - end, len(filtered_tax) + len(filtered_ext) ))
-
-
-        context['url_fulltest_entries'] = reverse('fulltext_json', args=(query,))
-
-        return render(request, 'search_test.html', context=context)
+            "Genome json took {} sec for {} genomes.".format(start - end, len(filtered_tax) + len(filtered_ext)))
 
     def search_entry(self, request, query, selector=_entry_selector, redirect_valid=False):
 

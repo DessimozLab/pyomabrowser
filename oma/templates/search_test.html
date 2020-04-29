@@ -13,12 +13,8 @@
         <div class="jumbotron">
 
                 <div class="card-body ">
- {{test1}}<br>
-                    {{meta_group}}<br>
-                    {{test3}}<br>
-                    {{test4}}
-                     <div class="pull-left">
 
+                     <div class="pull-left">
 
                          <div class="row">
 
@@ -108,19 +104,24 @@
 
                                   <div class="col-md-2 ">
 
-                                       <br>
-                                       <br>
 
-                                       <b>Search specificity </b>
+                                       <b>Term specificity: </b>
+
+                                      <br>
+                                      <br>
+
+                                      {% for term, stat in meta_term_entry.items %}
+
+                                      <small>"{{term}}"</small>
+
+                                      <ul class="list-unstyled">
 
 
-                                      <ul class="list-group">
-
-                                          {% for key, value in meta_entry.items %}
+                                          {% for key, value in stat.items %}
 
                                           {% if key != 'total' and  key != 'shown'%}
 
-                                          <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <b class="text-capitalize">{{ key }}:</b>  {{ value }} hits
+                                          <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>
 
                                           {% if value > 10 %}
 
@@ -135,14 +136,17 @@
                                             {% endif %}
                                         {% endfor %}
 
-</ul>
+                                          </ul>
 
+                                          {% endfor %}
 
 
 
 
 
                                    </div>
+
+
 
 
                               </div>
@@ -182,7 +186,12 @@
                                                                 </tr>
                                                             </thead>
                                                           </table>
+
+
+
                              </div>
+
+
 
                           </div>
                          </div>
@@ -234,11 +243,6 @@
 
 
 
-
-
-
-
-
                     </div>
 
 
@@ -264,23 +268,34 @@
 
                 <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">Genes not present in selected taxon have been filtered out as per settings. <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a></div>
             </table>
-                                   </div>
+
+
+
+
+
+
+                              </div>
 
                                    <div class="col-md-2 ">
 
-                                       <br>
-                                       <br>
 
-                                       <b>Search specificity </b>
+                                       <b>Term specificity: </b>
+
+                                      <br>
+                                      <br>
+
+                                      {% for term, stat in meta_term_group.items %}
+
+                                      <small>"{{term}}"</small>
+
+                                      <ul class="list-unstyled">
 
 
-                                      <ul class="list-group">
-
-                                          {% for key, value in meta_group.items %}
+                                          {% for key, value in stat.items %}
 
                                           {% if key != 'total' and  key != 'shown'%}
 
-                                          <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <b class="text-capitalize">{{ key }}:</b>  {{ value }} hits
+                                          <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>
 
                                           {% if value > 10 %}
 
@@ -295,20 +310,17 @@
                                             {% endif %}
                                         {% endfor %}
 
+                                          <br>
+
+                                          {% endfor %}
 
 
-
-</ul>
-
-
-
+                                          </ul>
 
 
 
                                    </div>
-
-
-                              </div>
+                                   </div>
 
 
                           </div>
@@ -394,19 +406,25 @@
 
                                   <div class="col-md-2 ">
 
-                                       <br>
-                                       <br>
-
-                                       <b>Search specificity </b>
 
 
-                                      <ul class="list-group">
+                                      <b>Term specificity: </b>
 
-                                          {% for key, value in meta_genome.items %}
+                                      <br>
+                                      <br>
+
+                                      {% for term, stat in meta_term.items %}
+
+                                      <small>"{{term}}"</small>
+
+                                      <ul class="list-unstyled">
+
+
+                                          {% for key, value in stat.items %}
 
                                           {% if key != 'total' and  key != 'shown'%}
 
-                                          <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <b class="text-capitalize">{{ key }}:</b>  {{ value }} hits
+                                          <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>
 
                                           {% if value > 10 %}
 
@@ -422,13 +440,9 @@
                                         {% endfor %}
 
 
+                                          </ul>
 
-
-</ul>
-
-
-
-
+                                          {% endfor %}
 
 
                                    </div>

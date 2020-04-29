@@ -100,7 +100,7 @@ urlpatterns = [
 
     # Search Widget
     url(r'^search/$', views.Searcher.as_view(), name='search'),
-    url(r'^search/fulltext/(?P<query>[A-Za-z0-9 _.:()-/]+)/$', views.FullTextJson.as_view(), name="fulltext_json"),
+    url(r'^search/fulltext/(?P<query>[A-Za-z0-9 _.:()-/+"]+)/$', views.FullTextJson.as_view(), name="fulltext_json"),
 
     url(r'^export_markers', views.export_marker_genes, name='export_markers'),
     url(r'^markers/(?P<data_id>\w+)/$', views.MarkerGenesResults.as_view(), name='marker_genes'),
