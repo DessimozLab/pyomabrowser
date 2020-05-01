@@ -2141,8 +2141,6 @@ class Searcher(View):
             s1 = set(union_entry)
             s2 = set(entry_search['sequence'])
 
-            context['test1'] = s1
-            context['test2'] = s2
             entry_search['sequence'] = list(s1.intersection(s2))
 
         # select the top best 50 results
@@ -2196,6 +2194,7 @@ class Searcher(View):
                 r = self.search_group(request, term, selector=[selector])
                 raw_results.append(r)
                 search_term_meta[term][selector] += len(r)
+
             # Get the intersection of the raw results
             s = set(raw_results[0])
             ss = [set(e) for e in raw_results[1:]]
@@ -2227,21 +2226,27 @@ class Searcher(View):
 
             # for each terms we get the raw results
             for term in terms:
-                raw_results.append(self.search_hog(request, term, selector=[selector]))
+                r = self.search_hog(request, term, selector=[selector])
+                raw_results.append(r)
+                search_term_meta[term][selector] += len(r)
 
             # Get the intersection of the raw results
             s = set(raw_results[0])
             ss = [set(e) for e in raw_results[1:]]
             inter = list(s.intersection(*ss))
 
-            search_hog_meta[selector] = len(inter)
-            total_search_hog += len(inter)
-
-            if len(inter) <= self._max_results:
+            if len(inter) > 0:
                 hog_search[selector] = inter
+                total_search_hog += len(inter)
+                search_hog_meta[selector] = len(inter)
             else:
-                hog_search[selector] = inter[:self._max_results]
-                # TODO if inter < 50 then take union
+                # If intersection is empty take the union
+                union = list(s.union(*ss))
+                hog_search[selector] = union
+
+                total_search_hog += len(union)
+                search_hog_meta[selector] = len(union)
+
         search_hog_meta['total'] = total_search_hog
         search_group_meta['total'] = total_search_hog + total_search_og
 
@@ -2255,6 +2260,7 @@ class Searcher(View):
         for k in sorted(hog_search, key=lambda k: len(hog_search[k])):
             for r in hog_search[k]:
                 sorted_results_hog.append([r, k])
+
 
         filtered_og = []
         filtered_hog = []
@@ -2371,10 +2377,17 @@ class Searcher(View):
             for term in terms:
                 raw_results.append(self.search_taxon(request, term, selector=[selector]))
 
+
             # Get the intersection of the raw results
-            s = set(raw_results[0])
-            ss = [set(e) for e in raw_results[1:]]
-            inter = list(s.intersection(*ss))
+
+            #convert the object list into list of ncbi id
+            hashable_taxon = [[t['taxid'] for t in lt] for lt in raw_results ]
+
+
+            s = set(hashable_taxon[0])
+            ss = [set(e) for e in hashable_taxon[1:]]
+            id_inter = list(s.intersection(*ss))
+            inter = [x for list_x in raw_results for x in list_x if x['taxid'] in id_inter]
 
             if len(inter) > 0:
                 taxon_search[selector] = inter
@@ -2391,7 +2404,7 @@ class Searcher(View):
         search_taxon_meta['total'] = total_search_taxon
         search_genome_meta['total'] = total_search_taxon + total_search_ext
 
-        # select the top best 50 results in og and hog
+        # select the top best 50 results in extant species  and ancestral genomes
         sorted_results_genome = []
         for k in sorted(ext_search, key=lambda k: len(ext_search[k])):
             for r in ext_search[k]:
@@ -2416,10 +2429,10 @@ class Searcher(View):
         sorted_results_taxon2 = []
         seen = []
         for obj in sorted_results_taxon:
-            if obj.uniprot_species_code not in seen:
-                sorted_results_genome2.append(obj)
-                seen.append(obj.uniprot_species_code)
-                sorted_results_taxon = sorted_results_taxon2
+            if obj['taxid'] not in seen:
+                sorted_results_taxon2.append(obj)
+                seen.append(obj['taxid'])
+        sorted_results_taxon = sorted_results_taxon2
 
 
         # Both search overflow -> 25/25

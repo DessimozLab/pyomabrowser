@@ -21,7 +21,7 @@
 
     exports.format_sciname_genomes = function(value, row) {
 
-        if (value === "Ancestral") {
+        if (row.type === "Ancestral") {
             return '<a href="/oma/ancestralgenome/info/'+value+'/">' + value + '</a>';
         }
 

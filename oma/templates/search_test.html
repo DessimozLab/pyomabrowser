@@ -14,6 +14,8 @@
 
                 <div class="card-body ">
 
+                    {{test1}}
+
                      <div class="pull-left">
 
                          <div class="row">
@@ -529,6 +531,8 @@
         var myHilitor3 = new Hilitor("matchTable_genome");
         myHilitor3.setMatchType("open");
         var data = {{ data_genome | safe }};
+
+        console.log(data)
         var tab = $("#matchTable_genome");
         tab.bootstrapTable({
             reorderableColumns: true,
