@@ -2092,14 +2092,19 @@ class Searcher(View):
         protein_scope = []
 
         for term in terms:
-            for geno in json.loads(context["data_genome"]):
-                result = re.findall('\\b' + term + '\\b', json.dumps(geno), flags=re.IGNORECASE)
-                if result:
-                    genome_term.append(term)
-                    try:
-                        protein_scope += self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(geno["ncbi"]))
-                    except ValueError:
-                        pass
+            try:
+                int(term)
+                pass
+            except ValueError:
+
+                for geno in json.loads(context["data_genome"]):
+                    result = re.findall('\\b' + term + '\\b', json.dumps(geno), flags=re.IGNORECASE)
+                    if result:
+                        genome_term.append(term)
+                        try:
+                            protein_scope += self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(geno["ncbi"]))
+                        except ValueError:
+                            pass
 
         context["genome_term"] = genome_term
         context["protein_scope"] = protein_scope
@@ -2750,7 +2755,7 @@ class Searcher(View):
         def iterdict(d, search, query, found_by):
             for k, v in d.items():
                 for key in selector:
-                    if k == key:
+                    if k == key and "children" in d.keys():
                         if str(v).lower() == str(query).lower():
                             search = d
                             if key == 'name':
