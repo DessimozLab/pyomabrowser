@@ -2117,6 +2117,9 @@ class Searcher(View):
 
         logger.info("Start entry search")
 
+        if scope:
+            scope=set(scope)
+
         # store per term information
         search_term_meta = {}
         for term in terms:
@@ -2135,7 +2138,8 @@ class Searcher(View):
             for term in terms:
                 r = self.search_entry(request, term, selector=[selector])
                 if scope:
-                    r = list(filter(lambda x: x in scope, r))
+                    r = scope.intersection(set(r))
+                    #r = list(filter(lambda x: x in scope, r))
                 raw_results.append(r)
                 search_term_meta[term][selector] += len(r)
 
