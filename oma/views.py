@@ -2022,7 +2022,7 @@ def search_fulltext(query):
     return []
 
 
-def check_term_for_entry_nr(term):
+def check_term_for_entry_nr(term): # todo apply this to general term logic
         try:
             prefix, id_ = term.split(':', maxsplit=1)
             if prefix == "GO":
@@ -2086,15 +2086,34 @@ class Searcher(View):
 
         logger.info("Start Search for '{}' with '{}' selector".format(query, type))
 
-        self.logic_entry(request, context, terms)
-        self.logic_group(request, context, terms)
         self.logic_genomes(request, context, terms)
+
+        genome_term = []
+        protein_scope = []
+
+        for term in terms:
+            for geno in json.loads(context["data_genome"]):
+                result = re.findall('\\b' + term + '\\b', json.dumps(geno), flags=re.IGNORECASE)
+                if result:
+                    genome_term.append(term)
+                    try:
+                        protein_scope += self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(geno["ncbi"]))
+                    except ValueError:
+                        pass
+
+        context["genome_term"] = genome_term
+        context["protein_scope"] = protein_scope
+
+        pruned_term = [term for term in terms if term not in genome_term]
+
+        self.logic_entry(request, context, pruned_term, scope = protein_scope )
+        self.logic_group(request, context, pruned_term)
 
         context['url_fulltest_entries'] = reverse('fulltext_json', args=(query,))
 
         return render(request, 'search_test.html', context=context)
 
-    def logic_entry(self,request, context, terms):
+    def logic_entry(self,request, context, terms, scope = None):
 
         logger.info("Start entry search")
 
@@ -2115,24 +2134,33 @@ class Searcher(View):
             # for each terms we get the raw results
             for term in terms:
                 r = self.search_entry(request, term, selector=[selector])
+                if scope:
+                    r = list(filter(lambda x: x in scope, r))
                 raw_results.append(r)
                 search_term_meta[term][selector] += len(r)
 
+
+
             # Get the intersection of the raw results
-            s = set(raw_results[0])
-            ss = [set(e) for e in raw_results[1:]]
+            if raw_results:
+                s = set(raw_results[0])
+                ss = [set(e) for e in raw_results[1:]]
 
-            if selector == 'id':
-                result = list(s.intersection(*ss))
-                union_entry = list(s.union(*ss))
+                if selector == 'id':
+                    result = list(s.intersection(*ss))
+                    union_entry = list(s.union(*ss))
 
+                else:
+                    result = list(s.union(*ss))
 
+                entry_search[selector] = result
+                total_search += len(result)
+                search_entry_meta[selector] = len(result)
             else:
-                result = list(s.union(*ss))
+                entry_search[selector] = []
+                total_search += 0
+                search_entry_meta[selector] = 0
 
-            entry_search[selector] = result
-            total_search += len(result)
-            search_entry_meta[selector] = len(result)
 
         search_entry_meta['total'] =  total_search
 
@@ -2196,23 +2224,23 @@ class Searcher(View):
                 search_term_meta[term][selector] += len(r)
 
             # Get the intersection of the raw results
-            s = set(raw_results[0])
-            ss = [set(e) for e in raw_results[1:]]
-            inter = list(s.intersection(*ss))
+            if raw_results:
+                s = set(raw_results[0])
+                ss = [set(e) for e in raw_results[1:]]
+                inter = list(s.intersection(*ss))
 
+                if len(inter) > 0:
+                    toadd = inter
 
-            if len(inter) > 0:
-                og_search[selector] = inter
-                total_search_og += len(inter)
-                search_og_meta[selector] = len(inter)
+                else:
+                    # If intersection is empty take the union
+                    toadd = list(s.union(*ss))
             else:
-                # If intersection is empty take the union
-                union = list(s.union(*ss))
-                og_search[selector] = union
+                toadd = []
 
-                total_search_og += len(union)
-                search_og_meta[selector] = len(union)
-
+            og_search[selector] = toadd
+            total_search_og += len(toadd)
+            search_og_meta[selector] = len(toadd)
 
         search_og_meta['total'] = total_search_og
         search_og_meta['og_search'] = og_search
@@ -2221,6 +2249,7 @@ class Searcher(View):
         hog_search = {}
         search_hog_meta = {}
         total_search_hog = 0
+
         for selector in self._hog_selector:
             raw_results = []
 
@@ -2231,21 +2260,28 @@ class Searcher(View):
                 search_term_meta[term][selector] += len(r)
 
             # Get the intersection of the raw results
-            s = set(raw_results[0])
-            ss = [set(e) for e in raw_results[1:]]
-            inter = list(s.intersection(*ss))
 
-            if len(inter) > 0:
-                hog_search[selector] = inter
-                total_search_hog += len(inter)
-                search_hog_meta[selector] = len(inter)
+            if raw_results:
+                s = set(raw_results[0])
+                ss = [set(e) for e in raw_results[1:]]
+                inter = list(s.intersection(*ss))
+
+                if len(inter) > 0:
+                    hog_search[selector] = inter
+                    total_search_hog += len(inter)
+                    search_hog_meta[selector] = len(inter)
+                else:
+                    # If intersection is empty take the union
+                    union = list(s.union(*ss))
+                    hog_search[selector] = union
+
+                    total_search_hog += len(union)
+                    search_hog_meta[selector] = len(union)
             else:
-                # If intersection is empty take the union
-                union = list(s.union(*ss))
-                hog_search[selector] = union
+                hog_search[selector] = []
+                total_search_hog += 0
+                search_hog_meta[selector] = 0
 
-                total_search_hog += len(union)
-                search_hog_meta[selector] = len(union)
 
         search_hog_meta['total'] = total_search_hog
         search_group_meta['total'] = total_search_hog + total_search_og
@@ -2321,90 +2357,70 @@ class Searcher(View):
 
     def logic_genomes(self,request, context, terms):
 
+
+        def _add_genomes(genomes,search_data ,total_search, search_meta ):
+
+            search_data[selector] += genomes
+            total_search += len(genomes)
+            search_meta[selector] = len(genomes)
+
+
         logger.info("Start genome search")
 
         # store general search info
         search_genome_meta = {}
 
-        # store per term information
+        # store per term information for specificity widget
         search_term_meta = {}
         for term in terms:
-            search_term_meta[term] = {'name':0, 'taxid':0}
+            search_term_meta[term] = {select:0 for select in self._genome_selector}
 
-        # for each method to search an extant genomes
-        ext_search = {}
-
-        # store info for extant genome
-        search_ext_meta = {}
+        # for each method to search an extant genome store info
+        ext_search = {select:[] for select in self._genome_selector}
+        search_ext_meta = {select:0 for select in self._genome_selector}
         total_search_ext = 0
 
         for selector in self._genome_selector:
 
-            raw_results = []
-
             # for each terms we get the raw results
             for term in terms:
+
                 r = self.search_genome(request, term, selector=[selector])
-                raw_results.append(r)
+
                 search_term_meta[term][selector] += len(r)
 
-            # Get the intersection of the raw results
-            s = set(raw_results[0])
-            ss = [set(e) for e in raw_results[1:]]
-            inter = list(s.intersection(*ss))
+                _add_genomes(r, ext_search, total_search_ext, search_ext_meta)
 
-            if len(inter) > 0:
-                ext_search[selector] = inter
-                total_search_ext += len(inter)
-                search_ext_meta[selector] = len(inter)
-            else:
-                # If intersection is empty take the union
-                union = list(s.union(*ss))
-                ext_search[selector] = union
-
-                total_search_ext += len(union)
-                search_ext_meta[selector] = len(union)
 
         # for each method to search a taxon
-        taxon_search = {}
-        search_taxon_meta = {}
+        taxon_search = {select:[] for select in self._genome_selector}
+        search_taxon_meta = {select:0 for select in self._genome_selector}
         total_search_taxon = 0
 
         for selector in self._genome_selector:
-            raw_results = []
+
 
             # for each terms we get the raw results
             for term in terms:
-                raw_results.append(self.search_taxon(request, term, selector=[selector]))
+                r = self.search_taxon(request, term, selector=[selector]) # todo add approximate search for taxon
+                search_term_meta[term][selector] += len(r)
+                _add_genomes(r, taxon_search, total_search_taxon, search_taxon_meta)
 
+                for taxo in r:
 
-            # Get the intersection of the raw results
+                    induced_genome = self._genomes_from_taxonomy(
+                        utils.db.tax.get_subtaxonomy_rooted_at(taxo['taxid']))
 
-            #convert the object list into list of ncbi id
-            hashable_taxon = [[t['taxid'] for t in lt] for lt in raw_results ]
+                    for it in induced_genome:
+                        it.found_by = 'Ancestral genome'
+                        it.type = 'Extant'
 
-
-            s = set(hashable_taxon[0])
-            ss = [set(e) for e in hashable_taxon[1:]]
-            id_inter = list(s.intersection(*ss))
-            inter = [x for list_x in raw_results for x in list_x if x['taxid'] in id_inter]
-
-            if len(inter) > 0:
-                taxon_search[selector] = inter
-                total_search_taxon += len(inter)
-                search_taxon_meta[selector] = len(inter)
-            else:
-                # If intersection is empty take the union
-                union = list(s.union(*ss))
-                taxon_search[selector] = union
-
-                total_search_taxon += len(union)
-                search_taxon_meta[selector] = len(union)
+                    _add_genomes(induced_genome, ext_search, total_search_ext, search_ext_meta)
+                    search_term_meta[term][selector] += len(induced_genome)
 
         search_taxon_meta['total'] = total_search_taxon
         search_genome_meta['total'] = total_search_taxon + total_search_ext
 
-        # select the top best 50 results in extant species  and ancestral genomes
         sorted_results_genome = []
         for k in sorted(ext_search, key=lambda k: len(ext_search[k])):
             for r in ext_search[k]:
@@ -2415,47 +2431,23 @@ class Searcher(View):
             for r in taxon_search[k]:
                 sorted_results_taxon.append(r)
 
-        filtered_ext = []
-        filtered_tax = []
-
-        sorted_results_genome2 = []
+        cleaned_genome = []
         seen = []
         for obj in sorted_results_genome:
             if obj.uniprot_species_code not in seen:
-                sorted_results_genome2.append(obj)
+                cleaned_genome.append(obj)
                 seen.append(obj.uniprot_species_code)
-        sorted_results_genome = sorted_results_genome2
 
-        sorted_results_taxon2 = []
+        cleaned_taxon = []
         seen = []
         for obj in sorted_results_taxon:
             if obj['taxid'] not in seen:
-                sorted_results_taxon2.append(obj)
+                cleaned_taxon.append(obj)
                 seen.append(obj['taxid'])
-        sorted_results_taxon = sorted_results_taxon2
 
-
-        # Both search overflow -> 25/25
-        if len(sorted_results_genome) >= 25 and len(sorted_results_taxon) >= 25:
-            filtered_ext = sorted_results_genome[:25]
-            filtered_tax = sorted_results_taxon[:25]
-        else:
-            # Both don't have enough results
-            if len(sorted_results_genome) <= 25 and len(sorted_results_taxon) <= 25:
-                filtered_ext = sorted_results_genome
-                filtered_tax = sorted_results_taxon
-            # Oma group not enough
-            elif len(sorted_results_genome) < 25:
-                filtered_ext = sorted_results_genome
-                filtered_tax = sorted_results_taxon[:len(sorted_results_taxon) - len(filtered_ext)]
-            # HOG not enough
-            elif len(sorted_results_taxon) < 25:
-                filtered_tax = sorted_results_taxon
-                filtered_ext = sorted_results_genome[:len(sorted_results_genome) - len(filtered_tax)]
-
-        search_ext_meta['shown'] = len(filtered_ext)
-        search_taxon_meta['shown'] = len(filtered_tax)
-        search_genome_meta['shown'] = len(filtered_tax) + len(filtered_ext)
+        search_ext_meta['shown'] = len(cleaned_genome)
+        search_taxon_meta['shown'] = len(cleaned_taxon)
+        search_genome_meta['shown'] = len(cleaned_genome) + len(cleaned_taxon)
 
         search_genome_meta['name'] = search_ext_meta["name"] + search_taxon_meta["name"]
         search_genome_meta['taxid'] = search_ext_meta["taxid"] + search_taxon_meta["taxid"]
@@ -2463,9 +2455,9 @@ class Searcher(View):
         start = time.time()
         # encode genome data to json
 
-        json_genome = GenomeModelJsonMixin().as_json(filtered_ext)
+        json_genome = GenomeModelJsonMixin().as_json(cleaned_genome)
 
-        context['data_genome'] = json.dumps(json_genome + filtered_tax)
+        context['data_genome'] = json.dumps(json_genome + cleaned_taxon)
         context['meta_genome'] = search_genome_meta
         context['meta_extant'] = search_ext_meta
         context['meta_term'] = search_term_meta
@@ -2474,7 +2466,7 @@ class Searcher(View):
 
         end = time.time()
         logger.info(
-            "Genome json took {} sec for {} genomes.".format(start - end, len(filtered_tax) + len(filtered_ext)))
+            "Genome json took {} sec for {} genomes.".format(start - end, len(cleaned_taxon) + len(cleaned_genome)))
 
     def search_entry(self, request, query, selector=_entry_selector, redirect_valid=False):
 

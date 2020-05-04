@@ -23,7 +23,28 @@
                              <div class="col-md-8 offset-md-2">
 
                                  <h3><strong>Search results matching "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}" </strong></h3>
-</div>
+
+                              {% if genome_term|length > 0 %}
+
+                                 <h4 class="pl-5"> <small> Following term are used as genome or taxon filtering:
+                                 {% for term in genome_term %}
+
+                                 <span class="badge badge-secondary">{{term}}</span>
+
+
+                             {% endfor %}
+
+                                 <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="This define the genomic scope used to search protein ">?</span>
+
+
+                                 </small>
+
+
+                             </h4>
+
+                                 {% endif %}
+                             </div>
+
 
                          </div>
 
@@ -360,14 +381,21 @@
                         <div >
                             <input type="checkbox" class="form-check-input " id="f_g_name" onclick="set_filter_g_name()" checked>
                             <label  class="form-check-label" for="f_g_name" >
-                                Name
+                                Name <small>(e.g. HUMAN)</small>
                             </label>
                         </div>
 
                         <div>
                             <input type="checkbox" class="form-check-input" id="f_g_taxid" onclick="set_filter_g_tax()" checked>
                             <label class="form-check-label" for="f_g_taxid">
-                                NCBI ID
+                                NCBI ID <small>(e.g. 2759)</small>
+                            </label>
+                        </div>
+
+                                          <div>
+                            <input type="checkbox" class="form-check-input" id="f_g_ag" onclick="set_filter_g_ag()" checked>
+                            <label class="form-check-label" for="f_g_ag">
+                                Taxon  <small>(e.g. Fungi)</small>
                             </label>
                         </div>
 
@@ -695,6 +723,7 @@
         // FILTER Genome
         var keep_g_name=true;
         var keep_g_taxid=true;
+        var keep_g_ag=true;
 
         function set_filter_g_name() {
 
@@ -725,11 +754,21 @@
               apply_filter_genome();
         }
 
+        function set_filter_g_ag() {
+
+            // Get the checkbox
+            var checkBox = document.getElementById("f_g_ag");
+
+              // If the checkbox is checked, display the output text
+              if (checkBox.checked == true){
+                keep_g_ag = true;
+              } else {
+                keep_g_ag = false;
+              }
+              apply_filter_genome();
+        }
+
         function apply_filter_genome() {
-
-
-
-
 
             var filter_parameters = {found_by: []};
 
@@ -742,7 +781,9 @@
                 filter_parameters.found_by.push('taxid');
             }
 
-            console.log('assaaassa')
+            if (keep_g_ag) {
+                filter_parameters.found_by.push('Ancestral genome');
+            }
 
 
             $('#matchTable_genome').bootstrapTable('filterBy', filter_parameters)
