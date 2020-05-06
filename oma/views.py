@@ -2155,8 +2155,6 @@ class Searcher(View):
                             for x in align_data:
                                 align_term[x] = term
 
-
-
                 if scope:
                     r = scope.intersection(set(r))
                     #r = list(filter(lambda x: x in scope, r))
@@ -2213,6 +2211,8 @@ class Searcher(View):
             align_genes = [x for x in align_info]
         elif match == 'approx':
             align_genes = [x[0] for x in align_info]
+        else:
+            align_genes = []
 
         for en in filtered_entries:
             p = models.ProteinEntry.from_entry_nr(utils.db, en[0])
