@@ -1948,7 +1948,8 @@ class EntrySearchJson(JsonModelMixin):
                    'canonicalid': 'xrefid', 'oma_group': None,
                    'hog_family_nr': 'roothog', 'xrefs': None,
                    'description': None,
-                   "found_by": "found_by"}
+                   "found_by": "found_by",
+                   "sequence" : "sequence"}
 
 
 class GenomeModelJsonMixin(JsonModelMixin):
@@ -2136,12 +2137,26 @@ class Searcher(View):
         total_search = 0
         union_entry = None
 
+
+        align_info = []
+        align_term = {}
+
         for selector in self._entry_selector:
             raw_results = []
 
             # for each terms we get the raw results
             for term in terms:
-                r = self.search_entry(request, term, selector=[selector])
+                r, align_data, match = self.search_entry(request,  term, selector=[selector])
+
+                if selector == 'sequence':
+                    if align_data:
+                        align_info += align_data
+                        if match == 'exact':
+                            for x in align_data:
+                                align_term[x] = term
+
+
+
                 if scope:
                     r = scope.intersection(set(r))
                     #r = list(filter(lambda x: x in scope, r))
@@ -2170,7 +2185,6 @@ class Searcher(View):
                 total_search += 0
                 search_entry_meta[selector] = 0
 
-
         search_entry_meta['total'] =  total_search
 
         # Look for the intersection of sequence with ids if more than one terms
@@ -2195,10 +2209,39 @@ class Searcher(View):
         # encode entry data to json
         start = time.time()
         data_entry =  []
+        if match == 'exact':
+            align_genes = [x for x in align_info]
+        elif match == 'approx':
+            align_genes = [x[0] for x in align_info]
+
         for en in filtered_entries:
             p = models.ProteinEntry.from_entry_nr(utils.db, en[0])
             p.found_by = en[1]
+
+            # if not sequence alignment then remove sequence attribute
+
+            if p.entry_nr in align_genes:
+                if match == "exact":
+
+                    term = align_term[p.entry_nr]
+
+                    ali = [m.start() for m in re.finditer(term, p.sequence)]
+
+                    p.sequence = [{"sequence":p.sequence, 'align': [ali[0], ali[0] + len(term)]} for al in align_info  if al == p.entry_nr][0]
+
+                elif match == 'approx':
+                    p.sequence = [{"sequence":p.sequence, 'align': al[1]["alignment"][0][1:2][0]} for al in align_info  if al[0] == p.entry_nr][0]
+
+
+            else:
+                p.sequence = ""
             data_entry.append(p)
+
+
+
+
+
+
         json_encoder = EntrySearchJson()
         context['data_entry'] = json.dumps(json_encoder.as_json(data_entry))
         context['meta_entry'] = search_entry_meta
@@ -2383,6 +2426,7 @@ class Searcher(View):
         search_term_meta = {}
         for term in terms:
             search_term_meta[term] = {select:0 for select in self._genome_selector}
+            search_term_meta[term]['taxon'] = 0
 
         # for each method to search an extant genome store info
         ext_search = {select:[] for select in self._genome_selector}
@@ -2425,7 +2469,8 @@ class Searcher(View):
                         it.type = 'Extant'
 
                     _add_genomes(induced_genome, ext_search, total_search_ext, search_ext_meta)
-                    search_term_meta[term][selector] += len(induced_genome)
+                    #search_term_meta[term][selector] += len(induced_genome)
+                    search_term_meta[term]["taxon"] += len(induced_genome)
 
         search_taxon_meta['total'] = total_search_taxon
         search_genome_meta['total'] = total_search_taxon + total_search_ext
@@ -2477,7 +2522,7 @@ class Searcher(View):
         logger.info(
             "Genome json took {} sec for {} genomes.".format(start - end, len(cleaned_taxon) + len(cleaned_genome)))
 
-    def search_entry(self, request, query, selector=_entry_selector, redirect_valid=False):
+    def search_entry(self, request,  query, selector=_entry_selector, redirect_valid=False):
 
         """
         data = entry found with different selector
@@ -2514,39 +2559,43 @@ class Searcher(View):
         logger.info("[{}] Entry id search {}".format(query, start - end))
 
         start = time.time()
+        align_data = None
+        match=None
         if "sequence" in selector:
 
             seq_searcher = utils.db.seq_search
             seq = seq_searcher._sanitise_seq(query)
             if len(seq) >= 5:
 
-                context = {'searched_sequence': seq.decode(), 'search_method': 'sequence'}
                 targets = []
 
                 exact_matches = seq_searcher.exact_search(seq,only_full_length=False,is_sanitised=True)
+
                 if len(exact_matches) == 1:
                     if redirect_valid:
                         redirect('pairs', exact_matches[0])
 
-                context['identified_by'] = 'exact match'
 
                 for enr in exact_matches:
-
                     data.append(enr)
                     targets.append(enr)
 
                 if len(targets) == 0:
+
                     approx = seq_searcher.approx_search(seq, is_sanitised=True)
                     for enr, align_results in approx:
                         if align_results['score'] < 50:
                             break
                         data.append(enr)
-
-                    context['identified_by'] = 'approximate match'
+                    align_data = approx
+                    match = 'approx'
+                else:
+                    align_data = exact_matches
+                    match = 'exact'
         end = time.time()
         logger.info("[{}] Entry sequence search {}".format(query, start - end))
 
-        return data
+        return data, align_data, match
 
     def search_group(self, request, query, selector=_omagroup_selector, redirect_valid=False):
 

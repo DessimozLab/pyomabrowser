@@ -12,9 +12,10 @@
 
         <div class="jumbotron">
 
+            {{test1}}
+
                 <div class="card-body ">
 
-                    {{test1}}
 
                      <div class="pull-left">
 
@@ -47,6 +48,28 @@
 
 
                          </div>
+
+                         {% if meta_entry.shown == 0 and meta_group.shown == 0 and meta_genome.shown == 0  %}
+
+                         <br>
+                         <br>
+
+                         <div class="col-md-8 offset-md-2">
+
+
+                         <div class="alert alert-success" role="alert">
+  <h4 class="alert-heading">Oups!</h4>
+  <p>No proteins, orthologous groups or genomes matched your query...</p>
+  <hr>
+  <small>  <p class="mb-0"> But you can retry using other query like <b>"insulin"</b> or by combining protein name with species <b>"HBB human pig"</b></p> </small>
+
+                         </div>
+</div>
+                         {% endif %}
+
+
+
+                         {% if meta_entry.shown > 0%}
 
                          <div class="card search_entry " >
 
@@ -119,6 +142,8 @@
                                                                         <th data-field="description" data-sortable="true">Description</th>
 
                                                                         <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
+                                                                        <th data-field="sequence" data-sortable="true" data-formatter="tablehooks.format_entry_sequence_matches" >Matching sequences</th>
+
 
                                                                     </tr>
                                                                 </thead>
@@ -128,7 +153,10 @@
                                   <div class="col-md-2 ">
 
 
-                                       <b>Term specificity: </b>
+                                       <b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are founded according to search method used.
+                                      The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits">?</span>
+
+</b>
 
                                       <br>
                                       <br>
@@ -149,7 +177,7 @@
                                           {% if value > 10 %}
 
 
-                                              <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Message to help refine the search">?</span>
+                                              <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Too many hits! Try to combine it with species or taxon names to prune unwanted proteins: '{{term}} human' or '{{term}} Fungi'">?</span>
 
                                               {% endif %}
 
@@ -221,24 +249,38 @@
 
                          <br>
 
+                         {% endif %}
+
+                          {% if meta_group.shown > 0%}
+
                          <div class="card search_group" >
 
                           <div class="card-body">
+
+
+
 
                               <div class="col-md-8 offset-md-2">
 
 
                             <h5 class="card-title">Orthologous Groups </h5>
 
+
+
                               <b class="float-right "> {% if meta_group.total <= 50 %}  {{meta_group.shown}} orthologous groups founded {% else %} Best {{meta_group.shown}} orthologous groups shown out of {{meta_group.total}}
 {% endif %}</b>
-                              <br>
+
+                                  <br>
 
 
 
-       </div>
+                            </div>
+
+
 
                               <div class="row">
+
+
 
                                    <div class="col-md-2">
 
@@ -302,7 +344,10 @@
                                    <div class="col-md-2 ">
 
 
-                                       <b>Term specificity: </b>
+                                       <b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are founded according to search method used.
+                                      The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits">?</span>
+
+</b>
 
                                       <br>
                                       <br>
@@ -319,13 +364,6 @@
                                           {% if key != 'total' and  key != 'shown'%}
 
                                           <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>
-
-                                          {% if value > 10 %}
-
-
-                                              <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Message to help refine the search">?</span>
-
-                                              {% endif %}
 
 
                                           </li>
@@ -346,10 +384,17 @@
                                    </div>
 
 
+
+
                           </div>
                          </div>
 
+
                          <br>
+
+                         {% endif %}
+
+                         {% if meta_genome.shown > 0%}
 
                          <div class="card search_genome" >
                           <div class="card-body">
@@ -360,8 +405,7 @@
 
                             <h5 class="card-title">Genomes </h5>
 
-                              <b class="float-right "> {% if meta_genome.total <= 50 %}  {{meta_genome.shown}} genomes founded {% else %} Best {{meta_genome.shown}} genome shown out of {{meta_genome.total}}
-{% endif %}</b>
+                              <b class="float-right ">   {{meta_genome.shown}} genomes founded </b>
                               <br>
 
 
@@ -438,8 +482,10 @@
 
 
 
-                                      <b>Term specificity: </b>
+                                      <b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are founded according to search method used.
+                                      The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits">?</span>
 
+</b>
                                       <br>
                                       <br>
 
@@ -455,13 +501,6 @@
                                           {% if key != 'total' and  key != 'shown'%}
 
                                           <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>
-
-                                          {% if value > 10 %}
-
-
-                                              <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Message to help refine the search">?</span>
-
-                                              {% endif %}
 
 
                                           </li>
@@ -485,6 +524,8 @@
                          </div>
 
                          <br>
+
+                         {% endif %}
 
                      </div>
 
@@ -521,6 +562,7 @@
         var myHilitor = new Hilitor("matchTable_entry");
         myHilitor.setMatchType("open");
         var data = {{ data_entry | safe }};
+        console.log(data);
         var tab = $("#matchTable_entry");
         tab.bootstrapTable({
             reorderableColumns: true,
@@ -539,7 +581,7 @@
         var myHilitor2 = new Hilitor("matchTable_group");
         myHilitor2.setMatchType("open");
         var data = {{ data_group | safe }};
-        console.log(data);
+
         var tab = $("#matchTable_group");
         tab.bootstrapTable({
             reorderableColumns: true,

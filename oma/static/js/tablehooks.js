@@ -64,6 +64,25 @@
         return '<a class="external" href="https://uniprot.org/taxonomy/' + value +'">' + value + "</a>"
     };
 
+    exports.format_entry_sequence_matches = function(value, row){
+
+        if (value!=""){
+
+            var a = value.sequence;
+            var b1 = "</b>";
+            var b2 = "<b>";
+            var position1 = value.align[1];
+            var position2 = value.align[0];
+
+            console.log(position1,position2, a);
+            var output1 = [a.slice(0, position1), b1, a.slice(position1)].join('');
+            var output = [output1.slice(0, position2), b2, output1.slice(position2)].join('');
+
+            return output
+        }
+        return value;
+    };
+
     exports.format_subgenome = function(value){
         return "sub-genome "+value;
     };
