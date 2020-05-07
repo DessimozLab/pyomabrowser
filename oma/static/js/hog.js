@@ -41,6 +41,12 @@ hog_theme = function () {
                     scale: "linear",
                     field: "gc_content",
                     func: "color1d"
+                },
+                {
+                    name: "Number of Exons",
+                    scale: "linear",
+                    field: "nr_exons",
+                    func: "color1d"
                 }
             ];
 

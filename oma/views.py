@@ -740,7 +740,7 @@ class FamBase(ContextMixin, EntryCentricMixin):
 class FamGeneDataJson(FamBase, JsonModelMixin, View):
     json_fields = {'entry_nr': 'id', 'omaid': 'protid', 'sequence_length': None,
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'gc_content': None}
+                   'canonicalid': 'xrefid', 'gc_content': None, 'nr_exons': None}
 
     def get(self, request, *args, **kwargs):
         offset = int(request.GET.get('offset', 0))

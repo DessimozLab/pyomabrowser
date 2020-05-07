@@ -113,6 +113,7 @@
                                     <a class="dropdown-item active" href="#">Query Gene</a>
                                     <a class="dropdown-item" href="#">Gene Length</a>
                                     <a class="dropdown-item" href="#">GC Content</a>
+                                    <a class="dropdown-item" href="#">Number of Exons</a>
                                 </div>
                             </div>
 
@@ -304,6 +305,25 @@
                             return colorScale(d.gene.gc_content);
                         });
                         legend(colorScale, 'GC Content');
+                    }
+
+                    if (d3.select(this).text() === "Number of Exons") {
+                        var data = iham.fam_data();
+                        var domain = d3.extent(data, function (d) {
+                            return d.nr_exons
+                        });
+                        var colorScale = d3.scale.linear()
+                            .domain(domain)
+                            .range(["red", "blue"]);
+                        iham.gene_colors(function (d) {
+                            if(d){
+                                return colorScale(d.gene.nr_exons);
+                            }
+                            else{
+                                return "gray";
+                            }
+                        });
+                        legend(colorScale, 'Number of Exons');
                     }
                 });
 
