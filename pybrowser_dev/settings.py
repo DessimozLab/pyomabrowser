@@ -171,6 +171,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'oma.context_processors.oma_instance_name',
             ],
         },
     },
@@ -208,6 +209,7 @@ HDF5DB = {
     'NAME': 'Production',
     'PATH': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'OmaServer.h5')
 }
+OMA_INSTANCE_NAME = os.getenv('OMA_INSTANCE', 'full').lower()
 
 EMAIL_HOST = "whippee.com"
 EMAIL_PORT = 8025

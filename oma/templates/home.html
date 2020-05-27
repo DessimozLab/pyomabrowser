@@ -18,8 +18,11 @@
         <div class="col-sm-12 col-md-10 col-md-offset-1">
             <div class="jumbotron">
                 <div class="container">
+                    {% if oma_instance_name == "full" %}
                     <img src="{% static "image/oma2.png" %}" class="img-responsive margin-auto" alt="OMA logo">
-
+                    {% else %}
+                    <img src="{% static "image/omalogo-"|add:oma_instance_name|add:".svg" %}" style="max-width: 528px;" class="img-responsive margin-auto" alt="OMA logo">
+                    {% endif %}
                     <p><br></p>
                     <form role="search" id="searchForm" action="/cgi-bin/gateway.pl" method="GET">
                     <div class="col-md-10 col-md-offset-1">
