@@ -559,7 +559,7 @@
 
 
         // ENTRY RESULT TABLE
-        var myHilitor = new Hilitor("matchTable_entry");
+        var myHilitor = new Hilitor();
         myHilitor.setMatchType("open");
         var data = {{ data_entry | safe }};
         console.log(data);
@@ -578,7 +578,7 @@
         tab.bootstrapTable('refreshOptions', {'icons': icons});
 
         // GROUP RESULT TABLE
-        var myHilitor2 = new Hilitor("matchTable_group");
+        var myHilitor2 = new Hilitor();
         myHilitor2.setMatchType("open");
         var data = {{ data_group | safe }};
 
@@ -598,7 +598,7 @@
 
 
         // GENOME RESULT TABLE
-        var myHilitor3 = new Hilitor("matchTable_genome");
+        var myHilitor3 = new Hilitor();
         myHilitor3.setMatchType("open");
         var data = {{ data_genome | safe }};
 
