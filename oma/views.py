@@ -2140,6 +2140,7 @@ class Searcher(View):
 
         align_info = []
         align_term = {}
+        match= None
 
         for selector in self._entry_selector:
             raw_results = []
@@ -2160,8 +2161,6 @@ class Searcher(View):
                     #r = list(filter(lambda x: x in scope, r))
                 raw_results.append(r)
                 search_term_meta[term][selector] += len(r)
-
-
 
             # Get the intersection of the raw results
             if raw_results:
@@ -2225,7 +2224,12 @@ class Searcher(View):
 
                     term = align_term[p.entry_nr]
 
-                    ali = [m.start() for m in re.finditer(term, p.sequence)]
+                    seq_searcher = utils.db.seq_search
+                    seq = seq_searcher._sanitise_seq(term).decode()
+
+                    x = p.sequence
+
+                    ali = [m.start() for m in re.finditer(seq, p.sequence)]
 
                     p.sequence = [{"sequence":p.sequence, 'align': [ali[0], ali[0] + len(term)]} for al in align_info  if al == p.entry_nr][0]
 
@@ -2236,11 +2240,6 @@ class Searcher(View):
             else:
                 p.sequence = ""
             data_entry.append(p)
-
-
-
-
-
 
         json_encoder = EntrySearchJson()
         context['data_entry'] = json.dumps(json_encoder.as_json(data_entry))
