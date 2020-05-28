@@ -12,7 +12,11 @@
 
     <div class="container">
 
+        {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
         <div class="logo-oma-lg"></div>
+        {% else %}
+        <div class="logo-oma-lg-{{ oma_instance_name }}"></div>
+        {% endif %}
 
         <div class="oma-search">
             <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
@@ -58,10 +62,17 @@
             <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/>
             <p>
                 <strong>Examples:</strong>
-                <a href="#" id='exEntry'>Entry HUMAN22168</a> -
-                <a href="#"  id='exEntry2'>Entry P53_RAT</a> -
-                <a href="#" id='exPhoto'>Search for "photoreceptor"</a> -
-                <a href="#" id="exSpecies">"Drosophila" species</a>
+                {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
+                    <span class="ex" onclick="fillExample('id','HUMAN22168')">Entry HUMAN22168</span> -
+                    <span class="ex" onclick="fillExample('id','P53_RAT')">Entry P53_RAT</span> -
+                    <span class="ex" onclick="fillExample('fulltext','photoreceptor')">Search for "photoreceptor"</span> -
+                    <span class="ex" onclick="fillExample('species', 'Drosophila')">"Drosophila" species</span>
+                {% elif oma_instance_name == "corona" %}
+                    <span class="ex" onclick="fillExample('id','SARS200001')">Entry SARS200001</span> -
+                    <span class="ex" onclick="fillExample('id','R1AB_SARS2')">Entry R1AB_SARS2</span> -
+                    <span class="ex" onclick="fillExample('fulltext','glycoprotein')">Search for "glycoprotein"</span> -
+                    <span class="ex" onclick="fillExample('species', 'Bat coronavirus')">"Bat coronavirus" species</span>
+                {% endif %}
             </p>
         </div>
 
@@ -88,33 +99,12 @@
 </div>
 
 <script type="text/javascript">
-$('#exPhoto').click( function() {
-    $('#selectBrowser').val('entry_fulltext');
-    $('#selectBrowserModal').val('entry_fulltext');
-    $('#inputBrowser').val('photoreceptor').focus();
-    $('#inputBrowserModal').val('photoreceptor').focus();
-});
+function fillExample(search_select, term){
+    $('#selectBrowser').val(search_select);
+    $("#inputBrowser").val(term).focus();
+    $("#textarea").val(term).focus();
+}
 
-$('#exEntry').click( function() {
-    $('#selectBrowser').val('entry_id');
-    $('#selectBrowserModal').val('entry_id');
-    $('#inputBrowser').val('HUMAN22168').focus();
-    $('#inputBrowserModal').val('HUMAN22168').focus();
-});
-
-$('#exEntry2').click( function() {
-    $('#selectBrowser').val('entry_id');
-    $('#selectBrowserModal').val('entry_id');
-    $('#inputBrowser').val('P53_RAT').focus();
-    $('#inputBrowserModal').val('P53_RAT').focus();
-});
-
-$('#exSpecies').click( function(){
-    $('#selectBrowser').val('genome_name');
-    $('#selectBrowserModal').val('genome_name');
-    $('#inputBrowser').val('Drosophila').focus();
-    $('#inputBrowserModal').val('Drosophila').focus();
-});
 
 
 $('#inputBrowser').autocomplete(autocomplete_opts);

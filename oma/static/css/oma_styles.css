@@ -117,6 +117,12 @@ body {
 	 background: url('../image/logo-oma.svg') no-repeat center center / contain;
 	 margin: 0 auto;
 }
+  body #oma-search-container .container .logo-oma-lg-corona {
+	 width: 500px;
+	 height: 200px;
+	 background: url('../image/logo-oma-corona.svg') no-repeat center center / contain;
+	 margin: 0 auto;
+}
  body #oma-search-container .container .oma-search {
 	 position: relative;
 }
@@ -1003,6 +1009,11 @@ margin: 0 0 10px !important;
 		 width: 240px;
 		 height: 130px;
 		 background: url('../image/logo-oma-mobile.svg') no-repeat center center / contain;
+	}
+	 body #oma-search-container .container .logo-oma-lg-corona {
+		 width: 240px;
+		 height: 130px;
+		 background: url('../image/logo-oma-corona.svg') no-repeat center center / contain;
 	}
 	 body #oma-search-container .container .oma-quick-start {
 		 margin: 20px auto 0;
