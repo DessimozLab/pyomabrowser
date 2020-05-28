@@ -42,8 +42,11 @@
           <span class="icon-bar"></span>
         </button>
         <a href="{% url 'home'  %}">
+          {% if oma_instance_name == "full" %}
           <img alt="OMA logo" src="{% static "image/omalogo.png" %}" class="omalogo">
-
+          {% else %}
+          <img alt="OMA logo" src="{% static "image/omalogo-"|add:oma_instance_name|add:".svg" %}" class="omalogo">
+          {% endif %}
           <div class="glyphicon glyphicon-home icon-md"></div>
         </a>
       </div>

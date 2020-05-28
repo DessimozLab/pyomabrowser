@@ -291,3 +291,12 @@ dd#locus:hover {
 	cursor: pointer !important;
 	border: 1px #ddd solid !important ;
 }
+
+span.ex {
+	color: #337ab7;
+}
+span.ex:hover{
+	color: #23527c;
+	curser: pointer;
+	text-decoration: underline;
+}
