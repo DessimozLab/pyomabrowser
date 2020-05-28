@@ -6,6 +6,7 @@
         Bacteria: {cls: 'label-success', display_text: "Bacteria", tag: "B"},
         Archaea: {cls: 'label-primary', display_text: "Archaea", tag: "A"},
         Eukaryota: {cls: 'label-danger', display_text: "Eukaryota", tag: "E"},
+        Viruses: {cls: 'label-warning', display_text: "Viruses", tag: "V"},
         _default: {cls: 'label-default', display_text: "unknown", tag: "?"}
     };
 
