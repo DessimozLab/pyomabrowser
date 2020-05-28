@@ -2227,8 +2227,6 @@ class Searcher(View):
                     seq_searcher = utils.db.seq_search
                     seq = seq_searcher._sanitise_seq(term).decode()
 
-                    x = p.sequence
-
                     ali = [m.start() for m in re.finditer(seq, p.sequence)]
 
                     p.sequence = [{"sequence":p.sequence, 'align': [ali[0], ali[0] + len(term)]} for al in align_info  if al == p.entry_nr][0]
@@ -2454,7 +2452,7 @@ class Searcher(View):
 
             # for each terms we get the raw results
             for term in terms:
-                r = self.search_taxon(request, term, selector=[selector]) # todo add approximate search for taxon
+                r = self.search_taxon(request,context,  term, selector=[selector])
                 search_term_meta[term][selector] += len(r)
                 _add_genomes(r, taxon_search, total_search_taxon, search_taxon_meta)
 
@@ -2470,6 +2468,7 @@ class Searcher(View):
                     _add_genomes(induced_genome, ext_search, total_search_ext, search_ext_meta)
                     #search_term_meta[term][selector] += len(induced_genome)
                     search_term_meta[term]["taxon"] += len(induced_genome)
+
 
         search_taxon_meta['total'] = total_search_taxon
         search_genome_meta['total'] = total_search_taxon + total_search_ext
@@ -2510,7 +2509,11 @@ class Searcher(View):
 
         json_genome = GenomeModelJsonMixin().as_json(cleaned_genome)
 
-        context['data_genome'] = json.dumps(json_genome + cleaned_taxon)
+        if len(json_genome) < len(cleaned_taxon):
+            context['data_genome'] = json.dumps(json_genome + cleaned_taxon)
+        else:
+            context['data_genome'] = json.dumps( cleaned_taxon + json_genome)
+
         context['meta_genome'] = search_genome_meta
         context['meta_extant'] = search_ext_meta
         context['meta_term'] = search_term_meta
@@ -2795,10 +2798,9 @@ class Searcher(View):
 
         return data
 
-    def search_taxon(self, request, query, selector=_genome_selector,redirect_valid=False):
+    def search_taxon(self, request, context, query, selector=_genome_selector,redirect_valid=False):
 
         url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
-
 
         def iterdict(d, search, query, found_by):
             for k, v in d.items():
@@ -2840,6 +2842,30 @@ class Searcher(View):
             search["found_by"] = found_by
 
             data.append(search)
+
+        else:
+
+            if 'name' in selector:
+
+                amb_taxon = utils.taxon_approx_search.search_approx(query)
+
+                for amb_taxa in amb_taxon:
+
+                    query = amb_taxa[1]
+
+                    search, found_by = iterdict(json.load(open(url, 'r')), False, query , None)
+                    search["kingdom"] = ""
+                    search["uniprot_species_code"] = ""
+                    search["ncbi"] = search["taxid"]
+                    search["sciname"] = search["name"]
+                    search["common_name"] = ""
+                    search["last_modified"] = ""
+                    search["prots"] = search["nr_hogs"]
+                    search["type"] = "Ancestral"
+                    search["found_by"] = found_by
+
+                    data.append(search)
+
 
         return data
 
