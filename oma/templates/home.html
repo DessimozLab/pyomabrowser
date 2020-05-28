@@ -18,8 +18,11 @@
         <div class="col-sm-12 col-md-10 col-md-offset-1">
             <div class="jumbotron">
                 <div class="container">
+                    {% if oma_instance_name == "full" %}
                     <img src="{% static "image/oma2.png" %}" class="img-responsive margin-auto" alt="OMA logo">
-
+                    {% else %}
+                    <img src="{% static "image/omalogo-"|add:oma_instance_name|add:".svg" %}" style="max-width: 528px;" class="img-responsive margin-auto" alt="OMA logo">
+                    {% endif %}
                     <p><br></p>
                     <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
                     <div class="col-md-10 col-md-offset-1">
@@ -50,11 +53,18 @@
                 <div class="row top-buffer">
                     <div class="col-md-8 col-md-offset-2">
                         <div class="text-center">
-                            Examples: 
-                            <a id='exEntry'>Entry HUMAN22168</a>
-                          - <a id='exEntry2'>Entry P53_RAT</a>
-                          -  <a id='exPhoto'>Search for "photoreceptor"</a>
-                          - <a id="exSpecies">"Drosophila" species</a>
+                           Examples:
+                            {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
+                                <span class="ex" onclick="fillExample('id','HUMAN22168')">Entry HUMAN22168</span> -
+                                <span class="ex" onclick="fillExample('id','P53_RAT')">Entry P53_RAT</span> -
+                                <span class="ex" onclick="fillExample('fulltext','photoreceptor')">Search for "photoreceptor"</span> -
+                                <span class="ex" onclick="fillExample('species', 'Drosophila')">"Drosophila" species</span>
+                            {% elif oma_instance_name == "corona" %}
+                                <span class="ex" onclick="fillExample('id','SARS200001')">Entry SARS200001</span> -
+                                <span class="ex" onclick="fillExample('id','R1AB_SARS2')">Entry R1AB_SARS2</span> -
+                                <span class="ex" onclick="fillExample('fulltext','glycoprotein')">Search for "glycoprotein"</span> -
+                                <span class="ex" onclick="fillExample('species', 'Bat coronavirus')">"Bat coronavirus" species</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -64,29 +74,12 @@
 
 
 <script type="text/javascript">
+function fillExample(search_select, term){
+    $('#selectBrowser').val(search_select);
+    $("#inputBrowser").val(term).focus();
+    $("#textarea").val(term).focus();
+}
 
-$('#exPhoto').click( function() {
-    $('#selectBrowser').val('fulltext');
-    $('#inputBrowser').val('photoreceptor').focus();
-    $('#textarea').val('photoreceptor').focus();
-});
-
-$('#exEntry').click( function() {
-    $('#selectBrowser').val('id');
-    $('#inputBrowser').val('HUMAN22168').focus();
-    $('#textarea').val('HUMAN22168').focus();
-});
-
-$('#exEntry2').click( function() {
-    $('#selectBrowser').val('id');
-    $('#inputBrowser').val('P53_RAT').focus();
-    $('#textarea').val('P53_RAT').focus();
-});
-$('#exSpecies').click( function(){
-    $('#selectBrowser').val('species');
-    $('#inputBrowser').val('Drosophila').focus();
-    $('$textarea').val('Drosophila').focus();
-});
 
 var textbox = $("#inputBrowser");
 var textarea = $("<textarea id='textarea' rows='3' name='p1'></textarea>");
