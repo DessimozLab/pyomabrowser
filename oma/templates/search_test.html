@@ -74,18 +74,92 @@
 
                           <div class="card-body">
 
+                              <div class="row">
+
                               <div class="col-md-8 offset-md-2">
 
 
                             <h5 class="card-title">Proteins </h5>
 
-                              <b class="float-right "> {% if meta_entry.total <= 50 %}  {{meta_entry.shown}} entries founded {% else %} Best {{meta_entry.shown}} entries shown out of {{meta_entry.total}} entries
+                              <b class="float-right "> {% if meta_entry.total <= 50 %}  {{meta_entry.shown}} {% if meta_entry.shown == 1 %}  entry {% else %} entries {% endif %}  found {% else %} Best {{meta_entry.shown}} {% if meta_entry.shown == 1 %}  entry {% else %} entries {% endif %}  shown out of {{meta_entry.total}} entries
 
 {% endif %}
-                              </b>
+
+                                  <button id="entry_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button> </b>
+
+                                  <script>
+                                      $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content-entry";
+
+
+
+                                              {% for term, stat in meta_term_entry.items %}
+
+                                              var term = document.createElement("h5");
+                                              term.innerHTML = '{{term}}<br>'
+
+                                          content.appendChild(term);
+
+
+                                          var ul = document.createElement("ul");
+                                              ul.className = "list-unstyled"
+
+
+
+
+                                          {% for key, value in stat.items %}
+
+                                          {% if key != 'total' and  key != 'shown'%}
+
+                                          var li = document.createElement("li");
+                                              li.className = "list-group-item";
+                                              li.innerHTML = '<span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>'
+                                          li.style.border='none';
+                                              li.style.padding=".2rem 1.25rem"
+                                        ul.appendChild(li)
+                                            {% endif %}
+                                        {% endfor %}
+                                        content.appendChild(ul)
+
+                                          document.body.appendChild(content)
+
+
+
+
+
+
+                                      {% endfor %}
+
+
+
+
+
+
+
+
+
+
+  $('#entry_stat').popover({
+      title: title,
+      html: true,
+      content: function() {
+      return $('#popover-content-entry').html();
+    }
+  })
+})</script>
+
+
                               <br>
 
        </div>
+
+                                  </div>
 
                               <div class="row">
 
@@ -149,53 +223,6 @@
                                                               </table>
                                    </div>
 
-                                  <div class="col-md-2 ">
-
-
-                                       <b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are founded according to search method used.
-                                      The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits">?</span>
-
-</b>
-
-                                      <br>
-                                      <br>
-
-                                      {% for term, stat in meta_term_entry.items %}
-
-                                      <small>"{{term}}"</small>
-
-                                      <ul class="list-unstyled">
-
-
-                                          {% for key, value in stat.items %}
-
-                                          {% if key != 'total' and  key != 'shown'%}
-
-                                          <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>
-
-                                          {% if value > 10 %}
-
-
-                                              <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Too many hits! Try to combine it with species or taxon names to prune unwanted proteins: '{{term}} human' or '{{term}} Fungi'">?</span>
-
-                                              {% endif %}
-
-
-                                          </li>
-
-                                            {% endif %}
-                                        {% endfor %}
-
-                                          </ul>
-
-                                          {% endfor %}
-
-
-
-
-
-                                   </div>
-
 
 
 
@@ -257,6 +284,8 @@
                           <div class="card-body">
 
 
+                              <div class="row">
+
 
 
                               <div class="col-md-8 offset-md-2">
@@ -266,14 +295,85 @@
 
 
 
-                              <b class="float-right "> {% if meta_group.total <= 50 %}  {{meta_group.shown}} orthologous groups founded {% else %} Best {{meta_group.shown}} orthologous groups shown out of {{meta_group.total}}
-{% endif %}</b>
+                              <b class="float-right "> {% if meta_group.total <= 50 %}  {{meta_group.shown}} {% if meta_group.shown == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best {{meta_group.shown}} {% if meta_group.shown == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta_group.total}}
+{% endif %}
+
+                                  <button id="group_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button> </b>
+
+                                  <script>
+                                      $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content-group";
+
+
+
+                                              {% for term, stat in meta_term_group.items %}
+
+                                              var term = document.createElement("h5");
+                                              term.innerHTML = '{{term}}<br>'
+
+                                          content.appendChild(term);
+
+
+                                          var ul = document.createElement("ul");
+                                              ul.className = "list-unstyled"
+
+
+
+
+                                          {% for key, value in stat.items %}
+
+                                          {% if key != 'total' and  key != 'shown'%}
+
+                                          var li = document.createElement("li");
+                                              li.className = "list-group-item";
+                                              li.innerHTML = '<span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>'
+                                          li.style.border='none';
+                                              li.style.padding=".2rem 1.25rem"
+                                        ul.appendChild(li)
+                                            {% endif %}
+                                        {% endfor %}
+                                        content.appendChild(ul)
+
+                                          document.body.appendChild(content)
+
+
+
+
+
+
+                                      {% endfor %}
+
+
+
+
+
+
+
+
+
+
+  $('#group_stat').popover({
+      title: title,
+      html: true,
+      content: function() {
+      return $('#popover-content-group').html();
+    }
+  })
+})</script>
 
                                   <br>
 
 
 
                             </div>
+
+                              </div>
 
 
 
@@ -340,46 +440,7 @@
 
                               </div>
 
-                                   <div class="col-md-2 ">
 
-
-                                       <b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are founded according to search method used.
-                                      The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits">?</span>
-
-</b>
-
-                                      <br>
-                                      <br>
-
-                                      {% for term, stat in meta_term_group.items %}
-
-                                      <small>"{{term}}"</small>
-
-                                      <ul class="list-unstyled">
-
-
-                                          {% for key, value in stat.items %}
-
-                                          {% if key != 'total' and  key != 'shown'%}
-
-                                          <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>
-
-
-                                          </li>
-
-                                            {% endif %}
-                                        {% endfor %}
-
-                                          <br>
-
-                                          {% endfor %}
-
-
-                                          </ul>
-
-
-
-                                   </div>
                                    </div>
 
 
@@ -398,18 +459,92 @@
                          <div class="card search_genome" >
                           <div class="card-body">
 
+                              <div class="row">
+
 
                               <div class="col-md-8 offset-md-2">
 
 
                             <h5 class="card-title">Genomes </h5>
 
-                              <b class="float-right ">   {{meta_genome.shown}} genomes founded </b>
+                              <b class="float-right ">   {{meta_genome.shown}} {% if meta_genome.shown == 1 %}  genome {% else %} genomes {% endif %}  found
+                                  <button id="genome_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button> </b>
+
+                                  <script>
+                                      $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content";
+
+
+
+                                              {% for term, stat in meta_term.items %}
+
+                                              var term = document.createElement("h5");
+                                              term.innerHTML = '{{term}}<br>'
+
+                                          content.appendChild(term);
+
+
+                                          var ul = document.createElement("ul");
+                                              ul.className = "list-unstyled"
+
+
+
+
+                                          {% for key, value in stat.items %}
+
+                                          {% if key != 'total' and  key != 'shown'%}
+
+                                          var li = document.createElement("li");
+                                              li.className = "list-group-item";
+                                              li.innerHTML = '<span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>'
+                                          li.style.border='none';
+                                              li.style.padding=".2rem 1.25rem"
+                                        ul.appendChild(li)
+                                            {% endif %}
+                                        {% endfor %}
+                                        content.appendChild(ul)
+
+                                          document.body.appendChild(content)
+
+
+
+
+
+
+                                      {% endfor %}
+
+
+
+
+
+
+
+
+
+
+  $('#genome_stat').popover({
+      title: title,
+      html: true,
+      content: function() {
+      return $('#popover-content').html();
+    }
+  })
+})</script>
+
+
                               <br>
 
 
 
        </div>
+
+                              </div>
 
                               <div class="row">
 
@@ -477,43 +612,7 @@
                    </table>
                                    </div>
 
-                                  <div class="col-md-2 ">
 
-
-
-                                      <b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are founded according to search method used.
-                                      The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits">?</span>
-
-</b>
-                                      <br>
-                                      <br>
-
-                                      {% for term, stat in meta_term.items %}
-
-                                      <small>"{{term}}"</small>
-
-                                      <ul class="list-unstyled">
-
-
-                                          {% for key, value in stat.items %}
-
-                                          {% if key != 'total' and  key != 'shown'%}
-
-                                          <li class="list-group-item" style="border: none; padding: .2rem 1.25rem"><span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>
-
-
-                                          </li>
-
-                                            {% endif %}
-                                        {% endfor %}
-
-
-                                          </ul>
-
-                                          {% endfor %}
-
-
-                                   </div>
 
 
                               </div>
@@ -541,6 +640,9 @@
 <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
 
     <script src="{% static "js/highlight.js" %}"></script>
+
+
+
 
     <script>
 
@@ -617,35 +719,7 @@
         tab.bootstrapTable('refreshOptions', {'icons': icons});
 
 
-        document.getElementById('run_full_entries').onclick=function(){
-          // Remove any element-specific value, falling back to stylesheets
-          document.getElementById('matchTable_entry_full_text').style.display='';
-          document.getElementById('run_full_entries').style.display='none';
 
-
-
-          // ENTRY RESULT TABLE
-        var myHilitor = new Hilitor("matchTable_entry_full_text");
-        myHilitor.setMatchType("open");
-        var tab = $("#matchTable_entry_full_text");
-        tab.bootstrapTable({
-            url: "{{ url_fulltest_entries }}",
-            reorderableColumns: true,
-            clickToSelect: false,
-            showMultiSort: true,
-            onPostBody: function(d){
-                myHilitor.apply("{{ query }}");
-                document.getElementById('nbr_full_entrie').innerHTML=  'Loading...';
-            },
-            onLoadSuccess: function(d){
-                document.getElementById('nbr_full_entrie').innerHTML= d.length + ' full text match founded';
-            }
-        });
-        var icons = tab.bootstrapTable('getOptions').icons;
-        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
-        tab.bootstrapTable('refreshOptions', {'icons': icons});
-
-        };
 
 
         // FILTER ENTRY
@@ -836,7 +910,44 @@
   $('[data-toggle="tooltip"]').tooltip()
 })
 
+$(function () {
+  $('[data-toggle="popover"]').popover()
+})
 
+
+</script>
+
+
+<script>
+    document.getElementById('run_full_entries').onclick=function(){
+          // Remove any element-specific value, falling back to stylesheets
+          document.getElementById('matchTable_entry_full_text').style.display='';
+          document.getElementById('run_full_entries').style.display='none';
+
+
+
+          // ENTRY RESULT TABLE
+        var myHilitor = new Hilitor("matchTable_entry_full_text");
+        myHilitor.setMatchType("open");
+        var tab = $("#matchTable_entry_full_text");
+        tab.bootstrapTable({
+            url: "{{ url_fulltest_entries }}",
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            onPostBody: function(d){
+                myHilitor.apply("{{ query }}");
+                document.getElementById('nbr_full_entrie').innerHTML=  'Loading...';
+            },
+            onLoadSuccess: function(d){
+                document.getElementById('nbr_full_entrie').innerHTML= d.length + ' full text match found';
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+        };
 </script>
 
 

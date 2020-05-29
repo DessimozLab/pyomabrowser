@@ -2107,7 +2107,7 @@ class Searcher(View):
                         except ValueError:
                             pass
 
-        context["genome_term"] = genome_term
+        context["genome_term"] = list(set(genome_term))
         context["protein_scope"] = protein_scope
 
         pruned_term = [term for term in terms if term not in genome_term]
@@ -2468,7 +2468,6 @@ class Searcher(View):
                     _add_genomes(induced_genome, ext_search, total_search_ext, search_ext_meta)
                     #search_term_meta[term][selector] += len(induced_genome)
                     search_term_meta[term]["taxon"] += len(induced_genome)
-
 
         search_taxon_meta['total'] = total_search_taxon
         search_genome_meta['total'] = total_search_taxon + total_search_ext
