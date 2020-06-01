@@ -46,7 +46,11 @@
 
     <div class="logos-navbar mr-auto">
         <a href="https://www.sib.swiss/"><img src="{% static "image/logo-SIB.png" %}" alt="Logo SIB"/></a>
-        <a href="/oma/home/"><img src="{% static "image/logo-oma-mobile.png" %}" alt="Logo OMA small"/></a>
+        {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
+            <a href="/oma/home/"><img src="{% static "image/logo-oma-mobile.svg" %}" alt="Logo OMA small"/></a>
+        {% else %}
+            <a href="/oma/home/"><img src="{% static "image/logo-oma-"|add:oma_instance_name|add:".svg" %}" alt="Logo OMA small"/></a>
+        {% endif %}
     </div>
 
 

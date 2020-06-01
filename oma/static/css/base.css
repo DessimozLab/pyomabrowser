@@ -308,7 +308,6 @@ dd#locus:hover {
 	border: 1px #ddd solid !important ;
 }
 
-
 .nav_custom {
 	background-color: #f8f8f8 !important;
 }
@@ -388,3 +387,11 @@ dd#locus:hover {
 
 
 
+span.ex {
+	color: #337ab7;
+}
+span.ex:hover{
+	color: #23527c;
+	curser: pointer;
+	text-decoration: underline;
+}
