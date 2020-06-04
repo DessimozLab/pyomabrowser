@@ -443,6 +443,10 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         context = super(PairsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
+        start = time.time()
+
+
+
         # Get orthologs
         # /!\ in order to not refactor and introduce mistake, we keep the var vps and nr_vps. Nevertheless, this object will contain vps, HOG pairs and GO pair.
         orthologs_dict = {}
@@ -518,6 +522,9 @@ class PairsBase(ContextMixin, EntryCentricMixin):
             if not hasattr(rel, 'type_g'):
                 rel.type_g = 0
 
+        end = time.time()
+        logger.info("[{}] Compute badges {}".format(entry_id, start - end))
+
 
         entry.RelType = 'self'
         if entry._entry['AltSpliceVariant'] in (0, entry.entry_nr):
@@ -528,7 +535,6 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         longest_seq = 0
         if len(vps) > 0:
             longest_seq = max(e.sequence_length for e in vps)
-
 
         context.update(
             {'entry': entry, 'nr_pps': len(pps),
@@ -560,8 +566,14 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View, ):
                    'canonicalid': 'xrefid', 'RelType': 'RelType', 'type_p': 'type_p','type_h':'type_h','type_g':'type_g'}
 
     def get(self, request, *args, **kwargs):
+
+        start = time.time()
+
         context = self.get_context_data(**kwargs)
         data = list(self.to_json_dict(context['vps']))
+
+        end = time.time()
+        logger.info("[{}] Json formatting {}".format(context['entry'].omaid, start - end))
 
         return JsonResponse(data, safe=False)
 
