@@ -170,6 +170,8 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         context = super(InfoBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
+        start = time.time()
+
 
         # to compute the number of orthologs (PO, HOG-based, OG-based) for the badge  we need to do this..
         orthologs_list = []
@@ -197,6 +199,9 @@ class InfoBase(ContextMixin, EntryCentricMixin):
                 orthologs_list.append(ent[0])
 
         vps_ = list(set(orthologs_list))
+
+        end = time.time()
+        logger.info("[{}] Badge computation {}".format(context['entry'].omaid, start - end))
 
         context.update({'entry': entry, 'tab': 'geneinformation', 'nr_vps': len(vps_),
                         'nr_pps': len(pps)})
@@ -523,7 +528,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
                 rel.type_g = 0
 
         end = time.time()
-        logger.info("[{}] Compute badges {}".format(entry_id, start - end))
+        logger.info("[{}] Pairs modeled {}".format(entry_id, start - end))
 
 
         entry.RelType = 'self'
