@@ -147,7 +147,7 @@
         showMultiSort: true,
         showLoading: true,
         onPostBody: function () {
-            domains.visualize_all(".protein", {{ longest_seq }});
+            domains.visualize_all(".protein"); //, {{ longest_seq }});
         },
         onLoadSuccess: function (data) {
             tab.bootstrapTable('hideLoading');

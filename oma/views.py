@@ -448,106 +448,10 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         context = super(PairsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
-        start = time.time()
-
-
-
-        # Get orthologs
-        # /!\ in order to not refactor and introduce mistake, we keep the var vps and nr_vps. Nevertheless, this object will contain vps, HOG pairs and GO pair.
-        orthologs_dict = {}
-        entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
-
-        ## Get VPS
-        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-        pps = utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr)
-        for rel in itertools.chain(vps_raw):
-            pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
-            #pw_relation.RelType = rel['RelType']
-            #if len(rel['RelType']) == 3:
-            #    pw_relation.RelType += " ortholog"
-
-            pw_relation.type_p = 1
-
-            orthologs_dict[rel['EntryNr2']] = pw_relation
-
-        ## Get HOG orthologs
-        hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
-        for en in hog_pair:
-
-            if en[0] in orthologs_dict.keys():
-                pw_relation = orthologs_dict[en[0]]
-            else:
-                pw_relation = models.ProteinEntry.from_entry_nr(utils.db, en[0])
-
-            if not hasattr(pw_relation, 'RelType'):
-                pw_relation.RelType = en[-1].decode()
-
-
-
-            pw_relation.type_h = 1
-
-            orthologs_dict[en[0]] = pw_relation
-
-        ## Get OG orthologs
-
-        if entry.oma_group != 0:
-
-            OG_pair = list(utils.db.oma_group_members(entry.oma_group))
-            OG_pair.remove(entry_db)
-
-            for ent in OG_pair:
-
-                if ent[0] in orthologs_dict.keys():
-                    pw_relation = orthologs_dict[ent[0]]
-                else:
-                    pw_relation = models.ProteinEntry.from_entry_nr(utils.db, ent[0])
-
-                #if not hasattr(pw_relation, 'RelType'):
-                #    pw_relation.RelType = None
-
-                pw_relation.type_g = 1
-
-                orthologs_dict[ent[0]] = pw_relation
-
-        vps = orthologs_dict.values()
-
-
-        # populate with inference evidence missing attribute
-        for rel in vps:
-
-            if not hasattr(rel, 'RelType'):
-                rel.RelType = None
-
-            if not hasattr(rel, 'type_p'):
-                rel.type_p = 0
-
-            if not hasattr(rel, 'type_h'):
-                rel.type_h = 0
-
-            if not hasattr(rel, 'type_g'):
-                rel.type_g = 0
-
-        end = time.time()
-        logger.info("[{}] Pairs modeled {}".format(entry_id, start - end))
-
-
-        entry.RelType = 'self'
-        if entry._entry['AltSpliceVariant'] in (0, entry.entry_nr):
-            entry.alt_splicing_variant = entry.omaid
-        else:
-            entry.alt_splicing_variant = utils.id_mapper['OMA'].map_entry_nr(entry._entry['AltSpliceVariant'])
-
-        longest_seq = 0
-        if len(vps) > 0:
-            longest_seq = max(e.sequence_length for e in vps)
-
         context.update(
-            {'entry': entry, 'nr_pps': len(pps),
-             'vps': vps, 'nr_vps': len(vps), 'tab': 'orthologs',
-             'longest_seq': longest_seq,
+            {'entry': entry, 'nr_pps': 9999, 'nr_vps': 9999, 'tab': 'orthologs',
              'table_data_url': reverse('pairs_support_json', args=(entry.omaid,))
              })
-
 
         return context
 
@@ -572,12 +476,104 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View, ):
 
     def get(self, request, *args, **kwargs):
 
+        context = self.get_context_data(**kwargs)
+
+        entry = context['entry']
+
+        # Get orthologs
+        # /!\ in orde  d introduce mistake, we keep the var vps and nr_vps. Nevertheless, this object will contain vps, HOG pairs and GO pair.
+        orthologs_dict = {}
+        entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
+
         start = time.time()
 
-        context = self.get_context_data(**kwargs)
-        data = list(self.to_json_dict(context['vps']))
+        ## Get VPS
+        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
+        pps = utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr)
+        for rel in itertools.chain(vps_raw):
+            pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
+            # pw_relation.RelType = rel['RelType']
+            # if len(rel['RelType']) == 3:
+            #    pw_relation.RelType += " ortholog"
+
+            pw_relation.type_p = 1
+
+            orthologs_dict[rel['EntryNr2']] = pw_relation
+
+        ## Get HOG orthologs
+        hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
+        for en in hog_pair:
+
+            if en[0] in orthologs_dict.keys():
+                pw_relation = orthologs_dict[en[0]]
+            else:
+                pw_relation = models.ProteinEntry.from_entry_nr(utils.db, en[0])
+
+            if not hasattr(pw_relation, 'RelType'):
+                pw_relation.RelType = en[-1].decode()
+
+            pw_relation.type_h = 1
+
+            orthologs_dict[en[0]] = pw_relation
+
+        ## Get OG orthologs
+
+        if entry.oma_group != 0:
+
+            OG_pair = list(utils.db.oma_group_members(entry.oma_group))
+            OG_pair.remove(entry_db)
+
+            for ent in OG_pair:
+
+                if ent[0] in orthologs_dict.keys():
+                    pw_relation = orthologs_dict[ent[0]]
+                else:
+                    pw_relation = models.ProteinEntry.from_entry_nr(utils.db, ent[0])
+
+                # if not hasattr(pw_relation, 'RelType'):
+                #    pw_relation.RelType = None
+
+                pw_relation.type_g = 1
+
+                orthologs_dict[ent[0]] = pw_relation
+
+        vps = orthologs_dict.values()
+
+        # populate with inference evidence missing attribute
+        for rel in vps:
+
+            if not hasattr(rel, 'RelType'):
+                rel.RelType = None
+
+            if not hasattr(rel, 'type_p'):
+                rel.type_p = 0
+
+            if not hasattr(rel, 'type_h'):
+                rel.type_h = 0
+
+            if not hasattr(rel, 'type_g'):
+                rel.type_g = 0
 
         end = time.time()
+        logger.info("[{}] Pairs modeled {}".format(context['entry'].omaid, start - end))
+
+        entry.RelType = 'self'
+        if entry._entry['AltSpliceVariant'] in (0, entry.entry_nr):
+            entry.alt_splicing_variant = entry.omaid
+        else:
+            entry.alt_splicing_variant = utils.id_mapper['OMA'].map_entry_nr(entry._entry['AltSpliceVariant'])
+
+        longest_seq = 0
+        if len(vps) > 0:
+            longest_seq = max(e.sequence_length for e in vps)
+
+
+        start = time.time()
+
+        data = list(self.to_json_dict(vps))
+
+        end = time.time()
+
         logger.info("[{}] Json formatting {}".format(context['entry'].omaid, start - end))
 
         return JsonResponse(data, safe=False)
