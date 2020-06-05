@@ -448,8 +448,12 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         context = super(PairsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
+
+        pps = 9999
+        vps = 9999
+
         context.update(
-            {'entry': entry, 'nr_pps': 9999, 'nr_vps': 9999, 'tab': 'orthologs',
+            {'entry': entry, 'nr_pps': pps, 'nr_vps': vps, 'tab': 'orthologs',
              'table_data_url': reverse('pairs_support_json', args=(entry.omaid,))
              })
 
@@ -467,7 +471,7 @@ class PairsJson(PairsBase, JsonModelMixin, View):
         return JsonResponse(data, safe=False)
 
 # With information if the pair is supported by PO, HOGS and/or OMA groups
-class PairsJson_Support(PairsBase, JsonModelMixin, View, ):
+class PairsJson_Support(PairsBase, JsonModelMixin, View):
 
 
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
