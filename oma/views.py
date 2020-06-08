@@ -170,41 +170,11 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         context = super(InfoBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
-        start = time.time()
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
 
 
-        # to compute the number of orthologs (PO, HOG-based, OG-based) for the badge  we need to do this..
-        orthologs_list = []
-        entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
-
-        ## Get VPS
-        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-        pps = utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr)
-        for rel in itertools.chain(vps_raw):
-            orthologs_list.append(rel[1])
-
-        ## Get HOG orthologs
-        hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
-        for en in hog_pair:
-            orthologs_list.append(en[0])
-
-        ## Get OG orthologs
-
-        if entry.oma_group != 0:
-
-            OG_pair = list(utils.db.oma_group_members(entry.oma_group))
-            OG_pair.remove(entry_db)
-
-            for ent in OG_pair:
-                orthologs_list.append(ent[0])
-
-        vps_ = list(set(orthologs_list))
-
-        end = time.time()
-        logger.info("[{}] Badge computation {}".format(entry.omaid, start - end))
-
-        context.update({'entry': entry, 'tab': 'geneinformation', 'nr_vps': len(vps_),
-                        'nr_pps': len(pps)})
+        context.update({'entry': entry, 'tab': 'geneinformation', 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
+                        'nr_pps':  nr_ortholog_relations['NrHogInducedPWParalogs']  })
         return context
 
 
@@ -403,37 +373,13 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
         sorted(list(o_md_geneinfos.items()),
                key=lambda t: t[1]['row_number']))
 
-    # to compute the number of orthologs (PO, HOG-based, OG-based) for the badge  we need to do this..
-    orthologs_list = []
-    entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
 
-    ## Get VPS
-    vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-    pps = utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr)
-    for rel in itertools.chain(vps_raw):
-        orthologs_list.append(rel[1])
-
-    ## Get HOG orthologs
-    hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
-    for en in hog_pair:
-        orthologs_list.append(en[0])
-
-    ## Get OG orthologs
-
-    if entry.oma_group != 0:
-
-        OG_pair = list(utils.db.oma_group_members(entry.oma_group))
-        OG_pair.remove(entry_db)
-
-        for ent in OG_pair:
-            orthologs_list.append(ent[0])
-
-    vps_ = list(set(orthologs_list))
+    nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
 
     context = {'positions': positions, 'windows': windows,
                'md': md_geneinfos, 'o_md': o_md_geneinfos, 'colors': colors,
-               'stripes': stripes, 'nr_vps': len(vps_),
-               'nr_pps': len(pps),
+               'stripes': stripes, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
+               'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
                'entry': entry,
                'tab': 'synteny', 'xrefs': xrefs
     }
@@ -448,12 +394,10 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         context = super(PairsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
-
-        pps = 9999
-        vps = 9999
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
 
         context.update(
-            {'entry': entry, 'nr_pps': pps, 'nr_vps': vps, 'tab': 'orthologs',
+            {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'], 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'orthologs',
              'table_data_url': reverse('pairs_support_json', args=(entry.omaid,))
              })
 
@@ -610,33 +554,6 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
         context = super(Entry_Paralogy, self).get_context_data(entry_id, **kwargs)
         entry = self.get_entry(entry_id)
 
-        # to compute the number of orthologs (PO, HOG-based, OG-based) for the badge  we need to do this..
-        orthologs_list = []
-        entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
-
-        ## Get VPS
-        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-
-        for rel in itertools.chain(vps_raw):
-            orthologs_list.append(rel[1])
-
-        ## Get HOG orthologs
-        hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
-        for en in hog_pair:
-            orthologs_list.append(en[0])
-
-        ## Get OG orthologs
-
-        if entry.oma_group != 0:
-
-            OG_pair = list(utils.db.oma_group_members(entry.oma_group))
-            OG_pair.remove(entry_db)
-
-            for ent in OG_pair:
-                orthologs_list.append(ent[0])
-
-        vps_ = list(set(orthologs_list))
-
 
         ## GET PARALOGS
 
@@ -651,9 +568,11 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
         if len(pps) > 0:
             longest_seq = max(e.sequence_length for e in pps)
 
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
 
         context.update(
-            {'entry': entry, 'nr_pps': len(pps), 'nr_vps': len(vps_), 'pps':pps,
+            {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
+             'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'pps':pps,
              'longest_seq': longest_seq,
              'table_data_url': reverse('pairs_para_json', args=(entry.omaid,)),
               'tab': 'paralogs'})
@@ -776,7 +695,10 @@ class InfoView(InfoBase, TemplateView):
 
     def get_context_data(self, entry_id, **kwargs):
         context = super(InfoView, self).get_context_data(entry_id, **kwargs)
-        context['nr_vps'] = utils.db.count_vpairs(context['entry'].entry_nr)
+
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(context['entry'].entry_nr)
+        context['nr_pps']= nr_ortholog_relations['NrHogInducedPWParalogs']
+        context['nr_vps']= nr_ortholog_relations['NrAnyOrthologs']
         context['tab'] = 'geneinformation'
         if context['entry'].genome.is_polyploid:
             context['nr_hps'] = utils.db.count_homoeologs(context['entry'].entry_nr)
@@ -812,8 +734,11 @@ class HomoeologBase(ContextMixin, EntryCentricMixin):
         longest_seq = 0
         if len(hps) > 0:
             longest_seq = max(e.entry_2.sequence_length for e in hps)
+
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(context['entry'].entry_nr)
+
         context.update(
-            {'entry': entry, 'nr_vps': utils.db.count_vpairs(entry.entry_nr),
+            {'entry': entry, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'nr_vps':nr_ortholog_relations['NrAnyOrthologs'],
              'hps': hps, 'nr_hps': len(hps), 'tab': 'homoeologs',
              'longest_seq': longest_seq})
         return context

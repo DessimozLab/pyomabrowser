@@ -352,12 +352,7 @@
         _load = BootstrapTable.prototype.load,
         _initSearch = BootstrapTable.prototype.initSearch;
 
-
-
-
-
-
-    BootstrapTable.prototype.initToolbar = function () {
+        BootstrapTable.prototype.initToolbar = function () {
             _initToolbar.apply(this, Array.prototype.slice.apply(arguments));
 
             if (!this.options.search) {
@@ -466,9 +461,7 @@
 
         };
 
-    /*
-
-    BootstrapTable.prototype.load = function (data) {
+        BootstrapTable.prototype.load = function (data) {
         _load.apply(this, Array.prototype.slice.apply(arguments));
 
         if (!this.options.taxonFilter) {
@@ -555,6 +548,7 @@
         this.custom_filter_search = false;
     };
 
+    /*
     BootstrapTable.prototype.getData = function (useCurrentPage) {
 
         if (useCurrentPage) {
@@ -563,7 +557,6 @@
 
         return this.data;
     };
-
 */
 
 
