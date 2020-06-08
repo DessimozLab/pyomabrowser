@@ -310,7 +310,8 @@
                     showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
             }
 
-     // EXTENSION OF BOOTSTRAPTABLE LIB
+    // EXTENSION OF BOOTSTRAPTABLE LIB
+
 
     $.extend($.fn.bootstrapTable.defaults, {
         taxonFilter: false,
@@ -344,10 +345,17 @@
 
     $.extend($.fn.bootstrapTable.defaults, $.fn.bootstrapTable.locales);
 
+
+
     var BootstrapTable = $.fn.bootstrapTable.Constructor,
         _initToolbar = BootstrapTable.prototype.initToolbar,
         _load = BootstrapTable.prototype.load,
         _initSearch = BootstrapTable.prototype.initSearch;
+
+
+
+
+
 
     BootstrapTable.prototype.initToolbar = function () {
             _initToolbar.apply(this, Array.prototype.slice.apply(arguments));
@@ -458,6 +466,8 @@
 
         };
 
+    /*
+
     BootstrapTable.prototype.load = function (data) {
         _load.apply(this, Array.prototype.slice.apply(arguments));
 
@@ -553,6 +563,10 @@
 
         return this.data;
     };
+
+*/
+
+
 
 
 }(jQuery);

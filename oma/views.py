@@ -201,7 +201,7 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         vps_ = list(set(orthologs_list))
 
         end = time.time()
-        logger.info("[{}] Badge computation {}".format(context['entry'].omaid, start - end))
+        logger.info("[{}] Badge computation {}".format(entry.omaid, start - end))
 
         context.update({'entry': entry, 'tab': 'geneinformation', 'nr_vps': len(vps_),
                         'nr_pps': len(pps)})
