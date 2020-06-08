@@ -114,6 +114,7 @@
                                     <a class="dropdown-item" href="#">Gene Length</a>
                                     <a class="dropdown-item" href="#">GC Content</a>
                                     <a class="dropdown-item" href="#">Number of Exons</a>
+                                    <a class="dropdown-item" href="#">Gene Similarity</a>
                                 </div>
                             </div>
 
@@ -324,6 +325,25 @@
                             }
                         });
                         legend(colorScale, 'Number of Exons');
+                    }
+                    if (d3.select(this).text() === "Gene Similarity") {
+                        var data = iham.fam_data();
+                        var domain = d3.extent(data, function (d) {
+                            return d.similarity
+                        });
+                        var colorScale = d3.scale.linear()
+                            .domain(domain)
+                            .range(["red", "blue"]);
+                        iham.gene_colors(function (d) {
+                            if(d){
+                                console.log(d);
+                                return colorScale(d.gene.similarity);
+                            }
+                            else{
+                                return "gray";
+                            }
+                        });
+                        legend(colorScale, 'Gene Similarity');
                     }
                 });
 

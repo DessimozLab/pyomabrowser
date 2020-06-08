@@ -9741,7 +9741,8 @@ function iHam() {
         protid: gene.protid,
         sequence_length: gene.sequence_length,
         taxon: gene.taxon,
-        xrefid: gene.xrefid
+        xrefid: gene.xrefid,
+        similarity: gene.similarity
       };
     });
     d3.select(div).style("position", "relative");
