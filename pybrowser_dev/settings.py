@@ -188,6 +188,10 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 6 * 3600,
     }
 }
+# for backward compability reasons
+BROKER_URL = CELERY_BROKER_URL
+BEAT_SCHEDULE = CELERY_BEAT_SCHEDULE
+
 
 # CORS stuff to allow iHAM integration on other sites
 CORS_ORIGIN_ALLOW_ALL = True
