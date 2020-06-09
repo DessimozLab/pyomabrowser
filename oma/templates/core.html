@@ -23,7 +23,11 @@
     {% block js_hook %}{% endblock %}
   </head>
   <body>
-    {% block topelement %}{% endblock %}
+    {% block topelement %}
+        {% if oma_instance_name != "full" %}
+            <div class="ribbon">Go to <a href="https://omabrowser.org">main OMA Browser</a> instance</div>
+        {% endif %}
+    {% endblock %}
     <nav class="navbar navbar-default " role="navigation">
     <div class="container-fluid">
       <!-- Brand and toggle get grouped for better mobile display -->
