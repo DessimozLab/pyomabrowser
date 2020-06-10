@@ -24,9 +24,9 @@ class StandaloneExportApp(Application):
         quoted_genomes = map(lambda g: "'{}'".format(g), genomes)
         with tempfile.NamedTemporaryFile(prefix="standalone_cmd", delete=False) as fh:
             if release is not None:
-                fh.write("root_dir := getenv('DARWIN_BROWSER_SHARE'):")
-                fh.write("setenv('DARWIN_BROWSERDATA_PATH', root_dir.'/{}/data')".format(release))
-                fh.write("setenv('DARWIN_ALLALL_PATH', root_dir.'/AllAll/{}')".format(release))
+                fh.write("root_dir := getenv('DARWIN_BROWSER_SHARE'):\n")
+                fh.write("setenv('DARWIN_BROWSERDATA_PATH', root_dir.'/{}/data');\n".format(release))
+                fh.write("setenv('DARWIN_ALLALL_PATH', root_dir.'/AllAll/{}');\n".format(release))
             fh.write("genomes := [{}]:\nfn := '{}':\n"
                      .format(", ".join(quoted_genomes), out_base))
             fh.write("printlevel := 2;\n");

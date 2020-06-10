@@ -58,6 +58,7 @@ def submit_export(session, res_file=None, genomes=None, release=None):
                              shell=True, stdout=subprocess.PIPE)
         if res.returncode == 0:
             shutil.rmtree(os.path.join(session_dir, session))
+        logger.debug("return code of export command: {}".format(res.returncode))
         return JobStatus(res)
 
     except subprocess.TimeoutExpired as e:
