@@ -176,7 +176,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
-                'oma.context_processors.oma_instance_name',
+                'oma.context_processors.oma_instance',
             ],
         },
     },
@@ -237,7 +237,7 @@ NOCAPTCHA = True  # using No Captcha reCaptcha
 MAX_UPLOAD_SIZE = 10*2**20
 
 GOOGLE_ANALYTICS = {
-    'google_analytics_id': 'UA-1093824-1',
+    'google_analytics_id': os.getenv('GOOGLE_TRACKING_ID', 'UA-1093824-1'),
 }
 GOOGLE_ANALYTICS_IGNORE_PATH = ['/oma/', ]
 
