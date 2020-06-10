@@ -215,6 +215,8 @@ HDF5DB = {
     'PATH': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'OmaServer.h5')
 }
 OMA_INSTANCE_NAME = os.getenv('OMA_INSTANCE', 'full').lower()
+if OMA_INSTANCE_NAME == "":
+    OMA_INSTANCE_NAME = "full"
 
 EMAIL_HOST = "localhost"
 
