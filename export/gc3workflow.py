@@ -18,11 +18,15 @@ import logging
 
 
 class StandaloneExportApp(Application):
-    def __init__(self, genomes, out):
+    def __init__(self, genomes, out, release):
         self.final_out = out
         out_base = os.path.basename(out)
         quoted_genomes = map(lambda g: "'{}'".format(g), genomes)
         with tempfile.NamedTemporaryFile(prefix="standalone_cmd", delete=False) as fh:
+            if release is not None:
+                fh.write("root_dir := getenv('DARWIN_BROWSER_SHARE'):")
+                fh.write("setenv('DARWIN_BROWSERDATA_PATH', root_dir.'/{}/data')".format(release))
+                fh.write("setenv('DARWIN_ALLALL_PATH', root_dir.'/AllAll/{}')".format(release))
             fh.write("genomes := [{}]:\nfn := '{}':\n"
                      .format(", ".join(quoted_genomes), out_base))
             fh.write("printlevel := 2;\n");
@@ -56,11 +60,12 @@ class StandaloneExportScript(SessionBasedScript):
     version = "1.0"
 
     def setup_options(self):
+        self.add_param('--release', default=None, help="release name to use. Defaults to current main release")
         self.add_param('out', help="resulting output file")
         self.add_param('genome', nargs='+', help='genomes to export')
 
     def new_tasks(self, extra):
-        tasks = [StandaloneExportApp(self.params.genome, self.params.out)]
+        tasks = [StandaloneExportApp(self.params.genome, self.params.out, self.params.release)]
         return tasks
 
 

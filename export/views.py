@@ -12,6 +12,7 @@ from django.views.generic import TemplateView
 
 from .models import StandaloneExportJobs
 from .tasks import submit_export
+from oma.utils import db
 
 
 # Create your views here.
@@ -30,7 +31,8 @@ def export_omastandalone(request):
                 genomes_as_txt = json.dumps(genomes)
                 res_file_rel = os.path.join("AllAllExport", "AllAll-{}.tgz".format(data_id))
                 res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
-                res = submit_export(data_id, res_file_abs, genomes)
+                release = db.get_release_name()
+                res = submit_export(data_id, res_file_abs, genomes, release=release)
                 r = StandaloneExportJobs(data_hash=data_id, state=res.state, result=res_file_rel,
                                          genomes=genomes_as_txt, processing=False)
                 r.save()

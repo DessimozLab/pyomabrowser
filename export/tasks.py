@@ -30,7 +30,7 @@ class JobStatus(object):
             self.state = "error"
 
 
-def submit_export(session, res_file=None, genomes=None):
+def submit_export(session, res_file=None, genomes=None, release=None):
     session_dir = '/tmp/gc3sessions'
     if not os.path.isdir(session_dir):
         os.makedirs(session_dir)
@@ -42,7 +42,12 @@ def submit_export(session, res_file=None, genomes=None):
 
     cmd = ['source', os.path.expanduser(os.path.join('~', 'gc3pie', 'bin', 'activate'))]
     cmd.extend(['&&', 'python', 'gc3workflow.py', '-u' 'sqlite:///tmp/gc3session.db',
-                '-s', os.path.join(session_dir, session), res_file])
+                '-s', os.path.join(session_dir, session)])
+
+    if release is not None:
+        cmd.extend(['--release', release])
+
+    cmd.append(res_file)
     for g in genomes:
         cmd.append(g)
 
