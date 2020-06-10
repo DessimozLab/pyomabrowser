@@ -11,7 +11,10 @@ app = Celery('browser')
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
-app.config_from_object('django.conf:settings', namespace='CELERY')
+try:
+    app.config_from_object('django.conf:settings', namespace='CELERY')
+except TypeError:
+    app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 

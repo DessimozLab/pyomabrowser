@@ -363,11 +363,11 @@ class PairsViewFasta(FastaView, PairsBase):
 
 class FamBase(ContextMixin, EntryCentricMixin):
 
-    def get_context_data(self, entry_id, **kwargs):
+    def get_context_data(self, entry_id, start=0, stop=None, **kwargs):
         context = super(FamBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
-        fam_members = [models.ProteinEntry(utils.db, z) for z in
-                       utils.db.member_of_fam(utils.db.hog_family(entry.entry_nr))]
+        famhog_id = utils.db.format_hogid(utils.db.hog_family(entry.entry_nr))
+        fam_members = list(utils.db.iter_members_of_hog_id(famhog_id, start, stop))
         context.update({'entry': entry, 'fam_members': fam_members})
         return context
 
@@ -378,7 +378,11 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
                    'canonicalid': 'xrefid', 'gc_content': None}
 
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
+        offset = int(request.GET.get('offset', 0))
+        limit = request.GET.get('limit', None)
+        if limit is not None:
+            limit = offset + int(limit)
+        context = self.get_context_data(start=offset, stop=limit, **kwargs)
         data = [x for x in self.to_json_dict(context['fam_members'])]
         response = JsonResponse(data, safe=False)
         response['Access-Control-Allow-Origin'] = '*'
@@ -704,8 +708,13 @@ def home(request):
     except tweepy.TweepError:
         tweets = ['Currently no tweets found']
 
+    if settings.OMA_INSTANCE_NAME == "full":
+        template = "home.html"
+    else:
+        template = "home-{}.html".format(settings.OMA_INSTANCE_NAME)
+
     context = {'tweets': tweets}
-    return render(request, 'home.html', context)
+    return render(request, template, context)
 
 
 def fellowship(request):

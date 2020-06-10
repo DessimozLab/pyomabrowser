@@ -18,8 +18,11 @@
         <div class="col-sm-12 col-md-10 col-md-offset-1">
             <div class="jumbotron">
                 <div class="container">
+                    {% if oma_instance_name == "full" %}
                     <img src="{% static "image/oma2.png" %}" class="img-responsive margin-auto" alt="OMA logo">
-
+                    {% else %}
+                    <img src="{% static "image/omalogo-"|add:oma_instance_name|add:".svg" %}" style="max-width: 528px;" class="img-responsive margin-auto" alt="OMA logo">
+                    {% endif %}
                     <p><br></p>
                     <form role="search" id="searchForm" action="/cgi-bin/gateway.pl" method="GET">
                     <div class="col-md-10 col-md-offset-1">
@@ -49,10 +52,16 @@
                 <div class="row top-buffer">
                     <div class="col-md-8 col-md-offset-2">
                         <div class="text-center">
-                            Examples: 
-                            <a id='exEntry'>Entry HUMAN22168</a>
-                          - <a id='exEntry2'>Entry P53_RAT</a>
-                          -  <a id='exPhoto'>Search for "photoreceptor"</a> 
+                            Examples:
+                            {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
+                                <span class="ex" onclick="fillExample('DisplayEntry','HUMAN22168')">Entry HUMAN22168</span> -
+                                <span class="ex" onclick="fillExample('DisplayEntry','P53_RAT')">Entry P53_RAT</span> -
+                                <span class="ex" onclick="fillExample('SearchDb','photoreceptor')">Search for "photoreceptor"</span>
+                            {% elif oma_instance_name == "corona" %}
+                                <span class="ex" onclick="fillExample('DisplayEntry','SARS200001')">Entry SARS200001</span> -
+                                <span class="ex" onclick="fillExample('DisplayEntry','R1AB_SARS2')">Entry R1AB_SARS2</span> -
+                                <span class="ex" onclick="fillExample('SearchDb','glycoprotein')">Search for "glycoprotein"</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -62,24 +71,12 @@
 
 
 <script type="text/javascript">
+function fillExample(search_select, term){
+    $('#selectBrowser').val(search_select);
+    $("#inputBrowser").val(term).focus();
+    $("#textarea").val(term).focus();
+}
 
-$('#exPhoto').click( function() {
-    $('#selectBrowser').val('SearchDb');
-    $('#inputBrowser').val('photoreceptor').focus();
-    $('#textarea').val('photoreceptor').focus();
-});
-
-$('#exEntry').click( function() {
-    $('#selectBrowser').val('DisplayEntry');
-    $('#inputBrowser').val('HUMAN22168').focus();
-    $('#textarea').val('HUMAN22168').focus();
-});
-
-$('#exEntry2').click( function() {
-    $('#selectBrowser').val('DisplayEntry');
-    $('#inputBrowser').val('P53_RAT').focus();
-    $('#textarea').val('P53_RAT').focus();
-});
 var textbox = $("#inputBrowser");
 var textarea = $("<textarea id='textarea' rows='3' name='p1'></textarea>");
 $("#toggle").click(function () {
@@ -121,7 +118,21 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
         <div class="jumbotron">
             <div class="container">
                 <div class="row">
+                   {% block lower_home_boxes %}
                     <div class="col-sm-4 col-md-4 ">
+
+                        <div class="thumbnail oma-3-panels" style="background-color: #dfe6ad;">
+                            <div class="caption">
+                                <p class="text-center">
+                                    <span class="glyphicon glyphicon-xl"><a href="https://corona.omabrowser.org"><img src="{% static "image/omalogo-corona.svg"%}" style="width: 140px;"></a></span>
+                                </p>
+                                <h3>Try out our brand new <a href="https://corona.omabrowser.org">Corona OMA Browser</a></h3>
+                                <ul>
+                                    <li>all the functionality of the OMA Browser, but for <a href="https://corona.omabrowser.org/oma/release/">119 Nidovirales species</a>. </li>
+                                    <li>encompasses the human SARS and other single-stranded RNA viruses.</li>
+                            </div>
+                        </div>
+
                         <div class="thumbnail oma-3-panels">
                             <div class="caption">
                                 <p class="text-center ">
@@ -197,6 +208,7 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                             </div>
                         </div>
                     </div>
+                    {% endblock lower_home_boxes %}
                 </div>
             </div>
         </div>

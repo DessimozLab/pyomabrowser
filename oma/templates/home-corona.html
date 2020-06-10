@@ -1,0 +1,33 @@
+{% extends  "home.html" %}
+{% load staticfiles %}
+
+{% block title %}Corona OMA Orthology Database: orthologs among SARS-CoV-2 related viruses{% endblock %}
+
+{% block lower_home_boxes %}
+    <div class="col-sm-12 col-md-12 ">
+        <div class="thumbnail oma-3-panels">
+            <div class="caption">
+                <h3>Motivation</h3>
+                <p>
+                    The SARS-CoV-2 is a strain of coronavirus which causes the Covid19 disease in humans. Reaching a
+                    peak in the spring of 2020, the world was affected by a pandemic, causing many negative impacts
+                    on health, travel, the economy, education, and many other aspects of daily life. Out of this
+                    tragedy however, new scientific interest in the field of virology and specifically of
+                    coronaviruses has flourished. Scientists across the world are rapidly researching more into the
+                    subject, journals have fast-tracked papers, and the world waits anxiously to understand more
+                    about SARS-Cov-2 and to ultimately obtain a vaccine.
+                </p>
+
+                <h3>What is this?</h3>
+                <p>
+                    In order to facilitate the functional and evolutionary aspects of coronaviruses, we have created
+                    the Corona OMA Browser. This is a website with all the functionality of the OMA Browser, but
+                    for <a href="{% url "release" %}">119 Nidovirales</a> species. This encompasses the human SARS viruses, but also other
+                    coronaviruses and other single-stranded RNA viruses. Some of these viruses affect humans, while
+                    others affect bats, mice, horses, pigs, turkeys, cats, ferrets, etc. This browser is intended
+                    to be a resource for researchers in the coronavirus community.
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

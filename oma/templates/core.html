@@ -23,7 +23,11 @@
     {% block js_hook %}{% endblock %}
   </head>
   <body>
-    {% block topelement %}{% endblock %}
+    {% block topelement %}
+        {% if oma_instance_name != "full" %}
+            <div class="ribbon">Go to the regular (non-viral) <a href="https://omabrowser.org">OMA database</a></div>
+        {% endif %}
+    {% endblock %}
     <nav class="navbar navbar-default " role="navigation">
     <div class="container-fluid">
       <!-- Brand and toggle get grouped for better mobile display -->
@@ -42,8 +46,11 @@
           <span class="icon-bar"></span>
         </button>
         <a href="{% url 'home'  %}">
+          {% if oma_instance_name == "full" %}
           <img alt="OMA logo" src="{% static "image/omalogo.png" %}" class="omalogo">
-
+          {% else %}
+          <img alt="OMA logo" src="{% static "image/omalogo-"|add:oma_instance_name|add:".svg" %}" class="omalogo">
+          {% endif %}
           <div class="glyphicon glyphicon-home icon-md"></div>
         </a>
       </div>

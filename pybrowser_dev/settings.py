@@ -34,7 +34,7 @@ TWITTER_ACCESS_TOKEN_SECRET = 'wBQDobkrHXAha8IJEEHFiuB1BGeRDE7PaUZrQ0xqEXfRd'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (DEPLOYMENT != "PRODUCTION")
 
-ALLOWED_HOSTS = ['127.0.0.1', 'omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk', '.vital-it.ch']
+ALLOWED_HOSTS = ['127.0.0.1', 'omabrowser.org', '.omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk', '.vital-it.ch']
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 SHOW_TOOLBAR_CALLBACK = lambda x: True
@@ -171,11 +171,13 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'oma.context_processors.oma_instance_name',
             ],
         },
     },
 ]
 
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER', None)
 CELERY_BEAT_SCHEDULE = {
     'task-update-omastandalone-exports': {
         'task': 'export.tasks.update_running_jobs',
@@ -186,6 +188,10 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 6 * 3600,
     }
 }
+# for backward compability reasons
+BROKER_URL = CELERY_BROKER_URL
+BEAT_SCHEDULE = CELERY_BEAT_SCHEDULE
+
 
 # CORS stuff to allow iHAM integration on other sites
 CORS_ORIGIN_ALLOW_ALL = True
@@ -208,6 +214,7 @@ HDF5DB = {
     'NAME': 'Production',
     'PATH': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'OmaServer.h5')
 }
+OMA_INSTANCE_NAME = os.getenv('OMA_INSTANCE', 'full').lower()
 
 EMAIL_HOST = "localhost"
 
@@ -240,7 +247,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "static")
+STATIC_ROOT = os.path.join(
+    os.getenv('DARWIN_BROWSER_REPO_PATH',
+              os.path.join(os.path.expanduser("~"), "Browser")),
+    "htdocs",
+    "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, 'media'))
 
