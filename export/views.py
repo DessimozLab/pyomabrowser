@@ -5,6 +5,7 @@ from django.conf import settings
 import hashlib
 import os
 import json
+import logging
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -13,6 +14,7 @@ from django.views.generic import TemplateView
 from .models import StandaloneExportJobs
 from .tasks import submit_export
 from oma.utils import db
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -27,11 +29,14 @@ def export_omastandalone(request):
             except StandaloneExportJobs.DoesNotExist:
                 do_compute = True
 
+            logger.info("Export job with {} genomes ({}). Compute: {}"
+                        .format(len(genomes), genomes, do_compute))
             if do_compute:
                 genomes_as_txt = json.dumps(genomes)
                 res_file_rel = os.path.join("AllAllExport", "AllAll-{}.tgz".format(data_id))
                 res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
                 release = db.get_release_name()
+                logger.info("Export job for {}, hash: {}, result: {}".format(release, data_id, res_file_abs))
                 res = submit_export(data_id, res_file_abs, genomes, release=release)
                 r = StandaloneExportJobs(data_hash=data_id, state=res.state, result=res_file_rel,
                                          genomes=genomes_as_txt, processing=False)
