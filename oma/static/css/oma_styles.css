@@ -1229,6 +1229,11 @@ body .oma-details-container .oma-details-nav-left .gene-orthology li #filterPara
 	border: none !important;
 }
 
+.blink {animation-name: pulsate;
+      animation-duration: 2s;
+      animation-iteration-count: infinite;
+}
+
 
 
 

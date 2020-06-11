@@ -389,16 +389,27 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 # Orthologs
 class PairsBase(ContextMixin, EntryCentricMixin):
     """Base class to collect data for pairwise orthologs."""
+
+    _max_entry_to_load = 4  # todo PAIR
+
     def get_context_data(self, entry_id, **kwargs):
+
 
         context = super(PairsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
 
+        if nr_ortholog_relations['NrAnyOrthologs'] < self._max_entry_to_load:
+            load_full_data = 0
+            url = reverse('pairs_support_json', args=(entry.omaid,))
+        else:
+            url = reverse('pairs_support_sample_json', args=(entry.omaid,))
+            load_full_data = reverse('pairs_support_json', args=(entry.omaid,))
+
         context.update(
             {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'], 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'orthologs',
-             'table_data_url': reverse('pairs_support_json', args=(entry.omaid,))
+             'table_data_url': url , 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
              })
 
         return context
@@ -414,7 +425,7 @@ class PairsJson(PairsBase, JsonModelMixin, View):
         data = list(self.to_json_dict(context['vps']))
         return JsonResponse(data, safe=False)
 
-# With information if the pair is supported by PO, HOGS and/or OMA groups
+
 class PairsJson_Support(PairsBase, JsonModelMixin, View):
 
 
@@ -525,6 +536,67 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
         logger.info("[{}] Json formatting {}".format(context['entry'].omaid, start - end))
 
         return JsonResponse(data, safe=False)
+
+
+class PairsJson_SupportSample(PairsBase, JsonModelMixin, View):
+
+        json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                       'genome.species_and_strain_as_dict': 'taxon',
+                       'canonicalid': 'xrefid', 'RelType': 'RelType', 'type_p': 'type_p', 'type_h': 'type_h',
+                       'type_g': 'type_g'}
+
+        def get(self, request, *args, **kwargs):
+
+            context = self.get_context_data(**kwargs)
+
+            entry = context['entry']
+            entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
+
+            orthologs_dict = {}
+            vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
+            for rel in itertools.chain(vps_raw):
+                pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
+                pw_relation.type_p = 1
+                orthologs_dict[rel['EntryNr2']] = pw_relation
+
+            vps = orthologs_dict.values()
+            if len(vps) > PairsBase._max_entry_to_load:
+                vps = list(vps)
+                vps = vps[0:PairsBase._max_entry_to_load]
+
+            # populate with inference evidence missing attribute
+            for rel in vps:
+
+                rel_db = utils.db.entry_by_entry_nr(rel.entry_nr)
+
+                if not hasattr(rel, 'RelType'):
+                    rel.RelType = None
+
+                if not hasattr(rel, 'type_p'):
+                    rel.type_p = 0
+
+                if not hasattr(rel, 'type_h'):
+
+                    rel.type_h = 1
+
+                    prefix = os.path.commonprefix((entry_db["OmaHOG"], rel_db["OmaHOG"])).decode()
+                    if "." in prefix and prefix[-1].isdigit():
+                        rel.type_h = 0
+
+
+                if not hasattr(rel, 'type_g'):
+                    if entry.oma_group != 0:
+                        if entry.oma_group == rel.oma_group:
+                            rel.type_g = 1
+                        else:
+                            rel.type_g = 0
+
+
+            entry.RelType = 'self'
+
+            data = list(self.to_json_dict(vps))
+
+            return JsonResponse(data, safe=False)
 
 
 class PairsView(TemplateView, PairsBase):

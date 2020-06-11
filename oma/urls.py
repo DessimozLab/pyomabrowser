@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^vps/(?P<entry_id>\w+)/fasta/$', views.PairsViewFasta.as_view(), name="pairs_fasta"),
     url(r'^vps/(?P<entry_id>\w+)/json/$', views.PairsJson.as_view(), name="pairs_json"),
     url(r'^vps/(?P<entry_id>\w+)/json_support/$', views.PairsJson_Support.as_view(), name="pairs_support_json"),
+    url(r'^vps/(?P<entry_id>\w+)/json_support_sample/$', views.PairsJson_SupportSample.as_view(), name="pairs_support_sample_json"),
     url(r'^pps/(?P<entry_id>\w+)/json/$', views.PairsParalogsJson.as_view(), name="pairs_para_json"),
     url(r'^domains/(?P<entry_id>\w+)/json/$', views.domains_json, name='domains_json'),
     url(r'^synteny/(?P<entry_id>\w+)/$', views.synteny, name='synteny'),

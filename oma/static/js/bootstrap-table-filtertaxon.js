@@ -310,8 +310,7 @@
                     showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);
             }
 
-    // EXTENSION OF BOOTSTRAPTABLE LIB
-
+     // EXTENSION OF BOOTSTRAPTABLE LIB
 
     $.extend($.fn.bootstrapTable.defaults, {
         taxonFilter: false,
@@ -345,14 +344,12 @@
 
     $.extend($.fn.bootstrapTable.defaults, $.fn.bootstrapTable.locales);
 
-
-
     var BootstrapTable = $.fn.bootstrapTable.Constructor,
         _initToolbar = BootstrapTable.prototype.initToolbar,
         _load = BootstrapTable.prototype.load,
         _initSearch = BootstrapTable.prototype.initSearch;
 
-        BootstrapTable.prototype.initToolbar = function () {
+    BootstrapTable.prototype.initToolbar = function () {
             _initToolbar.apply(this, Array.prototype.slice.apply(arguments));
 
             if (!this.options.search) {
@@ -461,7 +458,7 @@
 
         };
 
-        BootstrapTable.prototype.load = function (data) {
+    BootstrapTable.prototype.load = function (data) {
         _load.apply(this, Array.prototype.slice.apply(arguments));
 
         if (!this.options.taxonFilter) {
@@ -548,7 +545,6 @@
         this.custom_filter_search = false;
     };
 
-    /*
     BootstrapTable.prototype.getData = function (useCurrentPage) {
 
         if (useCurrentPage) {
@@ -557,9 +553,6 @@
 
         return this.data;
     };
-*/
-
-
 
 
 }(jQuery);
