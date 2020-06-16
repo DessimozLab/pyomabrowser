@@ -1,5 +1,6 @@
 {% extends  "base_template.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 
 {% block title %}OMA Orthology database{% endblock %}
@@ -119,19 +120,19 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
             <div class="row row-centered">
                 <div class="col-md-1"></div>
                 <div class="col-md-2">
-                    <h1>{{ nr_genomes }}</h1>
+                    <h1>{{ nr_genomes|intcomma }}</h1>
                     <h3>Full genomes</h3>
                 </div>
                 <div class="col-md-2">
-                    <h1>{{ nr_proteins }}</h1>
+                    <h1>{{ nr_proteins|intcomma }}</h1>
                     <h3>Proteins</h3>
                 </div>
                 <div class="col-md-2">
-                    <h1>{{ nr_groups }}</h1>
+                    <h1>{{ nr_groups|intcomma }}</h1>
                     <h3>OMA groups</h3>
                 </div>
                 <div class="col-md-2">
-                    <h1>{{ nr_hogs }}</h1>
+                    <h1>{{ nr_hogs|intcomma }}</h1>
                     <h3>Deepest HOGs</h3>
                 </div>
                 <div class="col-md-2">
@@ -176,6 +177,15 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                     Get ideas about
                                     <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.</p>
                                 </li>
+
+
+
+                                <li><p>
+                                    <b>What makes OMA special?</b> lorem ipsum <a href="https://swissorthology.ch/service/about"> Swiss Orthology</a>
+                                    lorem ispsum <a href="https://orthology.benchmarkservice.org/proxy/"> Orthology benchmark</a>.</p>
+                                </li>
+
+
 
                                 <li class="btn-more-container" >
                                     <button type="button" class="btn btn-outline-dark " disabled>More help here!</button>
@@ -233,11 +243,11 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                              <br>
                             <ul>
                                 <li><b><a href="{% url 'current'  %}">Current release</a>:</b>
-                                    All data is available for downloading in a variety of formats.
+                                    All data is available for download in a variety of formats.
                                 </li>
 
                                 <li><b><a href="{% url 'api-docs:docs-index' %}">API</a>:</b>
-                                    The OMA Browser now supports its own REST API !
+                                    The OMA Browser now has a REST API !
                                 </li>
 
                                 <li><b><a href="{% url 'export' %}">Export All-All</a>:</b>
@@ -373,6 +383,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
 
 
     window.onresize = resize;
+
 
 </script>
 

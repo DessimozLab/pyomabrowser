@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'oma_rest',
     'export',
     'bootstrap4',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
@@ -86,6 +87,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'google_analytics.middleware.GoogleAnalyticsMiddleware',
+
     #'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
@@ -178,6 +180,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'oma.context_processors.xref_order',
                 'oma.context_processors.oma_instance_name',
+
             ],
         },
     },

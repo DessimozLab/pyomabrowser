@@ -40,6 +40,7 @@
 
 {% url 'home' as home %}
 
+
 <body class="{% if request.get_full_path == home %}landing{% endif %}">
 
 <nav class="navbar fixed-top navbar-expand-xl bg-light navbar-light">
@@ -52,7 +53,6 @@
             <a href="/oma/home/"><img src="{% static "image/logo-oma-"|add:oma_instance_name|add:".svg" %}" alt="Logo OMA small"/></a>
         {% endif %}
     </div>
-
 
 
 
