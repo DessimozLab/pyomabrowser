@@ -35,6 +35,7 @@ TWITTER_ACCESS_TOKEN_SECRET = 'wBQDobkrHXAha8IJEEHFiuB1BGeRDE7PaUZrQ0xqEXfRd'
 DEBUG = (DEPLOYMENT != "PRODUCTION")
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk', '.vital-it.ch']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'omabrowser.org', '.omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk', '.vital-it.ch']
 
 #DEBUG_TOOLBAR_PATCH_SETTINGS = False
 #SHOW_TOOLBAR_CALLBACK = lambda x: True
@@ -146,6 +147,11 @@ LOGGING = {
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True
         },
+        'export': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True
+        },
         'google_analytics': {
             'handlers': ['console'],
             'level': 'WARNING',
@@ -177,7 +183,7 @@ TEMPLATES = [
                 #'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 'oma.context_processors.xref_order',
-                'oma.context_processors.oma_instance_name',
+                'oma.context_processors.oma_instance',
             ],
         },
     },
@@ -194,6 +200,10 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 6 * 3600,
     }
 }
+# for backward compability reasons
+BROKER_URL = CELERY_BROKER_URL
+BEAT_SCHEDULE = CELERY_BEAT_SCHEDULE
+
 
 # CORS stuff to allow iHAM integration on other sites
 CORS_ORIGIN_ALLOW_ALL = True
@@ -221,6 +231,8 @@ HDF5DB = {
     'PATH': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'OmaServer.h5')
 }
 OMA_INSTANCE_NAME = os.getenv('OMA_INSTANCE', 'full').lower()
+if OMA_INSTANCE_NAME == "":
+    OMA_INSTANCE_NAME = "full"
 
 EMAIL_HOST = "whippee.com"
 EMAIL_PORT = 8025
@@ -236,7 +248,7 @@ NOCAPTCHA = True  # using No Captcha reCaptcha
 MAX_UPLOAD_SIZE = 10*2**20
 
 GOOGLE_ANALYTICS = {
-    'google_analytics_id': 'UA-1093824-1',
+    'google_analytics_id': os.getenv('GOOGLE_TRACKING_ID', 'UA-1093824-1'),
 }
 GOOGLE_ANALYTICS_IGNORE_PATH = ['/oma/', ]
 
@@ -257,7 +269,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = os.getenv('DARWIN_BROWSERSTATIC_PATH', os.path.join(os.path.expanduser("~"), "Browser", "htdocs", "static"))
+STATIC_ROOT = os.path.join(
+    os.getenv('DARWIN_BROWSER_REPO_PATH',
+              os.path.join(os.path.expanduser("~"), "Browser")),
+    "htdocs",
+    "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, 'media'))
 

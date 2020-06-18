@@ -713,8 +713,13 @@ def home(request):
     except tweepy.TweepError:
         tweets = ['Currently no tweets found']
 
+    if settings.OMA_INSTANCE_NAME == "full":
+        template = "home.html"
+    else:
+        template = "home-{}.html".format(settings.OMA_INSTANCE_NAME)
+
     context = {'tweets': tweets}
-    return render(request, 'home.html', context)
+    return render(request, template, context)
 
 
 def fellowship(request):

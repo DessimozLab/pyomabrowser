@@ -113,7 +113,21 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
         <div class="jumbotron">
             <div class="container">
                 <div class="row">
+                   {% block lower_home_boxes %}
                     <div class="col-sm-4 col-md-4 ">
+
+                        <div class="thumbnail oma-3-panels" style="background-color: #dfe6ad;">
+                            <div class="caption">
+                                <p class="text-center">
+                                    <span class="glyphicon glyphicon-xl"><a href="https://corona.omabrowser.org"><img src="{% static "image/omalogo-corona.svg"%}" style="width: 140px;"></a></span>
+                                </p>
+                                <h3>Try out our brand new <a href="https://corona.omabrowser.org">Corona OMA Browser</a></h3>
+                                <ul>
+                                    <li>all the functionality of the OMA Browser, but for <a href="https://corona.omabrowser.org/oma/release/">119 Nidovirales species</a>. </li>
+                                    <li>encompasses the human SARS and other single-stranded RNA viruses.</li>
+                            </div>
+                        </div>
+
                         <div class="thumbnail oma-3-panels">
                             <div class="caption">
                                 <p class="text-center ">
@@ -189,6 +203,7 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                             </div>
                         </div>
                     </div>
+                    {% endblock lower_home_boxes %}
                 </div>
             </div>
         </div>
