@@ -178,7 +178,13 @@
 
 
 
+
+
+
+
     (function () {
+
+
 
         $.when(
             $.ajax({url: "/oma/hogs/{{ entry.omaid }}/orthoxml/",
@@ -188,7 +194,11 @@
         ).then(function(orthoxml, speciestree, fam_data) {
 
 
+
+            {#console.log(Array.from(go_terms)[0]);#}
+
             fam_data = JSON.parse(fam_data[0]);
+
 
             var iham = iHam()
                 .newick(speciestree[0])

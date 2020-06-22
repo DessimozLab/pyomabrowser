@@ -47,6 +47,12 @@ hog_theme = function () {
                     scale: "linear",
                     field: "nr_exons",
                     func: "color1d"
+                },
+                {
+                    name: "Gene Similarity",
+                    scale: "linear",
+                    field: "similarity",
+                    func: "color1d"
                 }
             ];
 
