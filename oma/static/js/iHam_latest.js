@@ -10099,34 +10099,30 @@ module.exports = {
       var obj = {};
       obj.header = gene.gene.protid;
 
-      function useReturnData(data){
-        var ans = new Array();
-        ans = Array.from(data);
-        gene.gene.go_terms = ans.join(' , ');
-        console.log(gene.gene.go_terms);
-      };
-
-      function fetch_annots(gene_tooltip_obj, callback, protid){
+      function fetch_annots(gene_tooltip_obj, protid){
           $.ajax({
             type:'get',
             url: 'https://omabrowser.org/api/protein/' + protid + '/gene_ontology/?format=json',
             dataType:'json',
             success: function(data) {
-                var go_annots = new Set();
+                var seen = new Set();
+                var go_annots = []
                 $.each(data, function(i, item) {
-                                // console.log(item.GO_term);
-                                var temp = "";
-                                temp = temp + item.GO_term + " - " + item.name;
-                                go_annots.add(temp);
+                    // console.log(item.GO_term);
+                    //temp = temp + item.GO_term + " - " + item.name;
+                    if (!seen.has(item.GO_term)){
+                        go_annots.push({id: item.GO_term, name: item.name});
+                        seen.add(item.GO_term);
+                    }
                 });
-                callback(go_annots);
+                gene.gene.go_terms = go_annots;
                 gene_tooltip_obj.call.display(gene, div, mouseover);
             }
         });
       };
 
       if(gene.gene.go_terms==""){
-        fetch_annots(this, useReturnData, gene.gene.protid);
+        fetch_annots(this, gene.gene.protid);
       }
 
       obj.rows = [];
@@ -10134,12 +10130,12 @@ module.exports = {
         label: "Name",
         value: gene.gene.xrefid
       });
-      obj.rows.push({
-        label: "GO Annotations",
-        value: gene.gene.go_terms
+      obj.rows.push({label:"GO Annotations"});
+      $.each(gene.gene.go_terms, function(i, item){
+          obj.rows.push({label: item.id, value: item.name});
       });
 
-      _gene_tooltip = tooltip.table().width(120).id('gene_tooltip').container(div);
+      _gene_tooltip = tooltip.table().width(240).id('gene_tooltip').container(div);
 
       if (mouseover) {
         _gene_tooltip.show_closer(false);
