@@ -11,7 +11,7 @@ DARWIN_BROWSERMEDIA_PATH=/data/media
 
 # intstance identifier. should be one of "full", "basf" or "corona". Available
 # functionality and templates will be selected based on this value
-OMA_INSTANCE=basf
+OMA_INSTANCE=full
 
 # DEPLOYMENT_TYPE indicates if it is a production or development environment.
 # Development will produce more meaningful error messages, but this is discouraged
