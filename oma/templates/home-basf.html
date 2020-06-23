@@ -1,0 +1,61 @@
+{% extends  "home.html" %}
+{% load staticfiles %}
+
+{% block title %}BASF inhouse OMA Orthology Database{% endblock %}
+
+{% block search_examples %}
+    <span class="ex" onclick="fillExample('id','WHEAT99188')">Entry WHEAT99188</span> -
+    <span class="ex" onclick="fillExample('id','W5D237')">Entry W5D237</span> -
+    <span class="ex" onclick="fillExample('fulltext','photoreceptor')">Search for "photoreceptor"</span>
+{% endblock search_examples %}
+
+
+{% comment %}
+{% block oma-main-logo %}
+    <img src="{% static "image/omalogo-"|add:oma_instance_name|add:".svg" %}" style="max-width: 528px;" class="img-responsive margin-auto" alt="OMA logo">
+{% endblock oma-main-logo %}
+{% endcomment %}
+
+{% block second_box %}
+    <div class="caption">
+        <p class="text-center ">
+            <a href="#" data-toggle="modal" data-target=".bs-example-modal-md">
+                <span class="glyphicon glyphicon-wrench glyphicon-xl"></span>
+            </a>
+        </p>
+        <h3>User Support</h3>
+        <ul>
+            <li> <b><a href="https://jira.eu.seeds.basf.net/secure/CreateIssueDetails!init.jspa?issuetype=6&pid=15972&priority=3">create a JIRA ticket</a></b></li>
+            <!--
+            <li>
+                <b><a href="{% url 'current'  %}">Current release</a>:</b>
+                All data is available for downloading in a variety of formats.
+            </li>
+
+            <li>
+                <b><a href="/standalone">OMA Standalone</a>:</b>
+                OMA standalone allows you to infer orthologs on your own set of genomes.
+            </li>
+
+            <li>
+                <b><a href="{% url 'archives'  %}">Archives</a>:</b>
+                Previous OMA releases remain available in this section.
+            </li> -->
+        </ul>
+    </div>
+{% endblock second_box %}
+
+{% block third_box %}
+    <div class="caption comment-text" id="latest-news">
+        <p class="text-center ">
+            <span class="glyphicon glyphicon-info-sign glyphicon-xl">
+            </span>
+        </p>
+        <h3>Latest news</h3>
+        <ul >
+            <li><a href="https://oma-qa.eu.seeds.basf.net/oma/release/">84 species</a></li>
+            <li>Updates: <a href="https://glent-prod-1.eu.seeds.basf.net/seqrepo-app/sequencesetversion/detail/a9fa753e-df4e-4db4-8297-cc36f4544774">TRIDC_Zavitan_WEWSEQ_prot_1_0</a> and <a href="https://glent-prod-1.eu.seeds.basf.net/seqrepo-app/sequencesetversion/detail/001705d1-f1d7-4359-8a35-559471140180">AEGTS_AL8_78_UCD_prot_4_0</a></li>
+        </ul>
+        <p><a href="https://confluence.eu.seeds.basf.net/display/OB/OMA+Browser" class="btn btn-primary btn-sm bottomright" role="button">Follow us on Confluence</a></p>
+    </div>
+{% endblock third_box %}

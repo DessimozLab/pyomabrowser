@@ -57,7 +57,7 @@ class GenomeSuggestionFrom(forms.Form):
     captcha = ReCaptchaField()
 
 
-class FunctionProjectionUploadForm(forms.Form):
+class FunctionProjectionUploadFormBase(forms.Form):
     required_css_class = 'required'
     email = forms.EmailField(label='Email', required=False,
                              help_text="We send an email to this address once the predictions are ready.")
@@ -66,4 +66,7 @@ class FunctionProjectionUploadForm(forms.Form):
     #tax_limit = forms.IntegerField(label="Limit Taxonomic Clade", required=False, initial=2,
     #                               help_text="The NCBI Taxonomic ID of the clade from which "
     #                                         "functions are propagated.")
+
+
+class FunctionProjectionUploadForm(FunctionProjectionUploadFormBase):
     captcha = ReCaptchaField()

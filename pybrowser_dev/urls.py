@@ -9,8 +9,12 @@ admin.autodiscover()
 urlpatterns = [
     path('api/', include('oma_rest.urls')),
     path('oma/', include('oma.urls')),
-    path('oma/', include('export.urls'))
 ]
+
+if 'export' in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path('oma/', include('export.urls'))
+    )
 
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView

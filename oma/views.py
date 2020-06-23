@@ -710,7 +710,8 @@ def home(request):
                         '<a href="' + url['expanded_url'] + '">' + url['expanded_url'] + '</a>' +
                         text[url['indices'][1]:])
             tweets.append(text)
-    except tweepy.TweepError:
+    except (AttributeError, tweepy.TweepError) as err:
+        # attribute errors occur if TWITTER settings are not assigned
         tweets = ['Currently no tweets found']
 
     if settings.OMA_INSTANCE_NAME == "full":
@@ -827,8 +828,9 @@ def export_marker_genes(request):
 
 
 def function_projection(request):
+    form_cls = forms.FunctionProjectionUploadForm if 'captcha' in settings.INSTALLED_APPS else forms.FunctionProjectionUploadFormBase
     if request.method == 'POST':
-        form = forms.FunctionProjectionUploadForm(request.POST, request.FILES)
+        form = form_cls(request.POST, request.FILES)
         if form.is_valid():
             logger.info("received valid function projection form")
             user_file_info = misc.handle_uploaded_file(request.FILES['file'])
@@ -852,7 +854,7 @@ def function_projection(request):
 
             return HttpResponseRedirect(result_page)
     else:
-        form = forms.FunctionProjectionUploadForm()
+        form = form_cls()
     return render(request, "function_projection_upload.html",
                   {'form': form, 'max_upload_size': form.fields['file'].max_upload_size / (2**20)})
 
