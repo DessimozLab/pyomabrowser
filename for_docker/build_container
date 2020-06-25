@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+
+import yaml
+import argparse
+import os
+from subprocess import run, PIPE
+
+
+def load_compose():
+    res = run(["docker-compose", "config"], stdout=PIPE)
+    res.check_returncode()
+    comp = yaml.safe_load(res.stdout)
+    return comp
+
+
+def build(conf):
+    services = load_compose()['services']
+    for service, configs in services.items():
+        if len(conf.service) > 0 and service not in conf.service:
+            continue
+        if not 'build' in configs:
+            continue
+
+        build_conf = configs['build']
+        context = build_conf['context'] if "context" in build_conf else "./"
+        cmd = ["docker", "build", "--ssh", "default"]
+        if conf.no_cache:
+            cmd.append("--no-cache")
+        try:
+            cmd.extend(["-f", os.path.join(context, build_conf['dockerfile'])])
+        except KeyError:
+            pass
+        if 'args' in build_conf:
+            cmd.append("--build-arg")
+            build_args=",".join(["{}={}".format(arg,val) for arg, val in build_conf['args']])
+            cmd.append(build_args)
+        image_tag = configs['image']
+        if not ":" in image_tag:
+            image_tag += ":latest"
+        cmd.extend(["--tag", image_tag])
+        cmd.append(context)
+        print(cmd)
+
+        env = os.environ.copy()
+        env['DOCKER_BUILDKIT'] = "1"
+        res = run(cmd, env=env)
+        res.check_returncode()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="build docker images")
+    parser.add_argument('--no-cache', action="store_true", help="do not use cached images")
+    parser.add_argument('service', nargs='*', help="names of services to build")
+    conf = parser.parse_args()
+
+    build(conf)

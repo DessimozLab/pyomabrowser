@@ -18,11 +18,9 @@
         <div class="col-sm-12 col-md-10 col-md-offset-1">
             <div class="jumbotron">
                 <div class="container">
-                    {% if oma_instance_name == "full" %}
+                    {% block oma-main-logo %}
                     <img src="{% static "image/oma2.png" %}" class="img-responsive margin-auto" alt="OMA logo">
-                    {% else %}
-                    <img src="{% static "image/omalogo-"|add:oma_instance_name|add:".svg" %}" style="max-width: 528px;" class="img-responsive margin-auto" alt="OMA logo">
-                    {% endif %}
+                    {% endblock oma-main-logo %}
                     <p><br></p>
                     <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
                     <div class="col-md-10 col-md-offset-1">
@@ -53,18 +51,13 @@
                 <div class="row top-buffer">
                     <div class="col-md-8 col-md-offset-2">
                         <div class="text-center">
-                           Examples:
-                            {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
+                            Examples:
+                            {% block search_examples %}
                                 <span class="ex" onclick="fillExample('id','HUMAN22168')">Entry HUMAN22168</span> -
                                 <span class="ex" onclick="fillExample('id','P53_RAT')">Entry P53_RAT</span> -
                                 <span class="ex" onclick="fillExample('fulltext','photoreceptor')">Search for "photoreceptor"</span> -
                                 <span class="ex" onclick="fillExample('species', 'Drosophila')">"Drosophila" species</span>
-                            {% elif oma_instance_name == "corona" %}
-                                <span class="ex" onclick="fillExample('id','SARS200001')">Entry SARS200001</span> -
-                                <span class="ex" onclick="fillExample('id','R1AB_SARS2')">Entry R1AB_SARS2</span> -
-                                <span class="ex" onclick="fillExample('fulltext','glycoprotein')">Search for "glycoprotein"</span> -
-                                <span class="ex" onclick="fillExample('species', 'Bat coronavirus')">"Bat coronavirus" species</span>
-                            {% endif %}
+                            {% endblock search_examples %}
                         </div>
                     </div>
                 </div>
@@ -116,6 +109,7 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                    {% block lower_home_boxes %}
                     <div class="col-sm-4 col-md-4 ">
 
+                        {%  if oma_instance_name == "full" %}
                         <div class="thumbnail oma-3-panels" style="background-color: #dfe6ad;">
                             <div class="caption">
                                 <p class="text-center">
@@ -127,6 +121,7 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                                     <li>encompasses the human SARS and other single-stranded RNA viruses.</li>
                             </div>
                         </div>
+                        {% endif %}
 
                         <div class="thumbnail oma-3-panels">
                             <div class="caption">
@@ -151,8 +146,8 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                     </div>
                     <div class="col-sm-4 col-md-4">
                         <div class="thumbnail oma-3-panels">
+                            {% block second_box %}
                             <div class="caption">
-
                                 <p class="text-center ">
                                     <a href="#" data-toggle="modal" data-target=".bs-example-modal-md">
                                         <span class="glyphicon glyphicon-circle-arrow-down glyphicon-xl"></span>
@@ -181,10 +176,12 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                                     </li>
                                 </ul>
                             </div>
+                            {% endblock second_box %}
                         </div>
                     </div>
                     <div class="col-sm-4 col-md-4 ">
                         <div class="thumbnail oma-3-panels ">
+                            {% block third_box %}
                             <div class="caption comment-text" id="latest-news">
                                 <p class="text-center ">
                                     <span class="glyphicon glyphicon-info-sign glyphicon-xl">
@@ -201,6 +198,7 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                                 </ul>
                                 <p><a href="https://twitter.com/intent/user?screen_name=OMABrowser" class="btn btn-primary btn-sm bottomright" role="button">Follow us on Twitter</a></p>
                             </div>
+                            {% endblock third_box %}
                         </div>
                     </div>
                     {% endblock lower_home_boxes %}

@@ -34,7 +34,7 @@
   </head>
   <body>
     {% block topelement %}
-        {% if oma_instance_name != "full" %}
+        {% if oma_instance_name != "full" and oma_instance_name != "basf" %}
             <div class="ribbon">Go to the regular (non-viral) <a href="https://omabrowser.org">OMA database</a></div>
         {% endif %}
     {% endblock %}
@@ -141,11 +141,18 @@
               <li><a class="" href="{% url 'APISOAP'  %}">SOAP</a></li>
               <li class="divider"></li>
               <li role="presentation" class="dropdown-header">Semantic web</li>
+                {% if oma_instance_name == "basf" %}
+              <li><a class="" href="abezwiv0024.eu.seeds.basf.net:8890/sparql">BASF SPARQL endpoint</a></li>
+              <li><a class="" href="https://sparql.omabrowser.org">Public SPARQL endpoint</a></li>
+                {% else %}
               <li><a class="" href="https://sparql.omabrowser.org">SPARQL endpoint</a></li>
+                {% endif %}
               <li class="divider"></li>
               <li role="presentation" class="dropdown-header">User-side computations</li>
               <li><a class="" href="/standalone/">OMA standalone</a></li>
+              {% if oma_instance_name != "basf" %}
               <li><a class="" href="{% url 'export' %}">Export All/All</a></li>
+              {% endif %}
               <li><a class="" href="{% url 'export_markers' %}">Export marker genes</a></li>
             </ul>
           </li>
@@ -163,7 +170,9 @@
               <li><a class="" href="{% url 'about'  %}">OMA in a nutshell</a></li>
               <li><a class="" href="{% url 'type'  %}">Types of orthologs</a></li>
               <li><a class="" href="{% url 'uses'  %}">Typical uses</a></li>
+                {% if oma_instance_name != "basf" %}
               <li><a class="" href="{% url 'genome_suggestion' %}">Suggesting a genome</a></li>
+                {% endif %}
               <li><a class="" href="{% url 'FAQ'  %}">FAQ</a></li>
               <li><a class="" href="https://www.biostars.org/t/oma/">Q&amp;A on BioStars</a></li>
             </ul>

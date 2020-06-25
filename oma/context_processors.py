@@ -9,6 +9,9 @@ def xref_order(request):
 
 def oma_instance(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
-    return {'oma_instance_name': settings.OMA_INSTANCE_NAME,
-            'google_tracker_code': settings.GOOGLE_ANALYTICS['google_analytics_id'],
-            }
+    res = {'oma_instance_name': settings.OMA_INSTANCE_NAME}
+    try:
+        res['google_tracker_code'] = settings.GOOGLE_ANALYTICS['google_analytics_id']
+    except AttributeError:
+        pass
+    return res

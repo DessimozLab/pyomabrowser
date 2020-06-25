@@ -31,3 +31,15 @@
         </div>
     </div>
 {% endblock %}
+
+{% block search_examples %}
+    <span class="ex" onclick="fillExample('id','SARS200001')">Entry SARS200001</span> -
+    <span class="ex" onclick="fillExample('id','R1AB_SARS2')">Entry R1AB_SARS2</span> -
+    <span class="ex" onclick="fillExample('fulltext','glycoprotein')">Search for "glycoproteihome-corona.htmln"</span> -
+    <span class="ex" onclick="fillExample('species', 'Bat coronavirus')">"Bat coronavirus" species</span>
+{% endblock search_examples %}
+
+
+{% block oma-main-logo %}
+    <img src="{% static "image/omalogo-"|add:oma_instance_name|add:".svg" %}" style="max-width: 528px;" class="img-responsive margin-auto" alt="OMA logo">
+{% endblock oma-main-logo %}

@@ -67,10 +67,6 @@ urlpatterns = [
     url(r'^FAQ/$', TemplateView.as_view(template_name='FAQ.html'), name='FAQ'),
     url(r'^genomePW/$', TemplateView.as_view(template_name='genomePW.html'), name='genomePW'),
     url(r'^landOMA/$', TemplateView.as_view(template_name='landOMA.html'), name='landOMA'),
-    url(r'^fellowship/$', views.fellowship, name="fellowship"),
-    url(r'^fellowship/thanks/', TemplateView.as_view(template_name='fellowship_thanks.html'), name='fellowship_thanks'),
-    url(r'^suggestion/genome/$', views.genome_suggestion, name="genome_suggestion"),
-    url(r'^suggestion/genome/thanks$', TemplateView.as_view(template_name="genome_suggestion_thanks.html"), name="genome_suggestion_thanks"),
     url(r'^functions/$', views.function_projection, name='function-projection-input'),
     url(r'^functions/(?P<data_id>\w+)/$', views.FunctionProjectionResults.as_view(), name="function-projection"),
 
@@ -89,10 +85,17 @@ urlpatterns = [
         views.HomologsBetweenChromosomePairJson.as_view(), name='synteny_chr_pair_json')
 ]
 
+if settings.OMA_INSTANCE_NAME != "basf":
+    urlpatterns.extend([
+        url(r'^fellowship/$', views.fellowship, name="fellowship"),
+        url(r'^fellowship/thanks/', TemplateView.as_view(template_name='fellowship_thanks.html'), name='fellowship_thanks'),
+        url(r'^suggestion/genome/$', views.genome_suggestion, name="genome_suggestion"),
+        url(r'^suggestion/genome/thanks$', TemplateView.as_view(template_name="genome_suggestion_thanks.html"), name="genome_suggestion_thanks"),
+    ])
+
 if settings.DEBUG:
     try:
         import debug_toolbar
-
         urlpatterns.extend([
             url(r'^__debug__/', include(debug_toolbar.urls)),
         ])
