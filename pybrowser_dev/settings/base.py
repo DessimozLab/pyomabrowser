@@ -27,7 +27,7 @@ SECRET_KEY = '_^j%sp*a$&+$2esy(k7oarq+kyf@#ubc!lbo@_1r5#rqidc_l_'
 DEBUG = (DEPLOYMENT != "PRODUCTION")
 
 #ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'omabrowser.org', '.omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk', '.vital-it.ch']
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 #DEBUG_TOOLBAR_PATCH_SETTINGS = False
 #SHOW_TOOLBAR_CALLBACK = lambda x: True
