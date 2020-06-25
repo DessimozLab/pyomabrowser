@@ -27,4 +27,4 @@ RUN --mount=type=ssh git clone ssh://gitolite@lab.dessimoz.org:2222/OMA
 RUN --mount=type=ssh cd /browser && git pull \
       && cd /OMA && git pull
 
-ENTRYPOINT ["entrypoint", "uwsgi", "--ini", "/etc/oma-uwsgi.conf"]
+ENTRYPOINT ["entrypoint.sh", "uwsgi", "--ini", "/etc/oma-uwsgi.conf"]
