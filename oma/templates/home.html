@@ -124,6 +124,7 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                         {% endif %}
 
                         <div class="thumbnail oma-3-panels">
+                            {% block first_box %}
                             <div class="caption">
                                 <p class="text-center ">
                                     <span class="glyphicon glyphicon-question-sign glyphicon-xl"></span>
@@ -142,6 +143,7 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                                     </li>
                                 </ul>
                             </div>
+                            {% endblock first_box %}
                         </div>
                     </div>
                     <div class="col-sm-4 col-md-4">

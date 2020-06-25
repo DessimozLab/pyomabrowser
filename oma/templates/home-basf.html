@@ -16,6 +16,28 @@
 {% endblock oma-main-logo %}
 {% endcomment %}
 
+{% block first_box %}
+    <div class="caption">
+        <p class="text-center ">
+            <span class="glyphicon glyphicon-question-sign glyphicon-xl"></span>
+        </p>
+
+        <h3>First time here?</h3>
+        <ul>
+            <li>You are accessing to <b>Secret information</b> at BASF</li>
+            <li>Read our
+                <a href="{% url 'about'  %}">brief introduction to OMA</a>.
+            </li>
+            <li>Familiarise yourself with the
+                <a href="{% url 'type'  %}">different types of orthologs provided</a>.
+            </li>
+            <li>Get ideas about
+                <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
+            </li>
+        </ul>
+    </div>
+{% endblock first_box %}
+
 {% block second_box %}
     <div class="caption">
         <p class="text-center ">
@@ -26,21 +48,6 @@
         <h3>User Support</h3>
         <ul>
             <li> <b><a href="https://jira.eu.seeds.basf.net/secure/CreateIssueDetails!init.jspa?issuetype=6&pid=15972&priority=3">create a JIRA ticket</a></b></li>
-            <!--
-            <li>
-                <b><a href="{% url 'current'  %}">Current release</a>:</b>
-                All data is available for downloading in a variety of formats.
-            </li>
-
-            <li>
-                <b><a href="/standalone">OMA Standalone</a>:</b>
-                OMA standalone allows you to infer orthologs on your own set of genomes.
-            </li>
-
-            <li>
-                <b><a href="{% url 'archives'  %}">Archives</a>:</b>
-                Previous OMA releases remain available in this section.
-            </li> -->
         </ul>
     </div>
 {% endblock second_box %}
