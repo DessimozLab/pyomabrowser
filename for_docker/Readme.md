@@ -8,7 +8,7 @@
   - bind mount release data?
   - bind mount current checkout?
   
-- `build_container` to build container for OMA browser
+- `build_container` to build containers for OMA browser
 - `docker-compose up` to start containers
 
 
@@ -19,6 +19,11 @@ tool for near production, testing and development purposes.
 
 Currently the setup has not yet been tested under heavy load, 
 but it seems to work quite smoothly on various sized datasets.
+
+The following figure should give you a brief overview of the containers 
+and volumes and how they interact:
+![docker-setup](docker-setup.png "Overview of container setup") 
+ 
 
 In our setup of the containers, we make use of the 
 DOCKER_BUILDKIT extension, especially the `--ssh default` feature 
@@ -79,13 +84,15 @@ means you haven't yet copied the data into the volume.
 You can also start the containers in the background with `docker-compose up -d` 
 and stop them with `docker-compose down`. 
 
-### copying data into the release_volume
+### Copying data into the release_volume
 In order to copy the data of a specific release into a 
 docker release_volume, you need to mount both, the 
 original data and the release_volume into a thin docker 
 container and copy the data in there:
 
-`docker run --rm -ti --volume release_volume:/data -v /path/on/host/to/release:/input oma:latest cp -rpn /input/ /data`
+```shell script
+docker run --rm -ti --volume release_volume:/data -v /path/on/host/to/release:/input oma:latest cp -rpn /input/ /data
+```
 
 This command would use the oma container to copy the data from /path/on/host/to/relase into the volume. Note that the 
 path should be the directory that contains the `data`, and `downloads` directory of the release you need.
@@ -93,4 +100,7 @@ path should be the directory that contains the `data`, and `downloads` directory
 ### Removing volumes
 When changing a release you should consider removing **all the volume data**, i.e.
 the postgres sql data, the media folder and probably also the release data.
-You can do that with `docker-compose down --volume`.
+You can do that with 
+```shell script
+docker-compose down --volume
+```
