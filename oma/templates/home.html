@@ -109,6 +109,7 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                    {% block lower_home_boxes %}
                     <div class="col-sm-4 col-md-4 ">
 
+                        {%  if oma_instance_name == "full" %}
                         <div class="thumbnail oma-3-panels" style="background-color: #dfe6ad;">
                             <div class="caption">
                                 <p class="text-center">
@@ -120,6 +121,7 @@ $('#inputBrowser').autocomplete(autocomplete_opts);
                                     <li>encompasses the human SARS and other single-stranded RNA viruses.</li>
                             </div>
                         </div>
+                        {% endif %}
 
                         <div class="thumbnail oma-3-panels">
                             <div class="caption">

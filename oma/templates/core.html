@@ -170,7 +170,9 @@
               <li><a class="" href="{% url 'about'  %}">OMA in a nutshell</a></li>
               <li><a class="" href="{% url 'type'  %}">Types of orthologs</a></li>
               <li><a class="" href="{% url 'uses'  %}">Typical uses</a></li>
+                {% if oma_instance_name != "basf" %}
               <li><a class="" href="{% url 'genome_suggestion' %}">Suggesting a genome</a></li>
+                {% endif %}
               <li><a class="" href="{% url 'FAQ'  %}">FAQ</a></li>
               <li><a class="" href="https://www.biostars.org/t/oma/">Q&amp;A on BioStars</a></li>
             </ul>
