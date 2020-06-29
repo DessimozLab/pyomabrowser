@@ -10099,7 +10099,7 @@ module.exports = {
       var obj = {};
       obj.header = gene.gene.protid;
 
-      function fetch_annots(gene_tooltip_obj, protid){
+      function fetch_annots(gene_tooltip_obj, protid, mouseover){
           $.ajax({
             type:'get',
             url: 'https://omabrowser.org/api/protein/' + protid + '/gene_ontology/?format=json',
@@ -10117,13 +10117,24 @@ module.exports = {
                 });
 
                 gene.gene.go_terms = go_annots;
-                gene_tooltip_obj.call.display(gene, div, mouseover);
+                // gene_tooltip_obj.call.display(gene, div, mouseover);
+                var rect = gene_tooltip_obj.getBoundingClientRect();
+
+                // console.log(type_event);
+
+                var type_event = "click";
+                if(mouseover){
+                  type_event = "mouseover";
+                }
+                var evt = new MouseEvent(type_event, {bubbles: true, clientX: rect.right, clientY: rect.bottom});
+                gene_tooltip_obj.dispatchEvent(evt);
+
             }
         });
       };
 
       if(gene.gene.go_terms==""){
-        fetch_annots(this, gene.gene.protid);
+        fetch_annots(this, gene.gene.protid, mouseover);
       }
 
       obj.rows = [];
