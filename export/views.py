@@ -35,8 +35,7 @@ def export_omastandalone(request):
                                          genomes=genomes_as_txt, processing=False)
                 r.save()
             return HttpResponseRedirect(reverse('export-download', args=(data_id,)))
-    return render(request, "export.html", context={'max_nr_genomes': 50})
-
+    return render(request, "dlOMA_exportAllAll.html", context={'max_nr_genomes': 50})
 
 @method_decorator(never_cache, name='dispatch')
 class StandaloneExportResultDownloader(TemplateView):

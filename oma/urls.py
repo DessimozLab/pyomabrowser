@@ -110,7 +110,7 @@ urlpatterns = [
     url(r'^hogs/$', TemplateView.as_view(template_name='explore_HOG.html'), name='hogs'),
     url(r'^synteny/$', TemplateView.as_view(template_name='explore_synteny.html'), name='synteny'),
     url(r'^about/$', TemplateView.as_view(template_name='about_OMA.html'), name='about'),
-    url(r'^export_selection/$', TemplateView.as_view(template_name='dlOMA_exportAllAll.html'), name='export'),
+    #url(r'^export_selection/$', TemplateView.as_view(template_name='dlOMA_exportAllAll.html'), name='export'),
     url(r'^landAnnotation/$', TemplateView.as_view(template_name='explore_Annotation.html'),
         name='landAnnotation'),
     url(r'^team/$', TemplateView.as_view(template_name='about_team.html'), name='team'),
