@@ -10106,7 +10106,7 @@ module.exports = {
         console.log(gene.gene.go_terms);
       };
 
-      function fetch_annots(gene_tooltip_obj, callback, protid){
+      function fetch_annots(callback, protid){
           $.ajax({
             type:'get',
             url: 'https://omabrowser.org/api/protein/' + protid + '/gene_ontology/?format=json',
@@ -10120,13 +10120,13 @@ module.exports = {
                                 go_annots.add(temp);
                 });
                 callback(go_annots);
-                gene_tooltip_obj.call.display(gene, div, mouseover);
+                display.call(gene, div, mouseover);
             }
         });
       };
 
       if(gene.gene.go_terms==""){
-        fetch_annots(this, useReturnData, gene.gene.protid);
+        fetch_annots(useReturnData, gene.gene.protid);
       }
 
       obj.rows = [];
