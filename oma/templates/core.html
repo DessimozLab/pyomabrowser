@@ -56,7 +56,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="{% url 'home'  %}">
-          {% if oma_instance_name == "full" %}
+          {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
           <img alt="OMA logo" src="{% static "image/omalogo.png" %}" class="omalogo">
           {% else %}
           <img alt="OMA logo" src="{% static "image/omalogo-"|add:oma_instance_name|add:".svg" %}" class="omalogo">
