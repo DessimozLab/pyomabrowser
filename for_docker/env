@@ -1,19 +1,57 @@
-DARWIN_BROWSERDATA_PATH=/data/release
+# PATH for data, downloads and other volume mount points
+# RELEASE_PATH should point to the directory that contains data/ and downloads/
+# subdirectory with data for the current release
+RELEASE_PATH=/data/release
+DARWIN_BROWSERDATA_PATH=/data/release/data
+DARWIN_BROWSERDOWNLOAD_PATH=/data/release/downloads
+# these directories contain the static and media files
+# We suggest to create for each an independent volume
 DARWIN_BROWSERSTATIC_PATH=/data/static
 DARWIN_BROWSERMEDIA_PATH=/data/media
 
+# intstance identifier. should be one of "full", "basf" or "corona". Available
+# functionality and templates will be selected based on this value
+OMA_INSTANCE=full
+
+# DEPLOYMENT_TYPE indicates if it is a production or development environment.
+# Development will produce more meaningful error messages, but this is discouraged
+# in production by django developers.
+# value should be either production or development
+DEPLOYMENT_TYPE=production
+
+# source of code base:
+#   'from_local'   : local checkout of Git repo
+#   'from_git'     : clones the repo during build
+# if set to from_git, one can select a git tag/branch
+PYOMABROWSER_CODEBASE=from_local
+# PYOMABROWSER_GITTAG=master
+
+
+# rabbitmq user, password and broker url to which celery will connect
+# You can change as you wish, but don't forget to update the rabbitmq
+# docker image if you use the non-standard default queue
 RABBITMQ_DEFAULT_USER=user
 RABBITMQ_DEFAULT_PASS=password
 CELERY_BROKER=amqp://user:password@broker:5672
 FLOWER_BROKER=amqp://user:password@broker:5672
 
+# DATABASE stuff for postgres database used by django.
 DATABASE=postgres
 SQL_ENGINE=django.db.backends.postgresql
 SQL_DATABASE=omabrowser
 SQL_USER=db_user
 SQL_PASSWORD=db_pass
+SQL_USERMAIL=contact@omabrowser.org
 SQL_HOST=db
 SQL_PORT=5432
+
+# these are the credentials for the postgres superuser
 POSTGRES_USER=db_user
 POSTGRES_PASSWORD=db_pass
 POSTGRES_DB=omabrowser
+
+# prefix for docker registry. docker images can be pulled/pushed from/to there.
+DOCKER_REGISTRY=local
+
+# allowed hosts for Django
+ALLOWED_HOSTS=127.0.0.1,localhost,omabrowser.org,.omabrowser.org,.ethz.ch,.cs.ucl.ac.uk,.vital-it.ch

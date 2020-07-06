@@ -404,6 +404,8 @@
 
             html.push('<div id="div_add" class="text-center" ><button type="button" id="li_add" class="btn btn-outline-secondary  ">Add custom filter</button> </div>');
 
+            container_filter_taxon.html("");
+
             container_filter_taxon.prepend(html.join(''));
             container_filter_taxon.find('input[id=all]').prop('checked', true);
 
