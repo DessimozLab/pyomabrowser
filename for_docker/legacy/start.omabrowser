@@ -1,0 +1,12 @@
+
+#!/bin/bash
+
+# source related environment variables
+debug="false";
+if [[ "$1" == "-d" ]] ; then
+    debug="true";
+fi
+exec darwin << EOY
+DEBUG := ${debug};
+ReadProgram( getenv('DARWIN_BROWSER_REPO_PATH').'/ServerMain.drw' );
+EOY

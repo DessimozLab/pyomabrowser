@@ -10,9 +10,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% block meta_hook %}
         <meta name="keywords"
-              content="orthology,evolutionary gene relations,evolution,paralogy,inference">{% endblock %}
-    <link rel="shortcut icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
+              content="orthology,evolutionary gene relations,evolution,paralogy,inference">
+    {% endblock meta_hook %}
 
+    {% if google_tracker_code %}
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_tracker_code }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ google_tracker_code }}');
+    </script>
+    {% endif %}
+
+    <link rel="shortcut icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
 
     <!-- css includes -->
     <link rel="stylesheet"
@@ -39,18 +51,21 @@
 </head>
 
 {% url 'home' as home %}
-
-
 <body class="{% if request.get_full_path == home %}landing{% endif %}">
+{% block topelement %}
+   {% if oma_instance_name != "full" and oma_instance_name != "basf" %}
+      <div class="ribbon">Go to the regular (non-viral) <a href="https://omabrowser.org">OMA database</a></div>
+   {% endif %}
+{% endblock %}
 
 <nav class="navbar fixed-top navbar-expand-xl bg-light navbar-light">
 
     <div class="logos-navbar mr-auto">
         <a href="https://www.sib.swiss/"><img src="{% static "image/logo-SIB.png" %}" alt="Logo SIB"/></a>
         {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
-            <a href="/oma/home/"><img src="{% static "image/logo-oma-mobile.svg" %}" alt="Logo OMA small"/></a>
+            <a href="{% url "home" %}"><img src="{% static "image/logo-oma-mobile.svg" %}" alt="Logo OMA small"/></a>
         {% else %}
-            <a href="/oma/home/"><img src="{% static "image/logo-oma-"|add:oma_instance_name|add:".svg" %}" alt="Logo OMA small"/></a>
+            <a href="{% url "home" %}"><img src="{% static "image/logo-oma-"|add:oma_instance_name|add:".svg" %}" alt="Logo OMA small"/></a>
         {% endif %}
     </div>
 
@@ -305,7 +320,6 @@
 
 {% block content %}{% endblock %}
 
-{% include 'includes/analytics.html' %}
 
 </body>
 </html>
