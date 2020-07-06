@@ -16,7 +16,6 @@ INSTALLED_APPS.extend([
     'google_analytics',
     'captcha',
     'export',
-    'bootstrap3',
 ])
 
 MIDDLEWARE.extend([

@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'drf_link_header_pagination',
     'oma',
     'oma_rest',
+    'bootstrap4',
     'django.contrib.humanize',
 ]
 
