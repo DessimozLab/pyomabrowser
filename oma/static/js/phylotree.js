@@ -119,6 +119,8 @@ $(document).ready(function() {
                         for (var i in arrayIdSelectedGenome){
                             urlExport=urlExport + (i == 0 ? '' : '&') + 'genomes='+hashGenome[arrayIdSelectedGenome[i]];
                         }
+
+                        console.log(urlExport);
                         OpenInNewTab(urlExport);
                     };
                 } else {
