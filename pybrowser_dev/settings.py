@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'oma',
     'oma_rest',
     'export',
+    'fastmap',
     'bootstrap4',
     'django.contrib.humanize',
 ]
