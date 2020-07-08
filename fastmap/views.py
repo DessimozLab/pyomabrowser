@@ -5,6 +5,12 @@ from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
 from . import forms
 
+from .models import FastMappingJobs
+from .tasks import submit_mapping
+from oma import misc
+import hashlib
+
+
 # Create your views here.
 def fastmapping(request):
 
@@ -13,8 +19,6 @@ def fastmapping(request):
         form = forms.FastMappingUploadForm(request.POST, request.FILES)
 
         if form.is_valid():
-
-            logger.info("received valid function projection form")
 
             user_file_info = misc.handle_uploaded_file(request.FILES['file'])
             data_id = hashlib.md5(user_file_info['md5'].encode('utf-8')).hexdigest()
@@ -28,8 +32,8 @@ def fastmapping(request):
             if do_compute:
                 res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.tgz".format(data_id))
                 res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
-                res = submit_export(data_id, res_file_abs, genomes)
-                r = StandaloneExportJobs(data_hash=data_id, state=res.state, result=res_file_rel,
+                res = submit_mapping(data_id, res_file_abs, genomes)
+                r = FastMappingJobs(data_hash=data_id, state=res.state, result=res_file_rel,
                                          fasta=request.FILES['file'], processing=False)
                 r.save()
             return HttpResponseRedirect(reverse('fastmapping-download', args=(data_id,)))
