@@ -24,7 +24,7 @@ def fastmapping(request):
             data_id = hashlib.md5(user_file_info['md5'].encode('utf-8')).hexdigest()
 
             try:
-                r = FastMappingResultDownloader.objects.get(data_hash=data_id)
+                r = FastMappingJobs.objects.get(data_hash=data_id)
                 do_compute = r.remove_erroneous_or_long_pending()
             except FileResult.DoesNotExist:
                 do_compute = True

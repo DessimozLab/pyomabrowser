@@ -18,32 +18,19 @@ import logging
 
 
 class FastMappingApp(Application):
-    def __init__(self, fasta, out):
+    def __init__(self,  fasta, out):
         self.final_out = out
         out_base = os.path.basename(out)
 
-        # todo
-
-        quoted_fasta = "'{}'".format(fasta)
-        with tempfile.NamedTemporaryFile(prefix="standalone_cmd", delete=False) as fh:
-            fh.write("genomes := [{}]:\nfn := '{}':\n"
-                     .format(", ".join(quoted_fasta), out_base))
-            fh.write("printlevel := 2;\n");
-            fh.write("ReadProgram(getenv('HOME').'/Browser/AllAllExport_bgscript.drw');\n")
-            fh.write("done;\n");
-
-        self.cmdfile = fh.name
         Application.__init__(
            self,
-           arguments=["darwin", "-i", os.path.basename(self.cmdfile)],
-           inputs=[self.cmdfile],
+           arguments=["bin/fastmap-omamer {} {} ".format(fasta,out)],
+           inputs=[fasta],
            outputs=[out_base],
            output_dir="res_"+out_base,
            stdout="stdout.txt",
            stderr="stderr.txt",
            requested_memory=20*GB)
-
-        # todo
 
     def __del__(self):
         os.remove(self.cmdfile)
