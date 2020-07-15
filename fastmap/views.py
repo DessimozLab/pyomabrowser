@@ -47,7 +47,7 @@ def fastmapping(request):
 
 
 @method_decorator(never_cache, name='dispatch')
-class FastMappingResultDownloader(TemplateView): # todo
+class FastMappingResultDownloader(TemplateView):
 
     template_name = "fastmapping_download.html"
     reload_frequency = 20
