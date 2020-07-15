@@ -26,7 +26,7 @@ def fastmapping(request):
             try:
                 r = FastMappingJobs.objects.get(data_hash=data_id)
                 do_compute = r.remove_erroneous_or_long_pending()
-            except FileResult.DoesNotExist:
+            except FastMappingJobs.DoesNotExist:
                 do_compute = True
 
             if do_compute:
