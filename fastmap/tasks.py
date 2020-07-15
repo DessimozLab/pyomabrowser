@@ -80,6 +80,6 @@ def update_running_jobs():
 
 
 @task()
-def purge_old_exports():
+def purge_old_fastmap():
     time_threshold = datetime.now() - timedelta(days=8)
     FastMappingJobs.objects.filter(create_time__lt=time_threshold).delete()

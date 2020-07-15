@@ -180,10 +180,9 @@
             if (need_load == true) {
 
                 need_load = false;
-                console.log("wait...");
-                $("#toolbar").remove();
                 tab.bootstrapTable('refreshOptions', {url: '{{load_full_data}}'});
                 tab.bootstrapTable('refresh', {url: '{{load_full_data}}'});
+                $("#toolbar").remove();
             }
 
             {% endif %}
