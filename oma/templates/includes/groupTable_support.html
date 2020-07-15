@@ -180,36 +180,17 @@
             if (need_load == true) {
 
                 need_load = false;
-
-                setTimeout(function(){
-                    console.log("wait...");
-                    $("#toolbar").remove();
-                    tab.bootstrapTable('refreshOptions', {url: '{{load_full_data}}'});
-                    tab.bootstrapTable('refresh', {url: '{{load_full_data}}'});
-                }, 5000);
-
-
-
+                console.log("wait...");
+                $("#toolbar").remove();
+                tab.bootstrapTable('refreshOptions', {url: '{{load_full_data}}'});
+                tab.bootstrapTable('refresh', {url: '{{load_full_data}}'});
             }
 
             {% endif %}
 
-
-
         },
         refreshOptions: {'icons': icons}
     });
-
-
-
-
-
-
-
-
-
-
-
 
 
 

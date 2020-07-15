@@ -390,7 +390,7 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 class PairsBase(ContextMixin, EntryCentricMixin):
     """Base class to collect data for pairwise orthologs."""
 
-    _max_entry_to_load = 4  # todo PAIR
+    _max_entry_to_load = 25
 
     def get_context_data(self, entry_id, **kwargs):
 
