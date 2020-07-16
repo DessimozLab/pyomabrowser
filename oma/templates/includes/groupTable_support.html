@@ -172,6 +172,7 @@
             domains.visualize_all(".protein"); //, {{ longest_seq }});
         },
         onLoadSuccess: function (data) {
+
             tab.bootstrapTable('hideLoading');
 
             {% if load_full_data != 0 %}
@@ -180,8 +181,8 @@
             if (need_load == true) {
 
                 need_load = false;
-                tab.bootstrapTable('refreshOptions', {url: '{{load_full_data}}'});
-                tab.bootstrapTable('refresh', {url: '{{load_full_data}}'});
+                tab.bootstrapTable('refreshOptions', 'refresh', {url: '{{load_full_data}}'});
+                //tab.bootstrapTable('refresh', {url: '{{load_full_data}}'});
                 $("#toolbar").remove();
             }
 
