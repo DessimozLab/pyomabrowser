@@ -181,8 +181,8 @@
             if (need_load == true) {
 
                 need_load = false;
-                tab.bootstrapTable('refreshOptions', 'refresh', {url: '{{load_full_data}}'});
-                //tab.bootstrapTable('refresh', {url: '{{load_full_data}}'});
+                tab.bootstrapTable('refreshOptions', {url: '{{load_full_data}}'});
+                tab.bootstrapTable('refresh');
                 $("#toolbar").remove();
             }
 
