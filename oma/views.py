@@ -590,6 +590,8 @@ class PairsJson_SupportSample(PairsBase, JsonModelMixin, View):
                             rel.type_g = 1
                         else:
                             rel.type_g = 0
+                    else:
+                        rel.type_g = 0
 
 
             entry.RelType = 'self'
