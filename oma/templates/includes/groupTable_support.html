@@ -180,10 +180,14 @@
 
             if (need_load == true) {
 
+                $.getJSON("{{load_full_data}}", function (jsonData) {
+
                 need_load = false;
-                tab.bootstrapTable('refreshOptions', {url: '{{load_full_data}}'});
+                tab.bootstrapTable('refreshOptions', {data: jsonData});
                 tab.bootstrapTable('refresh');
                 $("#toolbar").remove();
+
+                 });
             }
 
             {% endif %}
