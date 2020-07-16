@@ -182,9 +182,11 @@
 
                 $.getJSON("{{load_full_data}}", function (jsonData) {
 
+
+
                 need_load = false;
-                tab.bootstrapTable('refreshOptions', {data: jsonData});
-                tab.bootstrapTable('refresh');
+                tab.bootstrapTable('load', jsonData );
+
                 $("#toolbar").remove();
 
                  });
