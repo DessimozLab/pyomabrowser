@@ -620,7 +620,7 @@ class PairsViewFasta(FastaView, PairsBase):
 class ParalogsBase(ContextMixin, EntryCentricMixin):
     """Base class to collect data for paralogs."""
 
-    _max_entry_to_load = 4
+    _max_entry_to_load = 25
 
     def get_context_data(self, entry_id, **kwargs):
 
