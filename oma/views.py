@@ -617,19 +617,49 @@ class PairsViewFasta(FastaView, PairsBase):
 
 
 # Paralogs
-class ParalogyBase(PairsBase):
-    pass
+class ParalogsBase(ContextMixin, EntryCentricMixin):
+    """Base class to collect data for paralogs."""
 
-class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
+    _max_entry_to_load = 4
+
+    def get_context_data(self, entry_id, **kwargs):
+
+        context = super(ParalogsBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
+
+        if nr_ortholog_relations['NrHogInducedPWParalogs'] < self._max_entry_to_load:
+            load_full_data = 0
+            url = reverse('paralogs_json', args=(entry.omaid,))
+        else:
+            url = reverse('paralogs_sample_json', args=(entry.omaid,))
+            load_full_data = reverse('paralogs_json', args=(entry.omaid,))
+
+        context.update(
+            {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
+             'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'paralogs',
+             'table_data_url': url, 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
+             })
+
+        return context
+
+
+class ParalogsView(TemplateView, ParalogsBase):
     template_name = "entry_paralogy.html"
 
 
-    def get_context_data(self, entry_id, **kwargs):
-        context = super(Entry_Paralogy, self).get_context_data(entry_id, **kwargs)
-        entry = self.get_entry(entry_id)
+class ParalogsJson(ParalogsBase, JsonModelMixin, View):
 
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'DivergenceLevel': 'DivergenceLevel'}
 
-        ## GET PARALOGS
+    def get(self, request, *args, **kwargs):
+
+        context = self.get_context_data(**kwargs)
+
+        entry = context['entry']
 
         pps = []
 
@@ -638,30 +668,40 @@ class Entry_Paralogy(InfoBase, TemplateView): #todo change to PairsBase
             pm.DivergenceLevel = p["DivergenceLevel"].decode('utf-8')
             pps.append(pm)
 
-        longest_seq = 0
-        if len(pps) > 0:
-            longest_seq = max(e.sequence_length for e in pps)
+        start = time.time()
 
-        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
+        data = list(self.to_json_dict(pps))
 
-        context.update(
-            {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
-             'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'pps':pps,
-             'longest_seq': longest_seq,
-             'table_data_url': reverse('pairs_para_json', args=(entry.omaid,)),
-              'tab': 'paralogs'})
-        return context
+        end = time.time()
 
-# With information if the pair is supported by PO, HOGS and/or OMA groups
-class PairsParalogsJson(Entry_Paralogy, JsonModelMixin, View,):
+        logger.info("[{}] Json formatting {}".format(context['entry'].omaid, end - start))
 
+        return JsonResponse(data, safe=False)
+
+
+class ParalogsSampleJson(ParalogsBase, JsonModelMixin, View):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'DivergenceLevel': 'DivergenceLevel'}
 
     def get(self, request, *args, **kwargs):
+
         context = self.get_context_data(**kwargs)
-        data = list(self.to_json_dict(context['pps']))
+
+        entry = context['entry']
+
+        pps = []
+
+        for p in utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr):
+            pm = models.ProteinEntry.from_entry_nr(utils.db, p[0])
+            pm.DivergenceLevel = p["DivergenceLevel"].decode('utf-8')
+            pps.append(pm)
+
+        if len(pps) > ParalogsBase._max_entry_to_load:
+            pps = list(pps)
+            pps = pps[0:PairsBase._max_entry_to_load]
+
+        data = list(self.to_json_dict(pps))
 
         return JsonResponse(data, safe=False)
 
