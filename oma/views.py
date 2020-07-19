@@ -1076,7 +1076,7 @@ class HOG_Base(ContextMixin):
             if level is None:
                 hog = next((x for x in subhogs_list if x.is_root == True), None)
             else:
-                hog = next((x for x in subhogs_list if x.is_root == level), None)
+                hog = next((x for x in subhogs_list if x.level == level), None)
 
             if hog is None:
                 raise ValueError('requested hog cannot be found at level {}'.format(level))
@@ -1144,8 +1144,10 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
 
+        sim_hogs = utils.db.get_families_with_similar_hog_profile(hog_id)
+
         context.update({
-            'tab': 'similar', 'subtab': 'profile'})
+            'tab': 'similar', 'subtab': 'profile', 'sim_data': sim_hogs})
         return context
 
 
