@@ -16,6 +16,7 @@ INSTALLED_APPS.extend([
     'google_analytics',
     'captcha',
     'export',
+    'fastmap',
 ])
 
 MIDDLEWARE.extend([
@@ -28,6 +29,11 @@ LOGGING['loggers'].update({
             'handlers': ['console'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True
+    },
+    'fastmap': {
+        'handlers': ['console'],
+        'level': 'DEBUG' if DEBUG else 'INFO',
+        'propagate': True
     },
     'google_analytics': {
             'handlers': ['console'],
@@ -44,6 +50,14 @@ CELERY_BEAT_SCHEDULE = {
     },
     'task-purge-old-exports': {
         'task': 'export.tasks.purge_old_exports',
+        'schedule': 6 * 3600,
+    },
+    'task-update-fastmap': {
+        'task': 'fastmap.tasks.update_running_jobs',
+        'schedule': 30.0,
+    },
+    'task-purge-old-fastmap': {
+        'task': 'fastmap.tasks.purge_old_fastmap',
         'schedule': 6 * 3600,
     }
 }

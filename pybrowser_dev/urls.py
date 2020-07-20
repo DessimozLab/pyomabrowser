@@ -15,6 +15,10 @@ if 'export' in settings.INSTALLED_APPS:
     urlpatterns.append(
         path('oma/', include('export.urls'))
     )
+if 'fastmap' in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path('oma/', include('fastmap.urls'))
+    )
 
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView

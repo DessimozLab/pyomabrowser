@@ -1,7 +1,6 @@
 {% load staticfiles %}
 
-
-            {% if load_full_data != 0 %}
+ {% if load_full_data != 0 %}
 
 
             <div id="toolbar">
@@ -10,61 +9,35 @@
 
             {% endif %}
 
-
-
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
-
-
-               {% if load_full_data != 0 %}
-               data-toolbar="#toolbar"
-               {% endif %}
-
-
                data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
                data-show-columns="true" data-search="true" data-show-export="true"
                data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
                data-checkbox-header="true"
-               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
-               >
+               data-group-by="true"
+               data-group-by-field="DivergenceLevel"
+               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
 
             <thead>
 
 
              <tr>
-
-
-                   <th class="micro-header" data-field="type_p"  data-align="center" data-halign="center"   data-formatter="stateFormatterPO" >
-
-                    P
-                       <span class="badge badge-pill badge-dark"  data-toggle="tooltip" data-placement="top" title="Inferred using the OMA algorithm">?</span>
-
-                   </th>
-
-
-                <th class="micro-header" data-field="type_h"   data-align="center" data-halign="center"   data-formatter="stateFormatterH" >
-                 H <span class="badge badge-pill badge-dark"  data-toggle="tooltip" data-placement="top" title="Inferred from HOGs">?</span>
-
-                   </th>
-
-
-                <th class="micro-header" data-field="type_g"   data-align="center" data-halign="center"   data-formatter="stateFormatterOG" >P <span class="badge badge-pill badge-dark"  data-toggle="tooltip" data-placement="top" title="Inferred from OMA groups">?</span>
-
-                   </th>
-
-
-                 <th  data-field="kingdom" data-sortable="true" data-filter-control="select"
+                  {% if tab == 'paralogs' %}
+<th  data-field="DivergenceLevel" data-sortable="true" >Duplication Level</th>
+                 {%endif%}
+                 <th data-field="kingdom" data-sortable="true" data-filter-control="select"
                     data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.</th>
                 <th  data-field="taxon" data-sortable="true" data-filter-control="input"
                     data-formatter="tablehooks.format_sciname">Taxon</th>
                 <th  data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
-                 <th  data-field="RelType" data-sortable="true" >Relation type</th>
                 <th  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
                 <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
+    </tr>
 
- </tr>
+
 
 
             </thead>
@@ -76,48 +49,7 @@
         </table>
 
 
-<script>
 
-
-    // Add header
-
-  function stateFormatterPO(value, row, index) {
-
-
-
-
-    if (row['type_p'] === 1) {
-      return '<i class="fas fa-check " style="color:green"></i>';
-    }
-    else {
-      return ' '
-    }
-  }
-
-  function stateFormatterH(value, row, index) {
-
-
-    if (row['type_h'] === 1) {
-      return '<a href="{% url 'hog_viewer' entry.oma_hog_root %}"><i class="fas fa-check " style="color:green"></i></a>';
-    }
-    else {
-      return ' '
-    }
-  }
-
-  function stateFormatterOG(value, row, index) {
-
-
-    if (row['type_g'] === 1) {
-      return '<a href="{% url 'omagroup_members' entry.oma_group %}"><i class="fas fa-check " style="color:green"></i></a>';
-    }
-    else {
-      return ' '
-    }
-  }
-
-
-</script>
 
 
 <!-- D3 and D3 Tooltip -->
@@ -155,9 +87,20 @@
 <link type="text/css" rel="stylesheet" href="{% static "css/bootstrap-editable.css" %}"/>
 <script src="{% static "js/bootstrap-editable.js" %}"></script>
 
+
+ {% if tab == 'paralogs' %}
+
+
+<link href="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/group-by-v2/bootstrap-table-group-by.css" rel="stylesheet">
+<script src="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/group-by-v2/bootstrap-table-group-by.js"></script>
+
+
+{%endif%}
+
 <script>
 
     var need_load = true;
+
 
     var tab = $("#grpTable");
     var icons = tab.bootstrapTable('getOptions').icons;
@@ -168,11 +111,11 @@
         clickToSelect: false,
         showMultiSort: true,
         showLoading: true,
-        onPostBody: function () {
-            domains.visualize_all(".protein"); //, {{ longest_seq }});
+        onPostBody: function (data) {
+            console.log(data);
+            domains.visualize_all(".protein", {{ longest_seq }});
         },
         onLoadSuccess: function (data) {
-
             tab.bootstrapTable('hideLoading');
 
             {% if load_full_data != 0 %}
@@ -182,6 +125,7 @@
 
                 $.getJSON("{{load_full_data}}", function (jsonData) {
 
+                    console.log(jsonData);
 
 
                 need_load = false;
@@ -194,12 +138,10 @@
 
             {% endif %}
 
+
         },
         refreshOptions: {'icons': icons}
     });
 
-
-
 </script>
-
 

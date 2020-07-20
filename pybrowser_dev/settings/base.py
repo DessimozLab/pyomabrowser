@@ -169,8 +169,6 @@ TEMPLATES = [
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER', None)
 # for backward compability reasons
 BROKER_URL = CELERY_BROKER_URL
-
-
 # CORS stuff to allow iHAM integration on other sites
 CORS_ORIGIN_ALLOW_ALL = True
 # allow all /api/ views, hogdata and orthoxml
