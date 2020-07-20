@@ -1144,7 +1144,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
 
-        sim_hogs = utils.db.get_families_with_similar_hog_profile(hog_id)
+        sim_hogs = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
         context.update({
             'tab': 'similar', 'subtab': 'profile', 'sim_data': sim_hogs})

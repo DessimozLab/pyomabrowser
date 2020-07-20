@@ -9,6 +9,7 @@ from .models import FastMappingJobs
 from .tasks import submit_mapping
 from oma import misc
 import hashlib
+import os
 
 
 # Create your views here.
