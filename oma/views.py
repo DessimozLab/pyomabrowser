@@ -1146,7 +1146,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
 
         sim_hogs = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
-        t = type(sim_hogs.values()[0])
+        t = type([sim_hogs.values()][0])
 
         context.update({
             'tab': 'similar', 'subtab': 'profile', 'sim_data': sim_hogs, 'test':t})
