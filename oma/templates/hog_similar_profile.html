@@ -7,11 +7,13 @@
 
  <div class="alert alert-danger" role="alert">
 
+  {{t}}
+
   <ul class="list-group list-group-flush">
 
   {% for key, value in sim_data.items %}
 
-   <li class="list-group-item"> {{ key }}: {{ value }}  </li>
+   <li class="list-group-item"> {{ key }}: {{ value }} </li>
 
   {% endfor %}
 
