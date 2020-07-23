@@ -1149,6 +1149,8 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         for key, val in sim_hogs.items():
             sim_hogs[key] = val.ravel()
 
+        print(sim_hogs)
+
         result = json.dumps(sim_hogs)
 
         context.update({ 'tab': 'similar', 'subtab': 'profile', 'sim_data': sim_hogs, 'test': result  })
@@ -2133,7 +2135,7 @@ class Searcher(View):
 
         context = {'query': query, 'type': type, 'terms':terms}
 
-        # if specific selector chosen (entry by protId) try to instant r`edirection if correct query
+        # if specific selector chosen (entry by protId) try to instant redirection if correct query
         if type!='all' and len(terms) == 1:
 
             data_type = type.split("_")[0]  # Entry, OG, HOG, Genome, Ancestral genome
