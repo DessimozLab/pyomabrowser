@@ -1148,7 +1148,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
 
         class NumpyEncoder(json.JSONEncoder):
             def default(self, obj):
-                if isinstance(obj, np.ndarray):
+                if isinstance(obj, numpy.ndarray):
                     return obj.tolist()
                 return json.JSONEncoder.default(self, obj)
 
