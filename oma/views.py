@@ -1146,14 +1146,16 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
 
         sim_hogs = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
-        for key, val in sim_hogs.items():
-            sim_hogs[key] = val.ravel()
+        class NumpyEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                return json.JSONEncoder.default(self, obj)
 
-        print(sim_hogs)
-
-        result = json.dumps(sim_hogs)
+        result = json.dumps(sim_hogs,  cls=NumpyEncoder)
 
         context.update({ 'tab': 'similar', 'subtab': 'profile', 'sim_data': sim_hogs, 'test': result  })
+
         return context
 
 
