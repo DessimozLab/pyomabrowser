@@ -4,44 +4,74 @@
 {% block contentTab %}
 
 
-<div>
- {{test}}
+ <ul class="list-group list-group-flush">
 
+  <li class="list-group-item" >
+
+    <div class="container">
+  <div class="row">
+    <div class="col-2">
+      <strong> HOG ID</strong>
+    </div>
+    <div class="col" >
+
+     <strong>HOG profile</strong>
+
+    </div>
+
+  </div>
 </div>
 
 
+   </li>
 
- <div class="alert alert-danger" role="alert">
+  {% for  key, val in sim_data.items %}
+
+   <li class="list-group-item" >
+
+    <div class="container">
+  <div class="row">
+    <div class="col-1">
+      {{key}}
+    </div>
+    <div class="col  profile_vis" id="{{ key }}">
+
+    </div>
+
+  </div>
+</div>
 
 
-
-  <ul class="list-group list-group-flush">
-
-  {% for key, value in sim_data.items %}
-
-   <li class="list-group-item" class="profile_vis" id="{{ key }}"></li>
-
+   </li>
 
   {% endfor %}
 
    </ul>
 
 
-</div>
 
+<!-- D3 todo dl the lib-->
+<script src="https://d3js.org/d3.v5.js"></script>
 
-<!-- D3 and D3 Tooltip -->
-<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
-<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
 
 <!-- Domain Visualisation -->
 <script src='{% static "js/profile.js" %}' type="text/javascript"></script>
 <link href='{% static "css/profile.css" %}' rel="stylesheet" type="text/css" />
 
+{{ sim_data|json_script:"hello-data" }}
+
 
     <script>
 
-     //profile.visualize_all(".profile_vis", {{sim_data}} );
+     window.onload = function() {
+
+         var value = JSON.parse(document.getElementById('hello-data').textContent);
+
+     profile.visualize_all(".profile_vis", value );
+
+
+};
+
 
 
 </script>
