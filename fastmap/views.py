@@ -67,6 +67,6 @@ class FastMappingResultDownloader(TemplateView):
         except FastMappingJobs.DoesNotExist:
             raise Http404('Invalid dataset')
         context['file_result'] = result
-        context['fasta'] = json.loads(result.fasta)
+        context['fasta'] = result.fasta
         context['reload_every_x_sec'] = self.reload_frequency
         return context
