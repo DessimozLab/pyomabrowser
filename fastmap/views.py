@@ -22,6 +22,8 @@ def fastmapping(request):
 
         if form.is_valid():
 
+            print(request.FILES['file'])
+
             user_file_info = misc.handle_uploaded_file(request.FILES['file'])
             data_id = hashlib.md5(user_file_info['md5'].encode('utf-8')).hexdigest()
 
@@ -34,7 +36,7 @@ def fastmapping(request):
             if do_compute:
                 res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.tgz".format(data_id))
                 res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
-                res = submit_mapping(data_id, res_file_abs, genomes)
+                res = submit_mapping(data_id, res_file_abs, user_file_info['fname'])
                 r = FastMappingJobs(data_hash=data_id, state=res.state, result=res_file_rel,
                                          fasta=request.FILES['file'], processing=False)
                 r.save()
