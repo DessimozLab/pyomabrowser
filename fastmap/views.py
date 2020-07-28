@@ -3,6 +3,7 @@ from . import views
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
+from django.http import HttpResponseRedirect, Http404
 from django.conf import settings
 from . import forms
 

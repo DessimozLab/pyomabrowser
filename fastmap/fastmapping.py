@@ -58,5 +58,6 @@ class FastMappingScript(SessionBasedScript):
 
 
 if __name__ == "__main__":
-    import gc3workflow
-    gc3workflow.FastMappingScript().run()
+    import fastmapping
+
+    fastmapping.FastMappingScript().run()
