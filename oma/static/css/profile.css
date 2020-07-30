@@ -1,0 +1,9 @@
+
+.profile_vis svg {
+  height: 120px; /* This can be changed. */
+  width:  100%;
+  min-width: 200px;
+}
+
+  /* Colour of sequnce line */
+  .profile_vis svg .profile { fill: #4F4F4F; }

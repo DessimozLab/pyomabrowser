@@ -1,8 +1,11 @@
 from django.shortcuts import render
+from django.urls import reverse
 from . import views
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import TemplateView, View
+from django.http import HttpResponseRedirect, Http404
+from django.conf import settings
 from . import forms
 
 from .models import FastMappingJobs
@@ -10,6 +13,8 @@ from .tasks import submit_mapping
 from oma import misc
 import hashlib
 import os
+import json
+
 
 
 # Create your views here.
@@ -21,6 +26,8 @@ def fastmapping(request):
 
         if form.is_valid():
 
+            print(request.FILES['file'])
+
             user_file_info = misc.handle_uploaded_file(request.FILES['file'])
             data_id = hashlib.md5(user_file_info['md5'].encode('utf-8')).hexdigest()
 
@@ -30,10 +37,12 @@ def fastmapping(request):
             except FastMappingJobs.DoesNotExist:
                 do_compute = True
 
+            print(do_compute)
+
             if do_compute:
                 res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.tgz".format(data_id))
                 res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
-                res = submit_mapping(data_id, res_file_abs, genomes)
+                res = submit_mapping(data_id, res_file_abs, user_file_info['fname'])
                 r = FastMappingJobs(data_hash=data_id, state=res.state, result=res_file_rel,
                                          fasta=request.FILES['file'], processing=False)
                 r.save()
@@ -60,6 +69,6 @@ class FastMappingResultDownloader(TemplateView):
         except FastMappingJobs.DoesNotExist:
             raise Http404('Invalid dataset')
         context['file_result'] = result
-        context['fasta'] = json.loads(result.fasta)
+        context['fasta'] = result.fasta
         context['reload_every_x_sec'] = self.reload_frequency
         return context
