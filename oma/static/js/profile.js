@@ -2,11 +2,10 @@
 (function (exports) {
     "use strict";
 
-    exports.visualize_all = function (class_of_entries, data, attr_name ) {
+    exports.visualize_all = function (class_of_entries, data, value_tax, value_sp, attr_name,  ) {
 
         if(attr_name === undefined)
         { attr_name = 'id'; }
-
 
         $.each($(class_of_entries), function (each, value) {
             // Retreive the entry ID
@@ -15,15 +14,18 @@
 
             var container = this;
 
-            exports.run_profile_vis(container, data_item);
+            exports.run_profile_vis(container, data_item, value_tax, value_sp);
         });
     };
 
-    exports.run_profile_vis = function(container, data_profile) {
+    exports.run_profile_vis = function(container, data_profile, taxon, species) {
 
             if (!data_profile) return;
 
             var data_taxon=[{'idx':'0', 'taxon':'taxon1'},{'idx':'500', 'taxon':'taxon2'},{'idx':'1500', 'taxon':'taxon3'},{'idx':'2000', 'taxon':'taxon4'},]
+
+            console.log(taxon['root']);
+
 
             // todo filter bar with no height
             // todo name on zoom

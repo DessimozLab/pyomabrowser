@@ -65,15 +65,20 @@
 <link href='{% static "css/profile.css" %}' rel="stylesheet" type="text/css" />
 
 {{ sim_data|json_script:"hello-data" }}
+{{ taxon_region|json_script:"tax-data" }}
+{{ species|json_script:"species-data" }}
 
 
     <script>
 
      window.onload = function() {
 
-         var value = JSON.parse(document.getElementById('hello-data').textContent);
 
-     profile.visualize_all(".profile_vis", value );
+         var value = JSON.parse(document.getElementById('hello-data').textContent);
+         var value_tax = JSON.parse(document.getElementById('tax-data').textContent);
+         var value_sp = JSON.parse(document.getElementById('species-data').textContent);
+
+     profile.visualize_all(".profile_vis", value, value_tax, value_sp);
 
 
 };
