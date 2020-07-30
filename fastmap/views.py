@@ -37,6 +37,8 @@ def fastmapping(request):
             except FastMappingJobs.DoesNotExist:
                 do_compute = True
 
+            print(do_compute)
+
             if do_compute:
                 res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.tgz".format(data_id))
                 res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
