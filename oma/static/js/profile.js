@@ -26,7 +26,7 @@
             var data_taxon=[{'idx':'0', 'taxon':'taxon1'},{'idx':'500', 'taxon':'taxon2'},{'idx':'1500', 'taxon':'taxon3'},{'idx':'2000', 'taxon':'taxon4'},]
 
             // todo filter bar with no height
-        // todo name on zoon
+            // todo name on zoom
 
 
             var margin = {top: 20, right: 20, bottom: 20, left: 20},
