@@ -1153,7 +1153,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         sim_hogs = results.similar
         sim_json = json.dumps(sim_hogs,  cls=NumpyEncoder)
 
-        ref_profile = '{"Reference": [{}]}'.format(results.query_profile)
+        ref_profile = {"Reference": results.query_profile}
         ref_json = json.dumps(ref_profile, cls=NumpyEncoder)
 
         taxon_region = results.tax_classes
