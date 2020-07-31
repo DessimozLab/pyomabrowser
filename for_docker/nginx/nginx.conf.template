@@ -8,18 +8,18 @@ upstream legacy {
 
 server {
     listen 80;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
 
     location ~ ^/(oma|api)/ {
         proxy_pass http://pyoma;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $host;
         proxy_redirect off;
     }
 
     location /cgi-bin {
         proxy_pass http://legacy;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $host;
         proxy_redirect off;
         include uwsgi_params;
         uwsgi_modifier1 9;
@@ -28,6 +28,7 @@ server {
 
     location /All/ {
         alias ${DARWIN_BROWSERDOWNLOAD_PATH}/;
+        add_header Access-Control-Allow-Origin *;
     }
 
     location /static/ {
