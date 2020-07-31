@@ -67,6 +67,7 @@
 {{ sim_data|json_script:"hello-data" }}
 {{ taxon_region|json_script:"tax-data" }}
 {{ species|json_script:"species-data" }}
+{{ reference|json_script:"ref-data" }}
 
 
     <script>
@@ -75,10 +76,11 @@
 
 
          var value = JSON.parse(document.getElementById('hello-data').textContent);
-         var value_tax = JSON.parse(document.getElementById('tax-data').textContent);
-         var value_sp = JSON.parse(document.getElementById('species-data').textContent);
+         var value_tax = JSON.parse(JSON.parse(document.getElementById('tax-data').textContent));
+         var value_sp = JSON.parse(JSON.parse(document.getElementById('species-data').textContent));
+         var ref_sp = JSON.parse(JSON.parse(document.getElementById('ref-data').textContent));
 
-     profile.visualize_all(".profile_vis", value, value_tax, value_sp);
+     profile.visualize_all(".profile_vis", value, value_tax, value_sp, ref_sp);
 
 
 };

@@ -2,16 +2,16 @@
 (function (exports) {
     "use strict";
 
-    exports.visualize_all = function (class_of_entries, data, value_tax, value_sp, attr_name,  ) {
+    exports.visualize_all = function (class_of_entries, data, value_tax, value_sp, ref_tax, attr_name  ) {
 
         if(attr_name === undefined)
         { attr_name = 'id'; }
 
         $.each($(class_of_entries), function (each, value) {
+
             // Retreive the entry ID
             var entry_id = $(this).attr(attr_name);
             var data_item = data[entry_id];
-
             var container = this;
 
             exports.run_profile_vis(container, data_item, value_tax, value_sp);
@@ -22,14 +22,36 @@
 
             if (!data_profile) return;
 
-            var data_taxon=[{'idx':'0', 'taxon':'taxon1'},{'idx':'500', 'taxon':'taxon2'},{'idx':'1500', 'taxon':'taxon3'},{'idx':'2000', 'taxon':'taxon4'},]
+            var _root = [];
+            var _200 = [];
+            var _50 = [];
 
-            console.log(taxon['root']);
+            $.each( taxon, function( level, ltax ) {
 
+            if (level == 'root'){
 
-            // todo filter bar with no height
-            // todo name on zoom
+                $.each( ltax, function( name, idx ) {
+                    _root.push({'idx':idx[0],'taxon':name});
+                })
+            }
 
+            else if (level == '50'){
+
+                $.each( ltax, function( name, idx ) {
+                    _50.push({'idx':idx[0],'taxon':name});
+                })
+            }
+
+            else if (level == '200'){
+
+                $.each( ltax, function( name, idx ) {
+                    _200.push({'idx':idx[0],'taxon':name});
+                })
+            }
+
+        });
+
+            var data_taxon = _root;
 
             var margin = {top: 20, right: 20, bottom: 20, left: 20},
 
@@ -83,12 +105,7 @@
             svg.append("g")
             .attr("class", "x-axis")
             .call(xAxis)
-        .selectAll("text")
-    .attr("dy", ".35em")
-                .attr("font-weight", 700)
-    .attr("transform", 'translate(+16,-0)')
-            .style("text-anchor", "start");
-
+            .selectAll("text")
             svg.node();
 
             function zoom(svg) {
@@ -106,16 +123,26 @@
 
   function zoomed() {
 
-      console.log(d3.event.transform.k)
+
     x.range([margin.left, width - margin.right].map(d => d3.event.transform.applyX(d)));
     svg.selectAll(".bars rect").attr("x", function(d,i) { return x(i) }).attr("width", x.bandwidth());
 
-    if (d3.event.transform.k > 25){
-        svg.selectAll(".x-axis").call(xAxis)
+    if (d3.event.transform.k > 10){
+
+        data_taxon = _50
+
+    }
+
+    else if (d3.event.transform.k > 5){
+
+        data_taxon = _200
+
     }
     else {
-        svg.selectAll(".x-axis").call(xAxis)
+        data_taxon = _root
     }
+
+    svg.selectAll(".x-axis").call(xAxis)
 
     ;
   }
