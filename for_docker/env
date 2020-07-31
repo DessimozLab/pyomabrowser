@@ -9,6 +9,11 @@ DARWIN_BROWSERDOWNLOAD_PATH=/data/release/downloads
 DARWIN_BROWSERSTATIC_PATH=/data/static
 DARWIN_BROWSERMEDIA_PATH=/data/media
 
+# host path where release data is stored, i.e. the base
+# directory containing data/, downloads/, etc.
+# This is only used if a bind mount of the data is used.
+RELEASE_PATH_HOST=/Volumes/TOSHIBA EXT/basf/All.Jun2019
+
 # intstance identifier. should be one of "full", "basf" or "corona". Available
 # functionality and templates will be selected based on this value
 OMA_INSTANCE=full

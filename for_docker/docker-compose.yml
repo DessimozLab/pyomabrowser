@@ -26,7 +26,7 @@ services:
       - release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
       #- type: bind
-      #  source: "/Volumes/TOSHIBA EXT/basf/All.Jun2019"
+      #  source: ${RELEASE_PATH_HOST}
       #  target: ${RELEASE_PATH}
       #  read_only: true
     ports:
@@ -64,7 +64,7 @@ services:
       - release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
       #- type: bind
-      #  source: "/Volumes/TOSHIBA EXT/basf/All.Jun2019"
+      #  source: ${RELEASE_PATH_HOST}
       #  target: ${RELEASE_PATH}
       #  read_only: true
     depends_on:
@@ -83,7 +83,7 @@ services:
       - release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
       #- type: bind
-      #  source: "/Volumes/TOSHIBA EXT/basf/All.Jun2019/downloads"
+      #  source: "${RELEASE_PATH_HOST}/downloads"
       #  target: ${DARWIN_BROWSERDOWNLOAD_PATH}
       #  read_only: true
     environment:
@@ -107,7 +107,7 @@ services:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       - release_volume:${RELEASE_PATH}
       #- type: bind
-      #  source: "/Volumes/TOSHIBA EXT/basf/All.Jun2019/data"
+      #  source: "${RELEASE_PATH_HOST}/data"
       #  target: ${DARWIN_BROWSERDATA_PATH}
       #  read_only: true
 
