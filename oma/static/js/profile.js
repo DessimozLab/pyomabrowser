@@ -51,6 +51,13 @@
 
         });
 
+            var sp_array = []
+            $.each( species, function( idx, name) {
+                sp_array.push({'idx':idx,'name':name});
+
+            })
+
+
             var data_taxon = _root;
 
             var margin = {top: 20, right: 20, bottom: 20, left: 20},
@@ -90,10 +97,16 @@
                 .domain(data_taxon.map(function(d) {return d.idx}))
                 .range(d3.schemeCategory10);
 
+            // Define the div for the tooltip
+            const div = d3
+              .select('body')
+              .append('div')
+              .attr('class', 'tooltip')
+              .style('opacity', 0);
+
 
             svg.append("g")
             .attr("class", "bars")
-
             .selectAll("rect")
             .data(data_profile)
             .join("rect")
@@ -101,7 +114,22 @@
             .attr("y", d => y(d))
                 .attr("fill", function(d, i) {return color_scale(i)})
             .attr("height", d => y(0) - y(d))
-            .attr("width", x.bandwidth());
+            .attr("width", x.bandwidth())
+            .on('mouseover',
+
+                function(d,i) {
+
+                div.transition().duration(200).style('opacity', 0.9);
+                div.html(sp_array.find(obj => {return obj.idx === i}).name)
+                    .style('left', d3.event.pageX + 'px')
+                    .style('top', d3.event.pageY - 28 + 'px');
+                })
+                .on('mouseout', () => {
+                  div
+                    .transition()
+                    .duration(500)
+                    .style('opacity', 0);
+                });
 
             svg.append("g")
             .attr("class", "x-axis")
