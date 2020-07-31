@@ -4,8 +4,70 @@
 
     exports.visualize_all = function (class_of_entries, data, value_tax, value_sp, attr_name  ) {
 
+
+        function zoom(svg, chart) {
+
+              const extent = [[margin.left, margin.top], [chart.width - margin.right, chart.height - margin.top]];
+
+              svg.call(d3.zoom()
+                  .scaleExtent([1, 50])
+                  .translateExtent(extent)
+                  .extent(extent)
+                  .on("zoom",function() {
+                      var e = d3.event.transform;
+
+                      $.each(array_chart, function (idx, chart_e) {
+                      zoomed(e, chart_e )
+
+                      });
+                  }));
+
+              function zoomed(e, chart_e) {
+
+                       chart_e.xscale.range([margin.left, chart_e.width - margin.right]
+                           .map(d => e.applyX(d)));
+
+                        chart_e.chart.selectAll(".bars rect")
+                            .attr("x", function(d,i) { return chart_e.xscale(i) })
+                            .attr("width", chart_e.xscale.bandwidth());
+
+                        chart_e.chart.selectAll(".x-axis").call(chart_e.xAxis)
+
+
+
+                        /*
+                        if (d3.event.transform.k > 10){
+
+                            data_taxon = _50
+
+                        }
+
+                        else if (d3.event.transform.k > 5){
+
+                            data_taxon = _200
+
+                        }
+                        else {
+                            data_taxon = _root
+                        }
+
+
+
+
+
+                      */
+
+
+              }
+}
+
+
+        var margin = {top: 20, right: 20, bottom: 20, left: 20};
+
         if(attr_name === undefined)
         { attr_name = 'id'; }
+
+        var array_chart = []
 
         $.each($(class_of_entries), function (each, value) {
 
@@ -14,11 +76,25 @@
             var data_item = data[entry_id];
             var container = this;
 
-            exports.run_profile_vis(container, data_item, value_tax, value_sp);
+
+            var width = container.offsetWidth - margin.left - margin.right,
+            height = 120 - margin.top - margin.bottom;
+
+            var chart_data = exports.run_profile_vis(container, data_item, value_tax, value_sp, margin, width, height);
+
+            array_chart.push({'chart':chart_data.svg, 'xscale': chart_data.x, 'width':width, 'height':width, 'xAxis': chart_data.xAxis})
         });
+
+        $.each(array_chart, function (idx, chart) {
+
+            console.log("before call", chart)
+            chart.chart.call(zoom, chart)
+
+        });
+
     };
 
-    exports.run_profile_vis = function(container, data_profile, taxon, species) {
+    exports.run_profile_vis = function(container, data_profile, taxon, species, margin, width, height) {
 
             if (!data_profile) return;
 
@@ -60,19 +136,15 @@
 
             var data_taxon = _root;
 
-            var margin = {top: 20, right: 20, bottom: 20, left: 20},
-
-                width = container.offsetWidth - margin.left - margin.right,
-            height = 120 - margin.top - margin.bottom;
-
             const svg =  d3.select(container).append("svg")
             .attr("viewBox", [0, 0, width, height])
-            .call(zoom);
+
 
             var  x = d3.scaleBand()
             .domain(data_profile.map(function(d,i) {return i}))
             .range([margin.left, width - margin.right])
             .padding(0.1)
+
 
             var y = d3.scaleLinear()
             .domain([0, d3.max(data_profile, d => d)]).nice()
@@ -137,45 +209,8 @@
             .selectAll("text")
             svg.node();
 
-            function zoom(svg) {
+            return {'svg':svg, 'x':x, 'xAxis': xAxis};
 
-
-
-  const extent = [[margin.left, margin.top], [width - margin.right, height - margin.top]];
-
-  svg.call(d3.zoom()
-      .scaleExtent([1, 50])
-      .translateExtent(extent)
-      .extent(extent)
-      .on("zoom", zoomed));
-
-
-  function zoomed() {
-
-
-    x.range([margin.left, width - margin.right].map(d => d3.event.transform.applyX(d)));
-    svg.selectAll(".bars rect").attr("x", function(d,i) { return x(i) }).attr("width", x.bandwidth());
-
-    if (d3.event.transform.k > 10){
-
-        data_taxon = _50
-
-    }
-
-    else if (d3.event.transform.k > 5){
-
-        data_taxon = _200
-
-    }
-    else {
-        data_taxon = _root
-    }
-
-    svg.selectAll(".x-axis").call(xAxis)
-
-    ;
-  }
-}
 
     };
 

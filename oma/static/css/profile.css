@@ -15,5 +15,12 @@ div.tooltip {
   border: 2px solid black;
   pointer-events: none;
 }
-  /* Colour of sequnce line */
-  .profile_vis svg .profile { fill: #4F4F4F; }
+
+#profile_container {
+
+  overflow-y: scroll;
+
+}
+
+
+.profile_vis svg .profile { fill: #4F4F4F; }
