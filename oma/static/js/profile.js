@@ -2,7 +2,7 @@
 (function (exports) {
     "use strict";
 
-    exports.visualize_all = function (class_of_entries, data, value_tax, value_sp, ref_tax, attr_name  ) {
+    exports.visualize_all = function (class_of_entries, data, value_tax, value_sp, attr_name  ) {
 
         if(attr_name === undefined)
         { attr_name = 'id'; }
@@ -89,6 +89,7 @@
             var color_scale = d3.scaleThreshold()
                 .domain(data_taxon.map(function(d) {return d.idx}))
                 .range(d3.schemeCategory10);
+
 
             svg.append("g")
             .attr("class", "bars")
