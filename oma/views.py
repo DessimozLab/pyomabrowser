@@ -1159,6 +1159,9 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         taxon_region = results.tax_classes
         tax_json = json.dumps(taxon_region,  cls=NumpyEncoder)
 
+        species = results.species_names
+        sp_json = json.dumps(species, cls=NumpyEncoder)
+
         context.update({ 'tab': 'similar', 'subtab': 'profile', 'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
 
         return context
