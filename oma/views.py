@@ -1151,8 +1151,11 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
 
         results = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
-        sim_hogs = results.similar[:10]
-        sim_json = json.dumps(sim_hogs,  cls=NumpyEncoder)
+        sim_hogs = results.similar
+        top_10_keys = sim_hogs.keys()[:10]
+        top_10_hogs = {k: top_hogs[k] for k in top_10_keys }
+
+        sim_json = json.dumps(top_10_hogs, cls=NumpyEncoder)
 
         ref_profile = {"Reference": results.query_profile}
         ref_json = json.dumps(ref_profile, cls=NumpyEncoder)
