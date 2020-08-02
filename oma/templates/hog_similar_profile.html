@@ -26,9 +26,22 @@
 
 <div class="container ">
   <div class="row">
-    <div class="col-2 my-auto">
+    <div class="col-2 my-auto text-center" style="padding: 0px">
 
-        Reference
+        <b>Reference</b>
+
+        <br>
+
+        <small style="color: #9d9d9d;">Use mouse to zoom/pan</small>
+
+
+
+       <!--
+
+        <i class="material-icons" style="cursor: pointer; font-size:18px"  id="button_zoomout">zoom_out</i>
+       <i class="material-icons" style="cursor: pointer; font-size:18px"  id="button_zoomin">zoom_in</i>
+
+       -->
 
 
     </div>
@@ -107,11 +120,7 @@
          var ref= JSON.parse(JSON.parse(document.getElementById('ref-data').textContent));
 
 
-
          var ref_prof = profile.visualize_all(".profile_vis_ref", ref, value_tax, value_sp);
-
-
-
          profile.visualize_all(".profile_vis", value, value_tax, value_sp, ref_prof);
 
 

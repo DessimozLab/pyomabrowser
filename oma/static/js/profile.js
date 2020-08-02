@@ -10,8 +10,6 @@
 
             const extent = [[margin.left, margin.top], [chart.width - margin.right, chart.height - margin.top]];
 
-
-
             var zoom_d = d3.zoom()
                 .scaleExtent([1, 50])
                 .translateExtent(extent)
@@ -21,20 +19,31 @@
                     var e = d3.event.transform;
 
                     $.each(array_chart, function (idx, chart_e) {
-
                         if (d3.event.sourceEvent instanceof MouseEvent || d3.event.sourceEvent instanceof WheelEvent) {
-
                             chart_e.chart.call(zoom_d.transform, e)
-
             }
-
-
 
                         zoomed(e, chart_e)
                     });
                 });
 
             svg.call(zoom_d)
+
+
+            /*
+
+            var button_zoomin = document.getElementById("button_zoomin");
+            button_zoomin.onclick = function() {
+                d3.select(svg).transition().call(zoom_d.scaleBy, 2)
+            };
+
+            var button_zoomout = document.getElementById("button_zoomout");
+            button_zoomout.onclick = function() {
+                zoom_d.scaleBy(d3.select(svg), 0.5);
+            };
+
+            */
+
 
             function zoomed(e, chart_e) {
 
@@ -48,29 +57,6 @@
                     .attr("width", chart_e.xscale.bandwidth());
 
                 chart_e.chart.selectAll(".x-axis").call(chart_e.xAxis)
-
-
-                /*
-                 if (d3.event.transform.k > 10){
-
-                 data_taxon = _50
-
-                 }
-
-                 else if (d3.event.transform.k > 5){
-
-                 data_taxon = _200
-
-                 }
-                 else {
-                 data_taxon = _root
-                 }
-
-
-
-
-
-                 */
 
 
             }
@@ -116,7 +102,6 @@
         });
 
         $.each(array_chart, function (idx, chart) {
-
 
             chart.chart.call(zoom, chart)
 
