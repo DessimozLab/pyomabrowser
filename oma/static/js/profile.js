@@ -6,20 +6,22 @@
 
         function zoom(svg, chart) {
 
-            // d3.zoomTransform(svg.node()).k
-
             const extent = [[margin.left, margin.top], [chart.width - margin.right, chart.height - margin.top]];
 
             var zoom_d = d3.zoom()
                 .scaleExtent([1, 50])
                 .translateExtent(extent)
                 .extent(extent)
+                .wheelDelta(function(d) {return -d3.event.deltaY * (d3.event.deltaMode ? 120 : 1) / 500})
                 .on("zoom", function () {
 
                     var e = d3.event.transform;
 
+
+
                     $.each(array_chart, function (idx, chart_e) {
                         if (d3.event.sourceEvent instanceof MouseEvent || d3.event.sourceEvent instanceof WheelEvent) {
+
                             chart_e.chart.call(zoom_d.transform, e)
             }
 
@@ -28,7 +30,6 @@
                 });
 
             svg.call(zoom_d)
-
 
             /*
 
@@ -48,6 +49,7 @@
 
             function zoomed(e, chart_e) {
 
+
                 chart_e.xscale.range([margin.left, chart_e.width - margin.right]
                     .map(d => e.applyX(d)));
 
@@ -59,9 +61,9 @@
 
                 chart_e.chart.selectAll(".x-axis").call(chart_e.xAxis).selectAll("text")
                     .style("text-anchor", "start")
-                .style("font-style",function (d) {return e.k > 5 ? "italic" : "normal"})
-            .style("font-weight",function (d) {return e.k <= 5 ? "bold" : "plain"})
-            .style("text-anchor", "start")
+                    .style("font-style",function (d) {return e.k > 5 ? "italic" : "normal"})
+                    .style("font-weight",function (d) {return e.k <= 5 ? "bold" : "plain"})
+                    .style("text-anchor", "start")
 
 
 
@@ -105,7 +107,8 @@
                 'xscale': chart_data.x,
                 'width': width,
                 'height': height,
-                'xAxis': chart_data.xAxis
+                'xAxis': chart_data.xAxis,
+                'color_scale' :chart_data.color_scale
             })
         });
 
@@ -219,7 +222,7 @@
             .call(d3.axisLeft(y))
             .call(g => g.select(".domain").remove())
 
-        var color_scale = d3.scaleThreshold()
+        var color_scale = d3.scaleLinear()
             .domain(data_taxon(d3.zoomTransform(svg.node()).k)
                 .map(function (d) {return d.idx}))
             .range(["green", "blue", "red"]);
@@ -230,7 +233,6 @@
             .append('div')
             .attr('class', 'tooltip')
             .style('opacity', 0);
-
 
         svg.append("g")
             .attr("class", "bars")
@@ -277,7 +279,7 @@
 
 
 
-        return {'svg': svg, 'x': x, 'xAxis': xAxis};
+        return {'svg': svg, 'x': x, 'xAxis': xAxis,'color_scale':color_scale};
 
 
     };
