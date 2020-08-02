@@ -108,9 +108,11 @@
 
 
 
-         profile.visualize_all(".profile_vis_ref", ref, value_tax, value_sp);
+         var ref_prof = profile.visualize_all(".profile_vis_ref", ref, value_tax, value_sp);
 
-         profile.visualize_all(".profile_vis", value, value_tax, value_sp);
+
+
+         profile.visualize_all(".profile_vis", value, value_tax, value_sp, ref_prof);
 
 
 };

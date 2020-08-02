@@ -1,7 +1,7 @@
 (function (exports) {
     "use strict";
 
-    exports.visualize_all = function (class_of_entries, data, value_tax, value_sp, attr_name) {
+    exports.visualize_all = function (class_of_entries, data, value_tax, value_sp, external_profile, attr_name) {
 
 
         function zoom(svg, chart) {
@@ -76,14 +76,22 @@
             }
         }
 
-
         var margin = {top: 20, right: 20, bottom: 20, left: 20};
 
         if (attr_name === undefined) {
             attr_name = 'id';
         }
 
-        var array_chart = []
+        var array_chart;
+
+        if (external_profile === undefined) {
+             array_chart = []
+        }
+        else {
+
+            array_chart = external_profile
+
+        }
 
         $.each($(class_of_entries), function (each, value) {
 
@@ -109,9 +117,12 @@
 
         $.each(array_chart, function (idx, chart) {
 
+
             chart.chart.call(zoom, chart)
 
         });
+
+        return array_chart
 
     };
 
