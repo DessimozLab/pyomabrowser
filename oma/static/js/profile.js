@@ -91,6 +91,8 @@
             var width = container.offsetWidth - margin.left - margin.right,
                 height = 120 - margin.top - margin.bottom;
 
+            container.innerHTML ="";
+
             var chart_data = exports.run_profile_vis(container, data_item, value_tax, value_sp, margin, width, height);
 
             array_chart.push({
