@@ -172,7 +172,7 @@
         var data_taxon = function (zoom_level) {
 
 
-            if (zoom_level > 10) {
+            if (zoom_level > 20) {
                 return _50
             }
             else if (zoom_level > 5) {
@@ -220,10 +220,9 @@
             .call(g => g.select(".domain").remove())
 
         var color_scale = d3.scaleThreshold()
-            .domain(data_taxon(d3.zoomTransform(svg.node()).k).map(function (d) {
-                return d.idx
-            }))
-            .range(d3.schemeCategory10);
+            .domain(data_taxon(d3.zoomTransform(svg.node()).k)
+                .map(function (d) {return d.idx}))
+            .range(["green", "blue", "red"]);
 
         // Define the div for the tooltip
         const div = d3
@@ -248,7 +247,6 @@
             .attr("height", d => y(0) - y(1))
             .attr("width", x.bandwidth())
             .on('mouseover',
-
                 function (d) {
 
                     div.transition().duration(200).style('opacity', 0.9);
