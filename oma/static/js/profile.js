@@ -32,6 +32,7 @@
 
             /*
 
+
             var button_zoomin = document.getElementById("button_zoomin");
             button_zoomin.onclick = function() {
                 d3.select(svg).transition().call(zoom_d.scaleBy, 2)
@@ -51,8 +52,8 @@
                     .map(d => e.applyX(d)));
 
                 chart_e.chart.selectAll(".bars rect")
-                    .attr("x", function (d, i) {
-                        return chart_e.xscale(i)
+                    .attr("x", function (d) {
+                        return chart_e.xscale(d)
                     })
                     .attr("width", chart_e.xscale.bandwidth());
 
@@ -114,6 +115,17 @@
     exports.run_profile_vis = function (container, data_profile, taxon, species, margin, width, height) {
 
         if (!data_profile) return;
+
+        var filter_data = []
+
+        $.each(data_profile, function (idx, val) {
+
+            if (val === 1 ) {
+                filter_data.push(idx);
+            }
+
+        });
+
 
         var _root = [];
         var _200 = [];
@@ -217,24 +229,24 @@
         svg.append("g")
             .attr("class", "bars")
             .selectAll("rect")
-            .data(data_profile)
+            .data(filter_data)
             .join("rect")
-            .attr("x", function (d, i) {
-                return x(i)
+            .attr("x", function (d) {
+                return x(d)
             })
-            .attr("y", d => y(d))
-            .attr("fill", function (d, i) {
-                return color_scale(i)
+            .attr("y", d => y(1))
+            .attr("fill", function (d) {
+                return color_scale(d)
             })
-            .attr("height", d => y(0) - y(d))
+            .attr("height", d => y(0) - y(1))
             .attr("width", x.bandwidth())
             .on('mouseover',
 
-                function (d, i) {
+                function (d) {
 
                     div.transition().duration(200).style('opacity', 0.9);
                     div.html(sp_array.find(obj => {
-                        return obj.idx === i
+                        return obj.idx === d
                     }).name)
                         .style('left', d3.event.pageX + 'px')
                         .style('top', d3.event.pageY - 28 + 'px');
