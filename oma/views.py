@@ -1149,9 +1149,9 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
                 return json.JSONEncoder.default(self, obj)
 
 
-        results = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])[:10]
+        results = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
-        sim_hogs = results.similar
+        sim_hogs = results.similar[:10]
         sim_json = json.dumps(sim_hogs,  cls=NumpyEncoder)
 
         ref_profile = {"Reference": results.query_profile}

@@ -57,7 +57,12 @@
                     })
                     .attr("width", chart_e.xscale.bandwidth());
 
-                chart_e.chart.selectAll(".x-axis").call(chart_e.xAxis)
+                chart_e.chart.selectAll(".x-axis").call(chart_e.xAxis).selectAll("text")
+                    .style("text-anchor", "start")
+                .style("font-style",function (d) {return e.k > 5 ? "italic" : "normal"})
+            .style("font-weight",function (d) {return e.k <= 5 ? "bold" : "plain"})
+            .style("text-anchor", "start")
+
 
 
             }
@@ -264,7 +269,15 @@
             .attr("class", "x-axis")
             .call(xAxis)
             .selectAll("text")
+            .style("font-style",function (d) {return d3.zoomTransform(svg.node()).k > 5 ? "italic" : "normal"})
+            .style("font-weight",function (d) {return d3.zoomTransform(svg.node()).k <= 5 ? "bold" : "plain"})
+            .style("text-anchor", "start")
+
+
+
         svg.node();
+
+
 
         return {'svg': svg, 'x': x, 'xAxis': xAxis};
 
