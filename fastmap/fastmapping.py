@@ -33,7 +33,7 @@ class FastMappingApp(Application):
            requested_memory=20*GB)
 
     def __del__(self):
-        os.remove(self.cmdfile)
+        pass
 
     def terminated(self):
         if self.execution.signal == 0 and self.execution.exitcode == 0:
