@@ -64,6 +64,8 @@
 
     exports.run_header = function (ref_profile_data, taxon_data, species_data, _root) {
 
+
+
         // Reference Profile
 
         var container_ref = document.getElementById("Reference");
@@ -162,6 +164,7 @@
 
 
         var brush_xtent = [[margin2.left, margin2.top], [width - margin2.right, height - margin2.bottom]]
+
         var brush = d3.brushX()
             .extent(brush_xtent)
             .on("brush end", function () {
@@ -171,7 +174,7 @@
                         return "translate(" + s[i] + "," + -margin2.bottom + ")";
                     });
 
-                //brushed(s, ref_prof)
+                brushed(s, ref_prof)
             });
 
         var brushResizePath = function (d) {
@@ -180,7 +183,6 @@
                 y = (height -margin2.bottom -margin2.bottom)*2 ;
             return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
         };
-
 
         var gg = svg.append("g")
             .attr("class", "brush").call(brush)
@@ -194,32 +196,23 @@
             .attr("d", brushResizePath);
 
 
-
         svg.selectAll(".handle--custom").attr("transform", function (d, i) {
                         return "translate(" + brush_xtent[i][0]  + "," + -margin2.bottom  + ")";
                     });
 
-
-
-
-
         svg.node();
 
         function brushed(s, ref_prof) {
+
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+            var s = d3.event.selection
 
-            console.log(s, ref_prof.x)
 
-            //var s = d3.event.selection //|| ref_prof.x.range();
-            x.domain(
-                s.map(ref_prof.x.invert, ref_prof.x));
-            focus.select(".area").attr("d", area);
-            focus.select(".axis--x").call(xAxis);
-            svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
-                .scale(width / (ref_prof.s[1] - ref_prof.s[0]))
-                .translate(-ref_prof.s[0], 0));
+            ref_prof.svg.call(ref_prof.zoom.transform, d3.zoomIdentity
+            .scale(width / (s[1] - s[0]))
+            .translate(-s[0], 0));
 
-        }
+            }
 
 
     }
@@ -288,11 +281,42 @@
             }
         }
 
+        var zoom = d3.zoom()
+    .scaleExtent([1, Infinity])
+    .translateExtent([[0, 0], [width, height]])
+    .extent([[0, 0], [width, height]])
+    .on("zoom", zoomed);
+
+        function zoomed() {
+  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+
+
+
+        var e = d3.event.transform;
+
+              x.range([margin.left, width - margin.right]
+                    .map(d => e.applyX(d)));
+
+                svg.selectAll(".bars rect")
+                    .attr("x", function (d) {
+                        return x(d)
+                    })
+                    .attr("width", x.bandwidth());
+
+                svg.selectAll(".x-axis").call(xAxis).selectAll("text")
+                    .style("text-anchor", "start")
+                    .style("font-style",function (d) {return e.k > 5 ? "italic" : "normal"})
+                    .style("font-weight",function (d) {return e.k <= 5 ? "bold" : "plain"})
+                    .style("text-anchor", "start")
+
+}
+
 
         var svg = d3.select(container).append("svg")
             .attr("viewBox", [0, 0, width, height])
-        //.attr("preserveAspectRatio", "none" )
-
+            .attr("class" ,"zoom")
+            .call(zoom)
+            .on("mousedown.zoom", null)
 
         var x = d3.scaleBand()
             .domain(data_profile.map(function (d, i) {
@@ -386,7 +410,7 @@
         svg.node();
 
 
-        return {'svg': svg, 'x': x, 'xAxis': xAxis, 'color_scale': color_scale};
+        return {'svg': svg, 'x': x, 'xAxis': xAxis, 'color_scale': color_scale, 'zoom':zoom};
 
 
     };
