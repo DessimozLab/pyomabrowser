@@ -1,126 +1,228 @@
 (function (exports) {
     "use strict";
 
-    exports.visualize_all = function (class_of_entries, data, value_tax, value_sp, external_profile, attr_name) {
 
+    var margin = {top: 20, right: 20, bottom: 20, left: 20};
+    var attr_name = 'id';
+    var class_of_entries = ".profile_vis";
+    var class_ref = ".profile_vis_ref";
+    var class_overview = ".overview";
 
-        function zoom(svg, chart) {
+    exports.visualize_all = function (profile_data, taxon_data, species_data, ref_profile_data) {
 
-            const extent = [[margin.left, margin.top], [chart.width - margin.right, chart.height - margin.top]];
+        var _root = [];
+        var _200 = [];
+        var _50 = [];
 
-            var zoom_d = d3.zoom()
-                .scaleExtent([1, 50])
-                .translateExtent(extent)
-                .extent(extent)
-                .wheelDelta(function(d) {return -d3.event.deltaY * (d3.event.deltaMode ? 120 : 1) / 500})
-                .on("zoom", function () {
+        $.each(taxon_data, function (level, ltax) {
 
-                    var e = d3.event.transform;
+            if (level == 'root') {
 
-
-
-                    $.each(array_chart, function (idx, chart_e) {
-                        if (d3.event.sourceEvent instanceof MouseEvent || d3.event.sourceEvent instanceof WheelEvent) {
-
-                            chart_e.chart.call(zoom_d.transform, e)
+                $.each(ltax, function (name, idx) {
+                    _root.push({'idx': idx[0], 'taxon': name});
+                })
             }
 
-                        zoomed(e, chart_e)
-                    });
-                });
+            else if (level == '50') {
 
-            svg.call(zoom_d)
-
-            /*
-
-
-            var button_zoomin = document.getElementById("button_zoomin");
-            button_zoomin.onclick = function() {
-                d3.select(svg).transition().call(zoom_d.scaleBy, 2)
-            };
-
-            var button_zoomout = document.getElementById("button_zoomout");
-            button_zoomout.onclick = function() {
-                zoom_d.scaleBy(d3.select(svg), 0.5);
-            };
-
-            */
-
-
-            function zoomed(e, chart_e) {
-
-
-                chart_e.xscale.range([margin.left, chart_e.width - margin.right]
-                    .map(d => e.applyX(d)));
-
-                chart_e.chart.selectAll(".bars rect")
-                    .attr("x", function (d) {
-                        return chart_e.xscale(d)
-                    })
-                    .attr("width", chart_e.xscale.bandwidth());
-
-                chart_e.chart.selectAll(".x-axis").call(chart_e.xAxis).selectAll("text")
-                    .style("text-anchor", "start")
-                    .style("font-style",function (d) {return e.k > 5 ? "italic" : "normal"})
-                    .style("font-weight",function (d) {return e.k <= 5 ? "bold" : "plain"})
-                    .style("text-anchor", "start")
-
-
-
+                $.each(ltax, function (name, idx) {
+                    _50.push({'idx': idx[0], 'taxon': name});
+                })
             }
-        }
 
-        var margin = {top: 20, right: 20, bottom: 20, left: 20};
+            else if (level == '200') {
 
-        if (attr_name === undefined) {
-            attr_name = 'id';
-        }
+                $.each(ltax, function (name, idx) {
+                    _200.push({'idx': idx[0], 'taxon': name});
+                })
+            }
 
-        var array_chart;
+        });
 
-        if (external_profile === undefined) {
-             array_chart = []
-        }
-        else {
+        exports.run_header(ref_profile_data, taxon_data, species_data, _root)
 
-            array_chart = external_profile
-
-        }
 
         $.each($(class_of_entries), function (each, value) {
 
             // Retreive the entry ID
             var entry_id = $(this).attr(attr_name);
-            var data_item = data[entry_id];
+            var data_item = profile_data[entry_id];
             var container = this;
 
 
             var width = container.offsetWidth - margin.left - margin.right,
                 height = 120 - margin.top - margin.bottom;
 
-            container.innerHTML ="";
+            container.innerHTML = "";
 
-            var chart_data = exports.run_profile_vis(container, data_item, value_tax, value_sp, margin, width, height);
-
-            array_chart.push({
-                'chart': chart_data.svg,
-                'xscale': chart_data.x,
-                'width': width,
-                'height': height,
-                'xAxis': chart_data.xAxis,
-                'color_scale' :chart_data.color_scale
-            })
-        });
-
-        $.each(array_chart, function (idx, chart) {
-
-            chart.chart.call(zoom, chart)
+            var chart_data = exports.run_profile_vis(container, data_item, taxon_data, species_data, margin, width, height);
 
         });
 
-        return array_chart
 
     };
+
+    exports.run_header = function (ref_profile_data, taxon_data, species_data, _root) {
+
+        // Reference Profile
+
+        var container_ref = document.getElementById("Reference");
+
+        var width = container_ref.offsetWidth - margin.left - margin.right, height = 120 - margin.top - margin.bottom;
+
+        var ref_prof = exports.run_profile_vis(container_ref, ref_profile_data["Reference"], taxon_data, species_data, margin, width, height);
+
+
+        // MINIMAP
+
+        var container_overview = document.getElementById("overview");
+        var margin2 = {top: 5, right: 20, bottom: 15, left: 20};
+        var width = container_overview.offsetWidth - margin.left - margin.right,
+            height = 60 - margin2.top - margin2.bottom;
+        var data_taxon = _root
+
+        //
+        var data_profile = ref_profile_data["Reference"];
+        var filter_data = []
+
+        $.each(data_profile, function (idx, val) {
+
+            if (val === 1) {
+                filter_data.push(idx);
+            }
+
+        });
+
+        //
+        var svg = d3.select(container_overview).append("svg")
+            .attr("viewBox", [0, 0, width, height])
+
+        //
+        var x = d3.scaleBand()
+            .domain(data_profile.map(function (d, i) {
+                return i
+            }))
+            .range([margin2.left, width - margin2.right])
+            .padding(0.1)
+
+        //
+        var y = d3.scaleLinear()
+            .domain([0, 1])
+            .range([height - margin2.bottom, margin2.top])
+
+        //
+        var xAxis = g => g
+            .attr("transform", `translate(0,${height - margin2.bottom})`)
+            .call(d3.axisBottom(x)
+                .tickValues(data_taxon.map(function (d) {
+                    return d.idx
+                }))
+                .tickFormat(function (d) {
+                    var result = data_taxon.find(obj => {
+                        return obj.idx === d
+                    });
+                    return result.taxon;
+                }));
+
+        var yAxis = g => g
+            .attr("transform", `translate(${margin2.left},0)`)
+            .call(d3.axisLeft(y))
+            .call(g => g.select(".domain").remove())
+
+        //
+        var color_scale = d3.scaleLinear()
+            .domain(data_taxon.map(function (d) {
+                return d.idx
+            }))
+            .range(["green", "blue", "red"]);
+
+
+        svg.append("g")
+            .attr("class", "bars")
+            .selectAll("rect")
+            .data(filter_data)
+            .join("rect")
+            .attr("x", function (d) {
+                return x(d)
+            })
+            .attr("y", d => y(1))
+            .attr("fill", function (d) {
+                return color_scale(d)
+            })
+            .attr("height", d => y(0) - y(1))
+            .attr("width", x.bandwidth())
+
+        svg.append("g")
+            .attr("class", "x-axis")
+            .call(xAxis)
+            .selectAll("text")
+            .style("font", "8px times")
+            .style("font-weight", "bold")
+            .style("text-anchor", "start")
+
+
+        var brush_xtent = [[margin2.left, margin2.top], [width - margin2.right, height - margin2.bottom]]
+        var brush = d3.brushX()
+            .extent(brush_xtent)
+            .on("brush end", function () {
+                var s = d3.event.selection
+
+                d3.select(this).selectAll(".handle--custom").attr("transform", function (d, i) {
+                        return "translate(" + s[i] + "," + -margin2.bottom + ")";
+                    });
+
+                //brushed(s, ref_prof)
+            });
+
+        var brushResizePath = function (d) {
+            var e = +(d.type === "e"),
+                x = e ? 1 : -1,
+                y = (height -margin2.bottom -margin2.bottom)*2 ;
+            return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
+        };
+
+
+        var gg = svg.append("g")
+            .attr("class", "brush").call(brush)
+            .call(brush.move, x.range())
+
+            var gh = gg.selectAll(".handle--custom")
+            .data([{type: "w"}, {type: "e"}]).enter().append("path")
+            .attr("class", "handle--custom")
+            .attr("stroke", "#000")
+            .attr("cursor", "ew-resize")
+            .attr("d", brushResizePath);
+
+
+
+        svg.selectAll(".handle--custom").attr("transform", function (d, i) {
+                        return "translate(" + brush_xtent[i][0]  + "," + -margin2.bottom  + ")";
+                    });
+
+
+
+
+
+        svg.node();
+
+        function brushed(s, ref_prof) {
+            if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+
+            console.log(s, ref_prof.x)
+
+            //var s = d3.event.selection //|| ref_prof.x.range();
+            x.domain(
+                s.map(ref_prof.x.invert, ref_prof.x));
+            focus.select(".area").attr("d", area);
+            focus.select(".axis--x").call(xAxis);
+            svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+                .scale(width / (ref_prof.s[1] - ref_prof.s[0]))
+                .translate(-ref_prof.s[0], 0));
+
+        }
+
+
+    }
 
     exports.run_profile_vis = function (container, data_profile, taxon, species, margin, width, height) {
 
@@ -130,7 +232,7 @@
 
         $.each(data_profile, function (idx, val) {
 
-            if (val === 1 ) {
+            if (val === 1) {
                 filter_data.push(idx);
             }
 
@@ -189,6 +291,7 @@
 
         var svg = d3.select(container).append("svg")
             .attr("viewBox", [0, 0, width, height])
+        //.attr("preserveAspectRatio", "none" )
 
 
         var x = d3.scaleBand()
@@ -224,7 +327,9 @@
 
         var color_scale = d3.scaleLinear()
             .domain(data_taxon(d3.zoomTransform(svg.node()).k)
-                .map(function (d) {return d.idx}))
+                .map(function (d) {
+                    return d.idx
+                }))
             .range(["green", "blue", "red"]);
 
         // Define the div for the tooltip
@@ -269,17 +374,19 @@
             .attr("class", "x-axis")
             .call(xAxis)
             .selectAll("text")
-            .style("font-style",function (d) {return d3.zoomTransform(svg.node()).k > 5 ? "italic" : "normal"})
-            .style("font-weight",function (d) {return d3.zoomTransform(svg.node()).k <= 5 ? "bold" : "plain"})
+            .style("font-style", function (d) {
+                return d3.zoomTransform(svg.node()).k > 5 ? "italic" : "normal"
+            })
+            .style("font-weight", function (d) {
+                return d3.zoomTransform(svg.node()).k <= 5 ? "bold" : "plain"
+            })
             .style("text-anchor", "start")
-
 
 
         svg.node();
 
 
-
-        return {'svg': svg, 'x': x, 'xAxis': xAxis,'color_scale':color_scale};
+        return {'svg': svg, 'x': x, 'xAxis': xAxis, 'color_scale': color_scale};
 
 
     };

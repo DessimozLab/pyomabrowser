@@ -12,7 +12,7 @@
 <!-- Domain Visualisation -->
 <script src='{% static "js/profile.js" %}' type="text/javascript"></script>
 
-<link href='{% static "css/profile.css" %}' rel="stylesheet" type="text/css" />
+<link href='{% static "css/profile.css" %}' rel="stylesheet" type="text/css"/>
 
 {{ sim_data|json_script:"hello-data" }}
 {{ taxon_region|json_script:"tax-data" }}
@@ -23,111 +23,119 @@
 <div class="list-group-item ">
 
 
+    <div class="container ">
+        <div class="row">
+            <div class="col-2 my-auto text-center" style="padding: 0px">
 
-<div class="container ">
-  <div class="row">
-    <div class="col-2 my-auto text-center" style="padding: 0px">
+                <b>Reference</b>
 
-        <b>Reference</b>
+            </div>
 
-        <br>
-
-        <small style="color: #9d9d9d;">Use mouse to zoom/pan</small>
-
+            <div class="col">
 
 
-       <!--
-
-        <i class="material-icons" style="cursor: pointer; font-size:18px"  id="button_zoomout">zoom_out</i>
-       <i class="material-icons" style="cursor: pointer; font-size:18px"  id="button_zoomin">zoom_in</i>
-
-       -->
+                <div class="profile_vis_ref" id="Reference"></div>
 
 
+
+            </div>
+
+        </div>
+
+        <div class="row">
+
+             <div class="col-2 my-auto  text-right" style="padding: 0px">
+
+             <small style="color: #9d9d9d;">Use mini-profile <br> to zoom/pan</small>
+
+
+            </div>
+
+            <div class="col">
+
+                <div class="overview" id="overview">
+
+                </div>
+
+                </div>
+
+
+
+        </div>
     </div>
-    <div class="col  profile_vis_ref" id="Reference">
 
-    </div>
-
-  </div>
 </div>
-
-    </div>
 
 <br>
 
 
-<div  id="profile_container">
+<div id="profile_container">
 
 
- <ul class="list-group list-group-flush">
+    <ul class="list-group list-group-flush">
 
-  {% for  key, val in sim_data.items %}
+        {% for key, val in sim_data.items %}
 
-   <li class="list-group-item" >
+        <li class="list-group-item">
 
-    <div class="container">
-  <div class="row">
-    <div class="col-2 my-auto">
+            <div class="container">
+                <div class="row">
+                    <div class="col-2 my-auto">
+                        <strong>[{{forloop.counter}}]</strong>
+                        <script>   document.write(tablehooks.format_generic_group_id({{key}},{'type': "HOG"}));  </script>
+                    </div>
 
-        <strong>[{{forloop.counter}}]</strong> <script>   document.write(tablehooks.format_generic_group_id({{key}}, {'type':"HOG"}));  </script>
+                    <div class="col  profile_vis" id="{{ key }}">
+
+                        <img src="{% static " image/loading.gif" %}" alt="Loading profile...">
+
+                    </div>
+
+                </div>
+            </div>
 
 
-    </div>
-    <div class="col  profile_vis" id="{{ key }}">
+        </li>
 
-        <img  src="{% static "image/loading.gif" %}" alt="Loading profile...">
+        {% endfor %}
 
-    </div>
+    </ul>
 
-  </div>
+
 </div>
 
 
-   </li>
+<script>
 
-  {% endfor %}
+    $(function () {
+        "use strict";
+        var resizeDiv = function (object) {
+            object.height($(window).height() - 420);
+        };
 
-   </ul>
+
+        $(window).ready(function () {
+            resizeDiv($('#profile_container'));
+        });
+
+        $(window).bind("resize", function () {
+            resizeDiv($('#profile_container'));
+        });
+
+    });
+
+    window.onload = function () {
 
 
-    </div>
+        var value = JSON.parse(document.getElementById('hello-data').textContent);
+        var value_tax = JSON.parse(JSON.parse(document.getElementById('tax-data').textContent));
+        var value_sp = JSON.parse(JSON.parse(document.getElementById('species-data').textContent));
+        var ref = JSON.parse(JSON.parse(document.getElementById('ref-data').textContent));
+
+        profile.visualize_all(value, value_tax, value_sp, ref);
 
 
-    <script>
-
-        $(function () {
-    "use strict";
-    var resizeDiv = function (object) {
-        object.height($(window).height() - 350  );
     };
-
-
-    $(window).ready(function () {
-        resizeDiv($('#profile_container'));
-    });
-
-    $(window).bind("resize", function () {
-        resizeDiv($('#profile_container'));
-    });
-
-});
-
-     window.onload = function() {
-
-
-         var value = JSON.parse(document.getElementById('hello-data').textContent);
-         var value_tax = JSON.parse(JSON.parse(document.getElementById('tax-data').textContent));
-         var value_sp = JSON.parse(JSON.parse(document.getElementById('species-data').textContent));
-         var ref= JSON.parse(JSON.parse(document.getElementById('ref-data').textContent));
-
-
-         var ref_prof = profile.visualize_all(".profile_vis_ref", ref, value_tax, value_sp);
-         profile.visualize_all(".profile_vis", value, value_tax, value_sp, ref_prof);
-
-
-};
-
 
 
 </script>
