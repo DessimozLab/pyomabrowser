@@ -40,7 +40,7 @@ def fastmapping(request):
             print(do_compute)
 
             if do_compute:
-                res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.tgz".format(data_id))
+                res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.txt.gz".format(data_id))
                 res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
                 res = submit_mapping(data_id, res_file_abs, user_file_info['fname'])
                 r = FastMappingJobs(data_hash=data_id, state=res.state, result=res_file_rel,
