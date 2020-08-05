@@ -3,6 +3,7 @@
 
 
     var margin = {top: 20, right: 20, bottom: 20, left: 20};
+    var margin2 = {top: 5, right: 20, bottom: 15, left: 20};
     var attr_name = 'id';
     var class_of_entries = ".profile_vis";
     var class_ref = ".profile_vis_ref";
@@ -13,6 +14,8 @@
         var _root = [];
         var _200 = [];
         var _50 = [];
+        var array_chart = []
+        var width, height
 
         $.each(taxon_data, function (level, ltax) {
 
@@ -39,7 +42,9 @@
 
         });
 
-        exports.run_header(ref_profile_data, taxon_data, species_data, _root)
+        var minimap = exports.run_header(ref_profile_data, taxon_data, species_data, _root)
+
+
 
 
         $.each($(class_of_entries), function (each, value) {
@@ -50,41 +55,61 @@
             var container = this;
 
 
-            var width = container.offsetWidth - margin.left - margin.right,
+            width = container.offsetWidth - margin.left - margin.right,
                 height = 120 - margin.top - margin.bottom;
 
             container.innerHTML = "";
 
             var chart_data = exports.run_profile_vis(container, data_item, taxon_data, species_data, margin, width, height);
 
+            array_chart.push(chart_data)
+
         });
+
+        var container_ref = document.getElementById("Reference");
+
+        var container = document.getElementById("Reference");
+
+
+        //var width = container.offsetWidth - margin.left - margin.right,
+        //    height = 120 - margin.top - margin.bottom;
+
+        container.innerHTML = "";
+
+        var chart_data = exports.run_profile_vis(container, ref_profile_data['Reference'], taxon_data, species_data, margin, width, height);
+
+        array_chart.push(chart_data)
+
+
+
+        exports.bind_brush_and_zoom(minimap, array_chart)
+
+
+
 
 
     };
 
     exports.run_header = function (ref_profile_data, taxon_data, species_data, _root) {
 
-
-
         // Reference Profile
 
         var container_ref = document.getElementById("Reference");
 
-        var width = container_ref.offsetWidth - margin.left - margin.right, height = 120 - margin.top - margin.bottom;
-
-        var ref_prof = exports.run_profile_vis(container_ref, ref_profile_data["Reference"], taxon_data, species_data, margin, width, height);
-
+        var widthr = container_ref.offsetWidth - margin.left - margin.right, heightr = 120 - margin.top - margin.bottom;
 
         // MINIMAP
 
         var container_overview = document.getElementById("overview");
-        var margin2 = {top: 5, right: 20, bottom: 15, left: 20};
+
         var width = container_overview.offsetWidth - margin.left - margin.right,
             height = 60 - margin2.top - margin2.bottom;
         var data_taxon = _root
 
         //
         var data_profile = ref_profile_data["Reference"];
+
+
         var filter_data = []
 
         $.each(data_profile, function (idx, val) {
@@ -162,6 +187,24 @@
             .style("font-weight", "bold")
             .style("text-anchor", "start")
 
+        svg.node();
+
+            return [svg, x]
+
+    }
+
+    exports.bind_brush_and_zoom = function (minimap, array_chart) {
+
+
+
+        var svg = minimap[0]
+        var x = minimap[1]
+
+        var container_overview = document.getElementById("overview");
+
+        var width = container_overview.offsetWidth - margin.left - margin.right,
+            height = 60 - margin2.top - margin2.bottom;
+
 
         var brush_xtent = [[margin2.left, margin2.top], [width - margin2.right, height - margin2.bottom]]
 
@@ -174,7 +217,7 @@
                         return "translate(" + s[i] + "," + -margin2.bottom + ")";
                     });
 
-                brushed(s, ref_prof)
+                brushed(s, array_chart[0])
             });
 
         var brushResizePath = function (d) {
@@ -200,19 +243,20 @@
                         return "translate(" + brush_xtent[i][0]  + "," + -margin2.bottom  + ")";
                     });
 
-        svg.node();
-
         function brushed(s, ref_prof) {
 
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
             var s = d3.event.selection
 
+            $.each(array_chart, function (idx, chart_e) {
 
-            ref_prof.svg.call(ref_prof.zoom.transform, d3.zoomIdentity
-            .scale(width / (s[1] - s[0]))
-            .translate(-s[0], 0));
+                chart_e.svg.call(chart_e.zoom.transform, d3.zoomIdentity.scale(width / (s[1] - s[0])).translate(-s[0], 0));
+                chart_e.svg.on("wheel.zoom", null);
 
-            }
+            })
+
+        }
+
 
 
     }

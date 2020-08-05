@@ -1119,7 +1119,6 @@ class HOGInfo(HOG_Base, TemplateView):
 
         sh = []
 
-        print(context['hog_fam'])
 
         all_levels = utils.db.hog_levels_of_fam(context['hog_fam'],deduplicate_and_decode=True)
 
@@ -1149,13 +1148,10 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
                 return json.JSONEncoder.default(self, obj)
 
 
-
-
-
         results = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
         sim_hogs = results.similar
-        top_10_keys = list(sim_hogs.keys())[:10]
+        top_10_keys = list(sim_hogs.keys())
         top_10_hogs = {k: sim_hogs[k] for k in top_10_keys }
 
         sim_json = json.dumps(top_10_hogs, cls=NumpyEncoder)
