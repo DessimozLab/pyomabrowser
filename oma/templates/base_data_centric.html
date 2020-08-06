@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<div class="oma-details-header {% block header_color_class %} gene-orthology {% endblock %}">
+<div class="oma-details-header ">
 
     {% block header_body %} {% endblock%}
 
@@ -57,6 +57,53 @@
 
 
 
+</script>
+
+
+<script>
+
+
+
+    $(document).on("click",".toggle-visibility", function () {
+
+
+        var nav =   document.getElementById("sideNavMobile");
+        var content =   document.getElementsByClassName("oma-details-content")[0];
+        var toggle =   document.getElementsByClassName("toggle-visibility")[0];
+
+
+        if (nav.offsetWidth > 0) {
+
+            toggle.innerHTML = '&#8250;'
+
+            nav.setAttribute("style","width:0px");
+
+        content.setAttribute("style","margin-left:0px");
+
+        toggle.setAttribute("style","left:0px");
+
+
+        }
+
+        else {
+
+            toggle.innerHTML = "&#8249;"
+
+            nav.setAttribute("style","width:280px");
+
+        content.setAttribute("style","margin-left:300px");
+
+        toggle.setAttribute("style","left:280px");
+            }
+
+
+
+
+
+
+
+
+});
 </script>
 
 

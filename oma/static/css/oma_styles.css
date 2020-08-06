@@ -18,6 +18,10 @@ body {
 	 background: #333;
 	 border-color: #333;
 }
+
+ body .topnav{
+	 background-color: #ffffff !important;
+ }
  body nav .logos-navbar {
 	 padding: 10px;
 }
@@ -290,6 +294,7 @@ background: #f7f7f7;
 	 margin: 0;
 }
  body .oma-details-header {
+	 background-color: #f5f5f5;
 	 position: fixed;
 	 z-index: 1000;
 	 width: 100%;
@@ -342,26 +347,16 @@ background: #f7f7f7;
 	 display: none;
 }
  body .oma-details-container .oma-details-nav-left {
-	 /*position:fixed;
-	 width: 300px;
-	 height: 100%;
-	 background: #f8f9fa;
-	 overflow-y: scroll;
-	 height: calc(100% - 192px);
 
-
-	 left: -15px;
-
-	 */
 
 	 position: fixed;
     width: 280px;
 	 height: calc(100% - 285px);
     background: #f8f9fa;
 
-	 overflow-y: scroll;
+	 overflow-y: auto;
 
-    margin: 93px 0 0px;
+    margin: 76px 0 0;
     border-radius: 0 10px 10px 0;
     box-shadow: 13px 14px 20px -12px rgba(0,0,0,0.1);
 
@@ -470,7 +465,7 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
 	 margin: 0;
 }
  body .oma-details-container .oma-details-content {
-	 width: calc(100vw - 320px);
+	 width: auto ;
 	 margin-left: 300px;
 	 padding: 18px;
 }
@@ -724,8 +719,9 @@ transform: none !important;
 	}
 	 body .oma-details-header {
 		 position: relative;
-		 padding: 0;
+		 padding: 10px 10px 10px 26px;
 	}
+
 	 body .oma-details-header .oma-details-title {
 		 float: none;
 		 padding: 10px;
@@ -733,6 +729,7 @@ transform: none !important;
 	 body .oma-details-header .oma-details-title h2 {
 		 font-size: 1.4rem;
 	}
+
 	 body .oma-details-header .oma-details-title-buttons {
 		 display: block !important;
 		 float: none;
@@ -749,6 +746,8 @@ transform: none !important;
 	 body .oma-details-header .oma-details-title-buttons .btn.btn-light {
 		 border-left: 1px solid rgba(0, 0, 0, 0.1);
 	}
+
+
 	 body .oma-details-container {
 		 height: calc(100vh - 202px);
 		 margin: 15px 0 0;
@@ -1048,9 +1047,9 @@ margin: 0 0 10px !important;
 }
 
 .scroll4more svg {
-width: 48px;
+width: 28px;
 animation-name: pulsate;
-      animation-duration: 5s;
+      animation-duration: 4s;
       animation-iteration-count: infinite;
 }
 
@@ -1061,18 +1060,18 @@ font-size: .9rem;
 }
 
 .gene-orthology, .gene-orthology .selected {
-    background-color: #c0fbff  !important;
+    background-color: #50b7b3  !important;
 }
 
 .oma-group, .oma-group .selected {
-background-color: #ddebfa !important;
+background-color: #336799 !important;
 color: #222 !important;
 }
 
 .oma-group li a span { color: #222 !important; }
 
 .genome, .genome .selected {
-    background-color: #ffdddd !important;
+    background-color: #e32026 !important;
 }
 
 .content-section-title-entry{
@@ -1176,20 +1175,34 @@ color: #222 !important;
 
 }
 
-body .oma-details-container .oma-details-nav-left .genome li #filterSynteny { background: #faebeb; }
-body .oma-details-container .oma-details-nav-left .genome li #filterSimilar { background: #faebeb; }
+body .oma-details-container .oma-details-nav-left .genome li #filterSynteny {background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
+body .oma-details-container .oma-details-nav-left .genome li #filterSimilar { background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
 body .oma-details-container .oma-details-nav-left .genome li #filterSynteny div { background: transparent !important; }
 body .oma-details-container .oma-details-nav-left .genome li #filterSimilar div { background: transparent !important; }
 
 
-body .oma-details-container .oma-details-nav-left .oma-group li #filterOrthologs { background: #ddebfa; }
+body .oma-details-container .oma-details-nav-left .oma-group li #filterOrthologs { background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
 body .oma-details-container .oma-details-nav-left .oma-group li #filterOrthologs div { background: transparent !important; }
-body .oma-details-container .oma-details-nav-left .oma-group li #filterSimilar { background: #d7fdff; }
+body .oma-details-container .oma-details-nav-left .oma-group li #filterSimilar { background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
 body .oma-details-container .oma-details-nav-left .oma-group li #filterSimilar div { background: transparent !important; }
 
-body .oma-details-container .oma-details-nav-left .gene-orthology li #filterOrthologs { background: #e9fafb; }
+body .oma-details-container .oma-details-nav-left .gene-orthology li #filterOrthologs {
+	background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px;}
 body .oma-details-container .oma-details-nav-left .gene-orthology li #filterOrthologs div { background: transparent !important; }
-body .oma-details-container .oma-details-nav-left .gene-orthology li #filterParalogs { background: #e9fafb; }
+
+body .oma-details-container .oma-details-nav-left .gene-orthology li #filterParalogs { background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
 body .oma-details-container .oma-details-nav-left .gene-orthology li #filterParalogs div { background: transparent !important; }
 
 
@@ -1197,8 +1210,6 @@ body .oma-details-container .oma-details-nav-left .gene-orthology li #filterPara
 .search_entry {
 	border: none !important;
 }
-
-
 
 .search_entry h5 {
 	background-color: #e9fafb;
@@ -1234,6 +1245,60 @@ body .oma-details-container .oma-details-nav-left .gene-orthology li #filterPara
       animation-duration: 2s;
       animation-iteration-count: infinite;
 }
+
+
+	 .group_title {
+		 border-left: 14px solid  #336799;
+			padding: 0 6px 0;
+	}
+	 .genome_title {
+		 border-left: 14px solid  #e32026;
+			padding: 0 6px 0;
+	}
+	 .gene_title {
+		 border-left: 14px solid  #50b7b3;
+			padding: 0 6px 0;
+	}
+
+
+	 .gene_back{
+		 background-color:  #50b7b3 !important;
+	 }
+.genome_back{
+		 background-color:  #e32026 !important;
+	 }
+.group_back{
+		 background-color:  #336799 !important;
+	 }
+
+
+	 .gene_color{
+		 color:  #50b7b3 !important;
+	 }
+.genome_color{
+		 color:  #e32026 !important;
+	 }
+.group_color{
+		 color:  #336799 !important;
+	 }
+
+
+.badge-info { color: #fff; background-color: rgba(255, 255, 255, 0.2); }
+
+.toggle-visibility {
+
+position: fixed;
+left: 280px;
+top: 65%;
+padding: 10px 4px;
+background: #e6e7e8;
+color: black;
+border-radius: 0 4px 4px 0;
+
+}
+
+
+
 
 
 
