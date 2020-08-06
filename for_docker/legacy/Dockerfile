@@ -15,6 +15,7 @@ RUN apt-get -qq update \
        uwsgi \
        uwsgi-core \
        uwsgi-plugin-python \
+       libcgi-session-perl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY uwsgi.conf /etc/oma-uwsgi.conf
