@@ -2,7 +2,7 @@
 
 {% block title %}Genome {{genome.uniprot_species_code}}{% endblock %}
 
-{% block header_color_class %} genome {% endblock %}
+{% block header_color_class %}  {% endblock %}
 
 {% block header_body %}
 
@@ -11,7 +11,7 @@
 
     <div class="oma-details-title">
 
-        <h2> {{  genome.uniprot_species_code }} - {{ genome.sciname }} </h2>
+        <h2 class="genome_title"> {{  genome.uniprot_species_code }} - {{ genome.sciname }} </h2>
         <p> <b>Proteome version: </b>{{ genome.release }} with <strong>{{ genome.nr_entries }} proteins.</strong> </p>
     </div>
 </div>

@@ -3,15 +3,15 @@
 
 {% block title %}Entry {{entry.omaid}}{% endblock %}
 
-{% block header_color_class %} gene-orthology {% endblock %}
+{% block header_color_class %} {% endblock %}
 
 {% block header_body %}
 
 
 <div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
 
-    <div class="oma-details-title">
-    <h2>Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %}</h2>
+    <div class="oma-details-title ">
+    <h2 class="gene_title">Entry {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %}</h2>
 
     <p>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} {{entry.genome.species}}
         {{entry.genome.strain}}
@@ -20,8 +20,8 @@
 
     </div>
 
-    <div class="ml-auto oma-details-title-buttons">
-      <button class="btn btn-default dropdown-toggle " data-toggle="dropdown"
+    <div class="ml-auto oma-details-title-buttons ">
+      <button class="btn btn-default dropdown-toggle gene_color " data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="false"> Groups
     </button>
 
@@ -36,7 +36,7 @@
 
     </div>
 
-    <button class="btn btn-default "><a href="{% url 'genome_info' entry.genome.uniprot_species_code %}">Genome</a>
+    <button class="btn btn-default "><a class="gene_color" href="{% url 'genome_info' entry.genome.uniprot_species_code %}">Genome</a>
     </button>
 
         </div>
@@ -53,6 +53,52 @@
     {% block contentTab %} {% endblock contentTab %}
 
 </div>
+
+<script>
+
+
+
+    $(document).on("click",".toggle-visibility", function () {
+
+
+        var nav =   document.getElementById("sideNavMobile");
+        var content =   document.getElementsByClassName("oma-details-content")[0];
+        var toggle =   document.getElementsByClassName("toggle-visibility")[0];
+
+
+        if (nav.offsetWidth > 0) {
+
+            toggle.innerHTML = '&#8250;'
+
+            nav.setAttribute("style","width:0px");
+
+        content.setAttribute("style","margin-left:0px");
+
+        toggle.setAttribute("style","left:0px");
+
+
+        }
+
+        else {
+
+            toggle.innerHTML = "&#8249;"
+
+            nav.setAttribute("style","width:280px");
+
+        content.setAttribute("style","margin-left:300px");
+
+        toggle.setAttribute("style","left:280px");
+            }
+
+
+
+
+
+
+
+
+});
+</script>
 
 
 

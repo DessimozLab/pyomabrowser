@@ -4,7 +4,7 @@
 {% block title %}HOG {{hog_id}} ontology{% endblock %}
 
 
-{% block header_color_class %} oma-group {% endblock %}
+{% block header_color_class %} group_title {% endblock %}
 
 {% block header_body %}
 
@@ -12,9 +12,9 @@
 <div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
  {% if is_subhog %}
 
-        <div class="oma-details-title">
+        <div class="oma-details-title  ">
 
-        <h2> Sub-HOG {{ hog_id }} with {{ members|length }} members   </h2>
+        <h2 class="group_title"> Sub-HOG {{ hog_id }} with {{ members|length }} members   </h2>
 
         <p>Level of Emergence:  <a href="{% url 'ancestralgenome_info' level %}">{{level}}</a>   </p>
 
@@ -33,7 +33,7 @@
 
      <div class="oma-details-title">
 
-        <h2>Root-HOG {{ hog_id }} with {{ members|length }} members   </h2>
+        <h2 class="group_title">Root-HOG {{ hog_id }} with {{ members|length }} members   </h2>
 
         <p>Root level: {{level}} </p>
 

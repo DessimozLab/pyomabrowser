@@ -3,7 +3,6 @@
 
 {% block title %}OMA group {{omagroup.group_nbr}} {% endblock %}
 
-{% block header_color_class %} oma-group {% endblock %}
 
 {% block header_body %}
 
@@ -11,7 +10,7 @@
 <div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
 
     <div class="oma-details-title">
-    <h2>OMA GROUP {{ omagroup.group_nbr }} with {{ nr_member }} members.</h2>
+    <h2 class="group_title">OMA GROUP {{ omagroup.group_nbr }} with {{ nr_member }} members.</h2>
 
     <p>Fingerprint: {{ omagroup.fingerprint }}</p>
 

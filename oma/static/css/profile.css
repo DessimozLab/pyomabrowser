@@ -1,9 +1,37 @@
 
 .profile_vis svg {
-  height: 120px; /* This can be changed. */
+  height: 80px;
   width:  100%;
   min-width: 200px;
 }
 
-  /* Colour of sequnce line */
-  .profile_vis svg .profile { fill: #4F4F4F; }
+.overview svg {
+  height: 50px;
+  width:  100%;
+  min-width: 200px;
+}
+
+div.tooltip {
+  color: white;
+  position: absolute;
+  text-align: center;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: rgba(0,0,0,.8);
+  border: 2px solid black;
+  pointer-events: none;
+}
+
+.selection  {
+  stroke-width: 0px;
+  fill-opacity: 0.08;
+}
+
+#profile_container {
+
+  overflow-y: scroll;
+
+}
+
+
+.profile_vis svg .profile { fill: #4F4F4F; }
