@@ -772,7 +772,10 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         intersect = annos1_anc.intersection(annos2_anc)
         union = annos1_anc.union(annos2_anc)
 
-        return len(intersect) / len(union)
+        if (len(union)):
+            return len(intersect) / len(union)
+        else:
+            return 0
 
     def get(self, request, *args, **kwargs):
         offset = int(request.GET.get('offset', 0))
@@ -783,9 +786,11 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         data = [x for x in self.to_json_dict(context['fam_members'])]
         num_genes = len(genes_to_use)
         dist_matrix = utils.gen_numpy_matrix(num_genes, num_genes)
-        for p1 in range(num_genes):
-            for p2 in range(num_genes):
-                dist_matrix[p1][p2] = 1 - self.find_similarity(genes_to_use[p1][0], genes_to_use[p2][0])
+        for p1 in range(0, num_genes):
+            for p2 in range(p1+1, num_genes):
+                score = 1 - self.find_similarity(genes_to_use[p1][0], genes_to_use[p2][0])
+                dist_matrix[p1][p2] = score
+                dist_matrix[p2][p1] = score
 
         positions = utils.mds.fit(dist_matrix).embedding_
         lst = positions.tolist()
