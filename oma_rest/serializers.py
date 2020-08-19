@@ -124,7 +124,7 @@ class IsoformProteinSerializer(ProteinEntrySerializer):
     def get_locus(self, obj):
         return obj.exons.as_list_of_dict()
 
-    def nr_exons(self, obj):
+    def get_nr_exons(self, obj):
         return len(obj.exons)
 
 
