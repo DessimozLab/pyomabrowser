@@ -100,6 +100,8 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
                                                          lookup_url_kwarg='group_id', nullvalues=[0])
     oma_hog_members = OptionalHyperlinkedIdentityField(view_name='hog-members', lookup_field='oma_hog',
                                                            lookup_url_kwarg='hog_id', nullvalues=('', b''))
+    isoforms = serializers.HyperlinkedIdentityField(view_name="protein-isoforms", read_only=True,
+                                                    lookup_field="entry_nr", lookup_url_kwarg='entry_id')
     alternative_isoforms_urls = serializers.ListSerializer(
         child=serializers.HyperlinkedIdentityField(view_name='protein-detail', lookup_field='entry_nr',
                                                    lookup_url_kwarg='entry_id', read_only=True),
@@ -113,6 +115,17 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
             if lev.encode('ascii') in db.tax.all_hog_levels and lev in levs_of_fam:
                 levels.append(lev)
         return levels
+
+
+class IsoformProteinSerializer(ProteinEntrySerializer):
+    locus = serializers.SerializerMethodField(method_name=None)
+    nr_exons = serializers.SerializerMethodField(method_name=None)
+
+    def get_locus(self, obj):
+        return obj.exons.as_list_of_dict()
+
+    def nr_exons(self, obj):
+        return len(obj.exons)
 
 
 class OrthologsListSerializer(ProteinEntrySerializer):

@@ -205,6 +205,28 @@ class ProteinEntryViewSet(ViewSet):
         return Response(response)
 
     @action(detail=True)
+    def isoforms(self, request, entry_id=None, format=None):
+        """List of isoforms for a protein.
+
+        The result contains a list of proteins with information on
+        their locus and and exon structure for all the isoforms
+        recored in OMA belonging to the gene of the query protein.
+
+        ---
+        parameters:
+          - name: entry_id
+            description: an unique identifier for a protein - either it
+                         entry number, omaid or its canonical id
+        """
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
+        proteins = [models.ProteinEntry(utils.db, e)
+                    for e in utils.db.get_splicing_variants(entry_nr)]
+        serializer = serializers.IsoformProteinSerializer(
+            instance=proteins, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+    @action(detail=True)
     def xref(self, request, entry_id=None, format=None):
         """List of cross-references for a protein.
         ---
