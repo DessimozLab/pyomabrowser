@@ -10,6 +10,7 @@ from builtins import range
 import hashlib
 import collections
 import pandas as pd
+import sklearn
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
@@ -784,25 +785,119 @@ class FamBase(ContextMixin, EntryCentricMixin):
         famhog_id = utils.db.format_hogid(utils.db.hog_family(entry.entry_nr))
         fam_members = list(utils.db.iter_members_of_hog_id(famhog_id, start, stop))
         context.update({'entry': entry, 'fam_members': fam_members})
-        return context
+        genes_to_use = []
+        for gene in fam_members:
+            genes_to_use.append([gene.entry_nr, gene.omaid])
+        return context, genes_to_use
 
 
 class FamGeneDataJson(FamBase, JsonModelMixin, View):
     json_fields = {'entry_nr': 'id', 'omaid': 'protid', 'sequence_length': None,
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'gc_content': None}
+                   'canonicalid': 'xrefid', 'gc_content': None, 'nr_exons': None}
+
+    def find_similarity(self, prot1, prot2):
+        annos1 = utils.db.get_gene_ontology_annotations(entry_nr=utils.id_resolver.resolve(prot1), as_dataframe=False)
+        annos2 = utils.db.get_gene_ontology_annotations(entry_nr=utils.id_resolver.resolve(prot2), as_dataframe=False)
+        annos1_set = set(annos1[:]['TermNr'])
+        annos2_set = set(annos2[:]['TermNr'])
+
+        annos1_anc = set()
+        for t in annos1_set:
+            for t1 in utils.db.gene_ontology.get_superterms_incl_queryterm(t):
+                annos1_anc.add(t1)
+        annos2_anc = set()
+        for t in annos2_set:
+            for t1 in utils.db.gene_ontology.get_superterms_incl_queryterm(t):
+                annos2_anc.add(t1)
+
+        intersect = annos1_anc.intersection(annos2_anc)
+        union = annos1_anc.union(annos2_anc)
+
+        if (len(union)):
+            return len(intersect) / len(union)
+        else:
+            return 0
 
     def get(self, request, *args, **kwargs):
         offset = int(request.GET.get('offset', 0))
         limit = request.GET.get('limit', None)
         if limit is not None:
             limit = offset + int(limit)
-        context = self.get_context_data(start=offset, stop=limit, **kwargs)
+        context, genes_to_use = self.get_context_data(start=offset, stop=limit, **kwargs)
         data = [x for x in self.to_json_dict(context['fam_members'])]
+        num_genes = len(genes_to_use)
+        dist_matrix = utils.gen_numpy_matrix(num_genes, num_genes)
+        for p1 in range(0, num_genes):
+            for p2 in range(p1+1, num_genes):
+                score = 1 - self.find_similarity(genes_to_use[p1][0], genes_to_use[p2][0])
+                dist_matrix[p1][p2] = score
+                dist_matrix[p2][p1] = score
+
+        positions = utils.mds.fit(dist_matrix).embedding_
+        lst = positions.tolist()
+        for g in range(num_genes):
+            data[g].update({'similarity':lst[g][0]})
         response = JsonResponse(data, safe=False)
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
+# class GeneSimilarityBase(ContextMixin, EntryCentricMixin):
+#
+#     def get_context_data(self, entry_id, start=0, stop=None, **kwargs):
+#         # context = super(GeneSimilarityBase, self).get_context_data(**kwargs)
+#         entry = self.get_entry(entry_id)
+#         famhog_id = utils.db.format_hogid(utils.db.hog_family(entry.entry_nr))
+#         fam_members = list(utils.db.iter_members_of_hog_id(famhog_id, start, stop))
+#         genes_to_use = []
+#         for gene in fam_members:
+#             genes_to_use.append([gene.entry_nr, gene.omaid])
+#         # context.update({'entry': entry, 'fam_members': fam_members})
+#         return genes_to_use
+
+
+# class GeneSimilarityDataJson(GeneSimilarityBase, JsonModelMixin, View):
+#     json_fields = {'entry_nr': 'id', 'omaid': 'protid', 'similarity': None}
+#
+#     def find_similarity(self, prot1, prot2):
+#         annos1 = utils.db.get_gene_ontology_annotations(entry_nr=utils.id_resolver.resolve(prot1), as_dataframe=False)
+#         annos2 = utils.db.get_gene_ontology_annotations(entry_nr=utils.id_resolver.resolve(prot2), as_dataframe=False)
+#         annos1_set = set(annos1[:]['TermNr'])
+#         annos2_set = set(annos2[:]['TermNr'])
+#
+#         annos1_anc = set()
+#         for t in annos1_set:
+#             for t1 in utils.db.gene_ontology.get_superterms_incl_queryterm(t):
+#                 annos1_anc.add(t1)
+#         annos2_anc = set()
+#         for t in annos2_set:
+#             for t1 in utils.db.gene_ontology.get_superterms_incl_queryterm(t):
+#                 annos2_anc.add(t1)
+#
+#         intersect = annos1_anc.intersection(annos2_anc)
+#         union = annos1_anc.union(annos2_anc)
+#
+#         return len(intersect) / len(union)
+#
+#     def get(self, request, *args, **kwargs):
+#         offset = int(request.GET.get('offset', 0))
+#         limit = request.GET.get('limit', None)
+#         if limit is not None:
+#             limit = offset + int(limit)
+#         genes_to_use = self.get_context_data(start=offset, stop=limit, **kwargs)
+#         #data = [x for x in self.to_json_dict(context['fam_members'])]
+#         num_genes = len(genes_to_use)
+#         dist_matrix = utils.gen_numpy_matrix(num_genes, num_genes)
+#         for p1 in range(num_genes):
+#             for p2 in range(num_genes):
+#                 dist_matrix[p1][p2] = 1 - self.find_similarity(genes_to_use[p1][0], genes_to_use[p2][0])
+#
+#         positions = utils.mds.fit(dist_matrix).embedding_
+#         lst = [{'id': gid[0], 'protid': gid[1], 'similarity': gsimi[0]} for gid, gsimi in zip(genes_to_use, positions.tolist())]
+#
+#         response = JsonResponse(lst, safe=False)
+#         response['Access-Control-Allow-Origin'] = '*'
+#         return response
 
 class InfoView(InfoBase, TemplateView):
     template_name = "entry_info.html"

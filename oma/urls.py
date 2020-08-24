@@ -95,6 +95,10 @@ urlpatterns = [
         views.HOGsMSA.as_view(), name='hogs_msa'),
     url(r'^hogdata/(?P<entry_id>\w+)/json', views.FamGeneDataJson.as_view(), name="fam_genedata"),
 
+    # Gene Similarity
+    # url(r'^genesimilarity/(?P<entry_id>\w+)/json', views.GeneSimilarityDataJson.as_view(), name="gene_similarity"),
+
+
     # OMA Groups via Entry
     url(r'^group/(?P<entry_id>\w+)/$', views.EntryCentricOMAGroup.as_view(), name="omagroup-entry"),
     url(r'^group/(?P<entry_id>\w+)/msa/$', views.EntryCentricOMAGroupMSA.as_view(), name="omagroup-entry-msa"),

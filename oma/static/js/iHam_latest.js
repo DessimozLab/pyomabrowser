@@ -9728,6 +9728,8 @@ function iHam() {
     label_height: 20
   };
 
+
+
   var theme = function theme(div) {
     var data = parse_orthoxml(config.newick, config.orthoxml);
     var data_per_species = data.per_species;
@@ -9736,11 +9738,14 @@ function iHam() {
     config.fam_data.forEach(function (gene) {
       fam_data_obj[gene.id] = {
         gc_content: gene.gc_content,
+        nr_exons: gene.nr_exons,
         id: gene.id,
         protid: gene.protid,
         sequence_length: gene.sequence_length,
         taxon: gene.taxon,
-        xrefid: gene.xrefid
+        xrefid: gene.xrefid,
+        similarity: gene.similarity,
+        go_terms: ""
       };
     });
     d3.select(div).style("position", "relative");
@@ -10013,6 +10018,9 @@ module.exports = iHam;
 },{"./features":39,"./hog_state":40,"./tooltips":42,"./utils.js":43,"./xcoords":44,"iham-parsers":9,"tnt.api":36}],42:[function(require,module,exports){
 "use strict";
 
+
+
+
 var _mouse_over_node = void 0;
 var _tree_node_tooltip = void 0;
 var _gene_tooltip = void 0;
@@ -10090,13 +10098,77 @@ module.exports = {
     display: function display(gene, div, mouseover) {
       var obj = {};
       obj.header = gene.gene.protid;
+
+      function fetch_annots(gene_tooltip_obj, protid, mouseover){
+          $.ajax({
+            type:'get',
+            url: 'https://omabrowser.org/api/protein/' + protid + '/gene_ontology/?format=json',
+            dataType:'json',
+            success: function(data) {
+
+                var seen = new Set();
+                var go_annots = []
+                $.each(data, function(i, item) {
+                    // console.log(item.GO_term);
+                    //temp = temp + item.GO_term + " - " + item.name;
+                    if (!seen.has(item.GO_term)){
+                        go_annots.push({id: item.GO_term, name: item.name});
+                        seen.add(item.GO_term);
+                    }
+                });
+
+                if(go_annots.length==0) {
+                    go_annots.push({id: "N/A", name: "N/A"});
+                }
+
+                gene.gene.go_terms = go_annots;
+                // gene_tooltip_obj.call.display(gene, div, mouseover);
+                var rect = gene_tooltip_obj.getBoundingClientRect();
+
+                // console.log(type_event);
+
+                var type_event = "click";
+                if(mouseover){
+                  type_event = "mouseover";
+                }
+                var evt = new MouseEvent(type_event, {bubbles: true, clientX: rect.right, clientY: rect.bottom});
+                gene_tooltip_obj.dispatchEvent(evt);
+
+            },
+            error: function(request,status,errorThrown) {
+              console.log("YES");
+                gene.gene.go_terms = [{id: "N/A", name: "N/A"}];
+                // gene_tooltip_obj.call.display(gene, div, mouseover);
+                var rect = gene_tooltip_obj.getBoundingClientRect();
+
+                // console.log(type_event);
+
+                var type_event = "click";
+                if(mouseover){
+                  type_event = "mouseover";
+                }
+                var evt = new MouseEvent(type_event, {bubbles: true, clientX: rect.right, clientY: rect.bottom});
+                gene_tooltip_obj.dispatchEvent(evt);
+
+            }
+        });
+      };
+
+      if(gene.gene.go_terms==""){
+        fetch_annots(this, gene.gene.protid, mouseover);
+      }
+
       obj.rows = [];
       obj.rows.push({
         label: "Name",
         value: gene.gene.xrefid
       });
+      obj.rows.push({label:"GO Annotations"});
+      $.each(gene.gene.go_terms, function(i, item){
+          obj.rows.push({label: item.id, value: item.name});
+      });
 
-      _gene_tooltip = tooltip.table().width(120).id('gene_tooltip').container(div);
+      _gene_tooltip = tooltip.table().width(240).id('gene_tooltip').container(div);
 
       if (mouseover) {
         _gene_tooltip.show_closer(false);
