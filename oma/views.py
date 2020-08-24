@@ -810,7 +810,7 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         if len(genes_to_use) < 200:
             go_annots_not_fetched, gene_similarity_vals = utils.db.get_gene_similarities_hog(hog_id)
             for g, gene in enumerate(genes_to_use):
-                if gene in go_annots_not_fetched:
+                if gene[0] in go_annots_not_fetched:
                     data[g].update({'similarity': None})
                 else:
                     data[g].update({'similarity': gene_similarity_vals[gene[0]]})
