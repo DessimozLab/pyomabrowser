@@ -226,7 +226,8 @@ else:
     STATIC_ROOT = os.path.join(
     os.getenv('DARWIN_BROWSER_REPO_PATH',
               os.path.join(os.path.expanduser("~"), "Browser")),
-    "htdocs")
+    "htdocs",
+    "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, '../../media'))
 
