@@ -765,14 +765,13 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         context, genes_to_use, hog_id = self.get_context_data(start=offset, stop=limit, **kwargs)
         data = [x for x in self.to_json_dict(context['fam_members'])]
 
-        # go_annots_not_fetched, gene_similarity_vals = utils.db.get_gene_similarities_hog(hog_id)
-        # for g, gene in enumerate(genes_to_use):
-        #     if gene in go_annots_not_fetched:
-        #         data[g].update({'similarity':})
-        #     else:
-        #         data[g].update({'similarity': gene_similarity_vals[gene]})
-
-
+        if len(genes_to_use) < 200:
+            go_annots_not_fetched, gene_similarity_vals = utils.db.get_gene_similarities_hog(hog_id)
+            for g, gene in enumerate(genes_to_use):
+                if gene in go_annots_not_fetched:
+                    data[g].update({'similarity':})
+                else:
+                    data[g].update({'similarity': gene_similarity_vals[gene]})
 
         response = JsonResponse(data, safe=False)
         response['Access-Control-Allow-Origin'] = '*'
