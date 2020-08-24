@@ -813,7 +813,7 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
                 if gene in go_annots_not_fetched:
                     data[g].update({'similarity': None})
                 else:
-                    data[g].update({'similarity': gene_similarity_vals[gene]})
+                    data[g].update({'similarity': gene_similarity_vals[gene[0]]})
 
         response = JsonResponse(data, safe=False)
         response['Access-Control-Allow-Origin'] = '*'
