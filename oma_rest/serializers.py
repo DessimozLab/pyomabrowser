@@ -248,6 +248,10 @@ class HOGsBaseSerializer(ReadOnlySerializer):
 
 class HOGsListSerializer(HOGsBaseSerializer):
     roothog_id = serializers.IntegerField()
+    similar_profile_hogs = serializers.HyperlinkedIdentityField(
+        view_name="hog-similar-profile-hogs",
+        lookup_field="roothog_id",
+        lookup_url_kwarg="hog_id")
 
 
 class HOGsLevelDetailSerializer(HOGsListSerializer):
@@ -259,6 +263,15 @@ class HOGMembersListSerializer(ReadOnlySerializer):
     hog_id = serializers.CharField()
     level = serializers.CharField()
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
+
+
+class HOGandPatternSerializer(HOGsBaseSerializer):
+    in_species = serializers.ListSerializer(child=serializers.CharField())
+
+
+class HOGsSimilarProfileSerializer(HOGsListSerializer):
+    in_species = serializers.ListSerializer(child=serializers.CharField())
+    similar_profile_hogs = serializers.ListSerializer(child=HOGandPatternSerializer())
 
 
 class DomainSerializer(ReadOnlySerializer):
