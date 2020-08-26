@@ -181,10 +181,9 @@
 
                 $.getJSON("{{load_full_data}}", function (jsonData) {
 
-
-
                 need_load = false;
                 tab.bootstrapTable('load', jsonData );
+                tab.bootstrapTable({'pagination': true, });
 
                 $("#toolbar").remove();
 
