@@ -57,6 +57,7 @@ class ProteinEntryViewSet(ViewSet):
         returned for this query element.
         ---
         parameters:
+
           - name: ids
             description: A list of ids of proteins to retrieve
             location: body
@@ -85,6 +86,7 @@ class ProteinEntryViewSet(ViewSet):
         Retrieve the information available for a protein entry.
         ---
         parameters:
+
           - name: entry_id
             description: an unique identifier for a protein - either it
                          entry number, omaid or its canonical id
@@ -104,6 +106,7 @@ class ProteinEntryViewSet(ViewSet):
         query parameter.
         ---
         parameters:
+
           - name: entry_id
             description: an unique identifier for a protein - either it
                          entry number, omaid or its canonical id
@@ -137,6 +140,7 @@ class ProteinEntryViewSet(ViewSet):
 
         ---
         parameters:
+
           - name: entry_id
             description: an unique identifier for a protein - either it
                          entry number, omaid or its canonical id
@@ -153,6 +157,7 @@ class ProteinEntryViewSet(ViewSet):
 
         ---
         parameters:
+
           - name: entry_id
             description: an unique identifier for a protein - either its
                          entry number, omaid or canonical id."""
@@ -174,6 +179,7 @@ class ProteinEntryViewSet(ViewSet):
         """Gene ontology information available for a protein.
         ---
         parameters:
+
           - name: entry_id
             description: an unique identifier for a protein - either its
                          entry number, omaid or its canonical id
@@ -205,10 +211,34 @@ class ProteinEntryViewSet(ViewSet):
         return Response(response)
 
     @action(detail=True)
+    def isoforms(self, request, entry_id=None, format=None):
+        """List of isoforms for a protein.
+
+        The result contains a list of proteins with information on
+        their locus and and exon structure for all the isoforms
+        recored in OMA belonging to the gene of the query protein.
+
+        ---
+        parameters:
+
+          - name: entry_id
+            description: an unique identifier for a protein - either it
+                         entry number, omaid or its canonical id
+        """
+        entry_nr = resolve_protein_from_id_or_raise(entry_id)
+        proteins = [models.ProteinEntry(utils.db, e)
+                    for e in utils.db.get_splicing_variants(entry_nr)]
+        serializer = serializers.IsoformProteinSerializer(
+            instance=proteins, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+    @action(detail=True)
     def xref(self, request, entry_id=None, format=None):
         """List of cross-references for a protein.
         ---
         parameters:
+
           - name: entry_id
             description: an unique identifier for a protein - either it
                          entry number, omaid or its canonical id
@@ -238,6 +268,7 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
         """Retrieve the information available for a given OMA group.
         ---
         parameters:
+
           - name: group_id
             description: an unique identifier for an OMA group - either its
                          group number, its fingerprint or an entry id of one
@@ -276,6 +307,7 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
         """Retrieve the sorted list of closely related groups for a given OMA group.
         ---
         parameters:
+
           - name: group_id
             description: an unique identifier for an OMA group - either its
                          group number, its fingerprint or an entry id of one
@@ -361,6 +393,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         """List of all the HOGs identified by OMA.
         ---
         parameters:
+
           - name: level
             description: filter the list of HOGs by a specific
                          taxonomic level.
@@ -401,6 +434,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         we infer that no event happened between those levels for this specific hog.
         ---
         parameters:
+
           - name: hog_id
             description: an unique identifier for a hog_group - either its hog id or one
                          of its member proteins
@@ -486,6 +520,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
 
         ---
         parameters:
+
           - name: hog_id
             description: an unique identifier for a hog_group - either
                          its hog id starting with "HOG:" or one of its
@@ -524,6 +559,66 @@ class HOGViewSet(PaginationMixin, ViewSet):
         data = {'hog_id': hog_id, 'level': level,
                 'members': members}
         serializer = serializers.HOGMembersListSerializer(instance=data, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=True)
+    def similar_profile_hogs(self, request, hog_id=None, format=None):
+        """Returns the HOGs with the most similar phylogenetic profiles.
+
+        The profiles are based on the number of duplications, losses and
+        retained genes along the phylogenetic tree. Hence, the profiles are
+        computed on the deepest level only and all sub-hogs ids will return
+        the same similar HOGs.
+
+        Similar profile search is only useful for hogs that have a certain
+        size, i.e. 100 species. For smaller query HOGs, the result will simply
+        be empty.
+
+        The result contains for both, the query HOG as well as the similar HOGs
+        a field `in_species` that contains a list of all species in which at
+        least one copy of the gene is present in the HOG.
+
+        ---
+        parameters:
+
+          - name: hog_id
+            description: an unique identifier for a hog_group - either
+                         its hog id starting with "HOG:" or one of its
+                         member proteins in which case the specific
+                         HOG ID of that protein is used.
+            example: HOG:0450897,  P12345
+
+          - name: max_results
+            description: the number of similar profiles to return. Must
+                         be a positive number less than 50. By default
+                         the 10 most HOGs with the most similar profiles
+                         are returned.
+            location: query
+            example: 20
+        """
+        if hog_id[:4] != "HOG:":
+            hog_id = self._hog_id_from_entry(hog_id)
+
+        try:
+            nr_profiles = float(self.request.query_params.get('max_results', "10"))
+            if 1 < nr_profiles > 50:
+                raise ParseError("max_results must be positive value <= 50")
+        except ValueError:
+            raise ParseError("max_results must be positive value <= 50")
+
+        result = utils.db.get_families_with_similar_hog_profile(
+            hog_id, max_nr_similar_fams=nr_profiles)
+        nr_species = len(result.species_names)
+        sim_hogs = [rest_models.HOG(hog_id=utils.db.format_hogid(fam),
+                                    in_species=[result.species_names[z] for z in range(nr_species) if result.similar[fam][z] > 0]
+                                    )
+                    for fam in result.similar.keys()]
+        data = rest_models.HOG(
+            hog_id=hog_id,
+            similar_profile_hogs=sim_hogs,
+            in_species=[result.species_names[z] for z in range(nr_species) if result.query_profile[z] > 0]
+        )
+        serializer = serializers.HOGsSimilarProfileSerializer(data, context={'request': request})
         return Response(serializer.data)
 
 

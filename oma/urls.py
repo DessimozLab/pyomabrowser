@@ -95,6 +95,10 @@ urlpatterns = [
         views.HOGsMSA.as_view(), name='hogs_msa'),
     url(r'^hogdata/(?P<entry_id>\w+)/json', views.FamGeneDataJson.as_view(), name="fam_genedata"),
 
+    # Gene Similarity
+    # url(r'^genesimilarity/(?P<entry_id>\w+)/json', views.GeneSimilarityDataJson.as_view(), name="gene_similarity"),
+
+
     # OMA Groups via Entry
     url(r'^group/(?P<entry_id>\w+)/$', views.EntryCentricOMAGroup.as_view(), name="omagroup-entry"),
     url(r'^group/(?P<entry_id>\w+)/msa/$', views.EntryCentricOMAGroupMSA.as_view(), name="omagroup-entry-msa"),
@@ -124,10 +128,7 @@ urlpatterns = [
     url(r'^FAQ/$', TemplateView.as_view(template_name='help_FAQ.html'), name='FAQ'),
     url(r'^genomePW/$', TemplateView.as_view(template_name='tool_genomePW.html'), name='genomePW'),
     url(r'^landOMA/$', TemplateView.as_view(template_name='explore_omaGroup.html'), name='landOMA'),
-    url(r'^fellowship/$', views.fellowship, name="fellowship"),
-    url(r'^fellowship/thanks/', TemplateView.as_view(template_name='fellowship_thanks.html'), name='fellowship_thanks'),
-    url(r'^suggestion/genome/$', views.genome_suggestion, name="genome_suggestion"),
-    url(r'^suggestion/genome/thanks$', TemplateView.as_view(template_name="help_genome_suggestion_thanks.html"), name="genome_suggestion_thanks"),
+
     url(r'^functions/$', views.function_projection, name='function-projection-input'),
     url(r'^functions/(?P<data_id>\w+)/$', views.FunctionProjectionResults.as_view(), name="function-projection"),
 
@@ -147,10 +148,19 @@ urlpatterns = [
     url(r'^tools/$', TemplateView.as_view(template_name='tool_catalog.html'), name='tool_catalog'),
 ]
 
+if settings.OMA_INSTANCE_NAME != "basf":
+    urlpatterns.extend([
+        url(r'^fellowship/$', views.fellowship, name="fellowship"),
+        url(r'^fellowship/thanks/', TemplateView.as_view(template_name='fellowship_thanks.html'),
+            name='fellowship_thanks'),
+        url(r'^suggestion/genome/$', views.genome_suggestion, name="genome_suggestion"),
+        url(r'^suggestion/genome/thanks$', TemplateView.as_view(template_name="help_genome_suggestion_thanks.html"),
+            name="genome_suggestion_thanks"),
+    ])
+
 if settings.DEBUG:
     try:
         import debug_toolbar
-
         urlpatterns.extend([
             url(r'^__debug__/', include(debug_toolbar.urls)),
         ])

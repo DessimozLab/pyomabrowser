@@ -63,17 +63,12 @@
             <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/>
             <p>
                 <strong>Examples:</strong>
-                {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
+                {% block search_examples %}
                     <span class="ex" onclick="fillExample('id','HUMAN22168')">Entry HUMAN22168</span> -
                     <span class="ex" onclick="fillExample('id','P53_RAT')">Entry P53_RAT</span> -
                     <span class="ex" onclick="fillExample('fulltext','photoreceptor')">Search for "photoreceptor"</span> -
                     <span class="ex" onclick="fillExample('species', 'Drosophila')">"Drosophila" species</span>
-                {% elif oma_instance_name == "corona" %}
-                    <span class="ex" onclick="fillExample('id','SARS200001')">Entry SARS200001</span> -
-                    <span class="ex" onclick="fillExample('id','R1AB_SARS2')">Entry R1AB_SARS2</span> -
-                    <span class="ex" onclick="fillExample('fulltext','glycoprotein')">Search for "glycoprotein"</span> -
-                    <span class="ex" onclick="fillExample('species', 'Bat coronavirus')">"Bat coronavirus" species</span>
-                {% endif %}
+                {% endblock search_examples %}
             </p>
         </div>
 
@@ -147,11 +142,10 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
  <div id="oma-landing-cards">
         <div class="container-fluid">
             <div class="row ">
-
-
-
+                {% block lower_home_boxes %}
                 <div class="col-lg-3 col-md-6">
                     <div class="oma-card">
+                        {% block first_card %}
                         <div class="oma-mobile-accordion">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                  preserveAspectRatio="xMidYMid" width="75.75" height="95.88" viewBox="0 0 37.875 47.94">
@@ -192,11 +186,13 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                 </li>
                             </ul>
                         </div>
+                        {% endblock first_card %}
                     </div>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
                     <div class="oma-card">
+                        {% block second_card %}
                         <div class="oma-mobile-accordion">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                  preserveAspectRatio="xMidYMid" width="96" height="95.82" viewBox="0 0 48 47.91">
@@ -221,13 +217,13 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                             </ul>
 
                         </div>
-
-
+                        {% endblock second_card %}
                     </div>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
                     <div class="oma-card">
+                        {% block third_card %}
                         <div class="oma-mobile-accordion">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                  preserveAspectRatio="xMidYMid" width="90" height="78" viewBox="0 0 60 52">
@@ -254,28 +250,18 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                     Export a set of genomes and their precomputed all-against-all comparisons for OMA standalone.
                                 </li>
 
-
-
                                 <li class="btn-more-container" >
                                     <button type="button" class="btn btn-outline-dark"  disabled>See more download options</button>
                                 </li>
-
                             </ul>
-
-
-
-
-
-
                         </div>
-
-
-
+                        {% endblock third_card %}
                     </div>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
                     <div class="oma-card">
+                        {% block forth_card %}
                         <div class="oma-mobile-accordion">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                  preserveAspectRatio="xMidYMid" width="90" height="90" viewBox="0 0 60 60">
@@ -331,8 +317,10 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                 }
                             </script>
                         </div>
+                        {% endblock forth_card %}
                     </div>
                 </div>
+                {% endblock lower_home_boxes %}
             </div>
         </div>
     </div>

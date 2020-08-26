@@ -1,0 +1,115 @@
+version: '3.7'
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  # if release data is used with bind mount, comment release_volume line
+  release_volume:
+
+services:
+  web:
+    restart: always
+    image: $DOCKER_REGISTRY/oma
+    build:
+      context: ..
+      dockerfile: for_docker/oma/Dockerfile
+    command: /entrypoint.sh uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi
+    env_file:
+      - env
+    volumes:
+      # uncomment the following line if you want to use transparently the current checkout mounted
+      # into your docker image. convenient for development, but not encouraged in production
+      #- ..:/usr/src/pyomabrowser
+      - static_volume:${DARWIN_BROWSERSTATIC_PATH}
+      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
+      - release_volume:${RELEASE_PATH}
+      # use a bind mount if you have the browser data on the host filesystem
+      #- type: bind
+      #  source: ${RELEASE_PATH_HOST}
+      #  target: ${RELEASE_PATH}
+      #  read_only: true
+    ports:
+      - 8000:8000
+    depends_on:
+      - broker
+      - db
+
+  db:
+    image: postgres:alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - env
+    shm_size: 256M
+
+  broker:
+    image: rabbitmq:3
+    env_file:
+      - env
+    ports:
+      - 5672:5672
+
+  worker:
+    image: $DOCKER_REGISTRY/oma
+    restart: "no"
+    command: ["celery", "worker", "--app=pybrowser_dev.celery_app", "--concurrency=1", "--hostname=worker@%h", "--loglevel=DEBUG"]
+    env_file:
+      - env
+    volumes:
+      # uncomment the following line if you want to use transparently the current checkout mounted
+      # into your docker image. convenient for development, but not encouraged in production
+      #- ..:/usr/src/pyomabrowser
+      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
+      - release_volume:${RELEASE_PATH}
+      # use a bind mount if you have the browser data on the host filesystem
+      #- type: bind
+      #  source: ${RELEASE_PATH_HOST}
+      #  target: ${RELEASE_PATH}
+      #  read_only: true
+    depends_on:
+      - broker
+      - db
+
+  nginx:
+    image: $DOCKER_REGISTRY/nginx
+    build:
+      context: ./nginx
+    ports:
+      - 8080:80
+    volumes:
+      - static_volume:${DARWIN_BROWSERSTATIC_PATH}
+      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
+      - release_volume:${RELEASE_PATH}
+      # use a bind mount if you have the browser data on the host filesystem
+      #- type: bind
+      #  source: "${RELEASE_PATH_HOST}/downloads"
+      #  target: ${DARWIN_BROWSERDOWNLOAD_PATH}
+      #  read_only: true
+    environment:
+      - DARWIN_BROWSERSTATIC_PATH=${DARWIN_BROWSERSTATIC_PATH}
+      - DARWIN_BROWSERMEDIA_PATH=${DARWIN_BROWSERMEDIA_PATH}
+      - DARWIN_BROWSERDOWNLOAD_PATH=${DARWIN_BROWSERDOWNLOAD_PATH}
+    depends_on:
+      - web
+      - legacy
+
+
+  legacy:
+    build:
+      context: ./legacy/
+    image: $DOCKER_REGISTRY/legacy
+    env_file:
+      - env
+    ports:
+      - 8001:8000
+    volumes:
+      - static_volume:${DARWIN_BROWSERSTATIC_PATH}
+      - release_volume:${RELEASE_PATH}
+      #- type: bind
+      #  source: "${RELEASE_PATH_HOST}/data"
+      #  target: ${DARWIN_BROWSERDATA_PATH}
+      #  read_only: true
+
+
+
