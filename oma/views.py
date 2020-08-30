@@ -1165,9 +1165,6 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
                 return json.JSONEncoder.default(self, obj)
 
 
-
-
-
         results = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
         sim_hogs = results.similar
@@ -2163,7 +2160,7 @@ def check_term_for_entry_nr(term): # todo apply this to general term logic
 class Searcher(View):
 
 
-    _entry_selector = ["id", "sequence"]
+    _entry_selector = ["id", "sequence", "crossref"]
     _omagroup_selector = ["groupid", "fingerprint"]
     _hog_selector = ["groupid"]
     _genome_selector = ["name", "taxid"]
@@ -2233,7 +2230,7 @@ class Searcher(View):
         # store per term information
         search_term_meta = {}
         for term in terms:
-            search_term_meta[term] = {'id': 0, 'sequence': 0}
+            search_term_meta[term] = {'id': 0, 'sequence': 0, 'crossref':0}
 
         # for each method to search an entry
         entry_search = {}
@@ -2246,45 +2243,144 @@ class Searcher(View):
         align_term = {}
         match= None
 
-        for selector in self._entry_selector:
-            raw_results = []
 
-            # for each terms we get the raw results
-            for term in terms:
-                r, align_data, match = self.search_entry(request,  term, selector=[selector])
+        # search by OMAID/numeric_id or Xref/Description
 
-                if selector == 'sequence':
-                    if align_data:
-                        align_info += align_data
-                        if match == 'exact':
-                            for x in align_data:
-                                align_term[x] = term
+        raw_hits_id = []
+        raw_hits_xref = []
 
-                if scope:
-                    r = scope.intersection(set(r))
-                    #r = list(filter(lambda x: x in scope, r))
-                raw_results.append(r)
-                search_term_meta[term][selector] += len(r)
+        # for each terms we get the raw results
+        for term in terms:
 
-            # Get the intersection of the raw results
-            if raw_results:
-                s = set(raw_results[0])
-                ss = [set(e) for e in raw_results[1:]]
+            term_hit_id = []
+            term_hit_xref = []
 
-                if selector == 'id':
-                    result = list(s.intersection(*ss))
-                    union_entry = list(s.union(*ss))
+            hits = utils.id_resolver.search_protein(term)
 
+            for id, hit in hits.items():
+                for accessor, value in hit.items():
+                    if accessor == "numeric_id" or accessor =="omaid":
+                        term_hit_id.append(id)
+                    else:
+                        term_hit_xref.append(id)
+
+            if scope:
+                term_hit_id = scope.intersection(set(term_hit_id))
+                term_hit_xref = scope.intersection(set(term_hit_xref))
+
+            term_hit_id = set(term_hit_id)
+            term_hit_xref = set(term_hit_xref)
+
+            raw_hits_id.append(term_hit_id)
+            raw_hits_xref.append(term_hit_xref)
+
+            search_term_meta[term]["id"] += len(term_hit_id)
+            search_term_meta[term]["crossref"] += len(term_hit_xref)
+
+        # Get the intersection of the raw id results
+        if raw_hits_id:
+
+            s = set(raw_hits_id[0])
+            ss = [set(e) for e in raw_hits_id[1:]]
+
+
+            result = list(s.intersection(*ss))
+            union_entry = list(s.union(*ss))
+
+            entry_search["id"] = result
+            total_search += len(result)
+            search_entry_meta["id"] = len(result)
+        else:
+            entry_search["id"] = []
+            total_search += 0
+            search_entry_meta["id"] = 0
+
+        # Get the intersection of the raw xref results
+        if raw_hits_xref:
+
+            s = set(raw_hits_xref[0])
+            ss = [set(e) for e in raw_hits_xref[1:]]
+
+            result = list(s.intersection(*ss))
+            union_entry = list(s.union(*ss))
+
+            entry_search["crossref"] = result
+            total_search += len(result)
+            search_entry_meta["crossref"] = len(result)
+        else:
+            entry_search["crossref"] = []
+            total_search += 0
+            search_entry_meta["crossref"] = 0
+
+        # search by Sequence
+
+        raw_hits_seq = []
+        align_data = None
+        match = None
+
+        # for each terms we get the raw results sequence
+        for term in terms:
+            term_hit_seq = []
+
+            seq_searcher = utils.db.seq_search
+            seq = seq_searcher._sanitise_seq(term)
+            if len(seq) >= 5:
+
+                targets = []
+
+                exact_matches = seq_searcher.exact_search(seq, only_full_length=False, is_sanitised=True)
+
+                if len(exact_matches) == 1:
+                    if redirect_valid:
+                        redirect('pairs', exact_matches[0])
+
+                for enr in exact_matches:
+                    term_hit_seq.append(enr)
+                    targets.append(enr)
+
+                if len(targets) == 0:
+
+                    approx = seq_searcher.approx_search(seq, is_sanitised=True)
+                    for enr, align_results in approx:
+                        if align_results['score'] < 50:
+                            break
+                            term_hit_seq.append(enr)
+                    align_data = approx
+                    match = 'approx'
                 else:
-                    result = list(s.union(*ss))
+                    align_data = exact_matches
+                    match = 'exact'
 
-                entry_search[selector] = result
-                total_search += len(result)
-                search_entry_meta[selector] = len(result)
-            else:
-                entry_search[selector] = []
-                total_search += 0
-                search_entry_meta[selector] = 0
+
+            if align_data:
+                align_info += align_data
+                if match == 'exact':
+                    for x in align_data:
+                        align_term[x] = term
+
+            if scope:
+                term_hit_seq = scope.intersection(set(term_hit_seq))
+            raw_hits_seq.append(term_hit_seq)
+            search_term_meta[term]["sequence"] += len(term_hit_seq)
+
+        # Get the intersection of the raw results sequence
+        if raw_hits_seq:
+
+            s = set(raw_hits_seq[0])
+            ss = [set(e) for e in raw_hits_seq[1:]]
+
+
+            result = list(s.union(*ss))
+
+            entry_search['sequence'] = result
+            total_search += len(result)
+            search_entry_meta['sequence'] = len(result)
+        else:
+            entry_search['sequence'] = []
+            total_search += 0
+            search_entry_meta['sequence'] = 0
+
+
 
         search_entry_meta['total'] =  total_search
 
@@ -2296,14 +2392,17 @@ class Searcher(View):
             entry_search['sequence'] = list(s1.intersection(s2))
 
         # select the top best 50 results
-        sorted_results = []
+        filtered_entries = []
         for k in sorted(entry_search, key=lambda k: len(entry_search[k])):
-            for r in entry_search[k]:
-                sorted_results.append([r,k])
-        if len(sorted_results) <= 50:
-            filtered_entries = sorted_results
-        else:
-            filtered_entries = sorted_results[:50]
+
+            res = entry_search[k]
+
+            if len(res) >= 15:
+                res = res[:15]
+
+            for r in res:
+                filtered_entries.append([r,k])
+
 
         search_entry_meta['shown'] = len(filtered_entries)
 
@@ -2643,25 +2742,30 @@ class Searcher(View):
         data = []
 
         start = time.time()
-        if "id" in selector:
+        if "id" in selector or "crossref" in selector:
             try:
-                entry_nr = utils.id_resolver.resolve(query)
+                entry_nr = utils.id_resolver.search_protein(query)
+
 
                 if redirect_valid:
                     return redirect('pairs', entry_nr)
                 else:
-
-                    data.append(entry_nr)
+                    logger.info(entry_nr)
+                    data.append(list(entry_nr.keys())[0])
 
             except db.AmbiguousID as ambiguous:
                 logger.info("query {} maps to {} entries".format(query, len(ambiguous.candidates)))
+
                 for entry in ambiguous.candidates:
-                    data.append(entry)
+                    pass
+                    #data.append(entry)
 
             except db.InvalidId as e:
                 data += []
         end = time.time()
         logger.info("[{}] Entry id search {}".format(query, start - end))
+
+
 
         start = time.time()
         align_data = None

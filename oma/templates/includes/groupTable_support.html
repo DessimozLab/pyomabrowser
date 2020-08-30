@@ -5,7 +5,7 @@
 
 
             <div id="toolbar">
-  <b class="blink" style="color: red;"> Only {{sample_size}} entries are loaded, please wait while the rest is loading...</b>
+  <b  style="color: red;"> Only {{sample_size}} entries are loaded, please wait while the rest is loading...</b>
 </div>
 
             {% endif %}
@@ -183,7 +183,7 @@
 
                 need_load = false;
                 tab.bootstrapTable('load', jsonData );
-                tab.bootstrapTable({'pagination': true, });
+                tab.bootstrapTable({'pagination': true});
 
                 $("#toolbar").remove();
 

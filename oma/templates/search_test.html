@@ -6,15 +6,17 @@
 {% block meta_description %}Disambiguate result page for OMA Browser query "{{ query }}"{% endblock %}
 {% block content %}
 
+
+
+
+<!--suppress ALL -->
 <div id="oma-generic-container">
 
     <div class="container-fluid">
 
         <div class="jumbotron">
 
-
                 <div class="card-body ">
-
 
                      <div class="pull-left">
 
@@ -63,12 +65,13 @@
   <small>  <p class="mb-0"> But you can retry using other query like <b>"insulin"</b> or by combining protein name with species <b>"HBB human pig"</b></p> </small>
 
                          </div>
-</div>
+
+                         </div>
                          {% endif %}
 
 
 
-                         {% if meta_entry.shown > 0%}
+
 
                          <div class="card search_entry " >
 
@@ -85,7 +88,19 @@
 
 {% endif %}
 
+                                   {% if meta_entry.shown > 0%}
+
+
+                                  <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-filter"></i> Filter</span> <span class="caret"></span></button>
+
+                                  <div class="dropdown-menu" role="menu">
+<a href="#" id="f_e_id" class="dropdown-item" data-value="id" tabIndex="-1"><input type="checkbox" />&nbsp;Id</a>
+<a href="#" id="f_e_crossref" class="dropdown-item" data-value="crossref" tabIndex="-1"><input type="checkbox"/>&nbsp;Cross Reference</a>
+ <a href="#" id="f_e_seq" class="dropdown-item" data-value="sequence" tabIndex="-1"><input type="checkbox"/>&nbsp;Sequence</a>
+</div>
+
                                   <button id="entry_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button> </b>
+
 
                                   <script>
                                       $(function () {
@@ -130,69 +145,33 @@
                                           document.body.appendChild(content)
 
 
-
-
-
-
                                       {% endfor %}
 
+                              $('#entry_stat').popover({
+                                  title: title,
+                                  html: true,
+                                  content: function() {
+                                  return $('#popover-content-entry').html();
+                                }
+                              })
 
 
 
-
-
-
-
-
-
-  $('#entry_stat').popover({
-      title: title,
-      html: true,
-      content: function() {
-      return $('#popover-content-entry').html();
-    }
-  })
-})</script>
+                            })</script>
 
 
                               <br>
+
+                                  {% endif %}
 
        </div>
 
                                   </div>
 
-                              <div class="row">
-
-                                   <div class="col-md-2 ">
-
-                                       <br>
-                                       <br>
-
-                                       <b>Matched by </b>
-                                      <div class="form-check pl-4">
-
-                        <div >
-                            <input type="checkbox" class="form-check-input " id="f_e_id" onclick="set_filter_e_id()" checked>
-                            <label  class="form-check-label" for="f_e_id" >
-                                Protein ID
-                            </label>
-                        </div>
-
-                        <div>
-                            <input type="checkbox" class="form-check-input" id="f_e_seq" onclick="set_filter_e_seq()" checked>
-                            <label class="form-check-label" for="f_e_seq">
-                                Sequences
-                            </label>
-                        </div>
+                               {% if meta_entry.shown > 0%}
 
 
-                    </div>
-
-
-                                   </div>
-
-
-                                  <div class="col-md-8 ">
+                                  <div class="col-md-12 ">
 
                                        <table class="table table-hover" id="matchTable_entry"
                                                                      data-mobile-responsive="true" data-check-on-init="true"
@@ -214,7 +193,7 @@
                                                                         <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
                                                                         <th data-field="description" data-sortable="true">Description</th>
 
-                                                                        <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
+                                                                        <th data-field="crossref" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
                                                                         <th data-field="sequence" data-sortable="true" data-formatter="tablehooks.format_entry_sequence_matches" >Matching sequences</th>
 
 
@@ -228,12 +207,14 @@
 
                               </div>
 
+
+
                               <br>
 
                              <button type="button" id="run_full_entries" class="btn btm-sm btn-outline-secondary btn-block mx-auto " style="width: 50%"> Use full text search to search for more proteins</button>
 
 
-                             <div class="col-md-8 offset-md-2">
+                             <div class="col-md-12">
 
                              <b class="float-right" id="nbr_full_entrie" ></b>
 
@@ -268,16 +249,14 @@
 
                              </div>
 
+                              {% endif %}
+
 
 
                           </div>
                          </div>
 
                          <br>
-
-                         {% endif %}
-
-                          {% if meta_group.shown > 0%}
 
                          <div class="card search_group" >
 
@@ -297,6 +276,19 @@
 
                               <b class="float-right "> {% if meta_group.total <= 50 %}  {{meta_group.shown}} {% if meta_group.shown == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best {{meta_group.shown}} {% if meta_group.shown == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta_group.total}}
 {% endif %}
+
+
+                                  {% if meta_group.shown > 0%}
+
+                                   <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-filter"></i> Filter</span> <span class="caret"></span></button>
+
+                                  <div class="dropdown-menu" role="menu">
+<a href="#" id="f_gr_id" class="dropdown-item" data-value="groupid" tabIndex="-1"><input type="checkbox" />&nbsp;Groups Id</a>
+<a href="#" id="f_gr_fin" class="dropdown-item" data-value="fingerprint" tabIndex="-1"><input type="checkbox"/>&nbsp;Fingerprint</a>
+</div>
+
+
+
 
                                   <button id="group_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button> </b>
 
@@ -369,6 +361,8 @@
 
                                   <br>
 
+                                   {% endif %}
+
 
 
                             </div>
@@ -376,44 +370,17 @@
                               </div>
 
 
+                              {% if meta_group.shown > 0%}
+
+
 
                               <div class="row">
 
 
 
-                                   <div class="col-md-2">
-
-                                       <br>
-                                       <br>
-
-                                       <b>Matched by </b>
-                                      <div class="form-check pl-4">
-
-                        <div>
-                            <input type="checkbox" class="form-check-input " id="f_gr_id" onclick="set_filter_gr_id()" checked>
-                            <label  class="form-check-label" for="f_gr_id" >
-                                Groups Id
-                            </label>
-                        </div>
 
 
-
-                       <div>
-                            <input type="checkbox" class="form-check-input " id="f_gr_fin" onclick="set_filter_gr_fin()" checked>
-                            <label  class="form-check-label" for="f_gr_fin" >
-                                Fingerprint
-                            </label>
-                        </div>
-
-
-
-                    </div>
-
-
-                                   </div>
-
-
-                                  <div class="col-md-8 ">
+                                  <div class="col-md-12 ">
 
                                        <table class="table table-hover" id="matchTable_group"
                    data-mobile-responsive="true" data-check-on-init="true"
@@ -443,18 +410,15 @@
 
                                    </div>
 
+                               {% endif %}
+
 
 
 
                           </div>
                          </div>
 
-
                          <br>
-
-                         {% endif %}
-
-                         {% if meta_genome.shown > 0%}
 
                          <div class="card search_genome" >
                           <div class="card-body">
@@ -468,6 +432,17 @@
                             <h5 class="card-title">Genomes </h5>
 
                               <b class="float-right ">   {{meta_genome.shown}} {% if meta_genome.shown == 1 %}  genome {% else %} genomes {% endif %}  found
+
+                                  {% if meta_genome.shown > 0%}
+
+                                    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-filter"></i> Filter</span> <span class="caret"></span></button>
+
+                                  <div class="dropdown-menu" role="menu">
+<a href="#" id="f_g_name" class="dropdown-item" data-value="name" tabIndex="-1"><input type="checkbox" />&nbsp;Name</a>
+<a href="#" id="f_g_taxid" class="dropdown-item" data-value="taxid" tabIndex="-1"><input type="checkbox"/>&nbsp;Taxon Id</a>
+<a href="#" id="f_g_ag" class="dropdown-item" data-value="Ancestral genome" tabIndex="-1"><input type="checkbox"/>&nbsp;Ancestral genome</a>
+</div>
+
                                   <button id="genome_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button> </b>
 
                                   <script>
@@ -537,6 +512,8 @@
   })
 })</script>
 
+                                  {% endif %}
+
 
                               <br>
 
@@ -546,49 +523,12 @@
 
                               </div>
 
+                              {% if meta_genome.shown > 0%}
+
+
                               <div class="row">
 
-                                   <div class="col-md-2">
-
-                                       <br>
-                                       <br>
-
-                                       <b>Matched by </b>
-                                      <div class="form-check pl-4">
-
-                        <div >
-                            <input type="checkbox" class="form-check-input " id="f_g_name" onclick="set_filter_g_name()" checked>
-                            <label  class="form-check-label" for="f_g_name" >
-                                Name <small>(e.g. HUMAN)</small>
-                            </label>
-                        </div>
-
-                        <div>
-                            <input type="checkbox" class="form-check-input" id="f_g_taxid" onclick="set_filter_g_tax()" checked>
-                            <label class="form-check-label" for="f_g_taxid">
-                                NCBI ID <small>(e.g. 2759)</small>
-                            </label>
-                        </div>
-
-                                          <div>
-                            <input type="checkbox" class="form-check-input" id="f_g_ag" onclick="set_filter_g_ag()" checked>
-                            <label class="form-check-label" for="f_g_ag">
-                                Taxon  <small>(e.g. Fungi)</small>
-                            </label>
-                        </div>
-
-
-
-
-
-
-                    </div>
-
-
-                                   </div>
-
-
-                                  <div class="col-md-8 ">
+                                  <div class="col-md-12 ">
 
                                        <table class="table table-hover" id="matchTable_genome"
 
@@ -617,13 +557,13 @@
 
                               </div>
 
+                              {% endif %}
+
 
                           </div>
                          </div>
 
                          <br>
-
-                         {% endif %}
 
                      </div>
 
@@ -635,16 +575,23 @@
 
 
     <!-- bootstrap-table -->
-    <script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+    <script src='{% static "js/tablehooks.js" %}' type="text/javascript"></script>
+
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
+
 <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
 
-    <script src="{% static "js/highlight.js" %}"></script>
+    <script src='{% static "js/highlight.js" %}'></script>
 
 
 
 
-    <script>
+
+
+
+
+<script>
+
 
         format_result_refs = function(value, row){
             var qterms = "{{ query }}".split('\s+');
@@ -719,191 +666,56 @@
         tab.bootstrapTable('refreshOptions', {'icons': icons});
 
 
-
-
-
         // FILTER ENTRY
-        var keep_entry_id=true;
-        var keep_entry_seq=true;
 
-        function set_filter_e_id() {
+    var options = [];
 
+$( '.dropdown-menu a' ).on( 'click', function( event ) {
 
+   var $target = $( event.currentTarget ),
+       val = $target.attr( 'data-value' ),
+       $inp = $target.find( 'input' ),
+       idx;
 
+   if ( ( idx = options.indexOf( val ) ) > -1 ) {
+      options.splice( idx, 1 );
+      setTimeout( function() { $inp.prop( 'checked', false ) }, 0);
+   } else {
+      options.push( val );
+      setTimeout( function() { $inp.prop( 'checked', true ) }, 0);
+   }
 
-            // Get the checkbox
-            var checkBox = document.getElementById("f_e_id");
+   $( event.target ).blur();
 
-              // If the checkbox is checked, display the output text
-              if (checkBox.checked == true){
-                keep_entry_id = true;
-              } else {
-                keep_entry_id = false;
-              }
-              apply_filter_entry();
-        }
+   if ($target[0].id.startsWith("f_e_")){
 
-        function set_filter_e_seq() {
+    $('#matchTable_entry').bootstrapTable('filterBy', {found_by:options} );
 
-            // Get the checkbox
-            var checkBox = document.getElementById("f_e_seq");
+    }
 
-              // If the checkbox is checked, display the output text
-              if (checkBox.checked == true){
-                keep_entry_seq = true;
-              } else {
-                keep_entry_seq = false;
-              }
-              apply_filter_entry();
-        }
+    else if ($target[0].id.startsWith("f_g_")){
 
-        function apply_filter_entry(){
+    $('#matchTable_genome').bootstrapTable('filterBy', {found_by:options} );
 
+    }
 
+    else if ($target[0].id.startsWith("f_gr_")){
 
-        //$('#filter_entry_div').find('.form-check').find('input[type=radio]:checked').prop('checked', true);
+    $('#matchTable_group').bootstrapTable('filterBy', {found_by:options} );
 
+    }
 
-        var filter_parameters = {found_by:[]};
-
-        if (keep_entry_id){
-            filter_parameters.found_by.push('id');
-        }
-
-
-        if (keep_entry_seq){
-            filter_parameters.found_by.push('sequence');
-        }
+   return false;
+});
 
 
 
-        $('#matchTable_entry').bootstrapTable('filterBy', filter_parameters )
-
-}
 
 
-        // FILTER Genome
-        var keep_gr_id=true;
-        var keep_gr_fin=true;
 
 
-        function set_filter_gr_id() {
 
 
-            // Get the checkbox
-            var checkBox = document.getElementById("f_gr_id");
-
-              // If the checkbox is checked, display the output text
-              if (checkBox.checked == true){
-                keep_gr_id = true;
-              } else {
-                keep_gr_id = false;
-              }
-              apply_filter_group();
-        }
-
-        function set_filter_gr_fin() {
-
-            // Get the checkbox
-            var checkBox = document.getElementById("f_gr_fin");
-
-              // If the checkbox is checked, display the output text
-              if (checkBox.checked == true){
-                keep_gr_fin = true;
-              } else {
-                keep_gr_fin = false;
-              }
-              apply_filter_group();
-        }
-
-        function apply_filter_group() {
-
-            var filter_parameters = {found_by: []};
-
-            if (keep_gr_id) {
-                filter_parameters.found_by.push('groupid');
-            }
-
-
-            if (keep_gr_fin) {
-                filter_parameters.found_by.push('fingerprint');
-            }
-
-
-            $('#matchTable_group').bootstrapTable('filterBy', filter_parameters)
-
-        }
-
-
-        // FILTER Genome
-        var keep_g_name=true;
-        var keep_g_taxid=true;
-        var keep_g_ag=true;
-
-        function set_filter_g_name() {
-
-
-            // Get the checkbox
-            var checkBox = document.getElementById("f_g_name");
-
-              // If the checkbox is checked, display the output text
-              if (checkBox.checked == true){
-                keep_g_name = true;
-              } else {
-                keep_g_name = false;
-              }
-              apply_filter_genome();
-        }
-
-        function set_filter_g_tax() {
-
-            // Get the checkbox
-            var checkBox = document.getElementById("f_g_taxid");
-
-              // If the checkbox is checked, display the output text
-              if (checkBox.checked == true){
-                keep_g_taxid = true;
-              } else {
-                keep_g_taxid = false;
-              }
-              apply_filter_genome();
-        }
-
-        function set_filter_g_ag() {
-
-            // Get the checkbox
-            var checkBox = document.getElementById("f_g_ag");
-
-              // If the checkbox is checked, display the output text
-              if (checkBox.checked == true){
-                keep_g_ag = true;
-              } else {
-                keep_g_ag = false;
-              }
-              apply_filter_genome();
-        }
-
-        function apply_filter_genome() {
-
-            var filter_parameters = {found_by: []};
-
-            if (keep_g_name) {
-                filter_parameters.found_by.push('name');
-            }
-
-
-            if (keep_g_taxid) {
-                filter_parameters.found_by.push('taxid');
-            }
-
-            if (keep_g_ag) {
-                filter_parameters.found_by.push('Ancestral genome');
-            }
-
-
-            $('#matchTable_genome').bootstrapTable('filterBy', filter_parameters)
-
-        }
 
 
         $(function () {
@@ -949,6 +761,42 @@ $(function () {
 
         };
 </script>
+
+
+{% if meta_group.shown > 0 %}
+
+<script>
+document.getElementById('f_gr_id').click();
+document.getElementById('f_gr_fin').click();
+</script>
+
+{% endif %}
+
+
+{% if meta_entry.shown > 0 %}
+
+<script>
+document.getElementById('f_e_crossref').click();
+document.getElementById('f_e_seq').click();
+document.getElementById('f_e_id').click();
+</script>
+
+
+ {% endif %}
+
+
+{% if meta_genome.shown > 0 %}
+
+<script>
+document.getElementById('f_g_name').click();
+document.getElementById('f_g_taxid').click();
+document.getElementById('f_g_ag').click();
+</script>
+
+
+ {% endif %}
+
+
 
 
 
