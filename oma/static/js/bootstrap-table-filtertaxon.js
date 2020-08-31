@@ -402,7 +402,7 @@
             }
 
 
-            html.push('<div id="div_add" class="text-center" ><button type="button" id="li_add" class="btn  ">Add custom filter</button> </div>');
+            html.push('<div id="div_add"><button type="button" id="li_add" class="btn  ">Add custom filter</button> </div>');
 
             container_filter_taxon.html("");
 

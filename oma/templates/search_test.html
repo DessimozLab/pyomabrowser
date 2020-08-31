@@ -70,6 +70,7 @@
                          {% endif %}
 
 
+                         </div>
 
 
 
@@ -134,7 +135,7 @@
 
                                           var li = document.createElement("li");
                                               li.className = "list-group-item";
-                                              li.innerHTML = '<span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>'
+                                              li.innerHTML = '<span class="dot {% if value == 0  %} bg-light  {% elif value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} bg-danger {% endif %}   "></span>  <small {% if value == 0  %} style="color: #9d9d9d;"  {% endif %}> <b class="text-capitalize" >{{ key }}:</b> {{ value }} hits </small>'
                                           li.style.border='none';
                                               li.style.padding=".2rem 1.25rem"
                                         ul.appendChild(li)
@@ -254,7 +255,7 @@
 
 
                           </div>
-                         </div>
+
 
                          <br>
 
@@ -324,7 +325,7 @@
 
                                           var li = document.createElement("li");
                                               li.className = "list-group-item";
-                                              li.innerHTML = '<span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>'
+                                              li.innerHTML = '<span class="dot  {% if value == 0  %} bg-light  {% elif value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small {% if value == 0  %} style="color: #9d9d9d;"  {% endif %}> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>'
                                           li.style.border='none';
                                               li.style.padding=".2rem 1.25rem"
                                         ul.appendChild(li)
@@ -477,7 +478,7 @@
 
                                           var li = document.createElement("li");
                                               li.className = "list-group-item";
-                                              li.innerHTML = '<span class="dot  {% if value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>'
+                                              li.innerHTML = '<span class="dot  {% if value == 0  %} bg-light  {% elif value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small {% if value == 0  %} style="color: #9d9d9d;"  {% endif %}> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>'
                                           li.style.border='none';
                                               li.style.padding=".2rem 1.25rem"
                                         ul.appendChild(li)

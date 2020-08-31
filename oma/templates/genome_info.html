@@ -13,7 +13,12 @@
 
 
    {% for o in genome.lineage reversed %}
-    <li class="breadcrumb-item active" aria-current="page">{{o}}</li>
+
+
+      {% if not forloop.last %}
+                    <li class="breadcrumb-item active" aria-current="page"><a href="/oma/ancestralgenome/info/{{o}}/">{{o}}</a></li>
+      {% endif %}
+
 {% endfor %}
 
   </ol>

@@ -8,6 +8,7 @@
     var class_of_entries = ".profile_vis";
     var class_ref = ".profile_vis_ref";
     var class_overview = ".overview";
+    var minimap_factor = null;
 
     exports.visualize_all = function (profile_data, taxon_data, species_data, ref_profile_data) {
 
@@ -44,9 +45,6 @@
 
         var minimap = exports.run_header(ref_profile_data, taxon_data, species_data, _root)
 
-
-
-
         $.each($(class_of_entries), function (each, value) {
 
             // Retreive the entry ID
@@ -71,8 +69,6 @@
         var container = document.getElementById("Reference");
 
 
-        //var width = container.offsetWidth - margin.left - margin.right,
-        //    height = 120 - margin.top - margin.bottom;
 
         container.innerHTML = "";
 
@@ -189,6 +185,8 @@
 
         svg.node();
 
+        minimap_factor = widthr/width;
+
             return [svg, x]
 
     }
@@ -250,7 +248,9 @@
 
             $.each(array_chart, function (idx, chart_e) {
 
-                chart_e.svg.call(chart_e.zoom.transform, d3.zoomIdentity.scale(width / (s[1] - s[0])).translate(-s[0], 0));
+
+                chart_e.svg.call(chart_e.zoom.transform, d3.zoomIdentity.scale( (width  / (s[1] - s[0]))).translate(-s[0], 0));
+
                 chart_e.svg.on("wheel.zoom", null);
 
             })
