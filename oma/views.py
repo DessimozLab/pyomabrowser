@@ -960,14 +960,17 @@ class GenomeCentricClosestGroups(GenomeBase, TemplateView):
 
     def get_context_data(self, specie_id, **kwargs):
         context = super(GenomeCentricClosestGroups, self).get_context_data(specie_id, **kwargs)
+
         gr_close_raw = context['genome_meta'].get_most_similar_species(limit=10, group_type='OMAGroup')
         gr_close = []
         for g in gr_close_raw:
             gr_close.append({'genome':models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr':g[1]})
-        gr_least_raw = context['genome_meta'].get_least_similar_species(limit=10, group_type='OMAGroup')
+
+        gr_least_raw = context['genome_meta'].get_least_similar_species(limit=11, group_type='OMAGroup')
         gr_least = []
         for g in gr_least_raw:
-            gr_least.append({'genome': models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])) , 'nbr': g[1]})
+            gr_least.append({'genome': models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr': g[1]})
+
         context.update({'tab': 'closest', 'subtab':'groups', 'closest':gr_close, 'least':gr_least })
         return context
 
