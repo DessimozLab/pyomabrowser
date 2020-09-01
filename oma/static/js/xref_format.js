@@ -196,6 +196,26 @@
                     }
                 });
             }
+        },
+        'STRING': {
+            url: function(id){return "https://string-db.org/network/"+id;},
+            img: '<img src="'+static_root+'/image/string.png" alt="STRING" />'
+        },
+        'Swiss Model': {
+            url: function(id){return "https://swissmodel.expasy.org/repository/uniprot/"+id;},
+            img: '<img src="'+static_root+'/image/swissmodel.png" alt="SwissModel" />'
+        },
+        'neXtProt': {
+            url: function(id){return "https://www.nextprot.org/entry/"+id;}
+            img: '<img src="'+static_root+'/image/neXtProt.png" alt="neXtProt" />'
+        },
+        'Bgee': {
+            url: function(id){return "https://bgee.org/?page=gene&gene_id="+id;},
+            img: '<img src="'+static_root+'/image/bgee.png" alt="Bgee" />'
+        },
+        'ChEMBL': {
+            url: function(id){return "https://www.ebi.ac.uk/chembldb/target/inspect/"+id;}
+            img: '<img src="'+static_root+'/image/ChEMBL.png" alt="ChEMBL" />'
         }
     };
     dbxrefs['Ensembl Gene'] = dbxrefs['Ensembl Transcript'] = dbxrefs['Ensembl Protein'];
