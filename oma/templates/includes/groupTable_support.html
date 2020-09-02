@@ -152,49 +152,65 @@
 
 <!-- taxon filter import: Editable field -->
 <link type="text/css" rel="stylesheet" href="{% static "css/bootstrap-editable.css" %}"/>
-<script src="{% static "js/bootstrap-editable.js" %}"></script>
+<script src='{% static "js/bootstrap-editable.js" %}'></script>
 
 <script>
 
-    var need_load = true;
 
-    var tab = $("#grpTable");
-    var icons = tab.bootstrapTable('getOptions').icons;
-    $.extend(icons, {export: 'fa-download'});
-    tab.bootstrapTable({
-        url: "{{ table_data_url }}",
-        reorderableColumns: true,
-        clickToSelect: false,
-        showMultiSort: true,
-        showLoading: true,
-        onPostBody: function () {
-            domains.visualize_all(".protein"); //, {{ longest_seq }});
-        },
-        onLoadSuccess: function (data) {
+     var need_load = true;
 
-            tab.bootstrapTable('hideLoading');
+    $.getJSON("{{load_full_data}}", function (initData) {
 
-            {% if load_full_data != 0 %}
+        var tab = $("#grpTable");
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'fa-download'});
+        tab.bootstrapTable({
+            data: initData,
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            showLoading: true,
+            onPostBody: function () {
+                domains.visualize_all(".protein"); //, {{ longest_seq }});
+
+                tab.bootstrapTable('hideLoading');
+
+                {% if load_full_data != 0 %}
+
+                if (need_load == true) {
+
+                    need_load = false;
+
+                    $.getJSON("{{load_full_data}}", function (jsonData) {
+
+                    tab.bootstrapTable({ data: jsonData, pageSize: 5 });
+                    tab.bootstrapTable('load', jsonData);
 
 
-            if (need_load == true) {
+                    $("#toolbar").remove();
 
 
-                tab.bootstrapTable('refreshOptions', {url: "{{load_full_data}}"});
-                tab.bootstrapTable('refresh', {url: "{{load_full_data}}",pageSize: 25});
-
-                need_load = false;
-
-                  $("#toolbar").remove();
+                      });
 
 
-            }
 
-            {% endif %}
 
-        },
-        refreshOptions: {'icons': icons}
-    });
+
+
+
+
+
+                }
+
+                {% endif %}
+            },
+
+            refreshOptions: {'icons': icons}
+        });
+
+
+
+     });
 
 
 
