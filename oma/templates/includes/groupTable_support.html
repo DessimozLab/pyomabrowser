@@ -156,10 +156,7 @@
 
 <script>
 
-
-     var need_load = true;
-
-    $.getJSON("{{load_full_data}}", function (initData) {
+    $.getJSON("{{ table_data_url }}", function (initData) {
 
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
@@ -173,42 +170,21 @@
             onPostBody: function () {
                 domains.visualize_all(".protein"); //, {{ longest_seq }});
 
-                tab.bootstrapTable('hideLoading');
-
-                {% if load_full_data != 0 %}
-
-                if (need_load == true) {
-
-                    need_load = false;
-
-                    $.getJSON("{{load_full_data}}", function (jsonData) {
-
-                    tab.bootstrapTable({ data: jsonData, pageSize: 5 });
-                    tab.bootstrapTable('load', jsonData);
-
-
-                    $("#toolbar").remove();
-
-
-                      });
-
-
-
-
-
-
-
-
-
-                }
-
-                {% endif %}
             },
 
             refreshOptions: {'icons': icons}
         });
+        tab.bootstrapTable('hideLoading');
 
 
+        {% if load_full_data != 0 %}
+
+            $.getJSON("{{load_full_data}}", function (jsonData) {
+            tab.bootstrapTable({ data: jsonData, pageSize: 5 });
+            tab.bootstrapTable('load', jsonData);
+            $("#toolbar").remove();});
+
+            {% endif %}
 
      });
 
