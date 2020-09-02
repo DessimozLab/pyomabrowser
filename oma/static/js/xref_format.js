@@ -206,7 +206,7 @@
             img: '<img src="'+static_root+'/image/swissmodel.png" alt="SwissModel" />'
         },
         'neXtProt': {
-            url: function(id){return "https://www.nextprot.org/entry/"+id;}
+            url: function(id){return "https://www.nextprot.org/entry/"+id;},
             img: '<img src="'+static_root+'/image/neXtProt.png" alt="neXtProt" />'
         },
         'Bgee': {
@@ -214,7 +214,7 @@
             img: '<img src="'+static_root+'/image/bgee.png" alt="Bgee" />'
         },
         'ChEMBL': {
-            url: function(id){return "https://www.ebi.ac.uk/chembldb/target/inspect/"+id;}
+            url: function(id){return "https://www.ebi.ac.uk/chembldb/target/inspect/"+id;},
             img: '<img src="'+static_root+'/image/ChEMBL.png" alt="ChEMBL" />'
         }
     };
