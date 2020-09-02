@@ -1286,6 +1286,8 @@ body .oma-details-container .oma-details-nav-left .gene-orthology li #filterPara
 
 .toggle-visibility {
 
+	cursor: pointer;
+
 position: fixed;
 left: 280px;
 top: 65%;

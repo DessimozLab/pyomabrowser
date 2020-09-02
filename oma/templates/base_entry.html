@@ -30,7 +30,7 @@
 
 
         <a class="dropdown-item"   {% if entry.oma_hog %} href="{% url 'hog_viewer' entry.oma_hog_root %}" > HOG {% else %} disabled > No related HOG {% endif %} </a>
-        <a class="dropdown-item"  {% if entry.oma_group %} href="{% url 'omagroup_members' entry.oma_group %}" > Oma Group {% else %} disabled > No related Oma Group {% endif %} </a>
+        <a class="dropdown-item"  {% if entry.oma_group %} href="{% url 'omagroup_members' entry.oma_group %}" > OMA Group {% else %} disabled > No related OMA Group {% endif %} </a>
 
 
 

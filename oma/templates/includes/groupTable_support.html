@@ -179,15 +179,15 @@
 
             if (need_load == true) {
 
-                $.getJSON("{{load_full_data}}", function (jsonData) {
+
+                tab.bootstrapTable('refreshOptions', {url: "{{load_full_data}}"});
+                tab.bootstrapTable('refresh', {url: "{{load_full_data}}",pageSize: 25});
 
                 need_load = false;
-                tab.bootstrapTable('load', jsonData );
-                tab.bootstrapTable({'pagination': true});
 
-                $("#toolbar").remove();
+                  $("#toolbar").remove();
 
-                 });
+
             }
 
             {% endif %}

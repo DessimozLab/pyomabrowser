@@ -527,7 +527,6 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
         if len(vps) > 0:
             longest_seq = max(e.sequence_length for e in vps)
 
-
         start = time.time()
 
         data = list(self.to_json_dict(vps))
