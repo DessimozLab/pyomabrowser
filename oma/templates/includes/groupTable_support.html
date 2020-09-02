@@ -180,11 +180,12 @@
         {% if load_full_data != 0 %}
 
             $.getJSON("{{load_full_data}}", function (jsonData) {
-            tab.bootstrapTable({ data: jsonData, pageSize: 5 });
+            tab.bootstrapTable({ data: jsonData});
+            tab.bootstrapTable('refreshOptions', { pageSize: 25});
             tab.bootstrapTable('load', jsonData);
             $("#toolbar").remove();});
 
-            {% endif %}
+        {% endif %}
 
      });
 
