@@ -1064,10 +1064,17 @@ font-size: .9rem;
 
 .oma-group, .oma-group .selected {
 background-color: #336799 !important;
-color: #222 !important;
+
+}
+.oma-group .selected {
+	color: #fff !important;
 }
 
-.oma-group li a span { color: #fff !important; }
+.oma-group .selected div {
+	color: #222 !important;
+}
+
+.oma-group .selected li a span { color: #222 !important; }
 
 .genome, .genome .selected {
     background-color: #e32026 !important;

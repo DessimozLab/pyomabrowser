@@ -2756,12 +2756,11 @@ class Searcher(View):
             try:
                 entry_nr = utils.id_resolver.search_protein(query)
 
-
-                if redirect_valid:
-                    return redirect('pairs', entry_nr)
+                if redirect_valid and len(list(entry_nr.keys()))==1:
+                    return redirect('pairs', list(entry_nr.keys())[0])
                 else:
-                    logger.info(entry_nr)
-                    data.append(list(entry_nr.keys())[0])
+                    for enr in entry_nr.keys():
+                        data.append(enr)
 
             except db.AmbiguousID as ambiguous:
                 logger.info("query {} maps to {} entries".format(query, len(ambiguous.candidates)))
@@ -3276,5 +3275,3 @@ class Searcher(View):
             return HttpResponseBadRequest(str(e))
 
 # //</editor-fold>
-
-
