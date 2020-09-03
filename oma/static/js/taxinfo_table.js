@@ -76,8 +76,6 @@
                  container.innerHTML =  '<a href="/oma/genome/'+data.code+'/info">' + data.species  +'</a>';
 
 
-                 console.log(data);
-
 
 
             });

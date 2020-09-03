@@ -533,7 +533,6 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
 
 
 
-
         data = list(self.to_json_dict(vps))
 
         end = time.time()
@@ -3089,7 +3088,7 @@ class Searcher(View):
 
     def get(self, request):
 
-        type = request.GET.get('type', 'id').lower()
+        type = request.GET.get('type', 'all').lower()
         query = request.GET.get('query', '')
         meth = getattr(self, "analyse_search")
 
@@ -3097,7 +3096,7 @@ class Searcher(View):
 
     def post(self, request):
 
-        type = request.POST.get('type', 'id').lower()
+        type = request.POST.get('type', 'all').lower()
         query = request.POST.get('query', '')
         meth = getattr(self, "analyse_search")
 

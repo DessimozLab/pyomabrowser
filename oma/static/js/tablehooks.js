@@ -30,6 +30,11 @@
     };
 
 
+    exports.format_locus = function(value, row) {
+        return value.start + "..." + value.end ;
+    };
+
+
 
     exports.format_generic_genome_link = function(value, row) {
         if (value === "Extant") {
