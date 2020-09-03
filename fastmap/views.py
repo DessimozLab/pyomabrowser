@@ -16,35 +16,30 @@ import os
 import json
 
 
-
 # Create your views here.
 def fastmapping(request):
-
     if request.method == 'POST':
-
         form = forms.FastMappingUploadForm(request.POST, request.FILES)
-
         if form.is_valid():
-
-            print(request.FILES['file'])
-
             user_file_info = misc.handle_uploaded_file(request.FILES['file'])
-            data_id = hashlib.md5(user_file_info['md5'].encode('utf-8')).hexdigest()
+            map_method = form.cleaned_data['map_method']
+            target = form.cleaned_data['target']
+            h = hashlib.md5(user_file_info['md5'].encode('utf-8'))
+            h.update(map_method.encode('utf-8'))
+            h.update(target.encode('utf-8'))
+            data_id = h.hexdigest()
 
             try:
                 r = FastMappingJobs.objects.get(data_hash=data_id)
                 do_compute = r.remove_erroneous_or_long_pending()
             except FastMappingJobs.DoesNotExist:
                 do_compute = True
-
-            print(do_compute)
-
             if do_compute:
                 res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.txt.gz".format(data_id))
                 res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
-                res = submit_mapping(data_id, res_file_abs, user_file_info['fname'])
+                res = submit_mapping(data_id, res_file_abs, user_file_info['fname'], map_method, target)
                 r = FastMappingJobs(data_hash=data_id, state=res.state, result=res_file_rel,
-                                         fasta=request.FILES['file'], processing=False)
+                                    map_method=map_method, fasta=request.FILES['file'], processing=False)
                 r.save()
             return HttpResponseRedirect(reverse('fastmapping-download', args=(data_id,)))
 
