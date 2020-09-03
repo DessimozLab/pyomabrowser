@@ -14,7 +14,6 @@ import subprocess
 logger = logging.getLogger(__name__)
 
 
-
 class JobStatus(object):
     def __init__(self, subproc):
         if isinstance(subproc, int) and subproc < 0:
@@ -31,7 +30,7 @@ class JobStatus(object):
             self.state = "error"
 
 
-def submit_mapping(session, res_file=None, fasta=None):
+def submit_mapping(session, res_file=None, fasta=None, map_method=None, target=None):
     session_dir = '/tmp/gc3sessions'
 
     if not os.path.isdir(session_dir):
@@ -40,14 +39,17 @@ def submit_mapping(session, res_file=None, fasta=None):
         os.makedirs(os.path.dirname(res_file))
 
     res_file = 'blank' if res_file is None else res_file
-
     fasta = 'blank' if fasta is None else fasta
+    map_method = 's' if map_method is None else map_method
+    target = 'all' if target is None else target
 
     cmd = ['source', os.path.expanduser(os.path.join('~', 'gc3pie', 'bin', 'activate'))]
     cmd.extend(['&&', 'python', 'fastmapping.py', '-u' 'sqlite:///tmp/gc3session.db',
-                '-s', os.path.join(session_dir, session), res_file])
-
+                '-s', os.path.join(session_dir, session)])
+    cmd.append(res_file)
     cmd.append(fasta)
+    cmd.append(map_method)
+    cmd.append(target)
 
     cmd = " ".join(cmd)
     logger.info('running command: ' + cmd)
@@ -72,7 +74,7 @@ def update_running_jobs():
         job.processing = True
         job.save()
 
-        res = submit_mapping(job.data_hash)
+        res = submit_mapping(job.data_hash, map_method=job.map_method)
         job.state = res.state
         job.create_time = timezone.now()
         job.processing = False

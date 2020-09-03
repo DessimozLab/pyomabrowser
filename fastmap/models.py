@@ -8,9 +8,25 @@ logger = logging.getLogger(__name__)
 
 # Create your models here.
 class FastMappingJobs(models.Model):
+    # Mapping choices
+    CLOSEST_SEQ = "s"
+    CLOSEST_SEQ_IN_SPECIES = "st"
+    CLOSEST_HOG = "h"
+    CLOSEST_HOG_AT_LEVEL = "ht"
+    MAP_METHODS = [
+        (CLOSEST_SEQ, "Closest sequence"),
+        (CLOSEST_SEQ_IN_SPECIES, "Closest sequence in target species"),
+    ]
+
+    # Model fields
     data_hash = models.CharField(max_length=32, primary_key=True)
     state = models.CharField(max_length=8)
     fasta = models.TextField(null=True)
+    map_method = models.CharField(
+        max_length=2,
+        choices=MAP_METHODS,
+        default=CLOSEST_SEQ
+    )
     result = models.FileField(blank=True)
     create_time = models.DateTimeField(auto_now=True)
     processing = models.BooleanField(False)
