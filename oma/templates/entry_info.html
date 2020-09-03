@@ -14,7 +14,7 @@
 <table class="table">
      {% if entry.description %}<tr><td>Description</td><td>{{ entry.description }}</td></tr> {% endif %}
     <tr><td>Organism</td><td><a href="{% url 'genome_info' entry.genome.uniprot_species_code %}"> {{ entry.genome.uniprot_species_code }} - {{ entry.genome.sciname }}</a></td></tr>
-    <tr><td>Locus</td><td>{{entry.locus_start}} ... {{entry.locus_end}} </td></tr>
+    <tr><td>Locus</td><td>[{{entry.chromosome}}]: {{entry.locus_start}} ... {{entry.locus_end}} </td></tr>
     <tr><td>Number of exons</td><td>{{ entry.exons | length }}</td></tr>
     <tr><td>Exons</td><td>{{ entry.exons }}</td></tr>
      {% if "PMP" in xrefs %}
