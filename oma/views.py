@@ -401,7 +401,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
 
-        if nr_ortholog_relations['NrAnyOrthologs'] < self._max_entry_to_load:
+        if nr_ortholog_relations['NrAnyOrthologs']  < self._max_entry_to_load:
             load_full_data = 0
             url = reverse('pairs_support_json', args=(entry.omaid,))
         else:
@@ -529,7 +529,6 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
 
 
         start = time.time()
-
 
 
 
