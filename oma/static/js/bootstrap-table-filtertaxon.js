@@ -337,8 +337,10 @@
             return "Apply";
         },
         taxon_to_show: function () {
-            //return ['Vertebrata', 'Mammalia', 'Neoptera', 'Viridiplantae', 'Fungi'];
-            return ['Dikarya', 'Saccharomycetaceae', 'Fungi', 'Viridiplantae', 'Fungi', 'Ascomycota', 'Eukaryota'];
+            return ['Eukaryota', 'Viridiplantae', 'Fungi', 'Metazoa', 'Vertebrata',
+            'Arthropoda', 'Bacteria', 'Archaea'];
+
+            //return ['Dikarya', 'Saccharomycetaceae', 'Fungi', 'Viridiplantae', 'Fungi', 'Ascomycota', 'Eukaryota'];
         }
     });
 
@@ -364,7 +366,7 @@
                 return;
             }
 
-            // List of inputted taxon name (not checked vor validity)
+            // List of inputted taxon name (not checked for validity)
             this.list_taxon_accepted = this.options.taxon_to_show();
 
             // SEARCH MODE TYPE
