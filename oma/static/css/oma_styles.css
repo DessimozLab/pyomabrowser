@@ -1067,7 +1067,7 @@ background-color: #336799 !important;
 color: #222 !important;
 }
 
-.oma-group li a span { color: #222 !important; }
+.oma-group li a span { color: #fff !important; }
 
 .genome, .genome .selected {
     background-color: #e32026 !important;

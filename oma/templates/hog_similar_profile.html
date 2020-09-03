@@ -3,6 +3,10 @@
 
 {% block contentTab %}
 
+{% if sim_data == {} %}
+This HOG does not contain required information to search for similar HOGs. We can therefore not provide other similar HOGs.
+{% else %}
+
 <script src='{% static "js/tablehooks.js" %}' type="text/javascript"></script>
 
 <!-- D3 todo dl the lib-->
@@ -156,6 +160,9 @@
 
 
 </script>
+
+
+{% endif %}
 
 
 {% endblock contentTab %}

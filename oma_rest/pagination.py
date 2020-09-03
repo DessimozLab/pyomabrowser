@@ -6,7 +6,7 @@ import itertools
 
 class LinkHeaderPagination(drf_link_header_pagination.LinkHeaderPagination):
     page_size_query_param = 'per_page'
-    max_page_size = 10000
+    max_page_size = 10000000
 
     def get_paginated_response(self, data):
         response = super(LinkHeaderPagination, self).get_paginated_response(data)
