@@ -80,7 +80,7 @@ class FastMappingScript(SessionBasedScript):
         self.add_param("method", choices=("s", "st", "h", "ht"),
                        help="mapping method - s: closest sequence, st: clostest seq in target species, "
                             "h: closest hog, ht: closest hog at target level")
-        self.add_param("taget", help="target species")
+        self.add_param("target", help="target species")
 
     def new_tasks(self, extra):
         if self.params.method in ("h", "ht"):
