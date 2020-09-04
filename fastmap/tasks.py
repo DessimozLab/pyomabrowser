@@ -41,7 +41,7 @@ def submit_mapping(session, res_file=None, fasta=None, map_method=None, target=N
     res_file = 'blank' if res_file is None else res_file
     fasta = 'blank' if fasta is None else fasta
     map_method = 's' if map_method is None else map_method
-    target = 'all' if target is None else target
+    target = 'all' if target in (None, "") else target
 
     cmd = ['source', os.path.expanduser(os.path.join('~', 'gc3pie', 'bin', 'activate'))]
     cmd.extend(['&&', 'python', 'fastmapping.py', '-u' 'sqlite:///tmp/gc3session.db',
