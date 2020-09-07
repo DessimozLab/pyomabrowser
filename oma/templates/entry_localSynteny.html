@@ -130,6 +130,18 @@ $(window).on('load', function () {
     $(".table").floatThead({top:181});
 
 });
+
+$(document).on("click",".toggle-visibility", function () {
+    console.log("toggle");
+    window.dispatchEvent(new Event('resize'));
+});
+
+
+
+
+
+
+
 </script>
 {% endblock js_hook %}
 

@@ -2449,10 +2449,14 @@ class Searcher(View):
 
                     ali = [m.start() for m in re.finditer(seq, p.sequence)]
 
-                    p.sequence = [{"sequence":p.sequence, 'align': [ali[0], ali[0] + len(term)]} for al in align_info  if al == p.entry_nr][0]
+                    p.sequence = [{"sequence":p.sequence, 'align': [ali[0], ali[0] + len(seq)]} for al in align_info  if al == p.entry_nr][0]
 
                 elif match == 'approx':
-                    p.sequence = [{"sequence":p.sequence, 'align': al[1]["alignment"][0][1:2][0]} for al in align_info  if al[0] == p.entry_nr][0]
+
+                    pos1 = al[1]["alignment"][0][1:2][0][0][0]
+                    seq = seq_searcher._sanitise_seq(term).decode()
+
+                    p.sequence = [{"sequence":p.sequence, 'align': [pos1, pos1 + len(seq)]} for al in align_info  if al[0] == p.entry_nr][0]
 
 
             else:

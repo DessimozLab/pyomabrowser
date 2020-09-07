@@ -255,7 +255,7 @@ function init_table(div_id) {
     });
 
     var icons = tab.bootstrapTable('getOptions').icons;
-    $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+    $.extend(icons, {export: 'fa-download', columns: 'fa-list'});
     tab.bootstrapTable('refreshOptions', {'icons': icons});
 }
 

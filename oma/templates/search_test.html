@@ -585,12 +585,6 @@
     <script src='{% static "js/highlight.js" %}'></script>
 
 
-
-
-
-
-
-
 <script>
 
 
@@ -651,7 +645,6 @@
         myHilitor3.setMatchType("open");
         var data = {{ data_genome | safe }};
 
-        console.log(data)
         var tab = $("#matchTable_genome");
         tab.bootstrapTable({
             reorderableColumns: true,
@@ -708,16 +701,6 @@ $( '.dropdown-menu a' ).on( 'click', function( event ) {
 
    return false;
 });
-
-
-
-
-
-
-
-
-
-
 
         $(function () {
   $('[data-toggle="tooltip"]').tooltip()
@@ -796,10 +779,6 @@ document.getElementById('f_g_ag').click();
 
 
  {% endif %}
-
-
-
-
 
     {% block js_formatter_hooks %}{% endblock %}
 

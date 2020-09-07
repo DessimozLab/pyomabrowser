@@ -80,7 +80,6 @@
             var position1 = value.align[1];
             var position2 = value.align[0];
 
-            console.log(position1,position2, a);
             var output1 = [a.slice(0, position1), b1, a.slice(position1)].join('');
             var output = [output1.slice(0, position2), b2, output1.slice(position2)].join('');
 
