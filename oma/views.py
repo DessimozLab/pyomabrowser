@@ -873,7 +873,7 @@ class HomoeologBase(ContextMixin, EntryCentricMixin):
         nr_ortholog_relations = utils.db.nr_ortholog_relations(context['entry'].entry_nr)
 
         context.update(
-            {'entry': entry, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'nr_vps':nr_ortholog_relations['NrAnyOrthologs'],
+            {'entry': entry, 'nr_vps':nr_ortholog_relations['NrAnyOrthologs'],
              'hps': hps, 'nr_hps': len(hps), 'tab': 'homoeologs',
              'longest_seq': longest_seq})
         return context
@@ -2073,7 +2073,15 @@ class GenomeModelJsonMixin(JsonModelMixin):
                    "type": "type"}
 
 
-class GenomesJson(GenomeModelJsonMixin, View):
+class GenomeModelJsonTableMixin(JsonModelMixin):
+    json_fields = {'uniprot_species_code': None,
+                   "species_and_strain_as_dict": 'sciname',
+                   'ncbi_taxon_id': "ncbi",
+                   "common_name": None,
+                   "nr_entries": "prots", "kingdom": None,
+                   "last_modified": None}
+
+class GenomesJson(GenomeModelJsonTableMixin, View):
     def get(self, request, *args, **kwargs):
         genome_key = utils.id_mapper['OMA']._genome_keys
         lg = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_table[utils.db.id_mapper['OMA']._entry_off_keys[e - 1]]) for e in genome_key]
