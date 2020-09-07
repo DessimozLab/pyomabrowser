@@ -28,10 +28,12 @@
 
                               {% if genome_term|length > 0 %}
 
-                                 <h4 class="pl-5"> <small> Following term are used as genome or taxon filtering:
-                                 {% for term in genome_term %}
 
-                                 <span class="badge badge-secondary">{{term}}</span>
+
+                                 <h4 class="pl-5"> <small> Following term are used as genome or taxon filtering:
+                                 {% for term in genome_term_link %}
+
+                                 <span class="badge badge-secondary"><a style="color:#fff" href="{% url 'genome_info' term.1 %}"> {{term.0}} </a> </span>
 
 
                              {% endfor %}

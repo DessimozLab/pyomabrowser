@@ -17,8 +17,6 @@
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
                data-checkbox-header="true"
-               data-group-by="true"
-               data-group-by-field="DivergenceLevel"
                data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
 
             <thead>
@@ -87,15 +85,6 @@
 <link type="text/css" rel="stylesheet" href="{% static "css/bootstrap-editable.css" %}"/>
 <script src="{% static "js/bootstrap-editable.js" %}"></script>
 
-
- {% if tab == 'paralogs' %}
-
-
-<link href="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/group-by-v2/bootstrap-table-group-by.css" rel="stylesheet">
-<script src="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/group-by-v2/bootstrap-table-group-by.js"></script>
-
-
-{%endif%}
 
 <script>
 

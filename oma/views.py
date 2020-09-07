@@ -2209,6 +2209,7 @@ class Searcher(View):
 
         genome_term = []
         protein_scope = []
+        genome_term_link = []
 
         for term in terms:
             try:
@@ -2220,12 +2221,15 @@ class Searcher(View):
                     result = re.findall('\\b' + term + '\\b', json.dumps(geno), flags=re.IGNORECASE)
                     if result:
                         genome_term.append(term)
+                        if geno["uniprot_species_code"]:
+                            genome_term_link.append([term,geno["uniprot_species_code"]])
                         try:
                             protein_scope += self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(geno["ncbi"]))
                         except ValueError:
                             pass
 
         context["genome_term"] = list(set(genome_term))
+        context["genome_term_link"] = genome_term_link
         context["protein_scope"] = protein_scope
 
         pruned_term = [term for term in terms if term not in genome_term]
@@ -3111,19 +3115,6 @@ class Searcher(View):
         meth = getattr(self, "analyse_search")
 
         return meth(request,type, query)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

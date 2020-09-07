@@ -453,7 +453,7 @@
                 // ADD EDIT CUSTOM ACTION
                 $(new_item).find('a[class=edit]').off('click').on('click', click_edit);
 
-                $(new_item).trigger( "click");
+                $(new_item).trigger("click");
 
                 var ci = get_item_by_id(that.tax_converter['custom'], empty_filter.Uid, 'Uid');
                 showAvdSearch(ci, that.options.formattaxonFilter(), that.options.formatAdvancedCloseButton(), that);

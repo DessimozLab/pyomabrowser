@@ -576,9 +576,6 @@
         genomeFullName_2 = genomeSpecies[$('#g2_name').val()];
 
 
-        console.log(genome_1,genome_2);
-        console.log(genomeFullName_1,genomeFullName_2);
-
         if (genome_1 === undefined || genome_2 === undefined) {
             return false;
         }
@@ -614,7 +611,6 @@
 
 
 
-                console.log(res1,res2);
 
 
                 var chrom1 = filterChromosomesByCount(res1[0].chromosomes, 10);
@@ -1014,7 +1010,6 @@
                     return;
                 }
                 var data = d3.merge(data_parts);
-                console.log(data_parts);
                 //$("#loader2").hide();
                 launch_dotplot();
 
@@ -1034,6 +1029,12 @@
                 }
 
                 function launch_dotplot() {
+
+                    var histmetric = document.getElementById("hist_metric");
+
+                    while (histmetric.firstChild) {
+                        histmetric.removeChild(histmetric.firstChild);
+                    }
 
 
                     var dotplot = new DotPlot(container, data, genome1, genome2, chromosome1, chromosome2);
