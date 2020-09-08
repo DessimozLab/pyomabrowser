@@ -1118,7 +1118,31 @@ class HOG_Base(ContextMixin):
             # get members:
             members_sub = [x for x in utils.db.member_of_hog_id(hog_id, level=level)]
 
-            #update context
+            # get level up
+            leaf = models.Genome(utils.db,utils.db.id_mapper["OMA"].genome_of_entry_nr(members_sub[0]["EntryNr"]))
+            leaf_id = leaf.ncbi_taxon_id
+            list_g = [x["Name"].decode() for x in utils.db.tax.get_parent_taxa(leaf_id)]
+            list_g.reverse()
+            threshold_down = list_g.index(hog.level)
+            threshold_up = list_g.index(models.HOG(utils.db, hog_id.split('.')[0]).level)
+            list_g = list_g[threshold_up:threshold_down]
+
+
+            """
+            # get level down
+
+            lineage_down = []
+
+            for subhog in subhogs_list:
+
+                if subhog.level != hog.level and subhog.level not in list_g:
+                    lineage_down.append(subhog)
+                    
+                    
+            """
+
+
+            # update context
             context['hog_id'] = hog_id
             context['root_id'] = hog_id.split('.')[0]
             context['hog_fam'] = fam
@@ -1126,6 +1150,8 @@ class HOG_Base(ContextMixin):
             context['members'] = members_sub
             context['is_subhog'] = is_subhog
             context['api_base'] = 'hog'
+            context['lineage_up'] =list_g
+            #context['lineage_down'] = lineage_down
 
 
 

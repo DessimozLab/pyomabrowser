@@ -10,6 +10,90 @@
 
 
 <div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
+
+
+
+    <div class="oma-details-title">
+
+        <h2 class="group_title"> {{ hog_id }} with {{ members|length }} members   </h2>
+
+        {% for taxa in lineage_up %}
+
+            {% if forloop.counter == 1 or forloop.counter == 2 %}
+
+               <a href=" {% url 'hog_viewer' hog_id  taxa%}  "> {{taxa|title}} </a> /
+
+            {% elif forloop.counter == 3 %}
+
+            <div id="lineage" style="display: inline">
+
+                <span id="a">... / </span>  <span id="b"> <a href=" {% url 'hog_viewer' hog_id  taxa%}  ">{{taxa|title}}</a> /
+
+
+            {% else  %}
+
+            <a href=" {% url 'hog_viewer' hog_id  taxa%}  ">{{taxa|title}}</a> /
+
+            {% endif %}
+                {% if forloop.last %}
+
+            </span>
+
+
+
+         {% endif %}
+
+
+        {% endfor %}
+
+         <b>{{level|title}}</b>
+
+
+                </div>
+
+        <!--
+<div class="btn-group dropright">
+  <button type="button" class="btn btn-outline-dark btn-sm dropdown-toggle" style="padding: .20rem .4rem !important; font-size: .600rem!important;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Lower Level
+  </button>
+  <div class="dropdown-menu">
+      {% for hog in lineage_down %}
+      <a class="dropdown-item" href=" {% url 'hog_viewer' hog_id  hog.level%}  " >[{{hog.nr_member_genes}} members]  {{hog.level}} </a>
+      {% endfor %}
+  </div>
+</div>
+        -->
+
+    </div>
+
+
+    <style>
+
+        div#lineage span#a {
+display:inline;
+}
+div#lineage:hover span#a {
+display:none;
+}
+div#lineage span#b {
+display:none;
+}
+div#lineage:hover span#b {
+display:inline;
+}
+
+        .show>.btn-outline-dark.dropdown-toggle, .btn-outline-dark:hover {
+            color: #fff;
+            background-color: #336799;
+            border: none;
+
+        }
+
+    </style>
+
+
+
+<!--
  {% if is_subhog %}
 
         <div class="oma-details-title  ">
@@ -25,10 +109,6 @@
         </button>
     </div>
 
-
-
-
-
         {% else %}
 
      <div class="oma-details-title">
@@ -41,14 +121,10 @@
 
         {% endif %}
 
-
-
-
-
-
-
-
     </div>
+
+
+-->
 
 </div>
 
