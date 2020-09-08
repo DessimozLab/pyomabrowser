@@ -2247,12 +2247,14 @@ class Searcher(View):
                     result = re.findall('\\b' + term + '\\b', json.dumps(geno), flags=re.IGNORECASE)
                     if result:
                         genome_term.append(term)
-                        if geno["uniprot_species_code"]:
-                            genome_term_link.append([term,geno["uniprot_species_code"]])
+                        if geno["ncbi"]:
+                            genome_term_link.append([term,geno["uniprot_species_code"], geno["sciname"]])
                         try:
                             protein_scope += self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(geno["ncbi"]))
+
                         except ValueError:
                             pass
+
 
         context["genome_term"] = list(set(genome_term))
         context["genome_term_link"] = genome_term_link

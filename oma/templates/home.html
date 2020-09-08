@@ -182,7 +182,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
 
 
                                 <li class="btn-more-container" >
-                                    <button type="button" class="btn btn-outline-dark " disabled>More help here!</button>
+                                    <button type="button" style="display: none;" class="btn btn-outline-dark " disabled>More help here!</button>
                                 </li>
                             </ul>
                         </div>
@@ -207,12 +207,12 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                         <div class="oma-card-content">
                              <br>
                             <ul>
-                                <li> <a  href="/standalone">OMA StandAlone <span class="badge badge-pill badge-dark float-right">Software</span></a> </li>
+                                <li> <a  href="https://omabrowser.org/standalone/">OMA StandAlone <span class="badge badge-pill badge-dark float-right">Software</span></a> </li>
                                 <li> <a  href="https://github.com/dessimozlab/pyham">pyHam </a> <span class="badge badge-pill badge-dark float-right">Python library</span></li>
                                 <li> <a  href="{% url 'function-projection-input' %}">Functional prediction <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
                                 <li> <a  href="{% url 'land_syntenyDP' %}">Synteny dotplot <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
                                 <li class="btn-more-container" >
-                                    <button type="button" class="btn btn-outline-dark " onclick="location.href='{% url 'tool_catalog' %}'" >Discover more tools</button>
+                                    <button type="button"  class="btn btn-outline-dark " onclick="location.href='{% url 'tool_catalog' %}'" >Discover more tools</button>
                                 </li>
                             </ul>
 
@@ -251,7 +251,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                 </li>
 
                                 <li class="btn-more-container" >
-                                    <button type="button" class="btn btn-outline-dark"  disabled>See more download options</button>
+                                    <button type="button" style="display: none;" class="btn btn-outline-dark"  disabled>See more download options</button>
                                 </li>
                             </ul>
                         </div>

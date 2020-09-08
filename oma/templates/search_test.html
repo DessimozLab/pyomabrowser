@@ -29,11 +29,26 @@
                               {% if genome_term|length > 0 %}
 
 
-
                                  <h4 class="pl-5"> <small> Following term are used as genome or taxon filtering:
                                  {% for term in genome_term_link %}
 
-                                 <span class="badge badge-secondary"><a style="color:#fff" href="{% url 'genome_info' term.1 %}"> {{term.0}} </a> </span>
+                                     {% if term.1|length > 0   %}
+
+
+                                     <span class="badge badge-secondary"><a style="color:#fff" href="{% url 'genome_info' term.1 %}">  {{term.2.species}} [{{term.1}}] </a> </span>
+
+
+
+                                     {% else %}
+
+                                     <span class="badge badge-secondary"><a style="color:#fff" href="{% url 'ancestralgenome_info' term.2 %}">  {{term.2}}  </a> </span>
+
+
+
+                                     {% endif %}
+
+
+
 
 
                              {% endfor %}
