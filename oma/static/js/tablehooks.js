@@ -133,11 +133,13 @@
         } else {return 'n/a';}
     };
 
+
     exports.format_omagroup_members = function(value){
         if (value > 0 ){
             return '<a href="/oma/omagroup/'+value+'/members/">' + value + '</a>';
         } else {return 'n/a';}
     };
+
 
     exports.format_hogid_vis = function(value, row) {
         return '<a href="/oma/hogs/' + row.ReprEntryNr

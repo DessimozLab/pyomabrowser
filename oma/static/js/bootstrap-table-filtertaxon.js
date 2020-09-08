@@ -385,11 +385,11 @@
 
             //  ADD CHECKBOX MENU
 
-            html.push('<h5>Filter by Taxon:</h5>');
+            html.push('<h5>Filter by Taxonomy:</h5>');
             html.push('<div class="form-check pl-4">');
 
             //  ADD CHECKBOX FOR EACH DEFAULT TAXA
-             html.push(add_input_div( 'all', 'All Taxon', false ));
+             html.push(add_input_div( 'all', 'All Taxa', false ));
 
             for (var tax in this.tax_converter) {
                 if (tax !== 'custom') {

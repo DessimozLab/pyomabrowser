@@ -50,43 +50,22 @@
 
               <h5>Based on:</h5>
 
-              <div class="form-group">
 
+  <ul class="list-group list-group-flush">
+     <a style="{% if subtab == 'domain' %}  border-radius: 8px; background-color: #336799 !important; color:white !important; {% else %}  background-color: #fff !important; {%endif%}border:none;  padding: .75rem 1.25rem  !important;" href="{% if level != None %}  {% url 'hog_similar_domain' hog_id  level%}  {%else%}  {% url 'hog_similar_domain' hog_id  %} {%endif%}" class="list-group-item list-group-item-action {% if subtab == 'domain' %} active {%endif%}">
+    Similar domains
+  </a>
 
-                  <div class="form-check">
-  <input class="form-check-input" type="checkbox" name="exampleRadios" id="exampleRadios3"
-         onclick="window.location='{% if level != None %}  {% url 'hog_similar_domain' hog_id  level%}  {%else%}  {% url 'hog_similar_domain' hog_id  %} {%endif%}';"
-         value="option3" {% if subtab == 'domain' %} checked {%endif%}>
-  <label class="form-check-label" for="exampleRadios3">
-   Shared domains
-  </label>
-</div>
+      <a style="{% if subtab == 'pairwise' %}  border-radius: 8px;  background-color: #336799 !important; color:white !important; {% else %}  background-color: #fff !important; {%endif%}border:none;  padding: .75rem 1.25rem  !important;" href="{% if level != None %}  {% url 'hog_similar_pairwise' hog_id  level%}  {%else%}  {% url 'hog_similar_pairwise' hog_id  %} {%endif%}" class="list-group-item list-group-item-action {% if subtab == 'pairwise' %} active {%endif%}">
+    Sequence similarity
+  </a>
 
+      <a style="{% if subtab == 'profile' %} border-radius: 8px;   background-color: #336799 !important;  color:white !important; {% else %}  background-color: #fff !important; {%endif%}border:none;  padding: .75rem 1.25rem  !important;" href="{% if level != None %}  {% url 'hog_similar_profile' hog_id  level%}  {%else%}  {% url 'hog_similar_profile' hog_id  %} {%endif%}" class="list-group-item list-group-item-action {% if subtab == 'profile' %} active {%endif%}">
+    Phylogenetic profiles
+  </a>
 
+  </ul>
 
-                  <div class="form-check">
-  <input class="form-check-input" type="checkbox" name="exampleRadios" id="exampleRadios1"
-         onclick="window.location='{% if level != None %}  {% url 'hog_similar_pairwise' hog_id  level%}  {%else%}  {% url 'hog_similar_pairwise' hog_id  %} {%endif%}';"
-         value="option1"   {% if subtab == 'pairwise' %} checked {%endif%}>
-  <label class="form-check-label" for="exampleRadios1">
-     Shared orthologs
-  </label>
-</div>
-
-
-                  <div class="form-check">
-  <input class="form-check-input" type="checkbox" name="exampleRadios" id="exampleRadios2"
-         onclick="window.location='{% if level != None %}  {% url 'hog_similar_profile' hog_id  level%}  {%else%}  {% url 'hog_similar_profile' hog_id  %} {%endif%}';"
-         value="option2" {% if subtab == 'profile' %} checked {%endif%}>
-  <label class="form-check-label" for="exampleRadios2">
-   Shared species
-  </label>
-</div>
-
-
-
-
-              </div>
 
           </div>
 

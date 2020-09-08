@@ -1218,7 +1218,8 @@ body .oma-details-container .oma-details-nav-left .gene-orthology li #filterPara
 }
 
 .search_entry h5 {
-	background-color: #e9fafb;
+	color: #fff;
+	background-color: #50b7b3;
     padding: 8px;
 	border-radius: 16px;
 	text-indent: 8px;
@@ -1226,7 +1227,8 @@ body .oma-details-container .oma-details-nav-left .gene-orthology li #filterPara
 
 
 .search_group h5 {
-	background-color: #d7fdff;
+	color: #fff;
+	background-color: #336799;
     padding: 8px;
 	border-radius: 16px;
 	text-indent: 8px;
@@ -1237,7 +1239,8 @@ body .oma-details-container .oma-details-nav-left .gene-orthology li #filterPara
 }
 
 .search_genome h5 {
-	background-color: #faebeb;
+	color: #fff;
+	background-color: #e32026;
     padding: 8px;
 	border-radius: 16px;
 	text-indent: 8px;
