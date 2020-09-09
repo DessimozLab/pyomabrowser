@@ -16,7 +16,18 @@
 
     function write_jsondata_to_storage(sKey, oData) {
         var sValue = JSON.stringify(oData);
-        window.localStorage.setItem(sKey, sValue);
+
+
+        while(true) {
+            try {
+                window.localStorage.setItem(sKey, sValue);
+                break;
+            } catch (e) {
+                localStorage.removeItem(localStorage.key(0));
+                continue;
+            }
+        }
+
     }
 
     function cachedAjaxPromise(sUrl, oAjaxOptions) {
