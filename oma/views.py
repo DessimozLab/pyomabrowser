@@ -1201,7 +1201,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         results = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
         sim_hogs = results.similar
-        sorted_profile = results.sorted_hogs[:20]
+        sorted_profile = list(results.sorted_hogs)[:20]
 
         top_profile_hogs = {k: sim_hogs[k] for k in sorted_profile}
 
