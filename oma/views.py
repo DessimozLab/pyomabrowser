@@ -2705,10 +2705,11 @@ class Searcher(View):
 
         for selector in self._genome_selector:
 
-
             # for each terms we get the raw results
             for term in terms:
-                r = self.search_taxon(request,context,  term, selector=[selector])
+                r = self.search_taxon(request, term, selector=[selector])
+
+
                 search_term_meta[term][selector] += len(r)
                 _add_genomes(r, taxon_search, total_search_taxon, search_taxon_meta)
 
@@ -3057,7 +3058,7 @@ class Searcher(View):
 
         return data
 
-    def search_taxon(self, request, context, query, selector=_genome_selector,redirect_valid=False):
+    def search_taxon(self, request, query, selector=_genome_selector,redirect_valid=False):
 
         url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
 
