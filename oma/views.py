@@ -2724,7 +2724,10 @@ class Searcher(View):
 
                     _add_genomes(induced_genome, ext_search, total_search_ext, search_ext_meta)
                     #search_term_meta[term][selector] += len(induced_genome)
-                    search_term_meta[term]["taxon"] += len(induced_genome)-1
+                    search_term_meta[term]["taxon"] += len(induced_genome)
+
+                if search_term_meta[term]["taxon"] > 0:
+                    search_term_meta[term]["taxon"] -= 1
 
         search_taxon_meta['total'] = total_search_taxon
         search_genome_meta['total'] = total_search_taxon + total_search_ext
