@@ -1217,7 +1217,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         
 
 
-        context.update({ 'tab': 'similar', 'subtab': 'profile', 'sortedhogs': results.sortedhogs,  'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
+        context.update({ 'tab': 'similar', 'subtab': 'profile',  'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
 
         return context
 
