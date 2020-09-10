@@ -1201,10 +1201,11 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         results = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
         sim_hogs = results.similar
-        top_10_keys = list(sim_hogs.keys())[:20]
-        top_10_hogs = {k: sim_hogs[k] for k in top_10_keys }
+        sorted_profile = results.sorted_hogs[:20]
 
-        sim_json = json.dumps(top_10_hogs, cls=NumpyEncoder)
+        top_profile_hogs = {k: sim_hogs[k] for k in sorted_profile}
+
+        sim_json = json.dumps(top_profile_hogs, cls=NumpyEncoder)
 
         ref_profile = {"Reference": results.query_profile}
         ref_json = json.dumps(ref_profile, cls=NumpyEncoder)
@@ -1214,10 +1215,8 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
 
         species = results.species_names
         sp_json = json.dumps(species, cls=NumpyEncoder)
-        
 
-
-        context.update({ 'tab': 'similar', 'subtab': 'profile', 'sorted_hogs': results.sorted_hogs,  'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
+        context.update({ 'tab': 'similar', 'subtab': 'profile', 'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
 
         return context
 
