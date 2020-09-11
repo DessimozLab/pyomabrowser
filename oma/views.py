@@ -1206,8 +1206,8 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         sortedhogs = [e[0] for e in sortedhogs]
         sortedhogs.reverse()
 
-        if context['hog_fam'] in sortedhogs:
-            sortedhogs.remove(context['hog_fam'])
+        if str(context['hog_fam']) in sortedhogs:
+            sortedhogs.remove(str(context['hog_fam']))
 
         sim_hogs = {}
         for sim in sortedhogs[:20]:
