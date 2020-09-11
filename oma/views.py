@@ -1206,9 +1206,12 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         sortedhogs = [e[0] for e in sortedhogs]
         sortedhogs.reverse()
 
+        sim_hogs[sim] = results.similar[sim]
+
+
         sim_hogs = {}
         for sim in sortedhogs[:20]:
-            sim_hogs[sim] = results.similar[sim]
+            sim_hogs[sim] = results.similar[int(sim)]
 
         sim_json = json.dumps(sim_hogs, cls=NumpyEncoder)
 
