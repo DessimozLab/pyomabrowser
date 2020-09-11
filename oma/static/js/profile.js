@@ -69,14 +69,11 @@
         var container = document.getElementById("Reference");
 
 
-
         container.innerHTML = "";
 
         var chart_data = exports.run_profile_vis(container, ref_profile_data['Reference'], taxon_data, species_data, margin, width, height);
 
         array_chart.push(chart_data)
-
-
 
         exports.bind_brush_and_zoom(minimap, array_chart)
 

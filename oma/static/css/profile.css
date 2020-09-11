@@ -5,6 +5,12 @@
   min-width: 200px;
 }
 
+.profile_vis2 svg {
+  height: 80px;
+  width:  100%;
+  min-width: 200px;
+}
+
 .overview svg {
   height: 50px;
   width:  100%;
