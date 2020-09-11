@@ -17,11 +17,11 @@
                 <span class="colour2"></span>
                 <span class="colour3"></span>
             </div>
-            <p>Lorem ipsum </p>
+
 
             <p>
-                Please upload a fasta formated file with your sequences (might also be in gzip or bzip compressed
-                format). The service identifies the closest sequence in a very quick manner and ...
+                This Fast Mapping service takes as input a query sequence and identifies the closest sequence in OMA. Please upload a fasta formatted file with your sequences (may also be in gzip or bzip compressed format). Select the mapping method一 either closest sequence in all of OMA, or closest sequence in a specified target species.
+
             </p>
 
             <div class="card card-header-oma">
@@ -49,6 +49,17 @@
 <script>
 (function() {
     'use strict';
+
+    $('[name="map_method"]').change(function () {
+    var end = this.value;
+    if (end == 'st'){
+        $('[name="target"]').parent().parent().show();
+    }
+    else {
+        $('[name="target"]').parent().parent().hide();
+    }
+})
+
     window.addEventListener('load', function() {
     // Fetch all the forms we want to apply custom Bootstrap validation styles to
     var forms = document.getElementsByClassName('needs-validation');
@@ -63,6 +74,8 @@
         }, false);
 });
 }, false);
+
+    $('[name="target"]').parent().parent().hide();
 })();
 </script>
 

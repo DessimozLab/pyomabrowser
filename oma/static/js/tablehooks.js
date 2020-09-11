@@ -80,10 +80,26 @@
             var position1 = value.align[1];
             var position2 = value.align[0];
 
+            var start = position2 - 20;
+            var begin_str = '...';
+            if (start < 0) {
+                start = 0;
+                begin_str = ''
+            }
+
+            var end = position1 + 20;
+            var end_str = '';
+            if (end < a.length) {
+                end = position1;
+                end_str = '...'
+            }
+
+
             var output1 = [a.slice(0, position1), b1, a.slice(position1)].join('');
             var output = [output1.slice(0, position2), b2, output1.slice(position2)].join('');
 
-            return output
+
+            return [begin_str,output.slice(start, end + 20 ), end_str].join('')
         }
         return value;
     };
