@@ -1207,7 +1207,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         sortedhogs.reverse()
 
         sim_hogs = {}
-        for sim in results.sorted_hogs[:20]:
+        for sim in sortedhogs[:20]:
             sim_hogs[sim] = results.similar[sim]
 
         sim_json = json.dumps(sim_hogs, cls=NumpyEncoder)
@@ -1222,7 +1222,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         sp_json = json.dumps(species, cls=NumpyEncoder)
 
 
-        context.update({ 'tab': 'similar', 'subtab': 'profile', 'sorted_hogs': results.sorted_hogs,  'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
+        context.update({ 'tab': 'similar', 'subtab': 'profile',  'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
 
         return context
 
