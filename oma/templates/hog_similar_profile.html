@@ -69,7 +69,7 @@ This HOG does not contain required information to search for similar HOGs. We ca
 
             </div>
 
-            <div class="col">
+            <div class="col profile_vis">
 
 
                 <div class="profile_vis_ref" id="Reference"></div>
@@ -87,7 +87,6 @@ This HOG does not contain required information to search for similar HOGs. We ca
 
 
 </ul>
-
 
 
 <div id="profile_container">
@@ -145,18 +144,20 @@ This HOG does not contain required information to search for similar HOGs. We ca
 
     });
 
-    window.onload = function () {
 
 
-        var value = JSON.parse(document.getElementById('hello-data').textContent);
+        function run_profile (){
+var value = JSON.parse(document.getElementById('hello-data').textContent);
         var value_tax = JSON.parse(JSON.parse(document.getElementById('tax-data').textContent));
         var value_sp = JSON.parse(JSON.parse(document.getElementById('species-data').textContent));
         var ref = JSON.parse(JSON.parse(document.getElementById('ref-data').textContent));
 
         profile.visualize_all(value, value_tax, value_sp, ref);
+}
 
+        window.addEventListener("resize", run_profile);
+        window.addEventListener("load", run_profile);
 
-    };
 
 
 </script>
