@@ -76,6 +76,25 @@
 }, false);
 
     $('[name="target"]').parent().parent().hide();
+
+
+    $.getJSON( "/All/flatgenomes.json", function( jsonData ) {
+
+        var all_names = [];
+
+        $.each( jsonData, function ( id, genome ) {
+            console.log(id,genome)
+            all_names.push({label: genome.id, value: genome.name + ' - '+ genome.id });
+        });
+
+        $('[name="target"]').autocomplete({
+            lookup: all_names,
+            delay: 200,
+            minLength: 3,
+        });
+  });
+
+
 })();
 </script>
 

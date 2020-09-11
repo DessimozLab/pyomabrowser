@@ -1200,6 +1200,12 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
 
         results = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
+
+        sortedhogs = [(k, v) for k, v in results.jaccard_distance.items()]
+        sortedhogs = sorted(sortedhogs, key=lambda x: x[1])
+        sortedhogs = [e[0] for e in sortedhogs]
+        sortedhogs.reverse()
+
         sim_hogs = {}
         for sim in results.sorted_hogs[:20]:
             sim_hogs[sim] = results.similar[sim]
