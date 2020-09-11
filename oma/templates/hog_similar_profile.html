@@ -147,7 +147,13 @@ This HOG does not contain required information to search for similar HOGs. We ca
 
 
         function run_profile (){
-var value = JSON.parse(document.getElementById('hello-data').textContent);
+                    var node = document.getElementById("overview");
+        if (node) {
+            node.querySelectorAll('*').forEach(n => n.remove());
+        }
+
+
+        var value = JSON.parse(document.getElementById('hello-data').textContent);
         var value_tax = JSON.parse(JSON.parse(document.getElementById('tax-data').textContent));
         var value_sp = JSON.parse(JSON.parse(document.getElementById('species-data').textContent));
         var ref = JSON.parse(JSON.parse(document.getElementById('ref-data').textContent));
