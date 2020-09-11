@@ -147,9 +147,11 @@ This HOG does not contain required information to search for similar HOGs. We ca
 
 
         function run_profile (){
-                    var node = document.getElementById("overview");
+
+
+            var node = document.getElementById("overview");
         if (node) {
-            node.querySelectorAll('*').forEach(n => n.remove());
+            node.innerHTML="";
         }
 
 
