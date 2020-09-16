@@ -32,17 +32,17 @@
                     <h5 > <strong> Search an OMA group</strong></h5>
                     <br>
 
-                    <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
-                        <input type="hidden" name="f" value="DisplayGroup"/>
+                    <form class="form-horizontal" role="search" action="{% url 'search' %}" method="GET">
+                        <input type="hidden" name="type" value="group_fingerprint"/>
                         <div class="form-group form-row">
                             <label for="textG1" class="col-sm-3 col-form-label control-label text-right">Fingerprint (stable across releases):
                             </label>
                             <div class="col-sm-8 no-gutters">
 
                                 <div class="input-group col mb-2">
-                                    <input id='textG1' name="p1" type="text" class="form-control">
+                                    <input id='textG1' name="query" type="text" class="form-control">
                                     <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></span></button>
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
                                     </div>
                                 </div>
 
@@ -56,8 +56,8 @@
                     </form>
                     <br>
 
-                    <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
-                        <input type="hidden" name="f" value="DisplayGroup"/>
+                    <form class="form-horizontal" role="search" action="{% url 'search' %}" method="GET">
+                        <input type="hidden" name="type" value="group_groupid"/>
                         <div class="form-group form-row">
 
                             <label for="textG2" class="col-sm-3 col-form-label control-label text-right">Group number (not stable across releases):
@@ -65,7 +65,7 @@
                             <div class="col-sm-8 no-gutters">
 
                                 <div class="input-group col mb-2">
-                                    <input id='textG2' name="p1" type="text" class="form-control">
+                                    <input id='textG2' name="query" type="text" class="form-control">
                                     <div class="input-group-append">
                                         <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></span></button>
                                     </div>
@@ -84,8 +84,8 @@
                     </form>
                     <br>
 
-                    <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
-                        <input type="hidden" name="f" value="DisplayGroup"/>
+                    <form class="form-horizontal" role="search" action="{% url 'search' %}" method="GET">
+                        <input type="hidden" name="type" value="group_entryid"/>
                         <div class="form-group form-row">
 
 
@@ -94,9 +94,9 @@
                             <div class="col-sm-8 no-gutters">
 
                                 <div class="input-group col mb-2">
-                                    <input id='textG3' name="p1" type="text" class="form-control">
+                                    <input id='textG3' name="query" type="text" class="form-control">
                                     <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></span></button>
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
                                     </div>
                                 </div>
 

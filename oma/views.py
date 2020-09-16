@@ -3138,20 +3138,14 @@ class Searcher(View):
         return data
 
     def get(self, request):
-
         type = request.GET.get('type', 'all').lower()
         query = request.GET.get('query', '')
-        meth = getattr(self, "analyse_search")
-
-        return meth(request, type, query)
+        return self.analyse_search(request, type, query)
 
     def post(self, request):
-
         type = request.POST.get('type', 'all').lower()
         query = request.POST.get('query', '')
-        meth = getattr(self, "analyse_search")
-
-        return meth(request,type, query)
+        return self.analyse_search(request,type, query)
 
 
 
