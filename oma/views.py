@@ -173,8 +173,10 @@ class InfoBase(ContextMixin, EntryCentricMixin):
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
 
+        nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
 
-        context.update({'entry': entry, 'tab': 'geneinformation', 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
+
+        context.update({'entry': entry, 'tab': 'geneinformation', 'nr_homo': nr_homeologs_relations, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
                         'nr_pps':  nr_ortholog_relations['NrHogInducedPWParalogs']  })
         return context
 
@@ -377,9 +379,14 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
     nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
 
+
+    nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
+
+
     context = {'positions': positions, 'windows': windows,
                'md': md_geneinfos, 'o_md': o_md_geneinfos, 'colors': colors,
                'stripes': stripes, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
+               'nr_homo': nr_homeologs_relations,
                'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
                'entry': entry,
                'tab': 'synteny', 'xrefs': xrefs
@@ -408,8 +415,11 @@ class PairsBase(ContextMixin, EntryCentricMixin):
             url = reverse('pairs_support_sample_json', args=(entry.omaid,))
             load_full_data = reverse('pairs_support_json', args=(entry.omaid,))
 
+        nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
+
         context.update(
-            {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'], 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'orthologs',
+            {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
+             'nr_homo': nr_homeologs_relations, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'orthologs',
              'table_data_url': url , 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
              })
 
@@ -639,9 +649,12 @@ class ParalogsBase(ContextMixin, EntryCentricMixin):
             url = reverse('paralogs_sample_json', args=(entry.omaid,))
             load_full_data = reverse('paralogs_json', args=(entry.omaid,))
 
+        nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
+
         context.update(
             {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'paralogs',
+             'nr_homo': nr_homeologs_relations,
              'table_data_url': url, 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
              })
 
@@ -758,6 +771,8 @@ class HomeologsJson(HomeologsBase, JsonModelMixin, View):
 
         for p in utils.db.get_homoeologs(entry.entry_nr):
             pm = models.ProteinEntry.from_entry_nr(utils.db, p[0])
+            pm.SyntenyConservationLocal = p["SyntenyConservationLocal"].decode('utf-8')
+            pm.Confidence = p["Confidence"].decode('utf-8')
             pps.append(pm)
 
         start = time.time()
@@ -785,6 +800,8 @@ class HomeologsSampleJson(HomeologsBase, JsonModelMixin, View):
 
             for p in utils.db.get_homoeologs(entry.entry_nr):
                 pm = models.ProteinEntry.from_entry_nr(utils.db, p[0])
+                pm.SyntenyConservationLocal = p["SyntenyConservationLocal"].decode('utf-8')
+                pm.Confidence = p["Confidence"].decode('utf-8')
                 pps.append(pm)
 
             if len(pps) > HomeologsBase._max_entry_to_load:
