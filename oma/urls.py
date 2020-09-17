@@ -37,6 +37,7 @@ urlpatterns = [
     url(r'^hog/information/(?P<hog_id>[\w.-:]+)/$', views.HOGInfo.as_view(),
         name='hog_info'),
 
+    url(r'^hog/resolve/(?P<hog_id>HOG:[\w.-:_]+)/$', views.resolve_hog_id, name="hog-resolve"),
     url(r'^hog/similar/domains/(?P<hog_id>[\w.-:]+)/json/$', views.HOGDomainsJson.as_view(), name='hog_domains_json'),
     url(r'^hog/similar/domain/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
     url(r'^hog/similar/domain/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
