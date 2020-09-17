@@ -84,36 +84,6 @@
                     </form>
                     <br>
 
-                    <form class="form-horizontal" role="search" action="{% url 'search' %}" method="GET">
-                        <input type="hidden" name="type" value="group_entryid"/>
-                        <div class="form-group form-row">
-
-
-                            <label for="textG3" class="col-sm-3 col-form-label control-label text-right">Member gene/protein:
-                            </label>
-                            <div class="col-sm-8 no-gutters">
-
-                                <div class="input-group col mb-2">
-                                    <input id='textG3' name="query" type="text" class="form-control">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="col-md-8 offset-sm-3">
-
-                                <span class="font-weight-bold">Example:</span>
-                                    <a href="#" class="text-muted" id='exMemb'> HUMAN02353</a>
-
-                            </div>
-
-
-                        </div>
-                    </form>
-                    <br>
-
                     <h5> <strong>Marker Genes</strong></h5>
                     <div>
                                 <p>OMA Groups are useful for species tree reconstruction. You can
@@ -135,10 +105,6 @@ function OpenInNewTab(url) {
     var win = window.open(url, '_blank');
     win.focus();
 }
-
-$('#exMemb').click( function() {
-    $('#textG3').val($(this).text()).focus();
-});
 
 $('#exNumber').click( function() {
     $('#textG2').val($(this).text()).focus();

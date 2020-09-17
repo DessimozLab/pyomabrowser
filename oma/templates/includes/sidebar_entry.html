@@ -109,7 +109,7 @@
         <li class="{% if tab == 'homeologs' %} active selected {%endif%}" {% if tab != 'homeologs' %}
              onclick="window.location='{% url 'pair_homeologs' entry.omaid %}'" {%endif%}>
             <a href="{% url 'pair_homeologs' entry.omaid %}" {% if tab == 'homeologs' %}data-toggle="collapse" data-target="#filterhomeologs"{%endif%}>
-                <span>Homeologs
+                <span>Homoeologs
                 {% if nr_homo %}
                 <span class="badge badge-info">{{nr_homo}}</span>
                 {% endif %}
