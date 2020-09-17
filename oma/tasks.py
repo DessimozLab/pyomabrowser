@@ -11,7 +11,10 @@ import gzip
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
+try:
+    from Bio.Alphabet import IUPAC
+except ImportError:
+    IUPAC = None
 from django.core.mail import EmailMessage
 from django.template.loader import get_template
 from zoo.wrappers.aligners import Mafft, DataType, WrapperError
@@ -130,7 +133,13 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
     elif group_type == 'og':
         memb = utils.db.oma_group_members(entry_nr_or_grp_nr)
     members = [pyoma.browser.models.ProteinEntry(utils.db, e) for e in memb]
-    seqs = [SeqRecord(Seq(m.sequence, IUPAC.protein), id=m.omaid) for m in members]
+    seqs = []
+    for prot in members:
+        if IUPAC is not None:
+            seq = Seq(prot.sequence, IUPAC.protein)
+        else:
+            seq = Seq(prot.sequence)
+        seqs.append(SeqRecord(seq, id=prot.omaid, annotations={"molecule_type": "protein"}))
     logger.info(u"msa for {:d} sequences (avg length: {:.1f})"
                 .format(len(seqs),
                         sum([len(str(s.seq)) for s in seqs])/len(seqs)))

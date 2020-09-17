@@ -1278,8 +1278,6 @@ class HOG_Base(ContextMixin):
             context['lineage_up'] =list_g
             #context['lineage_down'] = lineage_down
 
-
-
         except ValueError as e:
             raise Http404(e)
         return context
