@@ -709,6 +709,93 @@ class ParalogsSampleJson(ParalogsBase, JsonModelMixin, View):
         return JsonResponse(data, safe=False)
 
 
+# Homeologs
+class HomeologsBase(ContextMixin, EntryCentricMixin):
+    """Base class to collect data for homeologs."""
+
+    _max_entry_to_load = 25
+
+    def get_context_data(self, entry_id, **kwargs):
+
+        context = super(HomeologsBase, self).get_context_data(**kwargs)
+        entry = self.get_entry(entry_id)
+
+        nr_homeologs_relations  = utils.db.count_homoeologs(entry.entry_nr)
+
+        if nr_homeologs_relations < self._max_entry_to_load:
+            load_full_data = 0
+            url = reverse('homeologs_json', args=(entry.omaid,))
+        else:
+            url = reverse('homeologs_sample_json', args=(entry.omaid,))
+            load_full_data = reverse('homeologs_json', args=(entry.omaid,))
+
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
+
+        context.update(
+            {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
+             'nr_homo': nr_homeologs_relations,
+             'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'homeologs',
+             'table_data_url': url, 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
+             })
+
+        return context
+
+class HomeologsView(TemplateView, HomeologsBase):
+    template_name = "entry_homeologs.html"
+
+class HomeologsJson(HomeologsBase, JsonModelMixin, View):
+
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid'}
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+
+        entry = context['entry']
+
+        pps = []
+
+        for p in utils.db.get_homoeologs(entry.entry_nr):
+            pm = models.ProteinEntry.from_entry_nr(utils.db, p[0])
+            pps.append(pm)
+
+        start = time.time()
+
+        data = list(self.to_json_dict(pps))
+
+        end = time.time()
+
+        logger.info("[{}] Json formatting {}".format(context['entry'].omaid, end - start))
+
+        return JsonResponse(data, safe=False)
+
+class HomeologsSampleJson(HomeologsBase, JsonModelMixin, View):
+        json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                       'genome.species_and_strain_as_dict': 'taxon',
+                       'canonicalid': 'xrefid'}
+
+        def get(self, request, *args, **kwargs):
+
+            context = self.get_context_data(**kwargs)
+
+            entry = context['entry']
+
+            pps = []
+
+            for p in utils.db.get_homoeologs(entry.entry_nr):
+                pm = models.ProteinEntry.from_entry_nr(utils.db, p[0])
+                pps.append(pm)
+
+            if len(pps) > HomeologsBase._max_entry_to_load:
+                pps = list(pps)
+                pps = pps[0:HomeologsBase._max_entry_to_load]
+
+            data = list(self.to_json_dict(pps))
+
+            return JsonResponse(data, safe=False)
+
+
 # Isoform
 class Entry_Isoform(TemplateView, InfoBase):
     template_name = "entry_isoform.html"

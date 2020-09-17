@@ -47,6 +47,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
 
     <script src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
+
     {% block js_hook %}{% endblock %}
 </head>
 
@@ -265,10 +266,8 @@
         }
     }
     var autocomplete_opts = {
+
         paramName: 'search',
-        serviceUrl: '/api/xref/',
-        minChars: 3,
-        deferRequestBy: 200,
         serviceUrl: '/api/xref/',
         minChars: 3,
         deferRequestBy: 200,

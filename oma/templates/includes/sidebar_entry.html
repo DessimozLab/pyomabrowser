@@ -106,6 +106,34 @@
 
         </li>
 
+        <li class="{% if tab == 'homeologs' %} active selected {%endif%}" {% if tab != 'homeologs' %}
+             onclick="window.location='{% url 'pair_homeologs' entry.omaid %}'" {%endif%}>
+            <a href="{% url 'pair_homeologs' entry.omaid %}" {% if tab == 'homeologs' %}data-toggle="collapse" data-target="#filterhomeologs"{%endif%}>
+                <span>Homeologs
+                {% if nr_homo %}
+                <span class="badge badge-info">{{nr_homo}}</span>
+                {% endif %}
+                    </span>
+            {% if tab == 'homeologs' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
+            </a>
+
+
+             <div id="filterhomeologs" class="collapse {% if tab == 'paralogs'%} show {%endif%}">
+
+
+                 {% if tab == 'homeologs' %}
+
+                <div id="filter-taxon-container"></div>
+                <div>
+
+                    {%endif%}
+
+            </div>
+
+        </li>
+
         <li class="{% if tab == 'geneinformation' %} active selected {%endif%}">
             <a href="{% url 'entry_info' entry.omaid %}">
                 <span>Gene information</span>
