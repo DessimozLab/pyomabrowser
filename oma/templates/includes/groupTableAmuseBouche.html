@@ -32,6 +32,14 @@
                     data-formatter="tablehooks.format_sciname">Taxon</th>
                 <th  data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
                 <th  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+
+
+                 {% if tab == 'homeologs' %}
+<th  data-field="conservation" data-sortable="true" >Synteny conservation</th>
+<th  data-field="confidence" data-sortable="true" >Confidence</th>
+
+                 {%endif%}
+
                 <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
     </tr>
 

@@ -747,7 +747,7 @@ class HomeologsJson(HomeologsBase, JsonModelMixin, View):
 
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid'}
+                   'canonicalid': 'xrefid', 'SyntenyConservationLocal':'conservation', 'Confidence':'confidence'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -773,7 +773,7 @@ class HomeologsJson(HomeologsBase, JsonModelMixin, View):
 class HomeologsSampleJson(HomeologsBase, JsonModelMixin, View):
         json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                        'genome.species_and_strain_as_dict': 'taxon',
-                       'canonicalid': 'xrefid'}
+                       'canonicalid': 'xrefid', 'SyntenyConservationLocal':'conservation', 'Confidence':'confidence'}
 
         def get(self, request, *args, **kwargs):
 
