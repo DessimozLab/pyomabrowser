@@ -3,9 +3,12 @@ import operator
 import itertools
 import os
 
-import Bio.SeqRecord
-import Bio.Alphabet.IUPAC
-import Bio.Seq
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+try:
+    from Bio.Alphabet import IUPAC
+except ImportError:
+    IUPAC = None
 import collections
 
 from rest_framework.views import APIView
@@ -1062,7 +1065,11 @@ class PropagateFunctionAPIView(APIView):
         if len(query_seq) < 10:
             raise ParseError('The query sequence must be at least 10 amino acids long.')
 
-        seq_list = [Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(query_seq.decode(), Bio.Alphabet.IUPAC.protein), id='unknown')]
+        if IUPAC is not None:
+            seq = Seq(query_seq.decode(), IUPAC.protein)
+        else:
+            seq = Seq(query_seq.decode())
+        seq_list = [SeqRecord(seq, id='unknown', annotations={"molecule_type": "protein"})]
         projector = db.FastMapper(utils.db)
         annotations = []
         for anno in projector.iter_projected_goannotations(seq_list):
