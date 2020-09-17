@@ -770,7 +770,7 @@ class HomeologsJson(HomeologsBase, JsonModelMixin, View):
         pps = []
 
         for p in utils.db.get_homoeologs(entry.entry_nr):
-            pm = models.ProteinEntry.from_entry_nr(utils.db, p[0])
+            pm = models.ProteinEntry.from_entry_nr(utils.db, p[1])
             pm.SyntenyConservationLocal = p["SyntenyConservationLocal"].item()
             pm.Confidence = p["Confidence"].item()
             pps.append(pm)
@@ -799,7 +799,7 @@ class HomeologsSampleJson(HomeologsBase, JsonModelMixin, View):
             pps = []
 
             for p in utils.db.get_homoeologs(entry.entry_nr):
-                pm = models.ProteinEntry.from_entry_nr(utils.db, p[0])
+                pm = models.ProteinEntry.from_entry_nr(utils.db, p[1])
                 pm.SyntenyConservationLocal = p["SyntenyConservationLocal"].item()
                 pm.Confidence = p["Confidence"].item()
                 pps.append(pm)
