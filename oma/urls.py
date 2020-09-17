@@ -49,8 +49,14 @@ urlpatterns = [
     url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
     url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
 
+    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-]+)/fasta$', views.HOGFasta.as_view(), name='hog_fasta'),
+    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/fasta$', views.HOGFasta.as_view(), name='hog_fasta'),
+
     url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-]+)/$', views.HOGtable.as_view(), name='hog_table'),
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/$', views.HOGtable.as_view(), name='hog_table'),
+    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-]+)/$', views.HOGtable.as_view(), name='hog_table'),
+
+
+
 
 
     url(r'^hog/(?P<group_id>[A-Z0-9]+)/iham/$', views.HOGiHam.as_view(), name='hog_iham'),

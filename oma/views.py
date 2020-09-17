@@ -1468,8 +1468,18 @@ class HOGtable(HOG_Base, TemplateView):
 
     def get_context_data(self, hog_id, **kwargs):
         context = super(HOGtable, self).get_context_data(hog_id, **kwargs)
-        context.update({'tab': 'table', 'api_base': 'hog', 'api_url': '/api/hog/{}/members/'.format(hog_id)})
+
+        context.update({'tab': 'table', 'api_base': 'hog', 'api_url': '/api/hog/{}/members/?level={}'.format(hog_id, context['level'])})
         return context
+
+class HOGFasta(FastaView, HOG_Base):
+    def get_fastaheader(self, memb):
+        return ' | '.join([memb.omaid, memb.canonicalid, "HOG:{:07d}".format(memb.oma_hog),
+                           '[{}]'.format(memb.genome.sciname)])
+
+    def render_to_response(self, context):
+
+        return self.render_to_fasta_response(context['members'])
 
 
 #  OLD STUFF

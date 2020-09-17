@@ -6,6 +6,7 @@
 {% block meta_description %}Hierarchical orthologous groups (HOGs) provide a set of genes that have all started diverging from a single ancestral gene at the taxonomic range of interest.{% endblock %}
 {% block js_hook %}
 
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
 
 <!-- d3 -->
@@ -194,9 +195,6 @@
         ).then(function(orthoxml, speciestree, fam_data) {
 
 
-
-            {#console.log(Array.from(go_terms)[0]);#}
-
             fam_data = JSON.parse(fam_data[0]);
 
 
@@ -208,7 +206,7 @@
                     d3.select('#current_level_text')
                         .text(node.node_name());
                 })
-                //.show_oma_link(true)
+                .show_oma_link(true)
                 .tree_width(330)
                 .board_width(530)
                 .on("updating", function() {

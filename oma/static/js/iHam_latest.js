@@ -10194,12 +10194,23 @@ module.exports = {
       });
       if (show_oma_link) {
 
-        obj.rows.push({
-          value: "<a href=\"https://omabrowser.org/oma/hogs/" + hog.protid + "/" + taxa_name.replace(" ", "%20") + "/fasta\" target=\"_blank\">Sequences (Fasta)</a>"
+        console.log("b", obj.rows)
+
+        $.ajax({
+            url: 'https://oma-stage.vital-it.ch/api/hog/' + hog.protid + '/members/?level=' + taxa_name,
+            async: false, //blocks window close
+            success: function(data) {
+               obj.rows.push({
+                   value: "<a href=\"https://oma-stage.vital-it.ch/oma/hog/table/" +  data.hog_id +"/" +data.level.replace(" ", "%20") + "/fasta\" target=\"_blank\"> Sequences (Fasta)</a>"});
+               obj.rows.push({value: "<a href=\"https://oma-stage.vital-it.ch/oma/hog/table/" +  data.hog_id +"/" +data.level.replace(" ", "%20") + "/\" target=\"_blank\"> HOGs tables</a>"});
+
+          console.log("c", obj.rows)
+            }
         });
-        obj.rows.push({
-          value: "<a href=\"https://omabrowser.org/oma/hogs/" + hog.protid + "/" + taxa_name.replace(" ", "%20") + "/\" target=\"_blank\">HOGs tables</a>"
-        });
+
+
+        console.log("a", obj.rows)
+
       }
 
       _hog_header_tooltip = tooltip.list().width(180).id('hog_header_tooltip').container(div).call(this, obj);
