@@ -1,0 +1,257 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block title %}Glossary{% endblock %}
+{% block meta_description %}OMA is a method and database for the inference of orthologs among complete genomes. Since
+    2004 it has been continuesly maintained and improved. We provide browsable orthology predictions, APIs, flat file
+    downloads and a standalone version of the inference algorithm.{% endblock %}
+
+{% block content %}
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+            <h1>Glossary
+
+               <span> <small class="text-center text-muted h3 d-block">Web based database interface for orthology prediction
+                </small></span></h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+
+                <div class="card-body">
+
+
+                    <table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Term</th>
+      <th scope="col">Definition</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">5-letter species code</th>
+      <td> Organism code based on <a href="https://www.uniprot.org/docs/speclist">UniProt species codes</a>
+</td>
+
+    </tr>
+
+
+
+
+     <tr>
+      <th scope="row" id="g-allall">      all-against-all
+ </th>
+      <td>     The part of the OMA algorithm where all the protein sequences are compared to all of the other protein sequences by Smith Waterman
+
+</td>
+
+    </tr>
+     <tr>
+      <th scope="row">  ancestral gene
+  </th>
+      <td>   A gene in the common ancestor at the taxonomic level comprising all the species of interest. HOGs at a particular taxonomic level can be considered as one gene in the common ancestral species.
+
+</td>
+
+    </tr>
+     <tr>
+      <th scope="row" id="ancestralspe"> ancestral genome
+  </th>
+      <td>      As HOGs are by definition all genes that descended from an ancestral gene, ancestral genomes are all HOGs at a given taxonomic level
+
+</td>
+
+    </tr>
+     <tr>
+      <th scope="row" id="g-xref">  cross reference
+  </th>
+      <td>  An alternative identifier for a gene, assigned by the annotation source or database
+
+</td>
+
+    </tr>
+     <tr>
+      <th scope="row" id="g-domain">  domain of life
+  </th>
+      <td>   Eukaryote, Prokaryote, Archaea
+</td>
+
+    </tr>
+     <tr>
+      <th scope="row"> domain architecture
+   </th>
+      <td>  In OMA, domain architecture refers to the 2D visualization (boxes on a string representation) of the annotated protein sequence domains
+
+</td>
+
+    </tr>
+     <tr>
+      <th scope="row"> entry  </th>
+      <td>   Synonymous with gene
+
+</td>
+
+    </tr>
+     <tr>
+      <th scope="row" id="g-evod"> evolutionary distance
+   </th>
+      <td>  The amount of divergence between two protein sequences
+
+</td>
+
+    </tr>
+     <tr>
+      <th scope="row" id="g-extant"> extant species
+   </th>
+      <td>  Species which are still living today; the leaves of a species tree
+
+</td>
+
+    </tr>
+     <tr>
+      <th scope="row"> gene  </th>
+      <td>  The unit of evolution used in OMA for orthology inference. However, only protein sequences are used for sequence comparison in the homology inference process.
+
+</td>
+
+    </tr>
+
+
+                       <tr>
+                           <th scope="row"> gene ontology
+ </th>
+      <td> Controlled vocabulary and hierarchy on the biological functions of genes. See <a href="http://geneontology.org/">http://geneontology.org/</a>
+ </td></tr>
+                        <tr>
+                           <th scope="row">genome </th>
+      <td>  The collection of all the genes in an ancestral or extant organism. In OMA, the genomes of species are represented by 1 protein sequence per locus.
+</td></tr>
+                       <tr>
+                           <th scope="row"> group </th>
+      <td> A cluster or group of orthologous or paralogous genes in OMA.
+ </td></tr>
+                       <tr>
+                           <th scope="row" id="g-hog">HOG </th>
+      <td>  Hierarchical groups contain genes that descend from a single common ancestral gene within a given taxonomic range.
+</td></tr>
+                       <tr>
+                           <th scope="row"> HOG-induced ortholog
+</th>
+      <td> All genes which started diverging at the last common ancestor of the two species in question
+ </td></tr>
+
+
+
+
+
+
+
+
+
+
+
+
+                       <tr>
+                           <th scope="row" id="g-homoe">homoeolog </th>
+      <td> Genes of an allopolyploid which started diverging by a speciation event, and were brought back to the same genome via a hybridization event.
+ </td></tr>
+                       <tr>
+                           <th scope="row">member genes
+ </th>
+      <td> All the genes which comprise a group
+ </td></tr>
+                       <tr>
+                           <th scope="row" id="g-omadb"> OMA database
+</th>
+      <td>  All the data associated with a given OMA release, including: genes, sequences, locus information, groups and more. Can be accessed through the browser or programmatically
+</td></tr>
+
+                       <tr>
+                           <th scope="row"  id="g-og">OMA Group </th>
+      <td>  OMA groups contain sets of genes which are all orthologous to one another within group. This implies that there is at most one entry from each species in a group.
+</td></tr>
+                      <tr>
+                          <th scope="row">OMA Group-induced ortholog
+ </th>
+      <td> The pairwise combinations of all the genes in a given OMA Group
+ </td></tr>
+                        <tr>
+                            <th scope="row" id="g-omaid">OMA identifier
+ </th>
+      <td> Consists of the five-letter UniProtKB species code and a unique 5-digit number
+ </td></tr>
+                        <tr>
+                             <th scope="row" id="g-orthoxml">OrthoXML </th>
+      <td> Standard output format for orthology data. See <a href="http://www.orthoxml.org/xml/Main.html">http://www.orthoxml.org/xml/Main.html</a>
+ </td></tr>
+                        <tr>
+                            <th scope="row" id="g-op">pairwise ortholog
+ </th>
+      <td>  Orthologs in OMA inferred by comparing two genomes. After the all-against-all phase, and two sequences which are the best bidirectional hits within a confidence interval (to allow for more than one hit, i.e. duplications), AND pass the witness of non-orthology test
+</td></tr>
+                        <tr>
+                            <th scope="row"> PAM unit</th>
+      <td> Point accepted mutation. A measure of evolutionary distance; the amount of amino acid substitutions per 100 amino acids of a protein sequence. One PAM unit means that 1% of the amino acids were replaced since the divergence of the two protein sequences.
+ </td></tr>
+                        <tr>
+                            <th scope="row" id="g-para"> paralog</th>
+      <td>  Genes which started diverging by duplication. In OMA they inferred as
+</td></tr>
+                        <tr>
+                            <th scope="row" id="g-phyloxml">PhyloXML
+ </th>
+      <td>  A standard format for phylogenetic trees and their associated information. See <a href="http://www.phyloxml.org/">http://www.phyloxml.org/</a>
+</td></tr>
+                        <tr> <th scope="row" id="g-protid">protein ID </th>
+      <td>  The identifier for a gene in OMA
+</td></tr>
+                        <tr>
+                              <th scope="row" id="g-reltype">relation type
+ </th>
+      <td>  Reflects the level of co-orthology, or the degree of duplications which one or both of the orthologs in a pair has undergone. One-to-one (1:1) pairwise orthology means that both genes in the pair have only one ortholog in the other species. A one-to-many relationship (1:m) means that the gene of interest has more than one ortholog in the other species. This implies that the gene was duplicated in an ancestor of the other species, but after the speciation event. A many-to-many (m:m) relationship means both orthologs underwent lineage-specific duplications.
+</td></tr>
+                        <tr> <th scope="row" id="g-roothog">root HOG </th>
+      <td>  Nested HOGs (or sub-families) within the root HOG. The subHOGs arise due to duplication events at a given taxonomic level.
+</td></tr>
+                        <tr> <th scope="row">subHOGs </th>
+      <td>  The deepest taxonomic level which relates all the species of a HOG. The root HOG can be thought of as the gene family for the species in OMA. The root HOG is comprised of sub-HOGs
+</td></tr>
+                        <tr> <th scope="row" id="g-taxon">taxon</th>
+      <td>  Synonym for species or genome in the OMA database</td></tr>
+                        <tr> <th scope="row"> UniProt ID</th>
+      <td>  The stable and unique identifier for a gene from UniProt</td></tr>
+                        <tr> <th scope="row">Witness of non-orthology </th>
+      <td>  The final step in the OMA algorithm for inferring pairwise orthologs. In cases where an ortholog is missing, we seek to avoid erroneous classification of paralogs as orthologs by verifying stable pairs with sequences in a third genome that can act as witness of evolution.
+
+</td></tr>
+
+  </tbody>
+</table>
+
+
+                </div>
+            </div>
+
+
+
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+{% endblock content %}

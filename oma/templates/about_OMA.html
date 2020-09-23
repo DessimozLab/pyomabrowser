@@ -14,7 +14,7 @@
     <div class="container">
 
         <div class="jumbotron">
-            <h1>OMA
+            <h1>OMA in a nutshell (Introduction)
 
                <span> <small class="text-center text-muted h3 d-block">Web based database interface for orthology prediction
                 </small></span></h1>
@@ -26,85 +26,138 @@
             </div>
 
 
-            <div class="card card-header-oma">
-                <div class="card-header header-oma">
-                    <h4> OMA in a nutshell</h4>
-                </div>
+            <div class="card card-header-oma border-0">
+                    <h2> Why OMA?  </h2>
+                <hr>
                 <div class="card-body">
+
+
+
                     <p class="text-justify">The OMA (“Orthologous MAtrix”) project is a method and database for the inference of
-                            orthologs among complete genomes. The distinctive features of OMA are its broad scope and
-                            size, <a id='linkToBench' href='#bench'>high quality of inferences</a>, feature-rich web
-                            interface, <a href="{% url 'current' %}">availability of data in a wide range of formats and
-                                interfaces</a>, and frequent update schedule of two releases per year.</p>
+                        orthologs among complete genomes. </p>
 
-                        <p class="text-justify">OMA’s inference algorithm consists of three main phases. First, to infer homologous sequences
-                            (sequences of common ancestry), all-against-all Smith-Waterman alignments are computed and
-                            significant matches are retained. Second, to infer orthologous pairs (the subset of homologs
-                            related by speciation events), mutually closest homologs are identified based on
-                            evolutionary distances, taking into account distance inference uncertainty and the
-                            possibility for differential gene losses (for more details, see <a
-                                    href="http://www.biomedcentral.com/1471-2105/10/220">Roth et al 2008</a>). Third,
-                            these orthologs are clustered in two different ways, which are useful for different
-                            purposes: (a) we identify cliques of orthologous pairs (“OMA groups”), which are useful as
-                            marker genes for phylogenetic reconstruction and tend to be very specific; (b) we identify
-                            hierarchical orthologous groups (“HOGs”), groups of genes defined for particular taxonomic
-                            ranges and identify all genes that have descended from a common ancestral gene in that
-                            taxonomic range. Fore more details on the algorithm to infer HOGs from orthologous pairs,
-                            see <a href="http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0053786">Altenhoff
-                                et al. 2013</a>.</p>
 
-                        <p class="text-justify">The OMA pipeline can also run on custom genomic/transcriptomic data using the <a
-                                href="https://omabrowser.org/standalone/">OMA stand-alone software</a>, and it is even possible to combine
-                            precomputed data with custom data by <a href="/export">exporting parts of the OMA
-                                database</a>.
-                        </p>
 
-                        <p class="text-justify">For more info on the feature of the OMA Browser, please consult the help pages accessible
-                            from the navigation bar in the top-right corner.</p>
+
+
+
+
+                        <p class="text-justify">
+
+                            The distinctive features of OMA are its:
+
+                             <ul>
+                    <li> Broad scope and size </li>
+                    <li> <a id='linkToBench' href='#bench'>High quality of inferences</a> </li>
+                    <li>Feature-rich web interface </li>
+                    <li><a href="{% url 'current' %}"> Availability of data in a wide range of formats and interfaces </a> </li>
+                    <li>Frequent update schedule of two releases per year </li>
+
+                     </ul>
+
+                     <p class="text-justify">
+                         The OMA pipeline can also run on custom genomic/transcriptomic data using the OMA stand-alone software, and it is even possible to combine precomputed data with custom data by exporting parts of the OMA database.
+                     </p>
+
+
                 </div>
             </div>
 
             <br>
 
-            <div class="card card-header-oma">
-                <div class="card-header header-oma">
-                    <h4>History</h4>
-                </div>
+            <div class="card card-header-oma border-0">
+                    <h2>History</h2>
+                <hr>
                 <div class="card-body">
                     <p class="lead">{% now 'Y' as current_year %}</p>
-                        <p class="text-justify">The OMA project was initiated in 2004 at ETH Zurich by Prof. Gaston Gonnet, with the goal of
-                            identifying orthologs among all publicly available genomes. At the time, most sequenced
-                            genomes were bacteria and only few were eukaryotes. Several PhD students in his group became
-                            increasingly involved, in particular Adrian Schneider, Christophe Dessimoz, and Alexander
-                            Roth. Over the subsequent {{ current_year|add:"-2005" }} years, OMA underwent 25 major
-                            releases, steadily increasing the number of genomes under consideration.</p>
+                        <p class="text-justify">The OMA project was initiated in 2004 at ETH Zurich by Prof. Gaston Gonnet, with the goal of identifying orthologs among all publicly available genomes. At the time, most sequenced genomes were bacteria and only few were eukaryotes. Several PhD students in his group became increasingly involved, in particular Adrian Schneider, Christophe Dessimoz, and Alexander Roth. Over the subsequent 15 years, OMA underwent 24 major releases, steadily increasing the number of genomes under consideration.
+</p>
 
                         <img src="{% static "image/history.png" %}" class="rounded mx-auto d-block w-50 p-3 "
                              alt="Graph showing growth of OMA over time.">
 
+<div class="text-center small">
+                    <b> Graph showing growth of OMA over time.</b>
 
-                        <p class="text-justify">The OMA Browser was introduced in 2006. Early releases were developed by Adrian Schneider and
-                            Christophe Dessimoz. Adrian Altenhoff joined the team in 2008.
+    </div>
+
+                    <br>
+
+
+                        <p class="text-justify">The OMA Browser was introduced in 2006. Early releases were developed by Adrian Schneider and Christophe Dessimoz. Adrian Altenhoff joined the team in 2008.
+
                         </p>
 
 
-                        <p class="text-justify">In 2008, the responsibility of “baby-sitting” the all-against-all (i.e. importing and
-                            converting genomes, running and verifying computations across hundreds of CPUs) was handed
-                            over from Gaston to the two Adrians.</p>
+                        <p class="text-justify">In 2008, the responsibility of “baby-sitting” the all-against-all (i.e. importing and converting genomes, running and verifying computations across hundreds of CPUs) was handed over from Gaston to the two Adrians.</p>
 
 
-                        <p class="text-justify">Since 2010, Adrian Altenhoff has been the main baby-sitter of the all-against-all and manager
-                            of OMA’s operations. In 2011, Christophe joined Gaston as co-PI of OMA. In 2012, OMA became
-                            a SIB-funded bioinformatics resource.</p>
+                        <p class="text-justify">Since 2010, Adrian Altenhoff has been the main baby-sitter of the all-against-all and manager of OMA’s operations. In 2011, Christophe joined Gaston as co-PI of OMA. In 2012, OMA became a SIB-funded bioinformatics resource.</p>
                 </div>
             </div>
 
+
+             <div class="card card-header-oma border-0">
+                    <h2>The OMA algorithm</h2>
+                 <hr>
+                <div class="card-body">
+
+
+                     <p class="text-justify">OMA’s inference algorithm consists of three main phases. First, to infer homologous sequences (sequences of common ancestry),
+                         <a href="{% url 'glossary' %}#g-allall" >all-against-all  </a> Smith-Waterman alignments are computed and significant matches are retained.
+
+
+
+                         Second, to infer <a href="{% url 'glossary' %}#g-op" >orthologous pairs  </a>   (the subset of homologs related by speciation events),
+                         mutually closest homologs are identified based on <a href="{% url 'glossary' %}#g-evod" >evolutionary distances  </a>    , taking into account distance inference uncertainty and the possibility for differential gene losses (for more details, see <a
+                                    href="http://www.biomedcentral.com/1471-2105/10/220">Roth et al 2008</a>).
+Third, these orthologs are clustered in two different ways, which are useful for different purposes:
+
+                         <ul>
+
+                    <li>
+
+We identify cliques of orthologous pairs (<a href="{% url 'glossary' %}#g-og" >“OMA groups”   </a>  ), which are useful as <a href="{% url 'glossary' %}#g-markerg" >marker genes   </a>  for
+                         phylogenetic reconstruction and tend to be very specific; </li>
+<li>We identify <a href="{% url 'glossary' %}#g-hog" >hierarchical orthologous groups   </a>  (“HOGs”), groups of genes defined for particular
+                         <a href="{% url 'glossary' %}#g-taxr" >taxonomic ranges   </a>  and identify all genes that have descended from a common ancestral
+                         gene in that taxonomic range. </li>
+
+                    </ul>
+
+
+
+                         <h4> More details on the algorithm  </h4>
+
+
+                    <ul>
+
+                    <li>    How to Identify Orthologs with OMA: A Primer <a href="https://f1000research.com/articles/9-27/v1">(Zahn-Zabal et al. 2020)</a></li>
+<li>Inferring HOGs <a href="http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0053786"">(Altenhoff et al. 2013)</a></li>
+<li>Updates to the OMA algorithm <a href="">(Train et al. 2017)</a></li>
+<li>Initial OMA algorithm <a href="">(Roth et al. 2008)</a></li>
+
+                        </ul>
+
+                    <p class="text-justify">
+For more info on the features of the OMA Browser, please consult the help pages accessible from the navigation bar in the top-right corner.
+
+                    </p>
+
+
+
+                </div>
+             </div>
+
+
+
+
+
             <br>
 
-            <div class="card card-header-oma">
-                <div class="card-header header-oma">
-                    <h4>Publications</h4>
-                </div>
+            <div class="card card-header-oma border-0">
+                    <h2>Publications</h2>
+                <hr>
                 <div class="card-body">
                     <h4 id='publications' class="panel-heading">OMA overview</h4>
 
@@ -308,10 +361,9 @@
 
             <br>
 
-            <div class="card card-header-oma">
-                <div class="card-header header-oma">
-                    <h4>Related Resources</h4>
-                </div>
+            <div class="card card-header-oma border-0">
+                    <h2>Related Resources</h2>
+                <hr>
                 <div class="card-body">
                     <a href="https://swissorthology.ch"><img style="max-width: 200px;"
                                                                  src="{% static "image/logo-swiss-orthology.svg" %}"></a>

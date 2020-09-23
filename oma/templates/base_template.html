@@ -206,6 +206,10 @@
                         <div role="presentation" class="dropdown-header">Semantic web</div>
                         <a class="dropdown-item" href="http://sparql.omabrowser.org/">SPARQL endpoint</a>
 
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item text-center" href="{% url 'uses' %}"><b> <i class="fas fa-keyboard"></i> Access the OMA data</b></a>
+
+
 
                     </ul>
                 </li>
@@ -216,12 +220,15 @@
                     <a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown">Help
                         <span class="caret"></span></a>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                        <a class="dropdown-item" href="{% url 'about' %}">OMA in a nutshell</a>
-                        <a class="dropdown-item" href="{% url 'type' %}">Types of orthologs</a>
-                        <a class="dropdown-item" href="{% url 'uses' %}">Typical uses</a>
+                        <a class="dropdown-item" href="{% url 'about' %}">Introduction</a>
+                        <a class="dropdown-item" href="{% url 'type' %}">Orthology Basics</a>
+                        <a class="dropdown-item" href="{% url 'homologs' %}">Type of homologs</a>
+                        <a class="dropdown-item" href="{% url 'uses' %}">Access the OMA data</a>
                         <a class="dropdown-item" href="{% url 'genome_suggestion' %}">Suggesting a genome</a>
                         <a class="dropdown-item" href="{% url 'FAQ' %}">FAQ</a>
                         <a class="dropdown-item" href="https://www.biostars.org/t/oma/">Q&amp;A on BioStars</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item text-center" href="{% url 'glossary' %}"><b> <i class="fas fa-book"></i> Glossary</b></a>
                     </ul>
                 </li>
 
