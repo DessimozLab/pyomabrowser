@@ -1466,11 +1466,12 @@ class HOGviewer(HOG_Base, TemplateView):
 class HOGtable(HOG_Base, TemplateView):
     template_name = "hog_table.html"
 
-    def get_context_data(self, hog_id, **kwargs):
+    def get_context_data(self, hog_id , **kwargs):
         context = super(HOGtable, self).get_context_data(hog_id, **kwargs)
 
         context.update({'tab': 'table', 'api_base': 'hog', 'api_url': '/api/hog/{}/members/?level={}'.format(hog_id, context['level'])})
         return context
+
 
 class HOGFasta(FastaView, HOG_Base):
     def get_fastaheader(self, memb):
@@ -1480,6 +1481,18 @@ class HOGFasta(FastaView, HOG_Base):
     def render_to_response(self, context):
 
         return self.render_to_fasta_response(context['members'])
+
+
+class HOGSynteny(HOG_Base, TemplateView):
+    template_name = "hog_synteny.html"
+
+    def get_context_data(self, hog_id, level=None, **kwargs):
+        context = super(HOGSynteny, self).get_context_data(hog_id, level=None, **kwargs)
+
+        ancestral_synteny =  utils.db.get_syntentic_hogs(hog_id, level, steps=2)
+
+        context.update({'tab': 'synteny', 'synteny':ancestral_synteny})
+        return context
 
 
 #  OLD STUFF

@@ -33,6 +33,15 @@
         </li>
 
 
+        <li class="{% if tab == 'synteny' %} active selected {%endif%}">
+                <a href="{% if level != None %}  {% url 'hog_synteny' hog_id  level%}  {%else%}  {% url 'hog_synteny' hog_id  %} {%endif%} " >
+                <span>Ancestral synteny</span>
+
+            </a>
+
+        </li>
+
+
          <li class="{% if tab == 'similar' %} active selected {%endif%}">
             <a data-toggle="collapse" data-target="#filterSimilar">
 
