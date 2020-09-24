@@ -1,18 +1,25 @@
 {% extends  "base_template.html" %}
 {% load staticfiles %}
 
-{% block title %}Tools{% endblock %}
+{% block title %}Catalog of OMA Tools
+{% endblock %}
+{% block meta_description %}OMA is a method and database for the inference of orthologs among complete genomes. Since
+    2004 it has been continuesly maintained and improved. We provide browsable orthology predictions, APIs, flat file
+    downloads and a standalone version of the inference algorithm.{% endblock %}
 
 {% block content %}
+
 
 <div id="oma-generic-container">
 
     <div class="container">
 
         <div class="jumbotron">
+            <h1>Catalog of OMA Tools
 
 
-            <h1>Catalog of OMA tools</h1>
+               <span> <small class="text-center text-muted h3 d-block">Web based database interface for orthology prediction
+                </small></span></h1>
 
             <div class="oma-seperator">
                 <span class="colour1"></span>
@@ -21,245 +28,50 @@
             </div>
 
 
-            <p class="text-justify">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <div class="card card-header-oma border-0">
+                    <h2> Why OMA?  </h2>
+                <hr>
+                <div class="card-body">
 
-            <br>
-            <h2 class="display-4">Online tools
-                <hr></h2>
-            <br>
 
 
-            <div class="row" >
+                    <p class="text-justify">The OMA (“Orthologous MAtrix”) project is a method and database for the inference of
+                        orthologs among complete genomes. </p>
 
-    <div class="col">
 
 
-<img src="{% static "image/tool_dotplot.png" %}"  class="img-fluid" alt="Dotplot">
 
 
-    </div>
 
-    <div class="col my-auto">
 
-        <div class="card w-auto h-100 " style="width: 18rem;border:none">
-  <div class="card-body ">
-    <h5 class="card-title">Synteny viewer</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Online tool</h6>
-    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-    <a href="{% url 'land_syntenyDP' %}" class="card-link">Take me there</a>
+                        <p class="text-justify">
 
-  </div>
-</div>
+                            The distinctive features of OMA are its:
 
-    </div>
+                             <ul>
+                    <li> Broad scope and size </li>
+                    <li> <a id='linkToBench' href='#bench'>High quality of inferences</a> </li>
+                    <li>Feature-rich web interface </li>
+                    <li><a href="{% url 'current' %}"> Availability of data in a wide range of formats and interfaces </a> </li>
+                    <li>Frequent update schedule of two releases per year </li>
 
-</div>
+                     </ul>
 
-            <br>
-            <br>
+                     <p class="text-justify">
+                         The OMA pipeline can also run on custom genomic/transcriptomic data using the OMA stand-alone software, and it is even possible to combine precomputed data with custom data by exporting parts of the OMA database.
+                     </p>
 
 
-            <div class="row" >
-
-
-
-    <div class="col my-auto">
-
-        <div class="card w-auto h-100 " style="width: 18rem;border:none">
-  <div class="card-body ">
-    <h5 class="card-title">Functional prediction</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Online tool</h6>
-    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-    <a href="{% url 'function-projection-input' %}" class="card-link">Take me there</a>
-
-  </div>
-</div>
-
-    </div>
-
-                    <div class="col">
-
-
-<img src="{% static "image/tool_prediction.png" %}"  class="img-fluid" alt="Functional prediction">
-
-
-    </div>
-
-</div>
-
-            <br>
-            <br>
-
-
-            <div class="row" >
-
-    <div class="col">
-
-
-<img src="{% static "image/tool_genomepair.png" %}"  class="img-fluid" alt="Genome pair">
-
-
-    </div>
-
-    <div class="col my-auto">
-
-        <div class="card w-auto h-100 " style="width: 18rem;border:none">
-  <div class="card-body ">
-    <h5 class="card-title">Genome pair orthology</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Online tool</h6>
-    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-    <a href="{% url 'genomePW' %}" class="card-link">Take me there</a>
-
-  </div>
-</div>
-
-    </div>
-
-</div>
-
-
-            <br>
-            <br>
-
-
-            <h2 class="display-4">Softwares
-                <hr></h2>
-            <br>
-
-
-            <div class="row" >
-
-    <div class="col">
-
-
-<img src="{% static "image/soft_std.png" %}"  class="img-fluid" alt="OMA STANDALONE">
-
-
-    </div>
-
-    <div class="col my-auto">
-
-        <div class="card w-auto h-100 " style="width: 18rem;border:none">
-  <div class="card-body ">
-    <h5 class="card-title">OMA standalone</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Software (CLI)</h6>
-    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-    <a href="https://omabrowser.org/standalone/" class="card-link">Take me there</a>
-
-  </div>
-</div>
-
-    </div>
-
-</div>
-
-            <br>
-            <br>
-
-
-            <div class="row" >
-
-
-
-    <div class="col my-auto">
-
-        <div class="card w-auto h-100 " style="width: 18rem;border:none">
-  <div class="card-body ">
-    <h5 class="card-title">pyHam</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Python library</h6>
-    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-    <a href="https://github.com/dessimozlab/pyham" class="card-link">Take me there</a>
-
-  </div>
-</div>
-
-    </div>
-
-
-                    <div class="col">
-
-
-<img src="{% static "image/soft_pyham.png" %}"  class="img-fluid" alt="Pyham">
-
-
-    </div>
-
-</div>
-
-
-            <br>
-
-            <br>
-            <h2 class="display-4">Visualisation tools
-                <hr></h2>
-            <br>
-            <br>
-
-
-            <div class="row" >
-
-    <div class="col">
-
-
-<img src="{% static "image/vis_phylo.png" %}"  class="img-fluid" alt="Phylo.io">
-
-
-    </div>
-
-    <div class="col my-auto">
-
-        <div class="card w-auto h-100 " style="width: 18rem;border:none">
-  <div class="card-body ">
-    <h5 class="card-title">Phylo.io</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Tree visualisation</h6>
-    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-    <a  href="https://phylo.io/" class="card-link">Take me there</a>
-
-  </div>
-</div>
-
-    </div>
-
-</div>
-
-            <br>
-            <br>
-
-
-            <div class="row" >
-
-
-
-    <div class="col my-auto">
-
-        <div class="card w-auto h-100 " style="width: 18rem;border:none">
-  <div class="card-body ">
-    <h5 class="card-title">iHam</h5>
-    <h6 class="card-subtitle mb-2 text-muted">HOG viewer</h6>
-    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-    <a href="https://github.com/dessimozlab/iham" class="card-link">Take me there</a>
-
-  </div>
-</div>
-
-    </div>
-
-                    <div class="col">
-
-
-<img src="{% static "image/vis_iham.png" %}"  class="img-fluid" alt="iHam">
-
-
-    </div>
-
-</div>
-
-
+                </div>
+            </div>
 
         </div>
+
     </div>
-
-
 </div>
+
+
+
+
 
 {% endblock content %}

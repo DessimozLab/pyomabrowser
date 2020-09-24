@@ -1489,9 +1489,30 @@ class HOGSynteny(HOG_Base, TemplateView):
     def get_context_data(self, hog_id, level=None, **kwargs):
         context = super(HOGSynteny, self).get_context_data(hog_id, level=None, **kwargs)
 
-        ancestral_synteny =  utils.db.get_syntentic_hogs(hog_id, level, steps=2)
 
-        context.update({'tab': 'synteny', 'synteny':ancestral_synteny})
+        if not level:
+            level = context["level"]
+
+        graph = utils.db.get_syntentic_hogs(hog_id, level, steps=2)
+
+        ancestral_synteny = {"nodes": [],"links": []}
+        neigh = []
+
+        for n in graph.nodes.data('weight'):
+            ancestral_synteny["nodes"].append({"id": n[0],"name": n[0]})
+
+        for e in graph.edges.data('weight'):
+            ancestral_synteny["links"].append({"source_id": e[0], "target_id": e[1]})
+
+            if e[0] == hog_id:
+                neigh.append({'hog':e[1], 'weight': str(e[2])})
+
+            if e[1] == hog_id:
+                neigh.append({'hog':e[0], 'weight': str(e[2])})
+
+
+
+        context.update({'tab': 'synteny', 'synteny':ancestral_synteny, 'neighbor' : neigh })
         return context
 
 
