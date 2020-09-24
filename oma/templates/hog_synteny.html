@@ -138,7 +138,7 @@ function dragended(d) {
   .selectAll("circle")
             .data(graph.nodes)
   .enter().append("a")
-    .attr("xlink:href", function(d) {return  "{% url 'hog_viewer' 1234567890  %}".replace(/1234567890/, d.id) })
+    .attr("xlink:href", function(d) {return  "{% url 'hog_synteny' 1234567890  %}".replace(/1234567890/, d.id) })
       .append("circle")
           .attr("r", function(d){  return 6})
           .call(d3.drag()
