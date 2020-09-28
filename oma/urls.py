@@ -56,8 +56,8 @@ urlpatterns = [
     url(r'^hog/table/(?P<hog_id>[\w.-:]+)/$', views.HOGtable.as_view(), name='hog_table'),
 
 
-    url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-]+)/', views.HOGSynteny.as_view(), name='hog_synteny'),
-    url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/', views.HOGSynteny.as_view(), name='hog_synteny'),
+    url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-]+)/$', views.HOGSynteny.as_view(), name='hog_synteny'),
+    url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/$', views.HOGSynteny.as_view(), name='hog_synteny'),
 
 
 

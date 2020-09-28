@@ -1486,14 +1486,10 @@ class HOGFasta(FastaView, HOG_Base):
 class HOGSynteny(HOG_Base, TemplateView):
     template_name = "hog_synteny.html"
 
-    def get_context_data(self, hog_id, level=None, **kwargs):
-        context = super(HOGSynteny, self).get_context_data(hog_id, level=None, **kwargs)
+    def get_context_data(self, hog_id, **kwargs):
+        context = super(HOGSynteny, self).get_context_data(hog_id, **kwargs)
 
-
-        if not level:
-            level = context["level"]
-
-        graph = utils.db.get_syntentic_hogs(hog_id, level, steps=2)
+        graph = utils.db.get_syntentic_hogs(hog_id, context['level'], steps=2)
 
         ancestral_synteny = {"nodes": [],"links": []}
         neigh = []
@@ -1502,7 +1498,7 @@ class HOGSynteny(HOG_Base, TemplateView):
             ancestral_synteny["nodes"].append({"id": n[0],"name": n[0]})
 
         for e in graph.edges.data('weight'):
-            ancestral_synteny["links"].append({"source_id": e[0], "target_id": e[1]})
+            ancestral_synteny["links"].append({"source_id": e[0], "target_id": e[1], "weight": str(e[2])})
 
             if e[0] == hog_id:
                 neigh.append({'hog':e[1], 'weight': str(e[2])})

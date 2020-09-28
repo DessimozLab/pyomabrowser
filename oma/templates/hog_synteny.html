@@ -1,7 +1,12 @@
 {% extends  "base_hog.html" %}
 {% load staticfiles %}
 
+{% block title %}OMA: Hierarchical Orthologous Groups for {{ fam.id }}{% endblock %}
+
+
 {% block contentTab %}
+
+
 
 
 <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -26,8 +31,14 @@
 
     <div class="row">
 
-        <div class="col">
-            <svg width="600" height="600"></svg></div>
+        <div class="col" style=" height:calc(100vh - 285px); width:100px">
+
+            <svg id="synteny_svg" style="height:100%; width:100%" ></svg>
+
+
+
+        </div>
+
 
         <div class="col">
 
@@ -93,8 +104,9 @@
 <script>
 
 var svg = d3.select("svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
+    width = $("#synteny_svg").width()
+    height = $("#synteny_svg").height()
+
 
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
@@ -131,14 +143,20 @@ function dragended(d) {
                 .style("stroke", "#aaa")
                 .selectAll("line")
                 .data(graph.links)
-                .enter().append("line");
+                .enter()
+      .append("g")
+    .attr("class", "link")
+                .append("line")
+                .text(function(d) { return d.weight })
+                .attr("stroke-width", function(d) { return d.weight * 3})
+
 
   var node = svg.append("g")
             .attr("class", "nodes")
   .selectAll("circle")
             .data(graph.nodes)
   .enter().append("a")
-    .attr("xlink:href", function(d) {return  "{% url 'hog_synteny' 1234567890  %}".replace(/1234567890/, d.id) })
+    .attr("xlink:href", function(d) {return  "{% url 'hog_synteny' 12345 67890  %}".replace(/12345/, d.id).replace(/67890/, "{{level}}")     })
       .append("circle")
           .attr("r", function(d){  return 6})
           .call(d3.drag()
@@ -153,6 +171,18 @@ function dragended(d) {
       .enter().append("text")
         .attr("class", "label")
         .text(function(d){  return d.name});
+
+
+  var labelLine = svg.selectAll(".link")
+    .append("text")
+    .attr("class", "link-label")
+    .attr("fill", "#000")
+    .style("font", "bold 12px Arial")
+    .attr("dy", ".35em")
+    .attr("dx", "4px")
+    .attr("text-anchor", "middle")
+      .attr("stroke-width", "0px")
+    .text(function(d) {return d.weight} );
 
   simulation
       .nodes(graph.nodes)
@@ -175,6 +205,12 @@ function dragended(d) {
           .attr("y2", function (d) {
               return d.target.y;
           });
+
+       labelLine
+      .attr("x", function(d) {
+          return (d.source.x + d.target.x)/2; })
+      .attr("y", function(d) {
+          return (d.source.y + d.target.y)/2; });
 
       node
           .attr("r",  function(d){  return d.name === "{{hog_id}}" ?   20 :  10})
