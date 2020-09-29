@@ -139,6 +139,10 @@ function dragended(d) {
     d.target = d.target_id;
   });
 
+
+    var max = Math.max.apply(Math, graph.links.map(function(o) { return o.weight; }))
+    var scale = d3.scaleLinear().domain([0, max]).range([0, 10]);
+
   var link = svg.append("g")
                 .style("stroke", "#aaa")
                 .selectAll("line")
@@ -148,7 +152,7 @@ function dragended(d) {
     .attr("class", "link")
                 .append("line")
                 .text(function(d) { return d.weight })
-                .attr("stroke-width", function(d) { return d.weight * 3})
+                .attr("stroke-width", function(d) { return scale(d.weight)})
 
 
   var node = svg.append("g")
