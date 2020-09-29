@@ -10,6 +10,11 @@
         _default: {cls: 'label-default', display_text: "unknown", tag: "?"}
     };
 
+    var zeroPad = function(num, size) {
+        var s = "00000000000" + num;
+        return s.substr(s.length-size);
+    };
+
     exports.format_as_kingdom_tag = function (kingdom) {
         var cur_case = cases[kingdom] ? cases[kingdom] : cases['_default']
         return '<span class="label ' + cur_case.cls + '"><abbr class="abbrNoUnder" ' +
@@ -157,11 +162,9 @@
     };
 
 
-    exports.format_hogid_vis = function(value, row) {
-        return '<a href="/oma/hogs/' + row.ReprEntryNr
-                                      + '/vis/">HOG:'
-                                      + ('0000000' + value).slice(-7) // Format with leading 0s
-                                      + '</a>';
+    exports.format_hogid_vis = function(value) {
+        return '<a href="/oma/hogs/ihamviewer/HOG' + zeroPad(value, 7)
+            +'/">HOG:' +  zeroPad(value,7) + '</a>';
     };
 
 

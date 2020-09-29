@@ -905,8 +905,6 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
                    'canonicalid': 'xrefid', 'gc_content': None, 'nr_exons': None}
 
 
-
-
     def get(self, request, *args, **kwargs):
         offset = int(request.GET.get('offset', 0))
         limit = request.GET.get('limit', None)
