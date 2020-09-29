@@ -122,19 +122,16 @@
     };
 
     exports.format_hogid = function(value, row) {
-        return '<a href="/oma/hogs/' + row.ReprEntryNr 
-                                      + '/">HOG:'
-                                      + ('0000000' + value).slice(-7) // Format with leading 0s
-                                      + '</a>';
+        return '<a href="/oma/hog/table/HOG:' + zeroPad(value, 7)
+            + '/">HOG:' + zeroPad(value, 7) +'</a>';
     };
     exports.format_hog_api = function(value, row) {
-
         return '<a href="/oma/hog/ihamviewer/' + value + '/' +  row.level+'/">' + value + "</a>";
 
     };
     exports.format_roothog = function(value, row) {
         if (value > 0) {
-            return '<a href="/oma/hog/ihamviewer/HOG:' + ('0000000' + value).slice(-7) + '/">HOG:' + ('0000000' + value).slice(-7) + "</a>";
+            return '<a href="/oma/hog/ihamviewer/HOG:' + zeroPad(value, 7) + '/">HOG:' + zeroPad(value, 7) + "</a>";
         } else {
             return "n/a";
         }
@@ -163,7 +160,7 @@
 
 
     exports.format_hogid_vis = function(value) {
-        return '<a href="/oma/hogs/ihamviewer/HOG' + zeroPad(value, 7)
+        return '<a href="/oma/hog/ihamviewer/HOG:' + zeroPad(value, 7)
             +'/">HOG:' +  zeroPad(value,7) + '</a>';
     };
 
@@ -171,12 +168,12 @@
     exports.format_generic_group_id = function(value, row) {
 
         if (row.type === "HOG") {
-             return '<a href="/oma/hog/ihamviewer/HOG:' + ('0000000' + value).slice(-7) + '/">HOG:' + ('0000000' + value).slice(-7) + "</a>";
+             return '<a href="/oma/hog/ihamviewer/HOG:' + zeroPad(value, 7) + '/">HOG:' + zeroPad(value, 7) + "</a>";
 
         }
 
         else if (row.type === "OMA group") {
-            return '<a href="/oma/omagroup/'+value+'/members/">' + value + '</a>';
+            return '<a href="/oma/omagroup/' + value + '/members/">' + value + '</a>';
         }
 
     };
