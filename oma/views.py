@@ -3119,27 +3119,22 @@ class Searcher(View):
         """
 
         def _check_hog_number(gn):
-
             try:
                 gn = int(gn)
-
-                if 0 < gn <= utils.db.get_nr_toplevel_hogs():
-                    return gn
-
             except ValueError:
-
                 try:
-                    return utils.db.parse_hog_id(gn)
+                    gn = utils.db.parse_hog_id(gn)
                 except ValueError:
-                    return None
+                    gn = -1
 
+            if 0 < gn <= utils.db.get_nr_toplevel_hogs():
+                return gn
             return None
 
         data = []
         potential_group_nbr = []
 
         todo = selector if selector else ["entryid", "groupid", "protsequence"]
-
         if "groupid" in todo:
 
             start = time.time()
