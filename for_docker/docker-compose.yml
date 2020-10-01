@@ -5,7 +5,7 @@ volumes:
   static_volume:
   media_volume:
   # if release data is used with bind mount, comment release_volume line
-  release_volume:
+  #release_volume:
 
 services:
   web:
@@ -20,15 +20,15 @@ services:
     volumes:
       # uncomment the following line if you want to use transparently the current checkout mounted
       # into your docker image. convenient for development, but not encouraged in production
-      #- ..:/usr/src/pyomabrowser
+      - ..:/usr/src/pyomabrowser
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      - release_volume:${RELEASE_PATH}
+      #- release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
-      #- type: bind
-      #  source: ${RELEASE_PATH_HOST}
-      #  target: ${RELEASE_PATH}
-      #  read_only: true
+      - type: bind
+        source: ${RELEASE_PATH_HOST}
+        target: ${RELEASE_PATH}
+        read_only: true
     ports:
       - 8000:8000
     depends_on:
@@ -59,14 +59,14 @@ services:
     volumes:
       # uncomment the following line if you want to use transparently the current checkout mounted
       # into your docker image. convenient for development, but not encouraged in production
-      #- ..:/usr/src/pyomabrowser
+      - ..:/usr/src/pyomabrowser
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      - release_volume:${RELEASE_PATH}
+      #- release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
-      #- type: bind
-      #  source: ${RELEASE_PATH_HOST}
-      #  target: ${RELEASE_PATH}
-      #  read_only: true
+      - type: bind
+        source: ${RELEASE_PATH_HOST}
+        target: ${RELEASE_PATH}
+        read_only: true
     depends_on:
       - broker
       - db
@@ -80,12 +80,12 @@ services:
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      - release_volume:${RELEASE_PATH}
+      #- release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
-      #- type: bind
-      #  source: "${RELEASE_PATH_HOST}/downloads"
-      #  target: ${DARWIN_BROWSERDOWNLOAD_PATH}
-      #  read_only: true
+      - type: bind
+        source: "${RELEASE_PATH_HOST}/downloads"
+        target: ${DARWIN_BROWSERDOWNLOAD_PATH}
+        read_only: true
     environment:
       - DARWIN_BROWSERSTATIC_PATH=${DARWIN_BROWSERSTATIC_PATH}
       - DARWIN_BROWSERMEDIA_PATH=${DARWIN_BROWSERMEDIA_PATH}
@@ -103,13 +103,14 @@ services:
       - env
     ports:
       - 8001:8000
+    restart: "no"
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
-      - release_volume:${RELEASE_PATH}
-      #- type: bind
-      #  source: "${RELEASE_PATH_HOST}/data"
-      #  target: ${DARWIN_BROWSERDATA_PATH}
-      #  read_only: true
+      #- release_volume:${RELEASE_PATH}
+      - type: bind
+        source: "${RELEASE_PATH_HOST}/data"
+        target: ${DARWIN_BROWSERDATA_PATH}
+        read_only: true
 
 
 
