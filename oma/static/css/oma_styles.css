@@ -1294,6 +1294,12 @@ body .oma-details-container .oma-details-nav-left .gene-orthology li #filterPara
 
 .badge-info { color: #3c3c3c; background-color: rgba(100, 100, 100, 0.3); }
 
+a.external {
+	padding-right:11px;
+	background: url("../image/ext.png") no-repeat center right;
+	white-space: nowrap;
+}	
+
 .toggle-visibility {
 
 	cursor: pointer;
