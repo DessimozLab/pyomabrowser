@@ -2392,7 +2392,8 @@ class Searcher(View):
     _max_results = 50
 
     def analyse_search(self, request, type, query):
-
+        if query == "":
+            return redirect('home')
         terms = shlex.split(query)
 
         context = {'query': query, 'type': type, 'terms':terms}
