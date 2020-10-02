@@ -905,23 +905,35 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
                    'canonicalid': 'xrefid', 'gc_content': None, 'nr_exons': None}
 
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, entry_id, *args, **kwargs):
         offset = int(request.GET.get('offset', 0))
         limit = request.GET.get('limit', None)
         if limit is not None:
             limit = offset + int(limit)
-        context, genes_to_use, hog_id = self.get_context_data(start=offset, stop=limit, **kwargs)
-        data = [x for x in self.to_json_dict(context['fam_members'])]
+        entry = self.get_entry(entry_id)
+        response_ready = False
+        go_sim_computed = False
+        try:
+            encoded_data = utils.db.get_cached_family_json(entry.hog_family_nr)
+            if offset == 0 and limit is None:
+                response = HttpResponse(content=encoded_data, content_type="application/json")
+                response_ready = True
+            else:
+                data = json.loads(encoded_data)[offset:limit]
+                go_sim_computed = True
+        except db.DBOutdatedError:
+            context, genes_to_use, hog_id = self.get_context_data(entry_id=entry_id, start=offset, stop=limit, **kwargs)
+            data = [x for x in self.to_json_dict(context['fam_members'])]
 
-        if len(genes_to_use) < 200:
-            go_annots_not_fetched, gene_similarity_vals = utils.db.get_gene_similarities_hog(hog_id)
-            for g, gene in enumerate(genes_to_use):
-                if gene[0] in go_annots_not_fetched:
-                    data[g].update({'similarity': None})
-                else:
-                    data[g].update({'similarity': gene_similarity_vals[gene[0]]})
-
-        response = JsonResponse(data, safe=False)
+        if not response_ready:
+            if not go_sim_computed and len(genes_to_use) < 200:
+                go_annots_not_fetched, gene_similarity_vals = utils.db.get_gene_similarities_hog(hog_id)
+                for g, gene in enumerate(genes_to_use):
+                    if gene[0] in go_annots_not_fetched:
+                        data[g].update({'similarity': None})
+                    else:
+                        data[g].update({'similarity': gene_similarity_vals[gene[0]]})
+            response = JsonResponse(data, safe=False)
         response['Access-Control-Allow-Origin'] = '*'
         return response
 
