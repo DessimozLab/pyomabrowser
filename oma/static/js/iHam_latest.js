@@ -10161,8 +10161,10 @@ module.exports = {
       obj.rows = [];
       obj.rows.push({
         label: "Name",
-        value: gene.gene.xrefid
+        value: "<a href='https://oma-stage.vital-it.ch/oma/vps/" +  gene.gene.protid +"'/>" +  gene.gene.protid + "</a>"
       });
+
+
       obj.rows.push({label:"GO Annotations"});
       $.each(gene.gene.go_terms, function(i, item){
           obj.rows.push({label: item.id, value: item.name});

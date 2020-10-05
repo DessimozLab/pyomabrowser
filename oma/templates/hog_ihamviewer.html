@@ -170,7 +170,26 @@
 
     </div>
 
-    <div id="loader"><img src="{% static "image/loading.gif"%}"></div>
+    <div id="loader">
+
+                                {% include "includes/loading.html" %}
+
+
+        <style>
+
+            #search-status {
+  width: calc(100% - 280px);
+  height: calc(100% - 180px);
+  position: fixed;
+  top: 180px;
+  left: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  z-index: 10;
+}
+
+        </style>
+
+    </div>
 
 </div>
 
