@@ -915,7 +915,8 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         go_sim_computed = False
         try:
             encoded_data = utils.db.get_cached_family_json(entry.hog_family_nr)
-            encoded_data.replace('"gene_similarity"', '"similarity"')
+            for d in encoded_data:
+                d["similarity"]  = d.pop("gene_similarity")
             if offset == 0 and limit is None:
                 response = HttpResponse(content=encoded_data, content_type="application/json")
                 response_ready = True
@@ -925,7 +926,6 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         except db.DBOutdatedError:
             context, genes_to_use, hog_id = self.get_context_data(entry_id=entry_id, start=offset, stop=limit, **kwargs)
             data = [x for x in self.to_json_dict(context['fam_members'])]
-            data.replace('"gene_similarity"', '"similarity"')
 
         if not response_ready:
             if not go_sim_computed and len(genes_to_use) < 200:
