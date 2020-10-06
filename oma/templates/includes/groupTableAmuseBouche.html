@@ -9,6 +9,31 @@
 
             {% endif %}
 
+
+<div style="float: left;margin-top: 10px;margin-bottom: 10px;line-height: 34px;">
+    <a href="{% url 'type' %}">
+
+        {% if tab == 'orthologs' %}
+
+        Different evidences of orthology ?
+
+
+{% elif tab == 'paralogs' %}
+
+How we infer paralogy in OMA ?
+
+
+{% elif tab == 'homeologs' %}
+
+        How we infer homoeologs in OMA ?
+
+
+{%endif%}
+
+</a></div>
+
+
+
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
                data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
