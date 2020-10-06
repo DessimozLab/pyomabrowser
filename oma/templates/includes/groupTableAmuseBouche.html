@@ -11,26 +11,28 @@
 
 
 <div style="float: left;margin-top: 10px;margin-bottom: 10px;line-height: 34px;">
-    <a href="{% url 'type' %}">
-
-        {% if tab == 'orthologs' %}
-
-        Different evidences of orthology ?
 
 
-{% elif tab == 'paralogs' %}
 
-How we infer paralogy in OMA ?
+    {% if tab == 'orthologs' %}
+
+     <a href="{% url 'uses' %}#orthotable">Different evidences of orthology ?</a>
+
+
+    {% if tab == 'paralogs' %}
+
+     <a href="{% url 'uses' %}#paratable">How we infer paralogy in OMA ?</a>
 
 
 {% elif tab == 'homeologs' %}
 
-        How we infer homoeologs in OMA ?
+
+     <a href="{% url 'type' %}">How we infer homoeologs in OMA ?</a>
 
 
 {%endif%}
 
-</a></div>
+</div>
 
 
 
