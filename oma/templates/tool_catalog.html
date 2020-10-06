@@ -18,8 +18,7 @@
             <h1>Catalog of OMA Tools
 
 
-               <span> <small class="text-center text-muted h3 d-block">Web based database interface for orthology prediction
-                </small></span></h1>
+              </h1>
 
             <div class="oma-seperator">
                 <span class="colour1"></span>
@@ -28,42 +27,207 @@
             </div>
 
 
+            <p class="text-justify">
+
+                       We have developed several computational tools to facilitate user-side analyses using the OMA database. These tools are implemented either online, as software, or as interactive visualizations of the data.
+
+                   </p>
+
+
+            <br>
+
+
             <div class="card card-header-oma border-0">
-                    <h2> Why OMA?  </h2>
+                    <h2> Online Tools </h2>
                 <hr>
                 <div class="card-body">
 
 
-
-                    <p class="text-justify">The OMA (“Orthologous MAtrix”) project is a method and database for the inference of
-                        orthologs among complete genomes. </p>
+                    <h3>Fast Mapping</h3>
 
 
+                    <p class="text-justify">
+
+                       The ever accelerating pace of genomic sequencing is such that OMA can only focus on a subset of all public genomes available. Many will remain absent from orthology databases such as OMA. Thus, there is an interest in efficiently transferring knowledge from orthology databases to  genomes provided by the user. In (Altenhoff et al. 2018), we introduced GO function prediction tool based on fast mapping to the closest sequence. In the last release, we have improved the performance of the fast sequence mapper, which mainly relies on a k-mer index. On the current OMA server, the mapper can process approximately 200 sequences per second, meaning that a typical animal genome can be processed in less than 2 minutes. It remains possible to infer GO annotations based on the closest sequence. Alternatively, users can retrieve the closest match for all input sequences—either across all of OMA, or in a target genome.
+
+
+                   </p>
+
+
+                    <img src="{% static "image/fast_mapping-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Fastmap">
+
+<div class="text-center small">
+    <b> In the Fast Mapping service, the user can choose the mapping method-- either closest sequence in all of OMA, or closest sequence in a specified target species.
+ </b>
+
+    </div>
+
+
+
+
+                    <br>
+
+
+                    <h3>Phylogenetic Marker Gene Export
+</h3>
+
+
+                    <p class="text-justify">To infer a phylogenetic species tree, it is first necessary to identify sets of orthologous genes among the genomes of interest. One of the outputs of the OMA database are OMA Groups, or sets of genes which are all orthologous to each other. Since genes in OMA Groups are related exclusively by speciation events, there is at most one sequence per species in each OMA group. In contrast to most other phylogenetic methods, OMA makes no assumption about species relationships when inferring OMA Groups. This makes OMA Groups particularly useful for phylogenetic species tree inference. </p>
+                    <p class="text-justify"> We provide a function, ‘Export marker genes’, to retrieve the most complete OMA groups for a given subset of species.  </p>
+                    <p class="text-justify"> Use  the Download -> Export marker genes option. This will open a page which allows the user to select species. Species can be searched by name or clade. A whole clade can be selected by clicking on the node (select all species). A single species can be selected by clicking on the leaf (select species). All selected species will be displayed in the right box with additional species information (release info, taxon id, etc.). </p>
+
+
+                     <img src="{% static "image/export_marker_genes-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+<div class="text-center small">
+    <b> A) Choose which type of data to export from the Compute tab on the right hand side of the home page. B) Select your genomes from those in the OMA database by using the interactive species tree, based on the NCBI taxonomy.</b>
+
+    </div>
+
+                    <br>
+                    <p class="text-justify font-italic font-weight-bold">Specifying the Minimum Species Coverage and Maximum Number of Markers parameters.   </p>
+
+                    <p class="text-justify">
+
+                    After species selection, exported OGs will depend on the minimum fraction of covered species and the maximum number of markers parameters:
+<ul>
+                    <li><em>Minimum species coverage:</em> the lowest acceptable proportion of selected species that are present in any given OG in order to be exported.
+A more permissive (lower) minimum species coverage will result in a higher number of exported groups. Choosing this parameter depends on the number of and how closely related are the selected species. For instance, consider the Drosophila clade versus chordates clade (20 and 116 species in current release, respectively). If one selects the 20 Drosophila genomes and sets the minimum species coverage to 0.5, only OGs with at least 10 Drosophila species will be exported. In the current release, this results in 11,855 OGs which meet this criteria. If using the same 0.5 minimum species coverage for the chordates, it results in 14,357 OGs exported. On the other hand, for a 0.8 minimum species coverage, 7,886 and 6,329 OGs are exported for Drosophila and chordates clades, respectively.
+</li>
+                    <li><em>Maximum number of markers:</em> the maximum number of OGs/marker genes to return. To consider as much information as possible in the tree inference, remove any limit by setting this parameter to -1, in which case all OGs fulfilling the minimum species coverage parameter will be returned. To speed up the tree inference, set this value to below 1000 genes.
+                    </li>
+                </ul>
+                    </p>
+
+
+                    <p class="text-justify"> After filling in the parameters and submitting the request, the browser will return a compressed archive (“tarball”) that contains a fasta file with unaligned sequences for each OG. Depending on the size of the request, it may take a few minutes for this operation to complete. </p>
 
 
 
 
 
-                        <p class="text-justify">
 
-                            The distinctive features of OMA are its:
+                    <br>
 
-                             <ul>
-                    <li> Broad scope and size </li>
-                    <li> <a id='linkToBench' href='#bench'>High quality of inferences</a> </li>
-                    <li>Feature-rich web interface </li>
-                    <li><a href="{% url 'current' %}"> Availability of data in a wide range of formats and interfaces </a> </li>
-                    <li>Frequent update schedule of two releases per year </li>
+                    <h3>Synteny Dot Plot
+</h3>
 
-                     </ul>
+                    <p class="text-justify"> When comparing two related species, the position of orthologous genes is often conserved. Positional conservation can be at the chromosomal level—e.g. when there are entire chromosomes or chromosomal segments that are orthologous between species; or it can be more local—e.g. neighboring genes in one genome are orthologous to neighboring genes in the other genome. In OMA, we refer to global synteny for the former, and local synteny for the latter (local synteny is sometimes also referred to as ‘colinerarity’). The Synteny Dot Plot complements the
+                       <a href="{% url 'uses' %}#localsynteny">Local Synteny Viewer</a>  by providing a more global and interactive view of positional conservation.
 
-                     <p class="text-justify">
-                         The OMA pipeline can also run on custom genomic/transcriptomic data using the OMA stand-alone software, and it is even possible to combine precomputed data with custom data by exporting parts of the OMA database.
-                     </p>
+ </p>
+
+                     <p class="text-justify">If you want to visualise the synteny of a genome with another genome you need to first select a second genome in the side menu. Then, a chromosome selection widget will open and guide you to configure the viewer.
+ </p>
+
+
+
+                    <p class="text-justify"> For any pair of chromosomes (in different species if we consider orthologs, or different subgenomes if we consider homoeologs), the plot draws orthologs as dots on a two-dimensional plot, where the axes are the absolute physical location of the genes along the chromosome. Diagonals in the plot can thus be interpreted as syntenic regions, and one can easily identify genomic rearrangements such as inversions, duplications, insertions, deletions and highly repetitive regions. Users can zoom on particular regions of interest and obtain more details on orthologs of interest by selecting them. Each dot is colored based on a color scale reflecting the evolutionary distance in point accepted mutation (PAM) units. Furthermore, one can filter the orthologs to a specific distance range by clicking on the filtering icon and selecting the desired range on a histogram. Other features include panning and exporting the view as a high-resolution vector graphic. </p>
+
+
+
+
+
+                    <img src="{% static "image/synteny_dot_plot-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+                    <div class="text-center small">
+                        <b>  Synteny Dot Plot viewer, which enables users to identify gene order conservation between chromosomes as diagonal segments (main view in panel A). Inversions are visible as diagonal flips, which can be nested (panel B). Tandem duplications on one or the other chromosome are visible as vertical or horizontal lines—and, if both are present, as blocks (panel C). To focus on a subset of the data according to sequence divergence, the user can restrict the desired range of the distribution of the evolutionary distance of each point. Points can be selected by the user, in which case more details are provided in a table (panel D), including links to the local synteny viewer (panel E).
+ </b>
+    </div>
+                                        <small class="float-right">Please see <a href="">(Altenhoff et al. 2018)</a>  for more information.</small>
+
+
+
+
+                    <br>
+
+                    <h3>GO Functional Annotation
+
+</h3>
+
+                    <p class="text-justify"> </p>
+
+                    <br>
+
+                    <h3>Orthologs between two genomes (Genome Pair View)
+
+</h3>
+
+                    <br>
+
+                    <h3>Phylogenetic profiler
+</h3>
+
+                    <br>
+                    <h3>Add taxonomic filters to tables
+
+</h3>
+
+                    <br>
+
+                    <h3>Phylogenetic Marker Gene Export
+</h3>
+
+                    <br>
+
+
+
+
 
 
                 </div>
             </div>
+
+
+            <div class="card card-header-oma border-0">
+                    <h2> Software </h2>
+                <hr>
+                <div class="card-body">
+
+
+                    <h3>OMA Standalone</h3>
+                    <br>
+
+                    <h3>pyHam
+</h3>
+                    <br>
+
+                    <h3>OMA Rest API
+</h3>
+                    <br>
+
+                    <h3>OMAdb (python package)
+</h3>
+                    <br>
+
+                    <h3>OMAdb (R package)
+</h3>
+                    <br>
+
+                </div>
+
+            </div>
+
+
+             <div class="card card-header-oma border-0">
+                    <h2> Visualization tools </h2>
+                <hr>
+                <div class="card-body">
+
+
+                    <h3>iHam (Graphical Viewer)</h3>
+                    <br>
+
+                    <h3>Phylo.io
+</h3>
+
+
+
+                </div>
+
+             </div>
 
         </div>
 
