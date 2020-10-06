@@ -11,6 +11,32 @@
             {% endif %}
 
 
+<div style="float: left;margin-top: 10px;margin-bottom: 10px;line-height: 34px;">
+
+
+
+    {% if tab == 'orthologs' %}
+
+     <a href="{% url 'uses' %}#orthotable">Different evidences of orthology ?</a>
+
+
+    {% elif tab == 'paralogs' %}
+
+     <a href="{% url 'uses' %}#paratable">How we infer paralogy in OMA ?</a>
+
+
+{% elif tab == 'homeologs' %}
+
+
+     <a href="{% url 'type' %}">How we infer homoeologs in OMA ?</a>
+
+
+{%endif%}
+
+</div>
+
+
+
 
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
