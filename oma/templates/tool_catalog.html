@@ -147,7 +147,23 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 </h3>
 
-                    <p class="text-justify"> </p>
+                    <p class="text-justify"> An important application of orthology is the ability to transfer gene function annotations from the few well-studied model organisms to the large number of poorly studied genomes. We previously described our approach to predict Gene Ontology (GO) annotations from OMA Groups <a href="">(Altenhoff et al. 2015)</a>.
+ </p>
+                    <p class="text-justify"> We now provide a feature to annotate custom protein sequences through a fast approximate search with all the sequences in OMA. The user can upload a fasta formatted file and will receive the GO annotations (GAF 2.1 format) based on the closest sequence in OMA. These results can directly be further analyzed using other tools, e.g. to perform a gene enrichment analysis.
+ </p>
+
+                     <small class="float-right">Please see <a href="">(Altenhoff et al. 2018)</a> and <a href="">(Altenhoff et al. 2015)</a>  for more information.</small>
+
+                    <img src="{% static "image/go_functional_annotation-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+
+                    <div class="text-center small">
+    <b> Form for uploading protein sequences to OMA for GO annotation.</b>
+    </div>
+
+
+
 
                     <br>
 
@@ -155,27 +171,48 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 </h3>
 
+                    <p class="text-justify"> Use the following form to download the list of all predicted orthologs between a pair of genomes of interest. Since orthologs are sometimes 1:many or many:many relations, this download will return more orthologs than what is covered by the OMA groups. The result is returned as a tab-separated text file, each line corresponding to one orthologous relation. The columns are the two IDs, the type of orthology (1:1, 1:n, m:1 or m:n) and (if available) the OMA group containing both sequences.
+                    </p>
+
                     <br>
 
                     <h3>Phylogenetic profiler
 </h3>
+
+                    <p class="text-justify"> Genes that are involved in the same biological processes tend to be jointly retained or lost across evolution. Thus, such co-evolution patterns can be used to infer functionally related genes—a technique known as “phylogenetic profiling.”  Recently, we introduced HogProf, an algorithm to efficiently identify similar HOGs in terms of their presence or absence at each extant and ancestral node in the genome taxonomy, as well as the duplication or loss events on the branch leading to that node. This functionality has been added to the OMA browser, making it possible, starting from any HOG, to identify similar HOGs using similar phylogenetic patterns. </p>
+                    <p class="text-justify"> Under the “similar HOGs” tab, click on “phylogenetic profiles” to access the interactive visualization of the presence or absence of orthologs in different species (represented as vertical lines) in HOGs with a similar phylogenetic profile (displayed as rows).
+</p>
+                    <p class="text-justify">It is important to note that the visual representation of the profile available on the web interface only shows the extant species covered by the query and returned HOGs. The actual profile similarities are calculated between the set of taxonomic nodes where ancestral presence was inferred along with extant species, as well as the set of ancestral duplications and losses shared between HOGs.
+</p>
+
+                     <img src="{% static "image/phylogenetic_profiler.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
 
                     <br>
                     <h3>Add taxonomic filters to tables
 
 </h3>
 
+                    <p class="text-justify"> Export the <a href="{% url 'glossary' %}#g-allall" >all-against-all</a>  file for a subset of species in the OMA database. Search for species using the interactive species tree or the search bar. Click on a species or node to select genomes, which are displayed on the right.</p>
+ <img src="{% static "image/export_all_against_all-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
                     <br>
 
                     <h3>Phylogenetic Marker Gene Export
 </h3>
 
+                    <p class="text-justify">In several of the tables, it is possible to add a “custom filter” to the data. This function can be used to select only the results from a certain species or taxonomic range</p>
+<img src="{% static "image/custom_filter-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+
+
+                     <div class="text-center small">
+    <b> To add a custom filter, choose the taxonomic range interactively with the species tree, or type it in the search bar. Name your custom filter at the top to save it, and click Apply.
+</b>
+    </div>
+
                     <br>
-
-
-
-
-
 
                 </div>
             </div>
@@ -186,24 +223,96 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
                 <hr>
                 <div class="card-body">
 
+                                        <p class="text-justify">To enable user-side analyses we provide several softwares and libraries available for download. </p>
+
+
 
                     <h3>OMA Standalone</h3>
+
+                                        <p class="text-justify">OMA standalone takes as input the coding sequences of genomes or transcriptomes, in FASTA format. The recommended input type is amino acid sequences, but OMA also supports nucleotide sequences. With amino acid sequences, users can combine their own data with publicly available genomes from the OMA database, including precomputed all-against-all sequence comparisons (the first and computationally most intensive step), using the export function on the OMA website (<a
+                                                href="http://omabrowser.org/export">http://omabrowser.org/export</a>).</p>
+
+<p class="text-justify">OMA standalone produces several types of output:
+</p>
+
+
+<img src="{% static "image/omastandalone-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+
+
+                      <small class="float-right">Please see <a href="">(Altenhoff et al. 2019)</a>  for more information.</small>
+
+
                     <br>
 
                     <h3>pyHam
 </h3>
+
+                    <p class="text-justify">We have developed a python tool called pyham (Python HOG Analysis Method), which makes it possible to extract useful information from HOGs encoded in standard OrthoXML format. It is available both as a python library and as a set of command-line scripts. Input HOGs in OrthoXML format are available from multiple bioinformatics resources, including OMA, Ensembl and HieranoidDB.
+</p>
+                    <p class="font-weight-bold">The main features of pyHam are: </p>
+                    <ul>
+
+
+                        <li>Given a clade of interest, it can <b>extract all the relevant HOGs</b>, each of which ideally corresponds to a distinct <a href="{% url 'glossary' %}#g-agene" >ancestral gene</a>  in the last common ancestor of the clade</li>
+ <li>Given a branch on the species tree, <b>report the HOGs that duplicated</b> on the branch, got lost on the branch, <b>first appeared</b> on that branch or were simply <b>retained</b> </li>
+ <li>Repeat the previous point along the entire species tree and <b>plot an overview</b> of the gene evolution dynamics along the tree </li>
+ <li>Given a set of nested HOGs for a specific gene family of interest, generate a local iHam web page to <b>visualize its evolutionary history</b>.</li>
+
+
+                        <img src="{% static "image/pyham-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+
+
+                     <div class="text-center small">
+    <b> Example of pyham output.
+</b>
+    </div>
+
+
+
+                    </ul>
+
+                    For more information, please see:
+
+                    <ul>
+
+
+
+                        <li>Paper: <a href="">(Train et al. 2019)</a></li>
+                        <li>Github: <a href="https://github.com/dessimozlab/pyham">https://github.com/dessimozlab/pyham</a>
+</li>
+                        <li>Tutorial: <a href="https://zoo.cs.ucl.ac.uk/tutorials/tutorial_pyHam_get_started.html#object">https://zoo.cs.ucl.ac.uk/tutorials/tutorial_pyHam_get_started.html#object</a>
+</li>
+                        <li>Blog post: <a href="http://lab.dessimoz.org/blog/2017/06/29/pyham">http://lab.dessimoz.org/blog/2017/06/29/pyham</a>
+</li>
+                        <li>Pyham website: <a href="https://lab.dessimoz.org/pyham"> https://lab.dessimoz.org/pyham</a>
+</li>
+                    </ul>
+
+
+
+
                     <br>
 
                     <h3>OMA Rest API
 </h3>
+                    <p class="text-justify">(See <a href="{% url 'uses' %}#REST">OMA Rest API</a> under Access the Data.)
+</p>
                     <br>
 
                     <h3>OMAdb (python package)
 </h3>
+                    <p class="text-justify">(See <a href="{% url 'uses' %}#dbpython">OMAdb</a> python package under Access the Data.)
+</p>
                     <br>
 
                     <h3>OMAdb (R package)
 </h3>
+                    <p class="text-justify">(See <a href="{% url 'uses' %}#dbr">OMAdb</a> R package under Access the Data.)
+</p>
                     <br>
 
                 </div>
@@ -218,10 +327,109 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 
                     <h3>iHam (Graphical Viewer)</h3>
+
+
+                    <p class="text-justify">
+                        The iHam Graphical Viewer is an interactive JavaScript tool to visualize the evolutionary history of a specific gene family encoded in HOGs. The viewer is composed of two panels (Fig. 1A): a species tree which lets the user select a node to focus on a particular taxonomic range of interest, and a matrix that organizes extant genes according to their membership in species (rows) and HOGs (columns).
+                    </p>
+
+
+                    <p class="text-justify">
+
+The tree-guided matrix representation of HOGs facilitates:
+
+                        <ul>
+<li> To delineate orthologous groups at given taxonomic ranges</li>
+<li> To infer duplication and loss events in the species tree</li>
+<li> To gauge the cumulative effect of duplications and losses on gene repertoires </li>
+<li> To identify potential mistakes in genome assembly, annotation or orthology inference (e.g. if losses are concentrated on terminal branches—suggestive of incomplete genomes; or if the species coverage within a HOG looks implausible—suggestive of orthology inference error).</li>
+</ul>
+
+                    </p>
+
+
+                    <img src="{% static "image/iham_graphical_viewer-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+
+
+                     <div class="text-center small">
+    <b> pyHam can be used to map gene losses, duplications or new appearances (‘gained’) onto species trees (here, using the NCBI taxonomy tree)
+
+</b>
+    </div>
+
+
+                     <p class="text-justify">
+
+                    Users can customize the view in different ways. They can color genes according to protein length or GC-content. Low-confidence HOGs can be masked. Irrelevant species clades can be collapsed. iHam is a reusable web widget that can be easily embedded into a website; for instance, it is used to display HOGs in OMA (<a
+                             href="http://omabrowser.org">http://omabrowser.org</a>; Altenhoff et al., 2018). Implemented as a JavaScript library using the TnT framework (Pignatelli, 2016), iHam merely requires as input HOGs in the standard OrthoXML format (Schmitt et al., 2011) and the underlying species tree in newick or PhyloXML format.
+
+
+</p>
+
+                     <small class="float-right">Please see <a href="">(Train et al. 2019)</a>  for more information.</small>
+
+
                     <br>
 
                     <h3>Phylo.io
 </h3>
+
+                    <p class="text-justify">
+
+                        Phylogenetic trees are pervasively used to depict evolutionary relationships. Increasingly, researchers need to visualize large trees and compare multiple large trees inferred for the same set of taxa (reflecting uncertainty in the tree inference or genuine discordance among the loci analyzed). Existing tree visualization tools are however not well suited to these tasks. In particular, side-by-side comparison of trees can prove challenging beyond a few dozen taxa.
+                    </p>
+
+
+                    <p class="text-justify">
+
+Phylo.io  is a web application to visualize and compare phylogenetic trees side-by-side.
+                    </p>
+
+                    <p class="text-justify">
+
+Its distinctive features are:
+                        <ul>
+
+
+
+  <li>highlighting of similarities and differences between two trees</li>
+  <li>automatic identification of the best matching rooting and leaf order</li>
+  <li>scalability to large trees</li>
+  <li>high usability</li>
+  <li>multiplatform support via standard HTML5 implementation</li>
+  <li>Possibility to store and share visualizations</li>
+
+                     </ul>
+                    </p>
+
+                    <p class="text-justify">
+
+The tool can be freely accessed at <a href="http://phylo.io">http://phylo.io</a> and can easily be embedded in other web servers.
+
+                    </p>
+
+
+
+                     <img src="{% static "image/phyloio.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+                     <p class="text-justify">
+                    For more information:
+
+                         <ul>
+
+
+  <li>Paper: (Robinson et al. 2016) </li>
+  <li>Github: The code for the associated JavaScript library is available at https://github.com/DessimozLab/phylo-io under an MIT open source license. </li>
+  <li>Manual: <a href="http://phylo.io/manual.html">http://phylo.io/manual.html</a> </li>
+  <li>Blog post: <a href="https://lab.dessimoz.org/blog/2016/04/28/phylo-io-software-to-visualise-and-compare-phylogenetic-trees">https://lab.dessimoz.org/blog/2016/04/28/phylo-io-software-to-visualise-and-compare-phylogenetic-trees</a> </li>
+  <li>Youtube video: <a href="https://www.youtube.com/watch?v=IOQK3CP8GlA&feature=emb_logo ">https://www.youtube.com/watch?v=IOQK3CP8GlA&feature=emb_logo </a></li>
+
+                    </ul>
+
+                     </p>
 
 
 

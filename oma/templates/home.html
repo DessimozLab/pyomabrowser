@@ -193,7 +193,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
 
 
                                 <li class="btn-more-container" >
-                                    <button type="button" style="display: none;" class="btn btn-outline-dark " disabled>More help here!</button>
+                                    <button type="button"  class="btn btn-outline-dark " onclick="location.href='{% url 'about' %}'" >Start to read about OMA</button>
                                 </li>
                             </ul>
                         </div>
@@ -262,7 +262,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                 </li>
 
                                 <li class="btn-more-container" >
-                                    <button type="button" style="display: none;" class="btn btn-outline-dark"  disabled>See more download options</button>
+                                    <button type="button" class="btn btn-outline-dark" onclick="location.href='{% url 'uses' %}'"  >See more download options</button>
                                 </li>
                             </ul>
                         </div>
