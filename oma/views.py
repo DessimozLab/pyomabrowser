@@ -1360,7 +1360,10 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         species = results.species_names
         sp_json = json.dumps(species, cls=NumpyEncoder)
 
-        jaccard_json = json.dumps(results.jaccard_distance, cls=NumpyEncoder)
+        jaccard_json = {k:v for (k,v) in results.jaccard_distance.items()}
+        logger.info(jaccard_json)
+
+        jaccard_json = json.dumps(jaccard_json, cls=NumpyEncoder)
 
         context.update({ 'tab': 'similar', 'subtab': 'profile','jaccard': json.loads(jaccard_json), 'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
 
