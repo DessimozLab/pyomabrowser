@@ -1332,6 +1332,8 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
                 return json.JSONEncoder.default(self, obj)
 
 
+
+
         results = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
 
 
@@ -1358,8 +1360,9 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         species = results.species_names
         sp_json = json.dumps(species, cls=NumpyEncoder)
 
+        jaccard_json = json.dumps(results.jaccard_distance, cls=NumpyEncoder)
 
-        context.update({ 'tab': 'similar', 'subtab': 'profile',  'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
+        context.update({ 'tab': 'similar', 'subtab': 'profile','jaccard': json.loads(jaccard_json), 'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
 
         return context
 
