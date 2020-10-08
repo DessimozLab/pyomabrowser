@@ -61,8 +61,24 @@
 
              <tr>
 
+                 <th colspan="3">Evidence</th>
 
-                   <th class="micro-header" data-field="type_p"  data-align="center" data-halign="center"   data-formatter="stateFormatterPO" >
+
+
+
+                 <th rowspan="2"  data-field="kingdom" data-sortable="true" data-filter-control="select"
+                    data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.</th>
+                <th  rowspan="2" data-field="taxon" data-sortable="true" data-filter-control="input"
+                    data-formatter="tablehooks.format_sciname">Taxon</th>
+                <th rowspan="2"  data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                 <th rowspan="2"  data-field="RelType" data-sortable="true" >Relation type</th>
+                <th rowspan="2"  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                <th rowspan="2"  data-sortable="false" class="domain_vis">Domain Architectures</th>
+
+ </tr>
+
+            <tr>
+        <th class="micro-header" data-field="type_p"  data-align="center" data-halign="center"   data-formatter="stateFormatterPO" >
 
                     Pair
 
@@ -79,17 +95,7 @@
                     <div style="line-height: 1.5 !important;">  OMA <br> Group  </div>
                    </th>
 
-
-                 <th  data-field="kingdom" data-sortable="true" data-filter-control="select"
-                    data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.</th>
-                <th  data-field="taxon" data-sortable="true" data-filter-control="input"
-                    data-formatter="tablehooks.format_sciname">Taxon</th>
-                <th  data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
-                 <th  data-field="RelType" data-sortable="true" >Relation type</th>
-                <th  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
-                <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
-
- </tr>
+    </tr>
 
 
             </thead>
