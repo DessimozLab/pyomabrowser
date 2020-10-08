@@ -27,8 +27,6 @@ No HOG with a similar profile found.
 {{ reference|json_script:"ref-data" }}
 
 
-jac = {{jaccard}}
-
 <div class="container-fluid " style="background-color: rgba(240,240,240,0.4); border-radius: 8px 8px 0px 0px;
 ">
 
@@ -119,7 +117,7 @@ jac = {{jaccard}}
 
                              {{jac}}
 
-                              <i class="fas fa-info-circle" rel="tooltip" title="Jaccard distance between reference hog profile and this hog profile" ></i>
+                              <i class="fas fa-info-circle" rel="tooltip" title="Jaccard similarity between reference hog:{{fam.id}} profile and hog:{{id}} profile" ></i>
 
 
 
