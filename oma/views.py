@@ -1512,16 +1512,21 @@ class HOGSynteny(HOG_Base, TemplateView):
         neigh = []
 
         for n in graph.nodes.data('weight'):
+
             ancestral_synteny["nodes"].append({"id": n[0],"name": n[0]})
 
         for e in graph.edges.data('weight'):
             ancestral_synteny["links"].append({"source_id": e[0], "target_id": e[1], "weight": str(e[2])})
 
             if e[0] == hog_id:
-                neigh.append({'hog':e[1], 'weight': str(e[2])})
+                h = models.HOG(utils.db, e[1])
+
+                neigh.append({'hog':e[1], 'weight': str(e[2]), 'description': h.keyword})
 
             if e[1] == hog_id:
-                neigh.append({'hog':e[0], 'weight': str(e[2])})
+                h = models.HOG(utils.db, e[0])
+
+                neigh.append({'hog':e[0], 'weight': str(e[2]), 'description': h.keyword})
 
 
 
