@@ -15,23 +15,11 @@
 
 
 
-    {% if tab == 'orthologs' %}
-
-     <a href="{% url 'uses' %}#orthotable">Different evidences of orthology ?</a>
 
 
-    {% elif tab == 'paralogs' %}
-
-     <a href="{% url 'uses' %}#paratable">How we infer paralogy in OMA ?</a>
 
 
-{% elif tab == 'homeologs' %}
 
-
-     <a href="{% url 'type' %}">How we infer homoeologs in OMA ?</a>
-
-
-{%endif%}
 
 </div>
 
@@ -61,7 +49,7 @@
 
              <tr>
 
-                 <th colspan="3" class="text-center">Evidence</th>
+                 <th colspan="3" class="text-center">Evidence <a href="{% url 'uses' %}#orthotable"><i class="fa fa-info"></i></a></th>
 
 
 
@@ -92,7 +80,7 @@
 
 
                 <th class="micro-header" data-field="type_g"   data-align="center" data-halign="center"   data-formatter="stateFormatterOG" >
-                    <div style="line-height: 1.5 !important;">  OMA   </div>
+                    <div >  OMA   </div>
                    </th>
 
     </tr>
