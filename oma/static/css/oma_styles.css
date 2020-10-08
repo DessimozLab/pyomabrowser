@@ -1171,6 +1171,8 @@ background-color: #336799 !important;
 
 .micro-header{
 	font-size: xx-small !important;
+	padding-bottom: 2px;
+	padding-top: 2px;
 
 }
 
