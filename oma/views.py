@@ -915,12 +915,8 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         go_sim_computed = False
         try:
             encoded_data = utils.db.get_cached_family_json(entry.hog_family_nr)
-
-            temp = str.maketrans("gene_similarity", "similarity")
-            encoded_data = encoded_data.translate(temp)
-
+            encoded_data = encoded_data.replace("gene_similarity", "similarity")
             logger.info(encoded_data)
-
 
             if offset == 0 and limit is None:
                 response = HttpResponse(content=encoded_data, content_type="application/json")
