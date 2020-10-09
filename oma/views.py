@@ -915,9 +915,10 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         go_sim_computed = False
         try:
             encoded_data = utils.db.get_cached_family_json(entry.hog_family_nr)
-            logger.info(type(encoded_data))
-            for e in encoded_data:
-                e.replace("gene_similarity", "similarity")
+
+            temp = str.maketrans("gene_similarity", "similarity")
+            encoded_data = encoded_data.translate(temp)
+
             logger.info(encoded_data)
 
 
