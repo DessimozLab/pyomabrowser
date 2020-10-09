@@ -137,6 +137,14 @@
         }
     };
 
+
+
+
+
+
+
+
+
     exports.format_omagroup_of_entry = function(value, row){
         if (value > 0){
             return '<a href="/oma/group/'+row.protid+'/">' + value +'</a>';

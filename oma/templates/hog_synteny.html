@@ -56,8 +56,7 @@
 
              <tr>
 
-                 <th  data-field="hog" data-sortable="true" data-filter-control="select"
-                    >HOG id</th>
+                 <th  data-field="hog" data-sortable="true" data-filter-control="select" data-formatter="format_hog_synteny">HOG id</th>
 
 
                  <th  data-field="weight" data-sortable="true" data-filter-control="select"
@@ -67,13 +66,23 @@
                     >description</th>
 
 
+
  </tr>
+
+
 
 
             </thead>
 
 
                 <script>
+                    function  format_hog_synteny(value, row) {
+
+                         var u = "{% url 'hog_synteny' 12345 67890  %}".replace(/12345/, value).replace(/67890/, "{{level}}");
+                         return '<a href="' + u + '" >' +  value + ' </a>'
+
+                    }
+
 
                     var data = JSON.parse(document.getElementById('neighbor-data').textContent);
 
