@@ -915,16 +915,25 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         go_sim_computed = False
         try:
             encoded_data = utils.db.get_cached_family_json(entry.hog_family_nr)
+            logger.info(encoded_data)
+            encoded_data.replace('"gene_similarity"', '"similarity"')
+            logger.info(encoded_data)
+
 
             if offset == 0 and limit is None:
                 response = HttpResponse(content=encoded_data, content_type="application/json")
                 response_ready = True
+                logger.info(encoded_data)
             else:
                 data = json.loads(encoded_data)[offset:limit]
                 go_sim_computed = True
         except db.DBOutdatedError:
             context, genes_to_use, hog_id = self.get_context_data(entry_id=entry_id, start=offset, stop=limit, **kwargs)
             data = [x for x in self.to_json_dict(context['fam_members'])]
+            logger.info(data)
+
+
+
 
         if not response_ready:
             if not go_sim_computed and len(genes_to_use) < 200:
@@ -934,8 +943,12 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
                         data[g].update({'similarity': None})
                     else:
                         data[g].update({'similarity': gene_similarity_vals[gene[0]]})
+
+            logger.info(data)
+
             response = JsonResponse(data, safe=False)
         response['Access-Control-Allow-Origin'] = '*'
+        logger.info(response)
         return response
 
 
