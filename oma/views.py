@@ -915,8 +915,9 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         go_sim_computed = False
         try:
             encoded_data = utils.db.get_cached_family_json(entry.hog_family_nr)
-            logger.info(encoded_data)
-            encoded_data.replace("gene_similarity", "similarity")
+            logger.info(type(encoded_data))
+            for e in encoded_data:
+                e.replace("gene_similarity", "similarity")
             logger.info(encoded_data)
 
 
@@ -948,7 +949,6 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
 
             response = JsonResponse(data, safe=False)
         response['Access-Control-Allow-Origin'] = '*'
-        logger.info(response)
         return response
 
 
