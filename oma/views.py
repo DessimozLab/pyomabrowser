@@ -2409,6 +2409,8 @@ class Searcher(View):
 
         context = {'query': query, 'type': type, 'terms':terms}
 
+        redir = (type != 'all' and len(terms) == 1)
+
         # if specific selector chosen (entry by protId) try to instant redirection if correct query
         if type!='all' and len(terms) == 1:
 
@@ -2456,14 +2458,14 @@ class Searcher(View):
 
         pruned_term = [term for term in terms if term not in genome_term]
 
-        self.logic_entry(request, context, pruned_term, scope = protein_scope )
+        self.logic_entry(request, context, pruned_term, scope = protein_scope, redirect_valid=redir )
         self.logic_group(request, context, pruned_term)
 
         context['url_fulltest_entries'] = reverse('fulltext_json', args=(query,))
 
         return render(request, 'search_test.html', context=context)
 
-    def logic_entry(self,request, context, terms, scope = None):
+    def logic_entry(self,request, context, terms, scope = None, redirect_valid=False):
 
         logger.info("Start entry search")
 
@@ -2495,10 +2497,14 @@ class Searcher(View):
         # for each terms we get the raw results
         for term in terms:
 
+
+
             term_hit_id = []
             term_hit_xref = []
 
             hits = utils.id_resolver.search_protein(term)
+
+
 
             for id, hit in hits.items():
                 for accessor, value in hit.items():
