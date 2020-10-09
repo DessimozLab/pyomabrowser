@@ -916,7 +916,10 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         try:
             encoded_data = utils.db.get_cached_family_json(entry.hog_family_nr)
             logger.info(encoded_data)
-            encoded_data.replace('"gene_similarity"', '"similarity"')
+
+            for e in encoded_data:
+                e['"similarity"'] = e.pop('"gene_similarity"')
+
             logger.info(encoded_data)
 
 
