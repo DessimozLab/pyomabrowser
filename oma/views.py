@@ -916,19 +916,16 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
         try:
             encoded_data = utils.db.get_cached_family_json(entry.hog_family_nr)
             encoded_data = encoded_data.replace("gene_similarity", "similarity")
-            logger.info(encoded_data)
 
             if offset == 0 and limit is None:
                 response = HttpResponse(content=encoded_data, content_type="application/json")
                 response_ready = True
-                logger.info(encoded_data)
             else:
                 data = json.loads(encoded_data)[offset:limit]
                 go_sim_computed = True
         except db.DBOutdatedError:
             context, genes_to_use, hog_id = self.get_context_data(entry_id=entry_id, start=offset, stop=limit, **kwargs)
             data = [x for x in self.to_json_dict(context['fam_members'])]
-            logger.info(data)
 
 
 
@@ -942,7 +939,6 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
                     else:
                         data[g].update({'similarity': gene_similarity_vals[gene[0]]})
 
-            logger.info(data)
 
             response = JsonResponse(data, safe=False)
         response['Access-Control-Allow-Origin'] = '*'
@@ -1318,9 +1314,7 @@ class HOGInfo(HOG_Base, TemplateView):
 
         for l in all_levels:
 
-            print(l)
             ids = utils.db.get_subhogids_at_level(context['hog_fam'],l)
-            print(ids)
 
             for i in ids:
                 sh.append([i, l])
@@ -1371,7 +1365,6 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         sp_json = json.dumps(species, cls=NumpyEncoder)
 
         jaccard_json = {k:v for (k,v) in results.jaccard_distance.items()}
-        logger.info(jaccard_json)
 
         jaccard_json = json.dumps(jaccard_json, cls=NumpyEncoder)
 
@@ -1522,6 +1515,8 @@ class HOGSynteny(HOG_Base, TemplateView):
         neigh = []
 
         for n in graph.nodes.data('weight'):
+
+            logger.info(n[0])
 
             ancestral_synteny["nodes"].append({"id": n[0],"name": n[0]})
 
