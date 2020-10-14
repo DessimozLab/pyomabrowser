@@ -1327,7 +1327,15 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
 
-        context.update({ 'tab': 'similar', 'subtab': 'profile', 'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,))})
+        fam = utils.db.parse_hog_id(hog_id)
+        results = utils.db.get_families_with_similar_hog_profile(fam)
+
+        if len(results.similar.keys()):
+            run_prof = True
+        else:
+            run_prof = False
+
+        context.update({ 'tab': 'similar', 'subtab': 'profile','run_prof':run_prof, 'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,results,))})
 
 
         return context
@@ -1344,14 +1352,10 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
                     return obj.tolist()
                 return json.JSONEncoder.default(self, obj)
 
-        context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
-
-
         data = {}
         fam = utils.db.parse_hog_id(hog_id)
 
-        #Get profile and sort hogid  according to jaccard
-        results = utils.db.get_families_with_similar_hog_profile(fam)
+        #Get profile from args and sort hogid  according to jaccard
 
         sortedhogs = [(k, v) for k, v in results.jaccard_distance.items()]
         sortedhogs = sorted(sortedhogs, key=lambda x: x[1])
@@ -1364,10 +1368,9 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
             sortedhogs.remove(str(fam))
             sim_hogs["Reference"] = results.similar[int(fam)]
 
-
-
         for sim in sortedhogs[:19]:
-            sim_hogs[sim] = {"id" : sim, "profile" : results.similar[int(sim)] ,"jaccard" : results.jaccard_distance[sim], "description" : models.HOG(utils.db, sim).keyword}
+            id_hog = db.format_hogid(sim)
+            sim_hogs[sim] = {"id" : sim, "profile" : results.similar[int(sim)] ,"jaccard" : results.jaccard_distance[sim], "description" : models.HOG(utils.db, id_hog).keyword}
 
         data["profile"] = json.dumps(sim_hogs, cls=NumpyEncoder)
         data["tax"] = json.dumps(results.tax_classes, cls=NumpyEncoder)
