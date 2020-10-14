@@ -41,8 +41,13 @@ urlpatterns = [
     url(r'^hog/similar/domains/(?P<hog_id>[\w.-:]+)/json/$', views.HOGDomainsJson.as_view(), name='hog_domains_json'),
     url(r'^hog/similar/domain/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
     url(r'^hog/similar/domain/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
+
     url(r'^hog/similar/profile/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
+    url(r'^hog/similar/profile/json/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
+    url(r'^hog/similar/profile/json/(?P<hog_id>[\w.-:]+)/$', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
     url(r'^hog/similar/profile/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
+
+
     url(r'^hog/similar/pairwise/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
     url(r'^hog/similar/pairwise/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
 

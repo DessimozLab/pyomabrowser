@@ -1323,11 +1323,47 @@ class HOGInfo(HOG_Base, TemplateView):
         return context
 
 
+class Entry_Isoform(TemplateView, InfoBase):
+    template_name = "entry_isoform.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(Entry_Isoform, self).get_context_data(entry_id, **kwargs)
+        entry = self.get_entry(entry_id)
+
+        isoforms = entry.alternative_isoforms
+        isoforms.append(entry)
+
+
+        main_isoform = None
+
+        for iso in isoforms:
+            if iso.is_main_isoform:
+                main_isoform = iso
+
+
+        context.update(
+            {'entry': entry,
+             'tab': 'isoform',
+             'isoforms': isoforms,
+             'main_isoform': main_isoform,
+             'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
+        return context
+
 class HOGSimilarProfile(HOG_Base, TemplateView):
     template_name = "hog_similar_profile.html"
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
+
+        context.update({ 'tab': 'similar', 'subtab': 'profile', 'table_data_url': reverse('profile_json', args=(hog_id,))})
+
+
+        return context
+
+class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
+
+    def get(self, request, *args, **kwargs):
+
 
         class NumpyEncoder(json.JSONEncoder):
             def default(self, obj):
@@ -1337,40 +1373,33 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
 
 
 
+        data = {}
+        fam = utils.db.parse_hog_id(hog_id)
 
-        results = utils.db.get_families_with_similar_hog_profile(context['hog_fam'])
-
+        #Get profile and sort hogid  according to jaccard
+        results = utils.db.get_families_with_similar_hog_profile(fam)
 
         sortedhogs = [(k, v) for k, v in results.jaccard_distance.items()]
         sortedhogs = sorted(sortedhogs, key=lambda x: x[1])
         sortedhogs = [e[0] for e in sortedhogs]
         sortedhogs.reverse()
 
-        if str(context['hog_fam']) in sortedhogs:
-            sortedhogs.remove(str(context['hog_fam']))
+        # we add manually the reference with tag name reference
+        if str(fam) in sortedhogs:
+            sortedhogs.remove(str(fam))
+            sim_hogs["Reference"] = results.similar[int(sim)]
+
 
         sim_hogs = {}
-        for sim in sortedhogs[:20]:
-            sim_hogs[sim] = results.similar[int(sim)]
+        for sim in sortedhogs[:19]:
+            sim_hogs[sim] = {"id" : sim, "profile" : results.similar[int(sim)] ,"jaccard" : results.jaccard_distance[int(sim)], "description" : models.HOG(utils.db, sim).keyword}
 
-        sim_json = json.dumps(sim_hogs, cls=NumpyEncoder)
+        data["profile"] = json.dumps(sim_hogs, cls=NumpyEncoder)
+        data["tax"] = json.dumps(results.tax_classes, cls=NumpyEncoder)
+        data["species"] = json.dumps(results.species_names, cls=NumpyEncoder)
 
-        ref_profile = {"Reference": results.query_profile}
-        ref_json = json.dumps(ref_profile, cls=NumpyEncoder)
 
-        taxon_region = results.tax_classes
-        tax_json = json.dumps(taxon_region,  cls=NumpyEncoder)
-
-        species = results.species_names
-        sp_json = json.dumps(species, cls=NumpyEncoder)
-
-        jaccard_json = {k:v for (k,v) in results.jaccard_distance.items()}
-
-        jaccard_json = json.dumps(jaccard_json, cls=NumpyEncoder)
-
-        context.update({ 'tab': 'similar', 'subtab': 'profile','jaccard': json.loads(jaccard_json), 'sim_data': json.loads(sim_json),'reference': ref_json,  'taxon_region': tax_json, "species": sp_json})
-
-        return context
+        return JsonResponse(data, safe=False)
 
 
 class HOGSimilarDomain(HOG_Base, TemplateView):
@@ -1515,8 +1544,6 @@ class HOGSynteny(HOG_Base, TemplateView):
         neigh = []
 
         for n in graph.nodes.data('weight'):
-
-            logger.info(n[0])
 
             ancestral_synteny["nodes"].append({"id": n[0],"name": n[0]})
 
