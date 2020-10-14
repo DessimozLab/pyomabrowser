@@ -61,7 +61,7 @@
     $("[rel=tooltip]").tooltip({ placement: 'right'});
 });
 
-    $.getJSON("{{ table_data_url }}", function (data) {
+    $.getJSON("{{ table_data_url }}", function (alldata) {
     //$.getJSON("https://oma-stage.vital-it.ch/oma/hog/similar/profile/json/HOG:0455705/", function (alldata) {
 
         var data = alldata["profile"]
