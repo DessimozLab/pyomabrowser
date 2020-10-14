@@ -47,6 +47,8 @@
 
     $.getJSON("{{ table_data_url }}", function (data) {
 
+        console.log(data)
+
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
         $.extend(icons, {export: 'fa-download'});

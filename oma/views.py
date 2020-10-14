@@ -1372,9 +1372,9 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
             id_hog = utils.db.format_hogid(int(sim))
             sim_hogs[sim] = {"id" : sim, "profile" : results.similar[int(sim)] ,"jaccard" : results.jaccard_distance[sim], "description" : models.HOG(utils.db, id_hog).keyword}
 
-        data["profile"] = json.dumps(sim_hogs, cls=NumpyEncoder)
-        data["tax"] = json.dumps(results.tax_classes, cls=NumpyEncoder)
-        data["species"] = json.dumps(results.species_names, cls=NumpyEncoder)
+        data["profile"] = sim_hogs
+        data["tax"] = results.tax_classes
+        data["species"] = results.species_names
 
 
         return JsonResponse(data, safe=False)
