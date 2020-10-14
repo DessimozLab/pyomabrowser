@@ -1366,7 +1366,10 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
         # we add manually the reference with tag name reference
         if str(fam) in sortedhogs:
             sortedhogs.remove(str(fam))
-            sim_hogs["Reference"] = {"id" : hog_id, "profile" : results.similar[int(fam)].tolist() ,"jaccard" : results.jaccard_distance[int(fam)], "description" : models.HOG(utils.db, int(hog_id)).keyword}
+            p = results.similar[int(fam)].tolist()
+            j = results.jaccard_distance[int(fam)]
+            d = models.HOG(utils.db, int(hog_id)).keyword
+            sim_hogs["Reference"] = {"id" : hog_id, "profile" : p  ,"jaccard" : j  , "description" : d}
 
 
         for sim in sortedhogs[:19]:
