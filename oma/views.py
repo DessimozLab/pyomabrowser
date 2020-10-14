@@ -1367,7 +1367,7 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
 
 
         for sim in sortedhogs[:19]:
-            sim_hogs[sim] = {"id" : sim, "profile" : results.similar[int(sim)] ,"jaccard" : results.jaccard_distance[int(sim)], "description" : models.HOG(utils.db, sim).keyword}
+            sim_hogs[sim] = {"id" : sim, "profile" : results.similar[int(sim)] ,"jaccard" : results.jaccard_distance[sim], "description" : models.HOG(utils.db, sim).keyword}
 
         data["profile"] = json.dumps(sim_hogs, cls=NumpyEncoder)
         data["tax"] = json.dumps(results.tax_classes, cls=NumpyEncoder)
