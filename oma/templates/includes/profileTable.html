@@ -1,0 +1,73 @@
+{% load staticfiles %}
+
+        <table class="table table-hover" id="grpTable"
+               data-show-toggle="false"
+               data-show-columns="true" data-search="true" data-show-export="true"
+               data-mobile-responsive="true" data-check-on-init="true"
+               data-undefined-text=""
+               data-id-field="id" data-row-attributes="tablehooks.add_proteinrow_attrs" >
+            <thead>
+
+
+             <tr>
+                <th  data-field="id" data-sortable="true">HOG ID</th>
+
+
+    </tr>
+
+
+
+
+            </thead>
+
+
+        </table>
+
+
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+
+        <!-- Exon Visualisation -->
+<script src="{% static "js/exon_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/exon_vis.css" %}" rel="stylesheet" type="text/css" />
+
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<script src="{% static "js/bootstrap-table.min.js" %}"></script>
+
+<link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+<script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+<script src="{% static "js/tableExport.min.js" %}"></script>
+
+
+
+<script>
+
+    $.getJSON("{{ table_data_url }}", function (data) {
+
+        var tab = $("#grpTable");
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'fa-download'});
+        tab.bootstrapTable({
+            data: data["profile"] ,
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            showLoading: true,
+            onPostBody: function (data) {
+                exon.visualize_all(".protein", data);
+
+            },
+            onLoadSuccess: function () {
+
+                tab.bootstrapTable('hideLoading');
+            },
+            refreshOptions: {'icons': icons}
+        });
+
+    });
+
+</script>
+
