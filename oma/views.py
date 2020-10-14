@@ -1355,7 +1355,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
 
-        context.update({ 'tab': 'similar', 'subtab': 'profile', 'table_data_url': reverse('profile_json', args=(hog_id,))})
+        context.update({ 'tab': 'similar', 'subtab': 'profile', 'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,))})
 
 
         return context
