@@ -1358,13 +1358,14 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
         sortedhogs = [e[0] for e in sortedhogs]
         sortedhogs.reverse()
 
+        sim_hogs = {}
         # we add manually the reference with tag name reference
         if str(fam) in sortedhogs:
             sortedhogs.remove(str(fam))
             sim_hogs["Reference"] = results.similar[int(fam)]
 
 
-        sim_hogs = {}
+
         for sim in sortedhogs[:19]:
             sim_hogs[sim] = {"id" : sim, "profile" : results.similar[int(sim)] ,"jaccard" : results.jaccard_distance[int(sim)], "description" : models.HOG(utils.db, sim).keyword}
 
