@@ -1362,19 +1362,19 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
         sortedhogs = [e[0] for e in sortedhogs]
         sortedhogs.reverse()
 
-        sim_hogs = {}
+        sim_hogs = []
         # we add manually the reference with tag name reference
         if str(fam) in sortedhogs:
             sortedhogs.remove(str(fam))
             p = results.similar[int(fam)].tolist()
             #j = results.jaccard_distance[fam]
             d = models.HOG(utils.db, hog_id).keyword
-            sim_hogs["Reference"] = {"id" : hog_id, "profile" : p  ,"jaccard" : None  , "description" : d}
+            sim_hogs.append({"id" : "Reference", "profile" : p  ,"jaccard" : None  , "description" : d})
 
 
         for sim in sortedhogs[:19]:
             id_hog = utils.db.format_hogid(int(sim))
-            sim_hogs[sim] = {"id" : sim, "profile" : results.similar[int(sim)].tolist() ,"jaccard" : results.jaccard_distance[sim], "description" : models.HOG(utils.db, id_hog).keyword}
+            sim_hogs.append({"id" : sim, "profile" : results.similar[int(sim)].tolist() ,"jaccard" : results.jaccard_distance[sim], "description" : models.HOG(utils.db, id_hog).keyword})
 
         data["profile"] = sim_hogs
         data["tax"] = results.tax_classes
