@@ -1334,7 +1334,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
 
 class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, hog_id,  *args, **kwargs):
         context = self.get_context_data(hog_id, **kwargs)
 
 
