@@ -122,6 +122,9 @@
     };
 
     exports.format_hogid = function(value, row) {
+
+        if (value == "Reference") { return value  }
+
         return '<a href="/oma/hog/table/HOG:' + zeroPad(value, 7)
             + '/">HOG:' + zeroPad(value, 7) +'</a>';
     };
