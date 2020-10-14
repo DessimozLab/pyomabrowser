@@ -1368,7 +1368,7 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
             sortedhogs.remove(str(fam))
             p = results.similar[int(fam)].tolist()
             #j = results.jaccard_distance[fam]
-            d = models.HOG(utils.db, int(hog_id)).keyword
+            d = models.HOG(utils.db, hog_id).keyword
             sim_hogs["Reference"] = {"id" : hog_id, "profile" : p  ,"jaccard" : None  , "description" : d}
 
 
