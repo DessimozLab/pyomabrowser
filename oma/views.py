@@ -840,7 +840,6 @@ class Entry_Isoform(TemplateView, InfoBase):
              'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
         return context
 
-
 class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
     json_fields = {'omaid': 'protid',
                    'canonicalid': 'xrefid',
@@ -1322,33 +1321,6 @@ class HOGInfo(HOG_Base, TemplateView):
         context.update({'tab': 'info', 'sub-hog':sh})
         return context
 
-
-class Entry_Isoform(TemplateView, InfoBase):
-    template_name = "entry_isoform.html"
-
-    def get_context_data(self, entry_id, **kwargs):
-        context = super(Entry_Isoform, self).get_context_data(entry_id, **kwargs)
-        entry = self.get_entry(entry_id)
-
-        isoforms = entry.alternative_isoforms
-        isoforms.append(entry)
-
-
-        main_isoform = None
-
-        for iso in isoforms:
-            if iso.is_main_isoform:
-                main_isoform = iso
-
-
-        context.update(
-            {'entry': entry,
-             'tab': 'isoform',
-             'isoforms': isoforms,
-             'main_isoform': main_isoform,
-             'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
-        return context
-
 class HOGSimilarProfile(HOG_Base, TemplateView):
     template_name = "hog_similar_profile.html"
 
@@ -1363,6 +1335,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
 class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
 
     def get(self, request, *args, **kwargs):
+        context = self.get_context_data(hog_id, **kwargs)
 
 
         class NumpyEncoder(json.JSONEncoder):
@@ -1371,6 +1344,7 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
                     return obj.tolist()
                 return json.JSONEncoder.default(self, obj)
 
+        context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
 
 
         data = {}
@@ -1437,6 +1411,7 @@ class HOGSimilarPairwise(HOG_Base, TemplateView):
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarPairwise, self).get_context_data(hog_id, **kwargs)
+
 
         members_models = [models.ProteinEntry.from_entry_nr(utils.db, e[0]) for e in context['members']]
         gene_ids = [en.entry_nr for en in members_models]
