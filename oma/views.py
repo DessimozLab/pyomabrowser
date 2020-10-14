@@ -1335,7 +1335,7 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
         else:
             run_prof = False
 
-        context.update({ 'tab': 'similar', 'subtab': 'profile','run_prof':run_prof, 'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,results,))})
+        context.update({ 'tab': 'similar', 'subtab': 'profile','run_prof':run_prof, 'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,))})
 
 
         return context
@@ -1356,7 +1356,7 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
         fam = utils.db.parse_hog_id(hog_id)
 
         #Get profile from args and sort hogid  according to jaccard
-
+        results = utils.db.get_families_with_similar_hog_profile(fam)
         sortedhogs = [(k, v) for k, v in results.jaccard_distance.items()]
         sortedhogs = sorted(sortedhogs, key=lambda x: x[1])
         sortedhogs = [e[0] for e in sortedhogs]
