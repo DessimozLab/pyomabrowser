@@ -7,8 +7,6 @@
 
 
 
-
-
      exports.visualize = function (container, data_profile, taxon , species){
 
          if (!data_profile) return;
@@ -286,12 +284,13 @@
         var ref;
 
         var container_ref = document.querySelector(container_reference_selector);
+        container_ref.innerHTML = "";
         ref = exports.visualize(container_ref, data_profile_ref["profile"], data_taxon , data_species )
 
         $.each(data_profile, function (each, value) {
 
             var td_profile = document.querySelector('[data-uniqueid="' + value.id+'"]').querySelector(container_profile_selector);
-
+            td_profile.innerHTML = "";
             profiler_stack.push(exports.visualize(td_profile, value.profile, data_taxon , data_species ))
 
         })
@@ -301,6 +300,12 @@
 
          //!\\ see how resize window perform now with table //!\\
     }
+
+
+
+
+
+
 
 
 

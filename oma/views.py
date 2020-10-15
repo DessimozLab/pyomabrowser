@@ -1288,6 +1288,7 @@ class HOG_Base(ContextMixin):
             context['root_id'] = hog_id.split('.')[0]
             context['hog_fam'] = fam
             context['level'] = hog.level
+            context['description'] = hog.keyword
             context['members'] = members_sub
             context['is_subhog'] = is_subhog
             context['api_base'] = 'hog'

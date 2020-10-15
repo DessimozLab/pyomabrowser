@@ -13,13 +13,13 @@
              <tr>
                 <th  data-field="id" data-valign="middle" data-sortable="true" data-formatter="tablehooks.format_hogid">HOG ID</th>
                 <th  data-field="jaccard" data-valign="middle" data-sortable="true">Jaccard similarity <i class="fas fa-info-circle" rel="tooltip" title="Jaccard similarity between reference hog profile and  target hog profile" ></i></th>
-                <th data-class='profile_cell' data-valign="middle" data-width="600"  > <div id="profile_ref"></div></th>
+                <th data-class='profile_cell' data-valign="middle" data-width="600"></th>
                 <th  data-field="description" data-valign="middle" data-sortable="true">Description</th>
 
 
     </tr>
 
-
+<!-- <button type="button"  class="btn btn-sm btn-danger float-right" style="padding: .10rem .20rem; font-size: .600rem;line-height: 1;">Reset</button> -->
 
             </thead>
 
@@ -87,8 +87,7 @@
             showLoading: true,
             height:$(window).height() - 300,
             onPostBody: function (data) {
-
-                profile.run(data,ref, alldata["tax"], alldata["species"], "#profile_ref", '.profile_cell' );
+                profile.run(data,ref, alldata["tax"], alldata["species"], "th.profile_cell", '.profile_cell' );
 
             },
             onLoadSuccess: function () {

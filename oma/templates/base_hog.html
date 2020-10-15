@@ -17,6 +17,16 @@
 
         <h2 class="group_title"> {{ hog_id }} with {{ members|length }} members   </h2>
 
+        {% if description  %}
+        {{description}} |
+
+
+
+         {% endif %}
+
+
+
+
         {% for taxa in lineage_up %}
 
             {% if forloop.counter == 1 or forloop.counter == 2 %}
