@@ -1,5 +1,7 @@
 {% load staticfiles %}
 
+
+
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
                data-show-columns="false" data-search="true" data-show-export="true"
@@ -13,13 +15,12 @@
              <tr>
                 <th  data-field="id" data-valign="middle" data-sortable="true" data-formatter="tablehooks.format_hogid">HOG ID</th>
                 <th  data-field="jaccard" data-valign="middle" data-sortable="true">Jaccard similarity <i class="fas fa-info-circle" rel="tooltip" title="Jaccard similarity between reference hog profile and  target hog profile" ></i></th>
-                <th data-class='profile_cell' data-valign="middle" data-width="600"></th>
+                <th data-class='profile_cell' data-valign="middle" data-width="600" ></th>
                 <th  data-field="description" data-valign="middle" data-sortable="true">Description</th>
 
 
     </tr>
 
-<!-- <button type="button"  class="btn btn-sm btn-danger float-right" style="padding: .10rem .20rem; font-size: .600rem;line-height: 1;">Reset</button> -->
 
             </thead>
 
@@ -93,7 +94,15 @@
     var selector = "tr"
     var filteredEls = addedNodes.find(selector).addBack(selector); // finds either added alone or as tree
     filteredEls.each(function () { // can use jQuery select to filter addedNodes
-      profile.run(data,ref, alldata["tax"], alldata["species"], ".fixed-table-header th.profile_cell", '.profile_cell' );;
+
+        profile.run(data,ref, alldata["tax"], alldata["species"], ".fixed-table-header th.profile_cell", '.profile_cell' );
+
+      document.querySelector("th.profile_cell").style.paddingLeft = "8px";
+
+ var html_to_insert ='<button type="button"  id="resetbutton" onclick="profile.reset();" class="btn btn-sm btn-danger float-right" style="margin-top: 4px;margin-right: 4px; font-size: .600rem;line-height: 1;">Reset</button>'
+            document.querySelector("th.profile_cell").insertAdjacentHTML('afterbegin', html_to_insert );
+
+
     });
   });
 });
@@ -115,6 +124,13 @@
     });
 
 </script>
+
+
+
+
+
+
+
 
 
 
