@@ -284,6 +284,7 @@
         var ref;
 
         var container_ref = document.querySelector(container_reference_selector);
+
         container_ref.innerHTML = "";
         ref = exports.visualize(container_ref, data_profile_ref["profile"], data_taxon , data_species )
 
@@ -295,7 +296,7 @@
 
         })
 
-        //exports.bind_zoom(ref,container_ref, profiler_stack)
+        exports.bind_zoom(ref,container_ref, profiler_stack)
 
 
          //!\\ see how resize window perform now with table //!\\

@@ -10173,7 +10173,7 @@ module.exports = {
           value: "<a href=\"https://omabrowser.org/oma/hogs/" + hog.protid + "/" + taxa_name.replace(" ", "%20") + "/fasta\" target=\"_blank\">Sequences (Fasta)</a>"
         });
         obj.rows.push({
-          value: "<a href=\"https://omabrowser.org/oma/hogs/" + hog.protid + "/" + taxa_name.replace(" ", "%20") + "/\" target=\"_blank\">HOGs tables</a>"
+          value: "<a href=\"https://omabrowser.org/oma/hogs/" + hog.protid + "/" + taxa_name.replace(" ", "%20") + "/\" target=\"_blank\">Open sub-HOG</a>"
         });
       }
 

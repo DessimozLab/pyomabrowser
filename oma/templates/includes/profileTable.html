@@ -26,15 +26,6 @@
 
         </table>
 
-
-<!-- D3 and D3 Tooltip -->
-<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
-<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
-
-        <!-- Exon Visualisation -->
-<script src="{% static "js/exon_vis.js" %}" type="text/javascript"></script>
-<link href="{% static "css/exon_vis.css" %}" rel="stylesheet" type="text/css" />
-
 <!-- bootstrap-table -->
 <script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
 <script src="{% static "js/bootstrap-table.min.js" %}"></script>
@@ -87,7 +78,29 @@
             showLoading: true,
             height:$(window).height() - 300,
             onPostBody: function (data) {
+
                 profile.run(data,ref, alldata["tax"], alldata["species"], "th.profile_cell", '.profile_cell' );
+
+                $(document).ready(function(){
+                $("[rel=tooltip]").tooltip({ placement: 'right'});
+                });
+
+
+                var obs = new MutationObserver(function(mutations, observer) {
+  // using jQuery to optimize code
+  $.each(mutations, function (i, mutation) {
+    var addedNodes = $(mutation.addedNodes);
+    var selector = "tr"
+    var filteredEls = addedNodes.find(selector).addBack(selector); // finds either added alone or as tree
+    filteredEls.each(function () { // can use jQuery select to filter addedNodes
+      profile.run(data,ref, alldata["tax"], alldata["species"], ".fixed-table-header th.profile_cell", '.profile_cell' );;
+    });
+  });
+});
+
+                var canvasElement = $(".fixed-table-header")[0];
+                obs.observe(canvasElement, {childList: true, subtree: true});
+
 
             },
             onLoadSuccess: function () {
@@ -97,7 +110,11 @@
             refreshOptions: {'icons': icons}
         });
 
+
+
     });
 
 </script>
+
+
 

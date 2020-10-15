@@ -10204,7 +10204,7 @@ module.exports = {
             success: function(data) {
                obj.rows.push({
                    value: "<a href=\"https://oma-stage.vital-it.ch/oma/hog/table/" +  data.hog_id +"/" +data.level.replace(" ", "%20") + "/fasta\" target=\"_blank\"> Sequences (Fasta)</a>"});
-               obj.rows.push({value: "<a href=\"https://oma-stage.vital-it.ch/oma/hog/table/" +  data.hog_id +"/" +data.level.replace(" ", "%20") + "/\" target=\"_blank\"> HOGs tables</a>"});
+               obj.rows.push({value: "<a href=\"https://oma-stage.vital-it.ch/oma/hog/table/" +  data.hog_id +"/" +data.level.replace(" ", "%20") + "/\" target=\"_blank\"> Open sub-HOG</a>"});
 
           console.log("c", obj.rows)
             }

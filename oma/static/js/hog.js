@@ -388,7 +388,7 @@ hog_theme = function () {
                     var fasta_url = '/oma/hogs/' + first_gene.protid + '/' + current_opened_taxa_name.replace(" ", "%20") + '/fasta';
                     var table_url = '/oma/hogs/' + first_gene.protid + '/' + current_opened_taxa_name.replace(" ", "%20") + '/';
                     toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + fasta_url + '"> Sequences (Fasta) <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
-                    toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + table_url + '"> HOGs tables <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
+                    toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + table_url + '"> Open sub-HOG <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
                 }
                 toolt_div.innerHTML += '</ul>';
 
