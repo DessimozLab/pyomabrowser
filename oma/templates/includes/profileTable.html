@@ -5,15 +5,16 @@
                data-show-columns="false" data-search="true" data-show-export="true"
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
+               data-unique-id="id"
                data-id-field="id" data-row-attributes="tablehooks.add_proteinrow_attrs" >
             <thead>
 
 
              <tr>
-                <th  data-field="id" data-sortable="true" data-formatter="tablehooks.format_hogid">HOG ID</th>
-                <th  data-field="jaccard" data-sortable="true">Jaccard similarity <i class="fas fa-info-circle" rel="tooltip" title="Jaccard similarity between reference hog profile and  target hog profile" ></i></th>
-                <th data-class='profile_cell' data-width="300"  > <div id="profile_ref"></div></th>
-                <th  data-field="description" data-sortable="true">Description</th>
+                <th  data-field="id" data-valign="middle" data-sortable="true" data-formatter="tablehooks.format_hogid">HOG ID</th>
+                <th  data-field="jaccard" data-valign="middle" data-sortable="true">Jaccard similarity <i class="fas fa-info-circle" rel="tooltip" title="Jaccard similarity between reference hog profile and  target hog profile" ></i></th>
+                <th data-class='profile_cell' data-valign="middle" data-width="600"  > <div id="profile_ref"></div></th>
+                <th  data-field="description" data-valign="middle" data-sortable="true">Description</th>
 
 
     </tr>
@@ -74,8 +75,6 @@
     }
 }
 
-        console.log(data)
-        console.log(ref)
 
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
@@ -89,23 +88,7 @@
             height:$(window).height() - 300,
             onPostBody: function (data) {
 
-                profile.visualize_header("profile_ref", ref["profile"], data["tax"], data["species"] )
-
-                $.each($(".profile_cell"), function (each, value) {
-
-                    if (this.tagName !=  "TH") {
-
-                        console.log(this.tagName)
-
-
-                        profile.visualize(this, ref["profile"], data["tax"], data["species"])
-
-                    }
-                })
-
-
-
-
+                profile.run(data,ref, alldata["tax"], alldata["species"], "#profile_ref", '.profile_cell' );
 
             },
             onLoadSuccess: function () {
