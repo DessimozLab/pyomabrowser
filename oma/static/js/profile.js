@@ -8,6 +8,7 @@
     var ref;
     var brush;
     var tr = 0;
+    var handle_width = 10
 
 
 
@@ -89,7 +90,7 @@
 
         var e = d3.event.transform;
 
-              x.range([margin.left, width - margin.right]
+              x.range([handle_width, width-handle_width ]
                     .map(d => e.applyX(d)));
 
                 svg.selectAll(".bars rect")
@@ -118,7 +119,7 @@
             .domain(data_profile.map(function (d, i) {
                 return i
             }))
-            .range([margin.left, width - margin.right])
+            .range([handle_width, width-handle_width ])
             .padding(0.1)
 
 
@@ -221,8 +222,8 @@
          var svg = ref['svg']
          var x = ref['x']
          var width = container_overview.offsetWidth - margin.left - margin.right;
-         var xt = [margin.left,width - margin.right]
-         var brush_xt = [[margin.left, margin.top], [width - margin.right, height - margin.bottom]]
+         var xt = [handle_width,width - handle_width]
+         var brush_xt = [[handle_width, margin.top], [width - handle_width, height - margin.bottom]]
 
 
 
