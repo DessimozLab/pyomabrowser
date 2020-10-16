@@ -23,18 +23,104 @@
 
             {% if forloop.counter == 1 or forloop.counter == 2 %}
 
-               <a href=" {% url 'hog_viewer' hog_id  taxa%}  "> {{taxa|title}} </a> /
+                    {% if tab == 'iham' %}
+
+        <a href=" {% url 'hog_viewer' hog_id  taxa%}  "> {{taxa|title}} </a> /
+
+
+                     {% elif tab == 'table' %}
+
+         <a href=" {% url 'hog_table' hog_id  taxa%}  "> {{taxa|title}} </a> /
+
+
+                     {% elif tab == 'synteny' %}
+         <a href=" {% url 'hog_synteny' hog_id  taxa%}  "> {{taxa|title}} </a> /
+                     {% elif tab == 'similar' %}
+
+                        {% if subtab == 'domain' %}
+
+        <a href=" {% url 'hog_similar_domain' hog_id  taxa%}  "> {{taxa|title}} </a> /
+        {% elif subtab == 'pairwise' %}
+         <a href=" {% url 'hog_similar_pairwise' hog_id  taxa%}  "> {{taxa|title}} </a> /
+        {% elif subtab == 'profile' %}
+         <a href=" {% url 'hog_similar_profile' hog_id  taxa%}  "> {{taxa|title}} </a> /
+        {% endif %}
+
+
+                    {% else  %}
+         <a href=" {% url 'hog_viewer' hog_id  taxa%}  "> {{taxa|title}} </a> /
+                    {% endif %}
+
+
+
+
 
             {% elif forloop.counter == 3 %}
 
             <div id="lineage" style="display: inline">
 
-                <span id="a">... / </span>  <span id="b"> <a href=" {% url 'hog_viewer' hog_id  taxa%}  ">{{taxa|title}}</a> /
+                <span id="a">... / </span>
+
+                <span id="b">
+
+                    {% if tab == 'iham' %}
+
+        <a href=" {% url 'hog_viewer' hog_id  taxa%}  "> {{taxa|title}} </a> /
+
+
+                     {% elif tab == 'table' %}
+
+         <a href=" {% url 'hog_table' hog_id  taxa%}  "> {{taxa|title}} </a> /
+
+
+                     {% elif tab == 'synteny' %}
+         <a href=" {% url 'hog_synteny' hog_id  taxa%}  "> {{taxa|title}} </a> /
+                     {% elif tab == 'similar' %}
+
+                        {% if subtab == 'domain' %}
+
+        <a href=" {% url 'hog_similar_domain' hog_id  taxa%}  "> {{taxa|title}} </a> /
+        {% elif subtab == 'pairwise' %}
+         <a href=" {% url 'hog_similar_pairwise' hog_id  taxa%}  "> {{taxa|title}} </a> /
+        {% elif subtab == 'profile' %}
+         <a href=" {% url 'hog_similar_profile' hog_id  taxa%}  "> {{taxa|title}} </a> /
+        {% endif %}
+
+
+                    {% else  %}
+         <a href=" {% url 'hog_viewer' hog_id  taxa%}  "> {{taxa|title}} </a> /
+                    {% endif %}
 
 
             {% else  %}
 
-            <a href=" {% url 'hog_viewer' hog_id  taxa%}  ">{{taxa|title}}</a> /
+           {% if tab == 'iham' %}
+
+        <a href=" {% url 'hog_viewer' hog_id  taxa%}  "> {{taxa|title}} </a> /
+
+
+                     {% elif tab == 'table' %}
+
+         <a href=" {% url 'hog_table' hog_id  taxa%}  "> {{taxa|title}} </a> /
+
+
+                     {% elif tab == 'synteny' %}
+         <a href=" {% url 'hog_synteny' hog_id  taxa%}  "> {{taxa|title}} </a> /
+                     {% elif tab == 'similar' %}
+
+                        {% if subtab == 'domain' %}
+
+        <a href=" {% url 'hog_similar_domain' hog_id  taxa%}  "> {{taxa|title}} </a> /
+        {% elif subtab == 'pairwise' %}
+         <a href=" {% url 'hog_similar_pairwise' hog_id  taxa%}  "> {{taxa|title}} </a> /
+        {% elif subtab == 'profile' %}
+         <a href=" {% url 'hog_similar_profile' hog_id  taxa%}  "> {{taxa|title}} </a> /
+        {% endif %}
+
+
+                    {% else  %}
+         <a href=" {% url 'hog_viewer' hog_id  taxa%}  "> {{taxa|title}} </a> /
+                    {% endif %}
 
             {% endif %}
                 {% if forloop.last %}

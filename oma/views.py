@@ -176,6 +176,7 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
 
 
+
         context.update({'entry': entry, 'tab': 'geneinformation', 'nr_homo': nr_homeologs_relations, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
                         'nr_pps':  nr_ortholog_relations['NrHogInducedPWParalogs']  })
         return context
