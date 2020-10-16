@@ -211,7 +211,7 @@ $(document).ready(function() {
 
                     var IDA = document.createElement('a');
                     IDA.innerHTML= d.id +'  '+'<img alt="ext logo" src="/static/image/ext.png" ></a>' ;
-                    IDA.href="/cgi-bin/gateway.pl?f=DisplayOS&p1="+d.id;
+                    IDA.href="/oma/genome/" + d.id +"/info/"
 
                     var TAXID = document.createElement('em');
                     TAXID.innerHTML='Taxon ID : ';
