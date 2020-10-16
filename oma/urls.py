@@ -54,14 +54,14 @@ urlpatterns = [
     url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
     url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
 
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-]+)/fasta$', views.HOGFasta.as_view(), name='hog_fasta'),
+    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/fasta$', views.HOGFasta.as_view(), name='hog_fasta'),
     url(r'^hog/table/(?P<hog_id>[\w.-:]+)/fasta$', views.HOGFasta.as_view(), name='hog_fasta'),
 
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-]+)/$', views.HOGtable.as_view(), name='hog_table'),
+    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGtable.as_view(), name='hog_table'),
     url(r'^hog/table/(?P<hog_id>[\w.-:]+)/$', views.HOGtable.as_view(), name='hog_table'),
 
 
-    url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-]+)/$', views.HOGSynteny.as_view(), name='hog_synteny'),
+    url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSynteny.as_view(), name='hog_synteny'),
     url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/$', views.HOGSynteny.as_view(), name='hog_synteny'),
 
 

@@ -8,6 +8,8 @@
 {% block header_body %}
 
 
+
+
 <div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
 
     <div class="oma-details-title ">
@@ -16,7 +18,6 @@
     <p>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} {{entry.genome.species}}
         {{entry.genome.strain}}
         {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %} is on Chromosome {{entry.chromosome}}.</p>
-
 
     </div>
 
@@ -29,7 +30,7 @@
     <div class="dropdown-menu">
 
 
-        <a class="dropdown-item"   {% if entry.oma_hog %} href="{% url 'hog_viewer' entry.oma_hog_root %}" > HOG {% else %} disabled > No related HOG {% endif %} </a>
+        <a class="dropdown-item"   {% if entry.oma_hog %} href="{% url 'hog_viewer' most_specific_hog most_specific_level %}" > HOG {% else %} disabled > No related HOG {% endif %} </a>
         <a class="dropdown-item"  {% if entry.oma_group %} href="{% url 'omagroup_members' entry.oma_group %}" > OMA Group {% else %} disabled > No related OMA Group {% endif %} </a>
 
 

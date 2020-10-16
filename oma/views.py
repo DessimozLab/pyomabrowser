@@ -176,8 +176,20 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
 
 
+        # get parent genome/hog level
+        taxnode_of_level = utils.db.tax.get_taxnode_from_name_or_taxid(entry.genome.ncbi_taxon_id)
+        parent_level = utils.db.tax.get_parent_taxa(taxnode_of_level[0]["NCBITaxonId"])[0]["Name"]
 
-        context.update({'entry': entry, 'tab': 'geneinformation', 'nr_homo': nr_homeologs_relations, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
+        shs = [x.decode() for x in utils.db.get_subhogids_at_level(entry.hog_family_nr, parent_level).tolist()]
+
+        most_specific_hog = None
+        for sh in shs:
+            m = utils.db.hog_members_from_hog_id(sh, parent_level.decode())
+            if entry.entry_nr in m["EntryNr"]:
+               most_specific_hog = sh
+               break
+
+        context.update({'entry': entry, 'most_specific_hog': most_specific_hog, 'most_specific_level': parent_level.decode(), 'tab': 'geneinformation', 'nr_homo': nr_homeologs_relations, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
                         'nr_pps':  nr_ortholog_relations['NrHogInducedPWParalogs']  })
         return context
 
@@ -383,8 +395,20 @@ def synteny(request, entry_id, mod=4, windows=4, idtype='OMA'):
 
     nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
 
+    # get parent genome/hog level
+    taxnode_of_level = utils.db.tax.get_taxnode_from_name_or_taxid(entry.genome.ncbi_taxon_id)
+    parent_level = utils.db.tax.get_parent_taxa(taxnode_of_level[0]["NCBITaxonId"])[0]["Name"]
 
-    context = {'positions': positions, 'windows': windows,
+    shs = [x.decode() for x in utils.db.get_subhogids_at_level(entry.hog_family_nr, parent_level).tolist()]
+
+    most_specific_hog = None
+    for sh in shs:
+        m = utils.db.hog_members_from_hog_id(sh, parent_level.decode())
+        if entry.entry_nr in m["EntryNr"]:
+            most_specific_hog = sh
+            break
+
+    context={'entry': entry, 'most_specific_hog': most_specific_hog, 'most_specific_level': parent_level.decode(),'positions': positions, 'windows': windows,
                'md': md_geneinfos, 'o_md': o_md_geneinfos, 'colors': colors,
                'stripes': stripes, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
                'nr_homo': nr_homeologs_relations,
@@ -418,8 +442,21 @@ class PairsBase(ContextMixin, EntryCentricMixin):
 
         nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
 
+        # get parent genome/hog level
+        taxnode_of_level = utils.db.tax.get_taxnode_from_name_or_taxid(entry.genome.ncbi_taxon_id)
+        parent_level = utils.db.tax.get_parent_taxa(taxnode_of_level[0]["NCBITaxonId"])[0]["Name"]
+
+        shs = [x.decode() for x in utils.db.get_subhogids_at_level(entry.hog_family_nr, parent_level).tolist()]
+
+        most_specific_hog = None
+        for sh in shs:
+            m = utils.db.hog_members_from_hog_id(sh, parent_level.decode())
+            if entry.entry_nr in m["EntryNr"]:
+                most_specific_hog = sh
+                break
+
         context.update(
-            {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
+            {'entry': entry, 'most_specific_hog': most_specific_hog, 'most_specific_level': parent_level.decode(), 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_homo': nr_homeologs_relations, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'orthologs',
              'table_data_url': url , 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
              })
@@ -652,8 +689,21 @@ class ParalogsBase(ContextMixin, EntryCentricMixin):
 
         nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
 
+        # get parent genome/hog level
+        taxnode_of_level = utils.db.tax.get_taxnode_from_name_or_taxid(entry.genome.ncbi_taxon_id)
+        parent_level = utils.db.tax.get_parent_taxa(taxnode_of_level[0]["NCBITaxonId"])[0]["Name"]
+
+        shs = [x.decode() for x in utils.db.get_subhogids_at_level(entry.hog_family_nr, parent_level).tolist()]
+
+        most_specific_hog = None
+        for sh in shs:
+            m = utils.db.hog_members_from_hog_id(sh, parent_level.decode())
+            if entry.entry_nr in m["EntryNr"]:
+                most_specific_hog = sh
+                break
+
         context.update(
-            {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
+            {'entry': entry, 'most_specific_hog': most_specific_hog, 'most_specific_level': parent_level.decode(), 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'paralogs',
              'nr_homo': nr_homeologs_relations,
              'table_data_url': url, 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
@@ -745,8 +795,21 @@ class HomeologsBase(ContextMixin, EntryCentricMixin):
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
 
+        # get parent genome/hog level
+        taxnode_of_level = utils.db.tax.get_taxnode_from_name_or_taxid(entry.genome.ncbi_taxon_id)
+        parent_level = utils.db.tax.get_parent_taxa(taxnode_of_level[0]["NCBITaxonId"])[0]["Name"]
+
+        shs = [x.decode() for x in utils.db.get_subhogids_at_level(entry.hog_family_nr, parent_level).tolist()]
+
+        most_specific_hog = None
+        for sh in shs:
+            m = utils.db.hog_members_from_hog_id(sh, parent_level.decode())
+            if entry.entry_nr in m["EntryNr"]:
+                most_specific_hog = sh
+                break
+
         context.update(
-            {'entry': entry, 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
+            {'entry': entry, 'most_specific_hog': most_specific_hog, 'most_specific_level': parent_level.decode(), 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_homo': nr_homeologs_relations,
              'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'homeologs',
              'table_data_url': url, 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
