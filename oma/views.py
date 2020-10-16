@@ -1326,7 +1326,7 @@ class HOG_Base(ContextMixin):
             lineage_up = utils.db.get_parent_hogs(hog_id, level=level)
             levels = [h.level for h in lineage_up]
 
-            lineage_down = utils.db.get_subhogs(hog_id)
+            lineage_down = utils.db.get_subhogs(hog_id,level=level)
 
 
             # update context
