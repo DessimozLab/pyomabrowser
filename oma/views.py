@@ -1338,8 +1338,8 @@ class HOG_Base(ContextMixin):
             context['members'] = members_sub
             context['is_subhog'] = is_subhog
             context['api_base'] = 'hog'
-            context['lineage_up'] =  [ [x.hog_id, x.level] for x in lineage_up] #[["A", "2"],["5", "gg"],["4", "r"]]#
-            context['lineage_down'] = [v for v in lineage_down if v.level not in levels  ]
+            context['lineage_up'] =  [ [x.hog_id, x.level] for x in lineage_up] #  [["A", "2"],["5", "gg"],["4", "r"],["A", "2"],["5", "gg"],["4", "r"],["A", "2"],["5", "gg"],["4", "r"],["A", "2"],["5", "gg"],["4", "r"]] #
+            context['lineage_down'] = [v for v in lineage_down if v.level not in levels ] #lineage_down #
 
         except ValueError as e:
             raise Http404(e)
