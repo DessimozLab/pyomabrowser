@@ -21,7 +21,7 @@
 
         {% for taxa in lineage_up %}
 
-            {% if forloop.counter == 1 or forloop.counter == 2 %}
+            {% if forloop.counter < 5 %}
 
                     {% if tab == 'iham' %}
 
@@ -55,7 +55,7 @@
 
 
 
-            {% elif forloop.counter == 3 %}
+            {% elif forloop.counter == 5 %}
 
             <div id="lineage" style="display: inline">
 
@@ -180,39 +180,6 @@ display:inline;
     </style>
 
 
-
-<!--
- {% if is_subhog %}
-
-        <div class="oma-details-title  ">
-
-        <h2 class="group_title"> Sub-HOG {{ hog_id }} with {{ members|length }} members   </h2>
-
-        <p>Level of Emergence:  <a href="{% url 'ancestralgenome_info' level %}">{{level}}</a>   </p>
-
-    </div>
-
-    <div class="ml-auto oma-details-title-buttons">
-        <button class="btn btn-default "><a href="{% url 'hog_viewer' root_id %}">Go to root HOG {{root_id}}</a>
-        </button>
-    </div>
-
-        {% else %}
-
-     <div class="oma-details-title">
-
-        <h2 class="group_title">Root-HOG {{ hog_id }} with {{ members|length }} members   </h2>
-
-        <p>Root level: {{level}} </p>
-
-     </div>
-
-        {% endif %}
-
-    </div>
-
-
--->
 
 </div>
 
