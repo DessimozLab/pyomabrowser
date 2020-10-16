@@ -1323,7 +1323,7 @@ class HOG_Base(ContextMixin):
             # get members:
             members_sub = [x for x in utils.db.member_of_hog_id(hog_id, level=level)]
 
-            lineage_up = utils.db.get_parent_hogs(self, hog_id, level=level)
+            lineage_up = utils.db.get_parent_hogs(hog_id, level=level)
 
 
             # update context
