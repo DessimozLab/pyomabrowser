@@ -132,16 +132,12 @@
 
                 {% endif %}
 
-
                 {% endfor %}
 
-                 </div>
-
-         <b>{{level|title}}</b>
+                <b>{{level|title}}</b>
                  /
 
-
-<div class="btn-group dropright">
+        <div class="btn-group dropright">
   <button type="button" class="btn btn-outline-dark btn-sm dropdown-toggle" style="padding: .20rem .4rem !important; font-size: .800rem!important;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     Lower Level
   </button>
@@ -152,6 +148,10 @@
       {% endfor %}
   </div>
 </div>
+
+                 </div>
+
+
 
 
 
@@ -172,13 +172,13 @@
         div#lineage span#a {
 display:inline;
 }
-div#lineage:hover span#a {
+div#lineage span#a:hover {
 display:none;
 }
 div#lineage span#b {
 display:none;
 }
-div#lineage:hover span#b {
+div#lineage span#b:hover {
 display:inline;
 }
 
