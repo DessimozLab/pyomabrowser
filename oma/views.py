@@ -1324,6 +1324,9 @@ class HOG_Base(ContextMixin):
             members_sub = [x for x in utils.db.member_of_hog_id(hog_id, level=level)]
 
             lineage_up = utils.db.get_parent_hogs(hog_id, level=level)
+            levels = [h.level for h in lineage_up]
+
+            lineage_down = utils.db.get_subhogs(hog_id)
 
 
             # update context
@@ -1335,7 +1338,8 @@ class HOG_Base(ContextMixin):
             context['members'] = members_sub
             context['is_subhog'] = is_subhog
             context['api_base'] = 'hog'
-            context['lineage_up'] =  [ [x.hog_id, x.level] for x in lineage_up]
+            context['lineage_up'] =  [ [x.hog_id, x.level] for x in lineage_up] #[["A", "2"],["5", "gg"],["4", "r"]]#
+            context['lineage_down'] = [v for v in lineage_down if v.level not in levels  ]
 
         except ValueError as e:
             raise Http404(e)
