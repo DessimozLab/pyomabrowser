@@ -1328,13 +1328,15 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
 
+
         fam = utils.db.parse_hog_id(hog_id)
         results = utils.db.get_families_with_similar_hog_profile(fam)
 
-        if len(results.similar.keys()):
+        if len(results.similar.keys())> 1:
             run_prof = True
         else:
             run_prof = False
+
 
         context.update({ 'tab': 'similar', 'subtab': 'profile','run_prof':run_prof, 'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,))})
 
