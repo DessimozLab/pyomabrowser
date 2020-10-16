@@ -54,7 +54,9 @@
             });
             // remove duplicated xref values of less important sources
             var clean_data = data.filter(function(obj, pos, arr){
-                return arr.map(function(obj){return obj.xref;}).indexOf(obj.xref) === pos});
+                return arr.map(function(obj){return obj.xref;}).indexOf(obj.xref) === pos
+                    || (obj.source !== "SourceID" && obj.source !== "SourceAC")
+            });
             _.forEach(_.groupBy(clean_data, "source"), function(xrefs, source){
                 var list_item = ["<tr><td>" + source + "</td>"];
                 _.forEach(xrefs, function(ref){

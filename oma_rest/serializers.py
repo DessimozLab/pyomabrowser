@@ -198,6 +198,7 @@ class OmaGroupSerializer(ReadOnlySerializer):
 class XRefSerializer(ReadOnlySerializer):
     xref = serializers.CharField()
     source = serializers.CharField()
+    seq_match = serializers.CharField()
     entry_nr = serializers.IntegerField()
     omaid = serializers.CharField()
     genome = GenomeInfoSerializer(required=False)
