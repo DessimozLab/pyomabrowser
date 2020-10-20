@@ -15,11 +15,11 @@
 
     <div class="oma-details-title">
 
-        <h2 class="group_title"> {{ hog_id }} with {{ members|length }} members {% if description  %}<small>({{description}})</small> {% endif %}  </h2>
+        <h2 class="group_title"> {{ hog_id }} with {{ hog.nr_member_genes }} members {% if description  %}<small>({{description}})</small> {% endif %}  </h2>
 
 
 
-        {% for e in lineage_up|slice:":-1" %}
+        {% for parent_hog in lineage_up|slice:":-1" %}
 
             {% if forloop.counter < 8 %}
 
@@ -27,30 +27,30 @@
 
                     {% if tab == 'iham' %}
 
-        <a href=" {% url 'hog_viewer' e.0  e.1%}  "> {{e.1}} </a> /
+        <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
 
 
                      {% elif tab == 'table' %}
 
-         <a href=" {% url 'hog_table' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_table' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
 
 
                      {% elif tab == 'synteny' %}
-         <a href=" {% url 'hog_synteny' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_synteny' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
                      {% elif tab == 'similar' %}
 
                         {% if subtab == 'domain' %}
 
-        <a href=" {% url 'hog_similar_domain' e.0  e.1%}  "> {{e.1}} </a> /
+        <a href=" {% url 'hog_similar_domain' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
         {% elif subtab == 'pairwise' %}
-         <a href=" {% url 'hog_similar_pairwise' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_similar_pairwise' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
         {% elif subtab == 'profile' %}
-         <a href=" {% url 'hog_similar_profile' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_similar_profile' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
         {% endif %}
 
 
                     {% else  %}
-         <a href=" {% url 'hog_viewer' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
                     {% endif %}
 
 
@@ -67,30 +67,30 @@
 
                     {% if tab == 'iham' %}
 
-        <a href=" {% url 'hog_viewer' e.0  e.1%}  "> {{e.1}} </a> /
+        <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
 
 
                      {% elif tab == 'table' %}
 
-         <a href=" {% url 'hog_table' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_table' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
 
 
                      {% elif tab == 'synteny' %}
-         <a href=" {% url 'hog_synteny' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_synteny' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
                      {% elif tab == 'similar' %}
 
                         {% if subtab == 'domain' %}
 
-        <a href=" {% url 'hog_similar_domain' e.0  e.1%}  "> {{e.1}} </a> /
+        <a href=" {% url 'hog_similar_domain' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
         {% elif subtab == 'pairwise' %}
-         <a href=" {% url 'hog_similar_pairwise' e.0  e.1%}  "> {{e.1}} </a> /
-        {% elif subtab == 'profile' %}
-         <a href=" {% url 'hog_similar_profile' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_similar_pairwise' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
+        {% elif subtab == 'profile' %}7
+         <a href=" {% url 'hog_similar_profile' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
         {% endif %}
 
 
                     {% else  %}
-         <a href=" {% url 'hog_viewer' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
                     {% endif %}
 
 
@@ -98,30 +98,30 @@
 
            {% if tab == 'iham' %}
 
-        <a href=" {% url 'hog_viewer' e.0  e.1%}  "> {{e.1}} </a> /
+        <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
 
 
                      {% elif tab == 'table' %}
 
-         <a href=" {% url 'hog_table' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_table' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
 
 
                      {% elif tab == 'synteny' %}
-         <a href=" {% url 'hog_synteny' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_synteny' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
                      {% elif tab == 'similar' %}
 
                         {% if subtab == 'domain' %}
 
-        <a href=" {% url 'hog_similar_domain' e.0  e.1%}  "> {{e.1}} </a> /
+        <a href=" {% url 'hog_similar_domain' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
         {% elif subtab == 'pairwise' %}
-         <a href=" {% url 'hog_similar_pairwise' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_similar_pairwise' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
         {% elif subtab == 'profile' %}
-         <a href=" {% url 'hog_similar_profile' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_similar_profile' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
         {% endif %}
 
 
                     {% else  %}
-         <a href=" {% url 'hog_viewer' e.0  e.1%}  "> {{e.1}} </a> /
+         <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
                     {% endif %}
 
             {% endif %}
@@ -147,7 +147,7 @@
   <div class="dropdown-menu" style="height:400px;overflow-y:auto;">
       <h6 class="dropdown-header">Select a hog at a lower level</h6>
       {% for hog in lineage_down %}
-      <a class="dropdown-item" href=" {% url 'hog_viewer' hog_id  hog.level%}  " ><b>{{hog.level}} </b> ({{hog.hog_id}} | {{hog.nr_member_genes}} members)   </a>
+      <a class="dropdown-item" href=" {% url 'hog_viewer' hog.hog_id  hog.level%}  " ><b>{{hog.level}} </b> ({{hog.hog_id}} | {{hog.nr_member_genes}} members)   </a>
       {% endfor %}
   </div>
 </div>

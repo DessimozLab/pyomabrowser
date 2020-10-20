@@ -14,6 +14,7 @@ tax = db.tax
 domain_source = pyoma.browser.db.DomainNameIdMapper(db)
 
 ProteinEntry = functools.partial(pyoma.browser.models.ProteinEntry, db)
+HOG = functools.partial(pyoma.browser.models.HOG, db)
 Genome = functools.partial(pyoma.browser.models.Genome, db)
 PairwiseRelation = functools.partial(pyoma.browser.models.PairwiseRelation, db)
 GeneOntologyAnnotation = functools.partial(pyoma.browser.models.GeneOntologyAnnotation, db)

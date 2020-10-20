@@ -990,9 +990,6 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
             context, genes_to_use, hog_id = self.get_context_data(entry_id=entry_id, start=offset, stop=limit, **kwargs)
             data = [x for x in self.to_json_dict(context['fam_members'])]
 
-
-
-
         if not response_ready:
             if not go_sim_computed and len(genes_to_use) < 200:
                 go_annots_not_fetched, gene_similarity_vals = utils.db.get_gene_similarities_hog(hog_id)
@@ -1001,12 +998,9 @@ class FamGeneDataJson(FamBase, JsonModelMixin, View):
                         data[g].update({'similarity': None})
                     else:
                         data[g].update({'similarity': gene_similarity_vals[gene[0]]})
-
-
             response = JsonResponse(data, safe=False)
         response['Access-Control-Allow-Origin'] = '*'
         return response
-
 
 
 class InfoView(InfoBase, TemplateView):
@@ -1016,8 +1010,8 @@ class InfoView(InfoBase, TemplateView):
         context = super(InfoView, self).get_context_data(entry_id, **kwargs)
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(context['entry'].entry_nr)
-        context['nr_pps']= nr_ortholog_relations['NrHogInducedPWParalogs']
-        context['nr_vps']= nr_ortholog_relations['NrAnyOrthologs']
+        context['nr_pps'] = nr_ortholog_relations['NrHogInducedPWParalogs']
+        context['nr_vps'] = nr_ortholog_relations['NrAnyOrthologs']
         context['tab'] = 'geneinformation'
         if context['entry'].genome.is_polyploid:
             context['nr_hps'] = utils.db.count_homoeologs(context['entry'].entry_nr)
@@ -1057,7 +1051,7 @@ class HomoeologBase(ContextMixin, EntryCentricMixin):
         nr_ortholog_relations = utils.db.nr_ortholog_relations(context['entry'].entry_nr)
 
         context.update(
-            {'entry': entry, 'nr_vps':nr_ortholog_relations['NrAnyOrthologs'],
+            {'entry': entry, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
              'hps': hps, 'nr_hps': len(hps), 'tab': 'homoeologs',
              'longest_seq': longest_seq})
         return context
@@ -1289,27 +1283,9 @@ def resolve_hog_id(request, hog_id):
 class HOG_Base(ContextMixin):
     def get_context_data(self, hog_id, level=None, **kwargs):
         context = super(HOG_Base, self).get_context_data(**kwargs)
-
         try:
-
-            # "dirty" check to verify hog id is correct
-            members = [x for x in utils.db.member_of_hog_id(hog_id)]
-            if not members:
-                raise ValueError('requested hog id is unknown')
-
-            subhogs_list = utils.db.get_subhogs(hog_id)
-            fam = utils.db.parse_hog_id(hog_id)
-
-
-            # Check if level is valid
-            if level is None:
-                hog = next((x for x in subhogs_list if x.is_root == True), None)
-            else:
-                hog = next((x for x in subhogs_list if x.level == level), None)
-
-            if hog is None:
-                raise ValueError('requested hog cannot be found at level {}'.format(level))
-
+            # check to verify hog id is correct, raises ValueError if unknown
+            hog = utils.HOG(utils.db.get_hog(hog_id, level=level))
 
             # check if sub hog or not
             if len(hog_id.split('.')) > 1:
@@ -1323,24 +1299,21 @@ class HOG_Base(ContextMixin):
             # get members:
             members_sub = [x for x in utils.db.member_of_hog_id(hog_id, level=level)]
 
-            lineage_up = utils.db.get_parent_hogs(hog_id, level=level)
-            levels = [h.level for h in lineage_up]
-
-            lineage_down = utils.db.get_subhogs(hog_id,level=level)
-
+            lineage_up = utils.db.get_parent_hogs(hog.hog_id, level=hog.level)
+            subhogs_down = utils.db.get_subhogs(hog_id, level=level, include_subids=True)
 
             # update context
+            context['hog'] = hog
             context['hog_id'] = hog_id
             context['root_id'] = hog_id.split('.')[0]
-            context['hog_fam'] = fam
+            context['hog_fam'] = hog.fam
             context['level'] = hog.level
             context['description'] = hog.keyword
             context['members'] = members_sub
             context['is_subhog'] = is_subhog
             context['api_base'] = 'hog'
-            context['lineage_up'] =  [ [x.hog_id, x.level] for x in lineage_up] #  [["A", "2"],["5", "gg"],["4", "r"],["A", "2"],["5", "gg"],["4", "r"],["A", "2"],["5", "gg"],["4", "r"],["A", "2"],["5", "gg"],["4", "r"]] #
-            context['lineage_down'] = [v for v in lineage_down if v.level not in levels ] #lineage_down #
-
+            context['lineage_down'] = subhogs_down
+            context['lineage_up'] = lineage_up
         except ValueError as e:
             raise Http404(e)
         return context
@@ -1365,26 +1338,27 @@ class HOGInfo(HOG_Base, TemplateView):
             for i in ids:
                 sh.append([i, l])
 
-        context.update({'tab': 'info', 'sub-hog':sh})
+        context.update({'tab': 'info', 'sub-hog': sh, 'lineage_link_name': 'hog_viewer',})
         return context
+
 
 class HOGSimilarProfile(HOG_Base, TemplateView):
     template_name = "hog_similar_profile.html"
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
-
-
-        fam = utils.db.parse_hog_id(hog_id)
-        results = utils.db.get_families_with_similar_hog_profile(fam)
-
-        if len(results.similar.keys())> 1:
+        results = utils.db.get_families_with_similar_hog_profile(context['hog'].fam)
+        if len(results.similar.keys()) > 1:
             run_prof = True
         else:
             run_prof = False
 
-
-        context.update({ 'tab': 'similar', 'subtab': 'profile','run_prof':run_prof, 'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,))})
+        context.update({'tab': 'similar',
+                        'subtab': 'profile',
+                        'run_prof': run_prof,
+                        'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,)),
+                        'lineage_link_name': 'hog_similar_profile',
+                        })
 
 
         return context
@@ -1453,13 +1427,12 @@ class HOGSimilarDomain(HOG_Base, TemplateView):
             sim_fams['ReprEntryNr'] = sim_fams['ReprEntryNr'].apply(
                 utils.db.id_mapper['Oma'].map_entry_nr)
 
-        context.update({#'hog': 'HOG:{:07d}'.format(fam),
-                        #'fam_nr': fam,
-                        'hog_row': fam_row,
+        context.update({'hog_row': fam_row,
                         'sim_hogs': sim_fams,
                         'longest_seq': longest_seq,
-            'tab': 'similar',
-            'subtab': 'domain'})
+                        'tab': 'similar',
+                        'subtab': 'domain',
+                        'lineage_link_name': 'hog_similar_domain',})
         return context
 
 
@@ -1481,22 +1454,19 @@ class HOGSimilarPairwise(HOG_Base, TemplateView):
             gene_outside += [models.ProteinEntry.from_entry_nr(utils.db, rel[1]) for rel in vps_raw if
                              rel[1] not in gene_ids]
 
-
         # count for each HOG orthologs the numbers of relations
         count_HOGs = defaultdict(int)
-
         for gene in gene_outside:
             if gene.oma_hog != "":
                 count_HOGs[gene.oma_hog] += 1
 
         # sorted the groups by number of orthologous relations
         sorted_HOGs = sorted([(value, key) for (key, value) in count_HOGs.items()], reverse=True)
-
-
-
         context.update({
             'tab': 'similar',
-            'subtab': 'pairwise', 'similar_hogs': sorted_HOGs})
+            'subtab': 'pairwise',
+            'lineage_link_name': 'hog_similar_pairwise',
+            'similar_hogs': sorted_HOGs})
         return context
 
 
@@ -1525,12 +1495,13 @@ class HOGviewer(HOG_Base, TemplateView):
     show_internal_labels = True
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
-        context = super(HOGviewer, self).get_context_data(hog_id,**kwargs)
+        context = super(HOGviewer, self).get_context_data(hog_id, **kwargs)
 
         entry = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(context['members'][0][0]))
 
         context.update({'tab': 'iham',
                         'entry': entry,
+                        'lineage_link_name': 'hog_viewer',
                         })
         try:
             fam_nr = entry.hog_family_nr
@@ -1549,8 +1520,10 @@ class HOGtable(HOG_Base, TemplateView):
 
     def get_context_data(self, hog_id , **kwargs):
         context = super(HOGtable, self).get_context_data(hog_id, **kwargs)
-
-        context.update({'tab': 'table', 'api_base': 'hog', 'api_url': '/api/hog/{}/members/?level={}'.format(hog_id, context['level'])})
+        hog = context['hog']
+        context.update({'tab': 'table', 'api_base': 'hog', 'api_url':
+                        '/api/hog/{}/members/?level={}'.format(hog.hog_id, hog.level),
+                        'lineage_link_name': 'hog_table',})
         return context
 
 
@@ -1558,7 +1531,6 @@ class HOGFasta(FastaView, HOG_Base):
     def get_fastaheader(self, memb):
         return ' | '.join([memb.omaid, memb.canonicalid, "HOG:{:07d}".format(memb.oma_hog),
                            '[{}]'.format(memb.genome.sciname)])
-
     def render_to_response(self, context):
 
         return self.render_to_fasta_response(context['members'])
@@ -1576,25 +1548,23 @@ class HOGSynteny(HOG_Base, TemplateView):
         neigh = []
 
         for n in graph.nodes.data('weight'):
-
-            ancestral_synteny["nodes"].append({"id": n[0],"name": n[0]})
+            ancestral_synteny["nodes"].append({"id": n[0], "name": n[0]})
 
         for e in graph.edges.data('weight'):
             ancestral_synteny["links"].append({"source_id": e[0], "target_id": e[1], "weight": str(e[2])})
 
             if e[0] == hog_id:
                 h = models.HOG(utils.db, e[1])
-
                 neigh.append({'hog':e[1], 'weight': str(e[2]), 'description': h.keyword})
 
             if e[1] == hog_id:
                 h = models.HOG(utils.db, e[0])
-
                 neigh.append({'hog':e[0], 'weight': str(e[2]), 'description': h.keyword})
 
-
-
-        context.update({'tab': 'synteny', 'synteny':ancestral_synteny, 'neighbor' : neigh })
+        context.update({'tab': 'synteny',
+                        'lineage_link_name': 'hog_synteny',
+                        'synteny': ancestral_synteny,
+                        'neighbor': neigh})
         return context
 
 
@@ -2924,8 +2894,7 @@ class Searcher(View):
         context['meta_hog'] = search_hog_meta
         context['meta_term_group'] = search_term_meta
 
-    def logic_genomes(self,request, context, terms):
-
+    def logic_genomes(self, request, context, terms):
 
         def _add_genomes(genomes,search_data ,total_search, search_meta ):
 
@@ -3185,8 +3154,7 @@ class Searcher(View):
         start = time.time()
         if "groupid" in selector:
             nbr = _check_group_number(query)
-
-            if nbr != None and redirect_valid:
+            if nbr is not None and redirect_valid:
                 return redirect('omagroup_members', nbr)
 
             potential_group_nbr.append(nbr)
