@@ -13,6 +13,7 @@ DARWIN_BROWSERMEDIA_PATH=/data/media
 # directory containing data/, downloads/, etc.
 # This is only used if a bind mount of the data is used.
 RELEASE_PATH_HOST=/Volumes/TOSHIBA EXT/browser/Test.Jul2014
+#RELEASE_PATH_HOST=/Volumes/browser/All.Aug2020
 
 # intstance identifier. should be one of "full", "basf" or "corona". Available
 # functionality and templates will be selected based on this value

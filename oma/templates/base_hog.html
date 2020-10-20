@@ -17,155 +17,40 @@
 
         <h2 class="group_title"> {{ hog_id }} with {{ hog.nr_member_genes }} members {% if description  %}<small>({{description}})</small> {% endif %}  </h2>
 
-
-
         {% for parent_hog in lineage_up|slice:":-1" %}
-
             {% if forloop.counter < 8 %}
+                <a href=" {% url lineage_link_name parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
 
-
-
-                    {% if tab == 'iham' %}
-
-        <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-
-
-                     {% elif tab == 'table' %}
-
-         <a href=" {% url 'hog_table' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-
-
-                     {% elif tab == 'synteny' %}
-         <a href=" {% url 'hog_synteny' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-                     {% elif tab == 'similar' %}
-
-                        {% if subtab == 'domain' %}
-
-        <a href=" {% url 'hog_similar_domain' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-        {% elif subtab == 'pairwise' %}
-         <a href=" {% url 'hog_similar_pairwise' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-        {% elif subtab == 'profile' %}
-         <a href=" {% url 'hog_similar_profile' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-        {% endif %}
-
-
-                    {% else  %}
-         <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-                    {% endif %}
-
-
-
-
-
-            {% elif forloop.counter == 8 %}
-
-            <div id="lineage" style="display: inline">
-
-                <span id="a">... / </span>
-
-                <span id="b">
-
-                    {% if tab == 'iham' %}
-
-        <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-
-
-                     {% elif tab == 'table' %}
-
-         <a href=" {% url 'hog_table' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-
-
-                     {% elif tab == 'synteny' %}
-         <a href=" {% url 'hog_synteny' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-                     {% elif tab == 'similar' %}
-
-                        {% if subtab == 'domain' %}
-
-        <a href=" {% url 'hog_similar_domain' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-        {% elif subtab == 'pairwise' %}
-         <a href=" {% url 'hog_similar_pairwise' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-        {% elif subtab == 'profile' %}7
-         <a href=" {% url 'hog_similar_profile' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-        {% endif %}
-
-
-                    {% else  %}
-         <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-                    {% endif %}
-
-
-            {% else  %}
-
-           {% if tab == 'iham' %}
-
-        <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-
-
-                     {% elif tab == 'table' %}
-
-         <a href=" {% url 'hog_table' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-
-
-                     {% elif tab == 'synteny' %}
-         <a href=" {% url 'hog_synteny' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-                     {% elif tab == 'similar' %}
-
-                        {% if subtab == 'domain' %}
-
-        <a href=" {% url 'hog_similar_domain' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-        {% elif subtab == 'pairwise' %}
-         <a href=" {% url 'hog_similar_pairwise' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-        {% elif subtab == 'profile' %}
-         <a href=" {% url 'hog_similar_profile' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-        {% endif %}
-
-
-                    {% else  %}
-         <a href=" {% url 'hog_viewer' parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
-                    {% endif %}
-
-            {% endif %}
-
+            {% elif forloop.counter == 8 and not forloop.last %}
+                <div id="lineage" style="display: inline">
+                    <span id="a">... / </span>
+                    <span id="b">
+                        <a href=" {% url lineage_link_name parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
+            {% elif forloop.counter > 8  %}
+                        <a href=" {% url lineage_link_name parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
                     {% if forloop.last %}
+                        </span>
+                        </div>
+                    {% endif %}
+            {% endif %}
+        {% endfor %}
 
-            </span>
+        <b>{{ level }}</b>
 
-                {% endif %}
-
-
-
-                {% endfor %}
-
+        {% if lineage_down %}
+            /
+            <div class="btn-group dropright">
+                <button type="button" class="btn btn-outline-dark btn-sm dropdown-toggle" style="padding: .20rem .4rem !important; font-size: .800rem!important;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Lower Level
+                </button>
+                <div class="dropdown-menu" style="height:400px;overflow-y:auto;">
+                    <h6 class="dropdown-header">Select a hog at a lower level</h6>
+                    {% for hog in lineage_down %}
+                        <a class="dropdown-item" href="{% url lineage_link_name hog.hog_id hog.level%}"><b>{{hog.level}} </b> ({{hog.hog_id}} | {{hog.nr_member_genes}} members)   </a>
+                    {% endfor %}
                 </div>
-
-                <b>{{level|title}}</b>
-                 /
-        <div class="btn-group dropright">
-  <button type="button" class="btn btn-outline-dark btn-sm dropdown-toggle" style="padding: .20rem .4rem !important; font-size: .800rem!important;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Lower Level
-  </button>
-  <div class="dropdown-menu" style="height:400px;overflow-y:auto;">
-      <h6 class="dropdown-header">Select a hog at a lower level</h6>
-      {% for hog in lineage_down %}
-      <a class="dropdown-item" href=" {% url 'hog_viewer' hog.hog_id  hog.level%}  " ><b>{{hog.level}} </b> ({{hog.hog_id}} | {{hog.nr_member_genes}} members)   </a>
-      {% endfor %}
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            </div>
+        {% endif %}
 
     </div>
 
