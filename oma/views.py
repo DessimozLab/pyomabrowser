@@ -1300,7 +1300,10 @@ class HOG_Base(ContextMixin):
             members_sub = [x for x in utils.db.member_of_hog_id(hog_id, level=level)]
 
             lineage_up = utils.db.get_parent_hogs(hog.hog_id, level=hog.level)
-            subhogs_down = utils.db.get_subhogs(hog_id, level=level, include_subids=True)
+            # load only up to 100 subhogs for performance reasons
+            subhogs_down = list(itertools.islice(
+                utils.db.get_subhogs(hog_id, level=level, include_subids=True),
+                100))
 
             # update context
             context['hog'] = hog
