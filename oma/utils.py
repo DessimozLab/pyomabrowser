@@ -19,11 +19,10 @@ Genome = functools.partial(pyoma.browser.models.Genome, db)
 PairwiseRelation = functools.partial(pyoma.browser.models.PairwiseRelation, db)
 GeneOntologyAnnotation = functools.partial(pyoma.browser.models.GeneOntologyAnnotation, db)
 
-#mds = manifold.MDS(n_components=1, max_iter=500, dissimilarity="precomputed", n_jobs=1)
+mds = manifold.MDS(n_components=1, max_iter=500, dissimilarity="precomputed", n_jobs=1)
 
 # approximate taxon search
-with open('genomes.json') as fh:
-    taxon_json_list = json.load(fh)
+taxon_json_list = json.load(open(os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json'), 'r'))
 values = []
 maps_to = []
 
@@ -47,6 +46,6 @@ def browse_json(d, values, maps_to, cpt):
 values, maps_to, cpt = browse_json(taxon_json_list, values, maps_to, 1)
 
 taxon_approx_search = pyoma.browser.db.FuzzyMatcher(values, maps_to, rel_sim_cutoff=0.6)
-#
-#def gen_numpy_matrix(r,c):
-#    return np.zeros((r,c))
+
+def gen_numpy_matrix(r,c):
+    return np.zeros((r,c))
