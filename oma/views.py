@@ -3313,18 +3313,19 @@ class Searcher(View):
             if 'name' in selector:
                 amb_taxon = utils.tax.approx_search(query)
                 for amb_taxa in amb_taxon:
-                    query = amb_taxa
+                    query = str(amb_taxa[1]).lower()
                     search_result, found_by = search_in_nested_dict(genomes_json, str(query).lower())
-                    search_result["kingdom"] = ""
-                    search_result["uniprot_species_code"] = ""
-                    search_result["ncbi"] = search_result["taxid"]
-                    search_result["sciname"] = search_result["name"]
-                    search_result["common_name"] = ""
-                    search_result["last_modified"] = ""
-                    search_result["prots"] = search_result["nr_hogs"]
-                    search_result["type"] = "Ancestral"
-                    search_result["found_by"] = found_by
-                    data.append(search_result)
+                    if search_result:
+                        search_result["kingdom"] = ""
+                        search_result["uniprot_species_code"] = ""
+                        search_result["ncbi"] = search_result["taxid"]
+                        search_result["sciname"] = search_result["name"]
+                        search_result["common_name"] = ""
+                        search_result["last_modified"] = ""
+                        search_result["prots"] = search_result["nr_hogs"]
+                        search_result["type"] = "Ancestral"
+                        search_result["found_by"] = found_by
+                        data.append(search_result)
         return data
 
     def get(self, request):
