@@ -1489,7 +1489,7 @@ class HOGviewer(HOG_Base, TemplateView):
             context.update({'fam': {'id': 'HOG:{:07d}'.format(context['hog'].fam)},
                             'show_internal_labels': self.show_internal_labels,
                             })
-            if context['hog'].fam_nr == 0:
+            if context['hog'].fam == 0:
                 context['isSingleton'] = True
         except db.Singleton:
             context['isSingleton'] = True
