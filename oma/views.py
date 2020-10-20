@@ -3242,7 +3242,6 @@ class Searcher(View):
             end = time.time()
             logger.info("[{}] genome name search {}".format(query, start - end))
 
-
         if "taxid" in selector:
 
             start = time.time()
@@ -3264,79 +3263,68 @@ class Searcher(View):
 
             end = time.time()
             logger.info("[{}] genome taxid search {}".format(query, start - end))
-
-
         return data
 
-    def search_taxon(self, request, query, selector=_genome_selector,redirect_valid=False):
+    def search_taxon(self, request, query, selector=_genome_selector, redirect_valid=False):
 
-        url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
-
-        def iterdict(d, search, query, found_by):
-            for k, v in d.items():
+        def search_in_nested_dict(d, query, result=False, found_by=None):
+            if "children" in d:
                 for key in selector:
-                    if k == key and "children" in d.keys():
-                        if str(v).lower() == str(query).lower():
-                            search = d
-                            if key == 'name':
-                                found_by = 'name'
-
-                            elif key == 'taxid':
-                                found_by = 'taxid'
-
-                if k == 'children':
-                    for c in v:
-                        search, found_by = iterdict(c, search, query, found_by)
-            return search, found_by
-
-        data = []
+                    try:
+                        if str(d[key]).lower() == query:
+                            # create flat copy without children if found
+                            result = {k: v for k, v in d.items() if k != "children"}
+                            found_by = key
+                            break
+                    except KeyError:
+                        pass
+                if not result and found_by is None:
+                    # traverse the children recursively
+                    for child in d['children']:
+                        result, found_by = search_in_nested_dict(child, query)
+                        if result and found_by is not None:
+                            break
+            return result, found_by
 
         start = time.time()
-        search, found_by = iterdict(json.load(open(url, 'r')), False, query, None)
+        query = str(query).lower()
+        url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
+        with open(url) as fh:
+            genomes_json = json.load(fh)
+        search_result, found_by = search_in_nested_dict(genomes_json, query)
         end = time.time()
         logger.info("[{}] taxon search {}".format(query, start - end))
 
-        if search:
-
+        data = []
+        if search_result:
             if redirect_valid:
-                return redirect('ancestralgenome_info', search['taxid'])
-
-            search["kingdom"] =  ""
-            search["uniprot_species_code"] =  ""
-            search["ncbi"] =  search["taxid"]
-            search["sciname"] =  search["name"]
-            search["common_name"] = ""
-            search["last_modified"] =  ""
-            search["prots"] =  search["nr_hogs"]
-            search["type"] =  "Ancestral"
-            search["found_by"] = found_by
-
-            data.append(search)
-
+                return redirect('ancestralgenome_info', search_result['taxid'])
+            search_result["kingdom"] = ""
+            search_result["uniprot_species_code"] = ""
+            search_result["ncbi"] = search_result["taxid"]
+            search_result["sciname"] = search_result["name"]
+            search_result["common_name"] = ""
+            search_result["last_modified"] = ""
+            search_result["prots"] = search_result["nr_hogs"]
+            search_result["type"] = "Ancestral"
+            search_result["found_by"] = found_by
+            data.append(search_result)
         else:
-
             if 'name' in selector:
-
-                amb_taxon = utils.taxon_approx_search.search_approx(query)
-
+                amb_taxon = utils.tax.search_approx(query)
                 for amb_taxa in amb_taxon:
-
-                    query = amb_taxa[1]
-
-                    search, found_by = iterdict(json.load(open(url, 'r')), False, query , None)
-                    search["kingdom"] = ""
-                    search["uniprot_species_code"] = ""
-                    search["ncbi"] = search["taxid"]
-                    search["sciname"] = search["name"]
-                    search["common_name"] = ""
-                    search["last_modified"] = ""
-                    search["prots"] = search["nr_hogs"]
-                    search["type"] = "Ancestral"
-                    search["found_by"] = found_by
-
-                    data.append(search)
-
-
+                    query = amb_taxa
+                    search_result, found_by = search_in_nested_dict(genomes_json, str(query).lower())
+                    search_result["kingdom"] = ""
+                    search_result["uniprot_species_code"] = ""
+                    search_result["ncbi"] = search_result["taxid"]
+                    search_result["sciname"] = search_result["name"]
+                    search_result["common_name"] = ""
+                    search_result["last_modified"] = ""
+                    search_result["prots"] = search_result["nr_hogs"]
+                    search_result["type"] = "Ancestral"
+                    search_result["found_by"] = found_by
+                    data.append(search_result)
         return data
 
     def get(self, request):
