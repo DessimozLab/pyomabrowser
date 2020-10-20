@@ -1427,8 +1427,7 @@ class HOGSimilarPairwise(HOG_Base, TemplateView):
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarPairwise, self).get_context_data(hog_id, **kwargs)
 
-
-        members_models = [models.ProteinEntry.from_entry_nr(utils.db, e[0]) for e in context['members']]
+        members_models = context['hog'].members
         gene_ids = [en.entry_nr for en in members_models]
 
         # get orthologs of the HOGs members
@@ -1513,11 +1512,11 @@ class HOGtable(HOG_Base, TemplateView):
 
 class HOGFasta(FastaView, HOG_Base):
     def get_fastaheader(self, memb):
-        return ' | '.join([memb.omaid, memb.canonicalid, "HOG:{:07d}".format(memb.oma_hog),
+        return ' | '.join([memb.omaid, memb.canonicalid, memb.oma_hog,
                            '[{}]'.format(memb.genome.sciname)])
-    def render_to_response(self, context):
 
-        return self.render_to_fasta_response(context['members'])
+    def render_to_response(self, context):
+        return self.render_to_fasta_response(context['hog'].members)
 
 
 class HOGSynteny(HOG_Base, TemplateView):
