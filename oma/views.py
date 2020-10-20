@@ -3311,7 +3311,7 @@ class Searcher(View):
             data.append(search_result)
         else:
             if 'name' in selector:
-                amb_taxon = utils.tax.search_approx(query)
+                amb_taxon = utils.tax.approx_search(query)
                 for amb_taxa in amb_taxon:
                     query = amb_taxa
                     search_result, found_by = search_in_nested_dict(genomes_json, str(query).lower())
