@@ -1296,9 +1296,6 @@ class HOG_Base(ContextMixin):
                 else:
                     is_subhog = True
 
-            # get members:
-            members_sub = [x for x in utils.db.member_of_hog_id(hog_id, level=level)]
-
             lineage_up = utils.db.get_parent_hogs(hog.hog_id, level=hog.level)
             # load only up to 100 subhogs for performance reasons
             subhogs_down = list(itertools.islice(
@@ -1312,7 +1309,6 @@ class HOG_Base(ContextMixin):
             context['hog_fam'] = hog.fam
             context['level'] = hog.level
             context['description'] = hog.keyword
-            context['members'] = members_sub
             context['is_subhog'] = is_subhog
             context['api_base'] = 'hog'
             context['lineage_down'] = subhogs_down
@@ -1328,20 +1324,9 @@ class HOGInfo(HOG_Base, TemplateView):
     def get_context_data(self, hog_id, **kwargs):
         context = super(HOGInfo, self).get_context_data(hog_id, **kwargs)
 
-
-        sh = []
-
-
-        all_levels = utils.db.hog_levels_of_fam(context['hog_fam'],deduplicate_and_decode=True)
-
-        for l in all_levels:
-
-            ids = utils.db.get_subhogids_at_level(context['hog_fam'],l)
-
-            for i in ids:
-                sh.append([i, l])
-
-        context.update({'tab': 'info', 'sub-hog': sh, 'lineage_link_name': 'hog_viewer',})
+        hog = context['hog']
+        sub_hogs = list(utils.db.get_subhogs(hog.fam, include_subids=True))
+        context.update({'tab': 'info', 'sub_hogs': sub_hogs, 'lineage_link_name': 'hog_viewer',})
         return context
 
 
@@ -1366,21 +1351,18 @@ class HOGSimilarProfile(HOG_Base, TemplateView):
 
         return context
 
+
 class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
 
     def get(self, request, hog_id,  *args, **kwargs):
         context = self.get_context_data(hog_id, **kwargs)
-
-
         class NumpyEncoder(json.JSONEncoder):
             def default(self, obj):
                 if isinstance(obj, numpy.ndarray):
                     return obj.tolist()
                 return json.JSONEncoder.default(self, obj)
 
-        data = {}
-        fam = utils.db.parse_hog_id(hog_id)
-
+        fam = context['hog'].fam
         #Get profile from args and sort hogid  according to jaccard
         results = utils.db.get_families_with_similar_hog_profile(fam)
         sortedhogs = [(k, v) for k, v in results.jaccard_distance.items()]
@@ -1393,20 +1375,21 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
         if str(fam) in sortedhogs:
             sortedhogs.remove(str(fam))
             p = results.similar[int(fam)].tolist()
-            #j = results.jaccard_distance[fam]
             d = models.HOG(utils.db, hog_id).keyword
-            sim_hogs.append({"id" : "Reference", "profile" : p  ,"jaccard" : None  , "description" : d})
-
-
+            sim_hogs.append({"id": "Reference",
+                             "profile": p,
+                             "jaccard": None,
+                             "description": d})
         for sim in sortedhogs[:19]:
             id_hog = utils.db.format_hogid(int(sim))
-            sim_hogs.append({"id" : sim, "profile" : results.similar[int(sim)].tolist() ,"jaccard" : results.jaccard_distance[sim], "description" : models.HOG(utils.db, id_hog).keyword})
-
-        data["profile"] = sim_hogs
-        data["tax"] = results.tax_classes
-        data["species"] = results.species_names
-
-
+            sim_hogs.append({"id": sim, "profile": results.similar[int(sim)].tolist(),
+                             "jaccard": results.jaccard_distance[sim],
+                             "description": models.HOG(utils.db, id_hog).keyword
+                             })
+        data = {"profile": sim_hogs,
+                "tax": results.tax_classes,
+                "species": results.species_names,
+                }
         return JsonResponse(data, safe=False)
 
 
@@ -1415,7 +1398,6 @@ class HOGSimilarDomain(HOG_Base, TemplateView):
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarDomain, self).get_context_data(hog_id, **kwargs)
-
 
         (fam_row, sim_fams) = utils.db.get_prevalent_domains(context["hog_fam"])
 
@@ -1451,7 +1433,6 @@ class HOGSimilarPairwise(HOG_Base, TemplateView):
 
         # get orthologs of the HOGs members
         gene_outside = []
-
         for m in members_models:
             vps_raw = sorted(utils.db.get_vpairs(m.entry_nr), key=lambda x: x['RelType'])
             gene_outside += [models.ProteinEntry.from_entry_nr(utils.db, rel[1]) for rel in vps_raw if
@@ -1499,19 +1480,17 @@ class HOGviewer(HOG_Base, TemplateView):
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGviewer, self).get_context_data(hog_id, **kwargs)
-
-        entry = models.ProteinEntry(utils.db, utils.db.entry_by_entry_nr(context['members'][0][0]))
+        one_entry = next(utils.db.iter_members_of_hog_id(context['hog'].hog_id))
 
         context.update({'tab': 'iham',
-                        'entry': entry,
+                        'entry': one_entry,
                         'lineage_link_name': 'hog_viewer',
                         })
         try:
-            fam_nr = entry.hog_family_nr
-            context.update({'fam': {'id': 'HOG:{:07d}'.format(fam_nr)},
+            context.update({'fam': {'id': 'HOG:{:07d}'.format(context['hog'].fam)},
                             'show_internal_labels': self.show_internal_labels,
                             })
-            if fam_nr == 0:
+            if context['hog'].fam_nr == 0:
                 context['isSingleton'] = True
         except db.Singleton:
             context['isSingleton'] = True
@@ -1521,12 +1500,14 @@ class HOGviewer(HOG_Base, TemplateView):
 class HOGtable(HOG_Base, TemplateView):
     template_name = "hog_table.html"
 
-    def get_context_data(self, hog_id , **kwargs):
+    def get_context_data(self, hog_id, **kwargs):
         context = super(HOGtable, self).get_context_data(hog_id, **kwargs)
         hog = context['hog']
-        context.update({'tab': 'table', 'api_base': 'hog', 'api_url':
-                        '/api/hog/{}/members/?level={}'.format(hog.hog_id, hog.level),
-                        'lineage_link_name': 'hog_table',})
+        context.update({'tab': 'table',
+                        'api_base': 'hog',
+                        'api_url': '/api/hog/{}/members/?level={}'.format(hog.hog_id, hog.level),
+                        'lineage_link_name': 'hog_table',
+                        })
         return context
 
 
