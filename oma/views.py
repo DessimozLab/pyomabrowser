@@ -1299,7 +1299,7 @@ class HOG_Base(ContextMixin):
             lineage_up = utils.db.get_parent_hogs(hog.hog_id, level=hog.level)
             # load only up to 100 subhogs for performance reasons
             subhogs_down = list(itertools.islice(
-                utils.db.get_subhogs(hog_id, level=level, include_subids=True),
+                utils.db.get_subhogs(hog_id, level=level, include_subids=True, include_leaf_levels=False),
                 100))
 
             # update context
