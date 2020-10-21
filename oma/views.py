@@ -1191,12 +1191,9 @@ class GenomeCentricSynteny(GenomeBase, TemplateView):
 
 class AncestralGenomeBase(ContextMixin):
 
-    def get_context_data(self, specie_id, **kwargs):
+    def get_context_data(self, species_id, **kwargs):
         context = super(AncestralGenomeBase, self).get_context_data(**kwargs)
         try:
-
-            url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
-
             def iterdict(d, search, query):
                 for k, v in d.items():
                     if k == 'taxid' or  k == 'name':
@@ -1207,27 +1204,28 @@ class AncestralGenomeBase(ContextMixin):
                             search = iterdict(c, search, query)
                 return search
 
-
-            def count_species(d, cpt):
-                for k, v in d.items():
-                    cpt +=1
-                    if k == 'children':
-                        for c in v:
-                            cpt = count_species(c, cpt)
+            def count_species(d):
+                cpt = 0
+                try:
+                    for child in d['children']:
+                        cpt += count_species(child)
+                except KeyError:
+                    # leaf node
+                    cpt = 1
                 return cpt
 
-            search = iterdict(json.load(open(url, 'r')), False, specie_id)
-
+            url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
+            with open(url, 'r') as fh:
+                genomes_json = json.load(fh)
+            search = iterdict(genomes_json, False, species_id)
 
             if search:
-
                 context['taxid'] = search['taxid']
                 context['genome_name'] = search['name']
                 context['nr_hogs'] = search['nr_hogs']
                 context['nbr_species'] = count_species(search, 0)
-
             else:
-                raise ValueError
+                raise ValueError("Could not find ancestral genome {}".format(species_id))
         except ValueError as e:
             raise Http404(e)
         return context
@@ -1236,8 +1234,8 @@ class AncestralGenomeBase(ContextMixin):
 class AncestralGenomeCentricInfo(AncestralGenomeBase, TemplateView):
     template_name = "ancestralgenome_info.html"
 
-    def get_context_data(self, specie_id, **kwargs):
-        context = super(AncestralGenomeCentricInfo, self).get_context_data(specie_id, **kwargs)
+    def get_context_data(self, species_id, **kwargs):
+        context = super(AncestralGenomeCentricInfo, self).get_context_data(species_id, **kwargs)
 
         context.update({'tab': 'information'})
         return context
@@ -1246,8 +1244,8 @@ class AncestralGenomeCentricInfo(AncestralGenomeBase, TemplateView):
 class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
     template_name = "ancestralgenome_genes.html"
 
-    def get_context_data(self, specie_id, **kwargs):
-        context = super(AncestralGenomeCentricGenes, self).get_context_data(specie_id, **kwargs)
+    def get_context_data(self, species_id, **kwargs):
+        context = super(AncestralGenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
         context.update({'tab': 'genes', 'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name'])})
         return context

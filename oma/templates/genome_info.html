@@ -4,44 +4,23 @@
 
 
 {% block contentTab %}
-
-
-
-
  <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-
-
    {% for o in genome.lineage reversed %}
-
-
       {% if not forloop.last %}
-                    <li class="breadcrumb-item active" aria-current="page"><a href="/oma/ancestralgenome/info/{{o}}/">{{o}}</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><a href="{% url "ancestralgenome_info" o %}">{{ o }}</a></li>
       {% endif %}
-
-{% endfor %}
-
+   {% endfor %}
   </ol>
-</nav>
+ </nav>
 
 
 <table class="table">
-
-
-    {% if genome.common_name %} <tr><td>Common name:</td><td>{{ genome.common_name }}</td></tr> {% endif %}
-
+     {% if genome.common_name %} <tr><td>Common name:</td><td>{{ genome.common_name }}</td></tr> {% endif %}
      {% if genome.uniprot_species_code %} <tr><td>UniProt identifier:</td><td>{{ genome.uniprot_species_code }}</td></tr> {% endif %}
-
      {% if genome.ncbi_taxon_id %}  <tr><td>NCBI Taxonomy ID:</td><td>{{ genome.ncbi_taxon_id }}</td></tr> {% endif %}
-
      {% if genome.release %} <tr><td>DB Release:</td><td>{{ genome.release }}</td></tr> {% endif %}
-
      {% if prot_in_group %}  <tr><td>Proteins in OMA groups:</td><td>{{ prot_in_group}}</td></tr> {% endif %}
-
      {% if prot_in_hogs %}  <tr><td>Proteins in HOGs:</td><td>{{ prot_in_hogs }}</td></tr> {% endif %}
-
-  </table>
-
-
-
+</table>
 {% endblock contentTab %}

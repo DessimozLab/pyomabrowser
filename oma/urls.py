@@ -90,8 +90,8 @@ urlpatterns = [
     url(r'^genome/(?P<specie_id>\w+)/synteny/$', views.GenomeCentricSynteny.as_view(), name='genome_synteny'),
 
     # AncestralGenome
-    url(r'^ancestralgenome/info/(?P<specie_id>[A-Za-z0-9 _.()-/]+)/$', views.AncestralGenomeCentricInfo.as_view(), name='ancestralgenome_info'),
-    url(r'^ancestralgenome/genes/(?P<specie_id>[A-Za-z0-9 _.()-/]+)/$', views.AncestralGenomeCentricGenes.as_view(), name='ancestralgenome_genes'),
+    url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/info/$', views.AncestralGenomeCentricInfo.as_view(), name='ancestralgenome_info'),
+    url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/genes/$', views.AncestralGenomeCentricGenes.as_view(), name='ancestralgenome_genes'),
 
     # HOG via Entry
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGsView.as_view(), name='hogs'),

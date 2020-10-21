@@ -28,7 +28,7 @@
     exports.format_sciname_genomes = function(value, row) {
 
         if (row.type === "Ancestral") {
-            return '<a href="/oma/ancestralgenome/info/'+value+'/">' + value + '</a>';
+            return '<a href="/oma/ancestralgenome/'+value+'/info/">' + value + '</a>';
         }
 
         return "<b>" + value.species + "</b> " + value.strain;
@@ -48,7 +48,7 @@
         }
 
         else if (value === "Ancestral") {
-            return '<a href="/oma/ancestralgenome/info/'+row.sciname+'/">' + row.sciname + '</a>';
+            return '<a href="/oma/ancestralgenome/'+row.sciname+'/info/">' + row.sciname + '</a>';
         }
     };
 
