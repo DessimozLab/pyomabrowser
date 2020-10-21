@@ -1223,7 +1223,7 @@ class AncestralGenomeBase(ContextMixin):
                 context['taxid'] = search['taxid']
                 context['genome_name'] = search['name']
                 context['nr_hogs'] = search['nr_hogs']
-                context['nbr_species'] = count_species(search, 0)
+                context['nbr_species'] = count_species(search)
             else:
                 raise ValueError("Could not find ancestral genome {}".format(species_id))
         except ValueError as e:
