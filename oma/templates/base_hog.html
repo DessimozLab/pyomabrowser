@@ -18,7 +18,7 @@
         <h2 class="group_title"> {{ hog_id }} with {{ hog.nr_member_genes }} members {% if description  %}<small>({{description}})</small> {% endif %}  </h2>
 
         {% for parent_hog in lineage_up|slice:":-1" %}
-            {% if forloop.counter < 8 %}
+            {% if forloop.counter < 8 or forloop.counter == 8 and forloop.last %}
                 <a href=" {% url lineage_link_name parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
 
             {% elif forloop.counter == 8 and not forloop.last %}
@@ -53,7 +53,6 @@
         {% endif %}
 
     </div>
-
 
     <style>
 
