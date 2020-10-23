@@ -1563,6 +1563,33 @@ class HOGSynteny(HOGBase, TemplateView):
         return context
 
 
+@method_decorator(never_cache, name='dispatch')
+class HOGsMSA(AsyncMsaMixin, HOGBase, TemplateView):
+    template_name = "hog_msa.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(HOGsMSA, self).get_context_data(**kwargs)
+        hog = context['hog']
+        context.update(self.get_msa_results('hog', hog.hog_id, hog.level))
+        context.update({'lineage_link_name': "hog_msa",
+                        "tab": "msa"})
+        return context
+
+
+class HOGsOrthoXMLView(HOGBase, View):
+    def get(self, request, **kwargs):
+        context = self.get_context_data(only_validate=True, **kwargs)
+        try:
+            fam = context['hog'].fam
+            orthoxml = utils.db.get_orthoxml(fam)
+        except ValueError as e:
+            raise Http404(e.message)
+        response = HttpResponse(content_type='text/plain')  #'application/xml')
+        response.write(orthoxml)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+
 #  OLD STUFF
 
 class HOGsBase(ContextMixin, EntryCentricMixin):
@@ -1629,29 +1656,20 @@ class HOGsFastaView(FastaView, HOGsBase):
         return self.render_to_fasta_response(context['hog_members'])
 
 
-class HOGsOrthoXMLView(HOGsView):
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        try:
-            fam = context['hog']['fam']
-            orthoxml = utils.db.get_orthoxml(fam)
-        except KeyError:
-            raise Http404('requested id is not part of any HOG')
-        except ValueError as e:
-            raise Http404(e.message)
-        response = HttpResponse(content_type='text/plain')
-        response.write(orthoxml)
-        response['Access-Control-Allow-Origin'] = '*'
-        return response
-
-@method_decorator(never_cache, name='dispatch')
-class HOGsMSA(AsyncMsaMixin, HOGsBase, TemplateView):
-    template_name = "hog_msa.html"
-
-    def get_context_data(self, entry_id, level, **kwargs):
-        context = super(HOGsMSA, self).get_context_data(entry_id, level)
-        context.update(self.get_msa_results('hog', context['entry'].entry_nr, level))
-        return context
+# class HOGsOrthoXMLView(HOGsView):
+#     def get(self, request, *args, **kwargs):
+#         context = self.get_context_data(**kwargs)
+#         try:
+#             fam = context['hog']['fam']
+#             orthoxml = utils.db.get_orthoxml(fam)
+#         except KeyError:
+#             raise Http404('requested id is not part of any HOG')
+#         except ValueError as e:
+#             raise Http404(e.message)
+#         response = HttpResponse(content_type='text/plain')
+#         response.write(orthoxml)
+#         response['Access-Control-Allow-Origin'] = '*'
+#         return response
 
 
 class HOGiHam(EntryCentricMixin, TemplateView):

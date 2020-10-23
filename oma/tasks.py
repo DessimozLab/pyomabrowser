@@ -120,7 +120,7 @@ class FastaTarballResultBuilder(object):
 
 
 @shared_task(soft_time_limit=800)
-def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
+def compute_msa(data_id, group_type, hog_id_or_grp_nr, *args):
     t0 = time.time()
     logger.info('starting computing MSA')
     db_entry = FileResult.objects.get(data_hash=data_id)
@@ -129,9 +129,9 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
 
     if group_type == 'hog':
         level = args[0]
-        memb = utils.db.hog_members(entry_nr_or_grp_nr, level)
+        memb = utils.db.member_of_hog_id(hog_id_or_grp_nr, level)
     elif group_type == 'og':
-        memb = utils.db.oma_group_members(entry_nr_or_grp_nr)
+        memb = utils.db.oma_group_members(hog_id_or_grp_nr)
     members = [pyoma.browser.models.ProteinEntry(utils.db, e) for e in memb]
     seqs = []
     for prot in members:
@@ -157,13 +157,13 @@ def compute_msa(data_id, group_type, entry_nr_or_grp_nr, *args):
         tot_time = time.time() - t0
         logger.info('finished compute_msa task. took {:.3f}sec, {:.3%} for mafft'.format(tot_time, mafft.elapsed_time/tot_time))
     except (IOError, WrapperError) as e:
-        arglist = [group_type, str(entry_nr_or_grp_nr)]
+        arglist = [group_type, str(hog_id_or_grp_nr)]
         arglist.extend(args)
         logger.exception('error while computing msa for dataset: {}'.format(
             ', '.join(arglist)))
         db_entry.state = 'error'
     except SoftTimeLimitExceeded as e:
-        arglist = [group_type, str(entry_nr_or_grp_nr)]
+        arglist = [group_type, str(hog_id_or_grp_nr)]
         arglist.extend(args)
         logger.warning('computing msa timed out for dataset: {}'.format(', '.join(arglist)))
         db_entry.state = 'timeout'

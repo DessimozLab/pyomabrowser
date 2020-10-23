@@ -36,6 +36,11 @@
 
         </li>
 
+        <li class="{% if tab == "msa" %} active selected {% endif %}">
+            <a href="{% if level != None %} {% url 'hog_msa' hog.hog_id hog.level %}{% else %}{% url 'hog_msa' hog.hog_id %}{% endif %}">
+            <span>Alignment</span> </a>
+        </li>
+
 
         <li class="{% if tab == 'synteny' %} active selected {%endif%}">
                 <a href="{% if level != None %}  {% url 'hog_synteny' hog_id  level%}  {%else%}  {% url 'hog_synteny' hog_id  %} {%endif%} " >

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls import include, url
+from django.urls import path
 from django.views.generic.base import TemplateView
 from . import views
 
@@ -54,8 +55,10 @@ urlpatterns = [
     url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
     url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
 
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/fasta$', views.HOGFasta.as_view(), name='hog_fasta'),
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/fasta$', views.HOGFasta.as_view(), name='hog_fasta'),
+    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
+    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
+    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/msa/$', views.HOGsMSA.as_view(), name='hog_msa'),
+    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/msa/$', views.HOGsMSA.as_view(), name='hog_msa'),
 
     url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGtable.as_view(), name='hog_table'),
     url(r'^hog/table/(?P<hog_id>[\w.-:]+)/$', views.HOGtable.as_view(), name='hog_table'),
@@ -64,9 +67,9 @@ urlpatterns = [
     url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSynteny.as_view(), name='hog_synteny'),
     url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/$', views.HOGSynteny.as_view(), name='hog_synteny'),
 
-
-
-
+    #roothog
+    url(r'^hogdata/(?P<entry_id>\w+)/json', views.FamGeneDataJsonFromEntry.as_view(), name="fam_genedata"),
+    url(r'^hog/(?P<hog_id>[\w:.]+)/orthoxml/', views.HOGsOrthoXMLView.as_view(), name="hogs_orthoxml"),
 
     url(r'^hog/(?P<group_id>[A-Z0-9]+)/iham/$', views.HOGiHam.as_view(), name='hog_iham'),
 
@@ -95,8 +98,6 @@ urlpatterns = [
 
     # HOG via Entry
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGsView.as_view(), name='hogs'),
-    url(r'^hogs/(?P<entry_id>\w+)/orthoxml/$', views.HOGsOrthoXMLView.as_view(),
-        name='hogs_orthoxml'),
     url(r'^hogs/(?P<entry_id>\w+)/vis/$', views.HOGiHam.as_view(), name='hog_vis'),
     url(r'^hogs/(?P<entry_id>\w+)/vis0/$', views.HogVisWithoutInternalLabels.as_view(),
         name='hog_vis_no_internal_labels'),
@@ -112,7 +113,6 @@ urlpatterns = [
         views.HOGsJson.as_view(), name='hog_json'),
     url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/msa/$',
         views.HOGsMSA.as_view(), name='hogs_msa'),
-    url(r'^hogdata/(?P<entry_id>\w+)/json', views.FamGeneDataJson.as_view(), name="fam_genedata"),
 
     # Gene Similarity
     # url(r'^genesimilarity/(?P<entry_id>\w+)/json', views.GeneSimilarityDataJson.as_view(), name="gene_similarity"),

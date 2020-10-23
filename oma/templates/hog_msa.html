@@ -1,8 +1,8 @@
-{% extends "base_entry.html" %}
-{% load staticfiles %}
+{% extends  "base_hog.html" %}
+{% load static %}
 
-{% block title %}OMA: MSA of Hierarchical Orthologous Groups for {{ entry.omaid }}{% endblock %}
-{% block meta_description %}Multiple sequence alignment of the member proteins of the hierarchical orthologous group (HOG) for {{ entry.omaid }}{% if level %} at {{ level }}{% endif %}.{% endblock %}
+{% block title %}OMA: MSA of {{ hog.hog_id }} at {{ hog.level }}{% endblock %}
+{% block meta_description %}Multiple sequence alignment of the member proteins of the hierarchical orthologous group (HOG) for {{ hog.hog_id }} at {{ hog.level }}.{% endblock %}
 
 {% block meta_hook %}
 {% if msa_file_obj.state == "pending" or msa_file_obj.state == "running" %}
@@ -15,53 +15,11 @@
 {% endblock %}
 
 {% block contentTab %}
-<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-lg">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-				<h3 id="myModalLabel">The OMA Browser reports for every entry different types of orthology</h3>
-			</div>
-			<div class="modal-body">
-				{% include "includes/otypes.html" %}
-			</div>
-		</div>
-	</div>
-</div>
-
-
-{% if levels %}
-<ol class="breadcrumb">
-{% for lev in levels %}
-<li {% ifequal lev level %}class="active" {%endifequal%}><a href="{%url 'hogs' entry.omaid lev %}">{{lev}}</a></li>
-{% endfor %}
-</ol>
+{% if isSingleton %}
+    This entry is not part of any hierarchical orthologous group.
 {% else %}
-This entry is not part of any hierarchical orthologous group.
-{% endif %}
 
-
-
-{% if hog_members %}
-<h3>Hierarchical group {{ hog.id }} at {{ level }}</h3>
-<h4>This group contains {{ hog_members|length }} members:
-    {%for kingdom, cnt in cnt_per_kingdom.items %}
-        {{cnt}} {% include "includes/kingdom.html" %}
-    {%endfor %}
-</h4>
-
-<div class="panel panel-default">
-    <div class="panel-heading clearfix">
-        <a href="http://mbe.oxfordjournals.org/content/30/4/772">Mafft</a> Multiple Sequence Alignment
-        <div class="pull-right">
-            Download:
-            <a href="{% url 'hogs_orthoxml' entry.omaid %}"><span class="glyphicon glyphicon-download"></span> OrthoXML</a> /
-            <a href="{% url 'hogs_fasta' entry.omaid level %}"><span class="glyphicon glyphicon-download"></span> Sequences (fasta)</a> /
-            <a href="{% url 'hogs_msa' entry.omaid level %}"><span class="glyphicon glyphicon-download"></span> MSA (fasta)</a>
-        </div>
-    </div>
-    {% include "includes/msa.html" %}
-</div>
+        {% include "includes/msa.html" %}
 
 {% endif %}
 {% endblock contentTab %}
