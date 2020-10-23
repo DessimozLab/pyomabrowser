@@ -23,7 +23,8 @@ OMA_INSTANCE=full
 # Development will produce more meaningful error messages, but this is discouraged
 # in production by django developers.
 # value should be either production or development
-DEPLOYMENT_TYPE=production
+#DEPLOYMENT_TYPE=production
+DEPLOYMENT_TYPE=DEV
 
 # source of code base:
 #   'from_local'   : local checkout of Git repo

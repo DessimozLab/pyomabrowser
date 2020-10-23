@@ -948,10 +948,21 @@ class Entry_sequences(TemplateView, InfoBase):
         return context
 
 
-class FamBase(ContextMixin, EntryCentricMixin):
+class FamBase(ContextMixin):
+    def get_context_data(self, fam, **kwargs):
+        context = super(FamBase, self).get_context_data(**kwargs)
+        context['fam'] = fam
+        return context
+
+    def iter_members(self, fam, start=0, stop=None):
+        famhog_id = utils.db.format_hogid(fam)
+        return utils.db.iter_members_of_hog_id(famhog_id, start, stop)
+
+
+class FamBaseFromEntry(ContextMixin, EntryCentricMixin):
 
     def get_context_data(self, entry_id, start=0, stop=None, **kwargs):
-        context = super(FamBase, self).get_context_data(**kwargs)
+        context = super(FamBaseFromEntry, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
         famhog_id = utils.db.format_hogid(utils.db.hog_family(entry.entry_nr))
         fam_members = list(utils.db.iter_members_of_hog_id(famhog_id, start, stop))
@@ -962,7 +973,7 @@ class FamBase(ContextMixin, EntryCentricMixin):
         return context, genes_to_use, famhog_id
 
 
-class FamGeneDataJson(FamBase, JsonModelMixin, View):
+class FamGeneDataJsonFromEntry(FamBaseFromEntry, JsonModelMixin, View):
     json_fields = {'entry_nr': 'id', 'omaid': 'protid', 'sequence_length': None,
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'gc_content': None, 'nr_exons': None}
@@ -1278,9 +1289,9 @@ def resolve_hog_id(request, hog_id):
     return HttpResponseRedirect(reverse('hog_table', args=args))
 
 
-class HOG_Base(ContextMixin):
-    def get_context_data(self, hog_id, level=None, **kwargs):
-        context = super(HOG_Base, self).get_context_data(**kwargs)
+class HOGBase(ContextMixin):
+    def get_context_data(self, hog_id, level=None, only_validate=False, **kwargs):
+        context = super(HOGBase, self).get_context_data(**kwargs)
         try:
             # check to verify hog id is correct, raises ValueError if unknown
             hog = utils.HOG(utils.db.get_hog(hog_id, level=level))
@@ -1294,12 +1305,6 @@ class HOG_Base(ContextMixin):
                 else:
                     is_subhog = True
 
-            lineage_up = utils.db.get_parent_hogs(hog.hog_id, level=hog.level)
-            # load only up to 100 subhogs for performance reasons
-            subhogs_down = list(itertools.islice(
-                utils.db.get_subhogs(hog_id, level=level, include_subids=True, include_leaf_levels=False),
-                100))
-
             # update context
             context['hog'] = hog
             context['hog_id'] = hog_id
@@ -1309,14 +1314,23 @@ class HOG_Base(ContextMixin):
             context['description'] = hog.keyword
             context['is_subhog'] = is_subhog
             context['api_base'] = 'hog'
-            context['lineage_down'] = subhogs_down
-            context['lineage_up'] = lineage_up
+
+            if not only_validate:
+                lineage_up = utils.db.get_parent_hogs(hog.hog_id, level=hog.level)
+                # load only up to 100 subhogs for performance reasons
+                subhogs_down = list(itertools.islice(
+                    utils.db.get_subhogs(hog_id, level=level, include_subids=True, include_leaf_levels=False),
+                    100))
+
+                context['lineage_down'] = subhogs_down
+                context['lineage_up'] = lineage_up
+                context['rootlevel'] = lineage_up[0].level
         except ValueError as e:
             raise Http404(e)
         return context
 
 
-class HOGInfo(HOG_Base, TemplateView):
+class HOGInfo(HOGBase, TemplateView):
     template_name = "hog_info.html"
 
     def get_context_data(self, hog_id, **kwargs):
@@ -1328,7 +1342,7 @@ class HOGInfo(HOG_Base, TemplateView):
         return context
 
 
-class HOGSimilarProfile(HOG_Base, TemplateView):
+class HOGSimilarProfile(HOGBase, TemplateView):
     template_name = "hog_similar_profile.html"
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
@@ -1391,7 +1405,7 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
         return JsonResponse(data, safe=False)
 
 
-class HOGSimilarDomain(HOG_Base, TemplateView):
+class HOGSimilarDomain(HOGBase, TemplateView):
     template_name = "hog_similar_domain.html"
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
@@ -1419,7 +1433,7 @@ class HOGSimilarDomain(HOG_Base, TemplateView):
         return context
 
 
-class HOGSimilarPairwise(HOG_Base, TemplateView):
+class HOGSimilarPairwise(HOGBase, TemplateView):
     template_name = "hog_similar_pairwise.html"
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
@@ -1471,7 +1485,7 @@ class HOGDomainsJson(HOGSimilarDomain, View):
         return HttpResponse(data, content_type='application/json')
 
 
-class HOGviewer(HOG_Base, TemplateView):
+class HOGviewer(HOGBase, TemplateView):
     template_name = "hog_ihamviewer.html"
     show_internal_labels = True
 
@@ -1494,7 +1508,7 @@ class HOGviewer(HOG_Base, TemplateView):
         return context
 
 
-class HOGtable(HOG_Base, TemplateView):
+class HOGtable(HOGBase, TemplateView):
     template_name = "hog_table.html"
 
     def get_context_data(self, hog_id, **kwargs):
@@ -1508,7 +1522,7 @@ class HOGtable(HOG_Base, TemplateView):
         return context
 
 
-class HOGFasta(FastaView, HOG_Base):
+class HOGFasta(FastaView, HOGBase):
     def get_fastaheader(self, memb):
         return ' | '.join([memb.omaid, memb.canonicalid, memb.oma_hog,
                            '[{}]'.format(memb.genome.sciname)])
@@ -1517,7 +1531,7 @@ class HOGFasta(FastaView, HOG_Base):
         return self.render_to_fasta_response(context['hog'].members)
 
 
-class HOGSynteny(HOG_Base, TemplateView):
+class HOGSynteny(HOGBase, TemplateView):
     template_name = "hog_synteny.html"
 
     def get_context_data(self, hog_id, **kwargs):
@@ -1525,7 +1539,7 @@ class HOGSynteny(HOG_Base, TemplateView):
 
         graph = utils.db.get_syntentic_hogs(hog_id, context['level'], steps=2)
 
-        ancestral_synteny = {"nodes": [],"links": []}
+        ancestral_synteny = {"nodes": [], "links": []}
         neigh = []
 
         for n in graph.nodes.data('weight'):
