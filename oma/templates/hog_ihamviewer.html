@@ -306,7 +306,7 @@
                         });
                     }
 
-                    if (d3.select(this).text() === "Gene Length") {
+                    if (d3.select(this).text() === "Protein Length") {
                         var data = iham.fam_data();
                         var domain = d3.extent(data, function (d) {
                             return d.sequence_length
@@ -353,7 +353,7 @@
                         });
                         legend(colorScale, 'Number of Exons');
                     }
-                    if (d3.select(this).text() === "Gene Similarity") {
+                    if (d3.select(this).text() === "Gene Function Similarity") {
                         var data = iham.fam_data();
                         var domain = d3.extent(data, function (d) {
                             return d.similarity
@@ -370,7 +370,7 @@
                                 return "gray";
                             }
                         });
-                        legend(colorScale, 'Gene Similarity');
+                        legend(colorScale, 'Gene Function Similarity');
                     }
                 });
 
