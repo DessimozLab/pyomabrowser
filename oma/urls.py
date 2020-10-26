@@ -74,23 +74,25 @@ urlpatterns = [
     url(r'^hog/(?P<group_id>[A-Z0-9]+)/iham/$', views.HOGiHam.as_view(), name='hog_iham'),
 
     # OMA Group
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/members/$', views.OMAGroup_members.as_view(), name='omagroup_members'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/similar/profile/$', views.OMAGroup_similar_profile.as_view(), name='omagroup_similar_profile'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/ontology/$', views.OMAGroup_ontology.as_view(), name='omagroup_ontology'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/similar/pairwise/$', views.OMAGroup_similar_pairwise.as_view(), name='omagroup_similar_pairwise'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/info/$', views.OMAGroup_info.as_view(), name='omagroup_info'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/alignment/$', views.OMAGroup_align.as_view(), name='omagroup_align'),
+    url(r'^group/(?P<group_id>\w+)/$', views.OMAGroup_members.as_view(), name='omagroup-old'),
+    url(r'^omagroup/(?P<group_id>\w+)/$', views.OMAGroup_members.as_view(), name='omagroup_members_short'),
+    url(r'^omagroup/(?P<group_id>\w+)/members/$', views.OMAGroup_members.as_view(), name='omagroup_members'),
+    url(r'^omagroup/(?P<group_id>\w+)/similar/profile/$', views.OMAGroup_similar_profile.as_view(), name='omagroup_similar_profile'),
+    url(r'^omagroup/(?P<group_id>\w+)/ontology/$', views.OMAGroup_ontology.as_view(), name='omagroup_ontology'),
+    url(r'^omagroup/(?P<group_id>\w+)/similar/pairwise/$', views.OMAGroup_similar_pairwise.as_view(), name='omagroup_similar_pairwise'),
+    url(r'^omagroup/(?P<group_id>\w+)/info/$', views.OMAGroup_info.as_view(), name='omagroup_info'),
+    url(r'^omagroup/(?P<group_id>\w+)/alignment/$', views.OMAGroup_align.as_view(), name='omagroup_align'),
     #url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/$', views.OMAGroup.as_view(), name='omagroup'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroupMSA.as_view(), name='omagroup-msa'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/fasta/$', views.OMAGroupFasta.as_view(), name='omagroup-fasta'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
 
     # Genome
-    url(r'^genome/(?P<specie_id>\w+)/info/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
-    url(r'^genome/(?P<specie_id>\w+)/genes/$', views.GenomeCentricGenes.as_view(), name='genome_genes'),
-    url(r'^genome/(?P<specie_id>\w+)/closest/groups/$', views.GenomeCentricClosestGroups.as_view(), name='genome_closest_og'),
-    url(r'^genome/(?P<specie_id>\w+)/closest/hogs/$', views.GenomeCentricClosestHOGs.as_view(), name='genome_closest_hog'),
-    url(r'^genome/(?P<specie_id>\w+)/synteny/$', views.GenomeCentricSynteny.as_view(), name='genome_synteny'),
+    url(r'^genome/(?P<species_id>\w+)/info/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
+    url(r'^genome/(?P<species_id>\w+)/genes/$', views.GenomeCentricGenes.as_view(), name='genome_genes'),
+    url(r'^genome/(?P<species_id>\w+)/closest/groups/$', views.GenomeCentricClosestGroups.as_view(), name='genome_closest_og'),
+    url(r'^genome/(?P<species_id>\w+)/closest/hogs/$', views.GenomeCentricClosestHOGs.as_view(), name='genome_closest_hog'),
+    url(r'^genome/(?P<species_id>\w+)/synteny/$', views.GenomeCentricSynteny.as_view(), name='genome_synteny'),
 
     # AncestralGenome
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/info/$', views.AncestralGenomeCentricInfo.as_view(), name='ancestralgenome_info'),
@@ -119,7 +121,7 @@ urlpatterns = [
 
 
     # OMA Groups via Entry
-    url(r'^group/(?P<entry_id>\w+)/$', views.EntryCentricOMAGroup.as_view(), name="omagroup-entry"),
+    #url(r'^group/(?P<entry_id>\w+)/$', views.EntryCentricOMAGroup.as_view(), name="omagroup-entry"),
     url(r'^group/(?P<entry_id>\w+)/msa/$', views.EntryCentricOMAGroupMSA.as_view(), name="omagroup-entry-msa"),
 
 

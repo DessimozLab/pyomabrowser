@@ -1070,11 +1070,11 @@ class HomoeologJson(HomoeologBase, JsonModelMixin, View):
 #<editor-fold desc="Genome Centric">
 
 class GenomeBase(ContextMixin):
-    def get_context_data(self, specie_id, **kwargs):
+    def get_context_data(self, species_id, **kwargs):
         context = super(GenomeBase, self).get_context_data(**kwargs)
         try:
-            genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(specie_id))
-            meta = utils.db.per_species_metadata_retriever(specie_id)
+            genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(species_id))
+            meta = utils.db.per_species_metadata_retriever(species_id)
             context['genome'] = genome_obj
             context['genome_meta'] = meta
         except db.InvalidId as e:
@@ -1085,8 +1085,8 @@ class GenomeBase(ContextMixin):
 class GenomeCentricInfo(GenomeBase, TemplateView):
     template_name = "genome_info.html"
 
-    def get_context_data(self, specie_id, **kwargs):
-        context = super(GenomeCentricInfo, self).get_context_data(specie_id, **kwargs)
+    def get_context_data(self, species_id, **kwargs):
+        context = super(GenomeCentricInfo, self).get_context_data(species_id, **kwargs)
 
         prot_in_group = context['genome_meta'].get_nr_genes_in_group(group_type="OMAGroup")
         prot_in_hogs = context['genome_meta'].get_nr_genes_in_group(group_type="HOG")
@@ -1098,18 +1098,18 @@ class GenomeCentricInfo(GenomeBase, TemplateView):
 class GenomeCentricGenes(GenomeBase, TemplateView):
     template_name = "genome_genes.html"
 
-    def get_context_data(self, specie_id, **kwargs):
-        context = super(GenomeCentricGenes, self).get_context_data(specie_id, **kwargs)
+    def get_context_data(self, species_id, **kwargs):
+        context = super(GenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
-        context.update({'tab': 'genes', 'api_base': 'genome', 'api_url': '/api/genome/{}/proteins/?&per_page=250000'.format(specie_id)})
+        context.update({'tab': 'genes', 'api_base': 'genome', 'api_url': '/api/genome/{}/proteins/?&per_page=250000'.format(species_id)})
         return context
 
 
 class GenomeCentricClosestGroups(GenomeBase, TemplateView):
     template_name = "genome_closest_groups.html"
 
-    def get_context_data(self, specie_id, **kwargs):
-        context = super(GenomeCentricClosestGroups, self).get_context_data(specie_id, **kwargs)
+    def get_context_data(self, species_id, **kwargs):
+        context = super(GenomeCentricClosestGroups, self).get_context_data(species_id, **kwargs)
 
         gr_close_raw = context['genome_meta'].get_most_similar_species(limit=10, group_type='OMAGroup')
         gr_close = []
@@ -1128,8 +1128,8 @@ class GenomeCentricClosestGroups(GenomeBase, TemplateView):
 class GenomeCentricClosestHOGs(GenomeBase, TemplateView):
     template_name = "genome_closest_hogs.html"
 
-    def get_context_data(self, specie_id, **kwargs):
-        context = super(GenomeCentricClosestHOGs, self).get_context_data(specie_id, **kwargs)
+    def get_context_data(self, species_id, **kwargs):
+        context = super(GenomeCentricClosestHOGs, self).get_context_data(species_id, **kwargs)
         hog_closest_raw = context['genome_meta'].get_most_similar_species(limit=10, group_type='HOG')
         hog_least_raw = context['genome_meta'].get_least_similar_species(limit=10, group_type='HOG')
 
@@ -1149,9 +1149,9 @@ class GenomeCentricClosestHOGs(GenomeBase, TemplateView):
 class GenomeCentricSynteny(GenomeBase, TemplateView):
     template_name = "genome_synteny.html"
 
-    def get_context_data(self, specie_id, **kwargs):
-        context = super(GenomeCentricSynteny, self).get_context_data(specie_id, **kwargs)
-        genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(specie_id))
+    def get_context_data(self, species_id, **kwargs):
+        context = super(GenomeCentricSynteny, self).get_context_data(species_id, **kwargs)
+        genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(species_id))
         context.update({'tab': 'synteny', 'genome_obj':genome_obj})
         return context
 
