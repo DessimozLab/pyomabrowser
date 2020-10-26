@@ -144,6 +144,7 @@ class AsyncMsaMixin(object):
 
 #//<editor-fold desc="Entry Centric">
 
+
 #  --- Entry Centric -------
 class EntryCentricMixin(object):
     def get_entry(self, entry_id):
@@ -155,14 +156,42 @@ class EntryCentricMixin(object):
         entry = utils.db.entry_by_entry_nr(entry_nr)
 
         # this need to be added to have root level hog id
-        model_entry  = models.ProteinEntry(utils.db, entry)
+        model_entry = models.ProteinEntry(utils.db, entry)
 
         if model_entry.oma_hog:
             model_entry.oma_hog_root = model_entry.oma_hog.split(".")[0]
         else:
             model_entry.oma_hog_root = None
-
         return model_entry
+
+    def get_most_specific_hog(self, entry):
+        if not isinstance(entry, models.ProteinEntry):
+            entry = self.get_entry(entry)
+        most_specific_hog = None
+        if entry.oma_hog != "":
+            # we want the hog at the first interesting level above the species itself
+            level = None
+            for level in entry.genome.lineage[1:]:
+                if level.encode('utf-8') in utils.tax.all_hog_levels:
+                    break
+            hog_id = entry.oma_hog
+            for _ in range(2):
+                try:
+                    most_specific_hog = utils.db.get_hog(hog_id, level)
+                    break
+                except ValueError:
+                    i = hog_id.rfind('.')
+                    if i >= 0:
+                        hog_id = hog_id[:i]
+                    else:  # i < 0:
+                        # should not happen. we get just the deepest level to make sure
+                        # we have something.
+                        most_specific_hog = utils.db.get_hog(entry.oma_hog)
+                        logger.error("Could not retrieve the most specific hog for entry '{}' (hog_id: {})"
+                                     .format(entry.omaid, entry.oma_hog))
+                        break
+            most_specific_hog = utils.HOG(most_specific_hog)
+        return most_specific_hog
 
 
 # Information
@@ -172,25 +201,17 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         entry = self.get_entry(entry_id)
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
-
-        nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
-
+        nr_homoeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
 
         # get parent genome/hog level
-        taxnode_of_level = utils.db.tax.get_taxnode_from_name_or_taxid(entry.genome.ncbi_taxon_id)
-        parent_level = utils.db.tax.get_parent_taxa(taxnode_of_level[0]["NCBITaxonId"])[0]["Name"]
+        most_specific_hog = self.get_most_specific_hog(entry)
 
-        shs = [x.decode() for x in utils.db.get_subhogids_at_level(entry.hog_family_nr, parent_level).tolist()]
-
-        most_specific_hog = None
-        for sh in shs:
-            m = utils.db.hog_members_from_hog_id(sh, parent_level.decode())
-            if entry.entry_nr in m["EntryNr"]:
-               most_specific_hog = sh
-               break
-
-        context.update({'entry': entry, 'most_specific_hog': most_specific_hog, 'most_specific_level': parent_level.decode(), 'tab': 'geneinformation', 'nr_homo': nr_homeologs_relations, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
-                        'nr_pps':  nr_ortholog_relations['NrHogInducedPWParalogs']  })
+        context.update({'entry': entry,
+                        'most_specific_hog': most_specific_hog,
+                        'tab': 'geneinformation',
+                        'nr_homo': nr_homoeologs_relations,
+                        'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
+                        'nr_pps':  nr_ortholog_relations['NrHogInducedPWParalogs']})
         return context
 
 
@@ -443,22 +464,18 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
 
         # get parent genome/hog level
-        taxnode_of_level = utils.db.tax.get_taxnode_from_name_or_taxid(entry.genome.ncbi_taxon_id)
-        parent_level = utils.db.tax.get_parent_taxa(taxnode_of_level[0]["NCBITaxonId"])[0]["Name"]
-
-        shs = [x.decode() for x in utils.db.get_subhogids_at_level(entry.hog_family_nr, parent_level).tolist()]
-
-        most_specific_hog = None
-        for sh in shs:
-            m = utils.db.hog_members_from_hog_id(sh, parent_level.decode())
-            if entry.entry_nr in m["EntryNr"]:
-                most_specific_hog = sh
-                break
+        most_specific_hog = self.get_most_specific_hog(entry)
 
         context.update(
-            {'entry': entry, 'most_specific_hog': most_specific_hog, 'most_specific_level': parent_level.decode(), 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
-             'nr_homo': nr_homeologs_relations, 'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'orthologs',
-             'table_data_url': url , 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
+            {'entry': entry,
+             'most_specific_hog': most_specific_hog,
+             'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
+             'nr_homo': nr_homeologs_relations,
+             'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
+             'tab': 'orthologs',
+             'table_data_url': url,
+             'load_full_data': load_full_data,
+             'sample_size': self._max_entry_to_load,
              })
 
         return context
@@ -476,16 +493,12 @@ class PairsJson(PairsBase, JsonModelMixin, View):
 
 
 class PairsJson_Support(PairsBase, JsonModelMixin, View):
-
-
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'RelType': 'RelType', 'type_p': 'type_p','type_h':'type_h','type_g':'type_g'}
 
     def get(self, request, *args, **kwargs):
-
         context = self.get_context_data(**kwargs)
-
         entry = context['entry']
 
         # Get orthologs
@@ -577,11 +590,7 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
 
 
         start = time.time()
-
-
-
         data = list(self.to_json_dict(vps))
-
         end = time.time()
 
         logger.info("[{}] Json formatting {}".format(context['entry'].omaid, start - end))
@@ -690,25 +699,19 @@ class ParalogsBase(ContextMixin, EntryCentricMixin):
         nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
 
         # get parent genome/hog level
-        taxnode_of_level = utils.db.tax.get_taxnode_from_name_or_taxid(entry.genome.ncbi_taxon_id)
-        parent_level = utils.db.tax.get_parent_taxa(taxnode_of_level[0]["NCBITaxonId"])[0]["Name"]
-
-        shs = [x.decode() for x in utils.db.get_subhogids_at_level(entry.hog_family_nr, parent_level).tolist()]
-
-        most_specific_hog = None
-        for sh in shs:
-            m = utils.db.hog_members_from_hog_id(sh, parent_level.decode())
-            if entry.entry_nr in m["EntryNr"]:
-                most_specific_hog = sh
-                break
+        most_specific_hog = self.get_most_specific_hog(entry)
 
         context.update(
-            {'entry': entry, 'most_specific_hog': most_specific_hog, 'most_specific_level': parent_level.decode(), 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
-             'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'paralogs',
+            {'entry': entry,
+             'most_specific_hog': most_specific_hog,
+             'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
+             'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
+             'tab': 'paralogs',
              'nr_homo': nr_homeologs_relations,
-             'table_data_url': url, 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
+             'table_data_url': url,
+             'load_full_data': load_full_data,
+             'sample_size': self._max_entry_to_load,
              })
-
         return context
 
 
@@ -736,11 +739,8 @@ class ParalogsJson(ParalogsBase, JsonModelMixin, View):
             pps.append(pm)
 
         start = time.time()
-
         data = list(self.to_json_dict(pps))
-
         end = time.time()
-
         logger.info("[{}] Json formatting {}".format(context['entry'].omaid, end - start))
 
         return JsonResponse(data, safe=False)
@@ -754,11 +754,9 @@ class ParalogsSampleJson(ParalogsBase, JsonModelMixin, View):
     def get(self, request, *args, **kwargs):
 
         context = self.get_context_data(**kwargs)
-
         entry = context['entry']
 
         pps = []
-
         for p in utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr):
             pm = models.ProteinEntry.from_entry_nr(utils.db, p[0])
             pm.DivergenceLevel = p["DivergenceLevel"].decode('utf-8')
@@ -769,7 +767,6 @@ class ParalogsSampleJson(ParalogsBase, JsonModelMixin, View):
             pps = pps[0:PairsBase._max_entry_to_load]
 
         data = list(self.to_json_dict(pps))
-
         return JsonResponse(data, safe=False)
 
 
@@ -796,26 +793,22 @@ class HomeologsBase(ContextMixin, EntryCentricMixin):
         nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
 
         # get parent genome/hog level
-        taxnode_of_level = utils.db.tax.get_taxnode_from_name_or_taxid(entry.genome.ncbi_taxon_id)
-        parent_level = utils.db.tax.get_parent_taxa(taxnode_of_level[0]["NCBITaxonId"])[0]["Name"]
-
-        shs = [x.decode() for x in utils.db.get_subhogids_at_level(entry.hog_family_nr, parent_level).tolist()]
-
-        most_specific_hog = None
-        for sh in shs:
-            m = utils.db.hog_members_from_hog_id(sh, parent_level.decode())
-            if entry.entry_nr in m["EntryNr"]:
-                most_specific_hog = sh
-                break
+        most_specific_hog = self.get_most_specific_hog(entry)
 
         context.update(
-            {'entry': entry, 'most_specific_hog': most_specific_hog, 'most_specific_level': parent_level.decode(), 'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
+            {'entry': entry,
+             'most_specific_hog': most_specific_hog,
+             'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_homo': nr_homeologs_relations,
-             'nr_vps': nr_ortholog_relations['NrAnyOrthologs'], 'tab': 'homeologs',
-             'table_data_url': url, 'load_full_data': load_full_data, 'sample_size': self._max_entry_to_load,
+             'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
+             'tab': 'homeologs',
+             'table_data_url': url,
+             'load_full_data': load_full_data,
+             'sample_size': self._max_entry_to_load,
              })
 
         return context
+
 
 class HomeologsView(TemplateView, HomeologsBase):
     template_name = "entry_homeologs.html"
@@ -828,11 +821,9 @@ class HomeologsJson(HomeologsBase, JsonModelMixin, View):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-
         entry = context['entry']
 
         pps = []
-
         for p in utils.db.get_homoeologs(entry.entry_nr):
             pm = models.ProteinEntry.from_entry_nr(utils.db, p[1])
             pm.SyntenyConservationLocal = p["SyntenyConservationLocal"].item()
@@ -840,14 +831,11 @@ class HomeologsJson(HomeologsBase, JsonModelMixin, View):
             pps.append(pm)
 
         start = time.time()
-
         data = list(self.to_json_dict(pps))
-
         end = time.time()
-
         logger.info("[{}] Json formatting {}".format(context['entry'].omaid, end - start))
-
         return JsonResponse(data, safe=False)
+
 
 class HomeologsSampleJson(HomeologsBase, JsonModelMixin, View):
         json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
@@ -855,13 +843,10 @@ class HomeologsSampleJson(HomeologsBase, JsonModelMixin, View):
                        'canonicalid': 'xrefid', 'SyntenyConservationLocal':'conservation', 'Confidence':'confidence'}
 
         def get(self, request, *args, **kwargs):
-
             context = self.get_context_data(**kwargs)
-
             entry = context['entry']
 
             pps = []
-
             for p in utils.db.get_homoeologs(entry.entry_nr):
                 pm = models.ProteinEntry.from_entry_nr(utils.db, p[1])
                 pm.SyntenyConservationLocal = p["SyntenyConservationLocal"].item()
@@ -873,7 +858,6 @@ class HomeologsSampleJson(HomeologsBase, JsonModelMixin, View):
                 pps = pps[0:HomeologsBase._max_entry_to_load]
 
             data = list(self.to_json_dict(pps))
-
             return JsonResponse(data, safe=False)
 
 
@@ -910,7 +894,7 @@ class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
                    'sequence_length': 'seqlen',
                    'is_main_isoform': None,
                    'locus_start': 'locus_start',
-                   'locus_end' : 'locus_end',
+                   'locus_end': 'locus_end',
                    'exons.as_list_of_dict': 'exons'}
 
 

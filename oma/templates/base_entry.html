@@ -28,13 +28,8 @@
 
 
     <div class="dropdown-menu">
-
-
-        <a class="dropdown-item"   {% if entry.oma_hog %} href="{% url 'hog_viewer' most_specific_hog most_specific_level %}" > HOG {% else %} disabled > No related HOG {% endif %} </a>
-        <a class="dropdown-item"  {% if entry.oma_group %} href="{% url 'omagroup_members' entry.oma_group %}" > OMA Group {% else %} disabled > No related OMA Group {% endif %} </a>
-
-
-
+        <a class="dropdown-item"   {% if entry.oma_hog != "" %} href="{% url 'hog_viewer' most_specific_hog.hog_id most_specific_hog.level %}" > HOG {% else %} disabled > No related HOG {% endif %} </a>
+        <a class="dropdown-item"  {% if entry.oma_group != 0 %} href="{% url 'omagroup_members' entry.oma_group %}" > OMA Group {% else %} disabled > No related OMA Group {% endif %} </a>
     </div>
 
     <button class="btn btn-default genome_back"><a style="color: #FFF;" href="{% url 'genome_info' entry.genome.uniprot_species_code %}">Genome</a>
