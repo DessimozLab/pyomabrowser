@@ -2068,21 +2068,28 @@ class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
 class OgCentricMixin(object):
     def get_og(self, group_id):
         try:
-            og = utils.db.oma_group_metadata(int(group_id))
+            og = utils.db.resolve_oma_group(group_id)
         except db.InvalidId as e:
+            try:
+                entry_nr = utils.id_resolver.resolve(group_id)
+                entry = utils.db.entry_by_entry_nr(entry_nr)
+                if entry['OmaGroup'] == 0:
+                    raise db.InvalidId("Protein '{}' is not part of any oma group".format(group_id))
+                og = entry['OmaGroup']
+            except (db.InvalidId, db.AmbiguousID) as e:
+                raise Http404(str(e))
+        except db.AmbiguousID as e:
             raise Http404(e)
         return models.OmaGroup(utils.db, og)
 
 
 class GroupBase(ContextMixin, OgCentricMixin):
     def get_context_data(self, group_id, **kwargs):
-
         context = super(GroupBase, self).get_context_data(**kwargs)
         try:
             og = self.get_og(group_id)
-            context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
             context.update({'omagroup': og,
-                            'nr_member': len(context['members'])})
+                            'nr_member': len(og)})
 
         except db.InvalidId as e:
             raise Http404(e)
@@ -2094,14 +2101,12 @@ class OMAGroup_members(TemplateView, GroupBase):
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup_members, self).get_context_data(group_id, **kwargs)
-
-        context.update(
-            {'tab': 'members',
-             'table_data_url': reverse('omagroup-json', args=(group_id,)),
-            'longest_seq': max([len(z.sequence) for z in context['members']])
+        grp = context['omagroup']
+        context.update({
+            'tab': 'members',
+            'table_data_url': reverse('omagroup-json', args=(grp.group_nbr,)),
+            'longest_seq': max([len(z) for z in grp.members]),
         })
-
-
         return context
 
 
@@ -2110,10 +2115,8 @@ class OMAGroup_similar_profile(TemplateView, GroupBase):
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup_similar_profile, self).get_context_data(group_id, **kwargs)
-
         context.update(
             {'tab': 'similar', 'subtab': 'profile'})
-
         return context
 
 
@@ -2122,7 +2125,7 @@ class OMAGroup_similar_pairwise(TemplateView, GroupBase):
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup_similar_pairwise, self).get_context_data(group_id, **kwargs)
-        gene_ids = [e.entry_nr for e in context['members']]
+        gene_ids = [e.entry_nr for e in context['omagroup'].members]
 
         # get orthologs of the group members
         gene_outside = []
@@ -2136,16 +2139,15 @@ class OMAGroup_similar_pairwise(TemplateView, GroupBase):
         count_groups = defaultdict(int)
 
         for gene in gene_outside:
-            if gene.oma_group > 0 :
-                count_groups[gene.oma_group] +=1
+            if gene.oma_group > 0:
+                count_groups[gene.oma_group] += 1
 
 
         # sorted the groups by number of orthologous relations
-        sorted_groups = sorted([(value, key) for (key, value) in count_groups.items()],reverse=True)
-
+        sorted_groups = sorted([(value, key) for (key, value) in count_groups.items()], reverse=True)
         context.update(
-            {'tab': 'similar', 'subtab': 'pairwise', 'similar_groups': sorted_groups })
-
+            {'tab': 'similar', 'subtab': 'pairwise',
+             'similar_groups': sorted_groups})
         return context
 
 
@@ -2154,10 +2156,8 @@ class OMAGroup_ontology(TemplateView, GroupBase):
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup_ontology, self).get_context_data(group_id, **kwargs)
-
         context.update(
             {'tab': 'ontology'})
-
         return context
 
 
@@ -2166,10 +2166,8 @@ class OMAGroup_info(TemplateView, GroupBase):
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup_info, self).get_context_data(group_id, **kwargs)
-
         context.update(
             {'tab': 'info'})
-
         return context
 
 
@@ -2179,7 +2177,7 @@ class OMAGroupFasta(FastaView, GroupBase):
                            '[{}]'.format(memb.genome.sciname)])
 
     def render_to_response(self, context):
-        return self.render_to_fasta_response(context['members'])
+        return self.render_to_fasta_response(context['omagroup'].members)
 
 
 class OMAGroupJson(GroupBase, JsonModelMixin, View):
@@ -2189,7 +2187,7 @@ class OMAGroupJson(GroupBase, JsonModelMixin, View):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        data = list(self.to_json_dict(context['members']))
+        data = list(self.to_json_dict(context['omagroup'].members))
         return JsonResponse(data, safe=False)
 
 
@@ -2198,16 +2196,17 @@ class OMAGroup(GroupBase, TemplateView):
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup, self).get_context_data(group_id, **kwargs)
-        grp_nr = context['members'][0].oma_group
+        grp = context['omagroup']
         king_comp = collections.defaultdict(int)
-        for e in context['members']:
+        for e in grp.members:
             king_comp[e.genome.kingdom] += 1
         context.update({'kingdom_composition': dict(king_comp),
                         'sub_tab': 'member_list',
-                        'table_data_url': reverse('omagroup-json', args=(grp_nr,)),
-                        'longest_seq': max([len(z.sequence) for z in context['members']])
+                        'table_data_url': reverse('omagroup-json', args=(grp.group_nbr,)),
+                        'longest_seq': max([len(z) for z in grp.members])
                         })
         return context
+
 
 @method_decorator(never_cache, name='dispatch')
 class OMAGroup_align(AsyncMsaMixin, OMAGroup):
