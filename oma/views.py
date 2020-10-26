@@ -239,9 +239,8 @@ class LocalSyntenyView(InfoBase, TemplateView):
     the window paramter is used to select the size of the
     neighborhood."""
 
-
     def get_context_data(self, entry_id, mod=4, windows=4, **kwargs):
-        context = super(LocalSyntenyView, self).get(entry_id, **kwargs)
+        context = super(LocalSyntenyView, self).get_context_data(entry_id, **kwargs)
         entry = context['entry']
         taxa = entry.genome.lineage
         windows = int(windows)
@@ -268,7 +267,7 @@ class LocalSyntenyView(InfoBase, TemplateView):
             geneinfo = {
                 "entryid": info['EntryNr'],
                 "species": entry.genome.uniprot_species_code,
-                "genenumber": "{0:05d}".format(info['EntryNr'] - genome['EntryOff']),
+                "genenumber": "{0:05d}".format(info['EntryNr'] - entry.genome.entry_nr_offset),
                 "dir": info['LocusStrand'],
                 "type": str((index - gene_left + int(mod)) % (windows + windows + 1)),
                 "geneindex": index}
