@@ -10102,7 +10102,7 @@ module.exports = {
       function fetch_annots(gene_tooltip_obj, protid, mouseover){
           $.ajax({
             type:'get',
-            url: 'https://omabrowser.org/api/protein/' + protid + '/gene_ontology/?format=json',
+            url: '/api/protein/' + protid + '/gene_ontology/?format=json',
             dataType:'json',
             success: function(data) {
 
@@ -10160,12 +10160,16 @@ module.exports = {
 
       obj.rows = [];
       obj.rows.push({
-        label: "Name",
-        value: "<a href='https://oma-stage.vital-it.ch/oma/vps/" +  gene.gene.protid +"'/>" +  gene.gene.protid + "</a>"
+        label: "Cross reference",
+        value: gene.gene.xrefid
+      });
+      obj.rows.push({
+        label: "Protein ID",
+        value: "<a href='/oma/vps/" +  gene.gene.protid +"'/>" +  gene.gene.protid + "</a>"
       });
 
 
-      obj.rows.push({label:"GO Annotations"});
+      obj.rows.push({label: "GO Annotations"});
       $.each(gene.gene.go_terms, function(i, item){
           obj.rows.push({label: item.id, value: item.name});
       });
@@ -10187,11 +10191,9 @@ module.exports = {
     display: function display(hog, taxa_name, div, show_oma_link) {
 
       $.ajax({
-            url: 'https://oma-stage.vital-it.ch/api/hog/' + hog.protid + '/members/?level=' + taxa_name,
+            url: '/api/hog/' + hog.protid + '/members/?level=' + taxa_name,
             async: false, //blocks window close
             success: function(data) {
-
-
                 var obj = {};
                 obj.header = data.hog_id;
                 obj.rows = [];
@@ -10202,11 +10204,12 @@ module.exports = {
                     value: hog.coverage.toFixed(2) + "% species represented"
                 });
                 if (show_oma_link) {
-
+                    var hogid = encodeURIComponent(data.hog_id);
+                    var level = encodeURIComponent(data.level);
                     obj.rows.push({
-                        value: "<a href=\"https://oma-stage.vital-it.ch/oma/hog/table/" + data.hog_id + "/" + data.level.replace(" ", "%20") + "/fasta\" target=\"_blank\"> Sequences (Fasta)</a>"
+                        value: "<a href=\"/oma/hog/" + hogid + "/" + level + "/fasta\" target=\"_blank\">Sequences (Fasta)</a>"
                     });
-                    obj.rows.push({value: "<a href=\"https://oma-stage.vital-it.ch/oma/hog/table/" + data.hog_id + "/" + data.level.replace(" ", "%20") + "/\" target=\"_blank\"> Open "+data.hog_id+ " </a>"});
+                    obj.rows.push({value: "<a href=\"/oma/hog/" + hogid + "/" + level + "/table/\" target=\"_blank\"> Open "+data.hog_id+ " </a>"});
                 }
 
                 _hog_header_tooltip = tooltip.list().width(180).id('hog_header_tooltip').container(div).call(this, obj);

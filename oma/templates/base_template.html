@@ -120,22 +120,22 @@
 
                 <!-- explore dropdown -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-nowrap" href="/oma/vps/YEAST00004/#" id="navbarDropdown"
+                    <a class="nav-link dropdown-toggle text-nowrap" href="#" id="navbarDropdown"
                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Explore <span
                             class="caret"></span></a>
 
 
                     <div class="dropdown-menu" role="menu">
-                        <a class="dropdown-item" href="/oma/release/">Release information</a>
+                        <a class="dropdown-item" href="{% url 'release' %}">Release information</a>
 
                         <div class="dropdown-divider"></div>
 
                         <div role="presentation" class="dropdown-header">Quick access to</div>
 
-                        <a class="dropdown-item" href="/oma/landOMA/">OMA groups</a>
-                        <a class="dropdown-item" href="/oma/hogs/">Hierarchical orthologous groups (HOGs)</a>
-                        <a class="dropdown-item" href="/oma/landAnnotation/">Functional annotations</a>
-                        <a class="dropdown-item" href="/oma/synteny/">Local synteny</a>
+                        <a class="dropdown-item" href="{% url 'landOMA' %}">OMA groups</a>
+                        <a class="dropdown-item" href="{% url 'hogs' %}">Hierarchical orthologous groups (HOGs)</a>
+                        <a class="dropdown-item" href="{% url 'landAnnotation' %}">Functional annotations</a>
+                        <a class="dropdown-item" href="{% url 'synteny' %}">Local synteny</a>
 
 
                     </div>
@@ -236,13 +236,12 @@
 
                 <!-- about dropdown -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-nowrap" href="/oma/vps/YEAST00004/#" role="button"
+                    <a class="nav-link dropdown-toggle text-nowrap" href="#" role="button"
                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">About <span
                             class="caret"></span></a>
 
 
                     <div class="dropdown-menu dropdown-menu-right" role="menu">
-
                         <a class="dropdown-item" href="{% url 'about' %}">OMA</a>
                         <a class="dropdown-item" href="{% url 'team' %}">Team</a>
                         <a class="dropdown-item" href="{% url 'funding' %}">Funding</a>
@@ -250,7 +249,6 @@
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="mailto:contact@omabrowser.org"><span
                                 class="glyphicon glyphicon-envelope"></span> Contact</a>
-
                     </div>
 
                 </li>

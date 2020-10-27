@@ -33,44 +33,44 @@ urlpatterns = [
     url(r'^sequences/(?P<entry_id>\w+)/$', views.Entry_sequences.as_view(), name="entry_sequences"),
 
     # HOG
-    url(r'^hog/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGInfo.as_view(),
+    url(r'^hog/resolve/(?P<hog_id>HOG:[\w.:_]+)/$', views.resolve_hog_id, name="hog-resolve"),
+
+    url(r'^hog/(?P<hog_id>[\w.:]+)/similar/domain/json/$', views.HOGDomainsJson.as_view(), name='hog_domains_json'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/similar/domain/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/domain/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
+
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/profile/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/similar/profile/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/profile/json/$', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/similar/profile/json/$', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
+
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/pairwise/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/similar/pairwise/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
+
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
+
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/msa/$', views.HOGsMSA.as_view(), name='hog_msa'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/msa/$', views.HOGsMSA.as_view(), name='hog_msa'),
+
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/table/$', views.HOGtable.as_view(), name='hog_table'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/table/$', views.HOGtable.as_view(), name='hog_table'),
+
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/synteny/$', views.HOGSynteny.as_view(), name='hog_synteny'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/synteny/$', views.HOGSynteny.as_view(), name='hog_synteny'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/orthoxml/$', views.HOGsOrthoXMLView.as_view(), name="hogs_orthoxml"),
+
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/info/$', views.HOGInfo.as_view(),
         name='hog_info'),
-    url(r'^hog/(?P<hog_id>[\w.-:]+)/$', views.HOGInfo.as_view(), name='hog_info'),
-
-    url(r'^hog/resolve/(?P<hog_id>HOG:[\w.-:_]+)/$', views.resolve_hog_id, name="hog-resolve"),
-    url(r'^hog/similar/domains/(?P<hog_id>[\w.-:]+)/json/$', views.HOGDomainsJson.as_view(), name='hog_domains_json'),
-    url(r'^hog/similar/domain/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
-    url(r'^hog/similar/domain/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
-
-    url(r'^hog/similar/profile/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
-    url(r'^hog/similar/profile/json/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
-    url(r'^hog/similar/profile/json/(?P<hog_id>[\w.-:]+)/$', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
-    url(r'^hog/similar/profile/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
-
-
-    url(r'^hog/similar/pairwise/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
-    url(r'^hog/similar/pairwise/(?P<hog_id>[\w.-:]+)/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
-
-    url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
-    url(r'^hog/ihamviewer/(?P<hog_id>[\w.-:]+)/$', views.HOGviewer.as_view(), name='hog_viewer'),
-
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/msa/$', views.HOGsMSA.as_view(), name='hog_msa'),
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/msa/$', views.HOGsMSA.as_view(), name='hog_msa'),
-
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGtable.as_view(), name='hog_table'),
-    url(r'^hog/table/(?P<hog_id>[\w.-:]+)/$', views.HOGtable.as_view(), name='hog_table'),
-
-
-    url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGSynteny.as_view(), name='hog_synteny'),
-    url(r'^hog/synteny/(?P<hog_id>[\w.-:]+)/$', views.HOGSynteny.as_view(), name='hog_synteny'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/info/$', views.HOGInfo.as_view(), name='hog_info'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGviewer.as_view(), name="hog_base"),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/$', views.HOGviewer.as_view(), name="hog_base"),
 
     #roothog
     url(r'^hogdata/(?P<entry_id>\w+)/json', views.FamGeneDataJsonFromEntry.as_view(), name="fam_genedata"),
-    url(r'^hog/(?P<hog_id>[\w:.]+)/orthoxml/', views.HOGsOrthoXMLView.as_view(), name="hogs_orthoxml"),
 
-    url(r'^hog/(?P<group_id>[A-Z0-9]+)/iham/$', views.HOGiHam.as_view(), name='hog_iham'),
 
     # OMA Group
     url(r'^group/(?P<group_id>\w+)/$', views.OMAGroup_members.as_view(), name='omagroup-old'),
@@ -97,27 +97,18 @@ urlpatterns = [
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/info/$', views.AncestralGenomeCentricInfo.as_view(), name='ancestralgenome_info'),
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/genes/$', views.AncestralGenomeCentricGenes.as_view(), name='ancestralgenome_genes'),
 
-    # HOG via Entry
-    url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGsView.as_view(), name='hogs'),
-    url(r'^hogs/(?P<entry_id>\w+)/vis/$', views.HOGiHam.as_view(), name='hog_vis'),
-    url(r'^hogs/(?P<entry_id>\w+)/vis0/$', views.HogVisWithoutInternalLabels.as_view(),
-        name='hog_vis_no_internal_labels'),
+    # HOG via Entry (from external resources)
+    url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGtableFromEntry.as_view(), name='hog_table_from_entry'),
+    url(r'^hogs/(?P<entry_id>\w+)/vis/$', views.HOGiHamFromEntry.as_view(), name='hog_viewer_from_entry'),
+    url(r'^hogs/(?P<entry_id>\w+)/iham/$', views.HOGiHamFromEntry.as_view(), name='hog_viewer_from_entry'),
+
+    #not sure if those are still needed somewhere. keep for now.
     url(r'^hogs/(?P<entry_id>\w+)/domains/$',
         views.HOGDomainsView.as_view(), name='hog_domains_'),
     url(r'^hogs/(?P<entry_id>\w+)/domains/json$',
         views.HOGDomainsJson.as_view(), name='hog_domains_json_'),
     url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/$', views.HOGsView.as_view(),
         name='hogs'),
-    url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/fasta/$',
-        views.HOGsFastaView.as_view(), name='hogs_fasta'),
-    url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/json/$',
-        views.HOGsJson.as_view(), name='hog_json'),
-    url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/msa/$',
-        views.HOGsMSA.as_view(), name='hogs_msa'),
-
-    # Gene Similarity
-    # url(r'^genesimilarity/(?P<entry_id>\w+)/json', views.GeneSimilarityDataJson.as_view(), name="gene_similarity"),
-
 
     # OMA Groups via Entry
     #url(r'^group/(?P<entry_id>\w+)/$', views.EntryCentricOMAGroup.as_view(), name="omagroup-entry"),

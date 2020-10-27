@@ -44,9 +44,7 @@
     exports.format_generic_genome_link = function(value, row) {
         if (value === "Extant") {
              return '<a href="/oma/genome/' + row.uniprot_species_code + '/info/" >' + row.uniprot_species_code + "</a>";
-
         }
-
         else if (value === "Ancestral") {
             return '<a href="/oma/ancestralgenome/'+row.sciname+'/info/">' + row.sciname + '</a>';
         }
@@ -125,28 +123,22 @@
 
         if (value == "Reference") { return value  }
 
-        return '<a href="/oma/hog/table/HOG:' + zeroPad(value, 7)
-            + '/">HOG:' + zeroPad(value, 7) +'</a>';
+        return '<a href="/oma/hog/HOG:' + zeroPad(value, 7)
+            + '/table/">HOG:' + zeroPad(value, 7) +'</a>';
     };
     exports.format_hog_api = function(value, row) {
-        return '<a href="/oma/hog/ihamviewer/' + value + '/' +  row.level+'/">' + value + "</a>";
+        var lev = encodeURIComponent(row.level);
+        var hogid = encodeURIComponent(value);
+        return '<a href="/oma/hog/' + hogid + '/' +  lev +'/iham/">' + value + "</a>";
 
     };
     exports.format_roothog = function(value, row) {
         if (value > 0) {
-            return '<a href="/oma/hog/ihamviewer/HOG:' + zeroPad(value, 7) + '/">HOG:' + zeroPad(value, 7) + "</a>";
+            return '<a href="/oma/hog/HOG:' + zeroPad(value, 7) + '/iham/">HOG:' + zeroPad(value, 7) + "</a>";
         } else {
             return "n/a";
         }
     };
-
-
-
-
-
-
-
-
 
     exports.format_omagroup_of_entry = function(value, row){
         if (value > 0){
@@ -171,18 +163,15 @@
 
 
     exports.format_hogid_vis = function(value) {
-        return '<a href="/oma/hog/ihamviewer/HOG:' + zeroPad(value, 7)
-            +'/">HOG:' +  zeroPad(value,7) + '</a>';
+        return '<a href="/oma/hog/HOG:' + zeroPad(value, 7)
+            +'/iham/">HOG:' +  zeroPad(value,7) + '</a>';
     };
 
 
     exports.format_generic_group_id = function(value, row) {
-
         if (row.type === "HOG") {
-             return '<a href="/oma/hog/ihamviewer/HOG:' + zeroPad(value, 7) + '/">HOG:' + zeroPad(value, 7) + "</a>";
-
+             return '<a href="/oma/hog/HOG:' + zeroPad(value, 7) + '/iham/">HOG:' + zeroPad(value, 7) + "</a>";
         }
-
         else if (row.type === "OMA group") {
             return '<a href="/oma/omagroup/' + value + '/members/">' + value + '</a>';
         }
@@ -191,16 +180,12 @@
 
 
     exports.format_group_aux = function(value, row) {
-
         if (row.type === "HOG") {
              return " <b>Root Level: </b> " +  row.level;
-
         }
-
         else if (row.type === "OMA group") {
             return "<b>Fingerprint: </b> " +  row.fingerprint;
         }
-
     };
 
 
@@ -225,17 +210,12 @@
     };
 
     exports.format_vps_link_isoforms = function(value, row){
-
         badge = '';
         badge2 = '';
 
         if (row.is_main_isoform) {
-
             badge = ' <span class="badge badge-secondary">reference isoform</span>'
-
         }
-
-
         return '<a href="/oma/vps/' + value + '">' + value  + badge+  '</a>';
     };
 

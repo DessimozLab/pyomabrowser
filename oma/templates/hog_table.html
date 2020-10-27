@@ -1,7 +1,13 @@
 {% extends  "base_hog.html" %}
 
 {% block contentTab %}
-
+<div id="tooltip" class="pull-right">
+            Download:
+            <a href="{% url 'hogs_orthoxml' hog.hog_id %}"><span class="glyphicon glyphicon-download"></span> OrthoXML</a> /
+            <a href="{% url 'taxonomy-detail' rootlevel %}?type=phyloxml"><span class="glyphicon glyphicon-download"></span> Phyloxml species tree ({{ rootlevel }})</a> /
+            <a href="{% url 'hog_fasta' hog.hog_id hog.level %}"><span class="glyphicon glyphicon-download"></span> Sequences (fasta)</a> /
+            <a href="{% url 'hog_msa' hog.hog_id hog.level %}"><span class="glyphicon glyphicon-download"></span> MSA (fasta)</a>
+        </div>
 {% include "includes/groupTableApi.html" %}
 
 {% endblock contentTab %}

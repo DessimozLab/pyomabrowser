@@ -1549,6 +1549,25 @@ class HOGsOrthoXMLView(HOGBase, View):
         return response
 
 
+class HOGtableFromEntry(EntryCentricMixin, View):
+    redirect_to = "hog_table"
+
+    def get(self, request, entry_id, **kwargs):
+        entry = self.get_entry(entry_id)
+        try:
+            hog = self.get_most_specific_hog(entry)
+            redirect(self.redirect_to, hog.hog_id, hog.level)
+        except db.InvalidId:
+            logger.info("hog for requested entry '{}' ({}) has no hog. redirect to protein info"
+                        .format(entry_id, entry.omaid))
+            return redirect("pairs", entry_id)
+
+
+class HOGiHamFromEntry(HOGtableFromEntry):
+    redirect_to = "hog_viewer"
+
+
+
 #  OLD STUFF
 
 class HOGsBase(ContextMixin, EntryCentricMixin):
