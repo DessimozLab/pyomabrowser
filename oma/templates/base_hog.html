@@ -55,23 +55,25 @@
     </div>
 
     <style>
-        .lineage:hover {
+        #lineage:hover {
             cursor: pointer;
         }
-        .lineage:hover > .lineage-collapsed {
+        #lineage:hover > .lineage-collapsed {
             display: none;
         }
-        .lineage .lineage-expanded {
+        #lineage > .lineage-collapsed {
+            display: inline;
+        }
+        #lineage > .lineage-expanded {
             display: none;
         }
-        .lineage:hover > .lineage-expanded {
-            display: block;
+        #lineage:hover > .lineage-expanded {
+            display: inline;
         }
         .show>.btn-outline-dark.dropdown-toggle, .btn-outline-dark:hover {
             color: #fff;
             background-color: #336799;
             border: none;
-
         }
     </style>
 
