@@ -256,7 +256,7 @@
             }
 
             function legend(colorScale, label) {
-                var n = 30;
+                var n = 50;
 
                 removeLegend();
 
@@ -271,18 +271,18 @@
                     .enter()
                     .append('div')
                     .style('display', 'inline-block')
-                    .style('width', '5px')
+                    .style('width', '8px')
                     .style('height', '15px')
                     .style('background-color', function (d, i) {
                         return colorScale(domain[0] + ((domain[1] - domain[0]) * i) / n);
                     });
 
-                var legendAxis = d3.svg.axis().scale(d3.scale.linear().domain(domain).range([1, (n-1) * 5])).orient('bottom').ticks(3);
+                var legendAxis = d3.svg.axis().scale(d3.scale.linear().domain(domain).range([1, (n-1) * 8])).orient('bottom').ticks(6);
 
                 d3.select('#color-legend')
                     .append('div')
                     .append('svg')
-                    .attr('width', (n * 5)+15)
+                    .attr('width', (n * 8)+15)
                     .attr('height', 30)
                     .append('g')
                     .attr('class', 'axis')
