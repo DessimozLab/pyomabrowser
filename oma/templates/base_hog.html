@@ -23,14 +23,14 @@
 
             {% elif forloop.counter == 8 and not forloop.last %}
                 <div id="lineage" style="display: inline">
-                    <span id="a">... / </span>
-                    <span id="b">
+                    <div class="lineage-collapsed">... / </div>
+                    <div class="lineage-expanded">
                         <a href=" {% url lineage_link_name parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
             {% elif forloop.counter > 8  %}
                         <a href=" {% url lineage_link_name parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
                     {% if forloop.last %}
-                        </span>
-                        </div>
+                    </div>
+                </div>
                     {% endif %}
             {% endif %}
         {% endfor %}
@@ -55,27 +55,24 @@
     </div>
 
     <style>
-
-        div#lineage span#a {
-display:inline;
-}
-div#lineage span#a:hover {
-display:none;
-}
-div#lineage span#b {
-display:none;
-}
-div#lineage span#b:hover {
-display:inline;
-}
-
+        .lineage:hover {
+            cursor: pointer;
+        }
+        .lineage:hover > .lineage-collapsed {
+            display: none;
+        }
+        .lineage .lineage-expanded {
+            display: none;
+        }
+        .lineage:hover > .lineage-expanded {
+            display: block;
+        }
         .show>.btn-outline-dark.dropdown-toggle, .btn-outline-dark:hover {
             color: #fff;
             background-color: #336799;
             border: none;
 
         }
-
     </style>
 
 
