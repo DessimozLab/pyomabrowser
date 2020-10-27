@@ -1556,11 +1556,13 @@ class HOGtableFromEntry(EntryCentricMixin, View):
         entry = self.get_entry(entry_id)
         try:
             hog = self.get_most_specific_hog(entry)
-            redirect(self.redirect_to, hog.hog_id, hog.level)
+            if hog is not None:
+                return redirect(self.redirect_to, hog.hog_id, hog.level)
         except db.InvalidId:
-            logger.info("hog for requested entry '{}' ({}) has no hog. redirect to protein info"
-                        .format(entry_id, entry.omaid))
-            return redirect("pairs", entry_id)
+            pass
+        logger.info("hog for requested entry '{}' ({}) has no hog. redirect to protein info"
+                    .format(entry_id, entry.omaid))
+        return redirect("pairs", entry_id)
 
 
 class HOGiHamFromEntry(HOGtableFromEntry):
