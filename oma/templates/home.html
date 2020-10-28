@@ -163,14 +163,14 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
 
                                 <li>
                                     <p>
-                                        Introduction to OMA: See OMA in a nutshell (<a href="">Introduction</a>) in OMA DOCS.
+                                        Introduction to OMA: See OMA in a nutshell (<a href="{% url "about" %}">Introduction</a>) in OMA DOCS.
                                     </p>
                                 </li>
 
                                 <li>
 
                                     <p>
-                                    Familiarise yourself with orthology basics: <a href="https://swissorthology.ch/service/about"> Swiss Orthology</a>
+                                    Familiarise yourself with <a href="{% url "type" %}">orthology basics</a>: <a href="https://swissorthology.ch/service/about"> Swiss Orthology</a>
                                     , <a href="https://orthology.benchmarkservice.org/proxy/"> Orthology benchmark</a>.
 
                                     </p>
@@ -179,7 +179,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
 
                                 <li>
                                     <p>
-                                        Familiarise yourself with the different types of orthologs provided: See <a href="">Different types of homologs</a> in OMA in OMA DOCS.
+                                        Familiarise yourself with the <a href="{% url "homologs" %}">different types of homologs</a> in the OMA doc.
                                     </p>
                                 </li>
 
@@ -218,6 +218,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                         <div class="oma-card-content">
                              <br>
                             <ul>
+                                <li> <a href="https://corona.omabrowser.org/"><img src="{% static "image/logo-oma-corona.svg" %}" style="width: 80px;"> Corona OMA Browser <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
                                 <li> <a  href="https://omabrowser.org/standalone/">OMA StandAlone <span class="badge badge-pill badge-dark float-right">Software</span></a> </li>
                                 <li> <a  href="https://github.com/dessimozlab/pyham">pyHam </a> <span class="badge badge-pill badge-dark float-right">Python library</span></li>
                                 <li> <a  href="{% url 'function-projection-input' %}">Functional prediction <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
