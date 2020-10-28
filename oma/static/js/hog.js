@@ -41,6 +41,18 @@ hog_theme = function () {
                     scale: "linear",
                     field: "gc_content",
                     func: "color1d"
+                },
+                {
+                    name: "Number of Exons",
+                    scale: "linear",
+                    field: "nr_exons",
+                    func: "color1d"
+                },
+                {
+                    name: "Gene Similarity",
+                    scale: "linear",
+                    field: "similarity",
+                    func: "color1d"
                 }
             ];
 
@@ -329,7 +341,7 @@ hog_theme = function () {
 
                 // create div for icons
                 var header_div = document.createElement("div");
-                header_div.innerHTML = '<span id="head_button_' + i + '" class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>';
+                header_div.innerHTML = '<span id="head_button_' + i + '" class="fas fa-ellipsis-v" aria-hidden="true"></span>';
                 header_div.setAttribute("class", "header_div");
                 header_div.setAttribute("id", "header_div_" + i);
                 header_div.style.top = relativePos.top - 16 + "px";
@@ -359,6 +371,8 @@ hog_theme = function () {
                 toolt_div.style.top = relative_menuPos.top  + "px";
                 toolt_div.style.left = relative_menuPos.left  + "px";
 
+                console.log(hog);
+
                 // add menu table
                 toolt_div.innerHTML += '<ul class="list-group ">';
 
@@ -374,7 +388,7 @@ hog_theme = function () {
                     var fasta_url = '/oma/hogs/' + first_gene.protid + '/' + current_opened_taxa_name.replace(" ", "%20") + '/fasta';
                     var table_url = '/oma/hogs/' + first_gene.protid + '/' + current_opened_taxa_name.replace(" ", "%20") + '/';
                     toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + fasta_url + '"> Sequences (Fasta) <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
-                    toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + table_url + '"> HOGs tables <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
+                    toolt_div.innerHTML += ' <li class="list-group-item menu_hog_li"> <a target="_blank" href=" ' + table_url + '"> Open sub-HOG <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> </a> </li> '
                 }
                 toolt_div.innerHTML += '</ul>';
 

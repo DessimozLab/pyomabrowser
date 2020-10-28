@@ -1,0 +1,42 @@
+{% extends "base_entry.html" %}
+{% load staticfiles %}
+
+{% block title %}Homeologs for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ nr_homo }} Homeologs{% endblock %}
+
+{% block contentTab %}
+
+
+{% if nr_homo > 0 %}
+
+    {% include "includes/groupTableAmuseBouche.html" %}
+
+{% else %}
+
+    {% if entry.get_main_isoform == entry %}
+
+<div class="alert alert-secondary" role="alert">
+  This entry does not have Homeologs
+</div>
+
+
+
+{% else %}
+
+<div class="alert alert-secondary" role="alert">
+  This entry is not the isoform used for Homeologs inferences,
+    please check entry <a href="{% url 'pair_homeologs' entry.get_main_isoform.omaid %}">{{entry.get_main_isoform.omaid}}</a> for homeologs.
+</div>
+
+
+
+{% endif %}
+
+
+
+
+{% endif %}
+
+
+
+{% endblock contentTab %}

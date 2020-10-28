@@ -1,74 +1,98 @@
-{% extends  "core.html" %}
+{% extends  "base_template.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 
-{% block title %}OMA Orthology database: orthologs among hundreds of complete genomes across all of life{% endblock %}
+{% block title %}OMA Orthology database{% endblock %}
 {% block meta_description %}OMA is a method and database for the inference of orthologs among complete genomes. We provide browsable orthology predictions, APIs, flat file downloads and a standalone version of the inference algorithm.{% endblock %}
 {% block meta_hook %} <meta name="keywords" content="orthology,evolutionary gene relations,evolution,paralogy,inference"> {% endblock %}
 
 {% block content %}
-<!--           -->
-<!-- alert    -->
-<div class="container-fluid">
-    <!-- content    -->
 
-    <div class="row">
-        <!--           -->
-        <!-- search    -->
-        <div class="col-sm-12 col-md-10 col-md-offset-1">
-            <div class="jumbotron">
-                <div class="container">
-                    {% if oma_instance_name == "full" %}
-                    <img src="{% static "image/oma2.png" %}" class="img-responsive margin-auto" alt="OMA logo">
-                    {% else %}
-                    <img src="{% static "image/omalogo-"|add:oma_instance_name|add:".svg" %}" style="max-width: 528px;" class="img-responsive margin-auto" alt="OMA logo">
-                    {% endif %}
-                    <p><br></p>
-                    <form role="search" id="searchForm" action="/cgi-bin/gateway.pl" method="GET">
-                    <div class="col-md-10 col-md-offset-1">
-                        <div class="col-sm-4">
-                            <select id="selectBrowser" class="form-control btn-mini" name="f" onchange="update_autocomplete()">
-                                <option value="DisplayEntry" selected="selected">Identifier</option>
-                                <option value="SearchSeqDb">Protein sequence</option>
-                                <option value="DisplayGroup">OMA group</option>
-                                <option value="SearchDb">Full-text search</option>
-                            </select>
-                        </div>
-                        <div class="col-sm-8">
-                            <div class="input-group">
-                                <input id='inputBrowser' name="p1" type="text" class="form-control" />
-                                <span class="input-group-btn">
-                                <button class="btn btn-default" id='loupeBrowser' type="submit">
-                                    <span class="glyphicon glyphicon-search "></span>
-                                </button>
-                                </span>
-                            </div>
-                            <a href="#" id="toggle">Expand (e.g. to paste a long amino-acid sequence)</a>
-                        </div>
-                    </div>
-                    </form>
-                    <br>
+<div id="oma-search-container">
+
+    <div class="container">
+
+        {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
+        <div class="logo-oma-lg"></div>
+        {% else %}
+        <div class="logo-oma-lg-{{ oma_instance_name }}"></div>
+        {% endif %}
+
+        <div class="oma-search">
+            <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
+                <div class="oma-search-select">
+                    <select id="selectBrowser" class="btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
+                       {% include "includes/search_select.html" %}
+                    </select>
                 </div>
-                <div class="row top-buffer">
-                    <div class="col-md-8 col-md-offset-2">
-                        <div class="text-center">
-                            Examples:
-                            {% if oma_instance_name == "full" or oma_instance_name == "basf" %}
-                                <span class="ex" onclick="fillExample('DisplayEntry','HUMAN22168')">Entry HUMAN22168</span> -
-                                <span class="ex" onclick="fillExample('DisplayEntry','P53_RAT')">Entry P53_RAT</span> -
-                                <span class="ex" onclick="fillExample('SearchDb','photoreceptor')">Search for "photoreceptor"</span>
-                            {% elif oma_instance_name == "corona" %}
-                                <span class="ex" onclick="fillExample('DisplayEntry','SARS200001')">Entry SARS200001</span> -
-                                <span class="ex" onclick="fillExample('DisplayEntry','R1AB_SARS2')">Entry R1AB_SARS2</span> -
-                                <span class="ex" onclick="fillExample('SearchDb','glycoprotein')">Search for "glycoprotein"</span>
-                            {% endif %}
-                        </div>
+                <input id='inputBrowser' name="query" type="text" class="" placeholder="Please enter a value"/>
+                <button><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
+            </form>
+        </div>
+
+        <p><a href="#" data-toggle="modal" data-target="#largeTextareaModal">Expand (e.g. to paste a long amino-acid
+            sequence)</a></p>
+
+        <!-- Modal Textarea -->
+        <div class="modal fade" id="largeTextareaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-body oma-search">
+                        <img src="{% static "image/logo-oma-o.svg" %}" alt="Icon OMA"/>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+                        <form class="search-long-string" role="search" id="searchFormModal" action="{% url 'search' %}" method="POST">{% csrf_token %}
+                            <div class="oma-search-select">
+                                 <select id="selectBrowserModal" class="btn-mini" name="type" onchange="update_autocomplete_enableing('searchFormModal')">
+                                    {% include "includes/search_select.html" %}
+                                </select>
+                            </div>
+                            <textarea id='inputBrowserModal' name="query" type="text" class="" placeholder="Please enter a value"></textarea>
+                            <button type="submit" class="btn btn-lg btn-block btn-primary">Search</button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+        <!-- End Modal Textarea -->
 
+        <div class="oma-quick-start">
+            <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/>
+            <p>
+                <strong>Examples:</strong>
+                {% block search_examples %}
+                    <span class="ex" onclick="fillExample('entry_id','HUMAN22168')">Entry HUMAN22168</span> -
+                    <span class="ex" onclick="fillExample('entry_id','P53_RAT')">Entry P53_RAT</span> -
+                    <span class="ex" onclick="fillExample('entry_fulltext','photoreceptor')">Search for "photoreceptor"</span> -
+                    <span class="ex" onclick="fillExample('genome_name', 'Drosophila')">"Drosophila" species</span>
+                {% endblock search_examples %}
+            </p>
+        </div>
+
+
+
+        <div class="d-none d-lg-block scroll4more">
+
+            <h5>Scroll to discover more</h5>
+
+
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 258.97" >
+  <title>chevronDown</title>
+  <g id="Layer_2" data-name="Layer 2">
+    <g id="Capa_1" data-name="Capa 1">
+      <path d="M298.41,241.44,506.13,34.16A20,20,0,0,0,477.87,5.84L270.14,213.14a20,20,0,0,1-28.3,0L34.13,5.84A20,20,0,0,0,5.87,34.16l207.7,207.27A60.07,60.07,0,0,0,298.41,241.44Z"/>
+    </g>
+  </g>
+</svg>
+        </div>
+
+
+
+    </div>
+</div>
 
 <script type="text/javascript">
 function fillExample(search_select, term){
@@ -77,191 +101,290 @@ function fillExample(search_select, term){
     $("#textarea").val(term).focus();
 }
 
-var textbox = $("#inputBrowser");
-var textarea = $("<textarea id='textarea' rows='3' name='p1'></textarea>");
-$("#toggle").click(function () {
-    //Check for textbox or textarea
-    if ($("#inputBrowser").length === 1) {
-        //Copy value to textarea
-        textarea.val(textbox.val());
-        textarea.css("width", textbox.width());
-        //Replace textbox with textarea
-        textbox = textbox.replaceWith(textarea);
-        $("#toggle").text('Revert to normal');
-    } else {
-        //Copy value to textbox
-        textbox.val(textarea.val());
-        //Replace textarea with textbox
-        textarea = textarea.replaceWith(textbox);
-        $("#toggle").text('Expand (e.g. to paste a long amino-acid sequence)');
-    }
-    $('#selectBrowser').val('SearchSeqDb');
-});
 
-function update_autocomplete() {
-        var sel=document.getElementById('selectBrowser');
-        var txt=document.getElementById('inputBrowser');
-        if (sel.value === "DisplayEntry"){
-            $('#inputBrowser').autocomplete('enable');
-        } else {
-            $('#inputBrowser').autocomplete('disable');
-        }
-    }
+
 $('#inputBrowser').autocomplete(autocomplete_opts);
-
-
+$('#inputBrowserModal').autocomplete(autocomplete_opts);
 </script>
-<div class="row">
-    <!--           -->
-    <!-- 3 columns    -->
-    <div class=" col-sm-12 col-md-10 col-md-offset-1">
-        <div class="jumbotron">
-            <div class="container">
-                <div class="row">
-                   {% block lower_home_boxes %}
-                    <div class="col-sm-4 col-md-4 ">
 
-                        <div class="thumbnail oma-3-panels" style="background-color: #dfe6ad;">
-                            <div class="caption">
-                                <p class="text-center">
-                                    <span class="glyphicon glyphicon-xl"><a href="https://corona.omabrowser.org"><img src="{% static "image/omalogo-corona.svg"%}" style="width: 140px;"></a></span>
-                                </p>
-                                <h3>Try out our brand new <a href="https://corona.omabrowser.org">Corona OMA Browser</a></h3>
-                                <ul>
-                                    <li>all the functionality of the OMA Browser, but for <a href="https://corona.omabrowser.org/oma/release/">119 Nidovirales species</a>. </li>
-                                    <li>encompasses the human SARS and other single-stranded RNA viruses.</li>
-                            </div>
-                        </div>
 
-                        <div class="thumbnail oma-3-panels">
-                            <div class="caption">
-                                <p class="text-center ">
-                                    <span class="glyphicon glyphicon-question-sign glyphicon-xl"></span>
-                                </p>
+<div id="omaLandingOthersContainer">
 
-                                <h3>First time here?</h3>
-                                <ul>
-                                    <li>Read our
-                                        <a href="{% url 'about'  %}">brief introduction to OMA</a>.
-                                    </li>
-                                    <li>Familiarise yourself with the
-                                        <a href="{% url 'type'  %}">different types of orthologs provided</a>.
-                                    </li>
-                                    <li>Get ideas about
-                                        <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-4 col-md-4">
-                        <div class="thumbnail oma-3-panels">
-                            <div class="caption">
-
-                                <p class="text-center ">
-                                    <a href="#" data-toggle="modal" data-target=".bs-example-modal-md">
-                                        <span class="glyphicon glyphicon-circle-arrow-down glyphicon-xl"></span>
-                                    </a>
-                                </p>
-                                <h3>Download options</h3>
-                                <ul>
-                                    <li>
-                                        <b><a href="{% url 'current'  %}">Current release</a>:</b>
-                                        All data is available for downloading in a variety of formats.
-                                    </li>
-
-                                    <li>
-                                        <b><a href="/standalone">OMA Standalone</a>:</b>
-                                        OMA standalone allows you to infer orthologs on your own set of genomes.
-                                    </li>
-
-                                    <li>
-                                        <b><a href="{% url 'export' %}">Export All-All</a>:</b>
-                                        Export a set of genomes and their precomputed all-against-all comparisons for OMA standalone.
-                                    </li>
-
-                                    <li>
-                                        <b><a href="{% url 'archives'  %}">Archives</a>:</b>
-                                        Previous OMA releases remain available in this section. 
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-4 col-md-4 ">
-                        <div class="thumbnail oma-3-panels ">
-                            <div class="caption comment-text" id="latest-news">
-                                <p class="text-center ">
-                                    <span class="glyphicon glyphicon-info-sign glyphicon-xl">
-                                    </span>
-                                </p>
-                                <h3>Latest news</h3>
-                                <ul >
-				    {% autoescape off %}
-                                    {%for t in tweets %}
-                                       <li>{{ t }}</li>
-                                    {% endfor %}
-				    {% endautoescape %}
-
-                                </ul>
-                                <p><a href="https://twitter.com/intent/user?screen_name=OMABrowser" class="btn btn-primary btn-sm bottomright" role="button">Follow us on Twitter</a></p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endblock lower_home_boxes %}
+    <div id="oma-statistics">
+        <div class="container">
+            <div class="row row-centered">
+                <div class="col-md-1"></div>
+                <div class="col-md-2">
+                    <h1>{{ nr_genomes|intcomma }}</h1>
+                    <h3>Full genomes</h3>
                 </div>
+                <div class="col-md-2">
+                    <h1>{{ nr_proteins|intcomma }}</h1>
+                    <h3>Proteins</h3>
+                </div>
+                <div class="col-md-2">
+                    <h1>{{ nr_groups|intcomma }}</h1>
+                    <h3>OMA groups</h3>
+                </div>
+                <div class="col-md-2">
+                    <h1>{{ nr_hogs|intcomma }}</h1>
+                    <h3>Deepest HOGs</h3>
+                </div>
+                <div class="col-md-2">
+                    <h1>{{ release }}</h1>
+                    <h3>Release</h3>
+                </div>
+                <div class="col-md-1"></div>
             </div>
         </div>
     </div>
-</div>
-    <!--           -->
-    <!-- cite    -->
-   <div class="row">
-       <div class="col-sm-12 col-md-7 col-md-offset-1">
-           <div class="alert alert-success thd" role="alert">
-            	If you use OMA in your work, please consider citing:<br/>
-               Altenhoff A et al., <em>The OMA orthology database in 2018: retrieving evolutionary
-               relationships among all domains of life through richer web and programmatic interfaces</em>
-               Nucleic Acids Research, 2018, 46 (D1): D477-D485
-               (doi:<a href="http://doi.org/10.1093/nar/gkx1019">10.1093/nar/gkx1019</a>).
-           </div>
-       </div>
-       <div class="col_sm-12 col-md-3">
-           <div class="thd" style="text-align: right;">
-               <b>How to stay in touch:</b>
-               <p>
-                   <a class="fig" href="javascript:show_frame('frame_twitter');" title="Twitter"> <i class="fa fa-2x fa-twitter"></i></a>
-                   &nbsp;
-                   <a class="fig" href="http://omabrowser.blogspot.com" title="Blog"><i class="fa fa-2x fa-pencil-square-o"></i></a>
-                    &nbsp;
-                   <a class="fig" href="http://omabrowser.blogspot.com/feeds/posts/default" title="RSS"><i class="fa fa-2x fa-rss"></i></a>
-                   &nbsp;
-                   <a class="fig" href="javascript:show_frame('frame_mailman');" title="Newsletter">
-                       <i class="fa fa-2x fa-newspaper-o"></i>
-                       <!--<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 32 32" focusable="false"><title>Newsletter</title><path d="M4,14h20v-2H4V14z M15,26h7v-2h-7V26z M15,22h9v-2h-9V22z M15,18h9v-2h-9V18z M4,26h9V16H4V26z M28,10V6H0v22c0,0,0,4,4,4   h25c0,0,3-0.062,3-4V10H28z M4,30c-2,0-2-2-2-2V8h24v20c0,0.921,0.284,1.558,0.676,2H4z"/></svg> -->
-                       </a>
 
-               </p>
-                <span id="frame_twitter" style="display: none;"><a href="https://twitter.com/omabrowser" class="twitter-follow-button" data-show-screen-name="false" data-show-count="true">Follow</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></span>
-                <span id="frame_mailman" style="display: none;">
-                    <form action="https://lists.dessimoz.org/subscribe/oma" method="POST">
-                        Email: <input name="email" size="13"/>
-                        <input type="submit" value="Sign up" /><br/>(max 1-2 emails/month, no spam!)
-                    </form>
-                </span>
-                <script>
-                    function show_frame(frame){
-                        var frames = ["frame_twitter", "frame_mailman"];
-                        frames.forEach(function(frm){
-                            document.getElementById(frm).style.display = (frm === frame ? 'initial' : 'none');
-                        });
-                    }
-                </script>
-           </div>
-       </div>
+ <div id="oma-landing-cards">
+        <div class="container-fluid">
+            <div class="row ">
+                {% block lower_home_boxes %}
+                <div class="col-lg-3 col-md-6">
+                    <div class="oma-card">
+                        {% block first_card %}
+                        <div class="oma-mobile-accordion">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                 preserveAspectRatio="xMidYMid" width="75.75" height="95.88" viewBox="0 0 37.875 47.94">
+                                <path d="M32.797,11.784 C32.269,11.877 31.886,12.319 31.886,12.835 L31.886,14.923 C31.886,15.123 31.811,15.299 31.708,15.455 C31.672,15.513 31.644,15.578 31.597,15.628 C31.546,15.675 31.482,15.702 31.423,15.739 C31.266,15.842 31.090,15.916 30.889,15.916 C30.688,15.916 30.511,15.842 30.355,15.739 C30.296,15.703 30.231,15.675 30.181,15.628 C30.134,15.578 30.106,15.513 30.069,15.455 C29.966,15.299 29.892,15.123 29.892,14.923 L29.892,12.835 C29.892,11.354 30.967,10.089 32.449,9.826 C35.272,9.329 35.869,7.466 35.873,5.991 C35.876,4.275 34.793,2.725 33.240,2.219 C31.942,1.800 30.596,1.995 29.545,2.757 C28.514,3.505 27.898,4.707 27.898,5.976 C27.898,6.525 27.452,6.971 26.902,6.971 C26.351,6.971 25.905,6.525 25.905,5.976 C25.905,4.074 26.828,2.270 28.373,1.149 C29.946,0.009 31.944,-0.290 33.856,0.329 C36.222,1.098 37.871,3.427 37.866,5.994 C37.859,9.107 36.011,11.216 32.797,11.784 ZM30.889,19.892 C30.629,19.892 30.370,19.782 30.181,19.604 C30.002,19.415 29.892,19.156 29.892,18.897 C29.892,18.639 30.002,18.381 30.181,18.192 C30.550,17.824 31.227,17.824 31.597,18.192 C31.776,18.381 31.886,18.639 31.886,18.897 C31.886,19.156 31.776,19.415 31.597,19.604 C31.407,19.782 31.148,19.892 30.889,19.892 ZM21.972,2.043 C21.603,2.016 21.233,2.001 20.856,2.001 C12.246,2.001 4.972,8.905 4.972,17.077 L4.972,19.591 C4.972,19.647 4.949,19.695 4.940,19.748 C4.932,19.802 4.938,19.855 4.920,19.908 L2.247,27.819 L5.792,29.023 C6.152,29.145 6.411,29.461 6.459,29.837 L7.705,39.514 C7.815,40.368 8.453,41.066 9.294,41.253 L16.153,42.776 C16.446,42.841 16.694,43.034 16.828,43.302 L17.875,45.940 L32.875,45.940 L29.911,31.631 C29.841,31.278 29.969,30.915 30.244,30.684 C30.284,30.649 34.424,27.052 35.573,20.671 C35.670,20.130 36.188,19.770 36.730,19.869 C37.272,19.966 37.633,20.482 37.535,21.023 C36.473,26.921 33.176,30.611 31.973,31.791 L34.857,46.538 C34.914,46.829 34.838,47.131 34.649,47.360 C34.459,47.589 34.173,47.940 33.875,47.940 L17.875,47.940 C17.497,47.940 16.709,47.510 16.540,47.173 L15.257,44.613 L8.861,43.192 C7.204,42.826 5.944,41.449 5.728,39.767 L4.561,30.704 L0.663,29.380 C0.143,29.204 -0.135,28.640 0.040,28.122 L2.978,19.428 L2.978,17.077 C2.978,7.827 11.165,0.013 20.856,0.013 C21.282,0.013 21.702,0.029 22.120,0.060 C22.669,0.101 23.081,0.578 23.040,1.125 C22.999,1.672 22.524,2.083 21.972,2.043 Z"
+                                      class="cls-1"/>
+                            </svg>
+                            <h1>First time here?</h1>
+                            <i class="material-icons">
+                                keyboard_arrow_right
+                            </i>
+                        </div>
+                        <div class="oma-card-content">
+                            <br>
+                            <ul>
+
+                                <li>
+                                    <p>
+                                        Introduction to OMA: See OMA in a nutshell (<a href="{% url "about" %}">Introduction</a>) in OMA doc.
+                                    </p>
+                                </li>
+
+                                <li>
+
+                                    <p>
+                                    Familiarise yourself with <a href="{% url "type" %}">orthology basics</a>: <a href="https://swissorthology.ch/service/about"> Swiss Orthology</a>
+                                    , <a href="https://orthology.benchmarkservice.org/proxy/"> Orthology benchmark</a>.
+
+                                    </p>
+                                </li>
+
+
+                                <li>
+                                    <p>
+                                        Familiarise yourself with the <a href="{% url "homologs" %}">different types of homologs</a> in the OMA doc.
+                                    </p>
+                                </li>
+
+                                <li>
+                                    <p>
+                                    Get ideas about
+                                    <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
+                                    </p>
+                                </li>
+
+
+
+                                <li class="btn-more-container" >
+                                    <button type="button"  class="btn btn-outline-dark " onclick="location.href='{% url 'about' %}'" >Start to read about OMA</button>
+                                </li>
+                            </ul>
+                        </div>
+                        {% endblock first_card %}
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="oma-card">
+                        {% block second_card %}
+                        <div class="oma-mobile-accordion">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                 preserveAspectRatio="xMidYMid" width="96" height="95.82" viewBox="0 0 48 47.91">
+                                <path d="M47.000,18.909 L44.000,18.909 C43.447,18.909 43.000,18.507 43.000,17.956 C43.000,17.405 43.447,16.909 44.000,16.909 L47.000,16.909 C47.553,16.909 48.000,17.405 48.000,17.956 C48.000,18.507 47.553,18.909 47.000,18.909 ZM41.707,5.687 C41.512,5.882 41.256,5.980 41.000,5.980 C40.744,5.980 40.488,5.882 40.293,5.687 C39.902,5.298 39.902,4.666 40.293,4.276 L44.293,0.284 C44.684,-0.106 45.316,-0.106 45.707,0.284 C46.098,0.674 46.098,1.306 45.707,1.695 L41.707,5.687 ZM31.898,31.677 C31.164,32.339 30.997,33.765 30.997,34.212 L30.997,42.479 C30.997,42.530 30.993,42.581 30.985,42.631 C30.703,44.454 28.880,47.898 23.998,47.898 C19.117,47.898 17.293,44.454 17.011,42.631 C17.003,42.581 16.999,42.530 16.999,42.479 L16.999,34.215 C16.995,33.741 16.824,32.366 16.089,31.668 C11.453,28.178 8.998,23.628 8.998,18.498 C8.998,9.945 15.727,2.986 23.998,2.986 C32.269,2.986 38.998,9.945 38.998,18.498 C38.998,23.633 36.540,28.186 31.898,31.677 ZM23.998,45.902 C28.082,45.902 28.878,42.977 28.997,42.388 L28.997,37.981 C27.333,38.667 25.706,38.925 24.224,38.925 C22.051,38.925 20.210,38.395 18.999,37.930 L18.999,42.390 C19.114,42.961 19.904,45.902 23.998,45.902 ZM23.998,4.982 C16.830,4.982 10.998,11.045 10.998,18.498 C10.998,24.190 14.459,27.966 17.363,30.131 C17.380,30.144 17.388,30.162 17.403,30.176 C17.417,30.188 17.435,30.191 17.448,30.204 C18.954,31.612 18.999,33.949 18.999,34.212 L18.999,35.772 C20.422,36.432 24.653,37.986 28.997,35.777 L28.997,34.212 C28.997,33.943 29.042,31.553 30.564,30.189 C30.576,30.179 30.590,30.176 30.602,30.167 C30.615,30.156 30.620,30.141 30.634,30.131 C33.537,27.966 36.998,24.190 36.998,18.498 C36.998,11.045 31.166,4.982 23.998,4.982 ZM3.707,35.629 C3.512,35.824 3.256,35.922 3.000,35.922 C2.744,35.922 2.488,35.824 2.293,35.629 C1.902,35.239 1.902,34.607 2.293,34.218 L6.293,30.226 C6.684,29.836 7.316,29.836 7.707,30.226 C8.098,30.615 8.098,31.247 7.707,31.636 L3.707,35.629 ZM6.999,5.980 C6.743,5.980 6.487,5.882 6.292,5.687 L2.292,1.695 C1.901,1.306 1.901,0.674 2.292,0.284 C2.683,-0.106 3.315,-0.106 3.706,0.284 L7.706,4.276 C8.097,4.666 8.097,5.298 7.706,5.687 C7.511,5.882 7.255,5.980 6.999,5.980 ZM5.000,17.956 C5.000,18.507 4.553,18.909 4.000,18.909 L1.000,18.909 C0.447,18.909 0.000,18.507 0.000,17.956 C0.000,17.405 0.447,16.909 1.000,16.909 L4.000,16.909 C4.553,16.909 5.000,17.405 5.000,17.956 ZM41.708,30.226 L45.708,34.218 C46.099,34.607 46.099,35.239 45.708,35.629 C45.513,35.824 45.257,35.922 45.001,35.922 C44.745,35.922 44.489,35.824 44.294,35.629 L40.294,31.636 C39.903,31.247 39.903,30.615 40.294,30.226 C40.685,29.836 41.317,29.836 41.708,30.226 Z"
+                                      class="cls-1"/>
+                            </svg>
+                            <h1>OMA tools</h1>
+                            <i class="material-icons">
+                                keyboard_arrow_right
+                            </i>
+                        </div>
+                        <div class="oma-card-content">
+                             <br>
+                            <ul>
+                                <li> <a href="https://corona.omabrowser.org/"><img src="{% static "image/logo-oma-corona.svg" %}" style="width: 80px;"> Corona OMA Browser <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
+                                <li> <a  href="https://omabrowser.org/standalone/">OMA StandAlone <span class="badge badge-pill badge-dark float-right">Software</span></a> </li>
+                                <li> <a  href="https://github.com/dessimozlab/pyham">pyHam </a> <span class="badge badge-pill badge-dark float-right">Python library</span></li>
+                                <li> <a  href="{% url 'function-projection-input' %}">Functional prediction <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
+                                <li> <a  href="{% url 'land_syntenyDP' %}">Synteny dotplot <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
+                                <li class="btn-more-container" >
+                                    <button type="button"  class="btn btn-outline-dark " onclick="location.href='{% url 'tool_catalog' %}'" >Discover more tools</button>
+                                </li>
+                            </ul>
+
+                        </div>
+                        {% endblock second_card %}
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="oma-card">
+                        {% block third_card %}
+                        <div class="oma-mobile-accordion">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                 preserveAspectRatio="xMidYMid" width="90" height="78" viewBox="0 0 60 52">
+                                <path d="M45.123,43.992 C45.081,43.997 45.040,44.000 44.999,44.000 C44.502,44.000 44.070,43.628 44.008,43.122 C43.940,42.575 44.329,42.074 44.877,42.008 C52.236,41.096 58.000,34.822 58.000,27.726 C58.000,19.856 51.510,13.453 43.533,13.453 C43.241,13.453 42.947,13.470 42.656,13.501 C42.201,13.557 41.762,13.278 41.606,12.842 C39.304,6.357 33.085,1.999 26.133,1.999 C17.091,1.999 9.734,9.258 9.734,18.179 C9.734,18.934 9.800,19.700 9.934,20.519 C10.014,21.006 9.727,21.479 9.257,21.632 C4.916,23.046 2.000,27.029 2.000,31.543 C2.000,37.308 6.755,42.000 12.600,42.000 L15.000,42.000 C15.552,42.000 16.000,42.446 16.000,43.000 C16.000,43.552 15.552,44.000 15.000,44.000 L12.600,44.000 C5.652,44.000 0.000,38.412 0.000,31.543 C0.000,26.441 3.119,21.910 7.844,20.018 C7.770,19.390 7.734,18.782 7.734,18.179 C7.734,8.155 15.988,-0.001 26.133,-0.001 C33.672,-0.001 40.443,4.572 43.220,11.458 C43.325,11.455 43.429,11.453 43.533,11.453 C52.613,11.453 60.000,18.753 60.000,27.726 C60.000,35.813 53.465,42.958 45.123,43.992 ZM22.707,42.293 L29.000,48.585 L29.000,29.000 C29.000,28.447 29.448,28.000 30.000,28.000 C30.552,28.000 31.000,28.447 31.000,29.000 L31.000,48.585 L37.293,42.293 C37.684,41.902 38.316,41.902 38.707,42.293 C39.098,42.683 39.098,43.316 38.707,43.706 L30.709,51.705 C30.616,51.798 30.505,51.872 30.381,51.923 C30.259,51.973 30.130,51.999 30.000,51.999 C29.870,51.999 29.741,51.973 29.619,51.923 C29.495,51.872 29.384,51.798 29.292,51.705 L21.293,43.706 C20.902,43.316 20.902,42.683 21.293,42.293 C21.684,41.902 22.316,41.902 22.707,42.293 Z"
+                                      class="cls-1"/>
+                            </svg>
+                            <h1>Download options</h1>
+                            <i class="material-icons">
+                                keyboard_arrow_right
+                            </i>
+                        </div>
+                        <div class="oma-card-content">
+                             <br>
+                            <ul>
+                                <li><b><a href="{% url 'current'  %}">Current release</a>:</b>
+                                    All data is available for download in a variety of formats.
+                                </li>
+
+                                <li><b><a href="{% url 'api-docs:docs-index' %}">API</a>:</b>
+                                    The OMA Browser now has a REST API !
+                                </li>
+
+                                <li><b><a href="{% url 'export' %}">Export All-All</a>:</b>
+                                    Export a set of genomes and their precomputed all-against-all comparisons for OMA standalone.
+                                </li>
+
+                                <li class="btn-more-container" >
+                                    <button type="button" class="btn btn-outline-dark" onclick="location.href='{% url 'uses' %}'"  >See more download options</button>
+                                </li>
+                            </ul>
+                        </div>
+                        {% endblock third_card %}
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="oma-card">
+                        {% block forth_card %}
+                        <div class="oma-mobile-accordion">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                 preserveAspectRatio="xMidYMid" width="90" height="90" viewBox="0 0 60 60">
+                                <path d="M59.000,51.999 L38.002,51.999 C34.141,51.999 31.000,55.139 31.000,58.999 C31.000,59.553 30.552,59.999 30.000,59.999 C29.448,59.999 29.000,59.553 29.000,58.999 C29.000,55.139 25.859,51.999 21.998,51.999 L1.000,51.999 C0.448,51.999 -0.000,51.552 -0.000,50.999 L-0.000,0.999 C-0.000,0.446 0.448,-0.002 1.000,-0.002 L22.267,-0.002 C22.274,-0.002 22.280,0.002 22.287,0.002 C25.634,0.010 28.541,1.912 30.000,4.689 C31.459,1.912 34.366,0.010 37.713,0.002 C37.720,0.002 37.726,-0.002 37.733,-0.002 L59.000,-0.002 C59.552,-0.002 60.000,0.446 60.000,0.999 L60.000,50.999 C60.000,51.552 59.552,51.999 59.000,51.999 ZM29.000,8.732 C29.000,5.021 25.980,2.002 22.267,2.002 C22.263,2.002 22.259,2.000 22.255,2.000 L2.000,2.000 L2.000,49.999 L22.267,49.999 C22.299,49.999 22.326,50.015 22.357,50.018 C25.037,50.124 27.419,51.399 29.000,53.356 L29.000,8.733 C29.000,8.733 29.000,8.733 29.000,8.732 C29.000,8.732 29.000,8.732 29.000,8.732 ZM58.000,2.000 L37.745,2.000 C37.741,2.000 37.737,2.002 37.733,2.002 C34.021,2.002 31.000,5.021 31.000,8.732 C31.000,8.732 31.000,8.732 31.000,8.732 C31.000,8.733 31.000,8.733 31.000,8.733 L31.000,53.356 C32.581,51.399 34.963,50.124 37.643,50.018 C37.674,50.015 37.701,49.999 37.733,49.999 L58.000,49.999 L58.000,2.000 ZM36.000,38.000 C36.000,37.446 36.448,37.000 37.000,37.000 L52.000,37.000 C52.552,37.000 53.000,37.446 53.000,38.000 C53.000,38.552 52.552,39.000 52.000,39.000 L37.000,39.000 C36.448,39.000 36.000,38.552 36.000,38.000 ZM52.000,27.999 L37.000,27.999 C36.448,27.999 36.000,27.552 36.000,26.998 C36.000,26.447 36.448,25.999 37.000,25.999 L52.000,25.999 C52.552,25.999 53.000,26.447 53.000,26.998 C53.000,27.552 52.552,27.999 52.000,27.999 ZM52.000,15.999 L37.000,15.999 C36.448,15.999 36.000,15.552 36.000,14.999 C36.000,14.446 36.448,13.999 37.000,13.999 L52.000,13.999 C52.552,13.999 53.000,14.446 53.000,14.999 C53.000,15.552 52.552,15.999 52.000,15.999 ZM23.000,39.000 L8.000,39.000 C7.448,39.000 7.000,38.552 7.000,38.000 C7.000,37.446 7.448,37.000 8.000,37.000 L23.000,37.000 C23.552,37.000 24.000,37.446 24.000,38.000 C24.000,38.552 23.552,39.000 23.000,39.000 ZM23.000,27.999 L8.000,27.999 C7.448,27.999 7.000,27.552 7.000,26.998 C7.000,26.447 7.448,25.999 8.000,25.999 L23.000,25.999 C23.552,25.999 24.000,26.447 24.000,26.998 C24.000,27.552 23.552,27.999 23.000,27.999 ZM23.000,15.999 L8.000,15.999 C7.448,15.999 7.000,15.552 7.000,14.999 C7.000,14.446 7.448,13.999 8.000,13.999 L23.000,13.999 C23.552,13.999 24.000,14.446 24.000,14.999 C24.000,15.552 23.552,15.999 23.000,15.999 Z"
+                                      class="cls-1"/>
+                            </svg>
+                            <h1>Latest news</h1>
+                            <i class="material-icons">
+                                keyboard_arrow_right
+                            </i>
+                        </div>
+                        <div class="oma-card-content">
+                             <br>
+                            <!-- Insert Twitter feed -->
+                            <div class="oma-twitter">
+                                <ul>
+                                    {% autoescape off %}
+                                    {%for t in tweets %}
+                                    <li>{{ t }}</li>
+                                    {% endfor %}
+				                    {% endautoescape %}
+                                </ul>
+                            </div>
+                            <br>
+                            <h1>Stay in touch</h1>
+                            <div class="icons-stay-in-touch">
+                                <a href="javascript:show_frame('frame_twitter');" title="Twitter">
+                                    <img src="{% static "image/icon-twitter-sm.png" %}" alt="Twitter"/>
+                                </a>
+                                <a href="http://omabrowser.blogspot.com" title="Blog">
+                                    <img src="{% static "image/icon-blog-write-sm.png" %}" alt="Blog"/>
+                                </a>
+                                <a href="javascript:show_frame('frame_mailman');" title="Newsletter">
+                                    <img src="{% static "image/icon-newspaper-sm.png" %}" alt="News"/>
+                                </a>
+                                <a href="http://omabrowser.blogspot.com/feeds/posts/default" title="RSS">
+                                    <img src="{% static "image/icon-rss-sm.png" %}" alt="RSS"/>
+                                </a>
+                            </div>
+                            <span id="frame_twitter" style="display: none;"><a href="https://twitter.com/omabrowser" class="twitter-follow-button" data-show-screen-name="false" data-show-count="true">Follow</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></span>
+                            <span id="frame_mailman" style="display: none;">
+                                <form action="https://lists.dessimoz.org/subscribe/oma" method="POST">
+                                    Email: <input name="email" size="13"/>
+                                    <input type="submit" value="Sign up" /><br/>(max 1-2 emails/month, no spam!)
+                                </form>
+                            </span>
+                            <script>
+                                function show_frame(frame){
+                                    var frames = ["frame_twitter", "frame_mailman"];
+                                    frames.forEach(function(frm){
+                                        document.getElementById(frm).style.display = (frm === frame ? 'initial' : 'none');
+                                    });
+                                }
+                            </script>
+                        </div>
+                        {% endblock forth_card %}
+                    </div>
+                </div>
+                {% endblock lower_home_boxes %}
+            </div>
+        </div>
     </div>
+
+    <div id="oma-citation">
+        <div class="container">
+            <div class="oma-alert">
+                <img src="{% static "image/icon-info.svg" %}" alt="!"/>
+                <p>If you use OMA in your work, please consider citing:<br/>
+               Altenhoff A et al., <em> <b>The OMA orthology database in 2018: retrieving evolutionary
+               relationships among all domains of life through richer web and programmatic interfaces </b></em>
+               Nucleic Acids Research, 2018, 46 (D1): D477-D485
+               (doi:<a href="http://doi.org/10.1093/nar/gkx1019">10.1093/nar/gkx1019</a>)</p>
+            </div>
+        </div>
+    </div>
+
 </div>
-<!--    end    -->
-<!-- content    -->
+
+<script>
+
+    $('.oma-mobile-accordion').click(function () {
+        if ( $(window).width() < 769) {
+            $(this).next('.oma-card-content').slideToggle('fast').siblings('.oma-card-content:visible').slideUp('fast');
+            $(this).toggleClass("active").siblings().removeClass("active");
+
+        }
+    });
+
+    function resize() {
+
+        if ($(window).width() < 769) {
+            [].forEach.call(document.querySelectorAll('.oma-card-content'), function (el) {
+                $(el).toggle(false);
+                $(el).prev('.oma-mobile-accordion').removeClass("active");
+            });
+        }
+        ;
+        if ($(window).width() > 769) {
+            [].forEach.call(document.querySelectorAll('.oma-card-content'), function (el) {
+                $(el).toggle(true);
+                $(el).prev('.oma-mobile-accordion').removeClass("active");
+            });
+        }
+        ;
+
+    }
+
+
+    window.onresize = resize;
+
+
+</script>
 
 {% endblock content %}

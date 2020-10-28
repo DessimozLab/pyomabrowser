@@ -1,0 +1,12 @@
+{% extends  "base_hog.html" %}
+
+{% block contentTab %}
+<div id="tooltip">
+            <a href="{% url 'hogs_orthoxml' hog.hog_id %}"><i class="fas fa-download"></i> OrthoXML</a> /
+            <a href="{% url 'taxonomy-detail' rootlevel %}?type=phyloxml"><i class="fas fa-download"></i> Phyloxml species tree ({{ rootlevel }})</a> /
+            <a href="{% url 'hog_fasta' hog.hog_id hog.level %}"><i class="fas fa-download"></i> Sequences (fasta)</a>
+{#            <a href="{% url 'hog_msa' hog.hog_id hog.level %}"><i class="fas fa-download"></i> MSA (fasta)</a>#}
+        </div>
+{% include "includes/groupTableApi.html" %}
+
+{% endblock contentTab %}

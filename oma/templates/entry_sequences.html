@@ -1,0 +1,72 @@
+{% extends "base_entry.html" %}
+{% load staticfiles %}
+{% load oma_extras %}
+
+{% block title %}Sequences for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} OMA stores the following information about the gene/protein.{% endblock %}
+
+{% block contentTab %}
+
+
+<div>
+
+    <h4 >Protein Sequence </h4>
+    <h6 >Download:<a href="{% url 'entry_fasta' entry.omaid %}"><i class="fas fa-download"></i> Fasta</a></h6>
+
+    <div class="card " style="display: inline-block">
+
+        <button class="btn btn-sm prot " data-clipboard-text="{{ entry.sequence}}">
+    Copy to clipboard
+</button>
+
+
+            <div id="ontology-panel" class="card-body" >
+                <pre >{{ entry.sequence|uniprot_seq_repr }}</pre>
+            </div>
+
+    </div>
+
+</div>
+
+
+<br>
+
+
+<div class=" ">
+      <div >
+         <h4 >Nucleotide Sequence (cDNA) </h4>
+      </div>
+      <div class="ml-auto">
+         <h6 >
+                    Download:
+                    <a href="#"><i class="fas fa-download"></i> Fasta</a>
+                </h6>
+
+
+      </div>
+ </div>
+<div class="card" style="display: inline-block;">
+
+    <button class="btn btn-sm cdna " data-clipboard-text="{{ entry.cdna}}">
+    Copy to clipboard
+</button>
+
+
+            <div  class="card-body" >
+               <pre >{{ entry.cdna|uniprot_seq_repr}}</pre>
+            </div>
+
+    </div>
+
+
+<script src="{% static "js/clipboard.min.js" %}"></script>
+
+<script>
+
+    new ClipboardJS('.cdna');
+    new ClipboardJS('.prot');
+
+</script>
+
+
+{% endblock contentTab %}

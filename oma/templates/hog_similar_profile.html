@@ -1,0 +1,21 @@
+{% extends  "base_hog.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA: Hierarchical Orthologous Groups for {{ fam.id }}{% endblock %}
+
+
+{% block contentTab %}
+
+{%  if run_prof  %}
+ {% include "includes/profileTable.html" %}
+
+
+{% else %}
+
+No HOG with a similar profile found.
+
+
+{% endif %}
+
+
+{% endblock contentTab %}

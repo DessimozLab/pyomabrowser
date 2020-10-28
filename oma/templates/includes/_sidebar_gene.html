@@ -1,0 +1,215 @@
+<!-- Sidebar / menu -->
+
+<div id="sidebar-container" class="col-sm-12 col-md-3 gene-orthology full-height" > <!-- #sidebar-container -->
+
+<button href="#accordion" class="btn btn-primary d-md-none tn-lg btn-block" data-toggle="collapse">Select a tab <i class="fa chevron_alias" aria-hidden="true"> </i> </button>
+
+
+    <div class="" id="accordion">
+
+        <div class="menu-tab col-6 col-sm-12 {% if tab == 'orthologs' %} active selected {%endif%}"
+             style="cursor: pointer;" {% if tab != 'orthologs' %} onclick="window.location='{% url "pairs" entry.omaid %}'" {%endif%}
+
+        {% if tab == 'orthologs' %} data-toggle="collapse" data-target="#collapseOrthology" aria-expanded="true" aria-controls="#collapseOrthology"{%endif%}>
+            <span class="">
+                <a href="{% url 'pairs' entry.omaid %}" >Orthologs
+                    {% if entry.number_vps %}<span class="badge badge-info">{{entry.number_vps}}</span>{% endif %}
+                </a>
+                <i class="fa chevron_alias float-right" aria-hidden="true"> </i>
+            </span>
+        </div>
+
+
+        <div id="collapseOrthology"
+             class="collapse pt-0{% if tab == 'orthologs' %} show{%endif%}"
+             aria-labelledby="headingOne" data-parent="#accordion">
+
+            <div class="card-body pl-4 py-2">
+
+                <div id="filter-taxon-container">
+                </div>
+
+
+                <div class="dropdown-divider pl-0"></div>
+                <div>
+
+
+                <h6>Display only:</h6>
+
+                <div class="form-check pl-4">
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="hogFilter">
+                        <label class="form-check-label" for="hogFilter">
+                            HOG
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="omagroupFilter">
+                        <label class="form-check-label" for="omagroupFilter">
+                            OMA Group
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="pairwiseFilter">
+                        <label class="form-check-label" for="pairwiseFilter">
+                            Pairwise
+                        </label>
+                    </div>
+
+                </div>
+
+
+                </div>
+
+
+            </div>
+        </div>
+
+    <div class="menu-tab col-6 col-sm-12 {% if tab == 'paralogs' %} active selected {%endif%}" style="cursor: pointer;" {% if tab != "paralogs" %}  onclick="window.location='{% url 'pair_paralogs' entry.omaid %}'" {%endif%}
+             {% if tab == 'paralogs' %} data-toggle="collapse" data-target="#collapseParalogy" aria-expanded="true" aria-controls="#collapseParalogy"{%endif%}>
+            <span class="">
+                <a href="{% url 'pair_paralogs' entry.omaid %}" >Paralogs
+                    {% if nr_pps %}<span class="badge badge-info">{{nr_pps}}</span>{% endif %}
+                </a>
+                <i class="fa chevron_alias float-right" aria-hidden="true"> </i>
+            </span>
+        </div>
+
+
+        <div id="collapseParalogy"
+             class="collapse pt-0{% if tab == 'paralogs' %} show{%endif%}"
+             aria-labelledby="headingOne" data-parent="#accordion">
+
+            <div class="card-body pl-4 py-2">
+                <h6>Filter by Taxon</h6>
+
+                <div class="form-check pl-4">
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="mammalsFilter">
+                        <label class="form-check-label" for="mammalsFilter">
+                            Mammals
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="vertebratesFilter">
+                        <label class="form-check-label" for="vertebratesFilter">
+                            Vertebrates
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="customFilter1">
+                        <label class="form-check-label" for="customFilter1">
+                            Custom 1
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="dropdown-divider pl-0"></div>
+
+                <h6>Display only:</h6>
+
+                <div class="form-check pl-4">
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="hogFilter">
+                        <label class="form-check-label" for="hogFilter">
+                            HOG
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="omagroupFilter">
+                        <label class="form-check-label" for="omagroupFilter">
+                            OMA Group
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="pairwiseFilter">
+                        <label class="form-check-label" for="pairwiseFilter">
+                            Pairwise
+                        </label>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div  class="menu-tab col-6 col-sm-12 {% if tab == 'geneinformation' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'geneinformation' %}
+              onclick="window.location='{% url 'entry_info' entry.omaid %}'" {%endif%}
+              >
+
+            <span class="">
+                <a href="{% url 'entry_info' entry.omaid %}" >Gene information</a>
+            </span>
+        </div>
+
+        <div  class="menu-tab col-6 col-sm-12 {% if tab == 'goa' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'goa' %}
+              onclick="window.location='{% url 'entry_goa' entry.omaid %}'" {%endif%}
+              >
+
+            <span class="">
+                <a href="{% url 'entry_goa' entry.omaid %}" >GO Annotations</a>
+            </span>
+        </div>
+
+        <div  class="menu-tab col-6 col-sm-12 {% if tab == 'sequences' %} active selected {%endif%}"
+              style="cursor: pointer;"  {% if tab != 'sequences' %}
+              onclick="window.location='{% url 'entry_sequences' entry.omaid %}'" {%endif%}
+              >
+
+            <span class="">
+                <a href="{% url 'entry_sequences' entry.omaid %}" >Sequences</a>
+            </span>
+        </div>
+
+        <div class="menu-tab  col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}" style="cursor: pointer;" {% if tab != 'synteny' %}  onclick="window.location='{% url 'synteny' entry.omaid 4 4 %}'" {%endif%}
+             {% if tab == 'synteny' %} data-toggle="collapse" data-target="#collapseSynteny" aria-expanded="true" aria-controls="#collapseSynteny"{%endif%}>
+            <span class=""><a href="{% url 'synteny' entry.omaid 4 4 %}" >Local synteny</a> <i class="fa chevron_alias float-right" aria-hidden="true"></i>  </span>
+        </div>
+        <div id="collapseSynteny" class="collapse  pt-0{% if tab == 'synteny' %} show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
+
+            <div class="card-body pl-4 py-2">
+                <h6>Filter by Taxon</h6>
+                <p class="small">These should be loaded from django side?</p>
+                <div class="form-check pl-4">
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="mammalsFilter">
+                        <label class="form-check-label" for="mammalsFilter">
+                            Mammals
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="vertebratesFilter">
+                        <label class="form-check-label" for="vertebratesFilter">
+                            Vertebrates
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="customFilter1">
+                        <label class="form-check-label" for="customFilter1">
+                            Custom 1
+                        </label>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div> <!-- #sidebar-container -->
+

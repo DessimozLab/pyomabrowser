@@ -1,0 +1,64 @@
+{% extends  "base_data_centric.html" %}
+{% load staticfiles %}
+
+{% block title %}Entry {{entry.omaid}}{% endblock %}
+
+{% block header_color_class %} {% endblock %}
+
+{% block header_body %}
+
+
+
+
+<div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
+
+    <div class="oma-details-title ">
+    <h2 class="gene_title">Gene {{ entry.omaid }} {% if entry.canonicalid %} ({{entry.canonicalid}}) {% endif %}</h2>
+
+    <p>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} {{entry.genome.species}}
+        {{entry.genome.strain}}
+        {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %} is on Chromosome {{entry.chromosome}}.</p>
+
+    </div>
+
+    <div class="ml-auto oma-details-title-buttons  ">
+      <button class="btn btn-default dropdown-toggle  group_back " data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false" style="color: #FFF;"  > Groups
+    </button>
+
+
+    <div class="dropdown-menu">
+        <a class="dropdown-item"   {% if entry.oma_hog != "" %} href="{% url 'hog_viewer' most_specific_hog.hog_id most_specific_hog.level %}" > HOG {% else %} disabled > No related HOG {% endif %} </a>
+        <a class="dropdown-item"  {% if entry.oma_group != 0 %} href="{% url 'omagroup_members' entry.oma_group %}" > OMA Group {% else %} disabled > No related OMA Group {% endif %} </a>
+    </div>
+
+    <button class="btn btn-default genome_back"><a style="color: #FFF;" href="{% url 'genome_info' entry.genome.uniprot_species_code %}">Genome</a>
+    </button>
+
+        </div>
+</div>
+
+{% endblock %}
+
+{% block data_content %}
+
+{% include "includes/sidebar_entry.html" with tab=tab %}
+
+<div class="oma-details-content">
+
+    {% block contentTab %} {% endblock contentTab %}
+
+</div>
+
+<script>
+
+
+
+
+</script>
+
+
+
+{% endblock data_content %}
+
+

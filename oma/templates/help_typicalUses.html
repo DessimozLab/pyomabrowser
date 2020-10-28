@@ -1,0 +1,687 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA orthology database: typical uses cases{% endblock %}
+{% block meta_description %}Here, we provide some examples of applications together with recommended solution provided by OMA{% endblock %}
+{% block content %}
+
+
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+
+            <h1>Access the OMA Data
+</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <p class="text-justify">The <a href="{% url 'glossary' %}#g-omadb" >OMA database   </a>   can be obtained and queried in a variety of ways. Pairwise orthologs, HOGs, OMA Groups, paralogs and homoeologs can be accessed through the browser, API, or SPARQL. They can be inferred on user-input genomes using the OMA Standalone software.
+</p>
+
+            <br>
+
+
+            <div class="card card-header-oma border-0">
+                    <h2> Browser </h2>
+                <hr>
+                <div class="card-body">
+
+
+                    <h3>Search for a gene, group, or genome of interest</h3>
+
+                    <p class="text-justify">From the landing page, users can search for their gene, group, or genome of interest. This can be done by clicking on the drop down menu to the left of the search bar.
+</p>
+
+                       <img src="{% static "image/access_the_data_search-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Graph showing growth of OMA over time.">
+
+<div class="text-center small">
+    <b> Searches can be done with identifiers, a protein sequence, full-text, OMA fingerprint, or NCBI taxon id. </b>
+
+    </div>
+
+                    <br>
+                    <ul>
+
+                        <li>
+                           <b> Finding a gene.</b> Each  <a href="{% url 'glossary' %}#g-gene" >gene</a>  (also known as an entry) in OMA has an  <a href="{% url 'glossary' %}#g-omaid" >OMA identifier  </a> , consisting of the five-letter UniProtKB species code and a unique 5-digit number. One can search for a gene by either an identifier (including  <a href="{% url 'glossary' %}#g-xref" >cross references   </a> ), a protein sequence or a full-text search in the OMA browser.
+
+                        </li>
+
+                         <li>
+                            <b>Finding an OMA Group.</b> Search for a particular  <a href="{% url 'glossary' %}#g-og" >OMA Group   </a>  by it’s OMA Group ID (Group Number), OMA Group fingerprint <a href="{% url 'glossary' %}#g-omadb" >OMA database   </a> , identifier of one of its member genes <a href="{% url 'glossary' %}#g-omadb" >OMA database   </a>  (Entry ID), or the protein sequence of one of its member genes.
+
+                        </li>
+
+                         <li>
+                            <b>Finding a HOG.</b> Search for a particular  <a href="{% url 'glossary' %}#g-hog" >HOG   </a>  by it’s HOG ID (Group Number), identifier of one of its member genes (Entry ID), or the protein sequence of one of its member genes.
+
+                        </li>
+
+                         <li>
+                            <b>Finding a Genome.</b> The OMA browser contains information for both  <a href="{% url 'glossary' %}#g-extant" >extant species   </a>  and  <a href="{% url 'glossary' %}#g-ancestralspe" >ancestral species’  </a>  genomes. Search for an extant or ancestral genome by the scientific name, common name, or NCBI taxon ID.
+
+                        </li>
+
+
+
+
+                    </ul>
+
+
+                    <p class="text-justify">Searching for a gene, group, or genome takes you to the gene-, group-, or genome-centric pages.
+</p>
+
+
+                    <br>
+                    <h3>Gene-centric pages</h3>
+
+
+                    <p class="text-justify">Gene-centric pages in OMA give all the information specific to a single gene in OMA. The gene is found at the top, with its OMA ID and UniProt ID. More information about the orthologs of this gene can be found in several different sub-pages are available on the side menu, including the orthologs, paralogs, gene information, isoforms, GO annotations, sequences, and local synteny. Each will be discussed in the following sections.</p>
+
+
+
+                        <h4 id="orthotable"> <small> <b>Orthologs of a given gene</b></small></h4>
+
+                    <p class="text-justify"> After searching a particular gene on OMA, a table of the orthologs is shown by default, also reachable from the side menu.  </p>
+
+
+
+
+
+
+
+
+                       <img src="{% static "image/access_the_data_orthologs-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Graph showing growth of OMA over time.">
+
+<div class="text-center small">
+    <b> Orthologs for the P53 gene in rat. Select Required Orthology Evidence from the left-hand menu to choose the intersection or union of pairwise orthologs, HOG-induced orthologs, and OMA Group-induced orthologs to display them in the table. </b>
+
+    </div>
+
+                    <br>
+
+
+                    <b>Displayed in the table</b>
+
+                    <ul>
+                         <li>The  <a href="{% url 'homologs' %}#" >three types of orthologs inferred by OMA   </a> are reported here, shown as the first three columns: the pairwise orthologs, HOG-induced orthologs, and OMA-induced orthologs.
+</li>
+                         <li>The  <a href="{% url 'glossary' %}#g-domain" >domain  </a> of life (eukaryote, prokaryote, archaea)
+</li>
+                         <li>The  <a href="{% url 'glossary' %}#g-taxon" >taxon  </a>, or the species name.
+</li>
+                         <li>The Protein ID ( <a href="{% url 'glossary' %}#g-omaid" >OMA identifier  </a>).
+</li>
+                         <li>The  <a href="{% url 'glossary' %}#g-reltype" >relation type  </a> (1:1, 1:m, m:m, etc)
+</li>
+                         <li>The  <a href="{% url 'glossary' %}#g-xref" >cross reference  </a>, or alternative IDs of the gene, taken from the source (e.g. UniProt IDs)
+</li>
+                         <li>Visual representation of the domain Architecture for the gene.
+</li>
+
+                    </ul>
+
+                    <br>
+
+
+                    <b>Filtering the Data
+</b>
+
+                    <ul>
+
+                        <li>In the side menu under “Required orthology evidence,” select which type of orthologs you want to display, or any combination of all three.
+</li>
+                        <li>Filter by Taxon to obtain orthologs within a certain taxonomic level. If your taxonomic level is not shown, you can add a custom filter
+                            <a href="">LINK CATALOGS</a>.
+</li>
+                        <li>You can search for a particular species, gene ID, or <a href="{% url 'glossary' %}#g-reltype" >relation type  </a>  of interest by using the search bar above the table.
+</li>
+                        <li>Remove certain columns from the table by clicking the Table icon.
+</li>
+                    </ul>
+
+                     <br>
+
+
+                    <b>Exporting the Data
+
+</b>
+
+                    <ul>
+                        <li>Download the data, with selected filters applied, by clicking the Download icon at the upper right of the table. A variety of formats are available, including JSON, XML, CSV, TXT, SQL, and MS-Excel.
+</li>
+                    </ul>
+
+
+                           <h4 id="paratable"> <small> <b>Paralogy for a given gene</b></small></h4>
+
+                    <p class="text-justify"> Paralogs are those genes which started diverging due to a duplication. They are defined in OMA by the taxonomic level at which the duplication occurred. The table is in the same format as the
+                        <a href="#orthotable">orthologs table</a>.
+
+  </p>
+
+
+
+                       <img src="{% static "image/access_the_data_paralogs-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Graph showing growth of OMA over time.">
+
+ <h4> <small> <b>Gene information
+</b></small></h4>
+
+                    <p class="text-justify"> Here one can get general information about the gene of interest. This includes the gene description, organism, locus coordinates, number of exons, and various ids and cross-references.
+  </p>
+
+
+
+                     <h4> <small> <b>Isoforms
+</b></small></h4>
+
+                    <p class="text-justify"> This page contains a table for any isoforms, or alternative splice variants, for the given gene, if it is stored in OMA. (Note, if no isoforms are available it doesn’t mean that isoforms don’t exist, but rather we don’t have the information in OMA.)
+
+  </p>
+
+
+
+                     <h4> <small> <b>Gene Ontology (GO) annotations
+</b></small></h4>
+
+                    <p class="text-justify"> This page contains the GO annotations, including evidence codes and reference numbers, for a given gene. One can jump to Biological Process, Cellular Component, or Molecular Function in the side menu.
+
+  </p>
+
+
+                     <h4> <small> <b>Sequences</b></small></h4>
+
+                    <p class="text-justify"> This page contains the protein and CDS sequences for the gene, available to download as a fasta file.
+
+  </p>
+
+
+                     <h4 id="localsynteny"> <small> <b>Local Synteny Viewer
+</b></small></h4>
+
+                    <p class="text-justify"> In the absence of genome rearrangement, orthology relationships can be expected to be consistent across neighbouring genes—a concept commonly referred to as ‘shared synteny’. Patterns of syntenic conservation or divergence can shed light on the evolutionary history of genomic loci of interest; they can also reveal sequencing artefacts, misannotations or orthology inference errors.
+  </p>
+
+
+
+                    <p class="text-justify">
+                        The OMA synteny viewer uses a typical layout: genes are represented by boxes, with neighbouring genes displayed in adjacent columns and orthologous regions displayed in different rows. The reference syntenic block, centred on a query gene, is displayed in the first row. The other rows are centred on genes that are orthologous to the query gene, ordered by increasing taxonomic distance to the query gene species. Orthology relationships to each gene contained in the reference syntenic block are coded using different colours. To convey many-to-one and many-to-many relationships, we use stripes of the relevant colours. To aid clarity, hovering over a gene highlights all orthologs of the same colour including those with stripes. The data can be conveniently explored by clicking on any gene, which recenters the display on that gene as a new query.
+                    </p>
+
+
+                    <img src="{% static "image/access_the_data_local_synteny_viewer-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Graph showing growth of OMA over time.">
+
+
+
+                    <small class="float-right">Please see <a href="https://genome.cshlp.org/content/29/7/1152.full">(Altenhoff et al. 2015)</a> for more information.</small>
+
+
+
+                     <br>
+                    <h3>Group-centric pages</h3>
+
+
+                    <p class="text-justify">
+                        There are two main types of Group-centric pages: the  <a href="{% url 'glossary' %}#g-hog" >HOG  </a> and  <a href="{% url 'glossary' %}#g-og" >OMA Group  </a> pages. These can be accessed by searching for a specific group by one of their group identifiers
+                        (HOG id, OMA Group id, OMA fingerprint) or by a member gene of the group.
+
+                    </p>
+
+
+                                          <img src="{% static "image/access_the_data_groups-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Graph showing growth of OMA over time.">
+
+<div class="text-center small">
+    <b> Example of a group being accessed by the gene-centric page of one of its member genes. </b>
+
+</div>
+
+
+                        <h4 > <small> <b>HOG pages</b></small></h4>
+
+                    <p class="text-justify"> The HOG page gives information on a HOG of interest. It can be accessed by searching for a specific HOG, or through one of its member genes.  </p>
+                    <p class="text-justify"> The landing HOG page gives information about the  <a href="{% url 'glossary' %}#g-roothog" >Root HOG   </a>  (i.e. gene family), including the Root HOG id, the taxonomic level at which this HOG is inferred, and the number of member genes in this HOG.
+  </p>
+
+ <br>
+                    <h5 >  <b>Graphical viewer
+</b></h5>
+
+                                        <p class="text-justify">
+                                        The Graphical viewer is displayed on the HOG landing page. This is an interactive display in which all the species in the HOG are organized by their species tree. All the genes in the HOG are represented as boxes. Ancestral genes and evolutionary events such as duplications and losses can be visualized by interacting with the graph. For more information on the iham visualization and the options, see (<a
+                                                href="https://academic.oup.com/bioinformatics/article/35/14/2504/5227980">Train et al. 2019</a>) and YouTube video.</p>
+
+
+
+ <img src="{% static "image/access_the_data_root_hog_graphical_viewer-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Graph showing growth of OMA over time.">
+
+ <br>
+                     <h5 >  <b>Members
+</b></h5>
+
+                                        <p class="text-justify">
+
+
+                                            By clicking on the Members tab in the side menu for a given HOG, one has access to all the genes in that particular HOG at that taxonomic level. Displayed in the table are the  <a href="{% url 'glossary' %}#g-protid" >Protein IDs   </a>,  <a href="{% url 'glossary' %}#g-xref" >Cross References  </a>,  <a href="{% url 'glossary' %}#g-domain" >Domain Architectures   </a>, and  <a href="{% url 'glossary' %}#g-taxon" >Taxon   </a>. The table can be filtered to show the sub-HOGs at various taxonomic levels.
+
+
+                                        </p>
+
+
+
+ <img src="{% static "image/access_the_data_hog_members-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Graph showing growth of OMA over time.">
+
+
+ <br>
+                    <h5 >  <b>Similar HOGs
+
+</b></h5>
+
+                                        <p class="text-justify">
+                                            The last tab in the side menu is for similar HOGs. Genes that belong to distinct but similar HOGs can be paralogs separated by a very deep duplication, orthologs misclassified by OMA in separate groups, or genes that are homologous for only part of their sequence (e.g. genes spanning over a domain fusion or fission event, artefactual fragments, etc.)
+
+                                        </p>
+
+
+                                        <small class="float-right">Please see <a href="http://doi.org/10.1093/nar/gkx1019">(Altenhoff et al. 2018)</a> for more information.</small>
+
+                    <br>
+
+                     <h5 >  <b>Shared Domains</b></h5>
+
+                                        <p class="text-justify">
+Domains can be used to establish links between HOGs. Given an initial HOG, a user can retrieve a table of the most similar HOGs based on conserved domain architecture. The similarity is computed by counting the number of domains in common between two HOGs.  At the top a visual representation of the overall domain architecture of the HOG is displayed, as well as the prevalence of this representative domain within the HOG.
+                                        </p>
+
+
+                     <p class="text-justify">
+In the domain architecture view of a HOG, information about the HOG (on the top) is followed by the table containing information about other HOGs that share at least one domain in common with the HOG of interest. The table can be sorted by any of the attributes.
+
+                                        </p>
+
+
+
+                    <img src="{% static "image/access_the_data_hogs_shared_domains-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Simple evolutionary scenario">
+
+
+
+            <div class=" w-75  text-justify mx-auto small">
+                    <b> The Domain Architecture view of a HOG. Deepest level: the last common ancestor of the species represented in a HOG; HOG size: the number of genes in a HOG; Representative Domain Architecture: the architecture that is characteristic of most of the proteins in a HOG; Prevalence: the percentage of the proteins in a HOG that have this domain architecture; Similarity: the number of the domains shared between this HOG and the HOG of interest (including duplicated domains).
+</b>
+    </div>
+
+                    <br>
+
+                    <h5 >  <b>Shared orthologss</b></h5>
+
+                                        <p class="text-justify">
+Here one can find similar HOGs based on the number of orthologous relations which link the HOGs. This can be useful for finding split HOGs which have not been merged by OMA.
+                                        </p>
+
+
+
+
+
+                    <h4 > <small> <b>OMA Groups pages
+</b></small></h4>
+
+                    <p class="text-justify">
+
+                        The OMA Group pages are similar to the HOG pages, but display information about an OMA Group, which are more stringent groups of orthologs. (See  <a href="{% url 'homologs' %}#" >Different types of orthologs in OMA  </a> ). The header of the page contains the OMA Group ID, the numbers, and the fingerprint. The side menu contains the following: Members, Alignment, Gene Ontology, and Similar OMA groups.
+<ul>
+
+                    <li>
+                        The Members table contains the Domain, taxon, protein id, cross references, and the domain architecture for each gene in the OMA Group.
+
+                    </li>
+                    <li>
+                        The Alignment tab computes a multiple sequence alignment of all the members in the OMA Group.
+<ul><li>The native web viewer MSAviewer is used to display multiple sequence alignments, which are computed both for HOGs and OMA groups using Mafft.
+</li></ul>
+                    </li>
+
+                </ul>
+
+
+                    </p>
+
+
+                    <br>
+
+                     <h3>Genome-centric pages</h3>
+
+
+                     <p class="text-justify">
+                         The genome-centric pages can be reached by clicking on the Genome tab on the right hand side of the header from individual gene pages, or by searching for a genome on the search bar.
+                                        </p>
+
+                     <p class="text-justify">
+The header of the genome-centric pages include the 5-letter uniprot species code, the scientific name, the proteome annotation source, date, and the number of proteins in this genome. The side menu includes the Genome information, a list of genes, related species, and synteny.                                        </p>
+
+
+
+                    <h4> <small> <b>Genome information
+
+</b></small></h4>
+
+
+                     <p class="text-justify">
+                         At the top of this page the taxonomy of the species is displayed, starting at the root of the NCBI species tree, going to the species of interest. Shown underneath are the common name, UniProt identifier (i.e. 5-letter species code), NCBI taxonomy ID, DB release, and the number of proteins which have been assigned to OMA Groups and HOGs. </p>
+
+
+
+                     <img src="{% static "image/access_the_data_genome-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Simple evolutionary scenario">
+
+
+
+                     <h4> <small> <b>List of genes
+
+
+</b></small></h4>
+
+
+                     <p class="text-justify">
+                         The list of genes contains a table with all the proteins in the genome, their cross references and domain architecture. The protein IDs are in the form of OMA ID, which goes in order with the locus position in the genome. Since these are displayed in order, one can easily see potential tandem duplications as those with identical domain architecture. </p>
+
+
+
+                     <img src="{% static "image/access_the_data_genome_list_of_genes-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Simple evolutionary scenario">
+
+
+
+
+                    <h4> <small> <b>Related species
+
+
+</b></small></h4>
+
+
+                     <p class="text-justify">
+Here one can find the most and least related species to the species of interest based on the number of shared OMA Groups or HOGs.
+                     </p>
+
+
+
+
+                    <h4> <small> <b>Synteny Dot Plot
+
+
+</b></small></h4>
+
+
+                     <p class="text-justify">
+See Synteny Dot Plot <a href="">LINK TO DOTPLOT TOOL</a>
+
+
+                     </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+            </div>
+
+
+<div class="card card-header-oma border-0">
+
+
+     <h2> API (python, R, wrappers)
+ </h2>
+                <hr>
+
+
+
+    <div class="card-body">
+
+                    <p class="text-justify">The OMA database is accessible programmatically for users who wish to obtain the data with python and R.</p>
+
+
+                    <h3 id="REST">OMA REST API</h3>
+
+
+                    <p class="text-justify">
+                        The REST API provides programmatic access to a comprehensive set of features provided through the web server. This API can be used to automate almost any analysis that a user could do on the website. On the REST API documentation page, which is accessible under
+                        <a href="https://omabrowser.org/api">https://omabrowser.org/api</a> , all the endpoints and their parameters are described. Each endpoint includes also a live example.
+
+                    </p>
+
+        <img src="{% static "image/access_the_data_rest_api-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Graph showing growth of OMA over time.">
+
+
+                    <small class="float-right">Please see <a href="https://genome.cshlp.org/content/29/7/1152.full">(Altenhoff et al. 2018)</a>  and
+                        <a href="https://f1000research.com/articles/8-42/v2"> (Kaleb et al. 2019)</a> for more information.</small>
+
+
+        <br>
+         <h3>Wrappers</h3>
+
+
+        <p class="text-justify">In addition, for R and python users, we provide native libraries wrapping around the REST API that further facilitates querying the OMA database in these languages.
+</p>
+
+                                <h4 id="dbr" > <small> <b>OmaDB Bioconductor package
+</b></small></h4>
+
+           <p class="text-justify">
+
+               The API wrapper package in R is available in Bioconductor (<a href="http://bioconductor.org/packages/OmaDB/">http://bioconductor.org/packages/OmaDB/</a>). The package consists of a collection of functions that import OMA data into R objects, the type of which depends on the query supplied. Due to the volume of the data available, some selected object attributes are at first given as URL endpoints. However, these are automatically loaded upon accession. OmaDB also facilitates further downstream analyses with other Bioconductor packages, such as GO enrichment analysis with topGO, sequence analysis with BioStrings, phylogenetic analyses using ggtree or gene locus analyses with the help of GenomicRanges.
+
+
+           </p>
+
+
+        <p class="text-justify">The open source code is hosted at <a href="https://github.com/DessimozLab/OmaDB/">https://github.com/DessimozLab/OmaDB/</a>. The latest version of the package (v2.0) requires R version >= 3.6 and Bioconductor version >= 3.9. </p>
+
+                    <small class="float-right">Please see <a href="https://f1000research.com/articles/8-42/v2"> (Kaleb et al. 2019)</a> for more information.</small>
+
+
+
+
+         <h4 id="dbpython" > <small> <b>Omadb Python package
+</b></small></h4>
+
+
+
+         <p class="text-justify">
+        For Python users, we provide an analogous package named omadb. Results are supplied to users as a hybrid attribute-dictionary object. As such, both attribute and key-based access is possible. Where the URL of a further API call is listed in a response, this has been designed to be automatically requested for the user.
+
+           </p>
+
+            <p class="text-justify">
+For data that can be represented as a table, the pandas package is supported. HOGs can be analysed or displayed using the pyham library. Trees are retrievable as DendroPy or ETE3 Tree objects. Gene Ontology enrichment analyses are possible through the use of the goatools package.
+
+           </p>
+
+
+            <p class="text-justify">
+The open source code is hosted at <a href="https://github.com/DessimozLab/pyomadb/">https://github.com/DessimozLab/pyomadb/</a> . The package requires Python >=3.6, as well as a stable internet connection. It is also available to download from PyPI, installable using pip.
+
+           </p>
+
+           <small class="float-right">Please see <a href="https://f1000research.com/articles/8-42/v2"> (Kaleb et al. 2019)</a> for more information.</small>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+
+
+     <h2> Bulk download from the browser
+ </h2>
+                <hr>
+
+
+
+    <div class="card-body">
+
+
+
+                    <h3>Current release</h3>
+
+
+        <p class="text-justify">
+            The entire OMA database is available for download in several formats. This option is available under Download -> Current Release.
+        </p>
+
+        <ul>
+
+            <li>All Orthology relationships from the OMA database are available for download by pairs or by groups, in text or <a href="{% url 'glossary' %}#g-orthoxml" >OrthoXML </a>  format. The species phylogeny of HOGs is available in <a href="{% url 'glossary' %}#g-phyloxml" >PhyloXML  </a>  and newick format. The information is given in terms of <a href="{% url 'glossary' %}#g-omaid" >OMA identifiers  </a> .
+</li>
+            <li>To obtain pairs of orthologs between any two species, use the <a href="{% url 'genomePW' %}">Genome Pair View</a> to select the species of interest.</li>
+            <li>All sequences with the corresponding OMA identifiers can be downloaded in fasta files. The proteins are all in one file, while the coding DNA is split into two files, one for the Eukaryotes and one for the Prokaryotes. Protein annotations are available in text format.</li>
+            <li>Mappings of the OMA identifier to various other databases are available. Mappings to UniProt, RefSeq and EntrezGene IDs are based on exact sequence matches, other cross-references come from source genome files directly.</li>
+            <li>Additionally available for download are: OMA Groups/Sequences in COGs format, Species information (Taxon IDs, scientific names, genome sources), Group descriptions, and Close OMA Groups.</li>
+
+        </ul>
+
+
+        <h3>Archives</h3>
+
+
+         <p class="text-justify">
+HDF5 download files from the current releases of OMA are still available under Download -> Archives.
+
+         </p>
+
+
+
+
+
+    </div>
+
+
+            </div>
+
+
+             <div class="card card-header-oma border-0">
+
+
+     <h2> SPARQL
+ </h2>
+                <hr>
+
+
+
+    <div class="card-body">
+
+
+         <p class="text-justify">
+
+        Recent years have witnessed an increasing adoption of Resource Description Framework (RDF) among bioinformatics databases to model their data, as evidenced by the YummyData monitor (see
+             <a href="https://yummydata.org">https://yummydata.org</a>), which currently highlights more than 65 biological and biomedical resources with SPARQL endpoints for querying their data (SPARQL is the main query language for RDF). The attractiveness of using RDF and SPARQL for bioinformatics databases can be explained by three main facts: the virtuous cycle of adopting a common data syntax and model that leverages data interchange on the Web; the SPARQL 1.1 specification makes it possible to run federated queries, which allow bioinformaticians to jointly retrieve data from multiple resources in one single query; and the existing growing number of RDF-based ontologies, controlled vocabularies, and taxonomies in life sciences. For example, the Bioportal, a repository of biomedical ontologies, contains more than 850 ontologies (see
+             <a href="https://bioportal.bioontology.org">https://bioportal.bioontology.org</a>).
+
+         </p>
+
+         <p class="text-justify">
+
+
+
+        Currently, the OMA RDF data are fully structured based on the Orthology Ontology (ORTH) version 2 (see documentation at
+             <a href="http://qfo.github.io/OrthologyOntology/ ">http://qfo.github.io/OrthologyOntology/</a>). As a result, we also enhance the interoperability among other resources such as the Microbial Genome Database (MBGD), another orthology database. The webpage of the OMA SPARQL endpoint is
+             <a href="https://sparql.omabrowser.org ">https://sparql.omabrowser.org </a>and provides several example queries. To build different queries and to understand how the RDF data are structured, please refer to the tutorial paper at
+             <a href="https://f1000research.com/articles/8-1822 and the full documentation of ORTH at http://qfo.github.io/OrthologyOntology/">https://f1000research.com/articles/8-1822</a> and the full documentation of ORTH at
+             <a href="http://qfo.github.io/OrthologyOntology/">http://qfo.github.io/OrthologyOntology/</a>. For programmatic requests and/or to invoke a portion of a SPARQL query against a remote SPARQL endpoint with the SERVICE2 keyword (federated queries), we recommend  to directly use the SPARQL endpoint query processor at
+             <a href="https://sparql.omabrowser.org/sparql/">https://sparql.omabrowser.org/sparql/</a>. To implement and execute SPARQL queries within software tools, specialized packages for SPARQL are often provided in different programming languages such as the SPARQLWrapper package  in Python ( pip install SPARQLWrapper, see
+             <a href="https://pypi.org/project/SPARQLWrapper/">https://pypi.org/project/SPARQLWrapper/</a>). An example of SPARQLWrapper usage with OMA is available as Orthology_SPARQL_Notebook.ipynb (a Jupyter notebook)  at
+             <a href="https://github.com/biosoda/tutorial_orthology">https://github.com/biosoda/tutorial_orthology</a>. To learn the SPARQL language, we suggest the introductory book chapter at https://doi.org/10.1007/978-1-4939-9074-0_22.
+
+ </p>
+
+
+        <img src="{% static "image/access_the_data_sparql-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Graph showing growth of OMA over time.">
+
+<div class="text-center small">
+    <b> Example of a SPARQL query to programmatically retrieve pairwise orthologs involving the HBB human gene represented here as  ENSG00000244734 ensembl identifier. Sample queries are provided in the right column of the page, accessible at
+        <a href="http://sparql.omabrowser.org">http://sparql.omabrowser.org</a>. </b>
+
+    </div>
+
+                    <br>
+
+    </div>
+
+             </div>
+
+             <div class="card card-header-oma border-0">
+
+
+     <h2> OMA Standalone
+ </h2>
+                <hr>
+
+
+
+    <div class="card-body">
+
+
+         <p class="text-justify">
+
+        In addition to accessing orthologs through the OMA database, one can run the OMA Standalone software on their own genomes (see
+             <a href=" ">LINK TOOL</a> OMA Standalone in Catalog of OMA Tools). This can be combined with any of the species in OMA, so to facilitate saving time on the  <a href="{% url 'glossary' %}#g-allall" >all-against-all</a>  computations, they are available for download as well (see
+             <a href="">LINK TOOL</a>Export all-against-all in Catalog of OMA Tools).
+         </p>
+
+                            <small class="float-right">Please see <a href="https://genome.cshlp.org/content/29/7/1152.full"> (Altenhoff et al. 2019)</a> for more information.</small>
+
+
+
+
+
+
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+{% endblock content %}

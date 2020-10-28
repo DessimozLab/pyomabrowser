@@ -1,0 +1,182 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA orthology database: Types of orthologous groupings{% endblock %}
+{% block meta_description %}The OMA database provides several destinct types of groupings to the users. The appropriate grouping depends on the application of the user.{% endblock %}
+
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+
+            <h1>Orthology Basics</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+
+             <div class="card card-header-oma border-0">
+
+                <div class="card-body">
+
+
+                    <h2> Differents types of homologs in OMA  </h2>
+
+                    <hr>
+
+
+
+                     <p class="text-justify"> In OMA, we infer and provide several sub-types of orthologs:
+                         <a href="{% url 'glossary' %}#g-op" >pairwise orthologs</a>, Hierarchical Orthologous Groups  <a href="{% url 'glossary' %}#g-hog" ></a>  (HOGs), and   <a href="{% url 'glossary' %}#g-og" >OMA Groups</a> . It is important
+                         to understand how these three categories of orthologs are different in order to choose the
+                         appropriate type for your analysis. The differences between the three sub-types of orthologs
+                         reported in OMA are all based on one main factor: how they are inferred. In the OMA algorithm,
+                         the pairwise orthologs are inferred first, and are then used to build the HOGs and OMA Groups.
+ </p>
+
+                    <br>
+
+                    <h4>Pairwise Orthologs</h4>
+
+                    <p class="text-justify">
+
+
+
+                    <ul>
+
+                    <li>Pairs of orthologs are inferred based on the sequence similarity of genes between genomes.</li>
+                    <li>In OMA, we also report the relationship cardinality of the pairwise orthologs, which reflects the level of co-orthology, or the degree of duplications which one or both of the orthologs has undergone. One-to-one (1:1) pairwise orthology means that both genes in the pair have only one ortholog in the other species. A one-to-many relationship (1:m) means that the gene of interest has more than one ortholog in the other species. This implies that the gene was duplicated in an ancestor of the other species, but after the speciation event. A many-to-many (m:m) relationship means both orthologs underwent lineage-specific duplications.
+</li>
+                    <li>For how to find pairwise orthologs in the OMA browser, see <a href="{% url 'uses' %}">Access the OMA DataーOrthologs of a given gene</a> .</li>
+                </ul>
+
+ </p>
+
+                    <br>
+
+
+                     <h4>Hierarchical Orthologous Groups (HOGs)</h4>
+
+                    <p class="text-justify">
+
+
+
+                    <ul>
+
+                    <li>HOGs aim to identify sets of genes that have descended from a common ancestral gene in a given ancestral species (i.e. at a specific taxonomic level).
+</li>
+                    <li>The pairwise orthologs are mapped to an orthology graph, where each node on the graph represents a gene, and each solid line between the genes represents an inferred pairwise orthologous relationship. The graphs are then used as input to compute the HOGs.
+</li>
+                    <li>HOGs are constructed by identifying groups in the graph of pairwise orthologs. Each of the <a
+                            href="https://en.wikipedia.org/w/index.php?title=Component_(graph_theory)&oldid=928592532">connected components</a>
+                         in the graph are putative gene families, composed of genes which descended from a common ancestral gene.
+</li>
+
+
+                    <li> After forming the groups of HOGs, HOG-derived orthologs can be considered as any pairs of genes between species which are contained in the same HOG, given that the HOG is defined at the level of their last common ancestor.
+
+
+                    </li>
+
+
+    <li> The “hierarchical” nature of HOGs is because they are defined with respect to specific taxonomic clades. Groups defined at more recent clades are encompassed within larger groups that are defined at older clades, thus making them nested subfamilies.
+
+
+    </li>
+
+                    <li>For how to find HOGs in OMA, see <a href="{% url 'uses' %}">Access the OMA Data </a> .
+</li>
+
+                </ul>
+
+ </p>
+
+                     <img src="{% static "image/nested_hogs-1.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="Simple evolutionary scenario">
+
+
+
+            <div class=" w-75  text-justify mx-auto small">
+                    <b>An example of the hierarchical nature of HOGs. At the mammalian level, there are two separate HOGs. At the tetrapod level, there is 1 HOG, encompassing the smaller, mammalian HOGs.
+</b>
+    </div>
+
+                    <br>
+
+
+
+
+
+
+                    <h4>OMA Groups</h4>
+
+                    <ul>
+
+                        <li> OMA Groups are <a href="https://en.wikipedia.org/w/index.php?title=Clique_(graph_theory)&oldid=916146828">cliques</a> of orthologs based on the orthology graph. In mathematics, a clique is a part of a graph where each node in that part is connected to all other nodes in that same part. Thus, in an OMA Group, all the genes are connected to each other by pairwise orthologous relations.
+</li>
+                   <li>While pairwise orthologs and hierarchical orthologous groups are commonly used terms, OMA Groups is a term specific to OMA. However, sometimes they are referred to as “Orthologous Groups” (see
+                       <a href="https://f1000research.com/articles/9-511/v1">(Dylus et al. 2020)</a>).
+</li>
+                   <li>One common misconception is that OMA Groups are groups of 1:1 orthologs. This is not necessarily the case. If two genes are 1:1 orthologs, this implies that there are no co-orthologs of either gene. If co-orthologs are inferred, OMA Groups will only contain one of the co-orthologous copies. However, like sets of 1:1 orthologs, OMA Groups have the property that all members are orthologous to all other members of the same group.
+</li>
+                   <li>For how to find OMA Groups in OMA, see <a href="{% url 'uses' %}">Access the OMA Data </a>.
+</li>
+                    </ul>
+
+
+
+
+
+                    <h4>Paralogs</h4>
+
+                    <ul>
+
+                        <li>Paralogs in OMA are derived from the HOGs. That is, they originated from an inferred duplication event.
+</li>
+                        <li>For how to find paralogs in OMA, see <a href="{% url 'uses' %}">Access the OMA Data </a>.
+</li>
+                    </ul>
+
+
+
+
+
+                    <h4>Homoeologs</h4>
+
+
+
+
+
+In OMA, we define homeologous genes as pairs of homologous genes that have started diverging through speciation between the progenitor genomes and then merged back into the same genome by hybridization. Thus, homeologs can be thought of as ‘orthologs between subgenomes’.
+
+
+
+                </div>
+             </div>
+
+
+
+
+
+
+
+<small class="float-right">Please see <a href="https://genome.cshlp.org/content/29/7/1152.full">(Altenhoff et al. 2015)</a>, <a href="https://genome.cshlp.org/content/29/7/1152.full">(Zahn-Zabal et al. 2020)</a> for more information.</small>
+
+
+
+
+                </div>
+            </div>
+
+
+</div>
+
+{% endblock content %}

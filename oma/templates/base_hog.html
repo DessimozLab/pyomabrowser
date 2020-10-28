@@ -1,0 +1,105 @@
+{% extends  "base_data_centric.html" %}
+{% load staticfiles %}
+
+{% block title %}HOG {{hog_id}} ontology{% endblock %}
+
+
+{% block header_color_class %} group_title {% endblock %}
+
+{% block header_body %}
+
+
+<div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
+
+
+
+    <div class="oma-details-title">
+
+        <h2 class="group_title"> {{ hog_id }} with {{ hog.nr_member_genes }} members {% if description  %}<small>({{description}})</small> {% endif %}  </h2>
+
+        {% for parent_hog in lineage_up|slice:":-1" %}
+            {% if forloop.counter < 8 or forloop.counter == 8 and forloop.last %}
+                <a href=" {% url lineage_link_name parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
+
+            {% elif forloop.counter == 8 and not forloop.last %}
+                <div id="lineage" style="display: inline">
+                    <div class="lineage-collapsed">... / </div>
+                    <div class="lineage-expanded">
+                        <a href=" {% url lineage_link_name parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
+            {% elif forloop.counter > 8  %}
+                        <a href=" {% url lineage_link_name parent_hog.hog_id  parent_hog.level%}  "> {{parent_hog.level}} </a> /
+                    {% if forloop.last %}
+                    </div>
+                </div>
+                    {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        <b>{{ level }}</b>
+
+        {% if lineage_down %}
+            /
+            <div class="btn-group dropright">
+                <button type="button" class="btn btn-outline-dark btn-sm dropdown-toggle" style="padding: .20rem .4rem !important; font-size: .800rem!important;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Lower Level
+                </button>
+                <div class="dropdown-menu" style="height:400px;overflow-y:auto;">
+                    <h6 class="dropdown-header">Select a hog at a lower level</h6>
+                    {% for hog in lineage_down %}
+                        <a class="dropdown-item" href="{% url lineage_link_name hog.hog_id hog.level%}"><b>{{hog.level}} </b> ({{hog.hog_id}} | {{hog.nr_member_genes}} members)   </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <style>
+        #lineage:hover {
+            cursor: pointer;
+        }
+        #lineage:hover > .lineage-collapsed {
+            display: none;
+        }
+        #lineage > .lineage-collapsed {
+            display: inline;
+        }
+        #lineage > .lineage-expanded {
+            display: none;
+        }
+        #lineage:hover > .lineage-expanded {
+            display: inline;
+        }
+        .show>.btn-outline-dark.dropdown-toggle, .btn-outline-dark:hover {
+            color: #fff;
+            background-color: #336799;
+            border: none;
+        }
+    </style>
+
+
+
+</div>
+
+{% endblock %}
+
+{% block data_content %}
+
+{% include "includes/sidebar_hog.html" with tab=tab %}
+
+<div class="oma-details-content">
+
+    {% block contentTab %} {% endblock contentTab %}
+
+</div>
+
+
+
+{% endblock data_content %}
+
+
+
+
+
+
+

@@ -1,0 +1,120 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+
+{% block title %}Accessing OMA Groups{% endblock %}
+{% block content %}
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>OMA groups</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <div class="card card-header-oma">
+                <div class="card-body ">
+
+                    <p class="text-justify">OMA groups are groups of protein sequences that are inferred to be related exclusively by speciation events. Consequently, there is at most one sequence per species in each OMA group. By convention, each sequence belongs to at most one OMA group.</p>
+                    <p class="text-justify">For an alternative, more inclusive definition of orthologous groups, consider using <a href="{% url 'hogs'  %}">hierarchical orthologous groups</a>.</p>
+
+                    <br>
+
+                    <h5 > <strong> Search an OMA group</strong></h5>
+                    <br>
+
+                    <form class="form-horizontal" role="search" action="{% url 'search' %}" method="GET">
+                        <input type="hidden" name="type" value="group_fingerprint"/>
+                        <div class="form-group form-row">
+                            <label for="textG1" class="col-sm-3 col-form-label control-label text-right">Fingerprint (stable across releases):
+                            </label>
+                            <div class="col-sm-8 no-gutters">
+
+                                <div class="input-group col mb-2">
+                                    <input id='textG1' name="query" type="text" class="form-control">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-8 offset-sm-3">
+                                <span class="font-weight-bold">Example: </span>
+                                    <a href="#" class="text-muted" id='exFinger'>ILYYSQD</a>
+                            </div>
+                        </div>
+                    </form>
+                    <br>
+
+                    <form class="form-horizontal" role="search" action="{% url 'search' %}" method="GET">
+                        <input type="hidden" name="type" value="group_groupid"/>
+                        <div class="form-group form-row">
+
+                            <label for="textG2" class="col-sm-3 col-form-label control-label text-right">Group number (not stable across releases):
+                            </label>
+                            <div class="col-sm-8 no-gutters">
+
+                                <div class="input-group col mb-2">
+                                    <input id='textG2' name="query" type="text" class="form-control">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></span></button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-8 offset-sm-3">
+
+                                <span class="font-weight-bold">Example: </span>
+                                    <a href="#" class="text-muted" id='exNumber'>70525</a>
+
+                            </div>
+
+                        </div>
+                    </form>
+                    <br>
+
+                    <h5> <strong>Marker Genes</strong></h5>
+                    <div>
+                                <p>OMA Groups are useful for species tree reconstruction. You can
+                                    <a href="{% url 'export_markers' %}">export a set of marker genes</a> for a subset of species of your choice.</p>
+                            </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+function OpenInNewTab(url) {
+    var win = window.open(url, '_blank');
+    win.focus();
+}
+
+$('#exNumber').click( function() {
+    $('#textG2').val($(this).text()).focus();
+
+});
+$('#exFinger').click( function() {
+    $('#textG1').val($(this).text()).focus();
+
+});
+
+</script>
+
+{% endblock content %}

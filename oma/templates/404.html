@@ -1,26 +1,41 @@
-{% extends "core.html" %}
-{% block title %}OMA Orthology database: Page not found{% endblock %}
+{% extends "base_template.html" %}
+{% block title %}Page not found{% endblock %}
 {% block meta_description %}{% endblock %}
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-12 col-md-10 col-md-offset-1">
-            <div class="jumbotron">
-                <div class="container">
-                    <h1 class="text-center">Invalid Page</h1><br>
-                    <div class="well well-sm entete"></div>
-                    <br>
-                    <div class="panel panel-default">
-                        <br>
-                        <div class="panel-body">
-<p>Sorry, the page you requested was not found on this server.</p>
+
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>Invalid page</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <div class="card card-header-oma">
+                <div class="card-body ">
+
+                    <p>Sorry, the page you requested was not found on this server.</p>
 <p>Please check that you have typed in the correct URL or else use the <a href="/">site search facility</a> to try and locate information you require.</p>
 <p>If you think an error has occurred, please <a href="mailto:contact@omabrowser.org">contact us</a>.</p>
-                        </div>
-                    </div>
+
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
+
 {% endblock %}

@@ -1,0 +1,17 @@
+{% extends  "dlOMA_exportAllAll.html" %}
+{% load staticfiles %}
+
+{% block title %}Export marker genes{% endblock %}
+{% block meta_description %}Export marker genes from a subset of your choice of OMA's genomes for species phylogeny reconstruction{% endblock %}
+{% block menu_additional_inputs %}
+    <div class="form-group">
+        <label for="min_species_coverage_input">Minimum fraction of covered species</label>
+        <input type="" class="form-control" id="min_species_coverage_input" placeholder="0.5">
+    </div>
+    <div class="form-group">
+        <label for="max_nr_markers_input"><span title="Put -1 to get all markers">Maximum nr of markers (-1: unlimited)</span></label>
+        <input type="" class="form-control" id="max_nr_markers_input" placeholder="200">
+    </div>
+{% endblock menu_additional_inputs %}
+
+{% block submit_button_id %}buttonSubmitMarkerGenes{% endblock %}

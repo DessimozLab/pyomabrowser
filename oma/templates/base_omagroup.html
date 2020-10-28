@@ -1,0 +1,38 @@
+{% extends  "base_data_centric.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA group {{omagroup.group_nbr}} {% endblock %}
+
+
+{% block header_body %}
+
+
+<div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
+    <div class="oma-details-title">
+        <h2 class="group_title">OMA GROUP {{ omagroup.group_nbr }} with {{ nr_member }} members.
+            {% if omagroup.keyword != '-' %}<small>({{ omagroup.keyword }})</small> {% endif %}
+        </h2>
+        <p>Fingerprint: {{ omagroup.fingerprint }}</p>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block data_content %}
+
+{% include "includes/sidebar_omagroup.html" with tab=tab %}
+
+<div class="oma-details-content">
+
+    {% block contentTab %} {% endblock contentTab %}
+
+</div>
+
+
+
+{% endblock data_content %}
+
+
+
+
+

@@ -1,0 +1,119 @@
+{% extends  "base_hog.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA: Hierarchical Orthologous Groups for {{ fam.id }}{% endblock %}
+
+
+{% block contentTab %}
+
+{% if hog_row == None %}
+This HOG does not contain domain annotations. We can therefore not provide other HOGs with a similar domain structure.
+{% else %}
+
+<dl class="dl-horizontal wide-label">
+
+    <dt>Representative domain architecture:</dt>
+    <dd>
+        <table><tr class="hog_domain" id="{{ hog }}" repr="{{ hog_row.repr_entry_omaid }}"><td class="domain_vis"></td></tr></table>
+    </dd>
+    <dt>Prevalence of repr. domain architecture within HOG:</dt>
+    <dd>{{ hog_row.prevalence |floatformat }}%</dd>
+</dl>
+
+<h4>This HOG has {{ sim_hogs|length }} similar HOGs:</h4>
+
+
+
+
+        <table class="table table-hover" id="grpTable"
+               data-show-toggle="true"
+               data-show-columns="true" data-search="true" data-show-export="true"
+               data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
+               data-mobile-responsive="true" data-check-on-init="true"
+               data-undefined-text=""
+               data-id-field="Fam"
+               data-url="{% url 'hog_domains_json' hog_id %}">
+            <thead><tr>
+                <th data-field="Fam" data-sortable="true" data-formatter="tablehooks.format_hogid_vis">HOG ID</th>
+                <th data-field="TopLevel" data-sortable="true">Deepest level</th>
+                <th data-field="FamSize" data-sortable="true" data-title-tooltip="Number of proteins in the similiar HOG at the deepest level">HOG size</th>
+                <th data-sortable="false" class="domain_vis">Representative Domain Architecture</th>
+                <th data-field="PrevFrac" data-sortable="true"
+                    data-title-tooltip="Proportion of proteins in HOG which have the representative domain architecture"
+                    data-formatter="tablehooks.format_domainprevalence">Prevalence</th>
+                <th data-field="Similarity" data-sortable="true" data-title-tooltip="Number of shared domains">Similarity</th>
+            </tr></thead>
+        </table>
+
+
+
+
+
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+
+<!-- Domain Visualisation -->
+<script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<script src="{% static "js/bootstrap-table.min.js" %}"></script>
+
+<link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+<script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+<script src="{% static "js/tableExport.min.js" %}"></script>
+
+
+
+
+
+
+
+
+<script>
+
+
+
+domains.visualize_all(".hog_domain", {{ longest_seq }}, 'repr');
+var tab = $("#grpTable");
+tab.bootstrapTable({
+    reorderableColumns: true,
+    clickToSelect: false,
+    filterControl: false,
+    showMultiSort: true,
+    onPostBody: function(){
+        domains.visualize_all(".hog", {{ longest_seq }}, 'repr');
+    },
+    onLoadSuccess: function(data){
+        tab.bootstrapTable('hideLoading');
+    },
+    rowAttributes: function(rowdata, index) {
+        var classes = "hog";
+        if (rowdata.Fam === {{ hog_row.fam }} ){ classes += " query";}
+        return {id: rowdata.Fam, repr: rowdata.ReprEntryNr, 'class': classes};
+    }
+});
+var icons = tab.bootstrapTable('getOptions').icons;
+$.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+tab.bootstrapTable('refreshOptions', {'icons': icons});
+tab.bootstrapTable('showLoading');
+
+</script>
+
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock contentTab %}

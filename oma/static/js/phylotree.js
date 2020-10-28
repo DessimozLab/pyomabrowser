@@ -119,6 +119,8 @@ $(document).ready(function() {
                         for (var i in arrayIdSelectedGenome){
                             urlExport=urlExport + (i == 0 ? '' : '&') + 'genomes='+hashGenome[arrayIdSelectedGenome[i]];
                         }
+
+                        console.log(urlExport);
                         OpenInNewTab(urlExport);
                     };
                 } else {
@@ -165,10 +167,11 @@ $(document).ready(function() {
                 divList.setAttribute('class', 'list-group');
                 divList.setAttribute('id', 'divList');
                 //$("#UISelected").append($(divList));
-                $("#UISelectedContent").append($(divList));
+                $("#UISelected").append($(divList));
                 for (var i = 0; i < root.leaves.length; i++){
                     if(exportList.indexOf(root.leaves[i].name) !== -1){
                         addToInfo(root.leaves[i])
+
                     }
                 }
 
@@ -208,7 +211,7 @@ $(document).ready(function() {
 
                     var IDA = document.createElement('a');
                     IDA.innerHTML= d.id +'  '+'<img alt="ext logo" src="/static/image/ext.png" ></a>' ;
-                    IDA.href="/cgi-bin/gateway.pl?f=DisplayOS&p1="+d.id;
+                    IDA.href="/oma/genome/" + d.id +"/info/"
 
                     var TAXID = document.createElement('em');
                     TAXID.innerHTML='Taxon ID : ';

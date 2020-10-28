@@ -33,6 +33,14 @@
             {% if "PMP" in xrefs %}
                 <dt>Protein Structures</dt><dd>n/a</dd>
             {% endif %}
+            {% if entry.ec_numbers %}
+                <dt>EC number</dt>
+                <dd>
+                    {% for ecnum in entry.ec_numbers %}
+                    <a class="external" href="https://enzyme.expasy.org/EC/{{ ecnum }}">EC:{{ ecnum }}</a>
+                    {% endfor %}
+                </dd>
+            {% endif %}
         </dl>
     </div>
 </div>

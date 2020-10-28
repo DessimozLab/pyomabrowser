@@ -1,0 +1,73 @@
+{% extends "base_entry.html" %}
+{% load staticfiles %}
+
+{% block title %}Information for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} OMA stores the following information about the gene/protein.{% endblock %}
+{% block contentTab %}
+
+{% include "includes/func_desc.html" %}
+
+
+<h4 >General Information</h4>
+
+
+<table class="table">
+     {% if entry.description %}<tr><td>Description</td><td>{{ entry.description }}</td></tr> {% endif %}
+    <tr><td>Organism</td><td><a href="{% url 'genome_info' entry.genome.uniprot_species_code %}"> {{ entry.genome.uniprot_species_code }} - {{ entry.genome.sciname }}</a></td></tr>
+    <tr><td>Locus</td><td>[{{entry.chromosome}}]: {{entry.locus_start}} ... {{entry.locus_end}} </td></tr>
+    <tr><td>Number of exons</td><td>{{ entry.exons | length }}</td></tr>
+    <tr><td>Exons</td><td>{{ entry.exons }}</td></tr>
+     {% if "PMP" in xrefs %}
+    <tr><td>Protein Structures</td><td>n/a</td></tr>
+    {% endif %}
+  </table>
+
+
+<br>
+
+<h4 >IDs and Cross-references</h4>
+
+    <div id="loader-xrefs"><img src="{% static "image/loading.gif" %}" alt="loading xrefs..."></div>
+<table id="xrefs" class="table">
+            {% for xref in xrefs %}
+                <tr><td>{{ xref.source }}</td><td><a class="external" href="{{ xref.url }}">{{ xref.xref }}</a></td></tr>
+            {% endfor %}
+</table>
+
+
+    <!-- Ontology -->
+<script src="{% static "js/underscore-min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/xref_format.js" %}" type="text/javascript"></script>
+
+
+    <script>
+    (function(){
+        $.getJSON("/api/protein/{{ entry.entry_nr }}/xref/", function(data){
+            // sort accroding to xref_source_order
+            var xref_source_order = {{ xref_order | safe }};
+            data.sort(function(a, b){
+                var idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
+                if (idx_a === idx_b){
+                    return a.xref > b.xref ? 1 : -1;
+                }
+                return idx_a - idx_b;
+            });
+            // remove duplicated xref values of less important sources
+            var clean_data = data.filter(function(obj, pos, arr){
+                return arr.map(function(obj){return obj.xref;}).indexOf(obj.xref) === pos
+                    || (obj.source !== "SourceID" && obj.source !== "SourceAC")
+            });
+            _.forEach(_.groupBy(clean_data, "source"), function(xrefs, source){
+                var list_item = ["<tr><td>" + source + "</td>"];
+                _.forEach(xrefs, function(ref){
+                    list_item.push("<td>"+xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}") +"</td>")
+                });
+                $('#xrefs').append(list_item.join("")+"</tr>\n");
+            });
+        });
+        $("#loader-xrefs").hide();
+    })();
+</script>
+
+
+{% endblock contentTab %}
