@@ -45,13 +45,7 @@ circle.picked {
 	opacity: 0.2;
 }
 
-.tile{
-    background-color: #fff;
-    padding: 16px;
-    box-shadow: 2px 2px 1px #eee;
-    border-radius: 4px;
-    margin:8px;
-}
+
 
 div.tooltip {
     position: absolute;

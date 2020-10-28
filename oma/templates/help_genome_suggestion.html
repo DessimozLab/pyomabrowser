@@ -1,0 +1,70 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+{% load bootstrap4 %}
+
+{% block title %}Suggesting Genome for OMA{% endblock %}
+
+{% block css_hook %}
+<style type="text/css">
+    div.required label:after { content: '*'; }
+</style>
+{% endblock css_hook %}
+
+{% block content %}
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+
+            <h1>Suggesting a new or updated genome for OMA</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <p class="text-justify">Are you missing an important genome in OMA? Is our coverage in a certain region
+                        of the phylogenetic tree underrepresented? Or did we miss out on an crucial update
+                        of your genome of interest? Please let us know with the form below and we will
+                        try to do our best to include your suggestion in the next possible release.</p>
+                    <p class="text-justify">The genomes requested must have a publicly available protein annotation in order to
+                        be included in OMA.</p>
+                    <p class="text-justify">Keep in mind that computational efforts are quite demanding and we might not be able
+                        to include your suggestion straight away. We prioritise the suggestions based on
+                        genome quality, importance, and easiness to include. We therefore recommend to
+                        complete the form to the best of your knowledge and to be available by email for
+                        further clarifications if needed later on.</p>
+
+            <div class="card" >
+                <div class="card-header">
+    Suggestion Form
+  </div>
+                <div class="card-body">
+                    {% bootstrap_messages %}
+
+                    <form role="form" class="" action="{% url 'genome_suggestion' %}" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% bootstrap_form form layout="horizontal" %}
+                        {% buttons %}
+                            <button type="submit" class="btn btn-primary float-right">Submit</button>
+                        {% endbuttons %}
+                    </form>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+</div>
+
+
+{% endblock content %}

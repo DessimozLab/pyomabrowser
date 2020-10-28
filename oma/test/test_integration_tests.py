@@ -1,7 +1,7 @@
 from __future__ import print_function, absolute_import, division
 import json
 from django.test import TestCase
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 import re
 import collections
 
@@ -99,7 +99,7 @@ class HogVisViewTest(TestCase):
         query = 'YEAST00012'
         reply = self.client.get(reverse('hog_vis', args=[query]))
         self.assertEqual(reply.status_code, 200)
-        self.assertTemplateUsed(reply, "hog_vis.html")
+        #self.assertTemplateUsed(reply, "hog_iHam.html")
         expected_orthoxml_url = reverse('hogs_orthoxml', args=[query])
         expected_species_url = '/All/speciestree.nwk'
         self.assertIn('url: "{}"'.format(expected_orthoxml_url).encode('utf-8'), reply.content)
@@ -162,6 +162,58 @@ class SyntenyViewTester(TestCase):
         context = decode_replycontent(reply)
         self.assertIn('btn-0-4-', context)
         self.verify_colors(query, 4)
+
+
+class SearchTester(TestCase):
+
+    def query_server(self, query, **kwargs):
+        url = reverse('search')
+        args = {'query': query}
+        args.update(kwargs)
+        reply = self.client.get(url, data=args)
+        return reply
+
+    def test_unique_ids_resolve_directly(self):
+        for query in ("PGTB2_SCHPO", "SPAC167.02", "O13948"):
+            res = self.query_server(query)
+            self.assertEqual(302, res.status_code, "ID '{}' did not resolve uniquely".format(query))
+            self.assertTrue(res.url.startswith('/oma/info/'))
+
+    def test_part_of_id(self):
+        query = "TB2"
+        reply = self.query_server(query)
+        for target in json.loads(reply.context['data']):
+            for xref in target['xrefs']:
+                if query.lower() in xref['xref'].lower():
+                    break
+            else:
+                self.assertTrue(False, "Couldn't find '{}' in search result {}".format(query, target))
+
+    def test_sequence_search(self):
+        s = "RSYKNSSAEGVLTGKGLNWGGSLIRPEAFGLVYYTQAMIDYATNGSFEGKRVTISGSGANVAQYAALKVIEVVSLSDSKGCIISETSEQIHD"
+        res = self.client.post(reverse('search'), data={'query': s, 'type': 'sequence'})
+        self.assertEqual(200, res.status_code)
+        self.assertIn('DHE5_YEAST', [z['xrefid'] for z in json.loads(res.context['data'])])
+
+    def test_sequence_in_lowercase(self):
+        s = "RSYKNSSAEGVLTGKGLNWGGSLIRPEAF".lower()
+        reply = self.query_server(s, type="sequence")
+        self.assertIn('DHE5_YEAST', [z['xrefid'] for z in json.loads(reply.context['data'])])
+
+    def test_numeric_group_search(self):
+        gnr = 10
+        res = self.query_server(gnr, type='group')
+        self.assertEqual(302, res.status_code)
+        self.assertEqual(reverse('omagroup', args=[gnr]), res.url)
+
+    def test_search_species_name(self):
+        queries = ["YEAST", "559292", "4890", "Saccharomyces cerevisiae", "Baker's yeast"]
+        expected_code = "YEAST"
+        for query in queries:
+            reply = self.query_server(query, type="species")
+            self.assertEqual(200, reply.status_code)
+            self.assertIn('YEAST', [z['uniprot_species_code'] for z in json.loads(reply.context['data'])])
+
 
 
 class TemplatetagTester(TestCase):

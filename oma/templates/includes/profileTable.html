@@ -1,0 +1,134 @@
+{% load staticfiles %}
+
+
+
+        <table class="table table-hover" id="grpTable"
+               data-show-toggle="false"
+               data-show-columns="false" data-search="true" data-show-export="true"
+               data-mobile-responsive="true" data-check-on-init="true"
+               data-undefined-text=""
+               data-unique-id="id"
+               data-id-field="id" data-row-attributes="tablehooks.add_proteinrow_attrs" >
+            <thead>
+
+
+             <tr>
+                <th  data-field="id" data-valign="middle" data-sortable="true" data-formatter="tablehooks.format_hogid">HOG ID</th>
+                <th  data-field="jaccard" data-valign="middle" data-sortable="true">Jaccard similarity <i class="fas fa-info-circle" rel="tooltip" title="Jaccard similarity between reference hog profile and  target hog profile" ></i></th>
+                <th data-class='profile_cell' data-valign="middle" data-width="600" ></th>
+                <th  data-field="description" data-valign="middle" data-sortable="true">Description</th>
+
+
+    </tr>
+
+
+            </thead>
+
+
+        </table>
+
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<script src="{% static "js/bootstrap-table.min.js" %}"></script>
+
+<link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+<script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+<script src="{% static "js/tableExport.min.js" %}"></script>
+
+<!-- D3 todo dl the lib-->
+<script src="https://d3js.org/d3.v5.js"></script>
+
+<!-- Profile Visualisation -->
+<script src='{% static "js/profile.js" %}' type="text/javascript"></script>
+<link href='{% static "css/profile.css" %}' rel="stylesheet" type="text/css"/>
+
+
+
+
+
+
+<script>
+
+
+
+    $.getJSON("{{ table_data_url }}", function (alldata) {
+    //$.getJSON("https://oma-stage.vital-it.ch/oma/hog/similar/profile/json/HOG:0455705/", function (alldata) {
+
+        var data = alldata["profile"]
+        var ref;
+
+        for (var i = data.length - 1; i >= 0; --i) {
+            if (data[i].id == "Reference") {
+                ref = data[i]
+        data.splice(i,1);
+    }
+}
+
+
+        var tab = $("#grpTable");
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'fa-download'});
+        tab.bootstrapTable({
+            data: data ,
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            showLoading: true,
+            height:$(window).height() - 300,
+            onPostBody: function (data) {
+
+                profile.run(data,ref, alldata["tax"], alldata["species"], "th.profile_cell", '.profile_cell' );
+
+                $(document).ready(function(){
+                $("[rel=tooltip]").tooltip({ placement: 'right'});
+                });
+
+
+                var obs = new MutationObserver(function(mutations, observer) {
+  // using jQuery to optimize code
+  $.each(mutations, function (i, mutation) {
+    var addedNodes = $(mutation.addedNodes);
+    var selector = "tr"
+    var filteredEls = addedNodes.find(selector).addBack(selector); // finds either added alone or as tree
+    filteredEls.each(function () { // can use jQuery select to filter addedNodes
+
+        profile.run(data,ref, alldata["tax"], alldata["species"], ".fixed-table-header th.profile_cell", '.profile_cell' );
+
+      document.querySelector("th.profile_cell").style.paddingLeft = "8px";
+
+ var html_to_insert ='<button type="button"  id="resetbutton" onclick="profile.reset();" class="btn btn-sm btn-danger float-right" style="margin-top: 4px;margin-right: 4px; font-size: .600rem;line-height: 1;">Reset</button>'
+            document.querySelector("th.profile_cell").insertAdjacentHTML('afterbegin', html_to_insert );
+
+
+    });
+  });
+});
+
+                var canvasElement = $(".fixed-table-header")[0];
+                obs.observe(canvasElement, {childList: true, subtree: true});
+
+
+            },
+            onLoadSuccess: function () {
+
+                tab.bootstrapTable('hideLoading');
+            },
+            refreshOptions: {'icons': icons}
+        });
+
+
+
+    });
+
+</script>
+
+
+
+
+
+
+
+
+
+

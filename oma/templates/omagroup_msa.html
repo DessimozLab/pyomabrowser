@@ -1,7 +1,7 @@
-{% extends  "ogCentric.html" %}
+{% extends  "base_omagroup.html" %}
 {% load staticfiles %}
 
-{% block title %}OMA: MSA of OMA Group {{ group_nr }}{% endblock %}
+{% block title %}OMA group {{omagroup.group_nbr}} MSA{% endblock %}
 {% block meta_description %}Multiple sequence alignment of the member proteins of the OMA Group {{ group_nr }}.{% endblock %}
 
 {% block meta_hook %}

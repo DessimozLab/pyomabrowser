@@ -1,0 +1,24 @@
+{% extends "base_entry.html" %}
+{% load staticfiles %}
+
+{% block title %}Isoforms for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}For {{ entry.omaid }} several isoforms are available{% endblock %}
+
+{% block contentTab %}
+
+{% if entry.alternative_isoforms|length > 0 %}
+
+
+    {% include "includes/groupTable_isoforms.html" %}
+{% else %}
+
+<div class="alert alert-secondary" role="alert">
+  This entry does not possess any isoforms.
+
+</div>
+
+
+{% endif %}
+
+
+{% endblock contentTab %}

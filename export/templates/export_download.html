@@ -1,4 +1,4 @@
-{% extends "core.html" %}
+{% extends  "base_template.html" %}
 {% load staticfiles %}
 
 {% block title %}OMA standalone: Export of public OMA data for OMA standalone{% endblock %}
@@ -11,18 +11,32 @@
 {% endblock meta_hook %}
 
 {% block content %}
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-sm-12 col-md-10 col-md-offset-1">
-			<div class="jumbotron">
-				<div class="container">
-					<h1 class="text-center">Export of Genomes and AllAll for OMA Standalone</h1>
-					<div class="well well-sm entete"></div>
-					<br>
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<p>The data we provide in here is intended to speed up the usage of the
-                                <a href="/standalone/">OMA Standalone package</a>. The compressed tar-file must be
+
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+            <h1>Export of Genomes and AllAll for OMA Standalone</h1>
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+            <p>Are you interested in annotating gene ontology functions to your own proteome? Here,
+                        we provide an easy way to project functions from the entire OMA Browser based on
+                        sequence similarity to your sequences
+            </p>
+
+            <div class="card card-header-oma">
+                <div class="card-header">
+                    <h4>Gene Ontology Function Projection</h4>
+                </div>
+                <div class="card-body">
+                    <p>The data we provide in here is intended to speed up the usage of the
+                                <a href="https://omabrowser.org/standalone/">OMA Standalone package</a>. The compressed tar-file must be
                                 deflated in the root directory of your analysis.
                                 <b>Do not change these files
                                     in any way, i.e. shuffling the sequences, adding or removing any sequences or
@@ -70,11 +84,13 @@
                               <input type="submit" value="Refresh" />
                             </form></p>
                             {% endif %}
-                        </div>
-			        </div>
-		        </div>
-	        </div>
+                </div>
+            </div>
+
         </div>
+
     </div>
 </div>
+
+
 {% endblock content %}

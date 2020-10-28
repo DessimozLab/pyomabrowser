@@ -1,0 +1,1325 @@
+body {
+	 color: #333;
+	 padding: 87px 0 0;
+	 font-family: "Noto Sans", sans-serif;
+}
+ body.landing {
+	 background: #317d3d;
+	 overflow-x: hidden;
+}
+ body .cls-1 {
+	 fill: #317d3d;
+}
+ body .btn-primary {
+	 background: #317d3d;
+	 border-color: #317d3d;
+}
+ body .btn-primary:hover {
+	 background: #333;
+	 border-color: #333;
+}
+
+ body .topnav{
+	 background-color: #ffffff !important;
+ }
+ body nav .logos-navbar {
+	 padding: 10px;
+}
+ body nav .logos-navbar a:nth-child(1) img {
+	 width: 67px;
+}
+ body nav .logos-navbar a:nth-child(2) img {
+	 margin: 0 0 0 8px;
+	 width: 104px;
+}
+ body nav .navbar-toggler {
+	 border: none;
+	 padding: 0 2rem;
+}
+ body nav .navbar-nav .search {
+	 display: none;
+}
+ body nav .oma-main-search-header {
+	 position: relative;
+	 flex: 1 1 auto;
+	 margin: 0 0 0 100px;
+}
+ body nav .oma-main-search-header form .oma-search-select {
+	 width: 170px;
+	 font-size: 0.8rem;
+}
+ body nav .oma-main-search-header form .oma-search-select select {
+	 padding: 5px;
+}
+ body nav .oma-main-search-header form input[type=text] {
+	 font-size: 0.8rem;
+}
+ body nav .oma-main-search-header form button {
+	 bottom: 8px;
+}
+ body .search form, body .oma-search form, body .oma-main-search-header form {
+	 display: flex;
+	 box-shadow: 2px 2px 10px -6px rgba(0,0,0,0.5);
+	 border-radius: 5px;
+}
+ body .search form .oma-search-select, body .oma-search form .oma-search-select, body .oma-main-search-header form .oma-search-select {
+	 width: 220px;
+	 border-radius: 5px 0 0 5px;
+	 padding: 8px;
+	 overflow: hidden;
+	 background: #e9e5e5 url("../image/select-arrows.png") no-repeat 95% 50%;
+	 background-size: 12px;
+	 display: inline-block;
+}
+ body .search form .oma-search-select:hover, body .oma-search form .oma-search-select:hover, body .oma-main-search-header form .oma-search-select:hover {
+	 background: #ddd url("../image/select-arrows.png") no-repeat 95% 50%;
+	 background-size: 12px;
+}
+ body .search form .oma-search-select select, body .oma-search form .oma-search-select select, body .oma-main-search-header form .oma-search-select select {
+	 width: 100%;
+	 padding: 5px 8px;
+	 border: none;
+	 box-shadow: none;
+	 background: transparent;
+	 -webkit-appearance: none;
+	 cursor: pointer;
+}
+ body .search form .oma-search-select select:focus, body .oma-search form .oma-search-select select:focus, body .oma-main-search-header form .oma-search-select select:focus {
+	 outline: none;
+}
+ body .search form input[type=text], body .oma-search form input[type=text], body .oma-main-search-header form input[type=text] {
+	 width: 100%;
+	 border: 1px solid #e9e5e5;
+	 box-shadow: none;
+	 border-radius: 0 5px 5px 0;
+	 padding: 8px;
+	 background: #fff;
+}
+ body .search form button, body .oma-search form button, body .oma-main-search-header form button {
+	 position: absolute;
+	 right: 10px;
+	 bottom: 10px;
+	 border: none;
+	 background: none;
+	 cursor: pointer;
+}
+ body .search form button img, body .oma-search form button img, body .oma-main-search-header form button img {
+	 width: 24px;
+}
+ body #oma-search-container {
+	 background: #f8f9fa;
+	 padding: 14px 0px 14px ;
+	 text-align: center;
+	 border-radius: 0 0 50% 50%;
+	 width: 120%;
+	 position: relative;
+	 left: -10%;
+}
+ body #oma-search-container .container .logo-oma-lg {
+	 width: 500px;
+	 height: 200px;
+	 background: url('../image/logo-oma.svg') no-repeat center center / contain;
+	 margin: 0 auto;
+}
+  body #oma-search-container .container .logo-oma-lg-corona {
+	 width: 500px;
+	 height: 200px;
+	 background: url('../image/logo-oma-corona.svg') no-repeat center center / contain;
+	 margin: 0 auto;
+}
+ body #oma-search-container .container .oma-search {
+	 position: relative;
+}
+ body #oma-search-container .container #largeTextareaModal img {
+	 width: 80px;
+	 margin: 0 10px 10px;
+	 -webkit-animation: spin 8s linear infinite;
+	 -moz-animation: spin 8s linear infinite;
+	 animation: spin 8s linear infinite;
+}
+ body #oma-search-container .container #largeTextareaModal form {
+	 display: block;
+}
+ body #oma-search-container .container #largeTextareaModal form .oma-search-select {
+	 width: 100%;
+	 border-radius: 5px;
+	 text-align: left;
+	 background: #f1f3f4 url("../image/select-arrows.png") no-repeat 95% 50%;
+	 background-size: 12px;
+}
+ body #oma-search-container .container #largeTextareaModal form textarea {
+	 width: 100%;
+	 height: 200px;
+	 border-color: #e9e5e5;
+	 padding: 10px;
+}
+ body #oma-search-container .container #largeTextareaModal form button {
+	 position: initial;
+}
+ body #oma-search-container .container #largeTextareaModal form.search-long-string button {
+	 background: #317d3d;
+}
+ body #oma-search-container .oma-quick-start {
+	 background: #ebf1f5;
+	 margin: 60px auto 0;
+	 padding: 10px 20px;
+	 border-radius: 30px;
+	 text-align: left;
+	 display: inline-flex;
+	 align-items: center;
+}
+ body #oma-search-container .oma-quick-start p {
+	 margin: 0;
+}
+ body #oma-search-container .oma-quick-start img {
+	 width: 24px;
+	 margin: 0 10px 0 0;
+}
+ body #oma-statistics {
+	 margin: 80px 0;
+}
+ body #oma-statistics .row {
+	 border-top: 7px solid rgba(0, 0, 0, 0.2);
+	 border-bottom: 7px solid rgba(0, 0, 0, 0.2);
+	 padding: 10px 0;
+}
+ body #oma-statistics .row .col-md-2 {
+	 font-family: "Ropa Sans", sans-serif;
+	 text-align: center;
+}
+ body #oma-statistics .row .col-md-2 h1 {
+	 color: #ddd;
+	 margin: 0;
+}
+ body #oma-landing-cards {
+	 margin: 0 0 60px 0;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card {
+	 text-align: center;
+	 background: #fff;
+	 height:100%;
+	 border-radius: 8px;
+	 /*min-height: 500px;
+	 font-size: 0.8rem;*/
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card h1 {
+	 font-family: "Dosis", sans-serif;
+	 font-size: 1.7rem;
+	 font-weight: 400;
+	 color: #317d3d;
+	 border-radius: 8px;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card svg {
+	 width: 52px;
+	max-height: 52px;
+	margin: 0 10px;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul {
+	 text-align: left;
+	 padding: 0;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul li {
+	 margin-bottom: -1px;
+    list-style: none;
+    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul li p {
+margin-bottom: 0;
+}
+
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .oma-mobile-accordion {
+	 border-bottom: none;
+background: #f7f7f7;
+	 border-radius: 8px 8px 0px 0px;
+ }
+
+
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .oma-mobile-accordion i {
+	 display: none;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .oma-twitter {
+	 text-align: left;
+	 max-height: 270px;
+	 overflow: auto;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .oma-twitter ul {
+	 padding: 0;
+	 list-style: none;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .oma-twitter ul li {
+	 white-space: pre-wrap;
+	 white-space: -moz-pre-wrap;
+	 white-space: -o-pre-wrap;
+	 word-wrap: break-word;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .icons-stay-in-touch {
+	 margin: 10px 0;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .icons-stay-in-touch a {
+	 width: 52px;
+	 height: 52px;
+	 background: #fff;
+	 border-radius: 50%;
+	 display: inline-flex;
+	 align-items: center;
+	 text-align: center;
+	 margin: 0 5px;
+	 transition: all 0.3s;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .icons-stay-in-touch a:hover {
+	 background: #e9e5e5;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card .icons-stay-in-touch a img {
+	 margin: 0 auto;
+}
+ body #oma-citation {
+	 margin: 60px 0;
+}
+ body #oma-citation .container .oma-alert {
+	 width: 100%;
+	 padding: 10px;
+	 display: inline-flex;
+	 align-items: center;
+	 background: #e9e5e5;
+	 border-radius: 20px;
+}
+ body #oma-citation .container .oma-alert img {
+	 width: 56px;
+	 margin: 0 10px;
+}
+ body #oma-citation .container .oma-alert p {
+	 margin: 0;
+}
+ body .oma-details-header {
+	 background-color: #f5f5f5;
+	 position: fixed;
+	 z-index: 1000;
+	 width: 100%;
+	 padding: 10px;
+	 box-shadow: 0px 1px 2px 2px rgba(0,0,0,0.05);
+}
+ body .oma-details-header .oma-details-title {
+	 float: left;
+	 padding: 0 0 0 17px;
+}
+ body .oma-details-header .oma-details-title h2 {
+	 font-weight: 700;
+}
+ body .oma-details-header .oma-details-title-buttons {
+	 float: right;
+}
+ body .oma-details-header .oma-details-title-buttons .btn {
+
+
+	 width: 140px;
+  height: 45px;
+
+
+  letter-spacing: 1.5px;
+  font-weight: 500;
+
+  border: none;
+  border-radius: 45px;
+
+  transition: all 0.3s ease 0s;
+  cursor: pointer;
+  outline: none;
+	 background-color: #fff;
+}
+
+ body  .gene-orthology .oma-details-title-buttons .btn  {
+	 color: #64c7cd !important;
+ }
+
+ body  .gene-orthology .oma-details-title-buttons .btn a {
+	 color: #64c7cd !important;
+ }
+
+
+ body .oma-details-container {
+	 height: calc(100vh - 202px);
+	 margin: 105px 0 0;
+	 background: #fff;
+}
+ body .oma-details-container #oma-details-sideNav-mobile {
+	 display: none;
+}
+ body .oma-details-container .oma-details-nav-left {
+
+
+	 position: fixed;
+    width: 280px;
+	 height: calc(100% - 285px);
+    background: #f8f9fa;
+
+	 overflow-y: auto;
+
+    margin: 76px 0 0;
+    border-radius: 0 10px 10px 0;
+    box-shadow: 13px 14px 20px -12px rgba(0,0,0,0.1);
+
+}
+ body .oma-details-container .oma-details-nav-left ul {
+	 padding: 0;
+
+}
+ body .oma-details-container .oma-details-nav-left ul li {
+	 list-style: none;
+	 text-align: left;
+	 padding: 0 0 0 0px;
+	 background: white;
+}
+ body .oma-details-container .oma-details-nav-left ul li:hover {
+	 background: #ccc;
+}
+ body .oma-details-container .oma-details-nav-left ul li:nth-child(odd) {
+	 background: #f1f3f4;
+}
+ body .oma-details-container .oma-details-nav-left ul li:nth-child(odd):hover {
+	 background: #ccc;
+}
+ body .oma-details-container .oma-details-nav-left ul.genome li.active {
+	 background: #ee3a39;
+	 border-top:    2px solid  #f8f9fa;
+	 border-bottom: 2px solid #f8f9fa;
+ }
+
+
+body .oma-details-container .oma-details-nav-left ul.gene-orthology  li.active {
+	 background: #369;
+    border-bottom: 2px solid #f8f9fa;
+    border-radius: 0 10px 0 0px;
+}
+body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
+	 background: #369;
+	 border-top:    2px solid  #f8f9fa;
+	 border-bottom: 2px solid #f8f9fa;
+}
+ body .oma-details-container .oma-details-nav-left ul li.active > a {
+	 font-weight: 700;
+	 color: #FFFFFF
+}
+
+   body .oma-details-container .oma-details-nav-left .edit {
+	 display: inline;
+	 width: 100%;
+	 padding: 0px 0;
+	 padding-left: 0px;
+	   color: blue;
+}
+
+
+ body .oma-details-container .oma-details-nav-left ul li a {
+	 display: flex;
+	 width: 100%;
+	 padding: 18px 0;
+	 padding-left: 20px;
+	 color: #333;
+}
+
+
+
+
+ body .oma-details-container .oma-details-nav-left ul li div {
+
+    background-color: #f8f9fa;
+
+    padding: 4px;
+
+    margin-top: 0px;
+
+    padding-left: 10px;
+
+}
+
+.h5, h5 {
+
+    font-size: smaller;
+
+    text-transform: uppercase;
+
+    font-weight: 700;
+}
+
+ body .oma-details-container .oma-details-nav-left ul li a:hover {
+	 text-decoration: none;
+}
+ body .oma-details-container .oma-details-nav-left ul li a span {
+	 flex-grow: 1;
+}
+ body .oma-details-container .oma-details-nav-left ul li a i {
+	 align-items: center;
+	 transform: rotate(0deg);
+}
+ body .oma-details-container .oma-details-nav-left ul li a[aria-expanded="true"] i {
+	 transform: rotate(90deg);
+}
+ body .oma-details-container .oma-details-nav-left ul li #filterParalogs {
+	 padding: 0 0 10px;
+}
+ body .oma-details-container .oma-details-nav-left ul li #filterParalogs p {
+	 margin: 0;
+}
+ body .oma-details-container .oma-details-content {
+	 width: auto ;
+	 margin-left: 300px;
+	 padding: 18px;
+}
+ @-moz-keyframes spin {
+	 100% {
+		 -moz-transform: rotate(360deg);
+	}
+}
+ @-webkit-keyframes spin {
+	 100% {
+		 -webkit-transform: rotate(360deg);
+	}
+}
+ @keyframes spin {
+	 100% {
+		 -webkit-transform: rotate(360deg);
+		 transform: rotate(360deg);
+	}
+}
+ #oma-generic-container {
+	 margin: 40px 0;
+}
+ #oma-generic-container .container .jumbotron {
+	 position: relative;
+     background: none;
+    padding: 2rem 1rem;
+}
+
+  #oma-generic-container .container-fluid .jumbotron {
+	 position: relative;
+     background: none;
+    padding: 2rem 1rem;
+}
+
+ #oma-generic-container .container .jumbotron .oma-seperator {
+	 position: relative;
+	 width: 100%;
+	 padding: 0 10px;
+	 margin: 20px auto;
+	 height: 8px;
+	 background: #317d3d;
+}
+ #oma-generic-container .container .jumbotron .oma-seperator .colour1, #oma-generic-container .container .jumbotron .oma-seperator .colour2, #oma-generic-container .container .jumbotron .oma-seperator .colour3 {
+	 position: absolute;
+	 left: 15%;
+	 top: 0;
+	 width: 10%;
+	 height: 8px;
+	 background: #64c7cd;
+}
+ #oma-generic-container .container .jumbotron .oma-seperator .colour2 {
+	 background: #ee3a39;
+	 left: 25%;
+}
+ #oma-generic-container .container .jumbotron .oma-seperator .colour3 {
+	 background: #369;
+	 left: 35%;
+}
+ #oma-generic-container .container .jumbotron h1 {
+	 font-size: 4rem;
+	 font-weight: 700;
+	 text-align: center;
+}
+ #oma-generic-container .container .jumbotron form {
+	 display: block;
+	 box-shadow: none;
+}
+ #oma-generic-container .container .jumbotron h4 {
+	 margin: 0;
+}
+
+.oma-mobile-accordion{
+ padding: 20px 0;
+display: flex;
+justify-content: center;
+align-items: center;
+border-bottom: 1px solid #eee;
+ }
+
+
+.oma-card-content{
+	padding: 0 20px;
+	min-height: 350px;
+}
+
+.btn-more-container {
+position: absolute !important;
+left: 50% !important;
+bottom: 0px !important;
+transform: translate(-50%, -10%) !important;
+border: none !important;
+}
+
+ @media (max-width: 1366px) {
+	 .col-md-6 {
+		 -ms-flex: 0 0 50%;
+		 flex: 0 0 50%;
+		 max-width: 50%;
+		 margin: 10px 0;
+	}
+
+	 .btn-more-container {
+position: relative !important;
+left: initial !important;
+bottom: initial !important;
+transform: none !important;
+}
+}
+ @media screen and (max-width: 1200px) {
+	 body {
+		 padding: 74px 0 0;
+	}
+	 body nav {
+		/* close animation */
+		/* end animation */
+	}
+	 body nav .navbar-toggler:focus, body nav .navbar-toggler:active {
+		 outline: 0;
+	}
+	 body nav .navbar-toggler span {
+		 position: relative;
+		 top: 2px;
+		 display: block;
+		 background-color: #317d3d;
+		 height: 3px;
+		 width: 28px;
+		 margin-top: 5px;
+		 margin-bottom: 5px;
+		 -webkit-transform: rotate(0deg);
+		 -moz-transform: rotate(0deg);
+		 -o-transform: rotate(0deg);
+		 transform: rotate(0deg);
+		 opacity: 1;
+	}
+	 body nav .navbar-toggler span:nth-child(1), body nav .navbar-toggler span:nth-child(3) {
+		 -webkit-transition: transform 0.35s ease-in-out;
+		 -moz-transition: transform 0.35s ease-in-out;
+		 -o-transition: transform 0.35s ease-in-out;
+		 transition: transform 0.35s ease-in-out;
+	}
+	 body nav .navbar-toggler:not(.collapsed) span:nth-child(1) {
+		 position: relative;
+		 top: 4px;
+		 margin-top: 0;
+		 -webkit-transform: rotate(135deg);
+		 -moz-transform: rotate(135deg);
+		 -o-transform: rotate(135deg);
+		 transform: rotate(135deg);
+		 opacity: 0.9;
+	}
+	 body nav .navbar-toggler:not(.collapsed) span:nth-child(2) {
+		 height: 10px;
+		 visibility: hidden;
+		 background-color: transparent;
+	}
+	 body nav .navbar-toggler:not(.collapsed) span:nth-child(3) {
+		 position: relative;
+		 top: 4px;
+		 margin-top: -22px;
+		 -webkit-transform: rotate(-135deg);
+		 -moz-transform: rotate(-135deg);
+		 -o-transform: rotate(-135deg);
+		 transform: rotate(-135deg);
+		 opacity: 0.9;
+	}
+	 body nav.navbar-light {
+		 padding: 0;
+	}
+	 body nav.navbar-light .logos-navbar {
+		 padding: 18px;
+	}
+	 body nav.navbar-light .logos-navbar a:nth-child(1) img {
+		 width: 50px;
+	}
+	 body nav.navbar-light .logos-navbar a:nth-child(2) img {
+		 width: 80px;
+	}
+	 body nav.navbar-light .oma-main-search-header {
+		 margin: 0 0 0 20px;
+	}
+	 body nav.navbar-light .navbar-collapse {
+		 background: #317d3d;
+		 height: 100vh;
+		 text-align: center;
+		 font-size: 1.6rem;
+		 overflow: auto;
+	}
+	 body nav.navbar-light .navbar-collapse .navbar-nav ul {
+		 padding: 10px;
+	}
+	 body nav.navbar-light .navbar-collapse .navbar-nav .search {
+		 color: #fff;
+		 background: rgba(0, 0, 0, 0.2);
+		 padding: 20px 10px 30px;
+	}
+	 body nav.navbar-light .navbar-collapse .navbar-nav .nav-item .nav-link {
+		 color: #fff;
+	}
+	 body nav .collapsing {
+		 -webkit-transition: none;
+		 transition: none;
+		 display: none;
+	}
+	 body #oma-statistics .container {
+		 max-width: 100%;
+	}
+	 .btn-more-container {
+position: relative !important;
+left: initial !important;
+bottom: initial !important;
+transform: none !important;
+}
+}
+ @media screen and (max-width: 1024px) {
+	 body {
+		 padding: 72px 0 0;
+	}
+	 body nav .logos-navbar a:nth-child(1) img {
+		 width: 40px;
+	}
+	 body nav .logos-navbar a:nth-child(2) img {
+		 width: 60px;
+	}
+	 body #oma-search-container {
+		 padding: 0 0 40px;
+		 left: 0;
+		 width: 100%;
+		 border-radius: 0;
+	}
+	 body #omaLandingOthersContainer {
+		 display: flex;
+		 flex-wrap: wrap;
+		 align-items: center;
+		 margin: 0;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards {
+		 flex: 100%;
+	}
+	 body #omaLandingOthersContainer #oma-statistics {
+		 flex: 100%;
+		 margin: 0;
+	}
+	 body #omaLandingOthersContainer #oma-statistics h1 {
+		 font-size: 2rem;
+	}
+	 body #omaLandingOthersContainer #oma-statistics h3 {
+		 font-size: 1.5rem;
+	}
+	 body #omaLandingOthersContainer #oma-citation {
+		 width: 100%;
+	}
+	 body .oma-details-header {
+		 position: relative;
+		 padding: 10px 10px 10px 26px;
+	}
+
+	 body .oma-details-header .oma-details-title {
+		 float: none;
+		 padding: 10px;
+	}
+	 body .oma-details-header .oma-details-title h2 {
+		 font-size: 1.4rem;
+	}
+
+	 body .oma-details-header .oma-details-title-buttons {
+		 display: block !important;
+		 float: none;
+         color: #fff;
+		 border-radius: 0;
+		 background: rgba(0, 0, 0, 0.2);
+	}
+	 body .oma-details-header .oma-details-title-buttons .btn {
+		 background: none;
+		 width: 49.5%;
+		 color: #fff;
+		 border-radius: 0;
+	}
+	 body .oma-details-header .oma-details-title-buttons .btn.btn-light {
+		 border-left: 1px solid rgba(0, 0, 0, 0.1);
+	}
+
+
+	 body .oma-details-container {
+		 height: calc(100vh - 202px);
+		 margin: 15px 0 0;
+		 background: #fff;
+	}
+	 body .oma-details-container .oma-details-content {
+		 width: 100%;
+		 margin: 0;
+	}
+	 body .oma-details-container #oma-details-sideNav-mobile {
+		 display: block;
+		 position: relative;
+		 top: 5px;
+		 width: 98%;
+		 margin: 10px auto 5px;
+		 background: #317d3d;
+		 border-radius: 10px;
+	}
+	 body .oma-details-container #oma-details-sideNav-mobile.sideNavMobile-opened {
+		 border-radius: 10px 10px 0 0;
+	}
+	 body .oma-details-container #oma-details-sideNav-mobile.sideNavMobile-opened a img {
+		 transform: rotate(180deg);
+	}
+	 body .oma-details-container #oma-details-sideNav-mobile a {
+		 display: flex;
+		 color: #fff;
+		 padding: 10px;
+		 align-items: center;
+	}
+	 body .oma-details-container #oma-details-sideNav-mobile a span {
+		 flex-grow: 1;
+	}
+	 body .oma-details-container #oma-details-sideNav-mobile a img {
+		 transform: rotate(90deg);
+	}
+	 body .oma-details-container .oma-details-nav-left {
+		 display: none;
+		 position: relative;
+		 width: 98%;
+		 height: auto;
+		 margin: 0 auto;
+
+
+
+
+	}
+	 body .oma-details-container .oma-details-nav-left ul li:nth-child(6) {
+		 border-radius: 0 0 10px 10px;
+	}
+	 body .oma-details-container .oma-details-nav-left ul li a {
+		 padding: 10px 0;
+	}
+	 .btn-more-container {
+position: relative !important;
+left: initial !important;
+bottom: initial !important;
+transform: none !important;
+}
+}
+ @media screen and (max-width: 768px) {
+
+
+
+
+
+	 body.landing {
+		 background: none;
+	}
+	 body .cls-1 {
+		 fill: #fff;
+	}
+	 body nav .oma-main-search-header {
+		 display: none;
+	}
+	 body nav .navbar-nav .search {
+		 display: block;
+	}
+	 body nav .navbar-nav form {
+		 font-size: 1rem;
+	}
+	 body #omaLandingOthersContainer {
+		 margin: 0;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards {
+		 order: 1;
+		 margin: 0;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 {
+		 -ms-flex: 0 0 100%;
+		 flex: 0 0 100%;
+		 max-width: 100%;
+		 margin: 0;
+		 padding: 0;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card {
+		 background: #317d3d;
+		 color: #fff;
+		 border-radius: 0;
+		 text-align: left;
+		 min-height: inherit;
+		 padding: 0;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion {
+		 display: flex;
+		 align-items: center;
+		 padding: 10px;
+		 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		 cursor: pointer;
+		 	background: inherit !important;
+
+
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion i {
+		 display: block;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion.active {
+		 border: none;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion.active h1, body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion.active i {
+		 color: #d8d82a;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion.active i {
+		 transform: rotate(90deg);
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion.active .cls-1 {
+		 fill: #d8d82a;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion h1 {
+		 flex: 1;
+		 font-family: "Ropa Sans", sans-serif;
+		 font-weight: 100;
+		 letter-spacing: 1px;
+		 color: #fff;
+		 padding: 0 0 0 10px;
+		 margin: 0;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion svg {
+		 width: 42px;
+		 max-height: 42px;
+		 margin: 0 10px 0 0;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content {
+		 display: none;
+		 padding: 0 20px;
+		 min-height: auto;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content h1 {
+		 border-top: 1px solid rgba(0, 0, 0, 0.1);
+		 color: #fff;
+		 padding: 10px;
+	}
+	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content a {
+		 color: #d8d82a;
+	}
+	 body #omaLandingOthersContainer #oma-statistics {
+		 order: 3;
+		 margin: 0;
+	}
+	 body #omaLandingOthersContainer #oma-statistics .row {
+		 background: #d8d82a;
+		 border: none;
+	}
+	 body #omaLandingOthersContainer #oma-statistics .row .col-md-1 {
+		 display: none;
+	}
+	 body #omaLandingOthersContainer #oma-statistics .row .col-md-2 {
+		 width: 20%;
+	}
+	 body #omaLandingOthersContainer #oma-statistics .row .col-md-2 h1 {
+		 color: #333;
+		 font-size: 1.4rem;
+		 font-weight: 700;
+	}
+	 body #omaLandingOthersContainer #oma-statistics .row .col-md-2 h3 {
+		 font-size: 1rem;
+	}
+	 body #oma-citation {
+		 order: 2;
+		 margin: 30px 0;
+	}
+	 body #oma-generic-container .container .jumbotron h1 {
+		 font-size: 2.5rem;
+	}
+
+
+	 	 .btn-more-container button {
+background-color: #343a40 !important;
+color: #fff !important;
+border-color: #343a40 !important;
+margin: 0 0 10px !important;
+}
+}
+ @media screen and (max-width: 575px) {
+	 body {
+		 padding: 53px 0 0;
+		/*details page mobile*/
+	}
+	 body nav .navbar-toggler {
+		 padding: 0 1rem;
+	}
+	 body nav.navbar-light {
+		 padding: 0;
+		 box-shadow: 0 0 13px -6px rgba(0, 0, 0, .4);
+	}
+	 body nav.navbar-light .logos-navbar {
+		 padding: 9px;
+	}
+	 body nav.navbar-light .logos-navbar a:nth-child(1) img {
+		 width: 47px;
+	}
+	 body nav.navbar-light .logos-navbar a:nth-child(2) img {
+		 width: 71px;
+	}
+	 body nav.navbar-light .navbar-collapse {
+		 background: #317d3d;
+		 height: 100vh;
+		 text-align: center;
+		 font-size: 1.6rem;
+		 overflow: auto;
+	}
+	 body nav.navbar-light .navbar-collapse .navbar-nav ul {
+		 padding: 10px;
+	}
+	 body nav.navbar-light .navbar-collapse .navbar-nav .search {
+		 display: block;
+	}
+	 body nav.navbar-light .navbar-collapse .navbar-nav .search {
+		 color: #fff;
+		 background: rgba(0, 0, 0, 0.2);
+		 padding: 20px 10px 30px;
+	}
+	 body nav.navbar-light .navbar-collapse .navbar-nav .nav-item .nav-link {
+		 color: #fff;
+	}
+	 body nav .collapsing {
+		 -webkit-transition: none;
+		 transition: none;
+		 display: none;
+	}
+	 body .search form, body .oma-search form, body .oma-main-search-header form {
+		 font-size: 1rem;
+		 display: block;
+		 box-shadow: 2px 2px 10px -6px rgba(0,0,0,0.1);
+		 position: relative;
+	}
+	 body .search form .oma-search-select, body .oma-search form .oma-search-select, body .oma-main-search-header form .oma-search-select {
+		 width: 100%;
+		 padding: 4px;
+		 border-radius: 10px;
+		 text-align: left;
+	}
+	 body .search form input[type=text], body .oma-search form input[type=text], body .oma-main-search-header form input[type=text] {
+		 padding: 12px;
+		 border-radius: 0 5px 5px 0;
+	}
+	 body .search form.oma-search-mobile button, body .oma-search form.oma-search-mobile button, body .oma-main-search-header form.oma-search-mobile button {
+		 z-index: 1100;
+	}
+	 body #oma-search-container .container p {
+		 font-size: 0.8rem;
+	}
+	 body #oma-search-container .container .logo-oma-lg {
+		 width: 240px;
+		 height: 130px;
+		 background: url('../image/logo-oma-mobile.svg') no-repeat center center / contain;
+	}
+	 body #oma-search-container .container .logo-oma-lg-corona {
+		 width: 240px;
+		 height: 130px;
+		 background: url('../image/logo-oma-corona.svg') no-repeat center center / contain;
+	}
+	 body #oma-search-container .container .oma-quick-start {
+		 margin: 20px auto 0;
+	}
+	 body #oma-landing-cards .container-fluid .row .col-md-3 .oma-card {
+		 margin: 10px 0;
+	}
+	 body #oma-citation .container .oma-alert {
+		 display: inline-block;
+		 text-align: center;
+		 font-size: 0.8rem;
+	}
+	 body .oma-details-container {
+		 margin: 0;
+	}
+}
+
+.scroll4more {
+	margin: 60px auto 14px;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+
+}
+
+.scroll4more svg {
+width: 28px;
+animation-name: pulsate;
+      animation-duration: 4s;
+      animation-iteration-count: infinite;
+}
+
+.scroll4more h5 {
+font-family: "Ropa Sans", sans-serif;
+text-transform: uppercase;
+font-size: .9rem;
+}
+
+.gene-orthology, .gene-orthology .selected {
+    background-color: #50b7b3  !important;
+}
+
+.oma-group, .oma-group .selected {
+background-color: #336799 !important;
+
+}
+.oma-group .selected {
+	color: #fff !important;
+}
+
+.oma-group .selected div {
+	color: #222 !important;
+}
+
+.oma-group .selected li a span { color: #222 !important; }
+
+.genome, .genome .selected {
+    background-color: #e32026 !important;
+}
+
+.content-section-title-entry{
+	border-bottom: 2px solid #90CAF9;
+}
+
+.card-header-oma{
+    border-radius: 16px !important;
+}
+
+.header-oma{
+    background-color: #317d3d ;
+    text-align: center;
+    color: #fff;
+    border-top-right-radius: 16px !important;
+    border-top-left-radius: 16px!important;
+    border-bottom-right-radius: 0px!important;
+    border-bottom-left-radius: 0px!important;
+}
+
+
+.autocomplete-suggestions { border: 1px solid #999; background: #FFF; overflow: auto; }
+
+.autocomplete-suggestion {
+	padding: 2px 5px;
+	/*white-space: nowrap; */
+	overflow: hidden;
+	cursor:  pointer;
+	}
+
+.autocomplete-suggestion span.auto-xref{
+	display: inline-block;
+	width: 70%;
+	color: black;
+}
+
+.autocomplete-suggestion span.auto-omaid{
+	display: inline-block;
+	width: 30%;
+	font-size: 75%;
+}
+
+.autocomplete-suggestion span.auto-species{
+	display: inline-block;
+	width: 100%;
+	font-size: 75%;
+	font-style: italic;
+	color: #bbb;
+}
+
+.autocomplete-selected { background: #F0F0F0; }
+.autocomplete-suggestion strong { font-weight: bold; color: black;border-bottom: 2px solid #307C3B }
+
+/* Database label */
+.autocomplete-group { padding: 3px 20px; text-align: right; border-bottom: 1px solid #ddd}
+.autocomplete-group strong {display: block;; color: #777; }
+
+
+
+ .mouse-icon {
+      width: 24px;
+    }
+    .scroll-wheel {
+      stroke:#231f20;
+      stroke-miterlimit:10;
+      stroke-width:3px;
+    }
+    .mouse-rect {
+      fill:transparent;
+      stroke: #222;
+      stroke-width: 3px;
+    }
+    .mouse-arrow-down {
+      animation-name: pulsate;
+      animation-duration: 2s;
+      animation-iteration-count: infinite;
+    }
+
+@keyframes pulsate {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+
+    }
+
+.micro-header{
+	font-size: xx-small !important;
+	padding-bottom: 2px;
+	padding-top: 2px;
+
+}
+
+
+.bootstrap-table .table > tbody > tr.groupBy {
+	cursor: pointer;
+	color: red;
+
+}
+
+body .oma-details-container .oma-details-nav-left .genome li #filterSynteny {background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
+body .oma-details-container .oma-details-nav-left .genome li #filterSimilar { background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
+body .oma-details-container .oma-details-nav-left .genome li #filterSynteny div { background: transparent !important; }
+body .oma-details-container .oma-details-nav-left .genome li #filterSimilar div { background: transparent !important; }
+
+
+body .oma-details-container .oma-details-nav-left .oma-group li #filterOrthologs { background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
+body .oma-details-container .oma-details-nav-left .oma-group li #filterOrthologs div { background: transparent !important; }
+body .oma-details-container .oma-details-nav-left .oma-group li #filterSimilar { background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
+body .oma-details-container .oma-details-nav-left .oma-group li #filterSimilar div { background: transparent !important; }
+
+body .oma-details-container .oma-details-nav-left .gene-orthology li #filterOrthologs {
+	background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px;}
+body .oma-details-container .oma-details-nav-left .gene-orthology li #filterOrthologs div { background: transparent !important; }
+
+body .oma-details-container .oma-details-nav-left .gene-orthology li #filterParalogs { background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
+body .oma-details-container .oma-details-nav-left .gene-orthology li #filterParalogs div { background: transparent !important; }
+
+
+
+.search_entry {
+	border: none !important;
+}
+
+.search_entry h5 {
+	color: #fff;
+	background-color: #50b7b3;
+    padding: 8px;
+	border-radius: 16px;
+	text-indent: 8px;
+}
+
+
+.search_group h5 {
+	color: #fff;
+	background-color: #336799;
+    padding: 8px;
+	border-radius: 16px;
+	text-indent: 8px;
+}
+
+.search_group {
+	border: none !important;
+}
+
+.search_genome h5 {
+	color: #fff;
+	background-color: #e32026;
+    padding: 8px;
+	border-radius: 16px;
+	text-indent: 8px;
+}
+
+.search_genome {
+	border: none !important;
+}
+
+.blink {animation-name: pulsate;
+      animation-duration: 2s;
+      animation-iteration-count: infinite;
+}
+
+
+	 .group_title {
+		 border-left: 14px solid  #336799;
+			padding: 0 6px 0;
+	}
+	 .genome_title {
+		 border-left: 14px solid  #e32026;
+			padding: 0 6px 0;
+	}
+	 .gene_title {
+		 border-left: 14px solid  #50b7b3;
+			padding: 0 6px 0;
+	}
+
+
+	 .gene_back{
+		 background-color:  #50b7b3 !important;
+	 }
+.genome_back{
+		 background-color:  #e32026 !important;
+	 }
+.group_back{
+		 background-color:  #336799 !important;
+	 }
+
+
+	 .gene_color{
+		 color:  #50b7b3 !important;
+	 }
+.genome_color{
+		 color:  #e32026 !important;
+	 }
+.group_color{
+		 color:  #336799 !important;
+	 }
+
+
+.badge-info { color: #3c3c3c; background-color: rgba(100, 100, 100, 0.3); }
+
+a.external {
+	padding-right:11px;
+	background: url("../image/ext.png") no-repeat center right;
+	white-space: nowrap;
+}	
+
+.toggle-visibility {
+
+	cursor: pointer;
+
+position: fixed;
+left: 280px;
+top: 65%;
+padding: 10px 4px;
+background: #e6e7e8;
+color: black;
+border-radius: 0 4px 4px 0;
+
+}
+
+
+
+
+
+
+
+

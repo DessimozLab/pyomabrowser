@@ -333,7 +333,7 @@ function click(d) {
     }
 
     if(d.id){
-        var id = "Species: <a href='/cgi-bin/gateway.pl?f=DisplayOS&p1="+d.id+"'>"+d.id+"</a>";
+        var id = "Species: <a href='"/oma/genome/" + d.id +"/info/"'>"+d.id+"</a>";
     } else {
         var id = "";
     }

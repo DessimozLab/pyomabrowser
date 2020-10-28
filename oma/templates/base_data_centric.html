@@ -1,0 +1,117 @@
+{% extends  "base_template.html" %}
+
+{% block content %}
+
+<div class="oma-details-header ">
+
+    {% block header_body %} {% endblock%}
+
+
+</div>
+
+<div class="oma-details-container">
+
+    {% block data_content %} {% endblock data_content%}
+
+</div>
+
+
+<script>
+
+
+
+
+    $(document).ready(function () {
+        $("#toggleSidenav").click(function () {
+            $('#sideNavMobile').toggle();
+            $('#oma-details-sideNav-mobile').toggleClass('sideNavMobile-opened');
+        });
+    });
+
+
+
+    var resizeTimer;
+
+    $(window).on('resize', function (e) {
+
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+
+            if ( $(window).width() > 1024) {
+
+                $('#sideNavMobile').toggle(true);
+                $('#oma-details-sideNav-mobile').removeClass('sideNavMobile-opened');
+                $('#oma-details-sideNav-mobile').addClass('sideNavMobile-opened');
+
+            }
+
+            else {
+                $('#sideNavMobile').toggle(false);
+                $('#oma-details-sideNav-mobile').removeClass('sideNavMobile-opened');
+                }
+
+        }, 50);
+
+    });
+
+
+
+
+</script>
+
+
+<script>
+
+
+
+    $(document).on("click",".toggle-visibility", function () {
+
+
+        var nav =   document.getElementById("sideNavMobile");
+        var content =   document.getElementsByClassName("oma-details-content")[0];
+        var toggle =   document.getElementsByClassName("toggle-visibility")[0];
+
+
+        if (nav.offsetWidth > 0) {
+
+            toggle.innerHTML = '&#8250;'
+
+            nav.setAttribute("style","width:0px");
+
+        content.setAttribute("style","margin-left:0px");
+
+        toggle.setAttribute("style","left:0px");
+
+
+        }
+
+        else {
+
+            toggle.innerHTML = "&#8249;"
+
+            nav.setAttribute("style","width:280px");
+
+        content.setAttribute("style","margin-left:300px");
+
+        toggle.setAttribute("style","left:280px");
+            }
+
+
+
+
+
+
+
+
+});
+</script>
+
+
+
+
+
+{% endblock content %}
+
+
+
+

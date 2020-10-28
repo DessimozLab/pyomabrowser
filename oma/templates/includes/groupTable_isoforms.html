@@ -1,0 +1,81 @@
+{% load staticfiles %}
+
+        <table class="table table-hover" id="grpTable"
+               data-show-toggle="false"
+               data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
+               data-show-columns="true" data-search="true" data-show-export="true"
+               data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
+               data-mobile-responsive="true" data-check-on-init="true"
+               data-undefined-text=""
+               data-checkbox-header="true"
+               data-group-by="true"
+               data-group-by-field="DivergenceLevel"
+               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
+               data-url="{{ table_data_url }}" >
+
+            <thead>
+
+
+             <tr>
+                <th  data-field="protid" class="tagcontainer" data-sortable="true" data-formatter="tablehooks.format_vps_link_isoforms">Protein ID</th>
+                  <th  data-field="seqlen" data-sortable="true" >Sequence length</th>
+                 <th  data-sortable="false" class="exon_vis">Exons</th>
+                 <th  data-field="exons"  data-sortable="true" data-formatter="tablehooks.format_exons_isoforms">Number exons</th>
+                 <th  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+
+    </tr>
+
+
+
+
+            </thead>
+            <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">
+                Genes not present in selected taxon have been filtered out as per settings.
+                <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a>
+            </div>
+
+        </table>
+
+
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+
+        <!-- Exon Visualisation -->
+<script src="{% static "js/exon_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/exon_vis.css" %}" rel="stylesheet" type="text/css" />
+
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<script src="{% static "js/bootstrap-table.min.js" %}"></script>
+
+<link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+<script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+<script src="{% static "js/tableExport.min.js" %}"></script>
+
+
+
+<script>
+    var tab = $("#grpTable");
+    var icons = tab.bootstrapTable('getOptions').icons;
+    $.extend(icons, {export: 'fa-download'});
+    tab.bootstrapTable({
+        //data: [{"protid": "MOUSE04051", "xrefid": "Q80ZA1", "seqlen": 381, "is_main_isoform": false, "locus_start": 69586891, "locus_end": 69591308, "exons": [{"start": 69586891, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591254, "end": 69591308, "strand": "+"}]}, {"protid": "MOUSE04052", "xrefid": "P53_MOUSE", "seqlen": 390, "is_main_isoform": false, "locus_start": 69586891, "locus_end": 69591431, "exons": [{"start": 69586891, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591350, "end": 69591431, "strand": "+"}]}, {"protid": "MOUSE04053", "xrefid": "ENSMUSG00000059552.1", "seqlen": 378, "is_main_isoform": false, "locus_start": 69586900, "locus_end": 69591308, "exons": [{"start": 69586900, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591254, "end": 69591308, "strand": "+"}]}],
+        reorderableColumns: true,
+        clickToSelect: false,
+        showMultiSort: true,
+        showLoading: true,
+        onPostBody: function (data) {
+            exon.visualize_all(".protein", data);
+
+        },
+        onLoadSuccess: function () {
+
+            tab.bootstrapTable('hideLoading');
+        },
+        refreshOptions: {'icons': icons}
+    });
+
+</script>
+

@@ -1,0 +1,61 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block title %}Mapping your protein sequences to OMA{% endblock %}
+{% block meta_description %}Mapping your own protein sequences to OMA using a fast kmer based approach.{% endblock %}
+
+{% block meta_hook %}
+    {% if file_result.state == "pending" or file_result.state == "running" %}
+    <meta http-equiv="refresh" content="{{ reload_every_x_sec }}">
+    {% endif %}
+{% endblock meta_hook %}
+
+{% block content %}
+
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+            <h1>Sequence mapping results</h1>
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <div class="card card-header-oma">
+                <div class="card-header">
+                    <h4>Fast Mapping</h4>
+                </div>
+                <div class="card-body">
+
+
+                            {% if file_result.state == "done" %}
+                                <p>Your dataset is now ready. You can download it from <a href="{{ file_result.result.url }} ">here</a>.</p>
+                            {% else %}
+                                <p>Your dataset is currently being assembled. Its status is <b>{{ file_result.state }}</b>.
+                                    Depending on the size of your requested dataset as well as the server load, this
+                                    may still take some time. Once the file is ready, we will store it
+                                    for 7 days. You can come back to this page using this link:
+                                    <a href="{% url 'fastmapping-download' file_result.data_hash %}">{{ request.get_host }}{% url 'fastmapping-download' file_result.data_hash %}</a>
+                                </p>
+
+                            <p>This page gets automatically reloaded every {{ reload_every_x_sec }} secs or after pressing the refresh button</p>
+                            <form action="{% url 'fastmapping-download' file_result.data_hash %}">
+                              <input type="submit" value="Refresh" />
+                            </form></p>
+                            {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock content %}

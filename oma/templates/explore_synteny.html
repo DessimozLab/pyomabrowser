@@ -1,0 +1,102 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block title %}Explore conserved neighboring genes across genomes{% endblock %}
+{% block meta_description %}The local synteny viewer provides an overview of the genomic context of a particular gene and its orthologs in other species.{% endblock %}
+{% block content %}
+
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>Local synteny</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <div class="card card-header-oma">
+                <div class="card-body ">
+
+                    <p class="text-justify">The synteny view provides an overview of the genomic context of a particular entry and its orthologs in other species. This enables to see conservation or divergence of syntenic regions across species.
+                            </p>
+                            <p class="text-justify">As synteny is computed with respect to a reference entry, please first search for a protein sequence of interest and click on the “Local Synteny” tab.
+                            </p>
+
+
+                    <br>
+
+
+                    <form class="form-horizontal" id="searchForm" onSubmit="goSynteny(); return false;">
+                        <input type="hidden" name="f" value="DisplayGroup"/>
+                        <div class="form-group form-row">
+
+                            <label for="textID" class="col-sm-3 col-form-label control-label text-right">Member gene/protein:
+                            </label>
+                            <div class="col-sm-8 no-gutters">
+
+                                <div class="input-group col mb-2">
+                                    <input id='textID' name="p1" type="text" class="form-control">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-8 offset-sm-3">
+
+                                <span class="font-weight-bold">Example: </span>
+                                <a href="#"  class="text-muted" id='exMemb1'>ADH1A_HUMAN</a> - <a href="#"  class="text-muted" id='exMemb2'>CESA1_ARATH</a> - <a href="#"  class="text-muted" id='exMemb3'>NP_001104739</a>
+
+
+                            </div>
+
+                        </div>
+                    </form>
+
+
+
+                            <script type="text/javascript">
+                            $('#exMemb1').click( function() {
+                                $('#textID').val('ADH1A_HUMAN').focus();
+                            });
+                            $('#exMemb2').click( function() {
+                                $('#textID').val('CESA1_ARATH').focus();
+                            });
+                            $('#exMemb3').click( function() {
+                                $('#textID').val('NP_001104739').focus();
+                            });
+                            function goSynteny() {
+                                var query= document.getElementById("textID").value;
+                                var newUrl="{% url 'synteny' %}"+query;
+                                window.location = newUrl;
+                                return false;
+                            }
+                            </script>
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+{% endblock content %}

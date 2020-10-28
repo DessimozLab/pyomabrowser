@@ -1,0 +1,68 @@
+
+.exon_vis svg {
+  height: 30px; /* This can be changed. */
+  width:  100%;
+  min-width: 200px;
+}
+
+  /* Colour of sequnce line */
+  .exon_vis svg .sequence { fill: #ccc; }
+
+  /* Border colour for exon  */
+  .exon_vis svg .rect_exon {
+    fill:#666;
+    cursor: pointer;
+  }
+
+  
+  /* Tool tips */
+.exon-info {
+  font-size: 0.8em;
+  line-height: 1;
+  padding: 8px;
+  background: rgba(255,255,255,0.99);
+  color: #000000;
+  border: 2px solid #4F4F4F;
+  border-radius: 8px;
+  pointer-events: none;
+  width: 150px;
+}
+
+  /* Creates a small triangle extender for the tooltip */
+  .exon-info:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 15px;
+    width: 100%;
+    line-height: 1;
+    color: #4F4F4F;
+    position: absolute;
+    pointer-events: none;
+  }
+    .exon-info.n:after {
+      content: "\25BC";
+      margin: -1px 0 0 0;
+      top: 100%;
+      left: 0;
+      text-align: center;
+    }
+    .exon-info.e:after {
+      content: "\25C0";
+      margin: -7px 0 0 0;
+      top: 50%;
+      left: -8px;
+    }
+    .exon-info.s:after {
+      content: "\25B2";
+      margin: 0 0 1px 0;
+      top: -8px;
+      left: 0;
+      text-align: center;
+    }
+    .exon-info.w:after {
+      content: "\25B6";
+      margin: -7px 0 0 -1px;
+      top: 50%;
+      left: 100%;
+    }
+

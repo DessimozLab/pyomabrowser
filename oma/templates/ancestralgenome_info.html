@@ -1,0 +1,18 @@
+{% extends  "base_ancestralgenome.html" %}
+
+{% block title %}Information of genome {{genome_name}}{% endblock %}
+
+
+{% block contentTab %}
+<table class="table">
+
+<tr><td>Common name:</td><td>{{ genome_name }}</td></tr>
+<tr><td>NCBI taxonomic identifier:</td><td>{{ taxid }}</td></tr>
+<tr><td>Number of ancestral genes:</td><td>{{ nr_hogs }}</td></tr>
+<tr><td>Number of descendant species:</td><td>{{ nbr_species }}</td></tr>
+
+
+
+</table>
+
+{% endblock contentTab %}

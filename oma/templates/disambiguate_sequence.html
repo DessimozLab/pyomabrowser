@@ -1,0 +1,8 @@
+{% extends "disambiguate_entry.html" %}
+
+{% block additional_columns %}
+    {% if identified_by == 'approximate match' %}
+        <th data-field="alignment" data-formatter="tablehooks.seq_search_alignment_formatter"
+            data-class="cell-full cell-ellipsis">Query matching alignment</th>
+    {% endif %}
+{% endblock %}

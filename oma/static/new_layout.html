@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>oma 2018 layout test</title>
+<!-- Bootstrap NavBar -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+
+<script>
+
+$(window).on('resize', function() {
+    if($(window).width() < 768) {
+        $('#sidebar-container').addClass('col-12');
+        $('#sidebar-container').removeClass('col-3');
+        $('#sidebar-container').removeClass('full-height');
+        $('#collapseOne').collapse('hide');
+    } else {
+        $('#sidebar-container').addClass('col-3');
+        $('#sidebar-container').addClass('full-height');
+        $('#sidebar-container').removeClass('col-12');
+        $('#collapseOne').collapse('show');
+    }
+})
+
+$(document).on('hidden.bs.collapse', '#accordion', function (e) {
+    console.log("hiding");
+    $('.menu-tab .active').removeClass('selected');
+    $('.menu-tab').removeClass('d-block');
+})
+
+
+$(document).on('shown.bs.collapse', '#accordion', function (e) {
+    console.log("showing");
+    $('.menu-tab .active').addClass('selected');
+    $('.menu-tab').addClass('d-block');
+})
+
+$(window).on('load', function() {
+    $(window).resize();
+});
+
+</script>
+<style>
+
+#sidebar-container.full-height {
+    /*min-height: 100vh;*/
+}
+
+/* Menu item*/
+#sidebar-container .list-group a {
+    height: 50px;
+    color: white;
+}
+
+/* Submenu item*/
+#sidebar-container .list-group .sidebar-submenu a {
+    height: 45px;
+
+}
+
+.sidebar-submenu {
+    font-size: 0.9rem;
+}
+
+/* Separators */
+.sidebar-separator-title {
+    background-color: #333;
+    height: 35px;
+}
+.sidebar-separator {
+    background-color: #333;
+    height: 25px;
+}
+.logo-separator {
+    background-color: #333;
+    height: 60px;
+}
+
+/* Closed submenu icon */
+#sidebar-container .list-group .list-group-item[aria-expanded="false"] .submenu-icon::after {
+  content: " \f0d7";
+  font-family: FontAwesome;
+  display: inline;
+  text-align: right;
+  padding-left: 10px;
+}
+/* Opened submenu icon */
+#sidebar-container .list-group .list-group-item[aria-expanded="true"] .submenu-icon::after {
+  content: " \f0da";
+  font-family: FontAwesome;
+  display: inline;
+  text-align: right;
+  padding-left: 10px;
+}
+
+.menu-tab {
+    background-color: white;
+    color: #307C3B;
+    /*height: 50px;*/
+    padding: 0.25rem 0.75rem;
+}
+
+.menu-tab:hover {
+    background-color: #C8C8C8;
+    transition: background 0.5s;
+}
+
+
+/*
+
+.menu-tab:active, .menu-tab.selected {
+    background-color: #307C3B;
+    color: white;
+}
+*/
+
+@keyframes fadein {
+0%   { opacity: 0; }
+100% { opacity: 1; }
+}
+
+.content-container-row {
+    margin-top: 1.2em;
+}
+
+.card-body.gene-orthology, .gene-orthology .selected {
+    background-color: #90CAF9;
+}
+.card-body.oma-group, .oma-group .selected {
+    background-color: #FFF49D;
+}
+.card-body.genome, .genome .selected {
+    background-color: #FFAB91;
+}
+
+.card-body.gene-orthology, .gene-orthology .selected {
+    /*background-color: #9acfea;*/
+}
+
+.menu-tab {
+    display: none;
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+}
+
+.menu-tab.selected {
+    display: block;
+  }
+
+@include media-breakpoint-up(lg) {
+  .menu-tab {
+    display: block;
+  }
+}
+
+.navbar img {
+    height: 35px !important;
+    margin: 6px 5px 0px 5px !important;
+}
+
+.logo-sm img {
+    height: 20px !important;
+    margin: 3px 3px 0px 3px !important;
+}
+
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-light navbar-expand-md bg-light" role="navigation">
+    <a href="http://www.sib.swiss" class="navbar-brand d-none d-lg-block">
+        <img alt="SIB logo" src="image/SIBlogo.png"  class="siblogo">
+    </a>
+
+    <a href="/oma/home/" class="navbar-brand d-none d-lg-block">
+        <img alt="OMA logo" src="image/omalogo.png" class="omalogo">
+        <div class="glyphicon glyphicon-home icon-md"></div>
+    </a>
+
+    <a href="http://www.sib.swiss" class="navbar-brand logo-sm d-lg-none">
+        <img alt="SIB logo" src="image/SIBlogo.png"  class="siblogo">
+    </a>
+
+    <a href="/oma/home/" class="navbar-brand logo-sm d-lg-none">
+        <img alt="OMA logo" src="image/omalogo.png" class="omalogo">
+        <div class="glyphicon glyphicon-home icon-md"></div>
+    </a>
+
+    <button type="button" class="navbar-toggler ml-auto" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="navbar-nav">
+
+            <!-- explore dropdown -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-nowrap" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">Explore <span class="caret"></span></a>
+                </a>
+
+                <div class="dropdown-menu" role="menu">
+                    <a class="dropdown-item" href="/oma/release/">Release information</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <a class="dropdown-item" href="/oma/landOMA/">OMA groups</a>
+                    <a class="dropdown-item" href="/oma/hogs/">Hierarchical orthologous groups (HOGs)</a>
+                    <a class="dropdown-item" href="/oma/landAnnotation/">Functional annotations</a>
+                    <a class="dropdown-item" href="/oma/synteny/">Local synteny</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <a class="dropdown-item" href="/oma/genomePW/">Orthology between two genomes</a>
+                    <a class="dropdown-item" href="/oma/dotplot/">Synteny dotplot</a>
+
+                </div>
+
+            </li>
+
+        </ul>
+
+        <!-- search    -->
+        <div class="text-nowrap">
+            <form class="form-inline" role="search" id="searchNavForm" action="/cgi-bin/gateway.pl" method="GET">
+                <select id="selectNav" class="form-control btn-mini" name="f" onchange="update_navbar_autocomplete()">
+                    <option value="DisplayEntry" selected="selected">Identifier</option>
+                    <option value="SearchSeqDb">Protein sequence</option>
+                    <option value="DisplayGroup">OMA Group</option>
+                    <option value="SearchDb">Full-text search</option>
+                </select>
+                <div class="input-group ">
+                    <input id="textNav" class="form-control " type="text" name="p1">
+                    <div class="input-group-append">
+                        <button class="btn btn-default" type="submit"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="navbar-nav ml-auto">
+
+            <!-- about dropdown -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-nowrap" href="#" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">About <span class="caret"></span></a>
+                </a>
+
+                <div class="dropdown-menu" role="menu">
+
+                    <a class="dropdown-item" href="/oma/about/">OMA</a>
+                    <a class="dropdown-item" href="/oma/team/">Team</a>
+                    <a class="dropdown-item" href="/oma/funding/">Funding</a>
+                    <a class="dropdown-item" href="/oma/license/">License</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="mailto:contact@omabrowser.org"><span class="glyphicon glyphicon-envelope"></span> Contact</a>
+
+                </div>
+
+            </li>
+
+            <!-- compute dropdown -->
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown">Compute <span class="caret"></span></a>
+
+                <div class="dropdown-menu" role="menu">
+
+                    <div role="presentation" class="dropdown-header">Web services</div>
+                    <a class="dropdown-item" href="/oma/functions/">Predict GO functions</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <div role="presentation" class="dropdown-header">API</div>
+                    <a class="dropdown-item" href="/api/docs">REST API</a>
+                    <a class="dropdown-item" href="/oma/APISOAP/">SOAP</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <div role="presentation" class="dropdown-header">Semantic web</div>
+                    <a class="dropdown-item" href="http://sparql.omabrowser.org">SPARQL endpoint</a>
+                    <a class="dropdown-item" href="/ontology/oma">RDF Schema</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <div role="presentation" class="dropdown-header">User-side computations</div>
+                    <a class="dropdown-item" href="https://omabrowser.org/standalone/">OMA standalone</a>
+                    <a class="dropdown-item" href="/oma/export/">Export All/All</a>
+                    <a class="dropdown-item" href="/oma/export_markers">Export marker genes</a>
+
+                </div>
+
+            </li>
+
+            <!-- Download dropdown -->
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown">Download <span class="caret"></span></a>
+
+                <ul class="dropdown-menu" role="menu">
+
+                    <div role="presentation" class="dropdown-header">OMA database files</div>
+                    <a class="dropdown-item" href="/oma/current/">Current release</a>
+                    <a class="dropdown-item" href="/oma/archives/">Archives</a>
+
+                </ul>
+
+            </li>
+
+            <!-- Help dropdown -->
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown">Help <span class="caret"></span></a>
+
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+
+                    <a class="dropdown-item" href="/oma/about/">OMA in a nutshell</a>
+                    <a class="dropdown-item" href="/oma/type/">Types of orthologs</a>
+                    <a class="dropdown-item" href="/oma/uses/">Typical uses</a>
+                    <a class="dropdown-item" href="/oma/suggestion/genome/">Suggesting a genome</a>
+                    <a class="dropdown-item" href="/oma/FAQ/">FAQ</a>
+                    <a class="dropdown-item" href="https://www.biostars.org/t/oma/">Q&amp;A on BioStars</a>
+
+                </ul>
+
+            </li>
+
+        </div>
+      <!-- /.navbar-collapse -->
+
+    </div>
+
+</nav>
+
+  <script type="text/javascript">
+    function update_navbar_autocomplete() {
+        var sel=document.getElementById('selectNav');
+        if (sel.value === "DisplayEntry"){
+            $('#textNav').autocomplete('enable');
+        } else {
+            $('#textNav').autocomplete('disable');
+        }
+    }
+    var autocomplete_opts = {
+        paramName: 'search',
+        serviceUrl: '/api/xref/',
+        minChars: 3,
+        deferRequestBy: 200,
+        transformResult: function (response) {
+            var json = JSON.parse(response);
+            return {
+                suggestions: $.map(json, function (dataItem) {
+                    return {value: dataItem.xref, data: dataItem};
+                })
+            };
+        },
+        groupBy: 'source',
+        formatResult: function(suggestion, currentValue) {
+            // Do not replace anything if there current value is empty
+            if (!currentValue) {
+                return suggestion.value;
+            }
+            // escape any special char
+            var pattern = '(' + currentValue.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&") + ')';
+            var highlight_and_escape = function(val){
+                return val.replace(new RegExp(pattern, 'gi'), '<strong>$1<\/strong>')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/&lt;(\/?strong)&gt;/g, '<$1>');
+            };
+            var label = '<span class="auto-xref">' + highlight_and_escape(suggestion.data.xref) +'</span> &nbsp;'+
+                        '<span class="auto-omaid">' + suggestion.data.omaid + '</span>'+
+                        '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
+            return label;
+        },
+        onSelect: function(item){
+            window.location.href = "/cgi-bin/gateway.pl?f=DisplayEntry&p1=" + item.data.entry_nr;
+            return false;
+        }
+    };
+    $('#textNav').autocomplete(autocomplete_opts);
+    update_navbar_autocomplete();
+  </script>
+
+
+<div class="container" id="body" style="margin-top: 2em;">
+
+    <div class="row">
+        <div class="col-12">
+
+            <div class="card">
+                <div class="card-body gene-orthology">
+                    <h5 class="card-title">Entry RATNO1256 ( P53_RAT)</h5>
+                    <p class="card-subtitle mb-2 text-muted">Rattus Norvegicus</p>
+                    <div class="d-flex">
+                        <p class="card-text mr-auto">In recent years, much research has been devoted to the synthesis of systems; however, few have evaluated the analysis of cache coherence. Given the current status of linear-time theory, statisticians compellingly desire the exploration of replication. We introduce new stable communication, which we call Windas. </p>
+                    </div>
+                    <div class="d-flex justify-content-sm-end mt-2">
+                        <button type="button" class="btn btn-sm btn-default dropdown-toggle col-6 col-sm-2  mr-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Groups</button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Group 1</a>
+                            <a class="dropdown-item" href="#">Group 2</a>
+                            <a class="dropdown-item" href="#">Group 3</a>
+                        </div>
+                        <button class="btn btn-sm col-6 col-sm-2">Genome</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row content-container-row">
+
+        <!-- Sidebar / menu -->
+        <div id="sidebar-container" class="col-3 gene-orthology full-height">
+
+            <div id="accordion">
+                <div class="menu-tab active selected" style="cursor: pointer;" onclick="console.log('orthology clicked')" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="#collapseOne">
+                    <span class="">Orthology</span>
+                </div>
+
+
+                <div id="collapseOne" class="collapse show pt-0" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body pl-4 py-2">
+                        <h6>Filter by Taxon</h6>
+
+                        <div class="form-check pl-4">
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="mammalsFilter">
+                                <label class="form-check-label" for="mammalsFilter">
+                                    Mammals
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="vertebratesFilter">
+                                <label class="form-check-label" for="vertebratesFilter">
+                                    Vertebrates
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="customFilter1">
+                                <label class="form-check-label" for="customFilter1">
+                                    Custom 1
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <div class="dropdown-divider pl-0"></div>
+
+                        <h6>Display only:</h6>
+
+                        <div class="form-check pl-4">
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="hogFilter">
+                                <label class="form-check-label" for="hogFilter">
+                                    HOG
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="omagroupFilter">
+                                <label class="form-check-label" for="omagroupFilter">
+                                    OMA Group
+                                </label>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" class="form-check-input" id="pairwiseFilter">
+                                <label class="form-check-label" for="pairwiseFilter">
+                                    Pairwise
+                                </label>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row justify-content-center mx-2 mx-sm-0">
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('paralogy clicked')">
+                    <span class="">Paralogy</span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('Gene information')">
+                    <span class="">Gene information</span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('GO annotations')">
+                    <span class="">GO annotations</span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('Sequence')">
+                    <span class="">Sequences</span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('Domain architecture')">
+                    <span class="">Domain architecture</span>
+                </div>
+
+                <div class="menu-tab d-none d-sm-block col-6 col-sm-12" style="cursor: pointer;" onclick="console.log('Local synteny')">
+                    <span class="">Local synteny</span>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- sidebar-container END -->
+
+        <!-- content toolbar -->
+        <div class="col mb-2">
+
+            <div class="d-flex d-flex-row btn-toolbar p-0 mt-0">
+                <button class="btn btn-light btn-sm mr-auto col-5 mb-2" id="helptrigger">Different orthology types</button>
+
+                <div class="input-group col mb-2">
+                  <input type="text" class="form-control" placeholder="Search..." aria-label="Search...">
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button"><i class="fas fa-search"></i></span></button>
+                  </div>
+                </div>
+                <div class="mb-2 ml-auto" role="group" aria-label="Settings group">
+
+                    <span class="dropdown">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-sliders-h"></i>
+                        </button>
+                          <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#">Format Option 1</a>
+                            <a class="dropdown-item" href="#">Format Option 2</a>
+                            <a class="dropdown-item" href="#">Format Option 3</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Some other setting</a>
+                          </div>
+
+                    </span>
+
+                    <span class="dropdown">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-cog"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#">Hide column 1</a>
+                            <a class="dropdown-item" href="#">Hide column 2</a>
+                            <a class="dropdown-item" href="#">Hide column 3</a>
+                            <a class="dropdown-item" href="#">Etc.</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Customise X</a>
+                        </div>
+                    </span>
+                </div>
+            </div>
+            <!-- content toolbar -->
+
+            <div class="card">
+                <h4 class="card-header">Content</h4>
+                <div class="card-body">
+                    <ul>
+                        <li>content here</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

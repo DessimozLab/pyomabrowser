@@ -1,0 +1,846 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+{% load oma_extras %}
+
+{% block title %}{% block titleTab %}Results for "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}"  {% endblock titleTab %}{% endblock %}
+{% block meta_description %}Disambiguate result page for OMA Browser query "{{ query }}"{% endblock %}
+{% block content %}
+
+
+
+
+<!--suppress ALL -->
+<div id="oma-generic-container">
+
+    <div class="container-fluid">
+
+        <div class="jumbotron">
+
+                <div class="card-body ">
+
+                     <div class="pull-left">
+
+                         <div class="row">
+
+                             <div class="col-md-8 offset-md-2">
+
+                                 <h3><strong>Search results matching "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}" </strong></h3>
+
+                              {% if genome_term|length > 0 %}
+
+
+                                 <h4 class="pl-5"> <small> Following term are used as genome or taxon filtering:
+                                 {% for term in genome_term_link %}
+
+                                     {% if term.1|length > 0   %}
+
+
+                                     <span class="badge badge-secondary"><a style="color:#fff" href="{% url 'genome_info' term.1 %}">  {{term.2.species}} [{{term.1}}] </a> </span>
+
+
+
+                                     {% else %}
+
+                                     <span class="badge badge-secondary"><a style="color:#fff" href="{% url 'ancestralgenome_info' term.2 %}">  {{term.2}}  </a> </span>
+
+
+
+                                     {% endif %}
+
+
+
+
+
+                             {% endfor %}
+
+                                 <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="This define the genomic scope used to search protein ">?</span>
+
+
+                                 </small>
+
+
+                             </h4>
+
+                                 {% endif %}
+                             </div>
+
+
+                         </div>
+
+                         {% if meta_entry.shown == 0 and meta_group.shown == 0 and meta_genome.shown == 0  %}
+
+                         <br>
+                         <br>
+
+                         <div class="col-md-8 offset-md-2">
+
+
+                         <div class="alert alert-success" role="alert">
+  <h4 class="alert-heading">Oups!</h4>
+  <p>No proteins, orthologous groups or genomes matched your query...</p>
+  <hr>
+  <small>  <p class="mb-0"> But you can retry using other query like <b>"insulin"</b> or by combining protein name with species <b>"HBB human pig"</b></p> </small>
+
+                         </div>
+
+                         </div>
+                         {% endif %}
+
+
+                         </div>
+
+
+
+                         <div class="card search_entry " >
+
+                          <div class="card-body">
+
+                              <div class="row">
+
+                              <div class="col-md-8 offset-md-2">
+
+
+                            <h5 class="card-title">Proteins </h5>
+
+                              <b class="float-right "> {% if meta_entry.total <= 50 %}  {{meta_entry.shown}} {% if meta_entry.shown == 1 %}  entry {% else %} entries {% endif %}  found {% else %} Best {{meta_entry.shown}} {% if meta_entry.shown == 1 %}  entry {% else %} entries {% endif %}  shown out of {{meta_entry.total}} entries
+
+{% endif %}
+
+                                   {% if meta_entry.shown > 0%}
+
+
+                                  <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-filter"></i> Filter</span> <span class="caret"></span></button>
+
+                                  <div class="dropdown-menu" role="menu">
+<a href="#" id="f_e_id" class="dropdown-item" data-value="id" tabIndex="-1"><input type="checkbox" />&nbsp;Id</a>
+<a href="#" id="f_e_crossref" class="dropdown-item" data-value="crossref" tabIndex="-1"><input type="checkbox"/>&nbsp;Cross Reference</a>
+ <a href="#" id="f_e_seq" class="dropdown-item" data-value="sequence" tabIndex="-1"><input type="checkbox"/>&nbsp;Sequence</a>
+</div>
+
+                                  <button id="entry_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
+
+
+                                  <script>
+                                      $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content-entry";
+
+
+
+                                              {% for term, stat in meta_term_entry.items %}
+
+                                              var term = document.createElement("h5");
+                                              term.innerHTML = '{{term}}<br>'
+
+                                          content.appendChild(term);
+
+
+                                          var ul = document.createElement("ul");
+                                              ul.className = "list-unstyled"
+
+
+
+
+                                          {% for key, value in stat.items %}
+
+                                          {% if key != 'total' and  key != 'shown'%}
+
+                                          var li = document.createElement("li");
+                                              li.className = "list-group-item";
+                                              li.innerHTML = '<span class="dot {% if value == 0  %} bg-light  {% elif value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} bg-danger {% endif %}   "></span>  <small {% if value == 0  %} style="color: #9d9d9d;"  {% endif %}> <b class="text-capitalize" >{{ key }}:</b> {{ value }} hits </small>'
+                                          li.style.border='none';
+                                              li.style.padding=".2rem 1.25rem"
+                                        ul.appendChild(li)
+                                            {% endif %}
+                                        {% endfor %}
+                                        content.appendChild(ul)
+
+                                          document.body.appendChild(content)
+
+
+                                      {% endfor %}
+
+                              $('#entry_stat').popover({
+                                  title: title,
+                                  html: true,
+                                  content: function() {
+                                  return $('#popover-content-entry').html();
+                                }
+                              })
+
+
+
+                            })</script>
+
+
+                              <br>
+
+                                  {% endif %}
+
+                                  </b>
+
+       </div>
+
+                                  </div>
+
+                               {% if meta_entry.shown > 0%}
+
+
+                                  <div class="col-md-12 ">
+
+                                       <table class="table table-hover" id="matchTable_entry"
+                                                                     data-mobile-responsive="true" data-check-on-init="true"
+                                                                     data-undefined-text=""
+                                                                     data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                                                                <thead>
+                                                                    <tr>
+
+                                                                        <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                                                                        <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                                                                        <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="tablehooks.format_sciname">Taxon</th>
+
+                                                                        <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                                                                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
+                                                                        </th>
+
+
+                                                                        <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">HOG</th>
+                                                                        <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
+                                                                        <th data-field="description" data-sortable="true">Description</th>
+
+                                                                        <th data-field="crossref" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
+                                                                        <th data-field="sequence" data-sortable="true" data-formatter="tablehooks.format_entry_sequence_matches" >Matching sequences</th>
+
+
+                                                                    </tr>
+                                                                </thead>
+                                                              </table>
+                                   </div>
+
+
+
+
+                              </div>
+
+
+
+                              <br>
+
+                             <button type="button" id="run_full_entries" class="btn btm-sm btn-outline-secondary btn-block mx-auto " style="width: 50%"> Use full text search to search for more proteins</button>
+
+
+                             <div class="col-md-12">
+
+                             <b class="float-right" id="nbr_full_entrie" ></b>
+
+                              <br>
+                                  <table class="table table-hover" style="display: none" id="matchTable_entry_full_text"
+                                                                 data-mobile-responsive="true" data-check-on-init="true"
+                                                                 data-undefined-text=""
+                                                                 data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                                                            <thead>
+                                                                <tr>
+
+                                                                    <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                                                                    <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                                                                    <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="tablehooks.format_sciname">Taxon</th>
+
+                                                                    <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                                                                        data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
+                                                                    </th>
+
+
+                                                                    <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
+                                                                    <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
+                                                                    <th data-field="description" data-sortable="true">Description</th>
+
+                                                                    <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
+
+                                                                </tr>
+                                                            </thead>
+                                                          </table>
+
+
+
+                             </div>
+
+                              {% endif %}
+
+
+
+                          </div>
+
+
+                         <br>
+
+                         <div class="card search_group" >
+
+                          <div class="card-body">
+
+
+                              <div class="row">
+
+
+
+                              <div class="col-md-8 offset-md-2">
+
+
+                            <h5 class="card-title">Orthologous Groups <small>(OMA Groups & HOGs)</small>  </h5>
+
+
+
+                              <b class="float-right "> {% if meta_group.total <= 50 %}  {{meta_group.shown}} {% if meta_group.shown == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best {{meta_group.shown}} {% if meta_group.shown == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta_group.total}}
+{% endif %}
+
+
+                                  {% if meta_group.shown > 0%}
+
+                                   <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-filter"></i> Filter</span> <span class="caret"></span></button></b>
+
+                                  <div class="dropdown-menu" role="menu">
+<a href="#" id="f_gr_id" class="dropdown-item" data-value="groupid" tabIndex="-1"><input type="checkbox" />&nbsp;Groups Id</a>
+<a href="#" id="f_gr_fin" class="dropdown-item" data-value="fingerprint" tabIndex="-1"><input type="checkbox"/>&nbsp;Fingerprint</a>
+</div>
+
+
+
+
+                                  <button id="group_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
+
+                                  <script>
+                                      $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content-group";
+
+
+
+                                              {% for term, stat in meta_term_group.items %}
+
+                                              var term = document.createElement("h5");
+                                              term.innerHTML = '{{term}}<br>'
+
+                                          content.appendChild(term);
+
+
+                                          var ul = document.createElement("ul");
+                                              ul.className = "list-unstyled"
+
+
+
+
+                                          {% for key, value in stat.items %}
+
+                                          {% if key != 'total' and  key != 'shown'%}
+
+                                          var li = document.createElement("li");
+                                              li.className = "list-group-item";
+                                              li.innerHTML = '<span class="dot  {% if value == 0  %} bg-light  {% elif value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} blinking-red {% endif %}   "></span>  <small {% if value == 0  %} style="color: #9d9d9d;"  {% endif %}> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>'
+                                          li.style.border='none';
+                                              li.style.padding=".2rem 1.25rem"
+                                        ul.appendChild(li)
+                                            {% endif %}
+                                        {% endfor %}
+                                        content.appendChild(ul)
+
+                                          document.body.appendChild(content)
+
+
+
+
+
+
+                                      {% endfor %}
+
+
+
+
+
+
+
+
+
+
+  $('#group_stat').popover({
+      title: title,
+      html: true,
+      content: function() {
+      return $('#popover-content-group').html();
+    }
+  })
+})</script>
+
+                                  <br>
+
+                                   {% endif %}
+
+                                  </b>
+
+
+
+                            </div>
+
+                              </div>
+
+
+                              {% if meta_group.shown > 0%}
+
+
+
+                              <div class="row">
+
+
+
+
+
+                                  <div class="col-md-12 ">
+
+                                       <table class="table table-hover" id="matchTable_group"
+                   data-mobile-responsive="true" data-check-on-init="true"
+                   data-undefined-text=""
+                   data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                <thead>
+                    <tr>
+                        <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_generic_group_id">Group ID</th>
+                        <th data-field="type" data-sortable="true" >Type</th>
+                        <th data-field="size" data-sortable="true" >Nr genes in Group</th>
+                        <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_group_aux">Auxiliary Data</th>
+
+
+                    </tr>
+                </thead>
+
+                <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">Genes not present in selected taxon have been filtered out as per settings. <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a></div>
+            </table>
+
+
+
+
+
+
+                              </div>
+
+
+                                   </div>
+
+                               {% endif %}
+
+
+
+
+                          </div>
+                         </div>
+
+                         <br>
+
+                         <div class="card search_genome" >
+                          <div class="card-body">
+
+                              <div class="row">
+
+
+                              <div class="col-md-8 offset-md-2">
+
+
+                            <h5 class="card-title">Genomes </h5>
+
+                              <b class="float-right ">   {{meta_genome.shown}} {% if meta_genome.shown == 1 %}  genome {% else %} genomes {% endif %}  found
+
+                                  {% if meta_genome.shown > 0%}
+
+                                    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-filter"></i> Filter</span> <span class="caret"></span></button>
+
+                                  <div class="dropdown-menu" role="menu">
+<a href="#" id="f_g_name" class="dropdown-item" data-value="name" tabIndex="-1"><input type="checkbox" />&nbsp;Name</a>
+<a href="#" id="f_g_taxid" class="dropdown-item" data-value="taxid" tabIndex="-1"><input type="checkbox"/>&nbsp;Taxon Id</a>
+<a href="#" id="f_g_ag" class="dropdown-item" data-value="Ancestral genome" tabIndex="-1"><input type="checkbox"/>&nbsp;Ancestral genome</a>
+</div>
+
+                                  <button id="genome_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
+
+                                  <script>
+                                      $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content";
+
+
+
+                                              {% for term, stat in meta_term.items %}
+
+                                              var term = document.createElement("h5");
+                                              term.innerHTML = '{{term}}<br>'
+
+                                          content.appendChild(term);
+
+
+                                          var ul = document.createElement("ul");
+                                              ul.className = "list-unstyled"
+
+
+
+
+                                          {% for key, value in stat.items %}
+
+                                          {% if key != 'total' and  key != 'shown'%}
+
+                                          var li = document.createElement("li");
+                                              li.className = "list-group-item";
+                                              li.innerHTML = '<span class="dot  {% if value == 0  %} bg-light  {% elif value < 10 and value != 0  %} bg-success {% elif value < 50  and value != 0 %} bg-warning {% else%} bg-danger {% endif %}   "></span>  <small {% if value == 0  %} style="color: #9d9d9d;"  {% endif %}> <b class="text-capitalize">{{ key }}:</b> {{ value }} hits </small>'
+                                          li.style.border='none';
+                                              li.style.padding=".2rem 1.25rem"
+                                        ul.appendChild(li)
+                                            {% endif %}
+                                        {% endfor %}
+                                        content.appendChild(ul)
+
+                                          document.body.appendChild(content)
+
+
+
+
+
+
+                                      {% endfor %}
+
+
+
+
+
+
+
+
+
+
+  $('#genome_stat').popover({
+      title: title,
+      html: true,
+      content: function() {
+      return $('#popover-content').html();
+    }
+  })
+})</script>
+
+                                  {% endif %}
+
+                                  </b>
+
+
+                              <br>
+
+
+
+       </div>
+
+                              </div>
+
+                              {% if meta_genome.shown > 0%}
+
+
+                              <div class="row">
+
+                                  <div class="col-md-12 ">
+
+                                       <table class="table table-hover" id="matchTable_genome"
+
+                   data-mobile-responsive="true" data-check-on-init="true"
+                   data-undefined-text=""
+                   data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                <thead>
+                    <tr>
+                        <th data-field="type" data-sortable="true" data-formatter="tablehooks.format_generic_genome_link">Code/Name</th>
+                        <th data-field="type" data-sortable="true">Type</th>
+                        <th data-field="ncbi" data-sortable="true" data-formatter="tablehooks.format_taxonid_as_link">NCBI Taxon ID</th>
+                        <th data-field="prots" data-sortable="true"># of Sequences/Genes</th>
+                        <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname_genomes">Scientific Name</th>
+                        <th data-field="common_name" data-sortable="true" data-formatter="tablehooks.format_species_common">Common Name</th>
+                        <th data-field="uniprot_species_code" data-sortable="true" data-formatter="tablehooks.format_species_code">Code</th>
+                        <th data-field="kingdom" data-sortable="true" data-formatter="tablehooks.format_as_kingdom_tag" title="Domain of Life">D.</th>
+
+                    </tr>
+                </thead>
+
+                   </table>
+                                   </div>
+
+
+
+
+                              </div>
+
+                              {% endif %}
+
+
+                          </div>
+                         </div>
+
+                         <br>
+
+                     </div>
+
+                </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- bootstrap-table -->
+    <script src='{% static "js/tablehooks.js" %}' type="text/javascript"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
+
+<script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
+
+    <script src='{% static "js/highlight.js" %}'></script>
+
+
+<script>
+
+
+        format_result_refs = function(value, row){
+            var qterms = "{{ query }}".split('\s+');
+            var all_evids = [];
+            if (row.hasOwnProperty('xrefs')){
+                all_evids = row.xrefs.map(x => x['source'] + ": " + x['xref']);
+            }
+            var keep = all_evids.filter(function(token){
+                return qterms.some(term => token.match(term));
+            });
+            return keep.join('<br>');
+        };
+
+
+        // ENTRY RESULT TABLE
+        var myHilitor = new Hilitor();
+        myHilitor.setMatchType("open");
+        var data = {{ data_entry | safe }};
+        console.log(data);
+        var tab = $("#matchTable_entry");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data ,
+            onPostBody: function(d){
+                myHilitor.apply("{{ query }}");
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+        // GROUP RESULT TABLE
+        var myHilitor2 = new Hilitor();
+        myHilitor2.setMatchType("open");
+        var data = {{ data_group | safe }};
+
+        var tab = $("#matchTable_group");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data ,
+            onPostBody: function(d){
+                myHilitor2.apply("{{ query }}");
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+
+        // GENOME RESULT TABLE
+        var myHilitor3 = new Hilitor();
+        myHilitor3.setMatchType("open");
+        var data = {{ data_genome | safe }};
+
+        var tab = $("#matchTable_genome");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data ,
+            onPostBody: function(d){
+                myHilitor3.apply("{{ query }}");
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+
+        // FILTER ENTRY
+
+    var options = [];
+
+$( '.dropdown-menu a' ).on( 'click', function( event ) {
+
+   var $target = $( event.currentTarget ),
+       val = $target.attr( 'data-value' ),
+       $inp = $target.find( 'input' ),
+       idx;
+
+   if ( ( idx = options.indexOf( val ) ) > -1 ) {
+      options.splice( idx, 1 );
+      setTimeout( function() { $inp.prop( 'checked', false ) }, 0);
+   } else {
+      options.push( val );
+      setTimeout( function() { $inp.prop( 'checked', true ) }, 0);
+   }
+
+   $( event.target ).blur();
+
+   if ($target[0].id.startsWith("f_e_")){
+
+    $('#matchTable_entry').bootstrapTable('filterBy', {found_by:options} );
+
+    }
+
+    else if ($target[0].id.startsWith("f_g_")){
+
+    $('#matchTable_genome').bootstrapTable('filterBy', {found_by:options} );
+
+    }
+
+    else if ($target[0].id.startsWith("f_gr_")){
+
+    $('#matchTable_group').bootstrapTable('filterBy', {found_by:options} );
+
+    }
+
+   return false;
+});
+
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
+$(function () {
+  $('[data-toggle="popover"]').popover()
+})
+
+
+</script>
+
+
+<script>
+    document.getElementById('run_full_entries').onclick=function(){
+          // Remove any element-specific value, falling back to stylesheets
+          document.getElementById('matchTable_entry_full_text').style.display='';
+          document.getElementById('run_full_entries').style.display='none';
+
+
+
+          // ENTRY RESULT TABLE
+        var myHilitor = new Hilitor("matchTable_entry_full_text");
+        myHilitor.setMatchType("open");
+        var tab = $("#matchTable_entry_full_text");
+        tab.bootstrapTable({
+            url: "{{ url_fulltest_entries }}",
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            onPostBody: function(d){
+                myHilitor.apply("{{ query }}");
+                document.getElementById('nbr_full_entrie').innerHTML=  'Loading...';
+            },
+            onLoadSuccess: function(d){
+                document.getElementById('nbr_full_entrie').innerHTML= d.length + ' full text match found';
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+        };
+</script>
+
+
+{% if meta_group.shown > 0 %}
+
+<script>
+document.getElementById('f_gr_id').click();
+document.getElementById('f_gr_fin').click();
+</script>
+
+{% endif %}
+
+
+{% if meta_entry.shown > 0 %}
+
+<script>
+document.getElementById('f_e_crossref').click();
+document.getElementById('f_e_seq').click();
+document.getElementById('f_e_id').click();
+</script>
+
+
+ {% endif %}
+
+
+{% if meta_genome.shown > 0 %}
+
+<script>
+document.getElementById('f_g_name').click();
+document.getElementById('f_g_taxid').click();
+document.getElementById('f_g_ag').click();
+
+
+document.getElementById("inputBrowser").value = "{{query}}"
+
+
+</script>
+
+
+ {% endif %}
+
+    {% block js_formatter_hooks %}{% endblock %}
+
+
+<style>
+
+    .fixed-table-body{
+        max-height: 400px;
+    }
+
+
+.bootstrap-table {
+	padding: 24px;
+}
+
+    .dot {
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+
+    .blinking-red{
+    animation:blinkingText 1.2s infinite;
+}
+@keyframes blinkingText{
+    0%{     background-color: #dc3545;    }
+    49%{    background-color: #dc3545; }
+    60%{    background-color: transparent; }
+    99%{    background-color:transparent;  }
+    100%{   background-color: #dc3545;    }
+}
+</style>
+
+
+{% endblock content %}

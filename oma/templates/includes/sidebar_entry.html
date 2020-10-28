@@ -1,0 +1,313 @@
+{% load staticfiles %}
+
+<div id="oma-details-sideNav-mobile">
+    <a href="#" id="toggleSidenav">
+        <span>Select a Tab</span><img src="{% static "image/icon-arrow.png" %}" alt="Arrow" />
+    </a>
+</div>
+
+
+    <div id="toggle-me" class="toggle-visibility">&#8249;</div>
+
+<div class="oma-details-nav-left" id="sideNavMobile">
+
+
+    <ul class="gene-orthology">
+
+        <li class="{% if tab == 'orthologs' %} active selected {%endif%}" {% if tab != 'orthologs' %}
+             onclick="window.location='{% url 'pairs' entry.omaid %}'" {%endif%}>
+            <a href="{% url 'pairs' entry.omaid %}" {% if tab == 'orthologs' %}data-toggle="collapse" data-target="#filterOrthologs"{%endif%}>
+
+                <span>Orthologs
+
+                {% if nr_vps %}
+
+                <span class="badge badge-info">{{nr_vps}}</span>
+                {% endif %}
+                    </span>
+                {% if tab == 'orthologs' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
+            </a>
+
+            <div id="filterOrthologs" class="collapse {% if tab == 'orthologs'%} show {%endif%}">
+
+
+                {% if tab == 'orthologs' %}
+
+                <div id="filter-taxon-container"></div>
+
+
+
+                    {%endif%}
+
+
+                <div class="dropdown-divider pl-0"></div>
+
+                <h5 style="padding-left:10px">Required orthology evidence:</h5>
+
+                <div class="form-check pl-4">
+
+                    <div >
+                        <input type="checkbox" class="form-check-input" id="pairwiseFilter" onclick="set_filter_pairwise()">
+                        <label  class="form-check-label" for="pairwiseFilter" >
+                            OMA pairs <span class="badge badge-pill badge-dark"  data-toggle="tooltip" data-placement="top" title="Inferred using the OMA algorithm">?</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="hogFilter" onclick="set_filter_hog()">
+                        <label class="form-check-label" for="hogFilter">
+                            HOG  <span class="badge badge-pill badge-dark"  data-toggle="tooltip" data-placement="top" title="Inferred from HOGs">?</span>
+
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="omagroupFilter" onclick="set_filter_group()">
+                        <label class="form-check-label" for="omagroupFilter">
+                            OMA Group  <span class="badge badge-pill badge-dark"  data-toggle="tooltip" data-placement="top" title="Inferred from OMA groups">?</span>
+                        </label>
+                    </div>
+
+
+
+                </div>
+
+            </div>
+
+        </li>
+
+        <li class="{% if tab == 'paralogs' %} active selected {%endif%}" {% if tab != 'paralogs' %}
+             onclick="window.location='{% url 'pair_paralogs' entry.omaid %}'" {%endif%}>
+            <a href="{% url 'pair_paralogs' entry.omaid %}" {% if tab == 'paralogs' %}data-toggle="collapse" data-target="#filterParalogs"{%endif%}>
+                <span>Paralogs
+                {% if nr_pps %}
+                <span class="badge badge-info">{{nr_pps}}</span>
+                {% endif %}
+                    </span>
+            {% if tab == 'paralogs' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
+            </a>
+
+
+             <div id="filterParalogs" class="collapse {% if tab == 'paralogs'%} show {%endif%}">
+
+
+                 {% if tab == 'paralogs' %}
+
+                <div id="filter-taxon-container"></div>
+                <div>
+
+                    {%endif%}
+
+            </div>
+
+        </li>
+
+        {% if entry.genome.is_polyploid %}
+        <li class="{% if tab == 'homeologs' %} active selected {%endif%}" {% if tab != 'homeologs' %}
+             onclick="window.location='{% url 'pair_homeologs' entry.omaid %}'" {%endif%}>
+            <a href="{% url 'pair_homeologs' entry.omaid %}" {% if tab == 'homeologs' %}data-toggle="collapse" data-target="#filterhomeologs"{%endif%}>
+                <span>Homoeologs
+                {% if nr_homo %}
+                <span class="badge badge-info">{{nr_homo}}</span>
+                {% endif %}
+                    </span>
+            {% if tab == 'homeologs' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
+            </a>
+
+
+             <div id="filterhomeologs" class="collapse {% if tab == 'paralogs'%} show {%endif%}">
+
+
+                 {% if tab == 'homeologs' %}
+
+                <div id="filter-taxon-container"></div>
+                <div>
+
+                    {%endif%}
+
+            </div>
+
+        </li>
+        {% endif  %}
+
+        <li class="{% if tab == 'geneinformation' %} active selected {%endif%}">
+            <a href="{% url 'entry_info' entry.omaid %}">
+                <span>Gene information</span>
+
+            </a>
+
+        </li>
+
+        <li class="{% if tab == 'isoform' %} active selected {%endif%}">
+            <a href="{% url 'entry_isoform' entry.omaid %}">
+                <span>Isoforms  <span class="badge badge-info">
+                    {% if tab == 'isoform' %}  {{entry.alternative_isoforms|length}}
+
+                    {%else%}
+
+                    {{entry.alternative_isoforms|length|add:1}}
+
+                    {%endif%}
+
+                    </span></span>
+
+
+            </a>
+
+        </li>
+
+        <li class="{% if tab == 'goa' %} active selected {%endif%}" {% if tab != 'goa' %}
+             onclick="window.location='{% url 'entry_goa' entry.omaid %}'" {%endif%}>
+            <a href="{% url 'entry_goa' entry.omaid %}" {% if tab == 'goa' %}data-toggle="collapse" data-target="#subgoa"{%endif%}>
+                <span>GO Annotations
+                    </span>
+            {% if tab == 'goa' %}
+                <i class="material-icons">keyboard_arrow_right</i>
+                {%endif%}
+            </a>
+
+
+             <div id="subgoa" class="collapse {% if tab == 'goa'%} show {%endif%}">
+
+
+                 {% if tab == 'goa' %}
+
+                 <h5 style="padding: 4px !important; padding-left: 8px !important">Jump to:</h5>
+
+                  <h6 ><a href="#molecular_function" style="color:#007bff !important; padding: 4px !important; padding-left: 25px !important"> Molecular function</a></h6>
+
+
+
+              <h6 ><a href="#cellular_component" style="color:#007bff !important; padding: 4px !important; padding-left: 25px !important"> Cellular component</a></h6>
+
+                 <h6 ><a href="#biological_process" style="color:#007bff !important; padding: 4px !important; padding-left: 25px !important"> Biological process</a></h6>
+
+
+
+
+                    {%endif%}
+
+            </div>
+
+        </li>
+
+        <li class="{% if tab == 'sequences' %} active selected {%endif%}">
+            <a href="{% url 'entry_sequences' entry.omaid %}">
+                <span>Sequences</span>
+
+            </a>
+
+        </li>
+
+        <li class="{% if tab == 'synteny' %} active selected {%endif%}">
+            <a href="{% url 'synteny' entry.omaid 4 4 %}">
+                <span>Local synteny</span>
+
+            </a>
+
+        </li>
+
+    </ul>
+
+</div>
+
+{% if tab == 'orthologs' %}
+
+
+<script>
+
+
+    var apply_filter_pair = false;
+    var apply_filter_hog = false;
+    var apply_filter_group = false;
+
+
+    $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+});
+
+    function set_filter_pairwise() {
+      // Get the checkbox
+      var checkBox = document.getElementById("pairwiseFilter");
+
+      // If the checkbox is checked, display the output text
+      if (checkBox.checked == true){
+        apply_filter_pair = true;
+      } else {
+        apply_filter_pair = false;
+      }
+      apply_filter();
+}
+
+    function set_filter_hog() {
+      // Get the checkbox
+      var checkBox = document.getElementById("hogFilter");
+
+      // If the checkbox is checked, display the output text
+      if (checkBox.checked == true){
+        apply_filter_hog = true;
+      } else {
+        apply_filter_hog = false;
+      }
+
+      apply_filter();
+}
+
+    function set_filter_group() {
+      // Get the checkbox
+      var checkBox = document.getElementById("omagroupFilter");
+
+      // If the checkbox is checked, display the output text
+      if (checkBox.checked == true){
+        apply_filter_group = true;
+      } else {
+        apply_filter_group = false;
+      }
+
+      apply_filter();
+}
+
+    function apply_filter(){
+
+        $('#filter-taxon-container').find('.form-check').find('input[type=radio]:checked').prop('checked', false);
+
+        document.getElementById("all").checked = true; //todo
+
+
+        var filter_parameters = {};
+
+        if (apply_filter_pair){
+            filter_parameters.type_p = 1
+        }
+
+        if (apply_filter_hog){
+            filter_parameters.type_h = 1
+        }
+
+        if (apply_filter_group){
+            filter_parameters.type_g = 1
+        }
+
+
+        $('#grpTable').bootstrapTable('filterBy', filter_parameters )
+
+}
+
+
+</script>
+
+
+{%endif%}
+
+
+
+
+
+
+

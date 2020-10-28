@@ -16,7 +16,18 @@
 
     function write_jsondata_to_storage(sKey, oData) {
         var sValue = JSON.stringify(oData);
-        window.localStorage.setItem(sKey, sValue);
+
+
+        while(true) {
+            try {
+                window.localStorage.setItem(sKey, sValue);
+                break;
+            } catch (e) {
+                localStorage.removeItem(localStorage.key(0));
+                continue;
+            }
+        }
+
     }
 
     function cachedAjaxPromise(sUrl, oAjaxOptions) {
@@ -53,7 +64,27 @@
     }
 
     exports.visualize_all = function (class_of_entries, longest_seq, attr_name) {
+
         if(attr_name === undefined){ attr_name = 'id'; }
+
+        if(longest_seq === undefined){
+
+
+            var longest_seq = 0;
+            var ls;
+
+            $.each($(class_of_entries), function (each, value) {
+                // Retreive the entry ID
+                var entry_id = $(this).attr(attr_name);
+                ls = exports.get_length(entry_id);
+
+                if (ls > longest_seq){
+                    longest_seq= ls;}
+            });
+
+        }
+
+
         $.each($(class_of_entries), function (each, value) {
             // Retreive the entry ID
             var entry_id = $(this).attr(attr_name),
@@ -65,7 +96,8 @@
     exports.load_and_visualize_domain = function(container, entry_id, longest_seq) {
         // Grab the domain annotations
         cachedAjaxPromise("/oma/domains/" + entry_id + "/json/")
-            .done(function (data) {
+            .done(function (data)
+            {
                 if (!data) return;
                 // Draw the sequence with domain annotations
                 var svg_container = d3.select(container).append("svg:svg");
@@ -74,6 +106,7 @@
                 var svg_height = parseInt(svg_container.style('height'));
 
                 // Line length (in %) is relative to the longest sequence.
+
                 var line_length = String((data.length / longest_seq) * 100) + "%";
                 var line_weight = 3;
 
@@ -186,4 +219,19 @@
 
 
     };
+
+    exports.get_length = function(entry_id) {
+
+        var ls2;
+        // Grab the domain annotations
+        cachedAjaxPromise("/oma/domains/" + entry_id + "/json/")
+            .done(function (data)
+            {
+                if (!data) {ls2=0;}
+                ls2 = data.length;
+
+            });
+        return ls2;
+    };
+
 })(this.domains={});

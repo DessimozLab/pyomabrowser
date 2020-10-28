@@ -1,0 +1,129 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block title %}OMA orthology database: Types of orthologous groupings{% endblock %}
+{% block meta_description %}The OMA database provides several destinct types of groupings to the users. The appropriate grouping depends on the application of the user.{% endblock %}
+
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+
+            <h1>Orthology Basics</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+                  <div class="card card-header-oma border-0">
+
+                <div class="card-body">
+
+
+            <p class="text-justify">The study of genetic material almost always starts with identifying, within or across species, homologous regions—regions of common ancestry. It is useful to distinguish between two classes of homologous genes: orthologs, which are pairs of genes that started diverging via evolutionary speciation, and paralogs, which are pairs of genes that started diverging via gene duplication. </p>
+
+
+
+            <img src="{% static "image/example_gene_tree_species-1.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="Simple evolutionary scenario">
+
+
+
+
+            <div class=" w-75  text-justify mx-auto small">
+                    <b>     (a) Simple evolutionary scenario of a gene family with two speciation events (S1 and S2) and one duplication event (star). The type of events completely and unambiguously define all pairs of orthologs and paralogs: The frog gene is orthologous to all other genes (they coalesce at S1). The red and blue genes are orthologs between themselves (they coalesce at S2), but paralogs between each other (they coalesce at star).
+                        <br> (b) The corresponding orthology graph. The genes are represented here by vertices and orthology relationships by edges. The frog gene forms one-to-many orthology with both the human and dog genes, because it is orthologous to more than one sequence in each of these organisms.
+
+
+
+</b>
+
+    </div>
+
+            <br>
+
+            <p class="text-justify">In comparative genomics and phylogenetics, the fundamental concept of orthology relates “corresponding” genes in different species: orthologs are pairs of genes which have evolved from a single gene in the last common ancestor. Among many applications, orthologs are useful to infer species trees and tend to be functionally conserved.
+                <br><br>
+<small class="float-right">Please see <a href="https://genome.cshlp.org/content/29/7/1152.full">(Altenhoff et al. 2019)</a>, <a href="https://f1000research.com/articles/9-27/v1">(Zahn-Zabal et al. 2020)</a> for more information.</small>
+
+
+            </p>
+
+                </div> </div>
+
+            <div class="card card-header-oma border-0">
+
+                <div class="card-body">
+
+
+
+                    <h2> Orthology Definitions  </h2>
+            <hr>
+
+
+
+                    <p class="text-justify">
+
+
+                    Orthology is a relation defined over a pair of homologous genes, where the two genes have emerged through a speciation event.
+
+                    </p>
+
+                        <img src="{% static "image/gene_tree-1.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="Simple evolutionary scenario">
+
+<div class="w-75  text-justify mx-auto small">
+
+    <b > In this gene tree, S1 and S2 at internal nodes represent speciation events. The star (D1) represents a duplication event. x1, y1, x2, y2, and z1 represent extant genes. </b>
+
+
+
+</div>
+
+
+                        <br>
+                    <br>
+
+                     <p class="text-justify">
+Example pairs of orthologs are (x1, y1) or (x2, z1). Orthologs can be further subclassified into one-to-one, one-to-many, many-to-one, and many-to-many orthologs. The qualifiers one and many indicate for each of the two involved genes whether they underwent an additional duplication after the speciation between the two genomes. Hence, the gene pair (x1, y1) is an example of a one-to-one orthologous pair, whereas (x2, z1) is a many-to-one ortholog relation.
+                     </p>
+
+                     <p class="text-justify">
+<b><a href="{% url 'glossary' %}#g-para">Paralogy</a></b>   is a relation defined over a pair of homologous genes that have emerged through a gene duplication, e.g., (x1, x2) or (x1, y2).
+                     </p>
+                     <p class="text-justify">
+<b>In-Paralogy</b> is a relation defined over a triplet. It involves a pair of genes and a speciation event of reference. A gene pair is an in-paralog if they are paralogs and duplicated after the speciation event of reference. The pair (x1, y2) are in-paralogs with respect to the speciation event S1.
+                     </p>
+                     <p class="text-justify">
+<b>Out-Paralogy</b> is also a relation defined over a pair of genes and a speciation event of reference. This pair is out-paralogs if the duplication event through which they are related to each other predates the speciation event of reference. Hence, the pair (x1, y2) are out-paralogs with respect to the speciation event S2.
+                     </p> <p
+                        class="text-justify">
+<b>Co-orthology</b> is a relation defined over three genes, where two of them are in-paralogs with respect to the speciation event associated with the third gene. The two in-paralogous genes are said to be co-orthologous to the third (out-group) gene. Thus, x1 and y2 are co-orthologs with respect to z1.
+                </p>
+                     <p class="text-justify">
+<b><a href="{% url 'glossary' %}#g-homoe">Homoeology</a></b>  is a specific type of homologous relation in a polyploid species, which thus contain multiple “sub-genomes.” This relation describes pairs of genes that originated by speciation and were brought back together in the same genome by allopolyploidization (hybridization). Thus, in the absence of rearrangement, homoeologs can be thought of as orthologs between sub-genomes.
+                     </p>
+
+
+
+                        <small class="float-right">Please see <a href="https://doi.org/10.1007/978-1-4939-9074-0_5">(Altenhoff et al. 2019)</a>, <a href="https://www.sciencedirect.com/science/article/pii/S1360138516000595?via%3Dihub">(Glover et al. 2016) </a> for more information.</small>
+
+
+
+</div></div>
+
+
+
+                </div>
+            </div>
+
+
+</div>
+
+{% endblock content %}

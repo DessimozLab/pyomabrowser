@@ -223,9 +223,7 @@ function init_table(div_id) {
             field: 'uniprot_species_code',
             title: 'Code',
             sortable: true,
-            formatter: function(value){
-                return '<a href="/cgi-bin/gateway.pl?f=DisplayOS&p1='+value+'">'+value+"</a>";
-            }
+            formatter: tablehooks.format_species_code
         }, {
             field: 'sciname',
             title: 'Scientific Name',
@@ -247,18 +245,17 @@ function init_table(div_id) {
             field: 'ncbi',
             title: 'NCBI TaxonId',
             sortable: true,
-            formatter: function(value) {
-                return '<a href="https://uniprot.org/taxonomy/'+value +'">' + value + "</a>";
-            }
+            formatter: tablehooks.format_taxonid_as_link
         }, {
             field: 'kingdom',
-            title: 'Kingdom',
-            sortable: true
+            title: 'D.',
+            sortable: true,
+            formatter:tablehooks.format_as_kingdom_tag
         }]
     });
 
     var icons = tab.bootstrapTable('getOptions').icons;
-    $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+    $.extend(icons, {export: 'fa-download', columns: 'fa-list'});
     tab.bootstrapTable('refreshOptions', {'icons': icons});
 }
 
