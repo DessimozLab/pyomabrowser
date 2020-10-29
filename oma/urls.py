@@ -81,8 +81,7 @@ urlpatterns = [
     url(r'^omagroup/(?P<group_id>\w+)/similar/pairwise/$', views.OMAGroup_similar_pairwise.as_view(), name='omagroup_similar_pairwise'),
     url(r'^omagroup/(?P<group_id>\w+)/info/$', views.OMAGroup_info.as_view(), name='omagroup_info'),
     url(r'^omagroup/(?P<group_id>\w+)/alignment/$', views.OMAGroup_align.as_view(), name='omagroup_align'),
-    #url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/$', views.OMAGroup.as_view(), name='omagroup'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroupMSA.as_view(), name='omagroup-msa'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroup_align.as_view(), name='omagroup_align'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/fasta/$', views.OMAGroupFasta.as_view(), name='omagroup-fasta'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
 

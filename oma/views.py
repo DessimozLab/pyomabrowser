@@ -2268,15 +2268,6 @@ class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
                         'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
         return context
 
-@method_decorator(never_cache, name='dispatch')
-class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
-    template_name = "omagroup_msa.html"
-
-    def get_context_data(self, group_id, **kwargs):
-        context = super(OMAGroupMSA, self).get_context_data(group_id)
-        context.update(self.get_msa_results('og', context['group_nr']))
-        context['sub_tab'] = 'msa'
-        return context
 
 @method_decorator(never_cache, name='dispatch')
 class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
