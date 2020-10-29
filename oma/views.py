@@ -1552,12 +1552,18 @@ class HOGsOrthoXMLView(HOGBase, View):
 class HOGtableFromEntry(EntryCentricMixin, View):
     redirect_to = "hog_table"
 
-    def get(self, request, entry_id, **kwargs):
+    def get(self, request, entry_id, level=None, **kwargs):
         entry = self.get_entry(entry_id)
         try:
-            hog = self.get_most_specific_hog(entry)
-            if hog is not None:
-                return redirect(self.redirect_to, hog.hog_id, hog.level)
+            if level is not None:
+                subhogs = [utils.HOG(h) for h in utils.db.get_subhogs_at_level(entry.hog_family_nr, level)]
+                for hog in subhogs:
+                    if entry.oma_hog.startswith(hog.hog_id):
+                        return redirect(self.redirect_to, hog.hog_id, hog.level)
+            else:
+                hog = self.get_most_specific_hog(entry)
+                if hog is not None:
+                    return redirect(self.redirect_to, hog.hog_id, hog.level)
         except db.InvalidId:
             pass
         logger.info("hog for requested entry '{}' ({}) has no hog. redirect to protein info"

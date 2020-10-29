@@ -100,18 +100,14 @@ urlpatterns = [
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGtableFromEntry.as_view(), name='hog_table_from_entry'),
     url(r'^hogs/(?P<entry_id>\w+)/vis/$', views.HOGiHamFromEntry.as_view(), name='hog_viewer_from_entry'),
     url(r'^hogs/(?P<entry_id>\w+)/iham/$', views.HOGiHamFromEntry.as_view(), name='hog_viewer_from_entry'),
+    url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/$',
+        views.HOGtableFromEntry.as_view(), name='hog_table_from_entry'),
 
     #not sure if those are still needed somewhere. keep for now.
     url(r'^hogs/(?P<entry_id>\w+)/domains/$',
         views.HOGDomainsView.as_view(), name='hog_domains_'),
     url(r'^hogs/(?P<entry_id>\w+)/domains/json$',
         views.HOGDomainsJson.as_view(), name='hog_domains_json_'),
-    url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/$', views.HOGsView.as_view(),
-        name='hogs'),
-
-    # OMA Groups via Entry
-    #url(r'^group/(?P<entry_id>\w+)/$', views.EntryCentricOMAGroup.as_view(), name="omagroup-entry"),
-    url(r'^group/(?P<entry_id>\w+)/msa/$', views.EntryCentricOMAGroupMSA.as_view(), name="omagroup-entry-msa"),
 
 
     # Search Widget
