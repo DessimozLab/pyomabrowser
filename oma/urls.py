@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls import include, url
 from django.urls import path
-from django.views.generic.base import TemplateView
+from django.views.generic.base import TemplateView, RedirectView
 from . import views
 
 urlpatterns = [
@@ -73,7 +73,7 @@ urlpatterns = [
 
 
     # OMA Group
-    url(r'^group/(?P<group_id>\w+)/$', views.OMAGroup_members.as_view(), name='omagroup-old'),
+    url(r'^group/(?P<group_id>\w+)/$', RedirectView.as_view(url="omagroup_members", permanent=False), name='omagroup-old'),
     url(r'^omagroup/(?P<group_id>\w+)/$', views.OMAGroup_members.as_view(), name='omagroup_members_short'),
     url(r'^omagroup/(?P<group_id>\w+)/members/$', views.OMAGroup_members.as_view(), name='omagroup_members'),
     url(r'^omagroup/(?P<group_id>\w+)/similar/profile/$', views.OMAGroup_similar_profile.as_view(), name='omagroup_similar_profile'),
