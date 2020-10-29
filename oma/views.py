@@ -2274,21 +2274,6 @@ class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
                         'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
         return context
 
-
-@method_decorator(never_cache, name='dispatch')
-class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
-    template_name = "omagroup_entry_msa.html"
-
-    def get_context_data(self, entry_id, **kwargs):
-        entry = self.get_entry(entry_id)
-        if entry.oma_group != 0:
-            context = super(EntryCentricOMAGroupMSA, self).get_context_data(entry.oma_group)
-        else:
-            context = {}
-        context.update({'sub_tab': 'msa', 'entry': entry})
-        return context
-
-
 # //</editor-fold>
 
 #<editor-fold desc="Search Widget">
