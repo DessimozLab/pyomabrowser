@@ -1077,6 +1077,7 @@ class GenomeBase(ContextMixin):
             meta = utils.db.per_species_metadata_retriever(species_id)
             context['genome'] = genome_obj
             context['genome_meta'] = meta
+            context['supported_ancestral_levels'] = set(l.decode() for l in utils.tax.all_hog_levels).intersection(genome_obj.lineage)
         except db.InvalidId as e:
             raise Http404(e)
         return context
@@ -1575,6 +1576,19 @@ class HOGiHamFromEntry(HOGtableFromEntry):
     redirect_to = "hog_viewer"
 
 
+# might be needed for external resources (orthoxml by protein entry)
+class OrthoXMLFromEntry(EntryCentricMixin, View):
+    def get(self, request, entry_id, **kwargs):
+        entry = self.get_entry(entry_id)
+        if entry.hog_family_nr == 0:
+            raise Http404("{} doesn't belong to any HOG".format(entry_id))
+        orthoxml = utils.db.get_orthoxml(entry.hog_family_nr)
+
+        response = HttpResponse(content_type='text/plain')  #'application/xml')
+        response.write(orthoxml)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
 
 #  OLD STUFF
 
@@ -1641,21 +1655,6 @@ class HOGsFastaView(FastaView, HOGsBase):
     def render_to_response(self, context, **response_kwargs):
         return self.render_to_fasta_response(context['hog_members'])
 
-
-# class HOGsOrthoXMLView(HOGsView):
-#     def get(self, request, *args, **kwargs):
-#         context = self.get_context_data(**kwargs)
-#         try:
-#             fam = context['hog']['fam']
-#             orthoxml = utils.db.get_orthoxml(fam)
-#         except KeyError:
-#             raise Http404('requested id is not part of any HOG')
-#         except ValueError as e:
-#             raise Http404(e.message)
-#         response = HttpResponse(content_type='text/plain')
-#         response.write(orthoxml)
-#         response['Access-Control-Allow-Origin'] = '*'
-#         return response
 
 
 class HOGiHam(EntryCentricMixin, TemplateView):
