@@ -60,6 +60,40 @@ class ReadOnlySerializer(serializers.Serializer):
         pass
 
 
+class GenomeBaseSerializer(ReadOnlySerializer):
+    code = serializers.CharField(max_length=5, source='uniprot_species_code')
+    taxon_id = serializers.IntegerField(source='ncbi_taxon_id')
+    species = serializers.CharField(source='sciname')
+    common = serializers.CharField(required=False)
+
+
+class GenomeInfoSerializer(GenomeBaseSerializer):
+    genome_url = serializers.HyperlinkedIdentityField(
+        view_name='genome-detail',
+        lookup_field='uniprot_species_code',
+        lookup_url_kwarg='genome_id')
+
+
+class GenomeDetailSerializer(GenomeBaseSerializer):
+    nr_entries = serializers.IntegerField()
+    lineage = serializers.ListSerializer(child=serializers.CharField())
+    proteins = serializers.HyperlinkedIdentityField(view_name='genome-proteins', read_only=True,
+                                                         lookup_field='uniprot_species_code',
+                                                         lookup_url_kwarg='genome_id')
+    chromosomes = serializers.SerializerMethodField(method_name=None)
+
+    def get_chromosomes(self, obj):
+        chrs = []
+        for chr_id in obj.chromosomes:
+            entries = obj.chromosomes[chr_id]
+            ranges = []
+            for k, g in itertools.groupby(enumerate(entries), lambda x: x[0] - x[1]):
+                group = [z[1] for z in g]
+                ranges.append((group[0], group[-1]))
+            chrs.append({'id': chr_id, 'entry_ranges': ranges})
+        return chrs
+
+
 class ProteinEntrySerializer(ReadOnlySerializer):
     entry_nr = serializers.IntegerField(required=True)
     entry_url = serializers.HyperlinkedIdentityField(
@@ -69,6 +103,8 @@ class ProteinEntrySerializer(ReadOnlySerializer):
     omaid = serializers.CharField()
     canonicalid = serializers.CharField()
     sequence_md5 = serializers.CharField()
+    sequence_length = serializers.IntegerField()
+    species = GenomeInfoSerializer(source='genome')
     oma_group = serializers.IntegerField(required=False)
     oma_hog_id = serializers.CharField(required=False, source='oma_hog')
     chromosome = serializers.CharField()
@@ -83,7 +119,6 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     roothog_id = serializers.IntegerField(source='hog_family_nr')
     hog_levels = serializers.SerializerMethodField(method_name=None)
 
-    sequence_length = serializers.IntegerField()
     sequence = serializers.CharField()
     cdna = serializers.CharField()
     domains = serializers.HyperlinkedIdentityField(view_name='protein-domains', read_only=True,
@@ -149,40 +184,6 @@ class ChromosomeInfoSerializer(ReadOnlySerializer):
     id = serializers.CharField()
     entry_ranges = serializers.ListSerializer(
         child=serializers.ListSerializer(child=serializers.IntegerField()))
-
-
-class GenomeBaseSerializer(ReadOnlySerializer):
-    code = serializers.CharField(max_length=5, source='uniprot_species_code')
-    taxon_id = serializers.IntegerField(source='ncbi_taxon_id')
-    species = serializers.CharField(source='sciname')
-    common = serializers.CharField(required=False)
-
-
-class GenomeInfoSerializer(GenomeBaseSerializer):
-    genome_url = serializers.HyperlinkedIdentityField(
-        view_name='genome-detail',
-        lookup_field='uniprot_species_code',
-        lookup_url_kwarg='genome_id')
-
-
-class GenomeDetailSerializer(GenomeBaseSerializer):
-    nr_entries = serializers.IntegerField()
-    lineage = serializers.ListSerializer(child=serializers.CharField())
-    proteins = serializers.HyperlinkedIdentityField(view_name='genome-proteins', read_only=True,
-                                                         lookup_field='uniprot_species_code',
-                                                         lookup_url_kwarg='genome_id')
-    chromosomes = serializers.SerializerMethodField(method_name=None)
-
-    def get_chromosomes(self, obj):
-        chrs = []
-        for chr_id in obj.chromosomes:
-            entries = obj.chromosomes[chr_id]
-            ranges = []
-            for k, g in itertools.groupby(enumerate(entries), lambda x: x[0] - x[1]):
-                group = [z[1] for z in g]
-                ranges.append((group[0], group[-1]))
-            chrs.append({'id': chr_id, 'entry_ranges': ranges})
-        return chrs
 
 
 class OmaGroupSerializer(ReadOnlySerializer):
