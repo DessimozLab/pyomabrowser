@@ -1207,8 +1207,13 @@ class AncestralGenomeCentricInfo(AncestralGenomeBase, TemplateView):
 
     def get_context_data(self, species_id, **kwargs):
         context = super(AncestralGenomeCentricInfo, self).get_context_data(species_id, **kwargs)
-
-        context.update({'tab': 'information'})
+        subtax = utils.tax.get_subtaxonomy_rooted_at(context['taxid'])
+        ext_genomes = []
+        for taxid in subtax.get_taxid_of_extent_genomes():
+            ext_genomes.append(utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid)))
+        ext_genomes_json = GenomeModelJsonTableMixin().as_json(ext_genomes)
+        context.update({'tab': 'information',
+                        'extant_genomes': ext_genomes_json})
         return context
 
 
@@ -1217,7 +1222,6 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
 
     def get_context_data(self, species_id, **kwargs):
         context = super(AncestralGenomeCentricGenes, self).get_context_data(species_id, **kwargs)
-
         context.update({'tab': 'genes', 'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name'])})
         return context
 
@@ -2306,6 +2310,7 @@ class GenomeModelJsonTableMixin(JsonModelMixin):
                    "common_name": None,
                    "nr_entries": "prots", "kingdom": None,
                    "last_modified": None}
+
 
 class GenomesJson(GenomeModelJsonTableMixin, View):
     def get(self, request, *args, **kwargs):
