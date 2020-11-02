@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls import include, url
 from django.urls import path
-from django.views.generic.base import TemplateView
+from django.views.generic.base import TemplateView, RedirectView
 from . import views
 
 urlpatterns = [
@@ -73,7 +73,7 @@ urlpatterns = [
 
 
     # OMA Group
-    url(r'^group/(?P<group_id>\w+)/$', views.OMAGroup_members.as_view(), name='omagroup-old'),
+    url(r'^group/(?P<group_id>\w+)/$', RedirectView.as_view(url="omagroup_members", permanent=False), name='omagroup-old'),
     url(r'^omagroup/(?P<group_id>\w+)/$', views.OMAGroup_members.as_view(), name='omagroup_members_short'),
     url(r'^omagroup/(?P<group_id>\w+)/members/$', views.OMAGroup_members.as_view(), name='omagroup_members'),
     url(r'^omagroup/(?P<group_id>\w+)/similar/profile/$', views.OMAGroup_similar_profile.as_view(), name='omagroup_similar_profile'),
@@ -81,8 +81,7 @@ urlpatterns = [
     url(r'^omagroup/(?P<group_id>\w+)/similar/pairwise/$', views.OMAGroup_similar_pairwise.as_view(), name='omagroup_similar_pairwise'),
     url(r'^omagroup/(?P<group_id>\w+)/info/$', views.OMAGroup_info.as_view(), name='omagroup_info'),
     url(r'^omagroup/(?P<group_id>\w+)/alignment/$', views.OMAGroup_align.as_view(), name='omagroup_align'),
-    #url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/$', views.OMAGroup.as_view(), name='omagroup'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroupMSA.as_view(), name='omagroup-msa'),
+    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroup_align.as_view(), name='omagroup_align'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/fasta/$', views.OMAGroupFasta.as_view(), name='omagroup-fasta'),
     url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
 
@@ -101,18 +100,14 @@ urlpatterns = [
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGtableFromEntry.as_view(), name='hog_table_from_entry'),
     url(r'^hogs/(?P<entry_id>\w+)/vis/$', views.HOGiHamFromEntry.as_view(), name='hog_viewer_from_entry'),
     url(r'^hogs/(?P<entry_id>\w+)/iham/$', views.HOGiHamFromEntry.as_view(), name='hog_viewer_from_entry'),
+    url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/$',
+        views.HOGtableFromEntry.as_view(), name='hog_table_from_entry'),
 
     #not sure if those are still needed somewhere. keep for now.
     url(r'^hogs/(?P<entry_id>\w+)/domains/$',
         views.HOGDomainsView.as_view(), name='hog_domains_'),
     url(r'^hogs/(?P<entry_id>\w+)/domains/json$',
         views.HOGDomainsJson.as_view(), name='hog_domains_json_'),
-    url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/$', views.HOGsView.as_view(),
-        name='hogs'),
-
-    # OMA Groups via Entry
-    #url(r'^group/(?P<entry_id>\w+)/$', views.EntryCentricOMAGroup.as_view(), name="omagroup-entry"),
-    url(r'^group/(?P<entry_id>\w+)/msa/$', views.EntryCentricOMAGroupMSA.as_view(), name="omagroup-entry-msa"),
 
 
     # Search Widget

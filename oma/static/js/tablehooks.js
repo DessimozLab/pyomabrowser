@@ -2,7 +2,7 @@
  * Created by adriaal on 03/06/16.
  */
 (function(exports) {
-    var cases = {
+    const cases = {
         Bacteria: {cls: 'label-success', display_text: "Bacteria", tag: "B"},
         Archaea: {cls: 'label-primary', display_text: "Archaea", tag: "A"},
         Eukaryota: {cls: 'label-danger', display_text: "Eukaryota", tag: "E"},
@@ -10,10 +10,20 @@
         _default: {cls: 'label-default', display_text: "unknown", tag: "?"}
     };
 
-    var zeroPad = function(num, size) {
+    const zeroPad = function(num, size) {
         var s = "00000000000" + num;
         return s.substr(s.length-size);
     };
+
+    const split_sciname_into_species_and_strain = function(sciname){
+        const strain_re = /\(|serogroup|serotype|serovar|biotype|subsp|pv\.|bv.|strain/;
+        var pos = sciname.search(strain_re)
+        if (pos > 0) {
+            return {species: sciname.substring(0, pos), strain: sciname.substring(pos)};
+        } else {
+            return {species: sciname, strain: ""};
+        }
+    }
 
     exports.format_as_kingdom_tag = function (kingdom) {
         var cur_case = cases[kingdom] ? cases[kingdom] : cases['_default']
@@ -23,6 +33,10 @@
 
     exports.format_sciname = function(value, row) {
         return "<b>" + value.species + "</b> " + value.strain;
+    };
+
+    exports.format_sciname_from_genome_object = function(genome){
+        return exports.format_sciname(split_sciname_into_species_and_strain(genome.species))
     };
 
     exports.format_sciname_genomes = function(value, row) {
@@ -120,12 +134,11 @@
     };
 
     exports.format_hogid = function(value, row) {
-
-        if (value == "Reference") { return value  }
-
+        if (value === "Reference") { return value  }
         return '<a href="/oma/hog/HOG:' + zeroPad(value, 7)
             + '/table/">HOG:' + zeroPad(value, 7) +'</a>';
     };
+
     exports.format_hog_api = function(value, row) {
         var lev = encodeURIComponent(row.level);
         var hogid = encodeURIComponent(value);

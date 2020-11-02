@@ -8,7 +8,13 @@
   <ol class="breadcrumb">
    {% for o in genome.lineage reversed %}
       {% if not forloop.last %}
-        <li class="breadcrumb-item active" aria-current="page"><a href="{% url "ancestralgenome_info" o %}">{{ o }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+        {% if o in supported_ancestral_levels %}
+            <a href="{% url "ancestralgenome_info" o %}">{{ o }}</a>
+        {% else %}
+            {{ o }}
+        {% endif %}
+        </li>
       {% endif %}
    {% endfor %}
   </ol>

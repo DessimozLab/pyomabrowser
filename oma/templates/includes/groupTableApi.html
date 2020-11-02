@@ -19,30 +19,15 @@
              <tr>
                 <th  data-field="omaid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
                 <th  data-field="canonicalid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+             {% if api_base == 'genome' %}
+                <th  data-field="locus" data-sortable="true" data-formatter="tablehooks.format_locus">Locus</th>
+             {% endif %}
 
+                <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
 
-
-                 {% if api_base == 'genome' %}
-
-
-                  <th  data-field="locus" data-sortable="true" data-formatter="tablehooks.format_locus">Locus</th>
-
-
-                 {% endif %}
-
-                  <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
-
-                  {% if api_base != 'genome' %}
-
-                 <!-- Taxon information in table -->
-                <script src="{% static 'js/taxinfo_table.js' %}" type="text/javascript"></script>
-
-                 <th  data-sortable="false" class="taxinfo_table">Taxon</th>
-
-
-                {% endif %}
-
-
+             {% if api_base != 'genome' %}
+                 <th data-field="species" data-formatter="tablehooks.format_sciname_from_genome_object" data-sortable="false" class="taxinfo_table">Taxon</th>
+             {% endif %}
              </tr>
 
 
@@ -117,7 +102,10 @@
 
 
 
-
+        const longest_seq = data.reduce(
+                (max, prot) => (prot.sequence_length > max ? prot.sequence_length : max),
+                data[0].sequence_length
+            );
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
         $.extend(icons, {export: 'fa-download'});
@@ -128,17 +116,10 @@
         showMultiSort: true,
         showLoading: true,
         onPostBody: function () {
-
-            domains.visualize_all(".protein");
-
-            if ( "{{api_base}}" != 'genome') {
-                taxinfo.load_all(".protein");
-            }
-
+            domains.visualize_all(".protein", longest_seq);
         },
-        onLoadSuccess: function (data) {
+        onLoadSuccess: function (data, status, jqXHR) {
             tab.bootstrapTable('hideLoading');
-
         },
         refreshOptions: {'icons': icons}
     });

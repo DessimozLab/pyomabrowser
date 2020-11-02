@@ -1077,6 +1077,7 @@ class GenomeBase(ContextMixin):
             meta = utils.db.per_species_metadata_retriever(species_id)
             context['genome'] = genome_obj
             context['genome_meta'] = meta
+            context['supported_ancestral_levels'] = set(l.decode() for l in utils.tax.all_hog_levels).intersection(genome_obj.lineage)
         except db.InvalidId as e:
             raise Http404(e)
         return context
@@ -1206,8 +1207,13 @@ class AncestralGenomeCentricInfo(AncestralGenomeBase, TemplateView):
 
     def get_context_data(self, species_id, **kwargs):
         context = super(AncestralGenomeCentricInfo, self).get_context_data(species_id, **kwargs)
-
-        context.update({'tab': 'information'})
+        subtax = utils.tax.get_subtaxonomy_rooted_at(context['taxid'])
+        ext_genomes = []
+        for taxid in subtax.get_taxid_of_extent_genomes():
+            ext_genomes.append(utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid)))
+        ext_genomes_json = GenomeModelJsonTableMixin().as_json(ext_genomes)
+        context.update({'tab': 'information',
+                        'extant_genomes': ext_genomes_json})
         return context
 
 
@@ -1216,7 +1222,6 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
 
     def get_context_data(self, species_id, **kwargs):
         context = super(AncestralGenomeCentricGenes, self).get_context_data(species_id, **kwargs)
-
         context.update({'tab': 'genes', 'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name'])})
         return context
 
@@ -1552,12 +1557,18 @@ class HOGsOrthoXMLView(HOGBase, View):
 class HOGtableFromEntry(EntryCentricMixin, View):
     redirect_to = "hog_table"
 
-    def get(self, request, entry_id, **kwargs):
+    def get(self, request, entry_id, level=None, **kwargs):
         entry = self.get_entry(entry_id)
         try:
-            hog = self.get_most_specific_hog(entry)
-            if hog is not None:
-                return redirect(self.redirect_to, hog.hog_id, hog.level)
+            if level is not None:
+                subhogs = [utils.HOG(h) for h in utils.db.get_subhogs_at_level(entry.hog_family_nr, level)]
+                for hog in subhogs:
+                    if entry.oma_hog.startswith(hog.hog_id):
+                        return redirect(self.redirect_to, hog.hog_id, hog.level)
+            else:
+                hog = self.get_most_specific_hog(entry)
+                if hog is not None:
+                    return redirect(self.redirect_to, hog.hog_id, hog.level)
         except db.InvalidId:
             pass
         logger.info("hog for requested entry '{}' ({}) has no hog. redirect to protein info"
@@ -1568,6 +1579,19 @@ class HOGtableFromEntry(EntryCentricMixin, View):
 class HOGiHamFromEntry(HOGtableFromEntry):
     redirect_to = "hog_viewer"
 
+
+# might be needed for external resources (orthoxml by protein entry)
+class OrthoXMLFromEntry(EntryCentricMixin, View):
+    def get(self, request, entry_id, **kwargs):
+        entry = self.get_entry(entry_id)
+        if entry.hog_family_nr == 0:
+            raise Http404("{} doesn't belong to any HOG".format(entry_id))
+        orthoxml = utils.db.get_orthoxml(entry.hog_family_nr)
+
+        response = HttpResponse(content_type='text/plain')  #'application/xml')
+        response.write(orthoxml)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
 
 #  OLD STUFF
@@ -1635,21 +1659,6 @@ class HOGsFastaView(FastaView, HOGsBase):
     def render_to_response(self, context, **response_kwargs):
         return self.render_to_fasta_response(context['hog_members'])
 
-
-# class HOGsOrthoXMLView(HOGsView):
-#     def get(self, request, *args, **kwargs):
-#         context = self.get_context_data(**kwargs)
-#         try:
-#             fam = context['hog']['fam']
-#             orthoxml = utils.db.get_orthoxml(fam)
-#         except KeyError:
-#             raise Http404('requested id is not part of any HOG')
-#         except ValueError as e:
-#             raise Http404(e.message)
-#         response = HttpResponse(content_type='text/plain')
-#         response.write(orthoxml)
-#         response['Access-Control-Allow-Origin'] = '*'
-#         return response
 
 
 class HOGiHam(EntryCentricMixin, TemplateView):
@@ -2268,30 +2277,6 @@ class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
                         'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
         return context
 
-@method_decorator(never_cache, name='dispatch')
-class OMAGroupMSA(AsyncMsaMixin, OMAGroup):
-    template_name = "omagroup_msa.html"
-
-    def get_context_data(self, group_id, **kwargs):
-        context = super(OMAGroupMSA, self).get_context_data(group_id)
-        context.update(self.get_msa_results('og', context['group_nr']))
-        context['sub_tab'] = 'msa'
-        return context
-
-@method_decorator(never_cache, name='dispatch')
-class EntryCentricOMAGroupMSA(OMAGroupMSA, EntryCentricMixin):
-    template_name = "omagroup_entry_msa.html"
-
-    def get_context_data(self, entry_id, **kwargs):
-        entry = self.get_entry(entry_id)
-        if entry.oma_group != 0:
-            context = super(EntryCentricOMAGroupMSA, self).get_context_data(entry.oma_group)
-        else:
-            context = {}
-        context.update({'sub_tab': 'msa', 'entry': entry})
-        return context
-
-
 # //</editor-fold>
 
 #<editor-fold desc="Search Widget">
@@ -2325,6 +2310,7 @@ class GenomeModelJsonTableMixin(JsonModelMixin):
                    "common_name": None,
                    "nr_entries": "prots", "kingdom": None,
                    "last_modified": None}
+
 
 class GenomesJson(GenomeModelJsonTableMixin, View):
     def get(self, request, *args, **kwargs):
