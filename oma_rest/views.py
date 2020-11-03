@@ -670,6 +670,7 @@ class XRefsViewSet(ViewSet):
                 res.append({'entry_nr': ref['EntryNr'],
                             'omaid': utils.id_mapper['OMA'].map_entry_nr(ref['EntryNr']),
                             'source': xref_mapper.source_as_string(ref['XRefSource']),
+                            'seq_match': xref_mapper.verification_as_string(ref['Verification']),
                             'xref': ref['XRefId'].decode(),
                             'genome': make_genome(enr_to_genome(ref['EntryNr']))})
             res = self._remove_redundant_xrefs(res)
