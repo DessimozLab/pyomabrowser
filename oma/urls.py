@@ -81,9 +81,9 @@ urlpatterns = [
     url(r'^omagroup/(?P<group_id>\w+)/similar/pairwise/$', views.OMAGroup_similar_pairwise.as_view(), name='omagroup_similar_pairwise'),
     url(r'^omagroup/(?P<group_id>\w+)/info/$', views.OMAGroup_info.as_view(), name='omagroup_info'),
     url(r'^omagroup/(?P<group_id>\w+)/alignment/$', views.OMAGroup_align.as_view(), name='omagroup_align'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/msa/$', views.OMAGroup_align.as_view(), name='omagroup_align'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/fasta/$', views.OMAGroupFasta.as_view(), name='omagroup-fasta'),
-    url(r'^omagroup/(?P<group_id>[A-Z0-9]+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
+    url(r'^omagroup/(?P<group_id>\w+)/msa/$', views.OMAGroup_align.as_view(), name='omagroup_align'),
+    url(r'^omagroup/(?P<group_id>\w+)/fasta/$', views.OMAGroupFasta.as_view(), name='omagroup-fasta'),
+    url(r'^omagroup/(?P<group_id>\w+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
 
     # Genome
     url(r'^genome/(?P<species_id>\w+)/info/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
