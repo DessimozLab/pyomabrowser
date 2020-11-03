@@ -50,7 +50,7 @@ class ProteinTest(APITestCase):
         response = client.get('/api/protein/909/')
         self.assertEqual(response.data['domains'], 'http://testserver/api/protein/909/domains/')
         self.assertEqual(response.data['orthologs'], 'http://testserver/api/protein/909/orthologs/')
-        self.assertEqual(response.data['ontology'], 'http://testserver/api/protein/909/ontology/')
+        self.assertEqual(response.data['gene_ontology'], 'http://testserver/api/protein/909/gene_ontology/')
         self.assertEqual(response.data['xref'], 'http://testserver/api/protein/909/xref/')
 
     def test_domains(self):
