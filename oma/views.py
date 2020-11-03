@@ -2501,7 +2501,7 @@ class Searcher(View):
         match= None
 
 
-        # search by OMAID/numeric_id or Xref/Description
+        # search by OMAID/numeric_id or Xref/
 
         raw_hits_id = []
         raw_hits_xref = []
@@ -2705,6 +2705,7 @@ class Searcher(View):
 
             else:
                 p.sequence = ""
+
             data_entry.append(p)
 
         json_encoder = EntrySearchJson()
