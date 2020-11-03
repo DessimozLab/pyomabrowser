@@ -84,6 +84,19 @@ class ProteinTest(APITestCase):
                                format='json')
         self.assertEqual(200, response.status_code)
         self.assertEqual(4, len(response.data))
+        dat = response.data
+        self.assertEqual(dat[0]['query_id'], str(1))
+        self.assertEqual(dat[0]['target']['entry_nr'], 1)
+        self.assertIsNone(dat[2]['target'])
+
+    def test_legacyversion_bulk_retrieve(self):
+        client = APIClient(HTTP_ACCEPT="application/json; version=1.6")
+        response = client.post('/api/protein/bulk_retrieve/',
+                               {'ids': [1, 'YEAST12', 'NON_EXISTING_ID', 66]},
+                               format="json")
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(3, len(response.data))
+        self.assertEqual([1, 12, 66], [x['entry_nr'] for x in response.data])
 
 
 class HOGsTest(APITestCase):

@@ -152,6 +152,11 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
         return levels
 
 
+class XRef2ProteinDetailSerializer(ReadOnlySerializer):
+    query_id = serializers.CharField()
+    target = ProteinEntryDetailSerializer(required=False)
+
+
 class IsoformProteinSerializer(ProteinEntrySerializer):
     locus = serializers.SerializerMethodField(method_name=None)
     nr_exons = serializers.SerializerMethodField(method_name=None)
