@@ -885,8 +885,8 @@ transform: none !important;
 		 margin: 0;
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-mobile-accordion svg {
-		 width: 42px;
-		 max-height: 42px;
+		 width: 34px;
+		 max-height: 34px;
 		 margin: 0 10px 0 0;
 	}
 	 body #omaLandingOthersContainer #oma-landing-cards .container-fluid .row .col-lg-3.col-md-6 .oma-card .oma-card-content {
@@ -906,16 +906,26 @@ transform: none !important;
 		 order: 3;
 		 margin: 0;
 	}
-	 body #omaLandingOthersContainer #oma-statistics .row {
-		 background: #d8d82a;
-		 border: none;
-	}
-	 body #omaLandingOthersContainer #oma-statistics .row .col-md-1 {
-		 display: none;
-	}
-	 body #omaLandingOthersContainer #oma-statistics .row .col-md-2 {
-		 width: 20%;
-	}
+	 body #oma-statistics .row {
+padding: 0;
+}
+
+
+body #omaLandingOthersContainer #oma-statistics .row .col-md-1 {
+display: none;
+}
+
+
+body #omaLandingOthersContainer #oma-statistics .row .col-md-2 {
+width: 50%;
+padding: 10px 0 0;
+border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+
+body #omaLandingOthersContainer #oma-statistics .row #last_stat  {
+width: 100%;
+}
 	 body #omaLandingOthersContainer #oma-statistics .row .col-md-2 h1 {
 		 color: #333;
 		 font-size: 1.4rem;

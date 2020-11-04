@@ -2859,6 +2859,7 @@ class Searcher(View):
         json_og = []
         for ogd in filtered_og:
             og = utils.db.oma_group_metadata(ogd[0])
+
             og["type"] = 'OMA group'
             og["found_by"] = ogd[1]
             json_og.append(og)

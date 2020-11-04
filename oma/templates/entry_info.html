@@ -58,10 +58,13 @@
                     || (obj.source !== "SourceID" && obj.source !== "SourceAC")
             });
             _.forEach(_.groupBy(clean_data, "source"), function(xrefs, source){
-                var list_item = ["<tr><td>" + source + "</td>"];
+                var list_item = ["<tr> <td>" + source + "</td>"];
+                list_item.push("<td>")
                 _.forEach(xrefs, function(ref){
-                    list_item.push("<td>"+xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}") +"</td>")
+                    list_item.push(xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}"))
                 });
+
+                list_item.push("</td>")
                 $('#xrefs').append(list_item.join("")+"</tr>\n");
             });
         });
