@@ -1,7 +1,7 @@
 {% extends  "base_hog.html" %}
 {% load staticfiles %}
 
-{% block title %}OMA: Hierarchical Orthologous Groups for {{ fam.id }}{% endblock %}
+{% block title %}Ancestral synteny for {{ fam.id }}{% endblock %}
 
 
 {% block contentTab %}
@@ -157,7 +157,12 @@ function dragended(d) {
     var max = Math.max.apply(Math, graph.links.map(function(o) { return o.weight; }))
     var scale = d3.scaleLinear().domain([0, max]).range([0, 10]);
 
-  var link = svg.append("g")
+
+    //add encompassing group for the zoom
+var g = svg.append("g")
+    .attr("class", "everything");
+
+  var link = g.append("g")
                 .style("stroke", "#aaa")
                 .selectAll("line")
                 .data(graph.links)
@@ -169,7 +174,7 @@ function dragended(d) {
                 .attr("stroke-width", function(d) { return scale(d.weight)})
 
 
-  var node = svg.append("g")
+  var node = g.append("g")
             .attr("class", "nodes")
   .selectAll("circle")
             .data(graph.nodes)
@@ -182,7 +187,7 @@ function dragended(d) {
               .on("drag", dragged)
               .on("end", dragended));
 
-  var label = svg.append("g")
+  var label = g.append("g")
       .attr("class", "labels")
       .selectAll("text")
       .data(graph.nodes)
@@ -191,7 +196,7 @@ function dragended(d) {
         .text(function(d){  return d.name});
 
 
-  var labelLine = svg.selectAll(".link")
+  var labelLine = g.selectAll(".link")
     .append("text")
     .attr("class", "link-label")
     .attr("fill", "#000")
@@ -250,6 +255,18 @@ function dragended(d) {
 
 
   }
+
+
+  //add zoom capabilities
+var zoom_handler = d3.zoom()
+    .on("zoom", zoom_actions);
+
+zoom_handler(svg);
+
+//Zoom functions
+function zoom_actions(){
+    g.attr("transform", d3.event.transform)
+}
 
 </script>
 

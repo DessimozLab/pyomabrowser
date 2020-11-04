@@ -3187,6 +3187,8 @@ class Searcher(View):
             if hog_nbr:
                 if redirect_valid:
                     return redirect('hog_viewer',  models.HOG(utils.db, hog_nbr).hog_id)
+                logger.info("QUERY HOG: {}".format(query))
+                logger.info("QUERY CHECKED: {}".format(hog_nbr))
                 potential_group_nbr.append(hog_nbr)
 
             end = time.time()
