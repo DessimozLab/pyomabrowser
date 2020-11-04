@@ -231,11 +231,11 @@
             .extent(brush_xt)
              .on("brush", function(d) {
                 brushing();
-                $("#resetbutton").show()
+
             })
             .on("end", function(d) {
                 brushed();
-                $("#resetbutton").show()
+
             })
 
          var brush_g = svg.append("g")
@@ -292,6 +292,9 @@
             console.log(current_ratio)
             console.log(ratio)
             console.log(tr)
+
+
+            $("#resetbutton").show()
 
 
             $.each(profiler_stack, function (idx, chart_e) {
