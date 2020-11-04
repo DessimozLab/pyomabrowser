@@ -62,6 +62,7 @@
                 list_item.push("<td>")
                 _.forEach(xrefs, function(ref){
                     list_item.push(xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}"))
+                    list_item.push(" ")
                 });
 
                 list_item.push("</td>")

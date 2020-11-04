@@ -286,6 +286,13 @@
              tr -= s[0]/current_ratio
 
 
+            if (current_ratio > 1) {
+                $("#resetbutton").show()
+            }
+            else {$("#resetbutton").hide()}
+
+
+
 
             console.log(current_ratio)
             console.log(ratio)
