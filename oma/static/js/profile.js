@@ -285,6 +285,7 @@
             var sc =  current_ratio * ratio
              tr -= s[0]/current_ratio
 
+            console.log(current_ratio);
 
             if (current_ratio > 1) {
                 $("#resetbutton").show()
