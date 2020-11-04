@@ -231,9 +231,11 @@
             .extent(brush_xt)
              .on("brush", function(d) {
                 brushing();
+                $("#resetbutton").show()
             })
             .on("end", function(d) {
                 brushed();
+                $("#resetbutton").show()
             })
 
          var brush_g = svg.append("g")
@@ -284,14 +286,6 @@
             var ratio = width  / (s[1] - s[0])
             var sc =  current_ratio * ratio
              tr -= s[0]/current_ratio
-
-            console.log(current_ratio);
-
-            if (current_ratio > 1) {
-                $("#resetbutton").show()
-            }
-            else {$("#resetbutton").hide()}
-
 
 
 
@@ -346,6 +340,9 @@
 
 
     exports.reset = function (){
+
+
+         $("#resetbutton").hide()
 
          tr = 0
 
