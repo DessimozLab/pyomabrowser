@@ -40,6 +40,7 @@
             if ( $(window).width() > 1024) {
 
                 $('#sideNavMobile').toggle(true);
+                $('#toggle-me').show();
                 $('#oma-details-sideNav-mobile').removeClass('sideNavMobile-opened');
                 $('#oma-details-sideNav-mobile').addClass('sideNavMobile-opened');
 
@@ -47,13 +48,13 @@
 
             else {
                 $('#sideNavMobile').toggle(false);
+                $('#toggle-me').hide();
                 $('#oma-details-sideNav-mobile').removeClass('sideNavMobile-opened');
                 }
 
         }, 50);
 
     });
-
 
 
 

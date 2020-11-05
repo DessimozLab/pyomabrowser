@@ -58,6 +58,10 @@ class ProteinEntryViewSet(ViewSet):
 
         In case the ID is not unique or unknown, an empty element is
         returned for this query element.
+
+        changed in verison 1.7: the endpoint returns now a list with tuples (query_id, target)
+        instead of a simple list of proteins in the order of the query ids.
+
         ---
         parameters:
 
@@ -74,14 +78,21 @@ class ProteinEntryViewSet(ViewSet):
             raise ParseError("POST request exceeded max number of ids. Please limit to {}".format(MAX_SIZE))
 
         proteins = []
+        requested_version = tuple(map(int, request.version.split('.')))
+
         for entry_id in request.data['ids']:
             try:
                 entry_nr = utils.id_resolver.resolve(entry_id)
-                proteins.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
+                pe = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
+                if requested_version < (1, 7):
+                    proteins.append(pe)
+                else:
+                    proteins.append({'query_id': entry_id, 'target': models.ProteinEntry.from_entry_nr(utils.db, entry_nr)})
             except (db.InvalidId, db.AmbiguousID):
-                proteins.append(None)
-        serializer = serializers.ProteinEntryDetailSerializer(
-            instance=proteins, many=True, context={'request': request})
+                if requested_version >= (1, 7):
+                    proteins.append({'query_id': entry_id, 'target': None})
+        serializer_cls = serializers.XRef2ProteinDetailSerializer if requested_version >= (1, 7) else serializers.ProteinEntryDetailSerializer
+        serializer = serializer_cls(instance=proteins, many=True, context={'request': request})
         return Response(serializer.data)
 
     def retrieve(self, request, entry_id=None, format=None):
@@ -670,6 +681,7 @@ class XRefsViewSet(ViewSet):
                 res.append({'entry_nr': ref['EntryNr'],
                             'omaid': utils.id_mapper['OMA'].map_entry_nr(ref['EntryNr']),
                             'source': xref_mapper.source_as_string(ref['XRefSource']),
+                            'seq_match': xref_mapper.verification_as_string(ref['Verification']),
                             'xref': ref['XRefId'].decode(),
                             'genome': make_genome(enr_to_genome(ref['EntryNr']))})
             res = self._remove_redundant_xrefs(res)

@@ -231,9 +231,11 @@
             .extent(brush_xt)
              .on("brush", function(d) {
                 brushing();
+
             })
             .on("end", function(d) {
                 brushed();
+
             })
 
          var brush_g = svg.append("g")
@@ -292,6 +294,9 @@
             console.log(tr)
 
 
+            $("#resetbutton").show()
+
+
             $.each(profiler_stack, function (idx, chart_e) {
 
                 chart_e.svg.call(chart_e.zoom.transform, d3.zoomIdentity.scale(sc).translate(tr, 0));
@@ -338,6 +343,9 @@
 
 
     exports.reset = function (){
+
+
+         $("#resetbutton").hide()
 
          tr = 0
 

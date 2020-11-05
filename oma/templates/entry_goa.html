@@ -16,7 +16,11 @@
 
 
     <div id="ontology-panel" class="card-body">
-        <div id="loader-ontology"><img src="{% static "image/loading.gif"%}" alt="loading GO annotations..."></div>
+
+         <div id="loader">                        {% include "includes/loading.html" %}
+</div>
+
+
     </div>
 </div>
 
@@ -24,6 +28,8 @@
 
         (function(){
         $.getJSON("/api/protein/{{ entry.entry_nr }}/ontology/", function(data){
+
+
 
             _.forEach(_.groupBy(data, "aspect"), function(annos, aspect){
 
@@ -67,8 +73,11 @@
 
            });
 
+            $("#loader").hide();
+
         });
-        $("#loader-ontology").hide();
+
+
     })();
 </script>
 

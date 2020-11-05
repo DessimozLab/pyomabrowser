@@ -2501,7 +2501,7 @@ class Searcher(View):
         match= None
 
 
-        # search by OMAID/numeric_id or Xref/Description
+        # search by OMAID/numeric_id or Xref/
 
         raw_hits_id = []
         raw_hits_xref = []
@@ -2705,6 +2705,7 @@ class Searcher(View):
 
             else:
                 p.sequence = ""
+
             data_entry.append(p)
 
         json_encoder = EntrySearchJson()
@@ -2858,6 +2859,7 @@ class Searcher(View):
         json_og = []
         for ogd in filtered_og:
             og = utils.db.oma_group_metadata(ogd[0])
+
             og["type"] = 'OMA group'
             og["found_by"] = ogd[1]
             json_og.append(og)
@@ -3186,6 +3188,8 @@ class Searcher(View):
             if hog_nbr:
                 if redirect_valid:
                     return redirect('hog_viewer',  models.HOG(utils.db, hog_nbr).hog_id)
+                logger.info("QUERY HOG: {}".format(query))
+                logger.info("QUERY CHECKED: {}".format(hog_nbr))
                 potential_group_nbr.append(hog_nbr)
 
             end = time.time()
