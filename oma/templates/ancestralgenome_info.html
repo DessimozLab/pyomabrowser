@@ -5,6 +5,7 @@
 
 
 {% block contentTab %}
+
 <table class="table">
 
 <tr><td>Common name:</td><td>{{ genome_name }}</td></tr>
@@ -12,6 +13,14 @@
 <tr><td>Number of ancestral genes:</td><td>{{ nr_hogs }}</td></tr>
 <tr><td>Number of descendant extant species:</td><td>{{ nbr_species }}</td></tr>
 </table>
+
+
+
+<div id="toolbar">
+  <b> Descendant extant species</b>
+</div>
+
+
 
 <table id="ext_genomes"></table>
 
@@ -41,6 +50,7 @@
         pageList: [10, 25, 50, 100, "All"],
         mobileResponsive: true,
         checkOnInit: true,
+        toolbar:"#toolbar",
         undefinedText: "",
         idField: 'uniprot_species_code',
         showToggle: 'true',
