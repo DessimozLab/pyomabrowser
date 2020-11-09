@@ -78,7 +78,14 @@
 
         // if touch screen ... open with click
          try {
-document.createEvent("TouchEvent");
+
+             document.createEvent("TouchEvent");
+
+
+
+             document.getElementById("linkexp").style.color = 'blue';
+             document.getElementById("linkexp").style.textDecoration = "underline";
+
              $('#lineage').click(function() {
                     document.querySelector(".lineage-expanded").style.display = 'inline';
                     document.querySelector(".lineage-collapsed").style.display = 'none';
