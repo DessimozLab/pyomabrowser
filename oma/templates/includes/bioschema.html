@@ -1,0 +1,68 @@
+{% load static %}
+{
+  "@context": "http://schema.org",
+  "@type": "WebPage",
+  "@id": "https://omabrowser.org",
+  "identifier": "OMA",
+  "name": "OMA Browser ",
+  "description": "OMA is a method and database for the inference of orthologs among complete genomes. We provide browsable orthology predictions, APIs, flat file downloads and a standalone version of the inference algorithm.",
+  "url": "https://omabrowser.org",
+  "keywords": "orthology, evolutionary gene relations, evolution, paralogy, HOGs, hierarchical orthologous groups, inference",
+  "dateModified": "{{ last_modified }}",
+  "publication": {
+    "@type": "PublicationEvent",
+    "name": "OMA orthology in 2021: website overhaul, conserved isoforms, ancestral gene order and more",
+    "url": "https://identifiers.org/doi:10.1093/nar/gkaa1007"
+  },
+  "license": {
+    "@type": "CreativeWork",
+    "name": "Creative Commons Attribution-Share Alike 2.5 License",
+    "url": "https://creativecommons.org/licenses/by-sa/2.5/"
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://omabrowser.org/{% static 'image/logo-oma.svg' %}"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "Laboratory of Computational Evolutionary Biology",
+    "url": "https://lab.dessimoz.org",
+    "email": [
+      "christophe.dessmoz@unil.ch",
+      "adrian.altenhoff@ethz.ch",
+    ],
+    "memberOf": [
+      {
+        "@type": "Organization",
+        "name": "SIB Swiss bioinformatics institute",
+        "url": "https://www.sib.swiss/"
+      },
+      {
+        "@type": "Organization",
+        "name": "European Molecular Biology Laboratory",
+        "url": "https://embl.org/"
+      },
+      {
+        "@type": "Organization",
+        "name": "University of Lausanne",
+        "url": "https://www.unil.ch/"
+      },
+      {
+        "@type": "Organization",
+        "name": "University College London",
+        "url": "https://www.ucl.ac.uk/"
+      },
+      {
+        "@type": "Organization",
+        "name": "ETH Zurich",
+        "url": "https://ethz.ch/"
+      }
+    ]
+  },
+  "version": "{{ release }}",
+  "potentialAction": {
+    "target": "https://omabrowser.org/oma/search/?type=all&amp;query={query_string}",
+    "@type": "SearchAction",
+    "query-input": "required name=query_string"
+  }
+}
