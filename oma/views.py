@@ -2517,7 +2517,6 @@ class Searcher(View):
             hits = utils.id_resolver.search_protein(term)
 
 
-
             for id, hit in hits.items():
                 for accessor, value in hit.items():
                     if accessor == "numeric_id" or accessor =="omaid":
