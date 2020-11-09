@@ -58,24 +58,57 @@
         #lineage:hover {
             cursor: pointer;
         }
-        #lineage:hover > .lineage-collapsed {
-            display: none;
-        }
+
         #lineage > .lineage-collapsed {
             display: inline;
         }
+
         #lineage > .lineage-expanded {
             display: none;
         }
-        #lineage:hover > .lineage-expanded {
-            display: inline;
-        }
+
         .show>.btn-outline-dark.dropdown-toggle, .btn-outline-dark:hover {
             color: #fff;
             background-color: #336799;
             border: none;
         }
     </style>
+
+    <script>
+
+        // if touch screen ... open with click
+         try {
+document.createEvent("TouchEvent");
+             $('#lineage').click(function() {
+                    document.querySelector(".lineage-expanded").style.display = 'inline';
+                    document.querySelector(".lineage-collapsed").style.display = 'none';
+                })
+
+  // else use hover event
+          } catch (e) {
+            $('#lineage').hover(function() {
+                    clearTimeout(this.timer);
+                    document.querySelector(".lineage-expanded").style.display = 'inline';
+                    document.querySelector(".lineage-collapsed").style.display = 'none';
+                }, function() {
+                    this.timer = setTimeout(function() {
+                           document.querySelector(".lineage-expanded").style.display = 'none';
+                            document.querySelector(".lineage-collapsed").style.display = 'inline';
+
+                    }, 1000);
+                });
+          }
+
+
+
+
+
+
+
+
+
+
+    </script>
 
 
 
