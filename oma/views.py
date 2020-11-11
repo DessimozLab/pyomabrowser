@@ -697,6 +697,7 @@ class ParalogsView(TemplateView, ParalogsBase):
 class ParalogsJson(ParalogsBase, JsonModelMixin, View):
 
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.uniprot_species_code': 'code',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'DivergenceLevel': 'DivergenceLevel'}
 
@@ -723,6 +724,7 @@ class ParalogsJson(ParalogsBase, JsonModelMixin, View):
 
 class ParalogsSampleJson(ParalogsBase, JsonModelMixin, View):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.uniprot_species_code': 'code',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'DivergenceLevel': 'DivergenceLevel'}
 
