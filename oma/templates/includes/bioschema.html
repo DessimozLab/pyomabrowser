@@ -1,0 +1,214 @@
+{% load static %}
+
+{"@context": "http://schema.org",
+"@graph": [{"@type": "Organization",
+  "name": "OMA Browser - Orthology MAtrix",
+  "url": "https://omabrowser.org/",
+  "description": "OMA is a method and database for the inference of orthologs among complete genomes. We provide browsable orthology predictions, APIs, flat file downloads and a standalone version of the inference algorithm.",
+  "logo": "https://omabrowser.org/{% static 'image/logo-oma.svg' %}",
+  "sameAs": ["https://twitter.com/OMABrowser", "https://omabrowser.blogspot.com"],
+  "parentOrganization": {
+    "@type": "Organization",
+    "name": "Laboratory of Computational Evolutionary Biology",
+    "url": "https://lab.dessimoz.org",
+    "email": [
+      "christophe.dessmoz@unil.ch",
+      "adrian.altenhoff@ethz.ch"
+    ],
+    "memberOf": [
+      {
+        "@type": "Organization",
+        "name": "SIB Swiss Institute of Bioinformatics",
+        "url": "https://www.sib.swiss/"
+      },
+      {
+        "@type": "Organization",
+        "name": "University of Lausanne",
+        "url": "https://www.unil.ch/"
+      },
+      {
+        "@type": "Organization",
+        "name": "University College London",
+        "url": "https://www.ucl.ac.uk/"
+      },
+      {
+        "@type": "Organization",
+        "name": "ETH Zurich",
+        "url": "https://ethz.ch/"
+      }
+    ]
+  }
+ },
+ {"@type": "WebPage",
+  "@id": "https://omabrowser.org/",
+  "identifier": "OMA",
+  "name": "OMA Browser ",
+  "description": "OMA is a method and database for the inference of orthologs among complete genomes. We provide browsable orthology predictions, APIs, flat file downloads and a standalone version of the inference algorithm.",
+  "url": "https://omabrowser.org",
+  "keywords": "orthology, evolutionary gene relations, evolution, paralogy, HOGs, hierarchical orthologous groups, inference",
+  "dateModified": "{{ last_modified }}",
+  "publication": {
+    "@type": "PublicationEvent",
+    "name": "OMA orthology in 2021: website overhaul, conserved isoforms, ancestral gene order and more",
+    "url": "https://identifiers.org/doi:10.1093/nar/gkaa1007"
+  },
+  "license": {
+    "@type": "CreativeWork",
+    "name": "Creative Commons Attribution-Share Alike 2.5 License",
+    "url": "https://creativecommons.org/licenses/by-sa/2.5/"
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://omabrowser.org/{% static 'image/logo-oma.svg' %}"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "Laboratory of Computational Evolutionary Biology",
+    "url": "https://lab.dessimoz.org",
+    "email": [
+      "christophe.dessmoz@unil.ch",
+      "adrian.altenhoff@ethz.ch"
+    ],
+    "memberOf": [
+      {
+        "@type": "Organization",
+        "name": "SIB Swiss Institute of Bioinformatics",
+        "url": "https://www.sib.swiss/"
+      },
+      {
+        "@type": "Organization",
+        "name": "University of Lausanne",
+        "url": "https://www.unil.ch/"
+      },
+      {
+        "@type": "Organization",
+        "name": "University College London",
+        "url": "https://www.ucl.ac.uk/"
+      },
+      {
+        "@type": "Organization",
+        "name": "ETH Zurich",
+        "url": "https://ethz.ch/"
+      }
+    ]
+  },
+  "version": "{{ release }}",
+  "potentialAction": {
+    "target": "https://omabrowser.org/oma/search/?type=all&amp;query={query_string}",
+    "@type": "SearchAction",
+    "query-input": "required name=query_string"
+  }
+ },
+ {"@type": "DataCatalog",
+  "@id": "https://omabrowser.org/oma/current/",
+  "identifier": "OMA",
+  "name": "OMA Browser orthology datasets",
+  "description": "Catalog of precomputed orthology datasets using the OMA algorithm.",
+  "url": "https://omabrowser.org/oma/current/",
+  "keywords": "orthology, evolutionary gene relations, evolution, paralogy, HOGs, hierarchical orthologous groups, inference",
+  "dateModified": "{{ last_modified }}",
+  "publication": [
+    {
+      "@type": "PublicationEvent",
+      "@id": "https://identifiers.org/doi:10.1093/bioinformatics/btx229",
+      "name": "Orthologous Matrix (OMA) algorithm 2.0: more robust to asymmetric evolutionary rates and more scalable hierarchical orthologous group inference",
+      "endDate": "2017-07"
+    },
+    {
+      "@type": "PublicationEvent",
+      "@id": "https://identifiers.org/doi:10.1371/journal.pone.0053786",
+      "name": "Inferring Hierarchical Orthologous Groups From Orthologous Gene Pairs",
+      "endDate": "2013-01"
+    }
+  ],
+  "license": {
+    "@type": "CreativeWork",
+    "name": "Creative Commons Attribution-Share Alike 2.5 License",
+    "url": "https://creativecommons.org/licenses/by-sa/2.5/"
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://omabrowser.org/{% static 'image/logo-oma.svg' %}"
+  },
+  "creator": {
+    "@type": "Organization",
+    "@id": "https://lab.dessimoz.org",
+    "name": "Laboratory of Computational Evolutionary Biology",
+    "url": "https://lab.dessimoz.org",
+    "email": [
+      "christophe.dessmoz@unil.ch",
+      "adrian.altenhoff@ethz.ch"
+    ],
+    "memberOf": [
+      {
+        "@type": "Organization",
+        "name": "SIB Swiss Institute of Bioinformatics",
+        "url": "https://www.sib.swiss/"
+      },
+      {
+        "@type": "Organization",
+        "name": "University of Lausanne",
+        "url": "https://www.unil.ch/"
+      },
+      {
+        "@type": "Organization",
+        "name": "University College London",
+        "url": "https://www.ucl.ac.uk/"
+      },
+      {
+        "@type": "Organization",
+        "name": "ETH Zurich",
+        "url": "https://ethz.ch/"
+      }
+    ]
+  },
+  "version": "{{ release }}",
+  "dataset": [
+    {
+      "@type": "Dataset",
+      "@id": "https://omabrowser.org/{{ release }}/oma-hogs.orthoXML.gz",
+      "name": "Hierarchical orthologous groups (HOGs)",
+      "description": "Precomputed HOGs computed with the OMA GETHOGs algorithm for OMA release {{ release }}",
+      "license": {
+        "@type": "CreativeWork",
+        "name": "Creative Commons Attribution-Share Alike 2.5 License",
+        "url": "https://creativecommons.org/licenses/by-sa/2.5/"
+      },
+      "creator": {
+        "@type": "Organization",
+        "@id": "https://lab.dessimoz.org"
+      }
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://omabrowser.org/{{ release }}/oma-groups.orthoXML.xml.gz",
+      "name": "OMA Groups",
+      "description": "Precomputed OMA Groups for OMA release {{ release }}. OMA Groups are marker genes that can be used to infer species phylogenies",
+      "license": {
+        "@type": "CreativeWork",
+        "name": "Creative Commons Attribution-Share Alike 2.5 License",
+        "url": "https://creativecommons.org/licenses/by-sa/2.5/"
+      },
+      "creator": {
+        "@type": "Organization",
+        "@id": "https://lab.dessimoz.org"
+      }
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://omabrowser.org/{{ release }}/oma-pairs.txt.gz",
+      "name": "Pairwise orthologs",
+      "description": "Precomputed pairwise orthologs for all species pairs in OMA release {{ release }}.",
+      "license": {
+        "@type": "CreativeWork",
+        "name": "Creative Commons Attribution-Share Alike 2.5 License",
+        "url": "https://creativecommons.org/licenses/by-sa/2.5/"
+      },
+      "creator": {
+        "@type": "Organization",
+        "@id": "https://lab.dessimoz.org"
+      }
+    }
+  ]
+ }
+]}
