@@ -229,46 +229,6 @@
 
 
 
-                              <br>
-
-                             <button type="button" id="run_full_entries" class="btn btm-sm btn-outline-secondary btn-block mx-auto " style="width: 50%"> Use full text search to search for more proteins</button>
-
-
-                             <div class="col-md-12">
-
-                             <b class="float-right" id="nbr_full_entrie" ></b>
-
-                              <br>
-                                  <table class="table table-hover" style="display: none" id="matchTable_entry_full_text"
-                                                                 data-mobile-responsive="true" data-check-on-init="true"
-                                                                 data-undefined-text=""
-                                                                 data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
-                                                            <thead>
-                                                                <tr>
-
-                                                                    <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
-                                                                    <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
-                                                                    <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="tablehooks.format_sciname">Taxon</th>
-
-                                                                    <th data-field="kingdom" data-sortable="true" data-filter-control="select"
-                                                                        data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
-                                                                    </th>
-
-
-                                                                    <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
-                                                                    <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
-                                                                    <th data-field="description" data-sortable="true">Description</th>
-
-                                                                    <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
-
-                                                                </tr>
-                                                            </thead>
-                                                          </table>
-
-
-
-                             </div>
-
                               {% endif %}
 
 
@@ -300,7 +260,7 @@
 
                                   {% if meta_group.shown > 0%}
 
-                                   <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-filter"></i> Filter</span> <span class="caret"></span></button></b>
+                                   <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-filter"></i> Filter</span> <span class="caret"></span></button>
 
                                   <div class="dropdown-menu" role="menu">
 <a href="#" id="f_gr_id" class="dropdown-item" data-value="groupid" tabIndex="-1"><input type="checkbox" />&nbsp;Groups Id</a>
@@ -739,37 +699,7 @@ $(function () {
 </script>
 
 
-<script>
-    document.getElementById('run_full_entries').onclick=function(){
-          // Remove any element-specific value, falling back to stylesheets
-          document.getElementById('matchTable_entry_full_text').style.display='';
-          document.getElementById('run_full_entries').style.display='none';
 
-
-
-          // ENTRY RESULT TABLE
-        var myHilitor = new Hilitor("matchTable_entry_full_text");
-        myHilitor.setMatchType("open");
-        var tab = $("#matchTable_entry_full_text");
-        tab.bootstrapTable({
-            url: "{{ url_fulltest_entries }}",
-            reorderableColumns: true,
-            clickToSelect: false,
-            showMultiSort: true,
-            onPostBody: function(d){
-                myHilitor.apply("{{ query }}");
-                document.getElementById('nbr_full_entrie').innerHTML=  'Loading...';
-            },
-            onLoadSuccess: function(d){
-                document.getElementById('nbr_full_entrie').innerHTML= d.length + ' full text match found';
-            }
-        });
-        var icons = tab.bootstrapTable('getOptions').icons;
-        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
-        tab.bootstrapTable('refreshOptions', {'icons': icons});
-
-        };
-</script>
 
 
 {% if meta_group.shown > 0 %}

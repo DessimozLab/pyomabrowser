@@ -2861,6 +2861,7 @@ class Searcher(View):
         for ogd in filtered_og:
             og = utils.db.oma_group_metadata(ogd[0])
 
+            og["size"] = len(models.OmaGroup(utils.db, og))
             og["type"] = 'OMA group'
             og["found_by"] = ogd[1]
             json_og.append(og)
