@@ -147,6 +147,8 @@
 
         </li>
 
+
+        <!--
         <li class="{% if tab == 'isoform' %} active selected {%endif%}">
             <a href="{% url 'entry_isoform' entry.query_id %}">
                 <span>Isoforms  <span class="badge badge-info">
@@ -164,6 +166,8 @@
             </a>
 
         </li>
+
+        -->
 
         <li class="{% if tab == 'goa' %} active selected {%endif%}" {% if tab != 'goa' %}
              onclick="window.location='{% url 'entry_goa' entry.query_id %}'" {%endif%}>
@@ -202,7 +206,16 @@
 
         <li class="{% if tab == 'sequences' %} active selected {%endif%}">
             <a href="{% url 'entry_sequences' entry.query_id %}">
-                <span>Sequences/Isoforms</span>
+                <span>Sequences/Isoforms <span class="badge badge-info">
+                    {% if tab == 'sequences' %}  {{entry.alternative_isoforms|length}}
+
+                    {%else%}
+
+                    {{entry.alternative_isoforms|length|add:1}}
+
+                    {%endif%}
+
+                    </span></span>
 
             </a>
 

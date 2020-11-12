@@ -8,9 +8,12 @@
 {% block contentTab %}
 
 
-<div class="row">
+<div class="container-fluid">
 
-        <div class="col">
+
+
+
+          <div >
 
 
             {% include "includes/groupTable_isoforms.html" %}
@@ -18,41 +21,71 @@
 
         </div>
 
-        <div class="col">
+        <br>
 
-             <div>
+    <br>
+
+
+
+
+            <div>
 
                 <h4 >Protein Sequence </h4>
 
+
+
                 <div class="card " style="display: inline-block">
-                        <div id="protein_div" class="card-body" ></div>
+
+                    <button class="btn btn-sm prot " data-clipboard-text="{{ entry.sequence}}">
+                Copy to clipboard
+            </button>
+
+                    <h6 class="float-right" style="margin: 8px">Download:<a id="protein_href" href=""><i class="fas fa-download"></i> Fasta</a></h6>
+
+
+                        <div id="protein_div" class="card-body" >
+                        </div>
+
                 </div>
 
             </div>
 
-<br>
+            <br>
 
 
-      <div >
+            <div>
+
+                <h4 >cDNA Sequence </h4>
 
 
-          <h4 >Nucleotide Sequence (cDNA) </h4>
+                <div class="card " style="display: inline-block">
+
+                    <button class="btn btn-sm cdna" >
+                Copy to clipboard
+            </button>
+
+                    <h6 class="float-right" style="margin: 8px">Download:<a id="cdna_href" href=""><i class="fas fa-download"></i> Fasta</a></h6>
 
 
-          <div class="card" style="display: inline-block;">
 
+                        <div id="cdna_div" class="card-body" >
+                        </div>
 
-            <div id="cdna_div" class="card-body" >
+                </div>
 
             </div>
 
-    </div>
 
-        </div>
+
+
+
+
+
 
 </div>
 
-</div>
+
+
 
 
 
