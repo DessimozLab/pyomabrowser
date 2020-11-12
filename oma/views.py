@@ -3193,11 +3193,17 @@ class Searcher(View):
         def _check_hog_number(gn):
             try:
                 gn = int(gn)
+
             except ValueError:
+
                 try:
-                    gn = utils.db.parse_hog_id(gn)
+                    utils.db.get_hog(gn)
+                    return gn
                 except ValueError:
-                    gn = -1
+                    try:
+                        gn = utils.db.parse_hog_id(gn)
+                    except ValueError:
+                        gn = -1
 
             if 0 < gn <= utils.db.get_nr_toplevel_hogs():
                 return gn
