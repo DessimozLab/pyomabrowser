@@ -1,5 +1,5 @@
 {% load staticfiles %}
-
+{% load oma_extras %}
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
                data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
@@ -17,6 +17,7 @@
 
 
              <tr>
+                 <th data-radio="true"></th>
                 <th  data-field="protid" class="tagcontainer" data-sortable="true" data-formatter="tablehooks.format_vps_link_isoforms">Protein ID</th>
                   <th  data-field="seqlen" data-sortable="true" >Sequence length</th>
                  <th  data-sortable="false" class="exon_vis">Exons</th>
@@ -68,14 +69,110 @@
         showLoading: true,
         onPostBody: function (data) {
             exon.visualize_all(".protein", data);
+            tab.bootstrapTable('checkBy', {field: 'is_main_isoform', values: [true]})
 
         },
         onLoadSuccess: function () {
 
             tab.bootstrapTable('hideLoading');
+
+        },onCheck: function (d) {
+
+
+            var format_uniprot = function(value){
+
+
+                var len_seq = value.length;
+                var res = '';
+
+                for (var i =0; i < len_seq; i+=60)  // check <= or <
+
+                {
+
+                     for (var k =i; k < i + 60; k+=10){
+
+                         res += value.slice(k, k+10);
+                         res += ' '
+                     }
+
+                     var padding = 5;
+
+                     if (i+60 > len_seq){padding += i+60-len_seq}
+
+                     res +=  (" ".repeat(padding)+Math.min(i+60, len_seq)).slice(-padding);
+                     res += '\n'
+
+                }
+
+
+
+
+
+                return res
+
+
+
+
+                /*
+
+
+                var sequ = value;
+                var buffer = 60 - (value.length % 60);
+
+                sequ = sequ.replace(/(.{10})/g,"$1 ");
+
+                sequ += " ".repeat(buffer)
+
+
+                var g = sequ.length
+
+
+
+
+                var pad =0
+
+                console.log(g,i)
+
+                for (var i = 65; i <= g;i+=66){
+
+
+
+
+                    var l = i - (pad*5) -5
+
+                    console.log(g,i,l)
+
+                    if (l > value.length)  l-=  buffer
+
+                    var end = ('      '+l).slice(-6);
+
+                    var j = i + pad*5;
+
+                    sequ = sequ.slice(0, j) + end + '\n'  + sequ.slice(j);
+
+                    pad +=1
+                }
+
+
+                return sequ
+
+                */
+
+            }
+
+             document.getElementById("cdna_div").innerHTML='<pre>' + format_uniprot(d.cdna)  + '</pre>'
+
+             document.getElementById("protein_div").innerHTML='<pre>' + format_uniprot(d.sequence)  + '</pre>'
+
+
+
+
+            console.log(d)
         },
         refreshOptions: {'icons': icons}
     });
+
+
 
 </script>
 

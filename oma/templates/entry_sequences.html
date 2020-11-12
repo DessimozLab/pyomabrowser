@@ -8,58 +8,57 @@
 {% block contentTab %}
 
 
-<div>
+<div class="row">
 
-    <h4 >Protein Sequence </h4>
-    <h6 >Download:<a href="{% url 'entry_fasta' entry.omaid %}"><i class="fas fa-download"></i> Fasta</a></h6>
-
-    <div class="card " style="display: inline-block">
-
-        <button class="btn btn-sm prot " data-clipboard-text="{{ entry.sequence}}">
-    Copy to clipboard
-</button>
+        <div class="col">
 
 
-            <div id="ontology-panel" class="card-body" >
-                <pre >{{ entry.sequence|uniprot_seq_repr }}</pre>
+            {% include "includes/groupTable_isoforms.html" %}
+
+
+        </div>
+
+        <div class="col">
+
+             <div>
+
+                <h4 >Protein Sequence </h4>
+
+                <div class="card " style="display: inline-block">
+                        <div id="protein_div" class="card-body" ></div>
+                </div>
+
             </div>
-
-    </div>
-
-</div>
-
 
 <br>
 
 
-<div class=" ">
       <div >
-         <h4 >Nucleotide Sequence (cDNA) </h4>
-      </div>
-      <div class="ml-auto">
-         <h6 >
-                    Download:
-                    <a href="#"><i class="fas fa-download"></i> Fasta</a>
-                </h6>
 
 
-      </div>
- </div>
-<div class="card" style="display: inline-block;">
-
-    <button class="btn btn-sm cdna " data-clipboard-text="{{ entry.cdna}}">
-    Copy to clipboard
-</button>
+          <h4 >Nucleotide Sequence (cDNA) </h4>
 
 
-            <div  class="card-body" >
-               <pre >{{ entry.cdna|uniprot_seq_repr}}</pre>
+          <div class="card" style="display: inline-block;">
+
+
+            <div id="cdna_div" class="card-body" >
+
             </div>
 
     </div>
 
+        </div>
 
-<script src="{% static "js/clipboard.min.js" %}"></script>
+</div>
+
+</div>
+
+
+
+
+<script src="{% static "js/clipboard.min.js" %}">
+</script>
 
 <script>
 

@@ -842,7 +842,7 @@ class HomeologsSampleJson(HomeologsBase, JsonModelMixin, View):
             return JsonResponse(data, safe=False)
 
 
-# Isoform
+# Isoforms (old before merging with sequences tab)
 class Entry_Isoform(TemplateView, InfoBase):
     template_name = "entry_isoform.html"
 
@@ -869,21 +869,7 @@ class Entry_Isoform(TemplateView, InfoBase):
              'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
         return context
 
-class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
-    json_fields = {'omaid': 'protid',
-                   'canonicalid': 'xrefid',
-                   'sequence_length': 'seqlen',
-                   'is_main_isoform': None,
-                   'locus_start': 'locus_start',
-                   'locus_end': 'locus_end',
-                   'exons.as_list_of_dict': 'exons'}
 
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        data = list(self.to_json_dict(context['isoforms']))
-
-        return JsonResponse(data, safe=False)
 
 # GOA
 class Entry_GOA(TemplateView, InfoBase):
@@ -899,18 +885,54 @@ class Entry_GOA(TemplateView, InfoBase):
         return context
 
 
-# Sequences
+# Sequences & Isoforms
 class Entry_sequences(TemplateView, InfoBase):
+
     template_name = "entry_sequences.html"
 
     def get_context_data(self, entry_id, **kwargs):
         context = super(Entry_sequences, self).get_context_data(entry_id, **kwargs)
+
+        # get the query entry
         entry = self.get_entry(entry_id)
+
+        #Get all isoforms including itself
+        isoforms = entry.alternative_isoforms
+        isoforms.append(entry)
+
+        main_isoform = None
+
+        for iso in isoforms:
+            if iso.is_main_isoform:
+                main_isoform = iso
 
         context.update(
             {'entry': entry,
-              'tab': 'sequences'})
+             'tab': 'sequences',
+             'isoforms': isoforms,
+             'main_isoform': main_isoform,
+             'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
+
         return context
+
+
+class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
+    json_fields = {'omaid': 'protid',
+                   'cdna': 'cdna',
+                   'sequence': 'sequence',
+                   'canonicalid': 'xrefid',
+                   'sequence_length': 'seqlen',
+                   'is_main_isoform': None,
+                   'locus_start': 'locus_start',
+                   'locus_end': 'locus_end',
+                   'exons.as_list_of_dict': 'exons'}
+
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['isoforms']))
+
+        return JsonResponse(data, safe=False)
 
 
 class FamBase(ContextMixin):
