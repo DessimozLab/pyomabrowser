@@ -150,7 +150,7 @@ class EntryCentricMixin(object):
     def get_entry(self, entry_id):
         """resolve any ID and return an entry or a 404 if it is unknown"""
         try:
-            entry_nr = utils.id_resolver.resolve(entry_id)
+            entry_nr, is_modif = utils.id_resolver.resolve(entry_id, check_if_modified=True)
         except (db.InvalidId, db.AmbiguousID):
             raise Http404('requested id is unknown')
         entry = utils.db.entry_by_entry_nr(entry_nr)
@@ -162,6 +162,10 @@ class EntryCentricMixin(object):
             model_entry.oma_hog_root = model_entry.oma_hog.split(".")[0]
         else:
             model_entry.oma_hog_root = None
+
+        model_entry.is_modified_xref = entry_id if is_modif else None
+        model_entry.query_id = entry_id
+
         return model_entry
 
     def get_most_specific_hog(self, entry):

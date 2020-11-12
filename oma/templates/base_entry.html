@@ -38,9 +38,25 @@
         </div>
 </div>
 
+
 {% endblock %}
 
+
+
 {% block data_content %}
+
+
+  {% if entry.is_modified_xref %}
+
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+  <strong>Attention!</strong> We use a slightly different sequence for our inferences than the original {{entry.query_id}} sequences.
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+{% endif %}
+
 
 {% include "includes/sidebar_entry.html" with tab=tab %}
 
