@@ -83,7 +83,7 @@
         },
         onLoadSuccess: function () {
             tab.bootstrapTable('hideLoading');
-            d3.select("#loader").style("display", "none");
+            $("#loader").hide();
         },
         refreshOptions: {'icons': icons}
     });

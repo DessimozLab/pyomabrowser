@@ -314,10 +314,11 @@
                         '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
             return label;
         },
-        onSelect: function(item){
+        /*onSelect: function(item){
             window.location.href = "/oma/vps/" + item.data.entry_nr;
             return false;
         }
+        */
     };
     $('#textNav').autocomplete(autocomplete_opts);
     $('#inputBrowser').autocomplete(autocomplete_opts);
