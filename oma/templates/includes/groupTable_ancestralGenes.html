@@ -29,6 +29,11 @@
 
         </table>
 
+ <div id="loader">                        {% include "includes/loading.html" %}
+</div>
+
+
+
 
 
 
@@ -78,6 +83,7 @@
         },
         onLoadSuccess: function () {
             tab.bootstrapTable('hideLoading');
+            d3.select("#loader").style("display", "none");
         },
         refreshOptions: {'icons': icons}
     });
