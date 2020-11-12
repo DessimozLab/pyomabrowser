@@ -906,6 +906,7 @@ class Entry_sequences(TemplateView, InfoBase):
             if iso.is_main_isoform:
                 main_isoform = iso
 
+
         context.update(
             {'entry': entry,
              'tab': 'sequences',
