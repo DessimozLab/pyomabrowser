@@ -70,6 +70,9 @@
     $.getJSON("{{api_url}}", function (jsonData) {
 
 
+         $("#loader").hide();
+
+
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
         $.extend(icons, {export: 'fa-download'});
@@ -83,7 +86,8 @@
         },
         onLoadSuccess: function () {
             tab.bootstrapTable('hideLoading');
-            $("#loader").hide();
+
+
         },
         refreshOptions: {'icons': icons}
     });
