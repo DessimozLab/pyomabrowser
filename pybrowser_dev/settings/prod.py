@@ -20,8 +20,8 @@ INSTALLED_APPS.extend([
 ])
 
 MIDDLEWARE.extend([
+    'oma.middleware.LongRunningLogger',
     'google_analytics.middleware.GoogleAnalyticsMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 ])
 
 LOGGING['loggers'].update({
