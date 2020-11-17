@@ -1,14 +1,15 @@
 {% load staticfiles %}
-
+{% load oma_extras %}
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
                data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
                data-show-columns="true" data-search="true" data-show-export="true"
-               data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
                data-checkbox-header="true"
                data-group-by="true"
+               data-pagination="false"
+               data-toolbar="#toolbar"
                data-group-by-field="DivergenceLevel"
                data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
                data-url="{{ table_data_url }}" >
@@ -17,9 +18,11 @@
 
 
              <tr>
+                 <th data-radio="true"></th>
                 <th  data-field="protid" class="tagcontainer" data-sortable="true" data-formatter="tablehooks.format_vps_link_isoforms">Protein ID</th>
                   <th  data-field="seqlen" data-sortable="true" >Sequence length</th>
                  <th  data-sortable="false" class="exon_vis">Exons</th>
+                 <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
                  <th  data-field="exons"  data-sortable="true" data-formatter="tablehooks.format_exons_isoforms">Number exons</th>
                  <th  data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
 
@@ -36,10 +39,20 @@
 
         </table>
 
+<div id="toolbar">
+   <small> <b> Protein sequences and cDNA of the selected isoforms are displayed below the tables </b></small>
+</div>
+
+
+
 
 <!-- D3 and D3 Tooltip -->
 <script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
 <script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+
+<!-- Domain Visualisation -->
+<script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
 
         <!-- Exon Visualisation -->
 <script src="{% static "js/exon_vis.js" %}" type="text/javascript"></script>
@@ -61,21 +74,121 @@
     var icons = tab.bootstrapTable('getOptions').icons;
     $.extend(icons, {export: 'fa-download'});
     tab.bootstrapTable({
-        //data: [{"protid": "MOUSE04051", "xrefid": "Q80ZA1", "seqlen": 381, "is_main_isoform": false, "locus_start": 69586891, "locus_end": 69591308, "exons": [{"start": 69586891, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591254, "end": 69591308, "strand": "+"}]}, {"protid": "MOUSE04052", "xrefid": "P53_MOUSE", "seqlen": 390, "is_main_isoform": false, "locus_start": 69586891, "locus_end": 69591431, "exons": [{"start": 69586891, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591350, "end": 69591431, "strand": "+"}]}, {"protid": "MOUSE04053", "xrefid": "ENSMUSG00000059552.1", "seqlen": 378, "is_main_isoform": false, "locus_start": 69586900, "locus_end": 69591308, "exons": [{"start": 69586900, "end": 69586973, "strand": "+"}, {"start": 69587257, "end": 69587278, "strand": "+"}, {"start": 69587372, "end": 69587632, "strand": "+"}, {"start": 69588364, "end": 69588547, "strand": "+"}, {"start": 69588626, "end": 69588738, "strand": "+"}, {"start": 69589141, "end": 69589250, "strand": "+"}, {"start": 69589573, "end": 69589709, "strand": "+"}, {"start": 69589789, "end": 69589862, "strand": "+"}, {"start": 69590656, "end": 69590762, "strand": "+"}, {"start": 69591254, "end": 69591308, "strand": "+"}]}],
         reorderableColumns: true,
         clickToSelect: false,
         showMultiSort: true,
         showLoading: true,
         onPostBody: function (data) {
             exon.visualize_all(".protein", data);
+            tab.bootstrapTable('checkBy', {field: 'is_main_isoform', values: [true]})
+            domains.visualize_all(".protein");
 
         },
         onLoadSuccess: function () {
 
             tab.bootstrapTable('hideLoading');
+
+        },onCheck: function (d) {
+
+            console.log(d);
+
+
+            var format_uniprot = function(value){
+
+
+                var len_seq = value.length;
+                var res = '';
+
+                for (var i =0; i < len_seq; i+=60)  // check <= or <
+
+                {
+
+                     for (var k =i; k < i + 60; k+=10){
+
+                         res += value.slice(k, k+10);
+                         res += ' '
+                     }
+
+                     var padding = 5;
+
+                     if (i+60 > len_seq){padding += i+60-len_seq}
+
+                     res +=  (" ".repeat(padding)+Math.min(i+60, len_seq)).slice(-padding);
+                     res += '\n'
+
+                }
+
+
+
+
+
+                return res
+
+
+
+
+                /*
+
+
+                var sequ = value;
+                var buffer = 60 - (value.length % 60);
+
+                sequ = sequ.replace(/(.{10})/g,"$1 ");
+
+                sequ += " ".repeat(buffer)
+
+
+                var g = sequ.length
+
+
+
+
+                var pad =0
+
+                console.log(g,i)
+
+                for (var i = 65; i <= g;i+=66){
+
+
+
+
+                    var l = i - (pad*5) -5
+
+                    console.log(g,i,l)
+
+                    if (l > value.length)  l-=  buffer
+
+                    var end = ('      '+l).slice(-6);
+
+                    var j = i + pad*5;
+
+                    sequ = sequ.slice(0, j) + end + '\n'  + sequ.slice(j);
+
+                    pad +=1
+                }
+
+
+                return sequ
+
+                */
+
+            }
+
+             document.getElementById("cdna_div").innerHTML='<pre>' + format_uniprot(d.cdna)  + '</pre>'
+             document.getElementById("cdna_href").href= "{% url 'entry_fasta' 12345 %}".replace(/12345/, d.protid)
+            document.querySelector('.cdna').setAttribute('data-clipboard-text', d.cdna);
+
+
+             document.getElementById("protein_div").innerHTML='<pre>' + format_uniprot(d.sequence)  + '</pre>'
+            document.getElementById("protein_href").href= "{% url 'entry_fasta' 12345 %}".replace(/12345/, d.protid)
+            document.querySelector('.prot').setAttribute('data-clipboard-text', d.sequence);
+
+
         },
         refreshOptions: {'icons': icons}
     });
+
+
 
 </script>
 

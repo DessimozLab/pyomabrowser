@@ -97,7 +97,7 @@
 
       document.querySelector("th.profile_cell").style.paddingLeft = "8px";
 
- var html_to_insert ='<button type="button"  id="resetbutton" onclick="profile.reset();" class="btn btn-sm btn-danger float-right" style="margin-top: 4px;margin-right: 4px; font-size: .600rem;line-height: 1;">Reset</button>'
+ var html_to_insert ='<button type="button"  id="resetbutton" onclick="profile.reset();" class="btn btn-sm btn-danger float-right" style="display:none;margin-top: 4px;margin-right: 4px; font-size: .600rem;line-height: 1;">Reset</button>'
             document.querySelector("th.profile_cell").insertAdjacentHTML('afterbegin', html_to_insert );
 
 
@@ -117,8 +117,7 @@
             refreshOptions: {'icons': icons}
         });
 
-
-         $("#resetbutton").hide()
+        $("#resetbutton").hide()
 
 
 

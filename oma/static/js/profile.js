@@ -294,7 +294,9 @@
             console.log(tr)
 
 
-            $("#resetbutton").show()
+            if (ratio > 1) {
+                $("#resetbutton").show()
+            }
 
 
             $.each(profiler_stack, function (idx, chart_e) {

@@ -7,8 +7,14 @@
 {% block meta_description %}OMA is a method and database for the inference of orthologs among complete genomes. We provide browsable orthology predictions, APIs, flat file downloads and a standalone version of the inference algorithm.{% endblock %}
 {% block meta_hook %} <meta name="keywords" content="orthology,evolutionary gene relations,evolution,paralogy,inference"> {% endblock %}
 
-{% block content %}
+{% block js_hook %}{{ block.super }}
+<script type="application/ld+json">
+    {% include "includes/bioschema.html" %}
+</script>
+{% endblock js_hook %}
 
+
+{% block content %}
 <div id="oma-search-container">
 
     <div class="container">
@@ -342,10 +348,9 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
             <div class="oma-alert">
                 <img src="{% static "image/icon-info.svg" %}" alt="!"/>
                 <p>If you use OMA in your work, please consider citing:<br/>
-               Altenhoff A et al., <em> <b>The OMA orthology database in 2018: retrieving evolutionary
-               relationships among all domains of life through richer web and programmatic interfaces </b></em>
-               Nucleic Acids Research, 2018, 46 (D1): D477-D485
-               (doi:<a href="http://doi.org/10.1093/nar/gkx1019">10.1093/nar/gkx1019</a>)</p>
+               Altenhoff A et al., <em> <b>OMA orthology in 2021: website overhaul, conserved isoforms, ancestral gene order and more</b></em>
+               Nucleic Acids Research, gka1007,
+               (doi:<a href="http://doi.org/10.1093/nar/gkaa1007">10.1093/nar/gkaa1007</a>)</p>
             </div>
         </div>
     </div>

@@ -34,7 +34,7 @@ body {
 }
  body nav .navbar-toggler {
 	 border: none;
-	 padding: 0 2rem;
+	 padding: 0 10px;
 }
  body nav .navbar-nav .search {
 	 display: none;
@@ -589,8 +589,9 @@ transform: none !important;
 		 top: 2px;
 		 display: block;
 		 background-color: #317d3d;
-		 height: 3px;
-		 width: 28px;
+		 width: 35px;
+height: 4px;
+border-radius: 4px;
 		 margin-top: 5px;
 		 margin-bottom: 5px;
 		 -webkit-transform: rotate(0deg);
@@ -678,6 +679,7 @@ bottom: initial !important;
 transform: none !important;
 }
 }
+
  @media screen and (max-width: 1024px) {
 	 body {
 		 padding: 72px 0 0;
@@ -718,7 +720,7 @@ transform: none !important;
 	}
 	 body .oma-details-header {
 		 position: relative;
-		 padding: 10px 10px 10px 26px;
+		 padding: 10px 10px 10px 0;
 	}
 
 	 body .oma-details-header .oma-details-title {
@@ -726,7 +728,7 @@ transform: none !important;
 		 padding: 10px;
 	}
 	 body .oma-details-header .oma-details-title h2 {
-		 font-size: 1.4rem;
+		 font-size: 1.2rem;
 	}
 
 	 body .oma-details-header .oma-details-title-buttons {
@@ -734,13 +736,16 @@ transform: none !important;
 		 float: none;
          color: #fff;
 		 border-radius: 0;
-		 background: rgba(0, 0, 0, 0.2);
+		 background: none;
 	}
 	 body .oma-details-header .oma-details-title-buttons .btn {
 		 background: none;
-		 width: 49.5%;
+		 width: 100%;
 		 color: #fff;
-		 border-radius: 0;
+		 margin: 4px 0 0 0;
+font-size: .8rem;
+text-align: left;
+border-radius: 5px;
 	}
 	 body .oma-details-header .oma-details-title-buttons .btn.btn-light {
 		 border-left: 1px solid rgba(0, 0, 0, 0.1);

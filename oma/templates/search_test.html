@@ -102,7 +102,7 @@
 
                             <h5 class="card-title">Proteins </h5>
 
-                              <b class="float-right "> {% if meta_entry.total <= 50 %}  {{meta_entry.shown}} {% if meta_entry.shown == 1 %}  entry {% else %} entries {% endif %}  found {% else %} Best {{meta_entry.shown}} {% if meta_entry.shown == 1 %}  entry {% else %} entries {% endif %}  shown out of {{meta_entry.total}} entries
+                              <b class="float-right "> {% if meta_entry.total <= 50 %}  <span id="total_entry">{{meta_entry.shown}}</span> {% if meta_entry.shown == 1 %}  entry {% else %} entries {% endif %}  found {% else %} Best <span id="total_entry">{{meta_entry.shown}}</span> {% if meta_entry.shown == 1 %}  entry {% else %} entries {% endif %}  shown out of {{meta_entry.total}} entries
 
 {% endif %}
 
@@ -229,46 +229,6 @@
 
 
 
-                              <br>
-
-                             <button type="button" id="run_full_entries" class="btn btm-sm btn-outline-secondary btn-block mx-auto " style="width: 50%"> Use full text search to search for more proteins</button>
-
-
-                             <div class="col-md-12">
-
-                             <b class="float-right" id="nbr_full_entrie" ></b>
-
-                              <br>
-                                  <table class="table table-hover" style="display: none" id="matchTable_entry_full_text"
-                                                                 data-mobile-responsive="true" data-check-on-init="true"
-                                                                 data-undefined-text=""
-                                                                 data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
-                                                            <thead>
-                                                                <tr>
-
-                                                                    <th data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
-                                                                    <th data-field="xrefid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
-                                                                    <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="tablehooks.format_sciname">Taxon</th>
-
-                                                                    <th data-field="kingdom" data-sortable="true" data-filter-control="select"
-                                                                        data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.
-                                                                    </th>
-
-
-                                                                    <th data-field="roothog" data-sortable="true" data-formatter="tablehooks.format_roothog">Root-HOG</th>
-                                                                    <th data-field="oma_group" data-sortable="true" data-formatter="tablehooks.format_omagroup_members">OMA Group</th>
-                                                                    <th data-field="description" data-sortable="true">Description</th>
-
-                                                                    <th data-field="" data-sortable="true" data-formatter="format_result_refs">Matching Crossreferences</th>
-
-                                                                </tr>
-                                                            </thead>
-                                                          </table>
-
-
-
-                             </div>
-
                               {% endif %}
 
 
@@ -294,13 +254,13 @@
 
 
 
-                              <b class="float-right "> {% if meta_group.total <= 50 %}  {{meta_group.shown}} {% if meta_group.shown == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best {{meta_group.shown}} {% if meta_group.shown == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta_group.total}}
+                              <b class="float-right "> {% if meta_group.total <= 50 %}   <span id="total_group">{{meta_group.shown}}</span>  {% if meta_group.shown == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best <span id="total_group">{{meta_group.shown}}</span> {% if meta_group.shown == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta_group.total}}
 {% endif %}
 
 
                                   {% if meta_group.shown > 0%}
 
-                                   <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-filter"></i> Filter</span> <span class="caret"></span></button></b>
+                                   <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-filter"></i> Filter</span> <span class="caret"></span></button>
 
                                   <div class="dropdown-menu" role="menu">
 <a href="#" id="f_gr_id" class="dropdown-item" data-value="groupid" tabIndex="-1"><input type="checkbox" />&nbsp;Groups Id</a>
@@ -453,7 +413,7 @@
 
                             <h5 class="card-title">Genomes </h5>
 
-                              <b class="float-right ">   {{meta_genome.shown}} {% if meta_genome.shown == 1 %}  genome {% else %} genomes {% endif %}  found
+                              <b class="float-right ">   <span id="total_genome">{{meta_genome.shown}}</span>  {% if meta_genome.shown == 1 %}  genome {% else %} genomes {% endif %}  found
 
                                   {% if meta_genome.shown > 0%}
 
@@ -628,7 +588,6 @@
         var myHilitor = new Hilitor();
         myHilitor.setMatchType("open");
         var data = {{ data_entry | safe }};
-        console.log(data);
         var tab = $("#matchTable_entry");
         tab.bootstrapTable({
             reorderableColumns: true,
@@ -637,6 +596,7 @@
             data: data ,
             onPostBody: function(d){
                 myHilitor.apply("{{ query }}");
+                document.getElementById("total_entry").innerHTML = d.length;
             }
         });
         var icons = tab.bootstrapTable('getOptions').icons;
@@ -656,6 +616,7 @@
             data: data ,
             onPostBody: function(d){
                 myHilitor2.apply("{{ query }}");
+                document.getElementById("total_group").innerHTML = d.length;
             }
         });
         var icons = tab.bootstrapTable('getOptions').icons;
@@ -676,6 +637,7 @@
             data: data ,
             onPostBody: function(d){
                 myHilitor3.apply("{{ query }}");
+                document.getElementById("total_genome").innerHTML = d.length;
             }
         });
         var icons = tab.bootstrapTable('getOptions').icons;
@@ -737,37 +699,7 @@ $(function () {
 </script>
 
 
-<script>
-    document.getElementById('run_full_entries').onclick=function(){
-          // Remove any element-specific value, falling back to stylesheets
-          document.getElementById('matchTable_entry_full_text').style.display='';
-          document.getElementById('run_full_entries').style.display='none';
 
-
-
-          // ENTRY RESULT TABLE
-        var myHilitor = new Hilitor("matchTable_entry_full_text");
-        myHilitor.setMatchType("open");
-        var tab = $("#matchTable_entry_full_text");
-        tab.bootstrapTable({
-            url: "{{ url_fulltest_entries }}",
-            reorderableColumns: true,
-            clickToSelect: false,
-            showMultiSort: true,
-            onPostBody: function(d){
-                myHilitor.apply("{{ query }}");
-                document.getElementById('nbr_full_entrie').innerHTML=  'Loading...';
-            },
-            onLoadSuccess: function(d){
-                document.getElementById('nbr_full_entrie').innerHTML= d.length + ' full text match found';
-            }
-        });
-        var icons = tab.bootstrapTable('getOptions').icons;
-        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
-        tab.bootstrapTable('refreshOptions', {'icons': icons});
-
-        };
-</script>
 
 
 {% if meta_group.shown > 0 %}

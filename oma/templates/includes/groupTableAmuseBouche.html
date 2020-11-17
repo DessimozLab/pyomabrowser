@@ -2,11 +2,23 @@
 
  {% if load_full_data != 0 %}
 
-
             <div id="toolbar">
   <b style="color: red;"> Only {{sample_size}} entries are loaded, please wait while the rest is loading...</b>
 </div>
+            {% endif %}
 
+
+{% if load_full_data == 0 and tab == 'paralogs'  %}
+
+            <div id="toolbar" >
+
+
+    <label class="checkbox">
+      <input id="height" type="checkbox" onclick="update_same_species();"/> Only show same species paralogs
+    </label>
+
+
+</div>
             {% endif %}
 
 
@@ -27,6 +39,7 @@
                data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
+               data-toolbar="#toolbar"
                data-checkbox-header="true"
                data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
 
@@ -109,6 +122,8 @@
 
     var need_load = true;
 
+    var t;
+
 
     var tab = $("#grpTable");
     var icons = tab.bootstrapTable('getOptions').icons;
@@ -126,30 +141,68 @@
         onLoadSuccess: function (data) {
             tab.bootstrapTable('hideLoading');
 
-            {% if load_full_data != 0 %}
+            t = data[0].taxon;
 
+            {% if load_full_data != 0 %}
 
             if (need_load == true) {
 
                 $.getJSON("{{load_full_data}}", function (jsonData) {
 
-                    console.log(jsonData);
+
 
 
                 need_load = false;
                 tab.bootstrapTable('load', jsonData );
 
+
+                {% if tab == 'paralogs' %}
+
+
+                document.getElementById("toolbar").innerHTML = '  <label class="checkbox"> ' +
+
+               '<input id="height" type="checkbox" onclick="update_same_species();"/> ' +
+
+                        'Only show same species paralogs </label>'
+
+
+
+
+
+
+
+
+
+
+                {%else%}
+
                 $("#toolbar").remove();
+
+
+                {%endif%}
+
+
 
                  });
             }
 
-            {% endif %}
+                {%endif%}
 
 
         },
         refreshOptions: {'icons': icons}
     });
+
+
+  function update_same_species(){
+    if (document.getElementById('height').checked)
+  {
+      $('#grpTable').bootstrapTable('filterBy', {code:"{{entry.genome.uniprot_species_code}}"} )
+  } else {
+      $('#grpTable').bootstrapTable('filterBy', {})
+  }
+  }
+
 
 </script>
 

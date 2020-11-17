@@ -150,7 +150,7 @@ class EntryCentricMixin(object):
     def get_entry(self, entry_id):
         """resolve any ID and return an entry or a 404 if it is unknown"""
         try:
-            entry_nr = utils.id_resolver.resolve(entry_id)
+            entry_nr, is_modif = utils.id_resolver.resolve(entry_id, check_if_modified=True)
         except (db.InvalidId, db.AmbiguousID):
             raise Http404('requested id is unknown')
         entry = utils.db.entry_by_entry_nr(entry_nr)
@@ -162,6 +162,10 @@ class EntryCentricMixin(object):
             model_entry.oma_hog_root = model_entry.oma_hog.split(".")[0]
         else:
             model_entry.oma_hog_root = None
+
+        model_entry.is_modified_xref = entry_id if is_modif else None
+        model_entry.query_id = entry_id
+
         return model_entry
 
     def get_most_specific_hog(self, entry):
@@ -697,6 +701,7 @@ class ParalogsView(TemplateView, ParalogsBase):
 class ParalogsJson(ParalogsBase, JsonModelMixin, View):
 
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.uniprot_species_code': 'code',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'DivergenceLevel': 'DivergenceLevel'}
 
@@ -723,6 +728,7 @@ class ParalogsJson(ParalogsBase, JsonModelMixin, View):
 
 class ParalogsSampleJson(ParalogsBase, JsonModelMixin, View):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.uniprot_species_code': 'code',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'DivergenceLevel': 'DivergenceLevel'}
 
@@ -836,7 +842,7 @@ class HomeologsSampleJson(HomeologsBase, JsonModelMixin, View):
             return JsonResponse(data, safe=False)
 
 
-# Isoform
+# Isoforms (old before merging with sequences tab)
 class Entry_Isoform(TemplateView, InfoBase):
     template_name = "entry_isoform.html"
 
@@ -863,21 +869,7 @@ class Entry_Isoform(TemplateView, InfoBase):
              'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
         return context
 
-class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
-    json_fields = {'omaid': 'protid',
-                   'canonicalid': 'xrefid',
-                   'sequence_length': 'seqlen',
-                   'is_main_isoform': None,
-                   'locus_start': 'locus_start',
-                   'locus_end': 'locus_end',
-                   'exons.as_list_of_dict': 'exons'}
 
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        data = list(self.to_json_dict(context['isoforms']))
-
-        return JsonResponse(data, safe=False)
 
 # GOA
 class Entry_GOA(TemplateView, InfoBase):
@@ -893,18 +885,55 @@ class Entry_GOA(TemplateView, InfoBase):
         return context
 
 
-# Sequences
+# Sequences & Isoforms
 class Entry_sequences(TemplateView, InfoBase):
+
     template_name = "entry_sequences.html"
 
     def get_context_data(self, entry_id, **kwargs):
         context = super(Entry_sequences, self).get_context_data(entry_id, **kwargs)
+
+        # get the query entry
         entry = self.get_entry(entry_id)
+
+        #Get all isoforms including itself
+        isoforms = entry.alternative_isoforms
+        isoforms.append(entry)
+
+        main_isoform = None
+
+        for iso in isoforms:
+            if iso.is_main_isoform:
+                main_isoform = iso
+
 
         context.update(
             {'entry': entry,
-              'tab': 'sequences'})
+             'tab': 'sequences',
+             'isoforms': isoforms,
+             'main_isoform': main_isoform,
+             'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
+
         return context
+
+
+class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
+    json_fields = {'omaid': 'protid',
+                   'cdna': 'cdna',
+                   'sequence': 'sequence',
+                   'canonicalid': 'xrefid',
+                   'sequence_length': 'seqlen',
+                   'is_main_isoform': None,
+                   'locus_start': 'locus_start',
+                   'locus_end': 'locus_end',
+                   'exons.as_list_of_dict': 'exons'}
+
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['isoforms']))
+
+        return JsonResponse(data, safe=False)
 
 
 class FamBase(ContextMixin):
@@ -2517,7 +2546,6 @@ class Searcher(View):
             hits = utils.id_resolver.search_protein(term)
 
 
-
             for id, hit in hits.items():
                 for accessor, value in hit.items():
                     if accessor == "numeric_id" or accessor =="omaid":
@@ -2860,6 +2888,7 @@ class Searcher(View):
         for ogd in filtered_og:
             og = utils.db.oma_group_metadata(ogd[0])
 
+            og["size"] = len(models.OmaGroup(utils.db, og))
             og["type"] = 'OMA group'
             og["found_by"] = ogd[1]
             json_og.append(og)
@@ -3164,11 +3193,17 @@ class Searcher(View):
         def _check_hog_number(gn):
             try:
                 gn = int(gn)
+
             except ValueError:
+
                 try:
-                    gn = utils.db.parse_hog_id(gn)
+                    utils.db.get_hog(gn)
+                    return gn
                 except ValueError:
-                    gn = -1
+                    try:
+                        gn = utils.db.parse_hog_id(gn)
+                    except ValueError:
+                        gn = -1
 
             if 0 < gn <= utils.db.get_nr_toplevel_hogs():
                 return gn

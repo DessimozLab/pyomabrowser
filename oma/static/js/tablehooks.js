@@ -183,6 +183,10 @@
 
     exports.format_generic_group_id = function(value, row) {
         if (row.type === "HOG") {
+            if (value.includes(".")){
+                return '<a href="/oma/hog/' + value + '/iham/">' + value + "</a>";
+            }
+
              return '<a href="/oma/hog/HOG:' + zeroPad(value, 7) + '/iham/">HOG:' + zeroPad(value, 7) + "</a>";
         }
         else if (row.type === "OMA group") {

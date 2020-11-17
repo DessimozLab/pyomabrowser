@@ -199,8 +199,8 @@ if OMA_INSTANCE_NAME == "":
     OMA_INSTANCE_NAME = "full"
 
 
-# Maximum upload size for files: 10MB
-MAX_UPLOAD_SIZE = 10*2**20
+# Maximum upload size for files: 50MB
+MAX_UPLOAD_SIZE = 50*2**20
 
 
 # Internationalization

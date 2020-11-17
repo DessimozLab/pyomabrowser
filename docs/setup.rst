@@ -3,82 +3,115 @@
 
 Setting up an  OMA Browser
 ==========================
+The preferred way to work with the OMA Browser is nowadays using
+docker images. The directory `for_docker` in the pyomabrowser repository
+contains all the relevant information how to set it up and bring it
+alive using docker-compose.
 
-There is a difference between a development environment setup and the production
-setup. The first one is usually relatively simple to setup as it involves most often
-only a Django server. In the following we explain how to setup the development
-setup from basic to more complicated functions, intended to be run on a simple laptop
-or dev host and finalize the section with the additional setup instructions
-required by the production site (which hosts also darwin and is capable to serve
-many requests simultaneously).
+The OMA Browser can be run via docker-compose as orchestration
+tool for near production, testing and development purposes.
 
-Development configuration
--------------------------
+Here are the necessary steps to start an instance:
 
-* consider using a :doc:`virtual machine for the whole project <vagrant_setup>`.
-  This would make sure that your code will integrate well with the real browser, as
-  that one will have a similar setup.
-
-* Prepare a virtual environment for at least python3.4. You can do that best with pyenv.
-  details are available :doc:`in the zoo documentation <zoo:setup>`
-
-* clone the source of the pyomabrowser repo and install the dependencies:
+* clone the source of the pyomabrowser repo:
 
 .. code-block:: sh
 
     git clone ssh://gitolite@lab.dessimoz.org:2222/pyomabrowser
     cd pyomabrowser
-    pip install -r requirements.txt
 
 * The next step is that you need a hdf5 database instance. There are several options how
   you could obtain or refer to one.
 
-  * a basic test db is accessible from the public OMA Browser:
-    http://omabrowser.org/All/Test.OmaServer.h5 as well as the suffix index file
-    http://omabrowser.org/All/Test.OmaServer.h5.idx. This database is useful if you want
-    to play around on your laptop and don't have a lot of disc space available. Once you
-    downloaded the file, rename it to OmaServer.h5 and either place it into the pyomabrowser
-    repo or set the environment variable DARWIN_BROWSERDATA_PATH to the folder where you
-    downloaded the file to, e.g. :sh:`export DARWIN_BROWSERDATA_PATH=/path/to/download/folder`
+  * copy a release from the UniL NAS, e.g. Test.Jul2014, the corona oma server,
+    or a full release. Store the whole directory somewhere on your computer or
+    on a external disk. Full release is quite big, several 100GB. Keep the
+    structure with ``./data`` and ``./downloads`` subdirectories.
 
-
-  * alternatively, you can copy the big file to you laptop. it is available on the
-    cs and ucl shared space under /oma-{browser,server}/<release>/data/OmaServer.h5.
-    The file is quite big (>50GB). procede afterwards as with the above.
-
-  * the last option is to mount the filesystem via sshfs and directly point with your
+  * alternatively, you can also mount the filesystem via sshfs and directly point with your
     DARWIN_BRWOSERDATA_PATH to the path where the file exists. This is handy, but requires
-    a very fast connection and will probably break the async computation functionalities like
-    the msa or marker gene export.
+    a very fast connection.
 
-Now, you are ready to start your server locally using the django 'runserver' command.
-If you are not familiar with `Django <https://www.djangoproject.com/>`_, have a careful
-ready about it and consider doing their `introduction tutorial <https://docs.djangoproject.com>`_.
-Essentially, you can start the service with
+* now, we're ready to adjust the docker settings. For this move into ``pyomabrowser/for_docker`` directory
 
 .. code-block:: sh
 
-    python manage.py migrate
-    python manage.py runserver --nothreading
+    cd pyomabrowser/for_docker
 
-and access the instance in your web browser on http://localhost:8000.
+You will also find up-to-date instruction in the Readme.md file in there.
 
-Advanced features
-#################
+Overview of system
+^^^^^^^^^^^^^^^^^^
 
-To be able to test the asynchronous features you need to install rabbitmq on your machine
-using homebrew or apt package manager. The omabrowser will connect as guest on localhost
-by default, so you don't have to configure any users there. Make sure rabbitmq-server is
-running either by starting it manually or as service in the background.
+The following figure should give you a brief overview of the containers
+and volumes and how they interact:
 
-Then you need to start at least one celery process that does the async work. You can do
-that by running to following commands in the pyomabrowser root folder:
+.. image:: ../for_docker/docker-setup.png
+   :target: docker-setup.png
+   :alt: docker-setup
 
-.. code-block:: sh
+In our setup of the containers, we make use of the
+DOCKER_BUILDKIT extension, especially the ``--ssh default`` feature
+to access the lab's git repo server. Currently (May 2020) this feature is
+not yet supported by docker-compose directly. Because of this, the
+docker images have to be converted with an extra script named ``build_container``.
 
-    celery worker -A pybrowser_dev --pool=solo --loglevel=DEBUG
+Settings in ``env`` file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The pool=solo is needed on macos only. obviously, you can play with the loglevel parameter.
+The ``env`` file contains most settings relevant to build and run the
+containers. The paths variables in the beginning are the mount points
+*inside* the containers and can in most situations be left as they
+are defined.
+
+The values for ``OMA_INSTANCE``\ , and ``PRODUCTION_TYPE`` can be modified
+as needed. The OMA_INSTANCE has the main thing to change between
+different setups/instances with different features. They load different
+django settings.
+
+The settings for PYOMABROWSER_CODEBASE and PYOMABROWSER_GITTAG variables
+should be adapted depending on whether from the current source checkout
+or directly from the git-repo at a certain tag should be used to build
+the oma docker image.
+
+Settings in ``docker-compose.yml``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the docker-compose file, you should mainly edit the mount method of
+the omabrowser data. By default it assumes a
+`docker volume <https://docs.docker.com/storage/volumes/>`_\ , but also
+a **bind mount** of a host directory into the container is possible (but
+discouraged for production).
+
+Last but not least, by uncommenting the line
+``..:/usr/src/pyomabrowser``
+
+in the web and celery service:volume section, you can mount the current
+repo checkout from your host to the docker containers which allows
+to transparently refresh on code changes. Note however that if
+static files change, you have to restart the docker-compose instances.
+
+Building the images
+^^^^^^^^^^^^^^^^^^^
+
+To build the images you should only need to run
+``build_container`` from the for_docker/ directory on your host.
+Note that this is a simple python script that requires yaml to
+be installed. You might need to install it into a virtualenv or
+install it systemwide with ``pip install pyaml``.
+
+Starting services
+^^^^^^^^^^^^^^^^^
+
+You should then be able to start the services with
+``docker-compose up``. This will run things in the foreground and
+you can check the logs of the different services. The first time
+you do this using a docker volume for the oma browser data, you
+will see error messages the the database cannot be opened. This
+means you haven't yet copied the data into the volume.
+(See next point)
+You can also start the containers in the background with ``docker-compose up -d``
+and stop them with ``docker-compose down``.
 
 
 
