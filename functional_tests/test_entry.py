@@ -15,7 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 class EntryPageTest(FunctionalTest):
 
 
-    def atest_pairwise_relations(self):
+    def test_pairwise_relations(self):
 
 
         # Variable to change between release (if required)
