@@ -18,6 +18,7 @@ except ImportError:
 from django.core.mail import EmailMessage
 from django.template.loader import get_template
 from zoo.wrappers.aligners import Mafft, DataType, WrapperError
+from zoo.utils import auto_open
 
 from django.conf import settings
 from celery import shared_task
@@ -196,13 +197,14 @@ def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit=None,
     name = os.path.join('function_projection', data_id[-2:], data_id[-4:-2], data_id+".txt.gz")
     path = os.path.join(settings.MEDIA_ROOT, name)
     try:
-        sequences = SeqIO.parse(sequence_file, 'fasta')
-        projector = FastMapper(utils.db)
+        with auto_open(sequence_file, 'rt') as seq_in:
+            sequences = SeqIO.parse(seq_in, 'fasta')
+            projector = FastMapper(utils.db)
 
-        if not os.path.isdir(os.path.dirname(path)):
-            os.makedirs(os.path.dirname(path))
-        with gzip.open(path, 'wt') as fout:
-            projector.write_annotations(fout, sequences)
+            if not os.path.isdir(os.path.dirname(path)):
+                os.makedirs(os.path.dirname(path))
+            with gzip.open(path, 'wt') as fout:
+                projector.write_annotations(fout, sequences)
 
         if db_entry.email != '':
             logger.info('sending ready mail to {}'.format(db_entry.email))
