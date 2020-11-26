@@ -8,7 +8,6 @@ from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 
-
 DEFAULT_WAIT = 5
 SCREEN_DUMP_LOCATION = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), 'screendumps'
@@ -16,17 +15,12 @@ SCREEN_DUMP_LOCATION = os.path.join(
 
 
 class FunctionalTest(StaticLiveServerTestCase):
+
     @classmethod
     def setUpClass(cls):
-        for arg in sys.argv:
-            if 'liveserver' in arg:
-                cls.server_host = arg.split('=')[1]
-                cls.server_url = 'https://' + cls.server_host
-                cls.against_staging = True
-                return
-        super().setUpClass()
-        cls.against_staging = False
-        cls.server_url = cls.live_server_url
+        cls.server_host = "omabrowser.org"
+        cls.server_url = 'https://'  + cls.server_host
+        cls.against_staging = True
 
     @classmethod
     def tearDownClass(cls):
