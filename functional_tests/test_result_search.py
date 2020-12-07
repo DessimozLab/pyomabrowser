@@ -15,23 +15,23 @@ from selenium.webdriver.support import expected_conditions as EC
 class EntrySearchTest(FunctionalTest):
 
 
-    def test_entry_by_uniprot(self):
+    def xtest_entry_by_uniprot(self):
         pass
 
-    def test_entry_by_sequences(self):
+    def xtest_entry_by_sequences(self):
         pass
 
-    def test_entry_restricted_to_species(self):
+    def xtest_entry_restricted_to_species(self):
         pass
 
-    def test_entry_restricted_to_taxon(self):
+    def xtest_entry_restricted_to_taxon(self):
         pass
 
 
 
 class GroupSearchTest(FunctionalTest):
 
-    def test_groups_by_id_and_fingerprint(self):
+    def xtest_groups_by_id_and_fingerprint(self):
         pass
 
 
@@ -58,7 +58,8 @@ class GenomeSearchTest(FunctionalTest):
 
         # Momo verify the number of hits
         details = self.browser.find_element(By.ID, 'genome_stat')
-        self.browser.execute_script('window.scrollTo({},{});'.format(details.location['x'],details.location['y'] - 400))
+        self.browser.execute_script('window.scrollTo({},{});'.format(details.location['x'],details.location['y']))
+
         self.browser.find_element(By.ID, "genome_stat").click()
 
         WebDriverWait(self.browser, 10).until(
@@ -130,7 +131,7 @@ class GenomeSearchTest(FunctionalTest):
 
 class QuickSearchTest(FunctionalTest):
 
-    def test_direct_search_redirection(self):
+    def xtest_direct_search_redirection(self):
         pass
 
 
