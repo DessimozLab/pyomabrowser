@@ -1535,6 +1535,7 @@ class HOGSynteny(HOGBase, TemplateView):
         ancestral_synteny = {"nodes": [], "links": []}
         neigh = []
 
+
         for n in graph.nodes.data('weight'):
             ancestral_synteny["nodes"].append({"id": n[0], "name": n[0]})
 
