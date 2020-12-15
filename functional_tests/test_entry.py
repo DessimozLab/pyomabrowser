@@ -56,8 +56,7 @@ class EntryPageTest(FunctionalTest):
         assert len(rows) == len(svgs)
 
         # JC verify number of protein loaded in the tables
-        assert int(self.browser.find_element(By.CLASS_NAME, "pagination-info").text.split(" ")[-2]) == int(
-            _p53_ortholgs)
+        assert int(self.browser.find_element(By.CLASS_NAME, "pagination-info").text.split(" ")[-2]) == int(_p53_ortholgs)
 
         # JC filter his research to Vertebrata only and verify number of filter protein matches
         self.browser.find_element(By.ID, "Vertebrata").click()
