@@ -25,15 +25,252 @@
         </li>
 
 
-         <li class="{% if tab == 'genes' %} active selected {%endif%}">
-            <a href="{% url 'ancestralgenome_genes' genome_name %}">
-                <span> Ancestral genes</span>
+      <li class="{% if tab == 'genes' %} active selected {%endif%}" {% if tab != 'genes' %}
+             onclick="window.location='{% url 'ancestralgenome_genes' genome_name %}'" {%endif%}>
+
+           <a href="{% url 'ancestralgenome_genes' genome_name %}" {% if tab == 'genes' %}data-toggle="collapse" data-target="#filterHogs"{%endif%}>
+
+                <span>Ancestral genes
+
+                    </span>
+
+           <i class="material-icons">keyboard_arrow_right</i>
+
             </a>
+
+            <div id="filterHogs" class="collapse {% if tab == 'genes'%} show {%endif%}" style="padding-left:0px !important">
+
+
+                {% if tab == 'genes' %}
+
+                    <h5 style="font-size: smaller; margin: 16px !important;" class="">Phylogenetic filter:</h5>
+
+
+                    <!--Genome selector -->
+                    <div  id="genome_selector" style="padding-left:0px !important">
+
+                    <p class="text-center small" style="margin-bottom: 0px !important"> Choose a target genome</p>
+
+
+
+                    <div class="btn-group-vertical " role="group" aria-label="Vertical button group" style=" display: block;margin: 0 auto;text-align: center;   ">
+    <div class="btn-group dropup" role="group" style="padding-bottom: 0px !important;">
+      <button id="btnGroupVerticalDrop1" type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <small>Ancestor genome</small>
+      </button>
+      <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop1" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 38px, 0px);">
+        <button class="dropdown-item" type="button" onclick="select_genome('Ancestor 1')">Ancestor 1</button>
+          <button class="dropdown-item" type="button" onclick="select_genome('Ancestor 2')">Ancestor 2</button>
+
+      </div>
+    </div>
+
+    <div class="btn-group " role="group" style="padding-top: 0px !important;">
+      <button id="btnGroupVerticalDrop2" type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <small>Descendant genome</small>
+      </button>
+      <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop2">
+        <button class="dropdown-item" type="button" onclick="select_genome('Descendant 1')">Descendant 1</button>
+          <button class="dropdown-item" type="button" onclick="select_genome('Descendant 2')">Descendant 2</button>
+      </div>
+    </div>
+
+  </div>
+
+
+
+
+                    </div>
+
+                    <!-- Genome selected -->
+
+                    <div id="genome_selected"  class="text-center" style="display: none">
+
+                        <p class="text-center small" style="margin-bottom: 8px"> Target genome set on <span style="font-weight: bold" id="selected_genome_name">Error </span></p>
+
+
+                <button type="button" class="btn btn-sm py-0" onclick="reset_selection()"> <small>Reset target genome</small> </button>
+
+
+                    </div>
+
+
+
+                    <!--Table filtering -->
+                    <div id="table_filter" style="padding-left:16px !important;display: none">
+
+                        <p class=" small" style="margin-bottom:4px !important;"> <b>Events of interest:</b></p>
+
+                   <div class="form-check pl-4 " >
+
+                    <div >
+                        <input type="checkbox" class="form-check-input" id="Retained" onclick="set_filter_retained()" checked>
+                        <label  class="form-check-label small" for="Retained" >
+                            Retained <span class="badge badge-pill badge-secondary"  data-toggle="tooltip" data-placement="top" title="All ncestral genes that have not been duplicated, lost or gained in between two the target ancestor and the current genome">?</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="Duplicated" onclick="set_filter_duplicated()" checked>
+                        <label class="form-check-label small" for="Duplicated">
+                            Duplicated  <span class="badge badge-pill badge-secondary"  data-toggle="tooltip" data-placement="top" title="All ancestral genes that have duplicated between the target level and the current level">?</span>
+                        </label>
+                    </div>
+
+                     <div>
+                        <input type="checkbox" class="form-check-input " id="Gained" onclick="set_filter_gained()" checked>
+                        <label class="form-check-label small" for="Gained">
+                            Gained  <span class="badge badge-pill  badge-secondary"  data-toggle="tooltip" data-placement="top" title="All ancestral gene that have emerged in between the oldest and the most recent level, HOGs shown come from the most recent taxonomic range selected">?</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="Lost" onclick="set_filter_lost()" checked>
+                        <label class="form-check-label small" for="Lost" style="color: red">
+                            <b>Lost</b>  <span class="badge badge-pill badge-secondary"  data-toggle="tooltip" data-placement="top" title="All ancestral gene that have been lost in between the oldest and the most recent level, HOGs shown come from the least recent taxonomic range selected">?</span>
+                        </label>
+                    </div>
+
+
+
+
+
+                </div>
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+            </div>
+{%endif%}
         </li>
+
+
+
 
 
      </ul>
 </div>
+
+
+
+<script>
+
+    var apply_filter_retained = true;
+    var apply_filter_duplicated = true;
+    var apply_filter_lost = true;
+    var apply_filter_gained = true;
+
+     $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+});
+
+     function select_genome(genome){
+
+         document.getElementById("selected_genome_name").innerHTML =  genome
+
+         $("#genome_selector").hide()
+         $("#genome_selected").show()
+         $("#table_filter").show()
+
+         window.alert("API call made with " + genome +  " level" )
+
+     }
+
+     function reset_selection(){
+
+         $("#genome_selector").show()
+         $("#genome_selected").hide()
+         $("#table_filter").hide()
+
+     }
+
+     function set_filter_retained(){
+
+         // Get the checkbox
+      var checkBox = document.getElementById("Retained");
+
+      // If the checkbox is checked, display the output text
+      if (checkBox.checked == true){
+        apply_filter_retained = true;
+      } else {
+        apply_filter_retained = false;
+      }
+
+      apply_filter();
+
+
+     }
+     function set_filter_gained(){
+
+         // Get the checkbox
+      var checkBox = document.getElementById("Gained");
+
+      // If the checkbox is checked, display the output text
+      if (checkBox.checked == true){
+        apply_filter_gained = true;
+      } else {
+        apply_filter_gained = false;
+      }
+
+      apply_filter();
+
+
+     }
+     function set_filter_duplicated(){
+
+         // Get the checkbox
+      var checkBox = document.getElementById("Duplicated");
+
+      // If the checkbox is checked, display the output text
+      if (checkBox.checked == true){
+        apply_filter_duplicated = true;
+      } else {
+        apply_filter_duplicated = false;
+      }
+
+      apply_filter();
+
+
+     }
+     function set_filter_lost(){
+
+         // Get the checkbox
+      var checkBox = document.getElementById("Lost");
+
+      // If the checkbox is checked, display the output text
+      if (checkBox.checked == true){
+        apply_filter_lost = true;
+      } else {
+        apply_filter_lost = false;
+      }
+
+      apply_filter();
+
+
+     }
+
+     function apply_filter(){
+
+
+         window.alert(
+             "retained:" + apply_filter_retained +"\n" +
+             "duplicated:" + apply_filter_duplicated +"\n" +
+             "lost:" + apply_filter_lost +"\n" +
+             "gained:" + apply_filter_gained
+         )
+
+}
+
+</script>
 
 
 

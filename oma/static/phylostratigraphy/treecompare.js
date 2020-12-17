@@ -30,13 +30,13 @@ var TreeCompare = function() {
      *
     */
 
-    var maxStackHeight = "ratio";
+    var maxStackHeight = "max";
     //var maxStackHeight = "max";
     var largestGenome = 0;
     var largestEvents = 0;
 
     // initial stack histogram dimensions
-    var stackHeight = 60;
+    var stackHeight = 100;
     var stackWidth = 20;
 
     // histogram zoom extents
@@ -92,7 +92,7 @@ var TreeCompare = function() {
         lineThickness: 3,
         nodeSize: 6,
         treeWidth: 800,
-        treeHeight: 15,
+        treeHeight: 10,
         moveOnClick: true,
         enableZoomSliders: true,
         enableStackZoomSliders: true,
@@ -4344,13 +4344,13 @@ var TreeCompare = function() {
                 .attr("title", "Scale histograms as normalised")
                 .attr("type", "button")
                 .append("span")
-                .text("Ratio");
+                .text("Fixed");
             scaleButton.append("button")
                 .attr("class", "btn btn-sm sharp fixed")
                 .attr("title", "Scale histograms as fixed")
                 .attr("type", "button")
                 .append("span")
-                .text("Fixed");
+                .text("Ratio");
 
         }
 
