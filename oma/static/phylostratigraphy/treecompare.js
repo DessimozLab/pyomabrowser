@@ -92,7 +92,7 @@ var TreeCompare = function() {
         lineThickness: 3,
         nodeSize: 6,
         treeWidth: 500,
-        treeHeight: 15,
+        treeHeight: 10,
         moveOnClick: true,
         enableZoomSliders: true,
         enableStackZoomSliders: true,
@@ -118,7 +118,7 @@ var TreeCompare = function() {
         autoCollapse: 2,
         showHistogramSummaryValue: true,
         showHistogramValues: true,
-        stackHeight: 50
+        stackHeight: 25
     };
 
 
