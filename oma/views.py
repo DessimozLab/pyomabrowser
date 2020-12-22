@@ -1220,10 +1220,15 @@ class AncestralGenomeBase(ContextMixin):
             search = iterdict(genomes_json, False, species_id)
 
             if search:
+
                 context['taxid'] = search['taxid']
+
                 context['genome_name'] = search['name']
+
                 context['nr_hogs'] = search['nr_hogs']
-                context['nbr_species'] = count_species(search)
+
+                context['nbr_species'] = search['nbr_species']
+
             else:
                 raise ValueError("Could not find ancestral genome {}".format(species_id))
         except ValueError as e:
@@ -1251,7 +1256,24 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
 
     def get_context_data(self, species_id, **kwargs):
         context = super(AncestralGenomeCentricGenes, self).get_context_data(species_id, **kwargs)
-        context.update({'tab': 'genes', 'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name'])})
+
+
+        ## get list lineage up
+        #  get an extant genome lineage
+        taxid = utils.tax.get_subtaxonomy_rooted_at(context['taxid']).get_taxid_of_extent_genomes()[0]
+        extant = utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid))
+        full_lineage = extant.lineage
+
+        # cut before current level
+        index = full_lineage.index(context['genome_name'])
+        lineage = full_lineage[index:]
+
+
+        hogs = utils.db.get_all_hogs_at_level(species_id)
+        # 'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name'])
+
+
+        context.update({'tab': 'genes', 'hogs':hogs, 'lineage': lineage })
         return context
 
 

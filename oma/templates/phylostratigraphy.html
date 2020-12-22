@@ -83,6 +83,13 @@
         <div id="scale-1"> </div>
         </div>
         <script type="text/javascript">
+
+
+            $.getJSON("https://oma-stage.vital-it.ch/All/genomes.json", function(data) {
+
+
+                console.log(data)
+
             var treecomp = TreeCompare().init({
                 enableScale: true,
                 scaleColor: "black",
@@ -94,6 +101,9 @@
             var tree1 = treecomp.addTree(treeData, undefined, "single");
             treecomp.viewTree(tree1.name, "vis-container1", "scale-1");
             treecomp.addMainLegend(tree1.name);
+
+
+            });
         </script>
         </div>
 
