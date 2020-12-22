@@ -3215,7 +3215,6 @@ var TreeCompare = function() {
 
         }
 
-
         function displaySearchResults(results, canvasId, baseTree) {
             for (var i = 0; i < results.length; i++) {
                 var resultsList = d3.select("#" + canvasId).select(".searchResultsList");
@@ -3228,7 +3227,10 @@ var TreeCompare = function() {
 
                 var indices = [];
                 // click on a leaf from the list and highlight only its path
-                d3.select("#" + canvasId).select("#" + results[i].name).on("click", function () {
+
+
+
+                d3.select("#" + canvasId).select("[id='" + results[i].name + "']").on("click", function () {
                     var index = $(this).attr("class");
                     //var index = i;
                     indices.push(parseInt(index));
@@ -3326,6 +3328,7 @@ var TreeCompare = function() {
         var leafObjs = [];
         for (var i = 0; i < baseTree.root.leaves.length; i++) {
             leafObjs.push(baseTree.root.leaves[i]);
+
         }
 
 
@@ -3340,7 +3343,6 @@ var TreeCompare = function() {
             var results = _.filter(leafObjs, function (leaf) {
                 return stringSearch(leaf.name.toLowerCase(), text.toLowerCase());
             });
-
             var results_name = [];
             var i;
             for (i = 0; i < results.length; i++) {
@@ -3668,8 +3670,6 @@ var TreeCompare = function() {
         renderTreeToggleDropDown(name, canvas, scale, oppositeCanvas, oppositeScale);
 
     }
-
-
 
     function createTreeRescale(canvasId, rescaleClass, baseTree) {
 
