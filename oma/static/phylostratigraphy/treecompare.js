@@ -91,8 +91,8 @@ var TreeCompare = function() {
         fontSize: 14,
         lineThickness: 3,
         nodeSize: 6,
-        treeWidth: 800,
-        treeHeight: 10,
+        treeWidth: 500,
+        treeHeight: 15,
         moveOnClick: true,
         enableZoomSliders: true,
         enableStackZoomSliders: true,
@@ -115,10 +115,10 @@ var TreeCompare = function() {
         fitTree: "scale", //none, scale
         enableSizeControls: true,
         enableSearch: true,
-        autoCollapse: null,
+        autoCollapse: 2,
         showHistogramSummaryValue: true,
         showHistogramValues: true,
-        stackHeight: 100
+        stackHeight: 50
     };
 
 
