@@ -1260,22 +1260,16 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
         extant = utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid))
         full_lineage = extant.lineage
 
-
-        print(full_lineage)
-
         # cut before current level
         index = full_lineage.index(context['genome_name'])
         lineage = full_lineage[index:]
-
-        print(lineage)
-
 
 
 
 
 
         context.update({'tab': 'genes','api_url' :'/api/ancestralgenome/{}/genes'.format(context['genome_name']),
-                        'lineage': lineage.reverse() })
+                        'lineage': lineage })
         return context
 
 
