@@ -87,6 +87,10 @@ console.log("{{ level }}")
 
         $("#loader").hide();
 
+         {% if level %}
+            select_genome("{{ level }}", true )
+         {% endif %}
+
 
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
@@ -102,9 +106,7 @@ console.log("{{ level }}")
         onLoadSuccess: function () {
             tab.bootstrapTable('hideLoading');
 
-            {% if level %}
-            select_genome({{ level }}, true )
-            {% endif %}
+
         },
         refreshOptions: {'icons': icons}
 
