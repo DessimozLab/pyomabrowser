@@ -4004,7 +4004,11 @@ var TreeCompare = function() {
                     .enter()
                     .append("rect")
                     .on("click", function(d) {
-                        window.alert(genome.name + " : " +   d[0].sizelbl);
+
+                        var compare_url = "/oma/ancestralgenome/" + genome.name.replace(" ", "%20") +"/genes/" +  genome.parent.name.replace(" ", "%20") + "/"
+                        window.open(compare_url, '_blank');
+                        console.log(genome.name + " : " +   d[0].sizelbl)
+
                     d3.event.stopPropagation();
                         });
 

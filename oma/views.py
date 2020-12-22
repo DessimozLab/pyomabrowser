@@ -1250,7 +1250,7 @@ class AncestralGenomeCentricInfo(AncestralGenomeBase, TemplateView):
 class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
     template_name = "ancestralgenome_genes.html"
 
-    def get_context_data(self, species_id, **kwargs):
+    def get_context_data(self, species_id, level=None, **kwargs):
         context = super(AncestralGenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
 
@@ -1264,8 +1264,7 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
         index = full_lineage.index(context['genome_name'])
         lineage = full_lineage[index:]
 
-
-        context.update({'tab': 'genes','api_url' :'/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
+        context.update({'tab': 'genes', 'compare_level': level, 'api_url' :'/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
                         'lineage': lineage })
         return context
 
