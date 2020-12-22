@@ -1220,14 +1220,10 @@ class AncestralGenomeBase(ContextMixin):
             search = iterdict(genomes_json, False, species_id)
 
             if search:
-
                 context['taxid'] = search['taxid']
-
                 context['genome_name'] = search['name']
-
                 context['nr_hogs'] = search['nr_hogs']
-
-                context['nbr_species'] = search['nbr_species']
+                context['nbr_species'] = count_species(search)
 
             else:
                 raise ValueError("Could not find ancestral genome {}".format(species_id))
