@@ -186,7 +186,7 @@
          $("#table_filter").show()
 
 
-         var new_url = "{{ api_url }}" + "&compare_with=" + genome
+         var new_url = "{{ api_url|safe }}" + "&compare_with=" + genome
 
          console.log(new_url)
 
@@ -204,7 +204,7 @@
 
 
 
-         $('#grpTable').bootstrapTable('refresh', {url:  "{{ api_url }}"  } )
+         $('#grpTable').bootstrapTable('refresh', {url:  "{{ api_url|safe }}"  } )
          $('#grpTable').bootstrapTable('hideColumn', 'event')
 
 
