@@ -185,7 +185,8 @@
          $("#genome_selected").show()
          $("#table_filter").show()
 
-         window.alert("API call made with " + genome +  " level" )
+
+         $("#faketable").html("{{ api_url }}" + "?compare_with=" + genome )
 
      }
 
@@ -194,6 +195,9 @@
          $("#genome_selector").show()
          $("#genome_selected").hide()
          $("#table_filter").hide()
+
+
+          $("#faketable").html("{{ api_url }}" )
 
      }
 
@@ -264,8 +268,7 @@
 
      function apply_filter(){
 
-
-         window.alert(
+         $("#fakefilter").html(
              "retained:" + apply_filter_retained +"\n" +
              "duplicated:" + apply_filter_duplicated +"\n" +
              "lost:" + apply_filter_lost +"\n" +
