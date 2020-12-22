@@ -69,9 +69,12 @@
 <script>
 
 
+console.log(level)
+
+
     {% if level %}
     $.getJSON("{{api_url}}", function (jsonData) {
-{% else %}
+    {% else %}
     $.getJSON("{{ api_url|safe }}" + "&compare_with=" + level , function (jsonData) {
 {% endif %}
 
