@@ -59,8 +59,9 @@
         <small>Ancestor genome</small>
       </button>
       <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop1" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 38px, 0px);">
-        <button class="dropdown-item" type="button" onclick="select_genome('Ancestor 1')">Ancestor 1</button>
-          <button class="dropdown-item" type="button" onclick="select_genome('Ancestor 2')">Ancestor 2</button>
+        {% for ancestor in lineage %}
+    <button class="dropdown-item" type="button" onclick="select_genome('{{ancestor}}')">{{ ancestor}}</button>
+{% endfor %}
 
       </div>
     </div>
@@ -73,9 +74,7 @@
       </button>
       <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop2">
 
-          {% for ancestor in lineage %}
-    <button class="dropdown-item" type="button" onclick="select_genome('{{ancestor}}')">{{ ancestor}}</button>
-{% endfor %}
+    <button class="dropdown-item" type="button" onclick="select_genome('desc')">desc</button>
       </div>
     </div>
 
