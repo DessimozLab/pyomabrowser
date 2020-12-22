@@ -72,8 +72,10 @@
           <small>Descendant genome</small>
       </button>
       <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop2">
-        <button class="dropdown-item" type="button" onclick="select_genome('Descendant 1')">Descendant 1</button>
-          <button class="dropdown-item" type="button" onclick="select_genome('Descendant 2')">Descendant 2</button>
+
+          {% for ancestor in lineage %}
+    <button class="dropdown-item" type="button" onclick="select_genome('{{ancestor}}')">{{ ancestor}}</button>
+{% endfor %}
       </div>
     </div>
 

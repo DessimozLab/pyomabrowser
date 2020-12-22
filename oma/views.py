@@ -1265,11 +1265,10 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
         lineage = full_lineage[index:]
 
 
-        hogs = utils.db.get_all_hogs_at_level(species_id)
-        # 'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name'])
 
 
-        context.update({'tab': 'genes', 'hogs':hogs, 'lineage': lineage })
+        context.update({'tab': 'genes','api_url' :'/api/ancestralgenome/{}/genes'.format(context['genome_name']),
+                        'lineage': lineage.reverse() })
         return context
 
 
