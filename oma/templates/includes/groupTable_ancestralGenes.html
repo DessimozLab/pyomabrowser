@@ -15,6 +15,7 @@
 
                 <th  data-field="hog_id" data-sortable="true"  data-formatter="tablehooks.format_hog_api">HOG ID</th>
                 <th  data-field="roothog_id" data-sortable="true" data-formatter="tablehooks.format_roothog">Root HOG ID</th>
+                <th  data-field="event" data-sortable="true" >Phylogenetic event</th>
 
             </tr>
 
@@ -86,6 +87,7 @@
         },
         onLoadSuccess: function () {
             tab.bootstrapTable('hideLoading');
+            tab.bootstrapTable('hideColumn', 'event')
 
 
         },

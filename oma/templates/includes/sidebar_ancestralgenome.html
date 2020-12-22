@@ -191,6 +191,7 @@
          console.log(new_url)
 
          $('#grpTable').bootstrapTable('refresh', {url: new_url  } )
+         $('#grpTable').bootstrapTable('showColumn', 'event')
 
 
      }
@@ -204,6 +205,7 @@
 
 
          $('#grpTable').bootstrapTable('refresh', {url:  "{{ api_url }}"  } )
+         $('#grpTable').bootstrapTable('hideColumn', 'event')
 
 
      }
@@ -275,17 +277,25 @@
 
      function apply_filter(){
 
+        var filter_parameters = [];
 
+        if (apply_filter_retained){
+            filter_parameters.push("retained")
+        }
 
-         window.alert(
-             "retained:" + apply_filter_retained +"\n" +
-             "duplicated:" + apply_filter_duplicated +"\n" +
-             "lost:" + apply_filter_lost +"\n" +
-             "gained:" + apply_filter_gained
-         )
+        if (apply_filter_duplicated){
+            filter_parameters.push("duplicated")
+        }
 
+        if (apply_filter_lost){
+            filter_parameters.push("lost")
+        }
 
+        if (apply_filter_gained){
+            filter_parameters.push("gained")
+        }
 
+        $('#grpTable').bootstrapTable('filterBy', {event: filter_parameters} )
 
 }
 
