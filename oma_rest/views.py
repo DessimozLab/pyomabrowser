@@ -412,20 +412,34 @@ class HOGViewSet(PaginationMixin, ViewSet):
             description: filter the list of HOGs by a specific
                          taxonomic level.
             location: query
+
+          - name: compare_with
+            description: compares the hog at `level` with those passed
+                         with this argument (must be a parent level) and
+                         annotates all hogs with the evolutionary events
+                         that occured between the two points in time.
+            location: query
         """
         level, _ = self._get_level_and_adjust_hogid_if_needed('HOG:000001')
         if level is not None:
-            query = 'Level == {!r}'.format(level.encode('utf-8'))
-            queryset = LazyPagedPytablesQuery(table=utils.db.get_hdf5_handle().get_node('/HogLevel'),
-                                              query=query,
-                                              obj_factory=lambda r: rest_models.HOG(hog_id=r['ID'].decode(),
-                                                                                    level=level))
+            compare_level = self.request.query_params.get('compare_with', None)
+            if compare_level is not None:
+                if not self._check_level_is_valid(compare_level):
+                    raise ValueError("Invalid level for \"compare_level\" parameter.")
+            hogs = utils.db.get_all_hogs_at_level(level, compare_with=compare_level)
+            if compare_level is None:
+                queryset = [rest_models.HOG(hog_id=h['ID'].decode(), level=h['Level'].decode()) for h in hogs]
+                serializer_cls = serializers.HOGsListSerializer
+            else:
+                queryset = [rest_models.HOG(hog_id=h['ID'].decode(), level=h['Level'].decode(), event=h['Event'].decode()) for h in hogs]
+                serializer_cls = serializers.HOGsCompareListSerializer
         else:
             # list of all the rootlevel hogs
             nr_hogs = utils.db.get_nr_toplevel_hogs()
             queryset = [rest_models.HOG(hog_id=utils.db.format_hogid(i), level="root") for i in range(1, nr_hogs + 1)]
+            serializer_cls = serializers.HOGsListSerializer
         page = self.paginator.paginate_queryset(queryset, request)
-        serializer = serializers.HOGsListSerializer(page, many=True, context={'request': request})
+        serializer = serializer_cls(page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, hog_id):
