@@ -166,13 +166,19 @@
   $('[data-toggle="tooltip"]').tooltip()
 });
 
-     function select_genome(genome){
+     function select_genome(genome, no_reload ){
+
+         no_reload = (typeof no_reload === 'undefined') ? false : no_reload;
+
 
          document.getElementById("selected_genome_name").innerHTML =  genome
 
          $("#genome_selector").hide()
          $("#genome_selected").show()
          $("#table_filter").show()
+
+
+         if (no_reload){return}
 
 
          var new_url = "{{ api_url|safe }}" + "&compare_with=" + genome

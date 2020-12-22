@@ -68,10 +68,19 @@
 
 <script>
 
+
+    {% if level %}
     $.getJSON("{{api_url}}", function (jsonData) {
+{% else %}
+    $.getJSON("{{ api_url|safe }}" + "&compare_with=" + level , function (jsonData) {
+{% endif %}
 
 
-         $("#loader").hide();
+
+
+
+
+        $("#loader").hide();
 
 
         var tab = $("#grpTable");
@@ -88,6 +97,9 @@
         onLoadSuccess: function () {
             tab.bootstrapTable('hideLoading');
 
+            {% if level %}
+            select_genome(level, true )
+            {% endif %}
         },
         refreshOptions: {'icons': icons}
 
