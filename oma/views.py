@@ -1268,7 +1268,7 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
 
 
 
-        context.update({'tab': 'genes','api_url' :'/api/ancestralgenome/{}/genes'.format(context['genome_name']),
+        context.update({'tab': 'genes','api_url' :'/api/hog/?level={}'.format(context['genome_name']),
                         'lineage': lineage })
         return context
 

@@ -186,7 +186,12 @@
          $("#table_filter").show()
 
 
-         $("#faketable").html("{{ api_url }}" + "?compare_with=" + genome )
+         var new_url = "{{ api_url }}" + "&compare_with=" + genome
+
+         console.log(new_url)
+
+         $('#grpTable').bootstrapTable('refresh', {url: new_url  } )
+
 
      }
 
@@ -197,7 +202,9 @@
          $("#table_filter").hide()
 
 
-          $("#faketable").html("{{ api_url }}" )
+
+         $('#grpTable').bootstrapTable('refresh', {url: {{ api_url }}  } )
+
 
      }
 
@@ -268,12 +275,17 @@
 
      function apply_filter(){
 
-         $("#fakefilter").html(
+
+
+         window.alert(
              "retained:" + apply_filter_retained +"\n" +
              "duplicated:" + apply_filter_duplicated +"\n" +
              "lost:" + apply_filter_lost +"\n" +
              "gained:" + apply_filter_gained
          )
+
+
+
 
 }
 
