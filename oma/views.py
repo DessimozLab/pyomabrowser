@@ -1262,7 +1262,7 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
 
         # cut before current level
         index = full_lineage.index(context['genome_name'])
-        lineage = full_lineage[index:]
+        lineage = full_lineage[index+1:]
 
         context.update({'tab': 'genes', 'level': level, 'api_url' :'/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
                         'lineage': lineage })

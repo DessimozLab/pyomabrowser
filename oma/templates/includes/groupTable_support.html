@@ -29,11 +29,9 @@
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
 
-
                {% if load_full_data != 0 %}
                data-toolbar="#toolbar"
                {% endif %}
-
 
                data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
                data-show-columns="true" data-search="true" data-show-export="true"
@@ -41,6 +39,7 @@
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
                data-checkbox-header="true"
+               data-buttons="buttons"
                data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
                >
 
@@ -50,9 +49,6 @@
              <tr>
 
                  <th colspan="3" class="text-center">Evidence <a href="{% url 'uses' %}#orthotable" style=" color: #000 !important;" ><i class="fa fa-info-circle"></i></a></th>
-
-
-
 
                  <th rowspan="2"  data-valign="middle" data-field="kingdom" data-sortable="true" data-filter-control="select"
                     data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life" ><span style="writing-mode: vertical-lr;">Domains</span></th>
@@ -156,6 +152,10 @@
 <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
 <script src="{% static "js/tableExport.min.js" %}"></script>
 
+<script src="{% static "js/FileSaver.js" %}"></script>
+
+
+
 <!-- taxon filter import: Core -->
 <script src="{% static "js/tnt.min.js" %}"></script>
 <script src="{% static "js/bootstrap-table-filtertaxon.js" %}"></script>
@@ -174,10 +174,11 @@
 
 <script>
 
+function download_fasta(){
+    console.log("fasta")
+}
+
     $.getJSON("{{ table_data_url }}", function (initData) {
-
-
-
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
         $.extend(icons, {export: 'fa-download'});
@@ -187,6 +188,88 @@
             clickToSelect: false,
             showMultiSort: true,
             showLoading: true,
+            onPostHeader: function () {
+
+                $('.fasta').remove();
+
+                var button_group = document.getElementsByClassName("columns columns-right btn-group float-right")[0];
+
+                var div = document.createElement('div');
+                div.className = "fasta btn-group"
+
+                var fasta = document.createElement('button');
+                fasta.className = "btn btn-secondary";
+                fasta.id = "fasta_btn";
+                fasta.title = "Export table protein sequences as fasta";
+                fasta.innerHTML = 'Fasta <i class="fa fa fa-file-download"></i>'
+
+                fasta.onclick = function() {
+
+                    // Get the table data (filtered out protein will not be here)
+                    var table = tab.bootstrapTable('getData')
+
+                    // extract the list of protein id
+                    var ids = []
+                    for (var protein in table){
+                        ids.push(table[protein].protid)}
+
+                    // init the sequences container and the request handler
+
+                    var call_pending = 0
+                    var sequences = ""
+
+                    function check_call_ready(){
+
+                        if (call_pending ==0){
+
+                            var filename =  "{{ entry.omaid }}_orthologs.txt";
+                                  var blob = new Blob([sequences], {
+                                      type: "text/plain;charset=utf-8"
+                                });
+
+                                saveAs(blob, filename);
+                        }
+
+                    }
+
+                    // Split the ids on array of 1000 elements max (limit of the api call for bulk_retreive)
+                    var i,j,chunk = 4;
+                    for (i=0,j=ids.length; i<j; i+=chunk) {
+
+                        var xhr = new XMLHttpRequest();
+                    xhr.open("POST", '/api/protein/bulk_retrieve/', true);
+
+                    xhr.setRequestHeader("Content-Type", "application/json");
+
+                    xhr.onreadystatechange = function() { //Appelle une fonction au changement d'état.
+
+                        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+
+                            var dat = JSON.parse(this.responseText)
+
+                            for (i in dat){
+
+                                sequences += ">" + dat[i]["target"].omaid  + '\n'+ dat[i]["target"].sequence + '\n'
+                            }
+                            call_pending -= 1
+                            check_call_ready(call_pending)
+
+                        }
+                    }
+
+                    call_pending += 1
+
+                        var id = JSON.stringify(({ids: ids.slice(i,i+chunk)}))
+                    xhr.send(id)
+
+                    }
+
+                }
+
+                div.appendChild(fasta)
+                button_group.appendChild(div)
+
+            },
             onPostBody: function () {
                 domains.visualize_all(".protein"); //, {{ longest_seq }});
 
