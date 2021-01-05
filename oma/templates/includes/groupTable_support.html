@@ -233,7 +233,7 @@ function download_fasta(){
                     }
 
                     // Split the ids on array of 1000 elements max (limit of the api call for bulk_retreive)
-                    var i,j,chunk = 4;
+                    var i,j,chunk = 999;
                     for (i=0,j=ids.length; i<j; i+=chunk) {
 
                         var xhr = new XMLHttpRequest();
@@ -252,6 +252,7 @@ function download_fasta(){
                                 sequences += ">" + dat[i]["target"].omaid  + '\n'+ dat[i]["target"].sequence + '\n'
                             }
                             call_pending -= 1
+                            console.log(call_pending)
                             check_call_ready(call_pending)
 
                         }
