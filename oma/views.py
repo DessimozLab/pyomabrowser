@@ -1551,7 +1551,10 @@ class HOGSynteny(HOGBase, TemplateView):
         neigh = []
 
         # Prune the hog neighbor to prevent unreadable graph
-        limit = 20
+        limit_first_radius = 20
+        limit_second_radius = 5
+
+        logger.info("pruning of big graph")
 
         # get the source hog node
         selected_node = [n for n, v in graph.nodes(data=True) if n == hog_id]
@@ -1561,13 +1564,18 @@ class HOGSynteny(HOGBase, TemplateView):
         neighbors = [selected_node[0]]
 
         e = graph.edges(selected_node[0], data="weight")
-        if len(e) < limit:
-            limit = len(e)
+        if len(e) < limit_first_radius:
+            limit_first_radius = len(e)
 
-        for edge in sorted(e,key=lambda x: x[2], reverse=True)[:limit]:
+        for edge in sorted(e,key=lambda x: x[2], reverse=True)[:limit_first_radius]:
             neighbors.append(edge[1])
 
-            for subedge in graph.edges(edge[1]):
+            se = graph.edges(edge[1], data="weight")
+
+            if len(se) < limit_second_radius:
+                limit_second_radius = len(se)
+
+            for subedge in sorted( se,key=lambda x: x[2], reverse=True)[:limit_second_radius]:
                 neighbors.append(subedge[1])
 
 
