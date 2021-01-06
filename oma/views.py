@@ -1542,12 +1542,43 @@ class HOGSynteny(HOGBase, TemplateView):
     template_name = "hog_synteny.html"
 
     def get_context_data(self, hog_id, **kwargs):
+
         context = super(HOGSynteny, self).get_context_data(hog_id, **kwargs)
 
         graph = utils.db.get_syntentic_hogs(hog_id, context['level'], steps=2)
 
         ancestral_synteny = {"nodes": [], "links": []}
         neigh = []
+
+        # Prune the hog neighbor to prevent unreadable graph
+        limit = 20
+
+        # get the source hog node
+        selected_node = [n for n, v in graph.nodes(data=True) if n == hog_id]
+        if len(selected_node) != 1:
+            logger.info("Error during graph pruning, {} nodes have been founded for {}".format(len(selected_node), hog_id))
+
+        neighbors = [selected_node[0]]
+
+        e = graph.edges(selected_node[0], data="weight")
+        if len(e) < limit:
+            limit = len(e)
+
+        for edge in sorted(e,key=lambda x: x[2], reverse=True)[:limit]:
+            neighbors.append(edge[1])
+
+            for subedge in graph.edges(edge[1]):
+                neighbors.append(subedge[1])
+
+
+        #logger.info(graph.nodes.data('weight'))
+        #logger.info(graph.edges.data('weight'))
+
+        graph = graph.subgraph(neighbors)
+        
+        
+
+
 
 
         for n in graph.nodes.data('weight'):
