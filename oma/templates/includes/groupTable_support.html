@@ -39,7 +39,6 @@
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
                data-checkbox-header="true"
-               data-buttons="buttons"
                data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
                >
 
@@ -174,9 +173,6 @@
 
 <script>
 
-function download_fasta(){
-    console.log("fasta")
-}
 
     $.getJSON("{{ table_data_url }}", function (initData) {
         var tab = $("#grpTable");
@@ -228,9 +224,12 @@ function download_fasta(){
                                 });
 
                                 saveAs(blob, filename);
+                                fasta.innerHTML = 'Fasta <i class="fa fa fa-file-download"></i>'
                         }
 
                     }
+
+                    fasta.innerHTML = 'Loading fasta</i>'
 
                     // Split the ids on array of 1000 elements max (limit of the api call for bulk_retreive)
                     var i,j,chunk = 999;
@@ -256,10 +255,10 @@ function download_fasta(){
                             check_call_ready(call_pending)
 
                         }
+
                     }
 
                     call_pending += 1
-
                         var id = JSON.stringify(({ids: ids.slice(i,i+chunk)}))
                     xhr.send(id)
 

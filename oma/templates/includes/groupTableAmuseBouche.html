@@ -99,6 +99,8 @@
 <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
 <script src="{% static "js/tableExport.min.js" %}"></script>
 
+<script src="{% static "js/FileSaver.js" %}"></script>
+
 <!-- taxon filter import: Core -->
 <script src="{% static "js/tnt.min.js" %}"></script>
 <script src="{% static "js/bootstrap-table-filtertaxon.js" %}"></script>
@@ -134,6 +136,92 @@
         clickToSelect: false,
         showMultiSort: true,
         showLoading: true,
+    onPostHeader: function () {
+
+                $('.fasta').remove();
+
+                var button_group = document.getElementsByClassName("columns columns-right btn-group float-right")[0];
+
+                var div = document.createElement('div');
+                div.className = "fasta btn-group"
+
+                var fasta = document.createElement('button');
+                fasta.className = "btn btn-secondary";
+                fasta.id = "fasta_btn";
+                fasta.title = "Export table protein sequences as fasta";
+                fasta.innerHTML = 'Fasta <i class="fa fa fa-file-download"></i>'
+
+                fasta.onclick = function() {
+
+                    // Get the table data (filtered out protein will not be here)
+                    var table = tab.bootstrapTable('getData')
+
+                    // extract the list of protein id
+                    var ids = []
+                    for (var protein in table){
+                        ids.push(table[protein].protid)}
+
+                    // init the sequences container and the request handler
+
+                    var call_pending = 0
+                    var sequences = ""
+
+                    function check_call_ready(){
+
+                        if (call_pending ==0){
+
+                            var filename =  "{{ entry.omaid }}_orthologs.txt";
+                                  var blob = new Blob([sequences], {
+                                      type: "text/plain;charset=utf-8"
+                                });
+
+                                saveAs(blob, filename);
+                                fasta.innerHTML = 'Fasta <i class="fa fa fa-file-download"></i>'
+                        }
+
+                    }
+
+                    fasta.innerHTML = 'Loading fasta</i>'
+
+                    // Split the ids on array of 1000 elements max (limit of the api call for bulk_retreive)
+                    var i,j,chunk = 999;
+                    for (i=0,j=ids.length; i<j; i+=chunk) {
+
+                        var xhr = new XMLHttpRequest();
+                    xhr.open("POST", '/api/protein/bulk_retrieve/', true);
+
+                    xhr.setRequestHeader("Content-Type", "application/json");
+
+                    xhr.onreadystatechange = function() { //Appelle une fonction au changement d'état.
+
+                        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+
+                            var dat = JSON.parse(this.responseText)
+
+                            for (i in dat){
+
+                                sequences += ">" + dat[i]["target"].omaid  + '\n'+ dat[i]["target"].sequence + '\n'
+                            }
+                            call_pending -= 1
+                            console.log(call_pending)
+                            check_call_ready(call_pending)
+
+                        }
+
+                    }
+
+                    call_pending += 1
+                        var id = JSON.stringify(({ids: ids.slice(i,i+chunk)}))
+                    xhr.send(id)
+
+                    }
+
+                }
+
+                div.appendChild(fasta)
+                button_group.appendChild(div)
+
+            },
         onPostBody: function (data) {
             console.log(data);
             domains.visualize_all(".protein", {{ longest_seq }});
