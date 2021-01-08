@@ -208,7 +208,7 @@ class InfoBase(ContextMixin, EntryCentricMixin):
             reference_entry= entry
         else:
             #In order to populate pairswise table, badge, link with main isofrma information we replace here
-            reference_entry = entry.get_main_isoform
+            reference_entry = entry.get_main_isoform()
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
         nr_homoeologs_relations = utils.db.count_homoeologs(reference_entry.entry_nr)
@@ -442,7 +442,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
             reference_entry= entry
         else:
             #In order to populate pairswise table, badge, link with main isofrma information we replace here
-            reference_entry = entry.get_main_isoform
+            reference_entry = entry.get_main_isoform()
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
 
@@ -685,7 +685,7 @@ class ParalogsBase(ContextMixin, EntryCentricMixin):
             reference_entry= entry
         else:
             #In order to populate pairswise table, badge, link with main isofrma information we replace here
-            reference_entry = entry.get_main_isoform
+            reference_entry = entry.get_main_isoform()
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
 
@@ -788,7 +788,7 @@ class HomeologsBase(ContextMixin, EntryCentricMixin):
             reference_entry= entry
         else:
             #In order to populate pairswise table, badge, link with main isofrma information we replace here
-            reference_entry = entry.get_main_isoform
+            reference_entry = entry.get_main_isoform()
 
         nr_homeologs_relations  = utils.db.count_homoeologs(reference_entry.entry_nr)
 
