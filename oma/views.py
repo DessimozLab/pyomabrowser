@@ -204,13 +204,21 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         context = super(InfoBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
-        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
-        nr_homoeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
+        if entry.is_main_isoform:
+            reference_entry= entry
+        else:
+            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            reference_entry = entry.get_main_isoform
+
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
+        nr_homoeologs_relations = utils.db.count_homoeologs(reference_entry.entry_nr)
+
 
         # get parent genome/hog level
-        most_specific_hog = self.get_most_specific_hog(entry)
+        most_specific_hog = self.get_most_specific_hog(reference_entry)
 
         context.update({'entry': entry,
+                        'reference_entry':reference_entry,
                         'most_specific_hog': most_specific_hog,
                         'tab': 'geneinformation',
                         'nr_homo': nr_homoeologs_relations,
@@ -427,26 +435,33 @@ class PairsBase(ContextMixin, EntryCentricMixin):
 
     def get_context_data(self, entry_id, **kwargs):
 
-
         context = super(PairsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
-        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
+        if entry.is_main_isoform:
+            reference_entry= entry
+        else:
+            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            reference_entry = entry.get_main_isoform
+
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
+
 
         if nr_ortholog_relations['NrAnyOrthologs']  < self._max_entry_to_load:
             load_full_data = 0
-            url = reverse('pairs_support_json', args=(entry.omaid,))
+            url = reverse('pairs_support_json', args=(reference_entry.omaid,))
         else:
-            url = reverse('pairs_support_sample_json', args=(entry.omaid,))
-            load_full_data = reverse('pairs_support_json', args=(entry.omaid,))
+            url = reverse('pairs_support_sample_json', args=(reference_entry.omaid,))
+            load_full_data = reverse('pairs_support_json', args=(reference_entry.omaid,))
 
-        nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
+        nr_homeologs_relations = utils.db.count_homoeologs(reference_entry.entry_nr)
 
         # get parent genome/hog level
-        most_specific_hog = self.get_most_specific_hog(entry)
+        most_specific_hog = self.get_most_specific_hog(reference_entry)
 
         context.update(
             {'entry': entry,
+             'reference_entry':reference_entry
              'most_specific_hog': most_specific_hog,
              'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_homo': nr_homeologs_relations,
@@ -762,22 +777,29 @@ class HomeologsBase(ContextMixin, EntryCentricMixin):
         context = super(HomeologsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
-        nr_homeologs_relations  = utils.db.count_homoeologs(entry.entry_nr)
+        if entry.is_main_isoform:
+            reference_entry= entry
+        else:
+            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            reference_entry = entry.get_main_isoform
+
+        nr_homeologs_relations  = utils.db.count_homoeologs(reference_entry.entry_nr)
 
         if nr_homeologs_relations < self._max_entry_to_load:
             load_full_data = 0
-            url = reverse('homeologs_json', args=(entry.omaid,))
+            url = reverse('homeologs_json', args=(reference_entry.omaid,))
         else:
-            url = reverse('homeologs_sample_json', args=(entry.omaid,))
-            load_full_data = reverse('homeologs_json', args=(entry.omaid,))
+            url = reverse('homeologs_sample_json', args=(reference_entry.omaid,))
+            load_full_data = reverse('homeologs_json', args=(reference_entry.omaid,))
 
-        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
 
         # get parent genome/hog level
-        most_specific_hog = self.get_most_specific_hog(entry)
+        most_specific_hog = self.get_most_specific_hog(reference_entry)
 
         context.update(
             {'entry': entry,
+             'reference_entry':reference_entry,
              'most_specific_hog': most_specific_hog,
              'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_homo': nr_homeologs_relations,
