@@ -12,7 +12,7 @@
 
     {% if reference_entry.omaid != entry.omaid %}
 
-        <div class="alert alert-secondary" role="alert">
+        <div class="alert alert-warning" role="alert">
   This entry is not the isoform used for orthologs inferences,
     orthologs below are inferred using the entry isoform <a href="{% url 'pairs' entry.get_main_isoform.omaid %}">{{entry.get_main_isoform.omaid}}</a>.
 </div>
@@ -39,7 +39,7 @@
 
 {% else %}
 
-        <div class="alert alert-secondary" role="alert">
+        <div class="alert alert-warning" role="alert">
   This entry is not the isoform used for orthologs inferences,
     please check entry <a href="{% url 'pairs' entry.get_main_isoform.omaid %}">{{entry.get_main_isoform.omaid}}</a> for orthologs.
 </div>

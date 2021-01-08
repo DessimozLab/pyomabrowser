@@ -69,11 +69,6 @@ Note that <b>{{entry.canonicalid}}</b> uses a slightly different sequence, but h
 
 {% endif %}
 
-    <div class="alert alert-warning" role="alert">
-  This entry is not the isoform used for orthologs inferences,
-    orthologs below are inferred using the entry isoform <a href="{% url 'pairs' entry.get_main_isoform.omaid %}">{{entry.get_main_isoform.omaid}}</a>.
-</div>
-
 
 {% include "includes/sidebar_entry.html" with tab=tab %}
 
