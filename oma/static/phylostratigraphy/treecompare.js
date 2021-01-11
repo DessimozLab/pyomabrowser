@@ -30,7 +30,7 @@ var TreeCompare = function() {
      *
     */
 
-    var maxStackHeight = "ratio";
+    var maxStackHeight = "max";
     //var maxStackHeight = "max";
     var largestGenome = 0;
     var largestEvents = 0;
@@ -51,7 +51,7 @@ var TreeCompare = function() {
     var maxTreeHeight = 500;
     var maxTreeWidth = 1500;
     var minTreeHeight = 20;
-    var minTreeWidth = 200;
+    var minTreeWidth = 400;
 
 
     var initTreeHeight = null;
@@ -92,12 +92,12 @@ var TreeCompare = function() {
         lineThickness: 3,
         nodeSize: 6,
         treeWidth: 500,
-        treeHeight: 15,
+        treeHeight: 10,
         moveOnClick: true,
         enableZoomSliders: true,
         enableStackZoomSliders: true,
         scaleMin: 0.05,
-        scaleMax: 15,
+        scaleMax: 10,
         scaleColor: "black",
         loadingCallback: function () {
         },
@@ -118,7 +118,7 @@ var TreeCompare = function() {
         autoCollapse: 2,
         showHistogramSummaryValue: true,
         showHistogramValues: true,
-        stackHeight: 100
+        stackHeight: 25
     };
 
 
@@ -2645,6 +2645,7 @@ var TreeCompare = function() {
     function createUndoButton(canvasId) {
 
         function buildUndoButton(canvasId) {
+
             var undo = d3.select("#" + canvasId + " .btn-group-menu").append("div")
                 .attr("class", "undo");
 
@@ -2656,6 +2657,8 @@ var TreeCompare = function() {
                 .append("i")
                 .attr("class", "fas fa-undo")
                 .attr("aria-hidden", "true");
+
+
         }
 
         if(canvasId == "global"){
@@ -3212,7 +3215,6 @@ var TreeCompare = function() {
 
         }
 
-
         function displaySearchResults(results, canvasId, baseTree) {
             for (var i = 0; i < results.length; i++) {
                 var resultsList = d3.select("#" + canvasId).select(".searchResultsList");
@@ -3359,7 +3361,6 @@ var TreeCompare = function() {
             var results = _.filter(leafObjs, function (leaf) {
                 return stringSearch(leaf.name.toLowerCase(), text.toLowerCase());
             });
-
             var results_name = [];
             var i;
             for (i = 0; i < results.length; i++) {
@@ -3687,8 +3688,6 @@ var TreeCompare = function() {
         renderTreeToggleDropDown(name, canvas, scale, oppositeCanvas, oppositeScale);
 
     }
-
-
 
     function createTreeRescale(canvasId, rescaleClass, baseTree) {
 
