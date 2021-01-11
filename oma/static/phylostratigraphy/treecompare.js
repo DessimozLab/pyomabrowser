@@ -3228,8 +3228,6 @@ var TreeCompare = function() {
                 var indices = [];
                 // click on a leaf from the list and highlight only its path
 
-
-
                 d3.select("#" + canvasId).select("[id='" + results[i].name + "']").on("click", function () {
                     var index = $(this).attr("class");
                     //var index = i;
@@ -3337,7 +3335,8 @@ var TreeCompare = function() {
         }
     }
 
-        var leafObjs = getChildLeaves(baseTree.root)
+        var leafObjs = getAllNodes(baseTree.root)
+
 
 
         /*
