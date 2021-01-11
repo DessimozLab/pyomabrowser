@@ -2620,10 +2620,10 @@ class Searcher(View):
         raw_hits_id = []
         raw_hits_xref = []
 
+        start = time.time()
+
         # for each terms we get the raw results
         for term in terms:
-
-
 
             term_hit_id = []
             term_hit_xref = []
@@ -2686,7 +2686,10 @@ class Searcher(View):
             total_search += 0
             search_entry_meta["crossref"] = 0
 
+        logger.info("Search entry by IDs took {} sec".format(start - end))
+
         # search by Sequence
+        start = time.time()
 
         raw_hits_seq = []
         align_data = None
@@ -2754,7 +2757,7 @@ class Searcher(View):
             total_search += 0
             search_entry_meta['sequence'] = 0
 
-
+        logger.info("Search entry by Sequences took {} sec".format(start - end))
 
         search_entry_meta['total'] =  total_search
 
@@ -2826,6 +2829,7 @@ class Searcher(View):
         context['meta_entry'] = search_entry_meta
         context['meta_term_entry'] = search_term_meta
         end = time.time()
+
         logger.info("Entry json took {} sec for {} entry.".format(start - end, len(data_entry)))
 
         return
