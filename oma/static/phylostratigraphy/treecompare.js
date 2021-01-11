@@ -3228,6 +3228,7 @@ var TreeCompare = function() {
                 var indices = [];
                 // click on a leaf from the list and highlight only its path
 
+
                 d3.select("#" + canvasId).select("[id='" + results[i].name + "']").on("click", function () {
                     var index = $(this).attr("class");
                     //var index = i;
@@ -3336,8 +3337,6 @@ var TreeCompare = function() {
     }
 
         var leafObjs = getAllNodes(baseTree.root)
-
-
 
         /*
         // variable i is set to the number of leaves
@@ -5289,11 +5288,11 @@ var TreeCompare = function() {
         update(baseTree.root, baseTree.data, undefined, treeToggle);
 
         // where zoom centers
-        baseTree.data.zoomBehaviour.translate([(width/2), 25]);
-        baseTree.data.zoomBehaviour.scale(0.5);
+        baseTree.data.zoomBehaviour.translate([90, 25]);
+        baseTree.data.zoomBehaviour.scale(0.8);
         // move the tree to the coordinates and scale it smaller
         d3.select("#" + baseTree.data.canvasId + " svg g")
-            .attr("transform", "translate(" + [(width/2), 25] + ") scale(0.5)")
+            .attr("transform", "translate(" + [90, 25] + ") scale(0.8)")
             .attr("class", "treegroup");
 
         d3.select(self.frameElement).style("height", "500px");
