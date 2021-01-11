@@ -2685,7 +2685,7 @@ class Searcher(View):
             entry_search["crossref"] = []
             total_search += 0
             search_entry_meta["crossref"] = 0
-
+        end = time.time()
         logger.info("Search entry by IDs took {} sec".format(start - end))
 
         # search by Sequence
@@ -2757,6 +2757,7 @@ class Searcher(View):
             total_search += 0
             search_entry_meta['sequence'] = 0
 
+        end = time.time()
         logger.info("Search entry by Sequences took {} sec".format(start - end))
 
         search_entry_meta['total'] =  total_search
