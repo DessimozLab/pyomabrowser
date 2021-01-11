@@ -30,7 +30,7 @@ var TreeCompare = function() {
      *
     */
 
-    var maxStackHeight = "max";
+    var maxStackHeight = "ratio";
     //var maxStackHeight = "max";
     var largestGenome = 0;
     var largestEvents = 0;
@@ -51,7 +51,7 @@ var TreeCompare = function() {
     var maxTreeHeight = 500;
     var maxTreeWidth = 1500;
     var minTreeHeight = 20;
-    var minTreeWidth = 400;
+    var minTreeWidth = 200;
 
 
     var initTreeHeight = null;
@@ -92,12 +92,12 @@ var TreeCompare = function() {
         lineThickness: 3,
         nodeSize: 6,
         treeWidth: 500,
-        treeHeight: 10,
+        treeHeight: 15,
         moveOnClick: true,
         enableZoomSliders: true,
         enableStackZoomSliders: true,
         scaleMin: 0.05,
-        scaleMax: 10,
+        scaleMax: 15,
         scaleColor: "black",
         loadingCallback: function () {
         },
@@ -118,7 +118,7 @@ var TreeCompare = function() {
         autoCollapse: 2,
         showHistogramSummaryValue: true,
         showHistogramValues: true,
-        stackHeight: 25
+        stackHeight: 100
     };
 
 
@@ -2645,7 +2645,6 @@ var TreeCompare = function() {
     function createUndoButton(canvasId) {
 
         function buildUndoButton(canvasId) {
-
             var undo = d3.select("#" + canvasId + " .btn-group-menu").append("div")
                 .attr("class", "undo");
 
@@ -2657,8 +2656,6 @@ var TreeCompare = function() {
                 .append("i")
                 .attr("class", "fas fa-undo")
                 .attr("aria-hidden", "true");
-
-
         }
 
         if(canvasId == "global"){
@@ -3215,6 +3212,7 @@ var TreeCompare = function() {
 
         }
 
+
         function displaySearchResults(results, canvasId, baseTree) {
             for (var i = 0; i < results.length; i++) {
                 var resultsList = d3.select("#" + canvasId).select(".searchResultsList");
@@ -3361,6 +3359,7 @@ var TreeCompare = function() {
             var results = _.filter(leafObjs, function (leaf) {
                 return stringSearch(leaf.name.toLowerCase(), text.toLowerCase());
             });
+
             var results_name = [];
             var i;
             for (i = 0; i < results.length; i++) {
@@ -3689,6 +3688,8 @@ var TreeCompare = function() {
 
     }
 
+
+
     function createTreeRescale(canvasId, rescaleClass, baseTree) {
 
         function buildRescaleButtons(canvasId) {
@@ -3836,7 +3837,7 @@ var TreeCompare = function() {
         var svgwidth  = $("#" + svgId).width();
         var legendSvg = d3.select("#" + svgId).append("svg").call(legendDrag)
              .attr("id", "histogram-legend")
-             .attr("x", svgwidth-250)
+             .attr("x", svgwidth - 250)
              .attr("y", svgheight - 150)
              .attr("width", width + "px")
              .attr("height", svgHeight + "px")
@@ -6582,7 +6583,7 @@ var TreeCompare = function() {
                         if (d.elementS){
                             return '#leaf: '+d.leaves.length+' | bcn: '+ d.elementS.toFixed(2);
                         } else {
-                            return '#leaf: '+d.leaves.length;
+                            return d.name;
                         }
                     });
                 // small extra space after infotext line
