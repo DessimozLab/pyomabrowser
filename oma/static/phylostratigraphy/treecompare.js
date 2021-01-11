@@ -3324,12 +3324,32 @@ var TreeCompare = function() {
             }
         });
 
+        function getAllNodes(d) {
+        if (d.children || d._children) {
+            var leaves = [d];
+            var children = getChildren(d);
+            for (var i = 0; i < children.length; i++) {
+                leaves = leaves.concat(getAllNodes(children[i]));
+            }
+            return leaves;
+        } else {
+            return [d];
+        }
+    }
+
+        var leafObjs = getChildLeaves(baseTree.root)
+
+
+        /*
         // variable i is set to the number of leaves
         var leafObjs = [];
+
         for (var i = 0; i < baseTree.root.leaves.length; i++) {
             leafObjs.push(baseTree.root.leaves[i]);
 
         }
+
+         */
 
 
         //main event handler, performs search every time a char is typed so can get realtime results
