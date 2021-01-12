@@ -3185,7 +3185,22 @@ class Searcher(View):
                 entry_nr = utils.id_resolver.search_protein(query)
 
                 if redirect_valid and len(list(entry_nr.keys()))==1:
-                    return redirect('pairs', list(entry_nr.keys())[0])
+
+                    # check if query is in founded match (e.g if search "DHE5_YEAST" we prefer keep this in url than "12")
+                    entry_nr, matches = list(entry_nr.items())[0]
+                    original_query = False
+
+                    if len(list(matches.keys()) ) == 1:
+                        t,m = list(matches.items())[0]
+                        if len(m) == 1:
+                            if m[0] == query:
+                                original_query = m[0]
+
+                    if original_query is False :
+                        return redirect('pairs', list(entry_nr.keys())[0])
+                    else:
+                        return redirect('pairs', original_query)
+
                 else:
                     for enr in entry_nr.keys():
                         data.append(enr)
