@@ -1498,7 +1498,36 @@ class HOGSimilarPairwise(HOGBase, TemplateView):
             'subtab': 'pairwise',
             'lineage_link_name': 'hog_similar_pairwise',
             'similar_hogs': sorted_HOGs})
+
         return context
+
+class HOGSimilarPairwiseJSON(HOGSimilarPairwise, View):
+
+
+    def get(self, request, hog_id, *args, **kwargs):
+        context = self.get_context_data(hog_id, **kwargs)
+        hogs = context['similar_hogs']
+        if len(hogs) == 0:
+            data = ''
+        else:
+
+            data = []
+            cpt = 0
+            for h in hogs:
+                cpt+=1
+                hog = models.HOG(utils.db, h[1])
+
+                hdata = {"rank": cpt,
+                        "HOG ID": hog.hog_id,
+                        "nbr_orthologs": h[0],
+                        "nbr_members": hog.nr_member_genes,
+                        "Description": hog.keyword,
+                        }
+
+                data.append(hdata)
+
+        return HttpResponse(data,content_type="application/json")
+
 
 
 class HOGDomainsJson(HOGSimilarDomain, View):

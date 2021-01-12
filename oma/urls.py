@@ -46,6 +46,8 @@ urlpatterns = [
 
     url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/pairwise/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/similar/pairwise/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/pairwise/json/$',views.HOGSimilarPairwiseJSON.as_view(), name='hog_similar_pairwise_json'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/similar/pairwise/json/$', views.HOGSimilarPairwiseJSON.as_view(), name='hog_similar_pairwise_json'),
 
     url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
