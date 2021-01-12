@@ -1493,9 +1493,32 @@ class HOGSimilarPairwise(HOGBase, TemplateView):
 
         # sorted the groups by number of orthologous relations
         sorted_HOGs = sorted([(value, key) for (key, value) in count_HOGs.items()], reverse=True)
+
+
+        if len(sorted_HOGs) == 0:
+            data = ''
+        else:
+
+            data = []
+            cpt = 0
+            for h in sorted_HOGs:
+                cpt += 1
+                hog = models.HOG(utils.db, h[1])
+
+                hdata = {"rank": cpt,
+                         "HOG ID": hog.hog_id,
+                         "nbr_orthologs": h[0],
+                         "nbr_members": hog.nr_member_genes,
+                         "Description": hog.keyword,
+                         }
+
+                data.append(hdata)
+
+
         context.update({
             'tab': 'similar',
             'subtab': 'pairwise',
+            'similar': data,
             'lineage_link_name': 'hog_similar_pairwise',
             'similar_hogs': sorted_HOGs})
 

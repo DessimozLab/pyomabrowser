@@ -9,10 +9,9 @@
      <table class="table table-hover" id="grpTable"
                data-show-columns="true" data-search="true" data-show-export="true"
                data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
-               data-mobile-responsive="true" data-check-on-init="true"
+               data-mobile-responsive="true"
                data-undefined-text=""
-               data-id-field="HOG ID"
-               data-url="{% url 'hog_similar_pairwise_json' hog_id %}">
+               data-id-field="HOG ID">
             <thead><tr>
                 <th data-field="rank" data-sortable="true" >Rank</th>
                 <th data-field="HOG ID" data-sortable="true" data-formatter="tablehooks.format_hogid_vis">HOG ID</th>
@@ -37,22 +36,25 @@
 <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
 <script src="{% static "js/tableExport.min.js" %}"></script>
 
+
+    {{ similar|json_script:"similar-data" }}
+
 <script>
 
 
+ var data = JSON.parse(document.getElementById('similar-data').textContent);
 
+ console.log(data)
 
 var tab = $("#grpTable");
-
 tab.bootstrapTable({
-    reorderableColumns: true,
-    onLoadSuccess: function(){
-        tab.bootstrapTable('hideLoading');
-    },
+            data: data,
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            showLoading: true,
 
-});
-
-tab.bootstrapTable('showLoading');
+        });
 
 </script>
 
