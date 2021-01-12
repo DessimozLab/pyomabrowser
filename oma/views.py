@@ -1526,11 +1526,11 @@ class HOGSimilarPairwiseJSON(HOGSimilarPairwise, View):
 
                 data.append(hdata)
 
-        return HttpResponse(data,content_type="application/json")
+        return JsonResponse(data,safe=False)
 
 
 
-class HOGDomainsJson(HOGSimilarDomain, View):
+class HOGDomainsJson(HOGSimilarDomain, JsonModelMixin, View):
 
     json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
                    'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
