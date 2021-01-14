@@ -218,7 +218,7 @@
 
                         if (call_pending ==0){
 
-                            var filename =  "{{ entry.omaid }}_orthologs.txt";
+                            var filename =  "{{ entry.omaid }}_{{tab}}.txt";
                                   var blob = new Blob([sequences], {
                                       type: "text/plain;charset=utf-8"
                                 });
@@ -240,7 +240,7 @@
 
                     xhr.setRequestHeader("Content-Type", "application/json");
 
-                    xhr.onreadystatechange = function() { //Appelle une fonction au changement d'état.
+                    xhr.onreadystatechange = function() {
 
                         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
 
@@ -248,7 +248,10 @@
 
                             for (i in dat){
 
-                                sequences += ">" + dat[i]["target"].omaid  + '\n'+ dat[i]["target"].sequence + '\n'
+                                sequences += ">{0} | {1} [{2}]  \n{3}\n".replace('{0}', dat[i]["target"].omaid)
+                                    .replace('{1}', dat[i]["target"].canonicalid)
+                                    .replace('{2}', dat[i]["target"].species.species)
+                                    .replace('{3}', dat[i]["target"].sequence.replace(/(.{60})/g,"$1\n"))
                             }
                             call_pending -= 1
                             console.log(call_pending)
