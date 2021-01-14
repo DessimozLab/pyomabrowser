@@ -147,6 +147,7 @@ class AsyncMsaMixin(object):
 
 #  --- Entry Centric -------
 class EntryCentricMixin(object):
+
     def get_entry(self, entry_id):
         """resolve any ID and return an entry or a 404 if it is unknown"""
         try:

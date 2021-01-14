@@ -1,7 +1,9 @@
 {% extends  "base_data_centric.html" %}
 {% load staticfiles %}
 
-{% block title %}Entry {{entry.omaid}}{% endblock %}
+{% block title %}Entry {{entry.omaid}} | {{entry.canonicalid}} {% endblock %}
+
+{% block meta_hook %} <meta name="keywords" content="orthology,evolutionary gene relations,evolution,paralogy,inference{% for key in entry.xrefs %}{% if key.seq_match == 'unchecked' %},{{  key.xref }}{% endif %}{% endfor %}"> {% endblock %}
 
 {% block header_color_class %} {% endblock %}
 
@@ -17,7 +19,27 @@
 
     <p>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} {{entry.genome.species}}
         {{entry.genome.strain}}
-        {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %} is on Chromosome {{entry.chromosome}}.</p>
+        {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %}
+
+    {% for key in entry.xrefs %}
+
+         {% if key.source == 'Protein Name' and key.seq_match == 'unchecked' %} | <b>{{  key.xref }} </b>
+         {% endif %}
+
+
+
+    {% endfor %}
+
+    {% for key in entry.xrefs %}
+
+        {% if key.source == 'Gene Name' and key.seq_match == 'unchecked' %}  <b>  [{{  key.xref }}]</b>
+         {% endif %}
+
+
+
+    {% endfor %}
+
+    </p>
 
     </div>
 
