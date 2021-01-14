@@ -232,6 +232,7 @@ var TreeCompare = function() {
         settings.showHistogramSummaryValue = getSetting(settingsIn.showHistogramSummaryValue, settings.showHistogramSummaryValue);
         settings.showHistogramValues = getSetting(settingsIn.showHistogramValues, settings.showHistogramValues);
         settings.stackHeight = getSetting(settingsIn.stackHeight, settings.stackHeight);
+        settings.autoCollapse = getSetting(settingsIn.autoCollapse, settings.autoCollapse);
 
         var i;
         if (!(settingsIn.treeWidth === undefined)) {

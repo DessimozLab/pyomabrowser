@@ -9,6 +9,9 @@
                data-undefined-text=""
                data-checkbox-header="true"
                data-group-by="true"
+               {% if toolbar %}
+               data-toolbar="#toolbar"
+               {% endif %}
                data-group-by-field="DivergenceLevel"
                data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
                data-url="{{ table_data_url }}">

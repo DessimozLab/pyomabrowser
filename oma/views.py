@@ -2300,6 +2300,7 @@ class OMAGroup_members(TemplateView, GroupBase):
         context = super(OMAGroup_members, self).get_context_data(group_id, **kwargs)
         grp = context['omagroup']
         context.update({
+            'toolbar': True,
             'tab': 'members',
             'table_data_url': reverse('omagroup-json', args=(grp.group_nbr,)),
             'longest_seq': max([len(z) for z in grp.members]),
