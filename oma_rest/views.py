@@ -691,7 +691,7 @@ class XRefsViewSet(ViewSet):
             make_genome = functools.partial(models.Genome, utils.db)
             enr_to_genome = utils.id_mapper['OMA'].genome_of_entry_nr
             xref_mapper = utils.id_mapper['XRef']
-            for ref in xref_mapper.search_xref(pattern, is_prefix=True):
+            for ref in xref_mapper.search_xref(pattern, match_any_substring=True):
                 res.append({'entry_nr': ref['EntryNr'],
                             'omaid': utils.id_mapper['OMA'].map_entry_nr(ref['EntryNr']),
                             'source': xref_mapper.source_as_string(ref['XRefSource']),
