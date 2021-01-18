@@ -38,7 +38,7 @@
                     <tr>
                         {% block bootstrap_table_columns %}
                         <th data-field="kingdom" data-sortable="true" data-filter-control="select"
-                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life"><span style="writing-mode: vertical-lr;">Domains</span>
+                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life"><span>Domains</span>
                         </th>
                         <th data-field="taxon" data-sortable="true" data-filter-control="input"
                             data-formatter="tablehooks.format_sciname">Taxon
@@ -137,6 +137,8 @@
             data: data,
             onPostBody: function(d){
                 myHilitor.apply("{{ query }}");
+                var element = $( "th span:contains('Domains')" )[0];
+        element.style.writingMode = "vertical-lr"
             }
         });
         var icons = tab.bootstrapTable('getOptions').icons;

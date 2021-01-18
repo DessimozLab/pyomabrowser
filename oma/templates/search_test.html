@@ -205,7 +205,7 @@
                                                                         <th data-field="taxon" data-sortable="true" data-filter-control="input" data-formatter="tablehooks.format_sciname">Taxon</th>
 
                                                                         <th data-field="kingdom" data-sortable="true" data-filter-control="select"
-                                                                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life"><span style="writing-mode: vertical-lr;">Domains</span>
+                                                                            data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life"><span >Domains</span>
                                                                         </th>
 
 
@@ -528,7 +528,7 @@
                         <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname_genomes">Scientific Name</th>
                         <th data-field="common_name" data-sortable="true" data-formatter="tablehooks.format_species_common">Common Name</th>
                         <th data-field="uniprot_species_code" data-sortable="true" data-formatter="tablehooks.format_species_code">Code</th>
-                        <th data-field="kingdom" data-sortable="true" data-formatter="tablehooks.format_as_kingdom_tag" title="Domain of Life"><span style="writing-mode: vertical-lr;">Domains</span></th>
+                        <th data-field="kingdom" data-sortable="true" data-formatter="tablehooks.format_as_kingdom_tag" title="Domain of Life"><span >Domains</span></th>
 
                     </tr>
                 </thead>
@@ -595,6 +595,8 @@
             showMultiSort: true,
             data: data ,
             onPostBody: function(d){
+                var element = $( "th span:contains('Domains')" )[0];
+        element.style.writingMode = "vertical-lr"
                 myHilitor.apply("{{ query }}");
                 document.getElementById("total_entry").innerHTML = d.length;
             }
@@ -636,6 +638,8 @@
             showMultiSort: true,
             data: data ,
             onPostBody: function(d){
+                var element = $( "th span:contains('Domains')" )[0];
+        element.style.writingMode = "vertical-lr"
                 myHilitor3.apply("{{ query }}");
                 document.getElementById("total_genome").innerHTML = d.length;
             }

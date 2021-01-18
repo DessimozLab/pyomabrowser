@@ -50,7 +50,7 @@
                  <th colspan="3" class="text-center">Evidence <a href="{% url 'uses' %}#orthotable" style=" color: #000 !important;" ><i class="fa fa-info-circle"></i></a></th>
 
                  <th rowspan="2"  data-valign="middle" data-field="kingdom" data-sortable="true" data-filter-control="select"
-                    data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life" ><span style="writing-mode: vertical-lr;">Domains</span></th>
+                    data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life" ><span >Domains</span></th>
                 <th  rowspan="2" data-valign="middle" data-field="taxon" data-sortable="true" data-filter-control="input"
                     data-formatter="tablehooks.format_sciname">Taxon</th>
                 <th rowspan="2"  data-valign="middle" data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
@@ -61,21 +61,15 @@
  </tr>
 
             <tr>
-        <th  class="micro-header" data-field="type_p"  data-align="center" data-halign="center"   data-formatter="stateFormatterPO" >
-
-                    Pair
-
-                   </th>
+        <th  class="micro-header" data-field="type_p"  data-align="center" data-halign="center"   data-formatter="stateFormatterPO" >Pair</th>
 
 
                 <th class="micro-header" data-field="type_h"   data-align="center" data-halign="center"   data-formatter="stateFormatterH" >
-                 HOG
-
-                   </th>
+                 HOG</th>
 
 
                 <th class="micro-header" data-field="type_g"   data-align="center" data-halign="center"   data-formatter="stateFormatterOG" >
-                    <div >  OMA   </div>
+                    <div >  OMA  </div>
                    </th>
 
     </tr>
@@ -188,6 +182,9 @@
 
                 $('.fasta').remove();
 
+                var element = $( "th span:contains('Domains')" )[0];
+                element.style.writingMode = "vertical-lr"
+
                 var button_group = document.getElementsByClassName("columns columns-right btn-group float-right")[0];
 
                 var div = document.createElement('div');
@@ -280,6 +277,24 @@
 
             refreshOptions: {'icons': icons}
         });
+
+        tab.on('column-switch.bs.table', function (e, arg1, arg2) {
+
+            var shown = $("th.micro-header").length;
+
+            if (shown > 0) {
+
+                var element = $( "th div:contains('Evidence')" )[0].parentElement;
+            element.colSpan = shown
+
+            }
+
+            else {
+                 $($( "th div:contains('Evidence')" )[0].parentElement).hide();
+            }
+})
+
+
 
 
         {% if load_full_data != 0 %}
