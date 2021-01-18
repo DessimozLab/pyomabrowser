@@ -276,7 +276,16 @@
 
         if (!custom){
 
-        return '<div> <input type="radio" class="form-check-input checkbox_taxa" id="'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+'</label> </div>';
+
+            if (label_text == that.options.paralogSpecies){
+
+return '<div> <input type="radio" class="form-check-input checkbox_taxa" id="'+id_input+'" <label class="form-check-label" for="'+id_input+'"><b>'+label_text+'</b></label> </div>';
+
+            }else{
+                return '<div> <input type="radio" class="form-check-input checkbox_taxa" id="'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+'</label> </div>';
+
+            }
+
         }
 
         else {
@@ -316,6 +325,7 @@
         taxonFilter: false,
         idTable: 'taxonFilter',
         urlSpeciesTree: undefined,
+        paralogSpecies: undefined,
         onColumntaxonFilter: function (name_selector) {
             return false;
         }
@@ -337,10 +347,14 @@
             return "Apply";
         },
         taxon_to_show: function () {
+
+            if (this.paralogSpecies){
+                return [ this.paralogSpecies, 'Eukaryota', 'Viridiplantae', 'Fungi', 'Metazoa', 'Vertebrata',
+            'Arthropoda', 'Bacteria', 'Archaea'];
+            }
             return ['Eukaryota', 'Viridiplantae', 'Fungi', 'Metazoa', 'Vertebrata',
             'Arthropoda', 'Bacteria', 'Archaea'];
 
-            //return ['Dikarya', 'Saccharomycetaceae', 'Fungi', 'Viridiplantae', 'Fungi', 'Ascomycota', 'Eukaryota'];
         }
     });
 
@@ -392,6 +406,8 @@
              html.push(add_input_div( 'all', 'All Taxa', false ));
 
             for (var tax in this.tax_converter) {
+
+
                 if (tax !== 'custom') {
                     html.push(add_input_div( tax, tax, false));
                 }

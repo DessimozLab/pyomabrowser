@@ -8,19 +8,6 @@
             {% endif %}
 
 
-{% if load_full_data == 0 and tab == 'paralogs'  %}
-
-            <div id="toolbar" >
-
-
-    <label class="checkbox">
-      <input id="height" type="checkbox" onclick="update_same_species();"/> Only show same species paralogs
-    </label>
-
-
-</div>
-            {% endif %}
-
 
 <div style="float: left;margin-top: 10px;margin-bottom: 10px;line-height: 34px;">
 
@@ -35,6 +22,9 @@
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
                data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
+                {% if tab == 'paralogs' %}
+data-paralog-species="{{ entry.genome.sciname }}"
+                 {%endif%}
                data-show-columns="true" data-search="true" data-show-export="true"
                data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                data-mobile-responsive="true" data-check-on-init="true"
@@ -226,8 +216,8 @@
 
             },
         onPostBody: function (data) {
-            console.log(data);
             domains.visualize_all(".protein", {{ longest_seq }});
+
         },
         onLoadSuccess: function (data) {
             tab.bootstrapTable('hideLoading');
@@ -247,31 +237,8 @@
                 tab.bootstrapTable('load', jsonData );
 
 
-                {% if tab == 'paralogs' %}
-
-
-                document.getElementById("toolbar").innerHTML = '  <label class="checkbox"> ' +
-
-               '<input id="height" type="checkbox" onclick="update_same_species();"/> ' +
-
-                        'Only show same species paralogs </label>'
-
-
-
-
-
-
-
-
-
-
-                {%else%}
 
                 $("#toolbar").remove();
-
-
-                {%endif%}
-
 
 
                  });
@@ -285,20 +252,12 @@
         var element = $( "th span:contains('Domains')" )[0];
         element.style.writingMode = "vertical-lr"
 
-
         },
         refreshOptions: {'icons': icons}
     });
 
 
-  function update_same_species(){
-    if (document.getElementById('height').checked)
-  {
-      $('#grpTable').bootstrapTable('filterBy', {code:"{{entry.genome.uniprot_species_code}}"} )
-  } else {
-      $('#grpTable').bootstrapTable('filterBy', {})
-  }
-  }
+
 
 
 
