@@ -38,12 +38,12 @@
 
             </a>
 
-            <div id="filterHogs" class="collapse {% if tab == 'genes'%} show {%endif%}" style="padding-left:0px !important">
+            <div id="filterHogs" class="submenu collapse {% if tab == 'genes'%} show {%endif%}" >
 
 
                 {% if tab == 'genes' %}
 
-                    <h5 style="font-size: smaller; margin: 16px !important;" class="">Phylogenetic filter:</h5>
+                    <h5 style="font-size: smaller" class="">Phylogenetic filter:</h5>
 
 
                     <!--Genome selector -->
@@ -58,7 +58,7 @@
       <button id="btnGroupVerticalDrop1" type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <small>Ancestor genome</small>
       </button>
-      <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop1" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 38px, 0px);">
+      <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop1" x-placement="bottom-start" style="background-color:#FFFFFF !important;position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 38px, 0px);">
 
           {% for ancestor in lineage reversed %}
     <button class="dropdown-item" type="button" onclick="select_genome('{{ancestor}}')">{{ ancestor }}</button>

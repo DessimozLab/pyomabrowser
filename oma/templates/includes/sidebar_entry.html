@@ -30,7 +30,7 @@
                 {%endif%}
             </a>
 {% if nr_vps >= 1 %}
-            <div id="filterOrthologs" class="collapse {% if tab == 'orthologs'%} show {%endif%}">
+            <div id="filterOrthologs" class=" submenu collapse {% if tab == 'orthologs'%} show {%endif%}">
 
 
                 {% if tab == 'orthologs' %}
@@ -92,7 +92,7 @@
             </a>
 
 {% if nr_pps >= 1 %}
-             <div id="filterParalogs" class="collapse {% if tab == 'paralogs'%} show {%endif%}">
+             <div id="filterParalogs" class="submenu collapse {% if tab == 'paralogs'%} show {%endif%}">
 
 
                  {% if tab == 'paralogs' %}
@@ -122,7 +122,7 @@
             </a>
 {% if nr_homo >= 1 %}
 
-             <div id="filterhomeologs" class="collapse {% if tab == 'paralogs'%} show {%endif%}">
+             <div id="filterhomeologs" class=" submenu  collapse {% if tab == 'paralogs'%} show {%endif%}">
 
 
                  {% if tab == 'homeologs' %}
@@ -180,7 +180,7 @@
             </a>
 
 
-             <div id="subgoa" class="collapse {% if tab == 'goa'%} show {%endif%}">
+             <div id="subgoa" class=" submenu collapse {% if tab == 'goa'%} show {%endif%}">
 
 
                  {% if tab == 'goa' %}

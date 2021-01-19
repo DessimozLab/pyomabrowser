@@ -21,7 +21,7 @@
 
                 {% if nr_member %}
 
-                <span class="badge badge-info">{{nr_member}}</span>
+                <span class="badge badge-{% if tab == 'members' %}light{% else %}info{%endif%}">{{nr_member}}</span>
                 {% endif %}
                     </span>
                 {% if tab == 'members' %}
@@ -29,7 +29,7 @@
                 {%endif%}
             </a>
 
-            <div id="filterOrthologs" class="collapse {% if tab == "members" %}show{% endif %}">
+            <div id="filterOrthologs" class=" submenu collapse {% if tab == "members" %}show{% endif %}">
                 <div id="filter-taxon-container"></div>
             </div>
 

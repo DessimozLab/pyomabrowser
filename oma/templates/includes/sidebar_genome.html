@@ -47,7 +47,9 @@
 
 
 
-          <div id="filterSimilar" class="collapse {% if tab == 'closest'%} show {%endif%}">
+          <div id="filterSimilar" class="submenu collapse {% if tab == 'closest'%} show {%endif%}">
+
+          <div>
 
 
               <h5 style="font-size: smaller">Based on number of:</h5>
@@ -74,6 +76,8 @@
               </div>
 
           </div>
+          </div>
+
 
           </li>
 
@@ -90,7 +94,7 @@
                 {%endif%}
             </a>
 
-            <div id="filterSynteny" class="collapse {% if tab == 'synteny'%} show {%endif%}">
+            <div id="filterSynteny" class="submenu collapse {% if tab == 'synteny'%} show {%endif%}">
 
 
                  {% if tab == 'synteny' %}
