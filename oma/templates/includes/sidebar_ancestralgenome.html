@@ -28,7 +28,7 @@
       <li class="{% if tab == 'genes' %} active selected {%endif%}" {% if tab != 'genes' %}
              onclick="window.location='{% url 'ancestralgenome_genes' genome_name %}'" {%endif%}>
 
-           <a href="{% url 'ancestralgenome_genes' genome_name %}" {% if tab == 'genes' %}data-toggle="collapse" data-target="#filterHogs"{%endif%}>
+           <a href="{% url 'ancestralgenome_genes' genome_name %}" {% if tab == 'genes' %}data-toggle="collapse" aria-expanded="true"  data-target="#filterHogs"{%endif%}>
 
                 <span>Ancestral genes
 

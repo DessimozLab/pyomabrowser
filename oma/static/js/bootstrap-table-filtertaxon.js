@@ -279,7 +279,7 @@
 
             if (label_text == that.options.paralogSpecies){
 
-return '<div> <input type="radio" class="form-check-input checkbox_taxa" id="'+id_input+'" <label class="form-check-label" for="'+id_input+'"><b>'+label_text+'</b></label> </div>';
+return '<div> <input type="radio" class="form-check-input checkbox_taxa" id="'+id_input+'" <label class="form-check-label" for="'+id_input+'"><i>'+label_text+'</i></label> </div>';
 
             }else{
                 return '<div> <input type="radio" class="form-check-input checkbox_taxa" id="'+id_input+'" <label class="form-check-label" for="'+id_input+'">'+label_text+'</label> </div>';

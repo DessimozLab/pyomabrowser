@@ -37,7 +37,7 @@
 
 
           <li class="{% if tab == 'closest' %} active selected {%endif%}">
-            <a href="{% url 'genome_closest_og' genome.uniprot_species_code %}" data-toggle="collapse" data-target="#filterSimilar">
+            <a href="{% url 'genome_closest_og' genome.uniprot_species_code %}" data-toggle="collapse" {% if tab == 'closest' %}aria-expanded="true"{%endif%} data-target="#filterSimilar">
 
                     <span>Related Species </span>
 
@@ -80,7 +80,7 @@
 
          <li class="{% if tab == 'synteny' %} active selected {%endif%}" {% if tab != 'synteny' %}
              onclick="window.location='{% url 'genome_synteny' genome.uniprot_species_code %}'" {%endif%}>
-            <a href="{% url 'genome_synteny' genome.uniprot_species_code %}" {% if tab == 'synteny' %}data-toggle="collapse" data-target="#filterSynteny"{%endif%}>
+            <a href="{% url 'genome_synteny' genome.uniprot_species_code %}" {% if tab == 'synteny' %}data-toggle="collapse" aria-expanded="true" data-target="#filterSynteny"{%endif%}>
 
                 <span>Synteny
 

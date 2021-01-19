@@ -52,7 +52,7 @@
 
 
          <li class="{% if tab == 'similar' %} active selected {%endif%}">
-            <a data-toggle="collapse" data-target="#filterSimilar">
+            <a data-toggle="collapse" {% if tab == 'similar'%} aria-expanded="true" {%endif%} data-target="#filterSimilar">
 
                 <span>Similar HOGs
 
