@@ -254,7 +254,7 @@ class LocalSyntenyView(InfoBase, TemplateView):
 
     def get_context_data(self, entry_id, mod=4, windows=4, **kwargs):
         context = super(LocalSyntenyView, self).get_context_data(entry_id, **kwargs)
-        entry = context['entry']
+        entry = context['reference_entry']
         taxa = entry.genome.lineage
         windows = int(windows)
 

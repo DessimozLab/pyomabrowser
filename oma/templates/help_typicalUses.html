@@ -1,7 +1,7 @@
 {% extends  "base_template.html" %}
 {% load staticfiles %}
 
-{% block title %}OMA orthology database: typical uses cases{% endblock %}
+{% block title %}Access the OMA Data{% endblock %}
 {% block meta_description %}Here, we provide some examples of applications together with recommended solution provided by OMA{% endblock %}
 {% block content %}
 
@@ -143,8 +143,8 @@
 
                         <li>In the side menu under “Required orthology evidence,” select which type of orthologs you want to display, or any combination of all three.
 </li>
-                        <li>Filter by Taxon to obtain orthologs within a certain taxonomic level. If your taxonomic level is not shown, you can add a custom filter
-                            <a href="">LINK CATALOGS</a>.
+                        <li>Filter by Taxon to obtain orthologs within a certain taxonomic level. If your taxonomic level is not shown, you can add a
+                            <a href="{% url 'tool_catalog' %}#addCustomFilter">custom filter</a>.
 </li>
                         <li>You can search for a particular species, gene ID, or <a href="{% url 'glossary' %}#g-reltype" >relation type  </a>  of interest by using the search bar above the table.
 </li>
@@ -429,7 +429,7 @@ Here one can find the most and least related species to the species of interest 
 
 
                      <p class="text-justify">
-See Synteny Dot Plot <a href="">LINK TO DOTPLOT TOOL</a>
+See  <a href="{% url 'land_syntenyDP' %}">Synteny Dot Plot</a>
 
 
                      </p>
@@ -661,8 +661,8 @@ HDF5 download files from the current releases of OMA are still available under D
          <p class="text-justify">
 
         In addition to accessing orthologs through the OMA database, one can run the OMA Standalone software on their own genomes (see
-             <a href=" ">LINK TOOL</a> OMA Standalone in Catalog of OMA Tools). This can be combined with any of the species in OMA, so to facilitate saving time on the  <a href="{% url 'glossary' %}#g-allall" >all-against-all</a>  computations, they are available for download as well (see
-             <a href="">LINK TOOL</a>Export all-against-all in Catalog of OMA Tools).
+             <a href="https://omabrowser.org/standalone/"> OMA Standalone</a> in Catalog of OMA Tools). This can be combined with any of the species in OMA, so to facilitate saving time on the  <a href="{% url 'glossary' %}#g-allall" >all-against-all</a>  computations, they are available for download as well (see
+             <a href="{% url 'export' %}">Export all-against-all</a> in Catalog of OMA Tools).
          </p>
 
                             <small class="float-right">Please see <a href="https://genome.cshlp.org/content/29/7/1152.full"> (Altenhoff et al. 2019)</a> for more information.</small>
