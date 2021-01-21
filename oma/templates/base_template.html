@@ -82,7 +82,7 @@
                         {% include "includes/search_select.html" %}
                     </select>
                 </div>
-                <input id='inputBrowser' name="query" type="text" class="" placeholder="Please enter a value"/>
+                <input style="font: small" id='inputBrowser' name="query" type="text" class="" placeholder='P53_RAT | Fungi | "auxin response factor"'/>
                 <button><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
             </form>
 
@@ -111,7 +111,7 @@
                              {% include "includes/search_select.html" %}
                         </select>
                     </div>
-                    <input type="text" id="textNav" class="" name="query" placeholder="Please enter a value"/>
+                    <input type="text" id="textNav" class="" name="query" placeholder='P53_RAT | Fungi | "auxin response factor"'/>
                     <button type="submit"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
                 </form>
             </div>
@@ -277,6 +277,7 @@
         paramName: 'search',
         serviceUrl: '/api/xref/',
         minChars: 3,
+        triggerSelectOnValidInput: false,
         deferRequestBy: 200,
         transformResult: function (response) {
             var json = JSON.parse(response);
