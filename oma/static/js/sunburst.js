@@ -333,9 +333,13 @@ function click(d) {
     }
 
     if(d.id){
-        var id = "Species: <a href='"/oma/genome/" + d.id +"/info/"'>"+d.id+"</a>";
+        var id = "Species: <a href='/oma/genome/" + d.id +"/info/'>"+d.id+"</a>";
     } else {
         var id = "";
+    }
+
+    if(d.nr_hogs){
+        var id = "Ancestral species: <a href='/oma/ancestralgenome/" + d.taxid +"/info/'>"+d.name+"</a>";
     }
 
     var lineageItems = d.lineage.split(" > ");
