@@ -19,6 +19,10 @@ if 'fastmap' in settings.INSTALLED_APPS:
     urlpatterns.append(
         path('oma/', include('fastmap.urls'))
     )
+if 'academy' in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path('oma/', include('academy.urls'))
+    )
 
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView
