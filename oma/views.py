@@ -1161,7 +1161,7 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
     def get_context_data(self, species_id, **kwargs):
         context = super(GenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
-        context.update({'tab': 'genes', 'api_base': 'genome', 'api_url': '/api/genome/{}/proteins/?&per_page=250000'.format(species_id)})
+        context.update({'tab': 'genes', 'api_base': 'genome', 'amuse_bouche': '/api/genome/{}/proteins/?&per_page=2500000'.format(species_id), 'api_url': '/api/genome/{}/proteins/?&per_page=25'.format(species_id)})
         return context
 
 

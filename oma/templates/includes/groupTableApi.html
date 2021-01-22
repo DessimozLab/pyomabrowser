@@ -1,6 +1,13 @@
 {% load staticfiles %}
 
 
+{% if amuse_bouche %}
+
+            <div id="toolbar">
+  <b style="color: red;"> Only 25 entries are loaded, please wait while the rest is loading...</b>
+</div>
+            {% endif %}
+
 
 
         <table class="table table-hover" id="grpTable"
@@ -8,6 +15,10 @@
                data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
 
                 {% if api_base == "hog" %}
+               data-toolbar="#toolbar"
+               {% endif %}
+
+        {% if amuse_bouche %}
                data-toolbar="#toolbar"
                {% endif %}
 
@@ -103,7 +114,7 @@
         else if ("{{api_base}}" == 'hog' ){
             data = jsonData["members"];
 
-            console.log(data)
+
         }
 
 
@@ -129,6 +140,18 @@
         },
         refreshOptions: {'icons': icons}
     });
+
+
+        {% if amuse_bouche %}
+
+            $.getJSON("{{amuse_bouche}}", function (jsonData) {
+                tab.bootstrapTable({ data: jsonData});
+                tab.bootstrapTable('refreshOptions', { pageSize: 20});
+                tab.bootstrapTable('load', jsonData);
+                $("#toolbar").remove();
+            });
+
+        {% endif %}
 
 
 });
