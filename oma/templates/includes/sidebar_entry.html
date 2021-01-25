@@ -16,7 +16,7 @@
 
         <li class="{% if tab == 'orthologs' %} active selected {%endif%}" {% if tab != 'orthologs' %}
              onclick="window.location='{% url 'pairs' entry.query_id %}'" {%endif%}>
-            <a href="{% url 'pairs' entry.query_id %}" {% if tab == 'orthologs' %}data-toggle="collapse" data-target="#filterOrthologs"{%endif%}>
+            <a href="{% url 'pairs' entry.query_id %}" {% if tab == 'orthologs' %}data-toggle="collapse" aria-expanded="true" data-target="#filterOrthologs"{%endif%}>
 
                 <span>Orthologs
 
@@ -30,7 +30,7 @@
                 {%endif%}
             </a>
 {% if nr_vps >= 1 %}
-            <div id="filterOrthologs" class="collapse {% if tab == 'orthologs'%} show {%endif%}">
+            <div id="filterOrthologs" class=" submenu collapse {% if tab == 'orthologs'%} show {%endif%}">
 
 
                 {% if tab == 'orthologs' %}
@@ -80,7 +80,7 @@
 
         <li class="{% if tab == 'paralogs' %} active selected {%endif%}" {% if tab != 'paralogs' %}
              onclick="window.location='{% url 'pair_paralogs' entry.query_id %}'" {%endif%}>
-            <a href="{% url 'pair_paralogs' entry.query_id %}" {% if tab == 'paralogs' %}data-toggle="collapse" data-target="#filterParalogs"{%endif%}>
+            <a href="{% url 'pair_paralogs' entry.query_id %}" {% if tab == 'paralogs' %}data-toggle="collapse" aria-expanded="true" data-target="#filterParalogs"{%endif%}>
                 <span>Paralogs
                 {% if nr_pps %}
                 <span class="badge badge-info">{{nr_pps}}</span>
@@ -92,7 +92,7 @@
             </a>
 
 {% if nr_pps >= 1 %}
-             <div id="filterParalogs" class="collapse {% if tab == 'paralogs'%} show {%endif%}">
+             <div id="filterParalogs" class="submenu collapse {% if tab == 'paralogs'%} show {%endif%}">
 
 
                  {% if tab == 'paralogs' %}
@@ -110,7 +110,7 @@
         {% if entry.genome.is_polyploid %}
         <li class="{% if tab == 'homeologs' %} active selected {%endif%}" {% if tab != 'homeologs' %}
              onclick="window.location='{% url 'pair_homeologs' entry.query_id %}'" {%endif%}>
-            <a href="{% url 'pair_homeologs' entry.query_id %}" {% if tab == 'homeologs' %}data-toggle="collapse" data-target="#filterhomeologs"{%endif%}>
+            <a href="{% url 'pair_homeologs' entry.query_id %}" {% if tab == 'homeologs' %}data-toggle="collapse" aria-expanded="true" data-target="#filterhomeologs"{%endif%}>
                 <span>Homoeologs
                 {% if nr_homo %}
                 <span class="badge badge-info">{{nr_homo}}</span>
@@ -122,7 +122,7 @@
             </a>
 {% if nr_homo >= 1 %}
 
-             <div id="filterhomeologs" class="collapse {% if tab == 'paralogs'%} show {%endif%}">
+             <div id="filterhomeologs" class=" submenu  collapse {% if tab == 'paralogs'%} show {%endif%}">
 
 
                  {% if tab == 'homeologs' %}
@@ -171,7 +171,7 @@
 
         <li class="{% if tab == 'goa' %} active selected {%endif%}" {% if tab != 'goa' %}
              onclick="window.location='{% url 'entry_goa' entry.query_id %}'" {%endif%}>
-            <a href="{% url 'entry_goa' entry.query_id %}" {% if tab == 'goa' %}data-toggle="collapse" data-target="#subgoa"{%endif%}>
+            <a href="{% url 'entry_goa' entry.query_id %}" {% if tab == 'goa' %}data-toggle="collapse" aria-expanded="true" data-target="#subgoa"{%endif%}>
                 <span>GO Annotations
                     </span>
             {% if tab == 'goa' %}
@@ -180,7 +180,7 @@
             </a>
 
 
-             <div id="subgoa" class="collapse {% if tab == 'goa'%} show {%endif%}">
+             <div id="subgoa" class=" submenu collapse {% if tab == 'goa'%} show {%endif%}">
 
 
                  {% if tab == 'goa' %}

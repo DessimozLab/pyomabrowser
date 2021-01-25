@@ -6,47 +6,63 @@
 
 {% block contentTab %}
 
-
-<div class="container-fluid">
-  <div class="row">
-    <div class="col">
-      <div class="card">
-  <div class="card-header">
-    HOGs with shared orthologs relations
-  </div>
-  <div class="card-body">
-
-
-      <table class="table table-borderless">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">HOGs</th>
-      <th scope="col">Orthologous relations</th>
-
-    </tr>
-  </thead>
-  <tbody>
-
-  {% for close in similar_hogs %}
-    <tr>
-        <th scope="row">{{forloop.counter}}</th>
-        <td ><a href="{% url 'hog_viewer' close.1 %}">{{close.1}}</a></td>
-        <th scope="row">{{close.0}}</th>
-    </tr>
-{% endfor %}
-
-  </tbody>
-</table>
+     <table class="table table-hover" id="grpTable"
+               data-show-columns="true" data-search="true" data-show-export="true"
+               data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
+               data-mobile-responsive="true"
+               data-undefined-text=""
+               data-id-field="HOG ID">
+            <thead><tr>
+                <th data-field="rank" data-sortable="true" >Rank</th>
+                <th data-field="HOG ID" data-sortable="true" data-formatter="tablehooks.format_hogid_vis">HOG ID</th>
+                <th data-field="nbr_orthologs" data-sortable="true" data-title-tooltip="Number of orthologs shed between the two hogs">Shared orthologs</th>
+                <th data-field="nbr_members" data-sortable="true" >HOG size</th>
+                <th data-field="Description" data-sortable="true" >Description</th>
+            </tr></thead>
+        </table>
 
 
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
 
-  </div>
-</div>
-    </div>
 
-  </div>
-</div>
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<script src="{% static "js/bootstrap-table.min.js" %}"></script>
+
+<link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+<script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+<script src="{% static "js/tableExport.min.js" %}"></script>
+
+
+    {{ similar|json_script:"similar-data" }}
+
+<script>
+
+
+ var data = JSON.parse(document.getElementById('similar-data').textContent);
+
+ console.log(data)
+
+var tab = $("#grpTable");
+tab.bootstrapTable({
+            data: data,
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            showLoading: true,
+
+        });
+
+</script>
+
+
+
+
+
+
 
 
 {% endblock contentTab %}

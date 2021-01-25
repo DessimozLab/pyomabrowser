@@ -8,19 +8,6 @@
             {% endif %}
 
 
-{% if load_full_data == 0 and tab == 'paralogs'  %}
-
-            <div id="toolbar" >
-
-
-    <label class="checkbox">
-      <input id="height" type="checkbox" onclick="update_same_species();"/> Only show same species paralogs
-    </label>
-
-
-</div>
-            {% endif %}
-
 
 <div style="float: left;margin-top: 10px;margin-bottom: 10px;line-height: 34px;">
 
@@ -35,6 +22,9 @@
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
                data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
+                {% if tab == 'paralogs' %}
+data-paralog-species="{{ entry.genome.sciname }}"
+                 {%endif%}
                data-show-columns="true" data-search="true" data-show-export="true"
                data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                data-mobile-responsive="true" data-check-on-init="true"
@@ -51,7 +41,7 @@
 <th  data-field="DivergenceLevel" data-sortable="true" >Duplication Level</th>
                  {%endif%}
                  <th data-field="kingdom" data-sortable="true" data-filter-control="select"
-                    data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life">D.</th>
+                    data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life"><span>Domains</span></th>
                 <th  data-field="taxon" data-sortable="true" data-filter-control="input"
                     data-formatter="tablehooks.format_sciname">Taxon</th>
                 <th  data-field="protid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
@@ -99,6 +89,8 @@
 <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
 <script src="{% static "js/tableExport.min.js" %}"></script>
 
+<script src="{% static "js/FileSaver.js" %}"></script>
+
 <!-- taxon filter import: Core -->
 <script src="{% static "js/tnt.min.js" %}"></script>
 <script src="{% static "js/bootstrap-table-filtertaxon.js" %}"></script>
@@ -134,9 +126,98 @@
         clickToSelect: false,
         showMultiSort: true,
         showLoading: true,
+        onPostHeader: function () {
+
+                $('.fasta').remove();
+
+                var button_group = document.getElementsByClassName("columns columns-right btn-group float-right")[0];
+
+                var div = document.createElement('div');
+                div.className = "fasta btn-group"
+
+                var fasta = document.createElement('button');
+                fasta.className = "btn btn-secondary";
+                fasta.id = "fasta_btn";
+                fasta.title = "Export table protein sequences as fasta";
+                fasta.innerHTML = 'Fasta <i class="fa fa fa-file-download"></i>'
+
+                fasta.onclick = function() {
+
+                    // Get the table data (filtered out protein will not be here)
+                    var table = tab.bootstrapTable('getData')
+
+                    // extract the list of protein id
+                    var ids = []
+                    for (var protein in table){
+                        ids.push(table[protein].protid)}
+
+                    // init the sequences container and the request handler
+
+                    var call_pending = 0
+                    var sequences = ""
+
+                    function check_call_ready(){
+
+                        if (call_pending ==0){
+
+                            var filename =  "{{ entry.omaid }}_{{tab}}.txt";
+                                  var blob = new Blob([sequences], {
+                                      type: "text/plain;charset=utf-8"
+                                });
+
+                                saveAs(blob, filename);
+                                fasta.innerHTML = 'Fasta <i class="fa fa fa-file-download"></i>'
+                        }
+
+                    }
+
+                    fasta.innerHTML = 'Loading fasta</i>'
+
+                    // Split the ids on array of 1000 elements max (limit of the api call for bulk_retreive)
+                    var i,j,chunk = 999;
+                    for (i=0,j=ids.length; i<j; i+=chunk) {
+
+                        var xhr = new XMLHttpRequest();
+                    xhr.open("POST", '/api/protein/bulk_retrieve/', true);
+
+                    xhr.setRequestHeader("Content-Type", "application/json");
+
+                    xhr.onreadystatechange = function() {
+
+                        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+
+                            var dat = JSON.parse(this.responseText)
+
+                            for (i in dat){
+
+                                sequences += ">{0} | {1} [{2}]  \n{3}\n".replace('{0}', dat[i]["target"].omaid)
+                                    .replace('{1}', dat[i]["target"].canonicalid)
+                                    .replace('{2}', dat[i]["target"].species.species)
+                                    .replace('{3}', dat[i]["target"].sequence.replace(/(.{60})/g,"$1\n"))
+                            }
+                            call_pending -= 1
+                            console.log(call_pending)
+                            check_call_ready(call_pending)
+
+                        }
+
+                    }
+
+                    call_pending += 1
+                        var id = JSON.stringify(({ids: ids.slice(i,i+chunk)}))
+                    xhr.send(id)
+
+                    }
+
+                }
+
+                div.appendChild(fasta)
+                button_group.appendChild(div)
+
+            },
         onPostBody: function (data) {
-            console.log(data);
             domains.visualize_all(".protein", {{ longest_seq }});
+
         },
         onLoadSuccess: function (data) {
             tab.bootstrapTable('hideLoading');
@@ -156,31 +237,8 @@
                 tab.bootstrapTable('load', jsonData );
 
 
-                {% if tab == 'paralogs' %}
-
-
-                document.getElementById("toolbar").innerHTML = '  <label class="checkbox"> ' +
-
-               '<input id="height" type="checkbox" onclick="update_same_species();"/> ' +
-
-                        'Only show same species paralogs </label>'
-
-
-
-
-
-
-
-
-
-
-                {%else%}
 
                 $("#toolbar").remove();
-
-
-                {%endif%}
-
 
 
                  });
@@ -189,19 +247,19 @@
                 {%endif%}
 
 
+
+
+        var element = $( "th span:contains('Domains')" )[0];
+        element.style.writingMode = "vertical-lr"
+
         },
         refreshOptions: {'icons': icons}
     });
 
 
-  function update_same_species(){
-    if (document.getElementById('height').checked)
-  {
-      $('#grpTable').bootstrapTable('filterBy', {code:"{{entry.genome.uniprot_species_code}}"} )
-  } else {
-      $('#grpTable').bootstrapTable('filterBy', {})
-  }
-  }
+
+
+
 
 
 </script>

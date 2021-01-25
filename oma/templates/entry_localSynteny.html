@@ -201,7 +201,7 @@ $(document).on("click",".toggle-visibility", function () {
                     <td>
                         <a href="/oma/synteny/{{ geneinfo.entryid }}/{{ geneinfo.type }}/{{ windows }}/"
                            class="btn btn-default btn-synteny cursor_wait btn-{{ geneinfo.type }}"
-                        data-toggle="tooltip" data-title="{% include 'includes/synteny_xref.html' %}" >
+                        data-toggle="tooltip" data-title="{% include 'includes/synteny_xref.html' %}{% if entry.omaid != reference_entry.omaid and  reference_entry.entry_nr == geneinfo.entryid   %} <br> (main isoform of {{entry.omaid}}) {% endif %}" >
                         {% if geneinfo.dir == -1 %}
                         <span class="fa fa-chevron-left"></span>
                         {% endif %}

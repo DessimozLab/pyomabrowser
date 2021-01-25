@@ -457,12 +457,14 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
  body .oma-details-container .oma-details-nav-left ul li a[aria-expanded="true"] i {
 	 transform: rotate(90deg);
 }
+ /*
  body .oma-details-container .oma-details-nav-left ul li #filterParalogs {
 	 padding: 0 0 10px;
 }
  body .oma-details-container .oma-details-nav-left ul li #filterParalogs p {
 	 margin: 0;
 }
+  */
  body .oma-details-container .oma-details-content {
 	 width: auto ;
 	 margin-left: 300px;
@@ -1197,7 +1199,7 @@ background-color: #336799 !important;
 	color: red;
 
 }
-
+/*
 body .oma-details-container .oma-details-nav-left .genome li #filterSynteny {background: #ffffff;
 box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
 padding: 20px 10px; }
@@ -1206,7 +1208,6 @@ box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
 padding: 20px 10px; }
 body .oma-details-container .oma-details-nav-left .genome li #filterSynteny div { background: transparent !important; }
 body .oma-details-container .oma-details-nav-left .genome li #filterSimilar div { background: transparent !important; }
-
 
 body .oma-details-container .oma-details-nav-left .oma-group li #filterOrthologs { background: #ffffff;
 box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
@@ -1227,7 +1228,12 @@ body .oma-details-container .oma-details-nav-left .gene-orthology li #filterPara
 box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
 padding: 20px 10px; }
 body .oma-details-container .oma-details-nav-left .gene-orthology li #filterParalogs div { background: transparent !important; }
+*/
 
+body .oma-details-container .oma-details-nav-left .submenu { background: #ffffff;
+box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+padding: 20px 10px; }
+body .oma-details-container .oma-details-nav-left .submenu div { background: transparent !important; }
 
 
 .search_entry {

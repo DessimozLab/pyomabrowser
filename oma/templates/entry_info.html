@@ -58,12 +58,47 @@
                     || (obj.source !== "SourceID" && obj.source !== "SourceAC")
             });
             _.forEach(_.groupBy(clean_data, "source"), function(xrefs, source){
-                var list_item = ["<tr> <td>" + source + "</td>"];
-                list_item.push("<td>")
+
+                var list_item = [];
+
                 _.forEach(xrefs, function(ref){
-                    list_item.push(xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}"))
-                    list_item.push(" ")
+
+
+
+                    var d = xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}");
+
+                    if (source == "Protein Name"){
+
+                        if (ref.seq_match == "unchecked" ) {
+                            list_item.unshift(" ")
+                            list_item.unshift(d)
+                        }
+
+
+                        else{
+                            list_item.push("<i style='color:grey;'>'" + d + "'</i> " )
+                         list_item.push(" ")
+                        }
+
+
+
+
+
+
+                    }
+                    else{
+                         list_item.push(d)
+                         list_item.push(" ")
+                    }
+
+
                 });
+
+
+                list_item.unshift("<td>")
+                list_item.unshift("<tr> <td>" + source + "</td>")
+
+
 
                 list_item.push("</td>")
                 $('#xrefs').append(list_item.join("")+"</tr>\n");

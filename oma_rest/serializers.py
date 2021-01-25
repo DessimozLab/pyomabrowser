@@ -261,6 +261,10 @@ class HOGsListSerializer(HOGsBaseSerializer):
         lookup_url_kwarg="hog_id")
 
 
+class HOGsCompareListSerializer(HOGsListSerializer):
+    event = serializers.CharField()
+
+
 class HOGsLevelDetailSerializer(HOGsListSerializer):
     parent_hogs = serializers.ListSerializer(child=HOGsBaseSerializer())
     children_hogs = serializers.ListSerializer(child=HOGsBaseSerializer())

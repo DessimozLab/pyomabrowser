@@ -32,8 +32,8 @@
                        {% include "includes/search_select.html" %}
                     </select>
                 </div>
-                <input id='inputBrowser' name="query" type="text" class="" placeholder="Please enter a value"/>
-                <button><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
+                <input id='inputBrowser' name="query" type="text" class="" placeholder='P53_RAT | "auxin response factor" | Fungi | Insulin Human '/>
+                <button id="submit_home"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
             </form>
         </div>
 
@@ -56,7 +56,7 @@
                                     {% include "includes/search_select.html" %}
                                 </select>
                             </div>
-                            <textarea id='inputBrowserModal' name="query" type="text" class="" placeholder="Please enter a value"></textarea>
+                            <textarea id='inputBrowserModal' name="query" type="text" class="" placeholder='P53_RAT | Fungi | Insulin HUMAN | "auxin response factor"'></textarea>
                             <button type="submit" class="btn btn-lg btn-block btn-primary">Search</button>
                         </form>
                     </div>
@@ -224,11 +224,12 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                         <div class="oma-card-content">
                              <br>
                             <ul>
-                                <li> <a href="https://corona.omabrowser.org/"><img src="{% static "image/logo-oma-corona.svg" %}" style="width: 80px;"> Corona OMA Browser <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
+                                <li> <a href="https://corona.omabrowser.org/"><img src="{% static "image/logo-oma-corona.svg" %}" style="width: 60px;"> Corona OMA Browser <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
                                 <li> <a  href="https://omabrowser.org/standalone/">OMA StandAlone <span class="badge badge-pill badge-dark float-right">Software</span></a> </li>
                                 <li> <a  href="https://github.com/dessimozlab/pyham">pyHam </a> <span class="badge badge-pill badge-dark float-right">Python library</span></li>
                                 <li> <a  href="{% url 'function-projection-input' %}">Functional prediction <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
                                 <li> <a  href="{% url 'land_syntenyDP' %}">Synteny dotplot <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
+                                <li> <a  href="https://swissorthology.ch">  Combined Orthology prediction from OMA & orthoDB <span class="badge badge-pill badge-dark float-right">Ressource</span> </a></li>
                                 <li class="btn-more-container" >
                                     <button type="button"  class="btn btn-outline-dark " onclick="location.href='{% url 'tool_catalog' %}'" >Discover more tools</button>
                                 </li>
@@ -351,6 +352,9 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                Altenhoff A et al., <em> <b>OMA orthology in 2021: website overhaul, conserved isoforms, ancestral gene order and more</b></em>
                Nucleic Acids Research, gka1007,
                (doi:<a href="http://doi.org/10.1093/nar/gkaa1007">10.1093/nar/gkaa1007</a>)</p>
+
+                <a href="https://swissorthology.ch"><img style="width: 100px"
+                                                                 src="{% static "image/logo-swiss-orthology.svg" %}"></a>
             </div>
         </div>
     </div>

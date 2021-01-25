@@ -2,14 +2,30 @@
 {% load staticfiles %}
 
 {% block title %}Pairwise Orthologs for {{ entry.omaid }}{% endblock %}
-{% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ vps|length }} pairwise
+{% block meta_description %}For {{ entry.omaid }} OMA predicts the following {{ nr_vps|length }} pairwise
     orthologs{% endblock %}
 
 {% block contentTab %}
 
+
 {% if nr_vps > 0 %}
 
-    {% include "includes/groupTable_support.html" %}
+    {% if reference_entry.omaid != entry.omaid %}
+
+        <div class="alert alert-warning" role="alert">
+  This entry is not the isoform used for orthologs inferences,
+    orthologs below are inferred using the entry isoform <a href="{% url 'pairs' entry.get_main_isoform.omaid %}">{{entry.get_main_isoform.omaid}}</a>.
+</div>
+
+
+         {% include "includes/groupTable_support.html" %}
+
+
+        {% else %}
+
+         {% include "includes/groupTable_support.html" %}
+
+     {% endif %}
 
 {% else %}
 
@@ -23,10 +39,12 @@
 
 {% else %}
 
-<div class="alert alert-secondary" role="alert">
+        <div class="alert alert-warning" role="alert">
   This entry is not the isoform used for orthologs inferences,
     please check entry <a href="{% url 'pairs' entry.get_main_isoform.omaid %}">{{entry.get_main_isoform.omaid}}</a> for orthologs.
 </div>
+
+
 
 
 

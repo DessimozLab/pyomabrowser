@@ -1,0 +1,123 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block title %}Phylostratigraphy{% endblock %}
+
+{% block content %}
+
+
+    <script src="{% static 'phylostratigraphy/BigInteger.min.js' %}"></script>
+    <script src="{% static 'phylostratigraphy/jquery-2.1.4.min.js' %}"></script>
+    <script src="{% static 'phylostratigraphy/treecompare.js' %}"></script>
+    <script src="{% static 'phylostratigraphy/d3.min.js' %}"></script>
+    <script src="{% static 'phylostratigraphy/FileSaver.min.js' %}"></script>
+    <script src="{% static 'phylostratigraphy/underscore-min.js' %}"></script>
+
+
+    <link rel="stylesheet" href="{% static "phylostratigraphy/style.css" %}"/>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/solid.css" integrity="sha384-v2Tw72dyUXeU3y4aM2Y0tBJQkGfplr39mxZqlTBDUZAb9BGoC40+rdFCG0m10lXk" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/fontawesome.css" integrity="sha384-q3jl8XQu1OpdLgGFvNRnPdj5VIlCvgsDQTQB6owSOHWlAurxul7f+JpUOVdAiJ5P" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+
+
+
+
+
+    <style>
+    text {
+        font-family: 'Open Sans', sans-serif;
+        text-rendering: optimizeLegibility;
+        stroke: none;
+    }
+    </style>
+
+<div class="modal  "  id="myModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Phylostratigraphy help</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+                        <embed src="https://cdn.rawgit.com/DessimozLab/pyham/fc01fb94/help.pdf"  width="100%" height="600px">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        <!-- Button trigger modal -->
+        <button style="position: fixed; bottom: 50%;right: 8px; z-index: 10000; color: white;background-color: #555" id="help_modal_button" type="button" class="btn" data-toggle="modal" data-target="#myModal">
+            Help (tmp)
+        </button>
+
+
+<div id="oma-generic-container">
+
+
+
+
+        <div class="container-fluid" style="height: 100vh;">
+
+
+
+            <div class="row">
+
+    <div class="col" style="height:100vh; background-color: #F9F9F9"> <!-- FCFCFC -->
+
+        <h2  style="position:fixed;margin: 8px">OMA phylostratigraphy viewer</h2>
+
+
+        <div id="phylo">
+
+        <div id="vis-container1" style="width: 100%; height: calc(100vh - 85px);">
+        <div id="scale-1"> </div>
+        </div>
+        <script type="text/javascript">
+
+
+            $.getJSON("/All/genomes.json", function(data) {
+
+
+            var treecomp = TreeCompare().init({
+                enableScale: true,
+                scaleColor: "black",
+                showHistogramValues: true,
+                showHistogramSummaryValue: true
+            });
+
+             treeData = JSON.stringify(data);
+
+            var tree1 = treecomp.addTree(treeData, undefined, "single");
+            treecomp.viewTree(tree1.name, "vis-container1", "scale-1");
+            treecomp.addMainLegend(tree1.name);
+
+
+            });
+        </script>
+        </div>
+
+
+    </div>
+
+
+
+  </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+{% endblock content %}

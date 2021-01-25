@@ -37,7 +37,7 @@
 
 
           <li class="{% if tab == 'closest' %} active selected {%endif%}">
-            <a href="{% url 'genome_closest_og' genome.uniprot_species_code %}" data-toggle="collapse" data-target="#filterSimilar">
+            <a href="{% url 'genome_closest_og' genome.uniprot_species_code %}" data-toggle="collapse" {% if tab == 'closest' %}aria-expanded="true"{%endif%} data-target="#filterSimilar">
 
                     <span>Related Species </span>
 
@@ -47,7 +47,9 @@
 
 
 
-          <div id="filterSimilar" class="collapse {% if tab == 'closest'%} show {%endif%}">
+          <div id="filterSimilar" class="submenu collapse {% if tab == 'closest'%} show {%endif%}">
+
+          <div>
 
 
               <h5 style="font-size: smaller">Based on number of:</h5>
@@ -74,13 +76,15 @@
               </div>
 
           </div>
+          </div>
+
 
           </li>
 
 
          <li class="{% if tab == 'synteny' %} active selected {%endif%}" {% if tab != 'synteny' %}
              onclick="window.location='{% url 'genome_synteny' genome.uniprot_species_code %}'" {%endif%}>
-            <a href="{% url 'genome_synteny' genome.uniprot_species_code %}" {% if tab == 'synteny' %}data-toggle="collapse" data-target="#filterSynteny"{%endif%}>
+            <a href="{% url 'genome_synteny' genome.uniprot_species_code %}" {% if tab == 'synteny' %}data-toggle="collapse" aria-expanded="true" data-target="#filterSynteny"{%endif%}>
 
                 <span>Synteny
 
@@ -90,7 +94,7 @@
                 {%endif%}
             </a>
 
-            <div id="filterSynteny" class="collapse {% if tab == 'synteny'%} show {%endif%}">
+            <div id="filterSynteny" class="submenu collapse {% if tab == 'synteny'%} show {%endif%}">
 
 
                  {% if tab == 'synteny' %}
@@ -161,6 +165,7 @@
 
      </ul>
 </div>
+
 
 
 

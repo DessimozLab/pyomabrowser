@@ -147,6 +147,7 @@ class AsyncMsaMixin(object):
 
 #  --- Entry Centric -------
 class EntryCentricMixin(object):
+
     def get_entry(self, entry_id):
         """resolve any ID and return an entry or a 404 if it is unknown"""
         try:
@@ -204,13 +205,21 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         context = super(InfoBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
-        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
-        nr_homoeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
+        if entry.is_main_isoform:
+            reference_entry= entry
+        else:
+            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            reference_entry = entry.get_main_isoform()
+
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
+        nr_homoeologs_relations = utils.db.count_homoeologs(reference_entry.entry_nr)
+
 
         # get parent genome/hog level
-        most_specific_hog = self.get_most_specific_hog(entry)
+        most_specific_hog = self.get_most_specific_hog(reference_entry)
 
         context.update({'entry': entry,
+                        'reference_entry':reference_entry,
                         'most_specific_hog': most_specific_hog,
                         'tab': 'geneinformation',
                         'nr_homo': nr_homoeologs_relations,
@@ -245,7 +254,7 @@ class LocalSyntenyView(InfoBase, TemplateView):
 
     def get_context_data(self, entry_id, mod=4, windows=4, **kwargs):
         context = super(LocalSyntenyView, self).get_context_data(entry_id, **kwargs)
-        entry = context['entry']
+        entry = context['reference_entry']
         taxa = entry.genome.lineage
         windows = int(windows)
 
@@ -427,26 +436,33 @@ class PairsBase(ContextMixin, EntryCentricMixin):
 
     def get_context_data(self, entry_id, **kwargs):
 
-
         context = super(PairsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
-        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
+        if entry.is_main_isoform:
+            reference_entry= entry
+        else:
+            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            reference_entry = entry.get_main_isoform()
+
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
+
 
         if nr_ortholog_relations['NrAnyOrthologs']  < self._max_entry_to_load:
             load_full_data = 0
-            url = reverse('pairs_support_json', args=(entry.omaid,))
+            url = reverse('pairs_support_json', args=(reference_entry.omaid,))
         else:
-            url = reverse('pairs_support_sample_json', args=(entry.omaid,))
-            load_full_data = reverse('pairs_support_json', args=(entry.omaid,))
+            url = reverse('pairs_support_sample_json', args=(reference_entry.omaid,))
+            load_full_data = reverse('pairs_support_json', args=(reference_entry.omaid,))
 
-        nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
+        nr_homeologs_relations = utils.db.count_homoeologs(reference_entry.entry_nr)
 
         # get parent genome/hog level
-        most_specific_hog = self.get_most_specific_hog(entry)
+        most_specific_hog = self.get_most_specific_hog(reference_entry)
 
         context.update(
             {'entry': entry,
+             'reference_entry':reference_entry,
              'most_specific_hog': most_specific_hog,
              'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_homo': nr_homeologs_relations,
@@ -666,22 +682,29 @@ class ParalogsBase(ContextMixin, EntryCentricMixin):
         context = super(ParalogsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
-        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
+        if entry.is_main_isoform:
+            reference_entry= entry
+        else:
+            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            reference_entry = entry.get_main_isoform()
+
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
 
         if nr_ortholog_relations['NrHogInducedPWParalogs'] < self._max_entry_to_load:
             load_full_data = 0
-            url = reverse('paralogs_json', args=(entry.omaid,))
+            url = reverse('paralogs_json', args=(reference_entry.omaid,))
         else:
-            url = reverse('paralogs_sample_json', args=(entry.omaid,))
-            load_full_data = reverse('paralogs_json', args=(entry.omaid,))
+            url = reverse('paralogs_sample_json', args=(reference_entry.omaid,))
+            load_full_data = reverse('paralogs_json', args=(reference_entry.omaid,))
 
-        nr_homeologs_relations = utils.db.count_homoeologs(entry.entry_nr)
+        nr_homeologs_relations = utils.db.count_homoeologs(reference_entry.entry_nr)
 
         # get parent genome/hog level
-        most_specific_hog = self.get_most_specific_hog(entry)
+        most_specific_hog = self.get_most_specific_hog(reference_entry)
 
         context.update(
             {'entry': entry,
+             'reference_entry': reference_entry,
              'most_specific_hog': most_specific_hog,
              'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
@@ -762,22 +785,29 @@ class HomeologsBase(ContextMixin, EntryCentricMixin):
         context = super(HomeologsBase, self).get_context_data(**kwargs)
         entry = self.get_entry(entry_id)
 
-        nr_homeologs_relations  = utils.db.count_homoeologs(entry.entry_nr)
+        if entry.is_main_isoform:
+            reference_entry= entry
+        else:
+            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            reference_entry = entry.get_main_isoform()
+
+        nr_homeologs_relations  = utils.db.count_homoeologs(reference_entry.entry_nr)
 
         if nr_homeologs_relations < self._max_entry_to_load:
             load_full_data = 0
-            url = reverse('homeologs_json', args=(entry.omaid,))
+            url = reverse('homeologs_json', args=(reference_entry.omaid,))
         else:
-            url = reverse('homeologs_sample_json', args=(entry.omaid,))
-            load_full_data = reverse('homeologs_json', args=(entry.omaid,))
+            url = reverse('homeologs_sample_json', args=(reference_entry.omaid,))
+            load_full_data = reverse('homeologs_json', args=(reference_entry.omaid,))
 
-        nr_ortholog_relations = utils.db.nr_ortholog_relations(entry.entry_nr)
+        nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
 
         # get parent genome/hog level
-        most_specific_hog = self.get_most_specific_hog(entry)
+        most_specific_hog = self.get_most_specific_hog(reference_entry)
 
         context.update(
             {'entry': entry,
+             'reference_entry':reference_entry,
              'most_specific_hog': most_specific_hog,
              'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_homo': nr_homeologs_relations,
@@ -1131,7 +1161,7 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
     def get_context_data(self, species_id, **kwargs):
         context = super(GenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
-        context.update({'tab': 'genes', 'api_base': 'genome', 'api_url': '/api/genome/{}/proteins/?&per_page=250000'.format(species_id)})
+        context.update({'tab': 'genes', 'api_base': 'genome', 'amuse_bouche': '/api/genome/{}/proteins/?&per_page=2500000'.format(species_id), 'api_url': '/api/genome/{}/proteins/?&per_page=25'.format(species_id)})
         return context
 
 
@@ -1224,6 +1254,7 @@ class AncestralGenomeBase(ContextMixin):
                 context['genome_name'] = search['name']
                 context['nr_hogs'] = search['nr_hogs']
                 context['nbr_species'] = count_species(search)
+
             else:
                 raise ValueError("Could not find ancestral genome {}".format(species_id))
         except ValueError as e:
@@ -1249,9 +1280,22 @@ class AncestralGenomeCentricInfo(AncestralGenomeBase, TemplateView):
 class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
     template_name = "ancestralgenome_genes.html"
 
-    def get_context_data(self, species_id, **kwargs):
+    def get_context_data(self, species_id, level=None, **kwargs):
         context = super(AncestralGenomeCentricGenes, self).get_context_data(species_id, **kwargs)
-        context.update({'tab': 'genes', 'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name'])})
+
+
+        ## get list lineage up
+        #  get an extant genome lineage
+        taxid = utils.tax.get_subtaxonomy_rooted_at(context['taxid']).get_taxid_of_extent_genomes()[0]
+        extant = utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid))
+        full_lineage = extant.lineage
+
+        # cut before current level
+        index = full_lineage.index(context['genome_name'])
+        lineage = full_lineage[index+1:]
+
+        context.update({'tab': 'genes', 'level': level, 'api_url' :'/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
+                        'lineage': lineage })
         return context
 
 
@@ -1450,15 +1494,67 @@ class HOGSimilarPairwise(HOGBase, TemplateView):
 
         # sorted the groups by number of orthologous relations
         sorted_HOGs = sorted([(value, key) for (key, value) in count_HOGs.items()], reverse=True)
+
+
+        if len(sorted_HOGs) == 0:
+            data = ''
+        else:
+
+            data = []
+            cpt = 0
+            for h in sorted_HOGs:
+                cpt += 1
+                hog = models.HOG(utils.db, h[1])
+
+                hdata = {"rank": cpt,
+                         "HOG ID": hog.hog_id,
+                         "nbr_orthologs": h[0],
+                         "nbr_members": hog.nr_member_genes,
+                         "Description": hog.keyword,
+                         }
+
+                data.append(hdata)
+
+
         context.update({
             'tab': 'similar',
             'subtab': 'pairwise',
+            'similar': data,
             'lineage_link_name': 'hog_similar_pairwise',
             'similar_hogs': sorted_HOGs})
+
         return context
 
+class HOGSimilarPairwiseJSON(HOGSimilarPairwise, View):
 
-class HOGDomainsJson(HOGSimilarDomain, View):
+
+    def get(self, request, hog_id, *args, **kwargs):
+        context = self.get_context_data(hog_id, **kwargs)
+        hogs = context['similar_hogs']
+        if len(hogs) == 0:
+            data = ''
+        else:
+
+            data = []
+            cpt = 0
+            for h in hogs:
+                cpt+=1
+                hog = models.HOG(utils.db, h[1])
+
+                hdata = {"rank": cpt,
+                        "HOG ID": hog.hog_id,
+                        "nbr_orthologs": h[0],
+                        "nbr_members": hog.nr_member_genes,
+                        "Description": hog.keyword,
+                        }
+
+                data.append(hdata)
+
+        return JsonResponse(data,safe=False)
+
+
+
+class HOGDomainsJson(HOGSimilarDomain, JsonModelMixin, View):
 
     json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
                    'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
@@ -1528,12 +1624,52 @@ class HOGSynteny(HOGBase, TemplateView):
     template_name = "hog_synteny.html"
 
     def get_context_data(self, hog_id, **kwargs):
+
         context = super(HOGSynteny, self).get_context_data(hog_id, **kwargs)
 
         graph = utils.db.get_syntentic_hogs(hog_id, context['level'], steps=2)
 
         ancestral_synteny = {"nodes": [], "links": []}
         neigh = []
+
+        # Prune the hog neighbor to prevent unreadable graph
+        limit_first_radius = 20
+        limit_second_radius = 5
+
+        logger.info("pruning of big graph")
+
+        # get the source hog node
+        selected_node = [n for n, v in graph.nodes(data=True) if n == hog_id]
+        if len(selected_node) != 1:
+            logger.info("Error during graph pruning, {} nodes have been founded for {}".format(len(selected_node), hog_id))
+
+        neighbors = [selected_node[0]]
+
+        logger.info("pruning of big graph:  node founded")
+
+        e = graph.edges(selected_node[0], data="weight")
+        if len(e) < limit_first_radius:
+            limit_first_radius = len(e)
+
+            logger.info("pruning of big graph:  first radius receive")
+
+        for edge in sorted(e,key=lambda x: x[2], reverse=True)[:limit_first_radius]:
+            neighbors.append(edge[1])
+
+            se = graph.edges(edge[1], data="weight")
+
+            logger.info("pruning of big graph:  second radius receive / {} ".format(limit_first_radius))
+
+            if len(se) < limit_second_radius:
+                limit_second_radius = len(se)
+
+            for subedge in sorted( se,key=lambda x: x[2], reverse=True)[:limit_second_radius]:
+                neighbors.append(subedge[1])
+
+        graph = graph.subgraph(neighbors)
+
+        logger.info("pruning of big graph:  done ")
+        
 
         for n in graph.nodes.data('weight'):
             ancestral_synteny["nodes"].append({"id": n[0], "name": n[0]})
@@ -1548,6 +1684,8 @@ class HOGSynteny(HOGBase, TemplateView):
             if e[1] == hog_id:
                 h = models.HOG(utils.db, e[0])
                 neigh.append({'hog':e[0], 'weight': str(e[2]), 'description': h.keyword})
+
+        logger.info("data ready to ship ")
 
         context.update({'tab': 'synteny',
                         'lineage_link_name': 'hog_synteny',
@@ -2162,6 +2300,7 @@ class OMAGroup_members(TemplateView, GroupBase):
         context = super(OMAGroup_members, self).get_context_data(group_id, **kwargs)
         grp = context['omagroup']
         context.update({
+            'toolbar': True,
             'tab': 'members',
             'table_data_url': reverse('omagroup-json', args=(grp.group_nbr,)),
             'longest_seq': max([len(z) for z in grp.members]),
@@ -2535,10 +2674,10 @@ class Searcher(View):
         raw_hits_id = []
         raw_hits_xref = []
 
+        start = time.time()
+
         # for each terms we get the raw results
         for term in terms:
-
-
 
             term_hit_id = []
             term_hit_xref = []
@@ -2600,8 +2739,11 @@ class Searcher(View):
             entry_search["crossref"] = []
             total_search += 0
             search_entry_meta["crossref"] = 0
+        end = time.time()
+        logger.info("Search entry by IDs took {} sec".format(start - end))
 
         # search by Sequence
+        start = time.time()
 
         raw_hits_seq = []
         align_data = None
@@ -2669,7 +2811,8 @@ class Searcher(View):
             total_search += 0
             search_entry_meta['sequence'] = 0
 
-
+        end = time.time()
+        logger.info("Search entry by Sequences took {} sec".format(start - end))
 
         search_entry_meta['total'] =  total_search
 
@@ -2741,6 +2884,7 @@ class Searcher(View):
         context['meta_entry'] = search_entry_meta
         context['meta_term_entry'] = search_term_meta
         end = time.time()
+
         logger.info("Entry json took {} sec for {} entry.".format(start - end, len(data_entry)))
 
         return
@@ -3043,7 +3187,22 @@ class Searcher(View):
                 entry_nr = utils.id_resolver.search_protein(query)
 
                 if redirect_valid and len(list(entry_nr.keys()))==1:
-                    return redirect('pairs', list(entry_nr.keys())[0])
+
+                    # check if query is in founded match (e.g if search "DHE5_YEAST" we prefer keep this in url than "12")
+                    entry_nr, matches = list(entry_nr.items())[0]
+                    original_query = False
+
+                    if len(list(matches.keys()) ) == 1:
+                        t,m = list(matches.items())[0]
+                        if len(m) == 1:
+                            if m[0] == query:
+                                original_query = m[0]
+
+                    if original_query is False :
+                        return redirect('pairs', list(entry_nr.keys())[0])
+                    else:
+                        return redirect('pairs', original_query)
+
                 else:
                     for enr in entry_nr.keys():
                         data.append(enr)

@@ -4,6 +4,10 @@
 
 {% block contentTab %}
 
+    <div id="toolbar">
+            <a href="{% url 'omagroup-fasta' omagroup.group_nbr %}"><i class="fas fa-download"></i> Sequences (fasta)</a>
+        </div>
+
 
     {% include "includes/groupTable.html" %}
 

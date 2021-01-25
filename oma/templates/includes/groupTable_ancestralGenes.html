@@ -15,6 +15,7 @@
 
                 <th  data-field="hog_id" data-sortable="true"  data-formatter="tablehooks.format_hog_api">HOG ID</th>
                 <th  data-field="roothog_id" data-sortable="true" data-formatter="tablehooks.format_roothog">Root HOG ID</th>
+                <th  data-field="event" data-sortable="true" >Phylogenetic event</th>
 
             </tr>
 
@@ -67,10 +68,28 @@
 
 <script>
 
-    $.getJSON("{{api_url}}", function (jsonData) {
+
+console.log("{{ level }}")
 
 
-         $("#loader").hide();
+    {% if level  %}
+        $.getJSON("{{ api_url|safe }}" + "&compare_with={{level}}" , function (jsonData) {
+
+    {% else %}
+
+         $.getJSON("{{api_url}}", function (jsonData) {
+{% endif %}
+
+
+
+
+
+
+        $("#loader").hide();
+
+         {% if level %}
+            select_genome("{{ level }}", true )
+         {% endif %}
 
 
         var tab = $("#grpTable");
@@ -90,7 +109,9 @@
 
         },
         refreshOptions: {'icons': icons}
+
     });
+
 });
 
 

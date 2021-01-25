@@ -1,7 +1,9 @@
 {% extends  "base_data_centric.html" %}
 {% load staticfiles %}
 
-{% block title %}Entry {{entry.omaid}}{% endblock %}
+{% block title %}Entry {{entry.omaid}} | {{entry.canonicalid}} {% endblock %}
+
+{% block meta_hook %} <meta name="keywords" content="orthology,evolutionary gene relations,evolution,paralogy,inference{% for key in entry.xrefs %}{% if key.seq_match == 'unchecked' %},{{  key.xref }}{% endif %}{% endfor %}"> {% endblock %}
 
 {% block header_color_class %} {% endblock %}
 
@@ -17,7 +19,27 @@
 
     <p>{% include "includes/kingdom.html" with kingdom=entry.genome.kingdom %} {{entry.genome.species}}
         {{entry.genome.strain}}
-        {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %} is on Chromosome {{entry.chromosome}}.</p>
+        {% if entry.genome.is_polyploid and entry.subgenome != "" %} (sub-genome {{ entry.subgenome }}) {% endif %}
+
+    {% for key in entry.xrefs %}
+
+         {% if key.source == 'Protein Name' and key.seq_match == 'unchecked' %} | <b>{{  key.xref }} </b>
+         {% endif %}
+
+
+
+    {% endfor %}
+
+    {% for key in entry.xrefs %}
+
+        {% if key.source == 'Gene Name' and key.seq_match == 'unchecked' %}  <b>  [{{  key.xref }}]</b>
+         {% endif %}
+
+
+
+    {% endfor %}
+
+    </p>
 
     </div>
 
@@ -28,8 +50,19 @@
 
 
     <div class="dropdown-menu">
-        <a class="dropdown-item"   {% if entry.oma_hog != "" %} href="{% url 'hog_viewer' most_specific_hog.hog_id most_specific_hog.level %}" > HOG {% else %} disabled > No related HOG {% endif %} </a>
-        <a class="dropdown-item"  {% if entry.oma_group != 0 %} href="{% url 'omagroup_members' entry.oma_group %}" > OMA Group {% else %} disabled > No related OMA Group {% endif %} </a>
+
+    {% if reference_entry.omaid != entry.omaid %}
+
+        <h6 class="dropdown-header">For related groups, use main isoform <a href="{% url 'pairs' reference_entry.omaid %}"> {{reference_entry.omaid}}</a> </h6>
+
+
+        {% else %}
+
+
+
+        <a class="dropdown-item"{% if reference_entry.oma_hog != "" %} href="{% url 'hog_viewer' most_specific_hog.hog_id most_specific_hog.level %}" >HOG{% else %} disabled > No related HOG {% endif %} </a>
+        <a class="dropdown-item"  {% if reference_entry.oma_group != 0 %} href="{% url 'omagroup_members' reference_entry.oma_group %}" > OMA Group  {% else %} disabled > No related OMA Group {% endif %} </a>
+    {% endif %}
     </div>
 
     <button class="btn btn-default genome_back"><a style="color: #FFF;" href="{% url 'genome_info' entry.genome.uniprot_species_code %}">Genome</a>
@@ -48,9 +81,10 @@
 
   {% if entry.is_modified_xref %}
 
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-  <strong>Attention!</strong> We use a slightly different sequence for our inferences than the original <b>{{entry.query_id}}</b> sequences.
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+<div class="alert  alert-warning alert-dismissible fade show" role="alert">
+Note that <b>{{entry.canonicalid}}</b> uses a slightly different sequence, but has still been determined to correspond to this OMA entry.
+
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>

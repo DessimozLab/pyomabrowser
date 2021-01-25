@@ -10,7 +10,25 @@
 
 {% if nr_pps > 0 %}
 
-    {% include "includes/groupTableAmuseBouche.html" %}
+    {% if reference_entry.omaid != entry.omaid %}
+
+        <div class="alert alert-warning" role="alert">
+  This entry is not the isoform used for paralogs inferences,
+    paralogs below are inferred using the entry isoform <a href="{% url 'pairs' entry.get_main_isoform.omaid %}">{{entry.get_main_isoform.omaid}}</a>.
+</div>
+
+
+         {% include "includes/groupTableAmuseBouche.html" %}
+
+
+        {% else %}
+
+         {% include "includes/groupTableAmuseBouche.html" %}
+
+     {% endif %}
+
+
+
 
 {% else %}
 
@@ -24,7 +42,7 @@
 
 {% else %}
 
-<div class="alert alert-secondary" role="alert">
+<div class="alert alert-warning" role="alert">
   This entry is not the isoform used for paralogs inferences,
     please check entry <a href="{% url 'pair_paralogs' entry.get_main_isoform.omaid %}">{{entry.get_main_isoform.omaid}}</a> for paralogs.
 </div>

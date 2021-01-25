@@ -46,6 +46,8 @@ urlpatterns = [
 
     url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/pairwise/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/similar/pairwise/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/pairwise/json/$',views.HOGSimilarPairwiseJSON.as_view(), name='hog_similar_pairwise_json'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/similar/pairwise/json/$', views.HOGSimilarPairwiseJSON.as_view(), name='hog_similar_pairwise_json'),
 
     url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
@@ -94,6 +96,8 @@ urlpatterns = [
 
     # AncestralGenome
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/info/$', views.AncestralGenomeCentricInfo.as_view(), name='ancestralgenome_info'),
+
+    url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/genes/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.AncestralGenomeCentricGenes.as_view(), name='ancestralgenome_genes'),
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/genes/$', views.AncestralGenomeCentricGenes.as_view(), name='ancestralgenome_genes'),
 
     # HOG via Entry (from external resources)
@@ -143,6 +147,8 @@ urlpatterns = [
 
     url(r'^release/$', views.Release.as_view(), name='release'),
     url(r'^release/json/$', views.GenomesJson.as_view(), name="genomes_json"),
+
+    url(r'^phylostratigraphy/$', TemplateView.as_view(template_name='phylostratigraphy.html'), name='phylostratigraphy'),
 
     url(r'^current/$', views.CurrentView.as_view(), name='current'),
     url(r'^archives/$', views.ArchiveView.as_view(), name='archives'),
