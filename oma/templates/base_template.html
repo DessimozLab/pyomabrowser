@@ -230,6 +230,13 @@
                         <a class="dropdown-item" href="{% url 'FAQ' %}">FAQ</a>
                         <a class="dropdown-item" href="https://www.biostars.org/t/oma/">Q&amp;A on BioStars</a>
                         <div class="dropdown-divider"></div>
+
+                        {% if oma_academy %}
+                            <a class="dropdown-item" href="{% url 'academy-home' %}">OMA Academy</a>
+
+                        <div class="dropdown-divider"></div>
+                        {% endif %}
+
                         <a class="dropdown-item text-center" href="{% url 'glossary' %}"><b> <i class="fas fa-book"></i> Glossary</b></a>
                     </ul>
                 </li>

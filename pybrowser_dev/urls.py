@@ -21,7 +21,7 @@ if 'fastmap' in settings.INSTALLED_APPS:
     )
 if 'academy' in settings.INSTALLED_APPS:
     urlpatterns.append(
-        path('oma/', include('academy.urls'))
+        path('oma/academy/', include('academy.urls'))
     )
 
 if settings.DEPLOYMENT != "PRODUCTION":

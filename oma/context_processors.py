@@ -15,3 +15,9 @@ def oma_instance(request):
     except AttributeError:
         pass
     return res
+
+
+def oma_academy(request):
+    if 'academy' in settings.INSTALLED_APPS:
+        return {'oma_academy': True}
+    return {'oma_academy': False}
