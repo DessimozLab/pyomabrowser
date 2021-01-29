@@ -162,7 +162,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'oma.context_processors.xref_order',
                 'oma.context_processors.oma_instance',
-                'oma.context_processors.oma_academy',
             ],
         },
     },
