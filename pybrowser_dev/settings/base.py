@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'oma_rest',
     'bootstrap4',
     'django.contrib.humanize',
+    'academy'
 ]
 
 MIDDLEWARE = [

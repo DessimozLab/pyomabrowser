@@ -229,8 +229,21 @@
                         <a class="dropdown-item" href="{% url 'genome_suggestion' %}">Suggesting a genome</a>
                         <a class="dropdown-item" href="{% url 'FAQ' %}">FAQ</a>
                         <a class="dropdown-item" href="https://www.biostars.org/t/oma/">Q&amp;A on BioStars</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item text-center" href="{% url 'glossary' %}"><b> <i class="fas fa-book"></i> Glossary</b></a>
+                        <a class="dropdown-item " href="{% url 'glossary' %}">  Glossary</a>
+
+
+
+                        {% if oma_academy %}
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-center" href="{% url 'academy-home' %}"><b> <i class="fas fa-book"></i> OMA Academy</b></a>
+
+
+                        {% endif %}
+
+
+
+
+
                     </ul>
                 </li>
 
