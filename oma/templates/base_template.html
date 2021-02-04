@@ -154,8 +154,7 @@
 
                         <div role="presentation" class="dropdown-header">Online tools</div>
 
-                        <!--a class="dropdown-item" href="{% url 'home' %}">Fast mapping</a-->
-                        <a class="dropdown-item" href="{% url 'fastmapping' %}">Fast mapping</a>
+                        {%if fastmap_enabled %}<a class="dropdown-item" href="{% url 'fastmapping' %}">Fast mapping</a> {% endif %}
                         <a class="dropdown-item" href="{% url 'function-projection-input' %}">Functional prediction</a>
                         <a class="dropdown-item" href="{% url 'land_syntenyDP' %}">Synteny dotplot</a>
                         <a class="dropdown-item" href="{% url 'genomePW' %}">Genome pair orthology</a>
@@ -191,7 +190,7 @@
 
                         <div role="presentation" class="dropdown-header">OMA database files</div>
                         <a class="dropdown-item" href="{% url 'current' %}">Current release</a>
-                        <a class="dropdown-item" href="{% url 'export' %}">Export All/All</a>
+                        {% if export_enabled %}<a class="dropdown-item" href="{% url 'export' %}">Export All/All</a> {% endif %}
                         <a class="dropdown-item" href="{% url 'export_markers' %}">Export marker genes</a>
                         <a class="dropdown-item" href="{% url 'archives' %}">Archives</a>
 
@@ -205,7 +204,12 @@
 
                         <div class="dropdown-divider"></div>
                         <div role="presentation" class="dropdown-header">Semantic web</div>
-                        <a class="dropdown-item" href="http://sparql.omabrowser.org/">SPARQL endpoint</a>
+                        {% if oma_instance_name == "basf" %}
+                          <a class="dropdown-item" href="{{ basf_sparql_url }}">BASF SPARQL endpoint</a>
+                          <a class="dropdown-item" href="https://sparql.omabrowser.org/">Public SPARQL endpoint</a>
+                        {% else %}
+                          <a class="dropdown-item" href="https://sparql.omabrowser.org/">SPARQL endpoint</a>
+                        {% endif %}
 
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item text-center" href="{% url 'uses' %}"><b> <i class="fas fa-keyboard"></i> Access the OMA data</b></a>
@@ -226,24 +230,18 @@
                         <a class="dropdown-item" href="{% url 'homologs' %}">Type of homologs</a>
                         <a class="dropdown-item" href="{% url 'uses' %}">Access the OMA data</a>
                         <a class="dropdown-item" href="{% url 'tool_catalog' %}">Catalog of tools</a>
-                        <a class="dropdown-item" href="{% url 'genome_suggestion' %}">Suggesting a genome</a>
+                        {% if oma_instance_name != "basf" %}
+                          <a class="dropdown-item" href="{% url 'genome_suggestion' %}">Suggesting a genome</a>
+                        {% endif %}
                         <a class="dropdown-item" href="{% url 'FAQ' %}">FAQ</a>
                         <a class="dropdown-item" href="https://www.biostars.org/t/oma/">Q&amp;A on BioStars</a>
                         <a class="dropdown-item " href="{% url 'glossary' %}">  Glossary</a>
 
 
-
-                        {% if oma_academy %}
+                        {% if oma_academy_enabled %}
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-center" href="{% url 'academy-home' %}"><b> <i class="fas fa-book"></i> OMA Academy</b></a>
-
-
                         {% endif %}
-
-
-
-
-
                     </ul>
                 </li>
 
