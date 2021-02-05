@@ -265,9 +265,11 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                     The OMA Browser now has a REST API !
                                 </li>
 
+                                {% if export_enabled %}
                                 <li><b><a href="{% url 'export' %}">Export All-All</a>:</b>
                                     Export a set of genomes and their precomputed all-against-all comparisons for OMA standalone.
                                 </li>
+                                {% endif %}
 
                                 <li class="btn-more-container" >
                                     <button type="button" class="btn btn-outline-dark" onclick="location.href='{% url 'uses' %}'"  >See more download options</button>
