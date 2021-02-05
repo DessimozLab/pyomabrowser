@@ -26,7 +26,7 @@ def load_genomes_json_file():
                  ""):
         fn = os.path.join(path, "genomes.json")
         if os.path.exists(fn):
-            with open(fn, 'rb', encoding='utf8') as fh:
+            with open(fn, 'rb') as fh:
                 data = json.load(fh)
             return data
     raise pyoma.browser.db.DBConsistencyError("cannot find \"genomes.json\" file.")
