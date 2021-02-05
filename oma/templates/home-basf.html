@@ -1,12 +1,13 @@
 {% extends  "home.html" %}
-{% load staticfiles %}
+{% load static %}
 
 {% block title %}BASF inhouse OMA Orthology Database{% endblock %}
 
 {% block search_examples %}
-    <span class="ex" onclick="fillExample('id','WHEAT99188')">Entry WHEAT99188</span> -
-    <span class="ex" onclick="fillExample('id','W5D237')">Entry W5D237</span> -
-    <span class="ex" onclick="fillExample('fulltext','photoreceptor')">Search for "photoreceptor"</span>
+    <span class="ex" onclick="fillExample('entry_id','WHEAT99188')">Entry WHEAT99188</span> -
+    <span class="ex" onclick="fillExample('entry_id','W5D237')">Entry W5D237</span> -
+    <span class="ex" onclick="fillExample('entry_fulltext','photoreceptor')">Search for "photoreceptor"</span>
+    <span class="ex" onclick="fillExample('genome_name', 'Mesangiospermae')">"Mesangiospermae" species</span>
 {% endblock search_examples %}
 
 
@@ -16,53 +17,42 @@
 {% endblock oma-main-logo %}
 {% endcomment %}
 
-{% block first_box %}
-    <div class="caption">
-        <p class="text-center ">
-            <span class="glyphicon glyphicon-question-sign glyphicon-xl"></span>
-        </p>
-
-        <h3>First time here?</h3>
-        <ul>
-            <li>You are accessing to <b>Secret information</b> at BASF</li>
-            <li>Read our
-                <a href="{% url 'about'  %}">brief introduction to OMA</a>.
-            </li>
-            <li>Familiarise yourself with the
-                <a href="{% url 'type'  %}">different types of orthologs provided</a>.
-            </li>
-            <li>Get ideas about
-                <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
-            </li>
-        </ul>
-    </div>
-{% endblock first_box %}
-
-{% block second_box %}
-    <div class="caption">
-        <p class="text-center ">
-            <a href="#" data-toggle="modal" data-target=".bs-example-modal-md">
-                <span class="glyphicon glyphicon-wrench glyphicon-xl"></span>
-            </a>
-        </p>
-        <h3>User Support</h3>
-        <ul>
+{% block first_card_body_content %}
+     <ul>
+        <li>You are accessing to <b>Secret information</b> at BASF</li>
+        <li>Read our
+            <a href="{% url 'about'  %}">brief introduction to OMA</a>.
+        </li>
+        <li>Familiarise yourself with the
+            <a href="{% url 'type'  %}">different types of orthologs provided</a>.
+        </li>
+        <li>Get ideas about
+            <a href="{% url 'uses'  %}">different types of analyses you could do with OMA</a>.
+        </li>
+    </ul>
+    <br>
+    <h1>Support</h1>
+    <ul>
             <li> <b><a href="https://jira.eu.seeds.basf.net/secure/CreateIssueDetails!init.jspa?issuetype=6&pid=15972&priority=3">create a JIRA ticket</a></b></li>
-        </ul>
-    </div>
-{% endblock second_box %}
+    </ul>
+{% endblock first_card_body_content %}
 
-{% block third_box %}
-    <div class="caption comment-text" id="latest-news">
-        <p class="text-center ">
-            <span class="glyphicon glyphicon-info-sign glyphicon-xl">
-            </span>
-        </p>
-        <h3>Latest news</h3>
+{%  block second_card_body_content %}
+    <ul>
+        <li> <a  href="https://omabrowser.org/standalone/">OMA StandAlone <span class="badge badge-pill badge-dark float-right">Software</span></a> </li>
+        <li> <a  href="https://github.com/dessimozlab/pyham">pyHam </a> <span class="badge badge-pill badge-dark float-right">Python library</span></li>
+        <li> <a  href="{% url 'function-projection-input' %}">Functional prediction <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
+        <li> <a  href="{% url 'land_syntenyDP' %}">Synteny dotplot <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
+        <li class="btn-more-container" >
+            <button type="button"  class="btn btn-outline-dark " onclick="location.href='{% url 'tool_catalog' %}'" >Discover more tools</button>
+        </li>
+    </ul>
+{% endblock second_card_body_content %}
+
+{% block forth_card_twitter_content %}
         <ul >
-            <li><a href="https://oma-qa.eu.seeds.basf.net/oma/release/">84 species</a></li>
+            <li><a href="https://oma-qa.eu.seeds.basf.net/oma/release/">{{ nr_genomes }} species</a></li>
             <li>Updates: <a href="https://glent-prod-1.eu.seeds.basf.net/seqrepo-app/sequencesetversion/detail/a9fa753e-df4e-4db4-8297-cc36f4544774">TRIDC_Zavitan_WEWSEQ_prot_1_0</a> and <a href="https://glent-prod-1.eu.seeds.basf.net/seqrepo-app/sequencesetversion/detail/001705d1-f1d7-4359-8a35-559471140180">AEGTS_AL8_78_UCD_prot_4_0</a></li>
         </ul>
         <p><a href="https://confluence.eu.seeds.basf.net/display/OB/OMA+Browser" class="btn btn-primary btn-sm bottomright" role="button">Follow us on Confluence</a></p>
-    </div>
-{% endblock third_box %}
+{% endblock forth_card_twitter_content %}
