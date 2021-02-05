@@ -1244,9 +1244,8 @@ class AncestralGenomeBase(ContextMixin):
                     cpt = 1
                 return cpt
 
-            url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
-            with open(url, 'r') as fh:
-                genomes_json = json.load(fh)
+
+            genomes_json = utils.load_genomes_json_file()
             search = iterdict(genomes_json, False, species_id)
 
             if search:
@@ -3481,9 +3480,7 @@ class Searcher(View):
 
         start = time.time()
         query = str(query).lower()
-        url = os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], 'genomes.json')
-        with open(url) as fh:
-            genomes_json = json.load(fh)
+        genomes_json = utils.load_genomes_json_file()
         search_result, found_by = search_in_nested_dict(genomes_json, query)
         end = time.time()
         logger.info("[{}] taxon search {}".format(query, start - end))
