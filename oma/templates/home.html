@@ -32,7 +32,7 @@
                        {% include "includes/search_select.html" %}
                     </select>
                 </div>
-                <input id='inputBrowser' name="query" type="text" class="" placeholder='P53_RAT | "auxin response factor" | Fungi | Insulin Human '/>
+                <input id='inputBrowser' name="query" type="text" class="" placeholder='{% block search_placeholder %}P53_RAT | "auxin response factor" | Fungi | Insulin Human {% endblock search_placeholder %}'/>
                 <button id="submit_home"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
             </form>
         </div>
