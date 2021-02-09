@@ -82,7 +82,7 @@
                         {% include "includes/search_select.html" %}
                     </select>
                 </div>
-                <input style="font: small" id='inputBrowser' name="query" type="text" class="" placeholder='P53_RAT | Fungi | "auxin response factor"'/>
+                <input style="font: small;" type="text" id="inputBrowser" class="" name="query" placeholder='{% if oma_instance_name != "basf" %}P53_RAT | Fungi | "auxin response factor"{% else %}PLDB2_ARATH | "auxin response factor" | psbC Brassicaceae{% endif %}'/>
                 <button><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
             </form>
 
@@ -111,7 +111,7 @@
                              {% include "includes/search_select.html" %}
                         </select>
                     </div>
-                    <input type="text" id="textNav" class="" name="query" placeholder='P53_RAT | Fungi | "auxin response factor"'/>
+                    <input type="text" id="textNav" class="" name="query" placeholder='{% if oma_instance_name != "basf" %}P53_RAT | Fungi | "auxin response factor"{% else %}PLDB2_ARATH | "auxin response factor" | psbC Brassicaceae{% endif %}'/>
                     <button type="submit"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
                 </form>
             </div>
