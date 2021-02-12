@@ -147,7 +147,7 @@ CELERY_BROKER_URL = os.getenv('CELERY_BROKER', None)
 CELERY_TASK_ROUTES = {
     'oma.tasks.assign_go_function_to_user_sequences': {'queue': 'long'},
     'oma.tasks.compute_msa': {'queue': 'async_web'},
-    'oma.tasks.export_marker_genes': {'queue', 'long'},
+    'oma.tasks.export_marker_genes': {'queue': 'long'},
 }
 # for backward compability reasons
 BROKER_URL = CELERY_BROKER_URL
