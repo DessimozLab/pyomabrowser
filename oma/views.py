@@ -2018,12 +2018,14 @@ class Release(TemplateView):
         return ctx
 
 
+
+
+
 def export_marker_genes(request):
     if request.method == 'GET' and 'genomes' in request.GET:
         genomes = request.GET.getlist('genomes')
         min_species_coverage = float(request.GET.get('min_species_coverage', 0.5))
         top_N_genomes = int(request.GET.get('max_nr_markers', 200))
-        genomes = frozenset(sorted(genomes))
         if top_N_genomes < 0:
             top_N_genomes = None
         if len(genomes) >= 2 and 0 < min_species_coverage <= 1:
