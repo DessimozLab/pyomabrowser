@@ -26,29 +26,11 @@ SECRET_KEY = '_^j%sp*a$&+$2esy(k7oarq+kyf@#ubc!lbo@_1r5#rqidc_l_'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (DEPLOYMENT != "PRODUCTION")
 
-#ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'omabrowser.org', '.omabrowser.org', '.ethz.ch', '.cs.ucl.ac.uk', '.vital-it.ch']
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
-#DEBUG_TOOLBAR_PATCH_SETTINGS = False
-#SHOW_TOOLBAR_CALLBACK = lambda x: True
 INTERNAL_IPS = ('127.0.0.1')
 
-# DEBUG_TOOLBAR_PANELS = (
-#     'debug_toolbar.panels.versions.VersionsPanel',
-#     'debug_toolbar.panels.timer.TimerPanel',
-#     'debug_toolbar.panels.settings.SettingsPanel',
-#     'debug_toolbar.panels.headers.HeadersPanel',
-#     'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-#     'debug_toolbar.panels.templates.TemplatesPanel',
-#     'debug_toolbar.panels.cache.CachePanel',
-#     'debug_toolbar.panels.signals.SignalsPanel',
-#     'debug_toolbar.panels.logging.LoggingPanel',
-#     'debug_toolbar.panels.redirects.RedirectsPanel',
-#     #'debug_toolbar_line_profiler.panel.ProfilingPanel',
-# )
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -153,22 +135,20 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                # TODO: remove? commented for Django 2.2 (upgrade phase)
-                #'django.template.context_processors.debug',
-                #'django.template.context_processors.i18n',
-                #'django.template.context_processors.media',
-                #'django.template.context_processors.static',
-                #'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 'oma.context_processors.xref_order',
                 'oma.context_processors.oma_instance',
-                'oma.context_processors.oma_academy',
             ],
         },
     },
 ]
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER', None)
+CELERY_TASK_ROUTES = {
+    'oma.tasks.assign_go_function_to_user_sequences': {'queue': 'long'},
+    'oma.tasks.compute_msa': {'queue': 'async_web'},
+    'oma.tasks.export_marker_genes': {'queue': 'long'},
+}
 # for backward compability reasons
 BROKER_URL = CELERY_BROKER_URL
 # CORS stuff to allow iHAM integration on other sites
@@ -178,8 +158,6 @@ CORS_URLS_REGEX = r'^/(api/|oma/hog(s|data)?/\w*/(orthoxml|json)/$)'
 CORS_ALLOW_METHODS = ('GET',)
 
 # Database
-# https://docs.djangoproject.com/en/1.6/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('SQL_ENGINE', 'django.db.backends.sqlite3'),

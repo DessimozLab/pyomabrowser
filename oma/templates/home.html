@@ -1,5 +1,5 @@
 {% extends  "base_template.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load humanize %}
 
 
@@ -32,7 +32,7 @@
                        {% include "includes/search_select.html" %}
                     </select>
                 </div>
-                <input id='inputBrowser' name="query" type="text" class="" placeholder='P53_RAT | "auxin response factor" | Fungi | Insulin Human '/>
+                <input id='inputBrowser' name="query" type="text" class="" placeholder='{% block search_placeholder %}P53_RAT | "auxin response factor" | Fungi | Insulin Human {% endblock search_placeholder %}'/>
                 <button id="submit_home"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
             </form>
         </div>
@@ -164,9 +164,8 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                             </i>
                         </div>
                         <div class="oma-card-content">
-                            <br>
+                            {%  block first_card_body_content %}
                             <ul>
-
                                 <li>
                                     <p>
                                         Introduction to OMA: See OMA in a nutshell (<a href="{% url "about" %}">Introduction</a>) in OMA doc.
@@ -202,6 +201,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                     <button type="button"  class="btn btn-outline-dark " onclick="location.href='{% url 'about' %}'" >Start to read about OMA</button>
                                 </li>
                             </ul>
+                            {%  endblock first_card_body_content %}
                         </div>
                         {% endblock first_card %}
                     </div>
@@ -222,7 +222,8 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                             </i>
                         </div>
                         <div class="oma-card-content">
-                             <br>
+                            <br>
+                            {% block second_card_body_content %}
                             <ul>
                                 <li> <a href="https://corona.omabrowser.org/"><img src="{% static "image/logo-oma-corona.svg" %}" style="width: 60px;"> Corona OMA Browser <span class="badge badge-pill badge-success float-right">Online tool</span></a></li>
                                 <li> <a  href="https://omabrowser.org/standalone/">OMA StandAlone <span class="badge badge-pill badge-dark float-right">Software</span></a> </li>
@@ -234,7 +235,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                     <button type="button"  class="btn btn-outline-dark " onclick="location.href='{% url 'tool_catalog' %}'" >Discover more tools</button>
                                 </li>
                             </ul>
-
+                            {% endblock second_card_body_content %}
                         </div>
                         {% endblock second_card %}
                     </div>
@@ -256,6 +257,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                         </div>
                         <div class="oma-card-content">
                              <br>
+                            {% block third_card_body_content %}
                             <ul>
                                 <li><b><a href="{% url 'current'  %}">Current release</a>:</b>
                                     All data is available for download in a variety of formats.
@@ -265,14 +267,17 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                     The OMA Browser now has a REST API !
                                 </li>
 
+                                {% if export_enabled %}
                                 <li><b><a href="{% url 'export' %}">Export All-All</a>:</b>
                                     Export a set of genomes and their precomputed all-against-all comparisons for OMA standalone.
                                 </li>
+                                {% endif %}
 
                                 <li class="btn-more-container" >
                                     <button type="button" class="btn btn-outline-dark" onclick="location.href='{% url 'uses' %}'"  >See more download options</button>
                                 </li>
                             </ul>
+                            {% endblock third_card_body_content %}
                         </div>
                         {% endblock third_card %}
                     </div>
@@ -294,8 +299,10 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                         </div>
                         <div class="oma-card-content">
                              <br>
+                            {% block forth_card_body_content %}
                             <!-- Insert Twitter feed -->
                             <div class="oma-twitter">
+                                {% block forth_card_twitter_content %}
                                 <ul>
                                     {% autoescape off %}
                                     {%for t in tweets %}
@@ -303,6 +310,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                     {% endfor %}
 				                    {% endautoescape %}
                                 </ul>
+                                {% endblock forth_card_twitter_content %}
                             </div>
                             <br>
                             <h1>Stay in touch</h1>
@@ -316,7 +324,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                 <a href="javascript:show_frame('frame_mailman');" title="Newsletter">
                                     <img src="{% static "image/icon-newspaper-sm.png" %}" alt="News"/>
                                 </a>
-                                <a href="http://omabrowser.blogspot.com/feeds/posts/default" title="RSS">
+                                <a href="https://omabrowser.blogspot.com/feeds/posts/default" title="RSS">
                                     <img src="{% static "image/icon-rss-sm.png" %}" alt="RSS"/>
                                 </a>
                             </div>
@@ -335,6 +343,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                     });
                                 }
                             </script>
+                            {% endblock forth_card_body_content%}
                         </div>
                         {% endblock forth_card %}
                     </div>
