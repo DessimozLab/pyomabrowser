@@ -1707,17 +1707,21 @@ class HOGsMSA(AsyncMsaMixin, HOGBase, TemplateView):
 
 
 class HOGsOrthoXMLView(HOGBase, View):
-    def get(self, request, **kwargs):
+    def get(self, request, file_type=None, **kwargs):
         context = self.get_context_data(only_validate=True, **kwargs)
+        augmented = False
+        if (file_type == 'augmented'):
+            augmented = True
         try:
             fam = context['hog'].fam
-            orthoxml = utils.db.get_orthoxml(fam)
+            orthoxml = utils.db.get_orthoxml(fam, augmented = augmented )
         except ValueError as e:
             raise Http404(e.message)
         response = HttpResponse(content_type='text/plain')  #'application/xml')
         response.write(orthoxml)
         response['Access-Control-Allow-Origin'] = '*'
         return response
+
 
 
 class HOGtableFromEntry(EntryCentricMixin, View):

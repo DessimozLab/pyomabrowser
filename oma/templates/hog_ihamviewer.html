@@ -207,6 +207,7 @@
 
 
         $.when(
+            //$.ajax({url: "/oma/hog/{{ hog.hog_id }}/orthoxml/augmented/",
             $.ajax({url: "/oma/hog/{{ hog.hog_id }}/orthoxml/",
                 dataType: "text"}),
             $.ajax({url: "/All/speciestree.nwk"}),
@@ -227,6 +228,7 @@
                 })
                 .show_oma_link(true)
                 .remote_data(true)
+                //.augmented_orthoxml(true)
                 .tree_width(330)
                 .board_width(530)
                 .on("updating", function() {
