@@ -9572,12 +9572,12 @@ module.exports = {
     var dom1 = x_scale.domain()[1];
 
     new_hog.append("line").attr("class", "hog_boundary").attr("x1", function (d) {
-      var width = d3.min([x_scale(dom1 / d.max), height]);
+      var width = 16; // d3.min([x_scale(dom1 / d.max), height]);
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
       return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
     }).attr("x2", function (d) {
-      var width = d3.min([x_scale(dom1 / d.max), height]);
+      var width = 16;
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
       return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
@@ -9590,12 +9590,12 @@ module.exports = {
     var dom1 = x_scale.domain()[1];
 
     hogs.select("line").transition().duration(200).attr("x1", function (d) {
-      var width = d3.min([x_scale(dom1 / d.max), height]);
+      var width = 16;
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
       return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
     }).attr("x2", function (d) {
-      var width = d3.min([x_scale(dom1 / d.max), height]);
+      var width = 16;
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
 
@@ -9604,6 +9604,7 @@ module.exports = {
   }),
   hog_gene_feature: function hog_gene_feature() {
     var feature = tnt.board.track.feature();
+    var width = 16;
 
     var color = function color() {
       return "grey";
@@ -9623,28 +9624,21 @@ module.exports = {
       var track = this;
       var padding = ~~(track.height() - track.height() * 0.8) / 2;
       var height = track.height() - ~~(padding * 2);
-      var dom1 = x_scale.domain()[1];
 
       new_elems.append("rect").attr("class", "hog_gene").attr("x", function (d) {
-        var width = d3.min([x_scale(dom1 / d.max), height]);
         var x = width * d.pos;
         return x + padding;
       }).attr("y", padding).attr("width", function (d) {
-        var width = d3.min([x_scale(dom1 / d.max), height]);
         return width - 2 * padding;
       }).attr("height", height).attr("fill", color);
     }).distribute(function (elems, x_scale) {
       var track = this;
       var padding = ~~(track.height() - track.height() * 0.8) / 2;
-      var height = track.height() - ~~(padding * 2);
-      var dom1 = x_scale.domain()[1];
 
       elems.select("rect").transition().attr("x", function (d) {
-        var width = d3.min([x_scale(dom1 / d.max), height]);
         var x = width * d.pos;
         return x + padding;
       }).attr("width", function (d) {
-        var width = d3.min([x_scale(dom1 / d.max), height]);
         return width - 2 * padding;
       });
     });
@@ -9656,11 +9650,9 @@ module.exports = {
   }).create(function (new_group, x_scale) {
     var track = this;
     var padding = ~~(track.height() - track.height() * 0.8) / 2;
-    var height = track.height() - ~~(padding * 2);
-    var dom1 = x_scale.domain()[1];
 
     var g = new_group.append('g').attr('transform', function (g) {
-      var width = d3.min([x_scale(dom1 / g.max), height]);
+      var width = 16;
       var posx = g.hog_start * width + g.max_in_hog * width / 2;
       return "translate(" + posx + ", 0)";
     }).style('cursor', 'pointer').attr('class', function (d) {
@@ -9671,13 +9663,9 @@ module.exports = {
 
     g.append('text').attr('x', 0).attr('y', -11).attr('text-anchor', 'middle').attr('alignment-baseline', 'middle').style('fill', '#95a5a6').style('font-size', '9px').style('cursor', 'pointer').text('?');
   }).distribute(function (elems, x_scale) {
-    var track = this;
-    var padding = ~~(track.height() - track.height() * 0.8) / 2;
-    var height = track.height() - ~~(padding * 2);
-    var dom1 = x_scale.domain()[1];
 
     elems.select('g').transition().attr('transform', function (g) {
-      var width = d3.min([x_scale(dom1 / g.max), height]);
+      var width = 16;
       var posx = g.hog_start * width + g.max_in_hog * width / 2;
       return "translate(" + posx + ", 0)";
     });
@@ -9918,7 +9906,16 @@ function iHam() {
       if (config.frozen_node) {
         var _removed_hogs = current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj);
         dispatch.hogs_removed.call(this, _removed_hogs);
-        board.width(board_width);
+
+        var w = 0;
+        var i = 0,
+            len = current_hog_state.hogs.length;
+        while (i < len) {
+          w += current_hog_state.hogs[i].max_in_hog * 16;
+          i++;
+        }
+
+        board.width(w);
         // update_board();
         board.update();
         dispatch.updated.call(this);
@@ -9931,7 +9928,16 @@ function iHam() {
       current_opened_taxa_name = node.node_name();
       var removed_hogs = current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj);
       dispatch.hogs_removed.call(this, removed_hogs);
-      board.width(board_width);
+
+      var w = 0;
+      var i = 0,
+          len = current_hog_state.hogs.length;
+      while (i < len) {
+        w += current_hog_state.hogs[i].max_in_hog * 16;
+        i++;
+      }
+
+      board.width(w);
       board.update();
 
       state.highlight_condition = function (n) {
@@ -10012,9 +10018,16 @@ function iHam() {
     current_opened_node = tree.root();
     current_opened_taxa_name = tree.root().node_name();
     current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj);
+    var w = 0;
+    var i = 0,
+        len = current_hog_state.hogs.length;
+    while (i < len) {
+      w += current_hog_state.hogs[i].max_in_hog * 16;
+      i++;
+    }
 
     // Board:
-    board = tnt.board().from(0).zoom_in(1).allow_drag(false).to(2).width(board_width);
+    board = tnt.board().from(0).zoom_in(1).allow_drag(false).to(2).width(w);
 
     // Board's track
     genes_feature = hog_gene_feature().colors(gene_color);

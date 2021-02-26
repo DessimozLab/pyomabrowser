@@ -4506,20 +4506,12 @@ var LevelIndexCreator = function(){
     };
 };
 
-var Converter = module.exports = function(tree, source, params) {
-
-    params = params || {};
-
-    saxOptions = params.saxOptions || {};
-    augmented = params.augmented || false ;
-
+var Converter = module.exports = function(tree, source, saxOptions) {
+    saxOptions = saxOptions || {};
     var parser = sax.parser(true, saxOptions);
 
     // main datastructure to return. a dict (species -> dict( level -> array with member genes))
     var per_species = {};
-    // Store meta information about hogs (Id, CompletenessScore, NrMemberGenes). Since hogs are not access in iham
-    // via their unique ids, we store them using protein id + level to accessed them later easily.
-    var hog_metadata = {}; // dict (entry_number -> dict( level -> hog_id) )
     var gene2sp = {};
     var xrefs = {};
     var orgs = [];
@@ -4596,7 +4588,6 @@ var Converter = module.exports = function(tree, source, params) {
             gene2sp[geneId] = _cur_sp;
             xrefs[geneId] = args.attributes.protId;
         } else if (tagName === "geneRef"){
-
             geneId = parseInt(args.attributes.id, 10);
             // add gene to per_species ds.
             let sp = gene2sp[geneId];
@@ -4609,25 +4600,14 @@ var Converter = module.exports = function(tree, source, params) {
                 prev.species_sublevels[sp] = [];
             }
             prev.species_sublevels[sp].push(geneId);
-
-            if (augmented) {
-              var metadata = {};
-              _og_stack.forEach(item => metadata[item.lev]=item.hog_id)
-              hog_metadata[geneId] = metadata
-            }
-
         } else if (tagName === "orthologGroup"){
-            og = {memb:[], lev:'', species_sublevels:{}}
-            if (augmented) {
-             og.hog_id = args.attributes.id
-            }
+            og = {memb:[], lev:'', species_sublevels:{}};
             _lev += 1;
             _og_stack.push(og);
         } else if (tagName === "property" && args.attributes.name === "TaxRange"){
             // assign taxrange level to current hog.
             prev = _og_stack[_og_stack.length - 1];
             prev.lev = args.attributes.value;
-
 
         } else if (tagName === "groups"){
             var sp = trimSpeciesTree();
@@ -4743,7 +4723,6 @@ var Converter = module.exports = function(tree, source, params) {
     create_remaining_empty_hogs_at_all_levels();
     return {
         per_species: per_species,
-        hog_metadata:hog_metadata,
         tree: tree_tool.ladderize(sptree),
         xrefs: xrefs
     };
@@ -9593,12 +9572,12 @@ module.exports = {
     var dom1 = x_scale.domain()[1];
 
     new_hog.append("line").attr("class", "hog_boundary").attr("x1", function (d) {
-      var width = d3.min([x_scale(dom1 / d.max), height]);
+      var width = 40//d3.min([x_scale(dom1 / d.max), height]);
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
       return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
     }).attr("x2", function (d) {
-      var width = d3.min([x_scale(dom1 / d.max), height]);
+      var width = 40//d3.min([x_scale(dom1 / d.max), height]);
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
       return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
@@ -9611,12 +9590,12 @@ module.exports = {
     var dom1 = x_scale.domain()[1];
 
     hogs.select("line").transition().duration(200).attr("x1", function (d) {
-      var width = d3.min([x_scale(dom1 / d.max), height]);
+      var width = 40//d3.min([x_scale(dom1 / d.max), height]);
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
       return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
     }).attr("x2", function (d) {
-      var width = d3.min([x_scale(dom1 / d.max), height]);
+      var width = 40//d3.min([x_scale(dom1 / d.max), height]);
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
 
@@ -9640,35 +9619,72 @@ module.exports = {
 
     feature.index(function (d) {
       return d.id;
-    }).create(function (new_elems, x_scale) {
+    })
+        .create(function (new_elems, x_scale) {
       var track = this;
       var padding = ~~(track.height() - track.height() * 0.8) / 2;
       var height = track.height() - ~~(padding * 2);
       var dom1 = x_scale.domain()[1];
 
-      new_elems.append("rect").attr("class", "hog_gene").attr("x", function (d) {
-        var width = d3.min([x_scale(dom1 / d.max), height]);
-        var x = width * d.pos;
+      var g = new_elems.append('g').attr('transform', function (g) {
+      var width = 40// d3.min([x_scale(dom1 / g.max), height]);
+      return "translate(" + width * g.pos + ", 0)";});
+
+      g.append("rect")
+          .attr("class", "hog_gene")
+          .attr("x", function (d) {
+        var width = 40//d3.min([x_scale(dom1 / d.max), height]);
+        var x = width ;
         return x + padding;
-      }).attr("y", padding).attr("width", function (d) {
-        var width = d3.min([x_scale(dom1 / d.max), height]);
+      })
+          .attr("y", padding)
+          .attr("width", function (d) {
+        var width = 40//d3.min([x_scale(dom1 / d.max), height]);
         return width - 2 * padding;
-      }).attr("height", height).attr("fill", color);
-    }).distribute(function (elems, x_scale) {
+      })
+          .attr("height", height)
+          .attr("fill", color)
+
+
+        g.append("rect")
+          .attr("class", "hog_gene")
+          .attr("x", function (d) {
+        var width = 40//d3.min([x_scale(dom1 / d.max), height]);
+        var x = width ;
+        return Math.floor(Math.random() * 24); + padding;
+      })
+          .attr("y", padding)
+          .attr("width", function (d) {
+        var width = 40//d3.min([x_scale(dom1 / d.max), height]);
+        return width - 2 * padding;
+      })
+          .attr("height", height)
+          .attr("fill", 'blue')
+
+         }).distribute(function (elems, x_scale) {
       var track = this;
       var padding = ~~(track.height() - track.height() * 0.8) / 2;
       var height = track.height() - ~~(padding * 2);
       var dom1 = x_scale.domain()[1];
 
-      elems.select("rect").transition().attr("x", function (d) {
-        var width = d3.min([x_scale(dom1 / d.max), height]);
+
+      elems.selectAll("rect")
+          .transition()
+          .attr("x", function (d) {
+        var width = 40//d3.min([x_scale(dom1 / d.max), height]);
         var x = width * d.pos;
-        return x + padding;
+        if (this.getAttribute("fill") == 'blue'){return this.getAttribute("x") }
+        return  padding;
       }).attr("width", function (d) {
-        var width = d3.min([x_scale(dom1 / d.max), height]);
+
+        var width;
+        if (this.getAttribute("fill") == 'blue'){width = Math.floor(Math.random() * 20);}
+        else{width = 40}
         return width - 2 * padding;
-      });
+      })
     });
+
+
 
     return feature;
   },
@@ -9681,7 +9697,7 @@ module.exports = {
     var dom1 = x_scale.domain()[1];
 
     var g = new_group.append('g').attr('transform', function (g) {
-      var width = d3.min([x_scale(dom1 / g.max), height]);
+      var width = 40// d3.min([x_scale(dom1 / g.max), height]);
       var posx = g.hog_start * width + g.max_in_hog * width / 2;
       return "translate(" + posx + ", 0)";
     }).style('cursor', 'pointer').attr('class', function (d) {
@@ -9698,7 +9714,7 @@ module.exports = {
     var dom1 = x_scale.domain()[1];
 
     elems.select('g').transition().attr('transform', function (g) {
-      var width = d3.min([x_scale(dom1 / g.max), height]);
+      var width = 40//d3.min([x_scale(dom1 / g.max), height]);
       var posx = g.hog_start * width + g.max_in_hog * width / 2;
       return "translate(" + posx + ", 0)";
     });
@@ -9717,12 +9733,11 @@ module.exports = function Hog_state() {
 
   var that = this;
 
-  this.reset_on = function (tree, per_species3, tax_name, threshold, fam_data, hog_metadata) {
+  this.reset_on = function (tree, per_species3, tax_name, threshold, fam_data) {
     that.current_level = tax_name;
     that.hogs = undefined;
     that.number_species = 0;
     that.removed_hogs = [];
-    that.hog_metadata = hog_metadata
 
     var leaves = tree.root().get_all_leaves(true);
 
@@ -9761,9 +9776,6 @@ module.exports = function Hog_state() {
         var protid = get_protid_for_genes(fam_data, that.hogs[_i3].genes);
         if (protid) {
           that.hogs[_i3].protid = protid;
-          if (that.hog_metadata != false){
-          that.hogs[_i3].name = that.hog_metadata[that.hogs[_i3].genes[0]][that.current_level]
-          }
         }
         genes_so_far += that.hogs[_i3].max_in_hog;
       }
@@ -9881,7 +9893,6 @@ function iHam() {
 
     show_oma_link: false,
     remote_data: false,
-    augmented_orthoxml: false,
 
     frozen_node: null,
 
@@ -9889,13 +9900,8 @@ function iHam() {
   };
 
   var theme = function theme(div) {
-    var data = parse_orthoxml(config.newick, config.orthoxml, {augmented: config.augmented_orthoxml});
+    var data = parse_orthoxml(config.newick, config.orthoxml);
     var data_per_species = data.per_species;
-
-    var hog_metadata;
-    if (config.augmented_orthoxml){hog_metadata = data.hog_metadata}
-    else{hog_metadata = false}
-
     var tree_obj = data.tree;
     var fam_data_obj = {};
     config.fam_data.forEach(function (gene) {
@@ -9947,7 +9953,7 @@ function iHam() {
       dispatch.updating.call(this);
 
       if (config.frozen_node) {
-        var _removed_hogs = current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj, hog_metadata);
+        var _removed_hogs = current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj);
         dispatch.hogs_removed.call(this, _removed_hogs);
         board.width(board_width);
         // update_board();
@@ -9960,7 +9966,7 @@ function iHam() {
       dispatch.node_selected.call(this, node);
       current_opened_node = node;
       current_opened_taxa_name = node.node_name();
-      var removed_hogs = current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj, hog_metadata);
+      var removed_hogs = current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj);
       dispatch.hogs_removed.call(this, removed_hogs);
       board.width(board_width);
       board.update();
@@ -10042,7 +10048,7 @@ function iHam() {
 
     current_opened_node = tree.root();
     current_opened_taxa_name = tree.root().node_name();
-    current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj, hog_metadata);
+    current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj);
 
     // Board:
     board = tnt.board().from(0).zoom_in(1).allow_drag(false).to(2).width(board_width);
@@ -10103,7 +10109,7 @@ function iHam() {
           gene_tooltip.close();
         }
       })).add("hogs", hog_feature).add('hog_groups', hog_group.on('click', function (hog) {
-        hog_header_tooltip.display.call(this, hog, current_opened_taxa_name, div, config.show_oma_link, config.remote_data, config.augmented_orthoxml);
+        hog_header_tooltip.display.call(this, hog, current_opened_taxa_name, div, config.show_oma_link, config.remote_data);
       })));
     }
 
@@ -10340,7 +10346,7 @@ module.exports = {
     }
   },
   hog_header_tooltip: {
-    display: function display(hog, taxa_name, div, show_oma_link, remote_data, augmented_orthoxml) {
+    display: function display(hog, taxa_name, div, show_oma_link, remote_data) {
 
       function create_tooltip(hog, header, hogid, level) {
 
@@ -10364,7 +10370,7 @@ module.exports = {
         _hog_header_tooltip = tooltip.list().width(180).id('hog_header_tooltip').container(div).call(this, obj);
       }
 
-      if (remote_data && augmented_orthoxml != true) {
+      if (remote_data) {
         $.ajax({
           url: '/api/hog/' + hog.protid + '/members/?level=' + taxa_name,
           async: false, //blocks window close
