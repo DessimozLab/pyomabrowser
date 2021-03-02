@@ -1638,57 +1638,41 @@ class HOGSynteny(HOGBase, TemplateView):
         limit_first_radius = 20
         limit_second_radius = 5
 
-        logger.info("pruning of big graph")
-
+        logger.debug("pruning of big graph")
         # get the source hog node
         selected_node = [n for n, v in graph.nodes(data=True) if n == hog_id]
         if len(selected_node) != 1:
-            logger.info("Error during graph pruning, {} nodes have been founded for {}".format(len(selected_node), hog_id))
+            logger.info("Error during graph pruning, {} nodes have been found for {}".format(len(selected_node), hog_id))
 
         neighbors = [selected_node[0]]
-
-        logger.info("pruning of big graph:  node founded")
-
+        logger.debug("pruning of big graph: query node found")
         e = graph.edges(selected_node[0], data="weight")
         if len(e) < limit_first_radius:
             limit_first_radius = len(e)
+            logger.debug("pruning of big graph:  first radius receive")
 
-            logger.info("pruning of big graph:  first radius receive")
-
-        for edge in sorted(e,key=lambda x: x[2], reverse=True)[:limit_first_radius]:
+        for edge in sorted(e, key=lambda x: x[2], reverse=True)[:limit_first_radius]:
             neighbors.append(edge[1])
-
             se = graph.edges(edge[1], data="weight")
-
-            logger.info("pruning of big graph:  second radius receive / {} ".format(limit_first_radius))
-
+            logger.debug("pruning of big graph:  second radius receive / {} ".format(limit_first_radius))
             if len(se) < limit_second_radius:
                 limit_second_radius = len(se)
-
             for subedge in sorted( se,key=lambda x: x[2], reverse=True)[:limit_second_radius]:
                 neighbors.append(subedge[1])
-
         graph = graph.subgraph(neighbors)
-
-        logger.info("pruning of big graph:  done ")
-        
+        logger.debug("pruning of big graph:  done ")
 
         for n in graph.nodes.data('weight'):
             ancestral_synteny["nodes"].append({"id": n[0], "name": n[0]})
-
         for e in graph.edges.data('weight'):
             ancestral_synteny["links"].append({"source_id": e[0], "target_id": e[1], "weight": str(e[2])})
-
             if e[0] == hog_id:
                 h = models.HOG(utils.db, e[1])
-                neigh.append({'hog':e[1], 'weight': str(e[2]), 'description': h.keyword})
-
+                neigh.append({'hog': e[1], 'weight': str(e[2]), 'description': h.keyword})
             if e[1] == hog_id:
                 h = models.HOG(utils.db, e[0])
-                neigh.append({'hog':e[0], 'weight': str(e[2]), 'description': h.keyword})
-
-        logger.info("data ready to ship ")
-
+                neigh.append({'hog': e[0], 'weight': str(e[2]), 'description': h.keyword})
+        logger.debug("data ready to ship ")
         context.update({'tab': 'synteny',
                         'lineage_link_name': 'hog_synteny',
                         'synteny': ancestral_synteny,
