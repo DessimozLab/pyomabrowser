@@ -1347,6 +1347,7 @@ class HOGBase(ContextMixin):
             context['root_id'] = hog_id.split('.')[0]
             context['hog_fam'] = hog.fam
             context['level'] = hog.level
+            context['taxid'] = utils.tax.get_taxnode_from_name_or_taxid(hog.level)[0]['NCBITaxonId']
             context['description'] = hog.keyword
             context['is_subhog'] = is_subhog
             context['api_base'] = 'hog'
