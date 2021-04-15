@@ -67,9 +67,26 @@
 
                          </div>
 
+                     {% if outdated_HOG %}
+                           <br>
+                         <div class="col-md-8 offset-md-2">
+
+
+                         <div class="alert alert-danger" role="alert">
+
+
+                          <h4 class="alert-heading">STOP!</h4>
+                          <p>You are using an <b>outdated HOG identifier</b>.
+                              Please verify that your HOG Id is formatted in the following way
+                          HOG:{{ release_char}}{0000000}</p>
+
+                         </div>
+
+                         </div>
+                         {%endif%}
+
                          {% if meta_entry.shown == 0 and meta_group.shown == 0 and meta_genome.shown == 0  %}
 
-                         <br>
                          <br>
 
                          <div class="col-md-8 offset-md-2">

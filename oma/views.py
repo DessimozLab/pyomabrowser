@@ -2573,12 +2573,13 @@ class Searcher(View):
     _genome_selector = ["name", "taxid"]
     _max_results = 50
 
+
     def analyse_search(self, request, type, query):
         if query == "":
             return redirect('home')
         terms = shlex.split(query)
 
-        context = {'query': query, 'type': type, 'terms':terms}
+        context = {'query': query, 'type': type, 'terms':terms, "outdated_HOG" : False}
 
         redir = (type != 'all' and len(terms) == 1)
 
@@ -2936,7 +2937,11 @@ class Searcher(View):
 
             # for each terms we get the raw results
             for term in terms:
-                r = self.search_hog(request, term, selector=[selector])
+                try:
+                    r = self.search_hog(request, term, selector=[selector])
+                except db.OutdatedHogId :
+                    context["outdated_HOG"] = True
+
                 raw_results.append(r)
                 search_term_meta[term][selector] += len(r)
 
