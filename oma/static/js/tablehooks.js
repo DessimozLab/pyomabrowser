@@ -2,6 +2,9 @@
  * Created by adriaal on 03/06/16.
  */
 (function(exports) {
+
+    const release_char = JSON.parse(document.getElementById('release_char-data').textContent);
+
     const cases = {
         Bacteria: {cls: 'label-success', display_text: "Bacteria", tag: "B"},
         Archaea: {cls: 'label-primary', display_text: "Archaea", tag: "A"},
@@ -135,8 +138,8 @@
 
     exports.format_hogid = function(value, row) {
         if (value === "Reference") { return value  }
-        return '<a href="/oma/hog/HOG:' + zeroPad(value, 7)
-            + '/table/">HOG:' + zeroPad(value, 7) +'</a>';
+        return '<a href="/oma/hog/HOG:' + release_char + zeroPad(value, 7)
+            + '/table/">HOG:' + release_char + zeroPad(value, 7) +'</a>';
     };
 
     exports.format_hog_api = function(value, row) {
@@ -147,7 +150,10 @@
     };
     exports.format_roothog = function(value, row) {
         if (value > 0) {
-            return '<a href="/oma/hog/HOG:' + zeroPad(value, 7) + '/iham/">HOG:' + zeroPad(value, 7) + "</a>";
+
+
+            console.log(release_char);
+            return '<a href="/oma/hog/HOG:' + release_char + zeroPad(value, 7) + '/iham/">HOG:' + release_char + zeroPad(value, 7) + "</a>";
         } else {
             return "n/a";
         }
@@ -176,8 +182,8 @@
 
 
     exports.format_hogid_vis = function(value) {
-        return '<a href="/oma/hog/HOG:' + zeroPad(value, 7)
-            +'/iham/">HOG:' +  zeroPad(value,7) + '</a>';
+        return '<a href="/oma/hog/HOG:' + release_char + zeroPad(value, 7)
+            +'/iham/">HOG:' + release_char +  zeroPad(value,7) + '</a>';
     };
 
 
@@ -186,8 +192,7 @@
             if (value.includes(".")){
                 return '<a href="/oma/hog/' + value + '/iham/">' + value + "</a>";
             }
-
-             return '<a href="/oma/hog/HOG:' + zeroPad(value, 7) + '/iham/">HOG:' + zeroPad(value, 7) + "</a>";
+             return '<a href="/oma/hog/' + row.group_nr + '/iham/">' +  row.group_nr + "</a>";
         }
         else if (row.type === "OMA group") {
             return '<a href="/oma/omagroup/' + value + '/members/">' + value + '</a>';
