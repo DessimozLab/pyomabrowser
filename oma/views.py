@@ -1307,7 +1307,7 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
 def resolve_hog_id(request, hog_id):
     # matches e.g. "HOG:0002124.1a.53bz.2a_4893"
     match = re.match(
-        r'(?P<id>HOG:(?P<fam>\d+)(?:[a-z0-9.]*))(?:_(?P<taxid>\d+))?',
+        r'(?P<id>HOG:(?P<rel>[A-Z]+)?(?P<fam>\d+)(?:[a-z0-9.]*))(?:_(?P<taxid>\d+))?',
         hog_id
     )
     if match is None:
