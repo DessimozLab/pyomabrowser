@@ -1698,7 +1698,7 @@ class HOGsOrthoXMLView(HOGBase, View):
     def get(self, request, file_type=None, **kwargs):
         context = self.get_context_data(only_validate=True, **kwargs)
         augmented = False
-        if (file_type == 'augmented'):
+        if file_type == 'augmented':
             augmented = True
         try:
             fam = context['hog'].fam
