@@ -21,7 +21,7 @@
                                      <p>The following new HOGs are our best candidates as a successor:</p>
                                      <ul>
                                         {% for new_hog in candidate_hogs %}
-                                        <li><b>{{ new_hog.hog_id }}</b> {{ new_hog.level }}: {% if new_hog.description %}({{ new_hog.description }}) {% endif %}; {{ new_hog.nr_member_genes }} member genes. Jaccard similarity with old hog: {{ new_hog.jaccard }}</li>
+                                            <li><b><a href="{{ new_hog.redirect_url }}">{{ new_hog.hog_id }}</a></b> {{ new_hog.level }}: {% if new_hog.keyword %}({{ new_hog.keyword }}) {% endif %}; {{ new_hog.nr_member_genes }} member genes. Jaccard similarity with old hog: {{ new_hog.jaccard }}</li>
                                         {% endfor %}
                                      </ul>
                                  {% else %}
