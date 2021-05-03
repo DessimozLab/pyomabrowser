@@ -38,7 +38,6 @@
                                      <span class="badge badge-secondary"><a style="color:#fff" href="{% url 'genome_info' term.1 %}">  {{term.2.species}} [{{term.1}}] </a> </span>
 
 
-
                                      {% else %}
 
                                      <span class="badge badge-secondary"><a style="color:#fff" href="{% url 'ancestralgenome_info' term.2 %}">  {{term.2}}  </a> </span>
@@ -74,11 +73,7 @@
 
                          <div class="alert alert-danger" role="alert">
 
-
-                          <h4 class="alert-heading">STOP!</h4>
-                          <p>You are using an <b>outdated HOG identifier</b>.
-                              Please verify that your HOG Id is formatted in the following way
-                          HOG:{{ release_char}}{0000000}</p>
+                              {% include "includes/outdated_hog.html" %}
 
                          </div>
 

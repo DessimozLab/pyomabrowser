@@ -2940,7 +2940,25 @@ class Searcher(View):
                 try:
                     r = self.search_hog(request, term, selector=[selector])
                 except db.OutdatedHogId :
+
+                    try:
+                        candidates = utils.hogid_forward_mapper.map_hogid(exception.outdated_hog_id)
+                    except AttributeError:
+                        candidates = {}
+
+                    target_view_name = request.resolver_match.view_name
+
+                    new_hogs = []
+                    for new_id, jaccard in candidates.items():
+                        h = utils.HOG(utils.db.get_hog(new_id))
+                        h.jaccard = jaccard
+                        h.redirect_url = resolve_url(target_view_name, h.hog_id)
+                        new_hogs.append(h)
+                    new_hogs.sort(key=lambda h: -h.jaccard)
+
                     context["outdated_HOG"] = True
+                    context["outdated_hog_id"] = db.OutdatedHogId.outdated_hog_id.decode()
+                    context["candidate_hogs"] = new_hogs
 
                 raw_results.append(r)
                 search_term_meta[term][selector] += len(r)
