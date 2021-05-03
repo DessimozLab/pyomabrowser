@@ -2946,13 +2946,11 @@ class Searcher(View):
                     except AttributeError:
                         candidates = {}
 
-                    target_view_name = request.resolver_match.view_name
-
                     new_hogs = []
                     for new_id, jaccard in candidates.items():
                         h = utils.HOG(utils.db.get_hog(new_id))
                         h.jaccard = jaccard
-                        h.redirect_url = resolve_url(target_view_name, h.hog_id)
+                        h.redirect_url = resolve_url("hog_viewer", h.hog_id)
                         new_hogs.append(h)
                     new_hogs.sort(key=lambda h: -h.jaccard)
 
