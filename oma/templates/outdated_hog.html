@@ -15,20 +15,9 @@
                      <div class="pull-left">
                          <div class="row">
                              <div class="col-md-8 offset-md-2">
-                                 <h3><strong>Out-dated hog_id "{{ outdated_hog_id }}"</strong></h3>
-                                 <p>Sorry, you tried to access a HOG with an out-dated ID. The requested HOG with the ID "{{ outdated_hog_id }}" comes from an older OMA release and is no longer valid.</p>
-                                 {% if candidate_hogs|length > 0 %}
-                                     <p>The following new HOGs are our best candidates as a successor:</p>
-                                     <ul>
-                                        {% for new_hog in candidate_hogs %}
-                                            <li><b><a href="{{ new_hog.redirect_url }}">{{ new_hog.hog_id }}</a></b> {{ new_hog.level }}: {% if new_hog.keyword %}({{ new_hog.keyword }}) {% endif %}; {{ new_hog.nr_member_genes }} member genes. Jaccard similarity with old hog: {{ new_hog.jaccard }}</li>
-                                        {% endfor %}
-                                     </ul>
-                                 {% else %}
-                                     <p>Unfortunately we can not find a good candidate HOG as a successor.
-                                        We suggest to try the protein search functionality to identify new HOG
-                                        that contains your gene of interest.</p>
-                                 {% endif %}
+
+                             {% include "includes/outdated_hog.html" %}
+
                              </div>
                          </div>
                      </div>
