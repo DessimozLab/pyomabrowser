@@ -2939,7 +2939,7 @@ class Searcher(View):
             for term in terms:
                 try:
                     r = self.search_hog(request, term, selector=[selector])
-                except db.OutdatedHogId :
+                except db.OutdatedHogId as exception :
 
                     try:
                         candidates = utils.hogid_forward_mapper.map_hogid(exception.outdated_hog_id)
@@ -2957,7 +2957,7 @@ class Searcher(View):
                     new_hogs.sort(key=lambda h: -h.jaccard)
 
                     context["outdated_HOG"] = True
-                    context["outdated_hog_id"] = db.OutdatedHogId.outdated_hog_id.decode()
+                    context["outdated_hog_id"] = exception.outdated_hog_id.decode()
                     context["candidate_hogs"] = new_hogs
 
                 raw_results.append(r)
