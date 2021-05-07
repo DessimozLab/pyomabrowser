@@ -383,7 +383,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
 
     def _validate_hogid(self, hogid):
         try:
-            fam = utils.db.parse_hogid(hogid)
+            fam = utils.db.parse_hog_id(hogid)
             return fam
         except db.OutdatedHogId as e:
             try:
