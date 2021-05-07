@@ -1314,12 +1314,16 @@ def resolve_hog_id(request, hog_id):
         raise Http404("Invalid HOG id format: {}".format(hog_id))
     if match.group('taxid') is not None:
         taxid = int(match.group('taxid'))
-        try:
-            taxnode = utils.tax.get_taxnode_from_name_or_taxid(taxid)
-            args = (match.group('id'), taxnode[0]['Name'].decode())
-        except Exception:
-            logger.exception("cannot determine taxon node for {}".format(taxid))
-            raise Http404("taxonid {} is unknown in OMA database".format(taxid))
+        if taxid in (0, 131567):
+            level = "LUCA"
+        else:
+            try:
+                taxnode = utils.tax.get_taxnode_from_name_or_taxid(taxid)
+                level = taxnode[0]['Name'].decode()
+            except Exception:
+                logger.exception("cannot determine taxon node for {}".format(taxid))
+                raise Http404("taxonid {} is unknown in OMA database".format(taxid))
+        args = (match.group('id'), level)
     else:
         args = (match.group('id'), )
     return HttpResponseRedirect(reverse('hog_table', args=args))
@@ -1341,13 +1345,17 @@ class HOGBase(ContextMixin):
                 else:
                     is_subhog = True
 
+            logger.debug("hog: {}".format(hog))
             # update context
             context['hog'] = hog
             context['hog_id'] = hog_id
             context['root_id'] = hog_id.split('.')[0]
             context['hog_fam'] = hog.fam
             context['level'] = hog.level
-            context['taxid'] = utils.tax.get_taxnode_from_name_or_taxid(hog.level)[0]['NCBITaxonId']
+            if hog.level != "LUCA":
+                context['taxid'] = utils.tax.get_taxnode_from_name_or_taxid(hog.level)[0]['NCBITaxonId']
+            else:
+                context['taxid'] = 0
             context['description'] = hog.keyword
             context['is_subhog'] = is_subhog
             context['api_base'] = 'hog'
@@ -1702,7 +1710,7 @@ class HOGsOrthoXMLView(HOGBase, View):
             augmented = True
         try:
             fam = context['hog'].fam
-            orthoxml = utils.db.get_orthoxml(fam, augmented = augmented )
+            orthoxml = utils.db.get_orthoxml(fam, augmented=augmented)
         except ValueError as e:
             raise Http404(e.message)
         response = HttpResponse(content_type='text/plain')  #'application/xml')
