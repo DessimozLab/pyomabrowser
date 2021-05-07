@@ -1345,6 +1345,7 @@ class HOGBase(ContextMixin):
                 else:
                     is_subhog = True
 
+            logger.debug("hog: {}".format(hog))
             # update context
             context['hog'] = hog
             context['hog_id'] = hog_id
@@ -1709,7 +1710,7 @@ class HOGsOrthoXMLView(HOGBase, View):
             augmented = True
         try:
             fam = context['hog'].fam
-            orthoxml = utils.db.get_orthoxml(fam, augmented = augmented )
+            orthoxml = utils.db.get_orthoxml(fam, augmented=augmented)
         except ValueError as e:
             raise Http404(e.message)
         response = HttpResponse(content_type='text/plain')  #'application/xml')
