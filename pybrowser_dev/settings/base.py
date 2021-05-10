@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'oma.middleware.OutdatedHogIdRedirector',
 ]
 
 REST_FRAMEWORK = {
@@ -138,6 +139,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'oma.context_processors.xref_order',
                 'oma.context_processors.oma_instance',
+                'oma.context_processors.release_char',
             ],
         },
     },

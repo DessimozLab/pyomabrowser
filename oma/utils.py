@@ -4,6 +4,8 @@ import django.conf
 import functools
 import os
 import json
+import logging
+logger = logging.getLogger(__name__)
 
 
 db = pyoma.browser.db.Database(django.conf.settings.HDF5DB['PATH'])
@@ -11,7 +13,13 @@ id_resolver = db.id_resolver
 id_mapper = db.id_mapper
 tax = db.tax
 domain_source = pyoma.browser.db.DomainNameIdMapper(db)
+try:
+    hogid_forward_mapper = pyoma.browser.db.HogIdForwardMapper(db)
+except IOError as e:
+    logger.warning("Cannot open HogIdForwardMapper: {}".format(e))
+    hogid_forward_mapper = None
 
+# Models
 ProteinEntry = functools.partial(pyoma.browser.models.ProteinEntry, db)
 HOG = functools.partial(pyoma.browser.models.HOG, db)
 Genome = functools.partial(pyoma.browser.models.Genome, db)

@@ -14,7 +14,7 @@ RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
        uwsgi \
        uwsgi-core \
-       uwsgi-plugin-python \
+       uwsgi-plugin-python3 \
        libcgi-session-perl \
     && rm -rf /var/lib/apt/lists/*
 

@@ -27,20 +27,6 @@
 }
 
 
-.tnt_groupDiv{
-    display: inline-block;
-}
-
-div[id^="tnt_tree_container_"] {
-    display: inherit;
-    overflow-x: auto;
-}
-
-div[id^="tnt_annot_container_"] {
-    display: inherit;
-    overflow-x: auto;
-}
-
 ::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 7px;

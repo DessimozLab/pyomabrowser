@@ -381,6 +381,20 @@ class HOGViewSet(PaginationMixin, ViewSet):
             raise NotFound("{} is not part of any HOG.".format(entry_id))
         return protein.oma_hog
 
+    def _validate_hogid(self, hogid):
+        try:
+            fam = utils.db.parse_hog_id(hogid)
+            return fam
+        except db.OutdatedHogId as e:
+            try:
+                cand = utils.hogid_forward_mapper.map_hogid(e.outdated_hog_id)
+            except AttributeError:
+                cand = {}
+            candidates = [{"hog_id": hogid, "jaccard": jaccard} for hogid, jaccard in cand.items()]
+            raise rest_models.IdGoneException(e.outdated_hog_id, candidates)
+        except ValueError as e:
+            raise NotFound(e)
+
     def _get_level_and_adjust_hogid_if_needed(self, hog_id):
         level = self.request.query_params.get('level', None)
         if level is not None:
@@ -420,7 +434,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
                          that occured between the two points in time.
             location: query
         """
-        level, _ = self._get_level_and_adjust_hogid_if_needed('HOG:000001')
+        level, _ = self._get_level_and_adjust_hogid_if_needed(utils.db.format_hogid(1))
         if level is not None:
             compare_level = self.request.query_params.get('compare_with', None)
             if compare_level is not None:
@@ -475,9 +489,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
         if hog_id[:4] != "HOG:":
             # hog_id == member
             hog_id = self._hog_id_from_entry(hog_id)
-
+        fam_nr = self._validate_hogid(hog_id)
         level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
-        fam_nr = utils.db.parse_hog_id(hog_id)
         if level is None:
             levs = frozenset(
                 [row['Level'].decode() for row in utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')])
@@ -565,13 +578,12 @@ class HOGViewSet(PaginationMixin, ViewSet):
         """
         if hog_id[:4] != "HOG:":
             hog_id = self._hog_id_from_entry(hog_id)
-
+        fam_nr = self._validate_hogid(hog_id)
         level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
         if level is not None:
             members = [utils.ProteinEntry(entry) for entry in utils.db.hog_members_from_hog_id(hog_id, level)]
             hog_id = self._identify_lca_hog_id_from_proteins(members)
         else:
-            fam_nr = utils.db.parse_hog_id(hog_id)
             condition = '(Fam == fam_nr) & (ID == hog_id)'
             levs = frozenset(
                 [hog['Level'].decode() for hog in utils.db.get_hdf5_handle().get_node('/HogLevel').where(condition)])
@@ -626,7 +638,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         """
         if hog_id[:4] != "HOG:":
             hog_id = self._hog_id_from_entry(hog_id)
-
+        fam_nr = self._validate_hogid(hog_id)
         try:
             nr_profiles = float(self.request.query_params.get('max_results', "10"))
             if 1 < nr_profiles > 50:

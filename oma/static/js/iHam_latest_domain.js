@@ -2831,6 +2831,23 @@ module.exports.parse_orthoxml = require("./src/xmlconverter.js");
 module.exports.tree_tool = require('./src/tree_utils.js');
 module.exports.parse_phyloxml = require('./src/phyloxml.js');
 
+/*function loadNewComponent(action) {
+    define(['',''], function (hogvis, newick) {
+        var mewComposedObject = {
+            parameterA : hogvis,
+            parameterB : newick,
+            methodA : function() {
+                this.parameterA.hogvisMethod();
+            }
+        }
+        action(newComposedObject);
+    });
+}
+
+loadNewComponent(function(component) {
+   component.methodA
+}); */
+
 },{"./src/newick.js":12,"./src/phyloxml.js":13,"./src/tree_utils.js":14,"./src/xmlconverter.js":15}],12:[function(require,module,exports){
 /**
  * Newick format parser in JavaScript.
@@ -4474,36 +4491,27 @@ var newick = require("./newick.js");
 var phyloxml = require("./phyloxml.js");
 var tree_tool = require("./tree_utils.js");
 
-var LevelIndexCreator = function () {
+var LevelIndexCreator = function(){
     this.levels = {};
-    this.next_index = function (level) {
-        if (this.levels[level] === undefined) {
+    this.next_index = function(level){
+        if (this.levels[level] === undefined){
             this.levels[level] = 0;
         } else {
             this.levels[level] += 1;
         }
         return this.levels[level];
     };
-    this.current_index = function (level) {
+    this.current_index = function(level){
         return this.levels[level];
     };
 };
 
-module.exports = function (tree, source, params) {
-    params = params || {};
-    var saxOptions = params.saxOptions || {};
-    var augmented = params.augmented || false;
-    var query_hog = params.query_hog || false;
-
-
+var Converter = module.exports = function(tree, source, saxOptions) {
+    saxOptions = saxOptions || {};
     var parser = sax.parser(true, saxOptions);
 
-// main datastructure to return. a dict (species -> dict( level -> array with member genes))
+    // main datastructure to return. a dict (species -> dict( level -> array with member genes))
     var per_species = {};
-// Store meta information about hogs (Id, CompletenessScore, NrMemberGenes). Since hogs are not accessed in iHAM
-// via their unique ids, we store them using protein id + level to accessed them later easily.
-    var hog_metadata = {};  // dict (entry_number -> dict( level -> hog_id) )
-    var query_members = {}; // if a query_hog is set, will return the list of its member genes
     var gene2sp = {};
     var xrefs = {};
     var orgs = [];
@@ -4513,13 +4521,12 @@ module.exports = function (tree, source, params) {
     var _lev = 0;
     var _cur_sp = '';
     var _og_stack = [];
-    var _skipped_levels = [];
-// counter of ancestral hogs per taxonomic level
+    // counter of ancestral hogs per taxonomic level
     var _level_index_creator = new LevelIndexCreator();
 
-    var parsed_tree = function () {
-        if (typeof (tree) === "string") {
-            if (tree.startsWith('<?xml') || tree.startsWith("<phyloxml")) {
+    var parsed_tree = function(){
+        if (typeof(tree) === "string"){
+            if (tree.startsWith('<?xml') || tree.startsWith("<phyloxml")){
                 var xmltree = phyloxml.phyloXml.parse(tree);
                 return tree_tool.add_nodenames_from_taxonomy_if_needed(tree_tool.extractTree(xmltree));
             } else {
@@ -4530,20 +4537,20 @@ module.exports = function (tree, source, params) {
             return tree;
         }
     }();
-    var trimSpeciesTree = function () {
-        var rec_trav = function (node) {
-            if (node !== undefined && node.children !== undefined) {
-                var childs = node.children.map(rec_trav).filter(el => el !== undefined);
+    var trimSpeciesTree = function(){
+        var rec_trav = function(node){
+            if (node !== undefined && node.children !== undefined){
+                var childs = node.children.map(rec_trav).filter( el => el !== undefined);
                 //console.log(childs);
                 var is_internal_species = (orgs.indexOf(node.name) >= 0);
-                if (is_internal_species) {
+                if (is_internal_species){
                     // this is a special case where one of the speices has
                     // the name of the internal taxlevel. We fix this by adding
                     // a (species) postfix to the genome and add it has a leaf
                     // to this level.
-                    for (let gene in gene2sp) {
-                        if (gene2sp.hasOwnProperty(gene)) {
-                            if (gene2sp[gene] === node.name) {
+                    for (let gene in gene2sp){
+                        if (gene2sp.hasOwnProperty(gene)){
+                            if (gene2sp[gene] ===  node.name){
                                 gene2sp[gene] += " (species)";
                             }
                         }
@@ -4551,17 +4558,14 @@ module.exports = function (tree, source, params) {
                     orgs[orgs.indexOf(node.name)] += " (species)";
                     childs.push({name: node.name + " (species)"});
                 }
-                if (childs.length === 0) {
-                    return undefined;
-                } else if (childs.length === 1) {
-                    _skipped_levels.push(node.name);
-                    return childs[0];
-                } else {
+                if (childs.length === 0) return undefined;
+                else if (childs.length === 1) return childs[0];
+                else {
                     return {name: node.name, children: childs};
                 }
             } else {
                 // check if this leaf (species) is present in the orthoxml.
-                if (orgs.indexOf(node.name) >= 0) {
+                if (orgs.indexOf(node.name) >= 0){
                     return {name: node.name};
                 } else {
                     return undefined;
@@ -4571,58 +4575,41 @@ module.exports = function (tree, source, params) {
         return rec_trav(parsed_tree);
     };
 
-    var openTag = function (args) {
+    var openTag = function(args) {
         // if xmlns option set use the local tag name rather than full name.
         var tagName = saxOptions.xmlns ? args.local : args.name;
         var prev, og, geneId;
 
-        if (tagName === "species") {
+        if (tagName === "species"){
             _cur_sp = args.attributes.name;
             orgs.push(args.attributes.name);
-        } else if (tagName === "gene") {
+        } else if (tagName === "gene"){
             geneId = parseInt(args.attributes.id, 10);
             gene2sp[geneId] = _cur_sp;
             xrefs[geneId] = args.attributes.protId;
-        } else if (tagName === "geneRef") {
+        } else if (tagName === "geneRef"){
             geneId = parseInt(args.attributes.id, 10);
+            // add gene to per_species ds.
+            let sp = gene2sp[geneId];
+            let lev_cnt = _level_index_creator.next_index(sp);
+            add_elements_to_per_species([geneId], sp, lev_cnt);
             // add gene to parent HOG.
             prev = _og_stack[_og_stack.length - 1];
             prev.memb.push(geneId);
-
-            if (!augmented) {
-                // add gene to per_species ds.
-                let sp = gene2sp[geneId];
-                let lev_cnt = _level_index_creator.next_index(sp);
-                add_elements_to_per_species([geneId], sp, lev_cnt);
-
-                if (prev.species_sublevels[sp] === undefined) {
-                    prev.species_sublevels[sp] = [];
-                }
-                prev.species_sublevels[sp].push(geneId);
-            } else {
-                let metadata = {};
-                _og_stack.forEach(item => metadata[item.lev] = item.hog_id);
-                hog_metadata[geneId] = metadata;
+            if (prev.species_sublevels[sp] === undefined) {
+                prev.species_sublevels[sp] = [];
             }
-        } else if (tagName === "orthologGroup") {
-            og = {memb: [], lev: undefined, species_sublevels: {}};
-            if (augmented) {
-                og.hog_id = args.attributes.id;
-            }
+            prev.species_sublevels[sp].push(geneId);
+        } else if (tagName === "orthologGroup"){
+            og = {memb:[], lev:'', species_sublevels:{}};
             _lev += 1;
             _og_stack.push(og);
-        } else if (tagName === "property" && args.attributes.name === "TaxRange") {
+        } else if (tagName === "property" && args.attributes.name === "TaxRange"){
             // assign taxrange level to current hog.
             prev = _og_stack[_og_stack.length - 1];
             prev.lev = args.attributes.value;
-        } else if (tagName === "property" && args.attributes.name === "taxid") {
-            // assign taxid level to current hog.
-            prev = _og_stack[_og_stack.length - 1];
-            prev.taxid = args.attributes.value;
-        } else if (tagName === "score") {
-            prev = _og_stack[_og_stack.length - 1];
-            prev[args.attributes.id] = args.attributes.value;
-        } else if (tagName === "groups") {
+
+        } else if (tagName === "groups"){
             var sp = trimSpeciesTree();
             //console.log(sp);
             sptree = sp;
@@ -4636,62 +4623,37 @@ module.exports = function (tree, source, params) {
      * @param lev  the level to which it should be added
      * @param anc_gene_idx  at what position (ancestral gene index)
      */
-    var add_elements_to_per_species = function (members, lev, anc_gene_idx) {
-        members.forEach(function (member) {
+    var add_elements_to_per_species = function(members, lev, anc_gene_idx){
+        members.forEach(function(member){
             let sp = gene2sp[member];
-            if (per_species[sp] === undefined) {
+            if (per_species[sp] === undefined){
                 per_species[sp] = {};
             }
-            if (per_species[sp][lev] === undefined) {
+            if (per_species[sp][lev] === undefined){
                 per_species[sp][lev] = [];
             }
             let levPerSpeciesObj = per_species[sp][lev];
-            while (levPerSpeciesObj.length <= anc_gene_idx) {
+            while (levPerSpeciesObj.length <= anc_gene_idx){
                 levPerSpeciesObj.push([]);
             }
             levPerSpeciesObj[anc_gene_idx].push(member);
         });
     };
 
-    var mrca = function (members) {
-        const lineage = function (gene) {
-            let sp = gene2sp[gene];
-            var lin = [sp];
-            let parent = _sptree_parent_relations[sp];
-            while (parent !== undefined) {
-                lin.push(parent);
-                parent = _sptree_parent_relations[parent];
-            }
-            return lin;
-        };
-        const lin = lineage(members[0]);
-        var cnts = Array.from({length: lin.length}, () => 0);
-        members.forEach(function (member) {
-            let ca = lineage(member).findIndex(x => lin.indexOf(x) >= 0);
-            for (let x = ca; x < lin.length; x++) {
-                cnts[x]++;
-            }
-        });
-        let sel = cnts.indexOf(members.length);
-        return lin[sel];
-    };
-
-    var add_levels_for_single_species_hogs = function (og) {
+    var add_levels_for_single_species_hogs = function(og){
         // we only have to do anything if there is at least one direct species in that hog
         let direct_species_levs = Object.keys(og.species_sublevels);
         if (direct_species_levs.length === 0) {
             return;
         }
 
-        direct_species_levs.forEach(function (sp) {
+        direct_species_levs.forEach(function(sp){
             let sp_memb = og.species_sublevels[sp];
             //console.log(sp+": "+sp_memb);
-            if (sp === og.lev) {
-                return;
-            }
+            if (sp === og.lev){return;}
 
             let lev_node = _sptree_parent_relations[sp];
-            while (lev_node !== undefined && lev_node !== og.lev) {
+            while (lev_node !== undefined && lev_node !== og.lev){
                 let idx = _level_index_creator.next_index(lev_node);
                 add_elements_to_per_species(sp_memb, lev_node, idx);
                 lev_node = _sptree_parent_relations[lev_node];
@@ -4702,28 +4664,16 @@ module.exports = function (tree, source, params) {
     var closeTag = function (name) {
         // `name` is namespace prefixed always.
         // Strip the ns off if xmlns option was set.
-        name = saxOptions.xmlns ? name.replace(/.+?:/, '') : name;
+        name = saxOptions.xmlns ? name.replace(/.+?:/,'') : name;
 
-        if (name === "orthologGroup") {
+        if (name === "orthologGroup"){
             var og = _og_stack.pop();
-
-            if (og.hog_id){
-                if (query_hog == og.hog_id){
-                    query_members = og.memb
-                }
-            }
-
-            if (og.lev === undefined) {
-                og.lev = mrca(og.memb);
-            }
-            if (_skipped_levels.indexOf(og.lev) === -1) {
-                var lev_cnt = _level_index_creator.next_index(og.lev);
-                add_elements_to_per_species(og.memb, og.lev, lev_cnt);
-                add_levels_for_single_species_hogs(og);
-            }
+            var lev_cnt = _level_index_creator.next_index(og.lev);
+            add_elements_to_per_species(og.memb, og.lev, lev_cnt);
+            add_levels_for_single_species_hogs(og);
 
             _lev -= 1;
-            if (_lev === 0) {
+            if (_lev === 0){
                 //_per_species_obj_to_array();
                 /*self.emit('hog_ds', {
                     per_species: per_species,
@@ -4734,31 +4684,30 @@ module.exports = function (tree, source, params) {
                 var prev = _og_stack[_og_stack.length - 1];
                 //extend memb in prev with the ones in og
                 prev.memb.push.apply(prev.memb, og.memb);
-                if (!augmented) {
-                    // add intermediate levels that do not exist
-                    let lev_node = _sptree_parent_relations[og.lev];
-                    while (lev_node !== undefined && lev_node !== prev.lev) {
-                        let idx = _level_index_creator.next_index(lev_node);
-                        add_elements_to_per_species(og.memb, lev_node, idx);
-                        lev_node = _sptree_parent_relations[lev_node];
-                    }
+
+                // add intermediate levels that do not exist
+                let lev_node = _sptree_parent_relations[og.lev];
+                while (lev_node !== undefined && lev_node !== prev.lev){
+                    let idx = _level_index_creator.next_index(lev_node);
+                    add_elements_to_per_species(og.memb, lev_node, idx);
+                    lev_node = _sptree_parent_relations[lev_node];
                 }
             }
-        } else if (name === "paralogGroup") {
+        } else if (name === "paralogGroup"){
 
         }
     };
 
-    var create_remaining_empty_hogs_at_all_levels = function () {
-        for (var sp in per_species) {
-            if (per_species.hasOwnProperty(sp)) {
+    var create_remaining_empty_hogs_at_all_levels = function(){
+        for (var sp in per_species){
+            if (per_species.hasOwnProperty(sp)){
                 var spObj = per_species[sp];
-                for (var tax in spObj) {
-                    if (spObj.hasOwnProperty(tax)) {
-                        for (var i = 0; i < spObj[tax].length; i++) {
+                for (var tax in spObj){
+                    if (spObj.hasOwnProperty(tax)){
+                        for (var i=0; i<spObj[tax].length; i++){
                             spObj[tax][i].sort();
                         }
-                        while (_level_index_creator.current_index(tax) >= spObj[tax].length) {
+                        while (_level_index_creator.current_index(tax) >= spObj[tax].length){
                             spObj[tax].push([]);
                         }
                     }
@@ -4774,12 +4723,11 @@ module.exports = function (tree, source, params) {
     create_remaining_empty_hogs_at_all_levels();
     return {
         per_species: per_species,
-        hog_metadata: hog_metadata,
-        query_members: query_members,
         tree: tree_tool.ladderize(sptree),
-        xrefs: xrefs,
+        xrefs: xrefs
     };
 };
+
 },{"./newick.js":12,"./phyloxml.js":13,"./tree_utils.js":14,"sax":34}],16:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
@@ -9624,12 +9572,12 @@ module.exports = {
     var dom1 = x_scale.domain()[1];
 
     new_hog.append("line").attr("class", "hog_boundary").attr("x1", function (d) {
-      var width = 16; // d3.min([x_scale(dom1 / d.max), height]);
+      var width = 40//d3.min([x_scale(dom1 / d.max), height]);
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
       return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
     }).attr("x2", function (d) {
-      var width = 16;
+      var width = 40//d3.min([x_scale(dom1 / d.max), height]);
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
       return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
@@ -9642,12 +9590,12 @@ module.exports = {
     var dom1 = x_scale.domain()[1];
 
     hogs.select("line").transition().duration(200).attr("x1", function (d) {
-      var width = 16;
+      var width = 40//d3.min([x_scale(dom1 / d.max), height]);
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
       return x + (xnext - x + width) / 2 + ~~(padding / 2) - 1;
     }).attr("x2", function (d) {
-      var width = 16;
+      var width = 40//d3.min([x_scale(dom1 / d.max), height]);
       var x = width * (d.max_in_hog - 1);
       var xnext = width * d.max_in_hog;
 
@@ -9656,7 +9604,6 @@ module.exports = {
   }),
   hog_gene_feature: function hog_gene_feature() {
     var feature = tnt.board.track.feature();
-    var width = 16;
 
     var color = function color() {
       return "grey";
@@ -9672,28 +9619,72 @@ module.exports = {
 
     feature.index(function (d) {
       return d.id;
-    }).create(function (new_elems, x_scale) {
+    })
+        .create(function (new_elems, x_scale) {
       var track = this;
       var padding = ~~(track.height() - track.height() * 0.8) / 2;
       var height = track.height() - ~~(padding * 2);
+      var dom1 = x_scale.domain()[1];
 
-      new_elems.append("rect").attr("class", "hog_gene").attr("x", function (d) {
-        var x = width * d.pos;
+      var g = new_elems.append('g').attr('transform', function (g) {
+      var width = 40// d3.min([x_scale(dom1 / g.max), height]);
+      return "translate(" + width * g.pos + ", 0)";});
+
+      g.append("rect")
+          .attr("class", "hog_gene")
+          .attr("x", function (d) {
+        var width = 40//d3.min([x_scale(dom1 / d.max), height]);
+        var x = width ;
         return x + padding;
-      }).attr("y", padding).attr("width", function (d) {
+      })
+          .attr("y", padding)
+          .attr("width", function (d) {
+        var width = 40//d3.min([x_scale(dom1 / d.max), height]);
         return width - 2 * padding;
-      }).attr("height", height).attr("fill", color);
-    }).distribute(function (elems, x_scale) {
+      })
+          .attr("height", height)
+          .attr("fill", color)
+
+
+        g.append("rect")
+          .attr("class", "hog_gene")
+          .attr("x", function (d) {
+        var width = 40//d3.min([x_scale(dom1 / d.max), height]);
+        var x = width ;
+        return Math.floor(Math.random() * 24); + padding;
+      })
+          .attr("y", padding)
+          .attr("width", function (d) {
+        var width = 40//d3.min([x_scale(dom1 / d.max), height]);
+        return width - 2 * padding;
+      })
+          .attr("height", height)
+          .attr("fill", 'blue')
+
+         }).distribute(function (elems, x_scale) {
       var track = this;
       var padding = ~~(track.height() - track.height() * 0.8) / 2;
+      var height = track.height() - ~~(padding * 2);
+      var dom1 = x_scale.domain()[1];
 
-      elems.select("rect").transition().attr("x", function (d) {
+
+      elems.selectAll("rect")
+          .transition()
+          .attr("x", function (d) {
+        var width = 40//d3.min([x_scale(dom1 / d.max), height]);
         var x = width * d.pos;
-        return x + padding;
+        if (this.getAttribute("fill") == 'blue'){return this.getAttribute("x") }
+        return  padding;
       }).attr("width", function (d) {
+
+        var width;
+        if (this.getAttribute("fill") == 'blue'){width = Math.floor(Math.random() * 20);}
+        else{width = 40}
         return width - 2 * padding;
-      });
+      })
     });
+
+
 
     return feature;
   },
@@ -9702,9 +9693,11 @@ module.exports = {
   }).create(function (new_group, x_scale) {
     var track = this;
     var padding = ~~(track.height() - track.height() * 0.8) / 2;
+    var height = track.height() - ~~(padding * 2);
+    var dom1 = x_scale.domain()[1];
 
     var g = new_group.append('g').attr('transform', function (g) {
-      var width = 16;
+      var width = 40// d3.min([x_scale(dom1 / g.max), height]);
       var posx = g.hog_start * width + g.max_in_hog * width / 2;
       return "translate(" + posx + ", 0)";
     }).style('cursor', 'pointer').attr('class', function (d) {
@@ -9715,9 +9708,13 @@ module.exports = {
 
     g.append('text').attr('x', 0).attr('y', -11).attr('text-anchor', 'middle').attr('alignment-baseline', 'middle').style('fill', '#95a5a6').style('font-size', '9px').style('cursor', 'pointer').text('?');
   }).distribute(function (elems, x_scale) {
+    var track = this;
+    var padding = ~~(track.height() - track.height() * 0.8) / 2;
+    var height = track.height() - ~~(padding * 2);
+    var dom1 = x_scale.domain()[1];
 
     elems.select('g').transition().attr('transform', function (g) {
-      var width = 16;
+      var width = 40//d3.min([x_scale(dom1 / g.max), height]);
       var posx = g.hog_start * width + g.max_in_hog * width / 2;
       return "translate(" + posx + ", 0)";
     });
@@ -9736,12 +9733,11 @@ module.exports = function Hog_state() {
 
   var that = this;
 
-  this.reset_on = function (tree, per_species3, tax_name, threshold, fam_data, hog_metadata) {
+  this.reset_on = function (tree, per_species3, tax_name, threshold, fam_data) {
     that.current_level = tax_name;
     that.hogs = undefined;
     that.number_species = 0;
     that.removed_hogs = [];
-    that.hog_metadata = hog_metadata;
 
     var leaves = tree.root().get_all_leaves(true);
 
@@ -9780,9 +9776,6 @@ module.exports = function Hog_state() {
         var protid = get_protid_for_genes(fam_data, that.hogs[_i3].genes);
         if (protid) {
           that.hogs[_i3].protid = protid;
-          if (that.hog_metadata != false) {
-            that.hogs[_i3].name = that.hog_metadata[that.hogs[_i3].genes[0]][that.current_level].split("_")[0];
-          }
         }
         genes_so_far += that.hogs[_i3].max_in_hog;
       }
@@ -9900,8 +9893,6 @@ function iHam() {
 
     show_oma_link: false,
     remote_data: false,
-    augmented_orthoxml: false,
-    query_hog: false,
 
     frozen_node: null,
 
@@ -9909,25 +9900,10 @@ function iHam() {
   };
 
   var theme = function theme(div) {
-    var data = parse_orthoxml(config.newick, config.orthoxml, { augmented: config.augmented_orthoxml, query_hog: config.query_hog });
+    var data = parse_orthoxml(config.newick, config.orthoxml);
     var data_per_species = data.per_species;
     var tree_obj = data.tree;
     var fam_data_obj = {};
-
-    var hog_metadata;
-    if (config.augmented_orthoxml) {
-      hog_metadata = data.hog_metadata;
-    } else {
-      hog_metadata = false;
-    }
-
-    var query_members;
-    if (config.augmented_orthoxml) {
-      query_members = data.query_members;
-    } else {
-      query_members = false;
-    }
-
     config.fam_data.forEach(function (gene) {
       fam_data_obj[gene.id] = {
         gc_content: gene.gc_content,
@@ -9947,14 +9923,7 @@ function iHam() {
     var current_hog_state = new hog_state(maxs);
 
     gene_color = function gene_color(gene) {
-      if (config.query_gene && gene.id === config.query_gene.id) {
-        return "#27ae60";
-      }
-      if (config.query_hog && $.inArray(gene.id, query_members) != -1) {
-        return "#27ae60";
-      }
-
-      return "#95a5a6";
+      return config.query_gene && gene.id === config.query_gene.id ? "#27ae60" : "#95a5a6";
     };
 
     // todo -30 should be define by margin variables
@@ -9984,18 +9953,9 @@ function iHam() {
       dispatch.updating.call(this);
 
       if (config.frozen_node) {
-        var _removed_hogs = current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj, hog_metadata);
+        var _removed_hogs = current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj);
         dispatch.hogs_removed.call(this, _removed_hogs);
-
-        var w = 0;
-        var i = 0,
-            len = current_hog_state.hogs.length;
-        while (i < len) {
-          w += current_hog_state.hogs[i].max_in_hog * 16;
-          i++;
-        }
-
-        board.width(w);
+        board.width(board_width);
         // update_board();
         board.update();
         dispatch.updated.call(this);
@@ -10006,18 +9966,9 @@ function iHam() {
       dispatch.node_selected.call(this, node);
       current_opened_node = node;
       current_opened_taxa_name = node.node_name();
-      var removed_hogs = current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj, hog_metadata);
+      var removed_hogs = current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj);
       dispatch.hogs_removed.call(this, removed_hogs);
-
-      var w = 0;
-      var i = 0,
-          len = current_hog_state.hogs.length;
-      while (i < len) {
-        w += current_hog_state.hogs[i].max_in_hog * 16;
-        i++;
-      }
-
-      board.width(w);
+      board.width(board_width);
       board.update();
 
       state.highlight_condition = function (n) {
@@ -10097,17 +10048,10 @@ function iHam() {
 
     current_opened_node = tree.root();
     current_opened_taxa_name = tree.root().node_name();
-    current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj, hog_metadata);
-    var w = 0;
-    var i = 0,
-        len = current_hog_state.hogs.length;
-    while (i < len) {
-      w += current_hog_state.hogs[i].max_in_hog * 16;
-      i++;
-    }
+    current_hog_state.reset_on(tree, data_per_species, current_opened_taxa_name, column_coverage_threshold, fam_data_obj);
 
     // Board:
-    board = tnt.board().from(0).zoom_in(1).allow_drag(false).to(2).width(w);
+    board = tnt.board().from(0).zoom_in(1).allow_drag(false).to(2).width(board_width);
 
     // Board's track
     genes_feature = hog_gene_feature().colors(gene_color);
@@ -10165,7 +10109,7 @@ function iHam() {
           gene_tooltip.close();
         }
       })).add("hogs", hog_feature).add('hog_groups', hog_group.on('click', function (hog) {
-        hog_header_tooltip.display.call(this, hog, current_opened_taxa_name, div, config.show_oma_link, config.remote_data, config.augmented_orthoxml);
+        hog_header_tooltip.display.call(this, hog, current_opened_taxa_name, div, config.show_oma_link, config.remote_data);
       })));
     }
 
@@ -10402,7 +10346,7 @@ module.exports = {
     }
   },
   hog_header_tooltip: {
-    display: function display(hog, taxa_name, div, show_oma_link, remote_data, augmented_orthoxml) {
+    display: function display(hog, taxa_name, div, show_oma_link, remote_data) {
 
       function create_tooltip(hog, header, hogid, level) {
 
@@ -10426,7 +10370,7 @@ module.exports = {
         _hog_header_tooltip = tooltip.list().width(180).id('hog_header_tooltip').container(div).call(this, obj);
       }
 
-      if (remote_data && augmented_orthoxml != true) {
+      if (remote_data) {
         $.ajax({
           url: '/api/hog/' + hog.protid + '/members/?level=' + taxa_name,
           async: false, //blocks window close
@@ -10435,7 +10379,7 @@ module.exports = {
           }
         });
       } else {
-        create_tooltip(hog, hog.name, hog.name, taxa_name.replace(" ", "%20"));
+        create_tooltip(hog, hog.name, hog.protid, taxa_name.replace(" ", "%20"));
       }
     },
     close: function close() {

@@ -326,12 +326,12 @@ class XRefLookupTest(APITestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual([], response.data)
 
-    def test_existing_prefix(self):
-        response = APIClient().get('/api/xref/?search=MAL')
+    def test_existing_pattern_in_search_xref(self):
+        response = APIClient().get('/api/xref/?search=MaL')
         self.assertEqual(200, response.status_code)
         self.assertLess(0, len(response.data))
         for hit in response.data:
-            self.assertTrue(hit['xref'].lower().startswith('mal'))
+            self.assertIn('mal', hit['xref'].lower())
 
 
 class SequenceIdentifyTest(APITestCase):

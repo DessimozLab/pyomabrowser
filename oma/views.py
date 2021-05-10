@@ -23,7 +23,7 @@ from django.core.mail import EmailMessage
 from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.contrib.staticfiles.templatetags.staticfiles import static
-
+from django.shortcuts import redirect, resolve_url
 
 
 from collections import OrderedDict, defaultdict
@@ -1307,19 +1307,23 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
 def resolve_hog_id(request, hog_id):
     # matches e.g. "HOG:0002124.1a.53bz.2a_4893"
     match = re.match(
-        r'(?P<id>HOG:(?P<fam>\d+)(?:[a-z0-9.]*))(?:_(?P<taxid>\d+))?',
+        r'(?P<id>HOG:(?P<rel>[A-Z]+)?(?P<fam>\d+)(?:[a-z0-9.]*))(?:_(?P<taxid>\d+))?',
         hog_id
     )
     if match is None:
         raise Http404("Invalid HOG id format: {}".format(hog_id))
     if match.group('taxid') is not None:
         taxid = int(match.group('taxid'))
-        try:
-            taxnode = utils.tax.get_taxnode_from_name_or_taxid(taxid)
-            args = (match.group('id'), taxnode[0]['Name'].decode())
-        except Exception:
-            logger.exception("cannot determine taxon node for {}".format(taxid))
-            raise Http404("taxonid {} is unknown in OMA database".format(taxid))
+        if taxid in (0, 131567):
+            level = "LUCA"
+        else:
+            try:
+                taxnode = utils.tax.get_taxnode_from_name_or_taxid(taxid)
+                level = taxnode[0]['Name'].decode()
+            except Exception:
+                logger.exception("cannot determine taxon node for {}".format(taxid))
+                raise Http404("taxonid {} is unknown in OMA database".format(taxid))
+        args = (match.group('id'), level)
     else:
         args = (match.group('id'), )
     return HttpResponseRedirect(reverse('hog_table', args=args))
@@ -1341,12 +1345,17 @@ class HOGBase(ContextMixin):
                 else:
                     is_subhog = True
 
+            logger.debug("hog: {}".format(hog))
             # update context
             context['hog'] = hog
             context['hog_id'] = hog_id
             context['root_id'] = hog_id.split('.')[0]
             context['hog_fam'] = hog.fam
             context['level'] = hog.level
+            if hog.level != "LUCA":
+                context['taxid'] = utils.tax.get_taxnode_from_name_or_taxid(hog.level)[0]['NCBITaxonId']
+            else:
+                context['taxid'] = 0
             context['description'] = hog.keyword
             context['is_subhog'] = is_subhog
             context['api_base'] = 'hog'
@@ -1626,7 +1635,10 @@ class HOGSynteny(HOGBase, TemplateView):
 
         context = super(HOGSynteny, self).get_context_data(hog_id, **kwargs)
 
-        graph = utils.db.get_syntentic_hogs(hog_id, context['level'], steps=2)
+        try:
+            graph = utils.db.get_syntentic_hogs(hog_id, context['level'], steps=2)
+        except db.DBConsistencyError as e:
+            raise Http404(str(e))
 
         ancestral_synteny = {"nodes": [], "links": []}
         neigh = []
@@ -1635,57 +1647,41 @@ class HOGSynteny(HOGBase, TemplateView):
         limit_first_radius = 20
         limit_second_radius = 5
 
-        logger.info("pruning of big graph")
-
+        logger.debug("pruning of big graph")
         # get the source hog node
         selected_node = [n for n, v in graph.nodes(data=True) if n == hog_id]
         if len(selected_node) != 1:
-            logger.info("Error during graph pruning, {} nodes have been founded for {}".format(len(selected_node), hog_id))
+            logger.info("Error during graph pruning, {} nodes have been found for {}".format(len(selected_node), hog_id))
 
         neighbors = [selected_node[0]]
-
-        logger.info("pruning of big graph:  node founded")
-
+        logger.debug("pruning of big graph: query node found")
         e = graph.edges(selected_node[0], data="weight")
         if len(e) < limit_first_radius:
             limit_first_radius = len(e)
+            logger.debug("pruning of big graph:  first radius receive")
 
-            logger.info("pruning of big graph:  first radius receive")
-
-        for edge in sorted(e,key=lambda x: x[2], reverse=True)[:limit_first_radius]:
+        for edge in sorted(e, key=lambda x: x[2], reverse=True)[:limit_first_radius]:
             neighbors.append(edge[1])
-
             se = graph.edges(edge[1], data="weight")
-
-            logger.info("pruning of big graph:  second radius receive / {} ".format(limit_first_radius))
-
+            logger.debug("pruning of big graph:  second radius receive / {} ".format(limit_first_radius))
             if len(se) < limit_second_radius:
                 limit_second_radius = len(se)
-
             for subedge in sorted( se,key=lambda x: x[2], reverse=True)[:limit_second_radius]:
                 neighbors.append(subedge[1])
-
         graph = graph.subgraph(neighbors)
-
-        logger.info("pruning of big graph:  done ")
-        
+        logger.debug("pruning of big graph:  done ")
 
         for n in graph.nodes.data('weight'):
             ancestral_synteny["nodes"].append({"id": n[0], "name": n[0]})
-
         for e in graph.edges.data('weight'):
             ancestral_synteny["links"].append({"source_id": e[0], "target_id": e[1], "weight": str(e[2])})
-
             if e[0] == hog_id:
                 h = models.HOG(utils.db, e[1])
-                neigh.append({'hog':e[1], 'weight': str(e[2]), 'description': h.keyword})
-
+                neigh.append({'hog': e[1], 'weight': str(e[2]), 'description': h.keyword})
             if e[1] == hog_id:
                 h = models.HOG(utils.db, e[0])
-                neigh.append({'hog':e[0], 'weight': str(e[2]), 'description': h.keyword})
-
-        logger.info("data ready to ship ")
-
+                neigh.append({'hog': e[0], 'weight': str(e[2]), 'description': h.keyword})
+        logger.debug("data ready to ship ")
         context.update({'tab': 'synteny',
                         'lineage_link_name': 'hog_synteny',
                         'synteny': ancestral_synteny,
@@ -1707,17 +1703,21 @@ class HOGsMSA(AsyncMsaMixin, HOGBase, TemplateView):
 
 
 class HOGsOrthoXMLView(HOGBase, View):
-    def get(self, request, **kwargs):
+    def get(self, request, file_type=None, **kwargs):
         context = self.get_context_data(only_validate=True, **kwargs)
+        augmented = False
+        if file_type == 'augmented':
+            augmented = True
         try:
             fam = context['hog'].fam
-            orthoxml = utils.db.get_orthoxml(fam)
+            orthoxml = utils.db.get_orthoxml(fam, augmented=augmented)
         except ValueError as e:
             raise Http404(e.message)
         response = HttpResponse(content_type='text/plain')  #'application/xml')
         response.write(orthoxml)
         response['Access-Control-Allow-Origin'] = '*'
         return response
+
 
 
 class HOGtableFromEntry(EntryCentricMixin, View):
@@ -2581,22 +2581,24 @@ class Searcher(View):
     _genome_selector = ["name", "taxid"]
     _max_results = 50
 
+
     def analyse_search(self, request, type, query):
         if query == "":
             return redirect('home')
         terms = shlex.split(query)
 
-        context = {'query': query, 'type': type, 'terms':terms}
+        context = {'query': query, 'type': type, 'terms':terms, "outdated_HOG" : False}
 
         redir = (type != 'all' and len(terms) == 1)
 
         # if specific selector chosen (entry by protId) try to instant redirection if correct query
-        if type!='all' and len(terms) == 1:
+        if type != 'all' and len(terms) == 1:
 
             data_type = type.split("_")[0]  # Entry, OG, HOG, Genome, Ancestral genome
             selector = [type.split("_")[1]]  # ID, sequence, Fingerprint, etc...
 
             meth = getattr(self, "search_" + data_type )
+            logger.debug("calling shortcut {} with query: {}".format(meth, terms[0]))
             resp = meth(request, terms[0], selector=selector, redirect_valid=True) # deal return if error
 
             if isinstance(resp,  HttpResponseRedirect):
@@ -2654,7 +2656,7 @@ class Searcher(View):
         # store per term information
         search_term_meta = {}
         for term in terms:
-            search_term_meta[term] = {'id': 0, 'sequence': 0, 'crossref':0}
+            search_term_meta[term] = {'id': 0, 'sequence': 0, 'crossref': 0}
 
         # for each method to search an entry
         entry_search = {}
@@ -2669,24 +2671,17 @@ class Searcher(View):
 
 
         # search by OMAID/numeric_id or Xref/
-
         raw_hits_id = []
         raw_hits_xref = []
-
         start = time.time()
-
         # for each terms we get the raw results
         for term in terms:
-
             term_hit_id = []
             term_hit_xref = []
-
             hits = utils.id_resolver.search_protein(term)
-
-
             for id, hit in hits.items():
                 for accessor, value in hit.items():
-                    if accessor == "numeric_id" or accessor =="omaid":
+                    if accessor == "numeric_id" or accessor == "omaid":
                         term_hit_id.append(id)
                     else:
                         term_hit_xref.append(id)
@@ -2745,8 +2740,7 @@ class Searcher(View):
         start = time.time()
 
         raw_hits_seq = []
-        align_data = None
-        match = None
+        align_data = {}
 
         # for each terms we get the raw results sequence
         for term in terms:
@@ -2754,39 +2748,28 @@ class Searcher(View):
 
             seq_searcher = utils.db.seq_search
             seq = seq_searcher._sanitise_seq(term)
+            logger.debug("searching '{}' as sequence: {}".format(term, seq))
             if len(seq) >= 5:
-
-                targets = []
-
                 exact_matches = seq_searcher.exact_search(seq, only_full_length=False, is_sanitised=True)
-
+                logger.debug("found {} exact matches for sequence {}".format(len(exact_matches), seq))
                 if len(exact_matches) == 1:
                     if redirect_valid:
+                        logger.debug("redirect to pairs page of entry {}".format(exact_matches[0]))
                         redirect('pairs', exact_matches[0])
 
-                for enr in exact_matches:
-                    term_hit_seq.append(enr)
-                    targets.append(enr)
-
-                if len(targets) == 0:
-
+                if len(exact_matches) == 0:
                     approx = seq_searcher.approx_search(seq, is_sanitised=True)
+                    logger.debug("approx search yield {} results".format(len(approx)))
                     for enr, align_results in approx:
                         if align_results['score'] < 50:
                             break
-                            term_hit_seq.append(enr)
-                    align_data = approx
-                    match = 'approx'
+                        term_hit_seq.append(enr)
+                        align_results['mode'] = 'approx'
+                        align_data[enr] = align_results
                 else:
-                    align_data = exact_matches
-                    match = 'exact'
-
-
-            if align_data:
-                align_info += align_data
-                if match == 'exact':
-                    for x in align_data:
-                        align_term[x] = term
+                    term_hit_seq = exact_matches
+                    # we put a high score for exact matches, can anyways not be higher with an approx match
+                    align_data.update({enr: {'mode': 'exact', 'query': term, 'score': 20000} for enr in exact_matches})
 
             if scope:
                 term_hit_seq = scope.intersection(set(term_hit_seq))
@@ -2795,97 +2778,66 @@ class Searcher(View):
 
         # Get the intersection of the raw results sequence
         if raw_hits_seq:
-
+            # TODO: says intersect, but does union...
             s = set(raw_hits_seq[0])
             ss = [set(e) for e in raw_hits_seq[1:]]
-
-
             result = list(s.union(*ss))
-
-            entry_search['sequence'] = result
-            total_search += len(result)
-            search_entry_meta['sequence'] = len(result)
         else:
-            entry_search['sequence'] = []
-            total_search += 0
-            search_entry_meta['sequence'] = 0
+            result = []
 
-        end = time.time()
-        logger.info("Search entry by Sequences took {} sec".format(start - end))
+        entry_search['sequence'] = result
+        total_search += len(result)
+        search_entry_meta['sequence'] = len(result)
+        search_entry_meta['total'] = total_search
 
-        search_entry_meta['total'] =  total_search
+        logger.info("Search entry by Sequences took {} sec".format(time.time() - start))
 
         # Look for the intersection of sequence with ids if more than one terms
+        # TODO: does this make sense? I wouldn't thinking len(terms)>1 is correct...
         if len(terms) > 1:
             s1 = set(union_entry)
             s2 = set(entry_search['sequence'])
-
             entry_search['sequence'] = list(s1.intersection(s2))
 
         # select the top best 50 results
         filtered_entries = []
         for k in sorted(entry_search, key=lambda k: len(entry_search[k])):
-
             res = entry_search[k]
-
             if len(res) >= 15:
+                res = sorted(res, key=lambda enr: -align_data[enr]['score'])
                 res = res[:15]
-
             for r in res:
-                filtered_entries.append([r,k])
-
+                filtered_entries.append([r, k])
 
         search_entry_meta['shown'] = len(filtered_entries)
 
         # encode entry data to json
         start = time.time()
-        data_entry =  []
-        if match == 'exact':
-            align_genes = [x for x in align_info]
-        elif match == 'approx':
-            align_genes = [x[0] for x in align_info]
-        else:
-            align_genes = []
+        data_entry = []
 
         for en in filtered_entries:
             p = models.ProteinEntry.from_entry_nr(utils.db, en[0])
             p.found_by = en[1]
 
             # if not sequence alignment then remove sequence attribute
-
-            if p.entry_nr in align_genes:
-                if match == "exact":
-
-                    term = align_term[p.entry_nr]
-
+            if p.entry_nr in align_data:
+                al = align_data[p.entry_nr]
+                if al['mode'] == "exact":
                     seq_searcher = utils.db.seq_search
-                    seq = seq_searcher._sanitise_seq(term).decode()
-
+                    seq = seq_searcher._sanitise_seq(al['query']).decode()
                     ali = [m.start() for m in re.finditer(seq, p.sequence)]
-
-                    p.sequence = [{"sequence":p.sequence, 'align': [ali[0], ali[0] + len(seq)]} for al in align_info  if al == p.entry_nr][0]
-
-                elif match == 'approx':
-
-                    pos1 = al[1]["alignment"][0][1:2][0][0][0]
-                    seq = seq_searcher._sanitise_seq(term).decode()
-
-                    p.sequence = [{"sequence":p.sequence, 'align': [pos1, pos1 + len(seq)]} for al in align_info  if al[0] == p.entry_nr][0]
-
-
+                    p.sequence = {"sequence": p.sequence, 'align': [ali[0], ali[0] + len(seq)]}
+                elif al['mode'] == 'approx':
+                    p.sequence = {"sequence": p.sequence, 'align': al['alignment'][0][1]}
             else:
                 p.sequence = ""
-
             data_entry.append(p)
 
         json_encoder = EntrySearchJson()
         context['data_entry'] = json.dumps(json_encoder.as_json(data_entry))
         context['meta_entry'] = search_entry_meta
         context['meta_term_entry'] = search_term_meta
-        end = time.time()
-
-        logger.info("Entry json took {} sec for {} entry.".format(start - end, len(data_entry)))
-
+        logger.info("Entry json took {} sec for {} entry.".format(time.time() - start, len(data_entry)))
         return
 
     def logic_group(self,request, context, terms):
@@ -2944,7 +2896,27 @@ class Searcher(View):
 
             # for each terms we get the raw results
             for term in terms:
-                r = self.search_hog(request, term, selector=[selector])
+                try:
+                    r = self.search_hog(request, term, selector=[selector])
+                except db.OutdatedHogId as exception :
+
+                    try:
+                        candidates = utils.hogid_forward_mapper.map_hogid(exception.outdated_hog_id)
+                    except AttributeError:
+                        candidates = {}
+
+                    new_hogs = []
+                    for new_id, jaccard in candidates.items():
+                        h = utils.HOG(utils.db.get_hog(new_id))
+                        h.jaccard = jaccard
+                        h.redirect_url = resolve_url("hog_viewer", h.hog_id)
+                        new_hogs.append(h)
+                    new_hogs.sort(key=lambda h: -h.jaccard)
+
+                    context["outdated_HOG"] = True
+                    context["outdated_hog_id"] = exception.outdated_hog_id.decode()
+                    context["candidate_hogs"] = new_hogs
+
                 raw_results.append(r)
                 search_term_meta[term][selector] += len(r)
 
@@ -3526,7 +3498,7 @@ class Searcher(View):
     def post(self, request):
         type = request.POST.get('type', 'all').lower()
         query = request.POST.get('query', '')
-        return self.analyse_search(request,type, query)
+        return self.analyse_search(request, type, query)
 
 
 

@@ -27,7 +27,7 @@
 <script src="{% static 'js/iHam_latest.js' %}" charset="UTF-8"></script>
 
 <!-- Load the stylesheet -->
-<link rel="stylesheet" href="https://dessimozlab.github.io/iHam/iHam.css"/>
+<link rel="stylesheet" href='{% static "css/iHam_latest.css" %}' />
 
 <script src="{% static 'js/orthoxml-hogvis.min.js' %}" charset="UTF-8"></script>
 
@@ -207,7 +207,8 @@
 
 
         $.when(
-            $.ajax({url: "/oma/hog/{{ hog.hog_id }}/orthoxml/",
+            $.ajax({url: "/oma/hog/{{ hog.hog_id }}/orthoxml/augmented/",
+            //$.ajax({url: "/oma/hog/{{ hog.hog_id }}/orthoxml/",
                 dataType: "text"}),
             $.ajax({url: "/All/speciestree.nwk"}),
             $.ajax({url: "/oma/hogdata/{{ entry.omaid }}/json",dataType: "text"})
@@ -226,6 +227,9 @@
                         .text(node.node_name());
                 })
                 .show_oma_link(true)
+                .remote_data(true)
+                .augmented_orthoxml(true)
+                .query_hog("{{ hog_id }}_{{taxid}}")
                 .tree_width(330)
                 .board_width(530)
                 .on("updating", function() {
