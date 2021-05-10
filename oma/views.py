@@ -2592,12 +2592,13 @@ class Searcher(View):
         redir = (type != 'all' and len(terms) == 1)
 
         # if specific selector chosen (entry by protId) try to instant redirection if correct query
-        if type!='all' and len(terms) == 1:
+        if type != 'all' and len(terms) == 1:
 
             data_type = type.split("_")[0]  # Entry, OG, HOG, Genome, Ancestral genome
             selector = [type.split("_")[1]]  # ID, sequence, Fingerprint, etc...
 
             meth = getattr(self, "search_" + data_type )
+            logger.debug("calling shortcut {} with query: {}".format(meth, terms[0]))
             resp = meth(request, terms[0], selector=selector, redirect_valid=True) # deal return if error
 
             if isinstance(resp,  HttpResponseRedirect):
@@ -2655,7 +2656,7 @@ class Searcher(View):
         # store per term information
         search_term_meta = {}
         for term in terms:
-            search_term_meta[term] = {'id': 0, 'sequence': 0, 'crossref':0}
+            search_term_meta[term] = {'id': 0, 'sequence': 0, 'crossref': 0}
 
         # for each method to search an entry
         entry_search = {}
@@ -2670,24 +2671,17 @@ class Searcher(View):
 
 
         # search by OMAID/numeric_id or Xref/
-
         raw_hits_id = []
         raw_hits_xref = []
-
         start = time.time()
-
         # for each terms we get the raw results
         for term in terms:
-
             term_hit_id = []
             term_hit_xref = []
-
             hits = utils.id_resolver.search_protein(term)
-
-
             for id, hit in hits.items():
                 for accessor, value in hit.items():
-                    if accessor == "numeric_id" or accessor =="omaid":
+                    if accessor == "numeric_id" or accessor == "omaid":
                         term_hit_id.append(id)
                     else:
                         term_hit_xref.append(id)
@@ -2755,22 +2749,21 @@ class Searcher(View):
 
             seq_searcher = utils.db.seq_search
             seq = seq_searcher._sanitise_seq(term)
+            logger.debug("searching '{}' as sequence: {}".format(term, seq))
             if len(seq) >= 5:
-
                 targets = []
-
                 exact_matches = seq_searcher.exact_search(seq, only_full_length=False, is_sanitised=True)
-
                 if len(exact_matches) == 1:
                     if redirect_valid:
+                        logger.debug("redirect to pairs page of entry {}".format(exact_matches[0]))
                         redirect('pairs', exact_matches[0])
 
                 for enr in exact_matches:
                     term_hit_seq.append(enr)
                     targets.append(enr)
 
+                logger.debug("found {} exact matches for sequence {}".format(len(targets, seq)))
                 if len(targets) == 0:
-
                     approx = seq_searcher.approx_search(seq, is_sanitised=True)
                     for enr, align_results in approx:
                         if align_results['score'] < 50:
@@ -2781,7 +2774,6 @@ class Searcher(View):
                 else:
                     align_data = exact_matches
                     match = 'exact'
-
 
             if align_data:
                 align_info += align_data
@@ -3547,7 +3539,7 @@ class Searcher(View):
     def post(self, request):
         type = request.POST.get('type', 'all').lower()
         query = request.POST.get('query', '')
-        return self.analyse_search(request,type, query)
+        return self.analyse_search(request, type, query)
 
 
 
