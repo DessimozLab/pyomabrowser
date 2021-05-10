@@ -38,7 +38,6 @@
                                      <span class="badge badge-secondary"><a style="color:#fff" href="{% url 'genome_info' term.1 %}">  {{term.2.species}} [{{term.1}}] </a> </span>
 
 
-
                                      {% else %}
 
                                      <span class="badge badge-secondary"><a style="color:#fff" href="{% url 'ancestralgenome_info' term.2 %}">  {{term.2}}  </a> </span>
@@ -67,9 +66,22 @@
 
                          </div>
 
+                     {% if outdated_HOG %}
+                           <br>
+                         <div class="col-md-8 offset-md-2">
+
+
+                         <div class="alert alert-danger" role="alert">
+
+                              {% include "includes/outdated_hog.html" %}
+
+                         </div>
+
+                         </div>
+                         {%endif%}
+
                          {% if meta_entry.shown == 0 and meta_group.shown == 0 and meta_genome.shown == 0  %}
 
-                         <br>
                          <br>
 
                          <div class="col-md-8 offset-md-2">
@@ -587,6 +599,7 @@
         // ENTRY RESULT TABLE
         var myHilitor = new Hilitor();
         myHilitor.setMatchType("open");
+
         var data = {{ data_entry | safe }};
         var tab = $("#matchTable_entry");
         tab.bootstrapTable({
@@ -597,7 +610,7 @@
             onPostBody: function(d){
                 var element = $( "th span:contains('Domains')" )[0];
         element.style.writingMode = "vertical-lr"
-                myHilitor.apply("{{ query }}");
+                myHilitor.apply("{{ query }}".replace(/hog/gi, ""));
                 document.getElementById("total_entry").innerHTML = d.length;
             }
         });
@@ -617,7 +630,7 @@
             showMultiSort: true,
             data: data ,
             onPostBody: function(d){
-                myHilitor2.apply("{{ query }}");
+                myHilitor2.apply("{{ query }}".replace(/hog/gi, ""));
                 document.getElementById("total_group").innerHTML = d.length;
             }
         });
@@ -640,7 +653,7 @@
             onPostBody: function(d){
                 var element = $( "th span:contains('Domains')" )[0];
         element.style.writingMode = "vertical-lr"
-                myHilitor3.apply("{{ query }}");
+                myHilitor3.apply("{{ query }}".replace(/hog/gi, ""));
                 document.getElementById("total_genome").innerHTML = d.length;
             }
         });

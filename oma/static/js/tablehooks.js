@@ -2,6 +2,9 @@
  * Created by adriaal on 03/06/16.
  */
 (function(exports) {
+
+    const release_char = JSON.parse(document.getElementById('release_char-data').textContent);
+
     const cases = {
         Bacteria: {cls: 'label-success', display_text: "Bacteria", tag: "B"},
         Archaea: {cls: 'label-primary', display_text: "Archaea", tag: "A"},
@@ -11,9 +14,41 @@
     };
 
     const zeroPad = function(num, size) {
+        if (typeof num !== "number" ){
+            return num;
+        }
         var s = "00000000000" + num;
         return s.substr(s.length-size);
     };
+
+    const hogid_str = function(hogid){
+        if (typeof hogid === "number"){
+            return "HOG:" + release_char + zeroPad(hogid, 7);
+        } else if (typeof hogid === "string"){
+            if (hogid.startsWith('HOG:')){return hogid;}
+            const found = hogid.match(/(?<fam>\d+)(?<sub>\..*)?/);
+            if (found){
+                let res = "HOG:" + release_char + zeroPad(parseInt(found.groups['fam'], 10), 7);
+                if (found.groups['sub']){
+                    res += found.groups['sub'];
+                }
+                return res;
+            }
+        } else {
+            console.log("weird hogid to process: " + hogid);
+            return hogid;
+        }
+    }
+    const link_to_hog_page_with_hogid_text = function(hogid, level, page="iham"){
+        let hog_id = hogid_str(hogid)
+        let encoded_hogid = encodeURIComponent(hog_id);
+        let encoded_level = ""
+        if (level !== undefined){
+            encoded_level = "/" + encodeURIComponent(level);
+        }
+        return '<a href="/oma/hog/' + encoded_hogid + encoded_level + '/' + page+ '/">' + hog_id +'</a>';
+
+    }
 
     const split_sciname_into_species_and_strain = function(sciname){
         const strain_re = /\(|serogroup|serotype|serovar|biotype|subsp|pv\.|bv.|strain/;
@@ -70,16 +105,12 @@
     };
 
     exports.format_species_common = function(value, row) {
-
         if (row.type === "Extant") {
              return value;
-
         }
-
         else if (row.type === "Ancestral") {
-            return '<a href="/oma/ancestralgenome/'+value+'/info/">' + value + '</a>';
+            return '<a href="/oma/ancestralgenome/' + encodeURIComponent(value) + '/info/">' + value + '</a>';
         }
-
     };
 
 
@@ -88,9 +119,7 @@
     };
 
     exports.format_entry_sequence_matches = function(value, row){
-
-        if (value!=""){
-
+        if (value !== ""){
             var a = value.sequence;
             var b1 = "</b>";
             var b2 = "<b>";
@@ -111,10 +140,8 @@
                 end_str = '...'
             }
 
-
             var output1 = [a.slice(0, position1), b1, a.slice(position1)].join('');
             var output = [output1.slice(0, position2), b2, output1.slice(position2)].join('');
-
 
             return [begin_str,output.slice(start, end + 20 ), end_str].join('')
         }
@@ -134,20 +161,17 @@
     };
 
     exports.format_hogid = function(value, row) {
-        if (value === "Reference") { return value  }
-        return '<a href="/oma/hog/HOG:' + zeroPad(value, 7)
-            + '/table/">HOG:' + zeroPad(value, 7) +'</a>';
+        if (value === "Reference"){ return value; }
+        return link_to_hog_page_with_hogid_text(value, undefined, "table")
     };
 
     exports.format_hog_api = function(value, row) {
-        var lev = encodeURIComponent(row.level);
-        var hogid = encodeURIComponent(value);
-        return '<a href="/oma/hog/' + hogid + '/' +  lev +'/iham/">' + value + "</a>";
-
+        return link_to_hog_page_with_hogid_text(value, row.level, 'iham')
     };
+
     exports.format_roothog = function(value, row) {
         if (value > 0) {
-            return '<a href="/oma/hog/HOG:' + zeroPad(value, 7) + '/iham/">HOG:' + zeroPad(value, 7) + "</a>";
+            return link_to_hog_page_with_hogid_text(value)
         } else {
             return "n/a";
         }
@@ -167,32 +191,26 @@
         } else {return 'n/a';}
     };
 
-
     exports.format_omagroup_members = function(value){
         if (value > 0 ){
             return '<a href="/oma/omagroup/'+value+'/members/">' + value + '</a>';
         } else {return 'n/a';}
     };
 
-
     exports.format_hogid_vis = function(value) {
-        return '<a href="/oma/hog/HOG:' + zeroPad(value, 7)
-            +'/iham/">HOG:' +  zeroPad(value,7) + '</a>';
+        return link_to_hog_page_with_hogid_text(value);
     };
-
 
     exports.format_generic_group_id = function(value, row) {
         if (row.type === "HOG") {
             if (value.includes(".")){
-                return '<a href="/oma/hog/' + value + '/iham/">' + value + "</a>";
+                return link_to_hog_page_with_hogid_text(value)
             }
-
-             return '<a href="/oma/hog/HOG:' + zeroPad(value, 7) + '/iham/">HOG:' + zeroPad(value, 7) + "</a>";
+            return link_to_hog_page_with_hogid_text(row.group_nr);
         }
         else if (row.type === "OMA group") {
             return '<a href="/oma/omagroup/' + value + '/members/">' + value + '</a>';
         }
-
     };
 
 
@@ -227,13 +245,11 @@
     };
 
     exports.format_vps_link_isoforms = function(value, row){
-        badge = '';
-        badge2 = '';
-
+        let badge = '';
         if (row.is_main_isoform) {
             badge = ' <span class="badge badge-secondary">reference isoform</span>'
         }
-        return '<a href="/oma/vps/' + value + '">' + value  + badge+  '</a>';
+        return '<a href="/oma/vps/' + value + '">' + value + badge + '</a>';
     };
 
     exports.format_exons_isoforms = function(value, row){return value.length};
