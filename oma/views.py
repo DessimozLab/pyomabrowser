@@ -2765,10 +2765,11 @@ class Searcher(View):
                 logger.debug("found {} exact matches for sequence {}".format(len(targets), seq))
                 if len(targets) == 0:
                     approx = seq_searcher.approx_search(seq, is_sanitised=True)
+                    logger.debug("approx search yield {} results".format(len(approx)))
                     for enr, align_results in approx:
                         if align_results['score'] < 50:
                             break
-                            term_hit_seq.append(enr)
+                        term_hit_seq.append(enr)
                     align_data = approx
                     match = 'approx'
                 else:
