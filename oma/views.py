@@ -2740,8 +2740,7 @@ class Searcher(View):
         start = time.time()
 
         raw_hits_seq = []
-        align_data = None
-        match = None
+        align_data = {}
 
         # for each terms we get the raw results sequence
         for term in terms:
@@ -2770,7 +2769,7 @@ class Searcher(View):
                 else:
                     term_hit_seq = exact_matches
                     # we put a high score for exact matches, can anyways not be higher with an approx match
-                    align_data = {enr: {'mode': 'exact', 'query': term, 'score': 20000} for enr in exact_matches}
+                    align_data.update({enr: {'mode': 'exact', 'query': term, 'score': 20000} for enr in exact_matches})
 
             if scope:
                 term_hit_seq = scope.intersection(set(term_hit_seq))
@@ -2791,8 +2790,7 @@ class Searcher(View):
         search_entry_meta['sequence'] = len(result)
         search_entry_meta['total'] = total_search
 
-        end = time.time()
-        logger.info("Search entry by Sequences took {} sec".format(start - end))
+        logger.info("Search entry by Sequences took {} sec".format(time.time() - start))
 
         # Look for the intersection of sequence with ids if more than one terms
         # TODO: does this make sense? I wouldn't thinking len(terms)>1 is correct...
@@ -2839,9 +2837,7 @@ class Searcher(View):
         context['data_entry'] = json.dumps(json_encoder.as_json(data_entry))
         context['meta_entry'] = search_entry_meta
         context['meta_term_entry'] = search_term_meta
-        end = time.time()
-
-        logger.info("Entry json took {} sec for {} entry.".format(start - end, len(data_entry)))
+        logger.info("Entry json took {} sec for {} entry.".format(time.time() - start, len(data_entry)))
         return
 
     def logic_group(self,request, context, terms):
