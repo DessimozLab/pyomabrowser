@@ -2751,36 +2751,26 @@ class Searcher(View):
             seq = seq_searcher._sanitise_seq(term)
             logger.debug("searching '{}' as sequence: {}".format(term, seq))
             if len(seq) >= 5:
-                targets = []
                 exact_matches = seq_searcher.exact_search(seq, only_full_length=False, is_sanitised=True)
+                logger.debug("found {} exact matches for sequence {}".format(len(targets), seq))
                 if len(exact_matches) == 1:
                     if redirect_valid:
                         logger.debug("redirect to pairs page of entry {}".format(exact_matches[0]))
                         redirect('pairs', exact_matches[0])
 
-                for enr in exact_matches:
-                    term_hit_seq.append(enr)
-                    targets.append(enr)
-
-                logger.debug("found {} exact matches for sequence {}".format(len(targets), seq))
-                if len(targets) == 0:
+                if len(exact_matches) == 0:
                     approx = seq_searcher.approx_search(seq, is_sanitised=True)
                     logger.debug("approx search yield {} results".format(len(approx)))
                     for enr, align_results in approx:
                         if align_results['score'] < 50:
                             break
                         term_hit_seq.append(enr)
-                    align_data = approx
-                    match = 'approx'
+                        align_results['mode'] = 'approx'
+                        align_data[enr] = align_results
                 else:
-                    align_data = exact_matches
-                    match = 'exact'
-
-            if align_data:
-                align_info += align_data
-                if match == 'exact':
-                    for x in align_data:
-                        align_term[x] = term
+                    term_hit_seq = exact_matches
+                    # we put a high score for exact matches, can anyways not be higher with an approx match
+                    align_data = {enr: {'mode': 'exact', 'query': term, 'score': 20000} for enr in exact_matches}
 
             if scope:
                 term_hit_seq = scope.intersection(set(term_hit_seq))
@@ -2793,25 +2783,22 @@ class Searcher(View):
             s = set(raw_hits_seq[0])
             ss = [set(e) for e in raw_hits_seq[1:]]
             result = list(s.union(*ss))
-
-            entry_search['sequence'] = result
-            total_search += len(result)
-            search_entry_meta['sequence'] = len(result)
         else:
-            entry_search['sequence'] = []
-            total_search += 0
-            search_entry_meta['sequence'] = 0
+            result = []
+
+        entry_search['sequence'] = result
+        total_search += len(result)
+        search_entry_meta['sequence'] = len(result)
+        search_entry_meta['total'] = total_search
 
         end = time.time()
         logger.info("Search entry by Sequences took {} sec".format(start - end))
 
-        search_entry_meta['total'] =  total_search
-
         # Look for the intersection of sequence with ids if more than one terms
+        # TODO: does this make sense? I wouldn't thinking len(terms)>1 is correct...
         if len(terms) > 1:
             s1 = set(union_entry)
             s2 = set(entry_search['sequence'])
-
             entry_search['sequence'] = list(s1.intersection(s2))
 
         # select the top best 50 results
@@ -2819,6 +2806,7 @@ class Searcher(View):
         for k in sorted(entry_search, key=lambda k: len(entry_search[k])):
             res = entry_search[k]
             if len(res) >= 15:
+                res = sorted(res, key=lambda enr: -align_data[enr]['score'])
                 res = res[:15]
             for r in res:
                 filtered_entries.append([r, k])
@@ -2827,39 +2815,24 @@ class Searcher(View):
 
         # encode entry data to json
         start = time.time()
-        data_entry =  []
-        if match == 'exact':
-            align_genes = [x for x in align_info]
-        elif match == 'approx':
-            align_genes = [x[0] for x in align_info]
-            en_2_align_info = {al[0]: al[1] for al in align_info}
-        else:
-            align_genes = []
+        data_entry = []
 
         for en in filtered_entries:
             p = models.ProteinEntry.from_entry_nr(utils.db, en[0])
             p.found_by = en[1]
 
             # if not sequence alignment then remove sequence attribute
-
-            if p.entry_nr in align_genes:
-                if match == "exact":
-                    term = align_term[p.entry_nr]
-
+            if p.entry_nr in align_data:
+                al = align_data[p.entry_nr]
+                if al['mode'] == "exact":
                     seq_searcher = utils.db.seq_search
-                    seq = seq_searcher._sanitise_seq(term).decode()
-
+                    seq = seq_searcher._sanitise_seq(al['query']).decode()
                     ali = [m.start() for m in re.finditer(seq, p.sequence)]
-                    p.sequence = [{"sequence": p.sequence, 'align': [ali[0], ali[0] + len(seq)]}
-                                  for al in align_info if al == p.entry_nr][0]
-
-                elif match == 'approx':
-                    al = en_2_align_info[p.entry_nr]
-                    p.sequence = {"sequence":p.sequence, 'align': al['alignment'][0][1]}
-
+                    p.sequence = {"sequence": p.sequence, 'align': [ali[0], ali[0] + len(seq)]}
+                elif al['mode'] == 'approx':
+                    p.sequence = {"sequence": p.sequence, 'align': al['alignment'][0][1]}
             else:
                 p.sequence = ""
-
             data_entry.append(p)
 
         json_encoder = EntrySearchJson()
@@ -2869,7 +2842,6 @@ class Searcher(View):
         end = time.time()
 
         logger.info("Entry json took {} sec for {} entry.".format(start - end, len(data_entry)))
-
         return
 
     def logic_group(self,request, context, terms):
