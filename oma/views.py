@@ -2752,7 +2752,7 @@ class Searcher(View):
             logger.debug("searching '{}' as sequence: {}".format(term, seq))
             if len(seq) >= 5:
                 exact_matches = seq_searcher.exact_search(seq, only_full_length=False, is_sanitised=True)
-                logger.debug("found {} exact matches for sequence {}".format(len(targets), seq))
+                logger.debug("found {} exact matches for sequence {}".format(len(exact_matches), seq))
                 if len(exact_matches) == 1:
                     if redirect_valid:
                         logger.debug("redirect to pairs page of entry {}".format(exact_matches[0]))
