@@ -2789,11 +2789,9 @@ class Searcher(View):
 
         # Get the intersection of the raw results sequence
         if raw_hits_seq:
-
+            # TODO: says intersect, but does union...
             s = set(raw_hits_seq[0])
             ss = [set(e) for e in raw_hits_seq[1:]]
-
-
             result = list(s.union(*ss))
 
             entry_search['sequence'] = result
@@ -2819,15 +2817,11 @@ class Searcher(View):
         # select the top best 50 results
         filtered_entries = []
         for k in sorted(entry_search, key=lambda k: len(entry_search[k])):
-
             res = entry_search[k]
-
             if len(res) >= 15:
                 res = res[:15]
-
             for r in res:
-                filtered_entries.append([r,k])
-
+                filtered_entries.append([r, k])
 
         search_entry_meta['shown'] = len(filtered_entries)
 
@@ -2838,6 +2832,7 @@ class Searcher(View):
             align_genes = [x for x in align_info]
         elif match == 'approx':
             align_genes = [x[0] for x in align_info]
+            en_2_align_info = {al[0]: al[1] for al in align_info}
         else:
             align_genes = []
 
@@ -2849,23 +2844,18 @@ class Searcher(View):
 
             if p.entry_nr in align_genes:
                 if match == "exact":
-
                     term = align_term[p.entry_nr]
 
                     seq_searcher = utils.db.seq_search
                     seq = seq_searcher._sanitise_seq(term).decode()
 
                     ali = [m.start() for m in re.finditer(seq, p.sequence)]
-
-                    p.sequence = [{"sequence":p.sequence, 'align': [ali[0], ali[0] + len(seq)]} for al in align_info  if al == p.entry_nr][0]
+                    p.sequence = [{"sequence": p.sequence, 'align': [ali[0], ali[0] + len(seq)]}
+                                  for al in align_info if al == p.entry_nr][0]
 
                 elif match == 'approx':
-
-                    pos1 = al[1]["alignment"][0][1:2][0][0][0]
-                    seq = seq_searcher._sanitise_seq(term).decode()
-
-                    p.sequence = [{"sequence":p.sequence, 'align': [pos1, pos1 + len(seq)]} for al in align_info  if al[0] == p.entry_nr][0]
-
+                    al = en_2_align_info[p.entry_nr]
+                    p.sequence = {"sequence":p.sequence, 'align': al['alignment'][0][1]}
 
             else:
                 p.sequence = ""
