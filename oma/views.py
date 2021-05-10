@@ -2762,7 +2762,7 @@ class Searcher(View):
                     term_hit_seq.append(enr)
                     targets.append(enr)
 
-                logger.debug("found {} exact matches for sequence {}".format(len(targets, seq)))
+                logger.debug("found {} exact matches for sequence {}".format(len(targets), seq))
                 if len(targets) == 0:
                     approx = seq_searcher.approx_search(seq, is_sanitised=True)
                     for enr, align_results in approx:
