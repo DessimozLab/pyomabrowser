@@ -19,7 +19,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         cls.server_host = "omabrowser.org"
-        cls.server_url = 'https://'  + cls.server_host
+        cls.server_url = 'https://' + cls.server_host
         cls.against_staging = True
 
     @classmethod

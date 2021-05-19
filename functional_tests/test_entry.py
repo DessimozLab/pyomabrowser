@@ -19,10 +19,10 @@ class EntryPageTest(FunctionalTest):
 
 
         # Variable to change between release (if required)
-        _p53_ortholgs = "107"
-        _p53_ortholgs_vertebrata = "96"
-        _p53_ortholgs_hog_induced = "84"
-        _p53_paralogs = "29"
+        _p53_ortholgs = "120"
+        _p53_ortholgs_vertebrata = "110"
+        _p53_ortholgs_hog_induced = "99"
+        _p53_paralogs = "34"
 
 
         # Jean-Claude open his browser and go to the oma browser
@@ -35,11 +35,15 @@ class EntryPageTest(FunctionalTest):
         self.browser.find_element(By.CSS_SELECTOR, "#searchForm img").click()
 
         # JC verify that the correct Ids are displayed
-        assert self.browser.find_element(By.CSS_SELECTOR, ".gene_title").text == "Gene RATNO03710 (P53_RAT)"
+        self.assertRegex(self.browser.find_element(By.CSS_SELECTOR, ".gene_title").text,
+                         r"Gene RATNO\d{5} \(P53_RAT\)",
+                         "Gene title not as expected")
 
 
         # JC verify that the orhologs tab is open by default with the correct number of ortholog
-        assert self.browser.find_element(By.CSS_SELECTOR, "li:nth-child(1) > a .badge").text == _p53_ortholgs
+        self.assertGreaterEqual(int(self.browser.find_element(By.CSS_SELECTOR, "li:nth-child(1) > a .badge").text),
+                                int(_p53_ortholgs),
+                                "Number of orthologs too small.")
         assert self.browser.find_elements(By.XPATH, "//li[@class=\' active selected \']/a/span")[0].text.startswith("Orthologs")
 
         #JC wait that the amuse bouche is over and all the data is loaded into the table
@@ -53,37 +57,43 @@ class EntryPageTest(FunctionalTest):
         )
         rows = self.browser.find_elements(By.CSS_SELECTOR, "tr.protein")
         svgs = self.browser.find_elements(By.CSS_SELECTOR, "tr.protein > td.domain_vis svg")
-        assert len(rows) == len(svgs)
+        self.assertEqual(len(rows), len(svgs), "Not all proteins have an domain svg loaded")
 
         # JC verify number of protein loaded in the tables
-        assert int(self.browser.find_element(By.CLASS_NAME, "pagination-info").text.split(" ")[-2]) == int(_p53_ortholgs)
+        nr_orthologs = int(self.browser.find_element(By.CLASS_NAME, "pagination-info").text.split(" ")[-2])
+        self.assertGreaterEqual(nr_orthologs, int(_p53_ortholgs), "Not as many orthologs as expected")
 
         # JC filter his research to Vertebrata only and verify number of filter protein matches
         self.browser.find_element(By.ID, "Vertebrata").click()
-        assert self.browser.find_element(By.CLASS_NAME, "pagination-info").text.split(" ")[
-                   -2] == _p53_ortholgs_vertebrata
+        nr_vertebrata_orthologs = int(self.browser.find_element(By.CLASS_NAME, "pagination-info").text.split(" ")[-2])
+        self.assertGreaterEqual(nr_vertebrata_orthologs, int(_p53_ortholgs_vertebrata), "Not enough vertebrata orthologs")
+        self.assertLess(nr_vertebrata_orthologs, nr_orthologs, "vertebrata should be fewer orthologs than total")
 
         # JC remove the filter by taxonn and now filter by hog inferences evidence
         self.browser.find_element(By.ID, "reset_taxon_filter").click()
         self.browser.find_element(By.ID, "hogFilter").click()
         # JC verify number of protein loaded in the tables
-        assert int(self.browser.find_element(By.CLASS_NAME, "pagination-info").text.split(" ")[-2]) == int(
-            _p53_ortholgs_hog_induced)
+        self.assertGreaterEqual(int(self.browser.find_element(By.CLASS_NAME, "pagination-info").text.split(" ")[-2]),
+                                int(_p53_ortholgs_hog_induced),
+                                "Too few hog-based orthologs")
 
         # JC now move to the paralogy tab and verify the tab and badge is updated correctly
         self.browser.find_element(By.CSS_SELECTOR, ".gene-orthology > li:nth-child(2) > a > span").click()
-        assert int(self.browser.find_element(By.CSS_SELECTOR, "li:nth-child(2) > a .badge").text) == int(_p53_paralogs)
+        self.assertGreaterEqual(int(self.browser.find_element(By.CSS_SELECTOR, "li:nth-child(2) > a .badge").text),
+                                int(_p53_paralogs),
+                                "Too few paralogs")
         assert self.browser.find_elements(By.XPATH, "//li[@class=\' active selected \']/a/span")[0].text.startswith(
             "Paralogs")
 
         # JC wait that the amuse bouche is over and all the data is loaded into the table
         element = WebDriverWait(self.browser, 10).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "label.checkbox"))
+            EC.invisibility_of_element_located((By.CLASS_NAME, "toolbar"))
         )
 
         # JC verify number of protein loaded in the tables
-        assert int(self.browser.find_element(By.CLASS_NAME, "pagination-info").text.split(" ")[-2]) == int(
-            _p53_paralogs)
+        self.assertGreaterEqual(int(self.browser.find_element(By.CLASS_NAME, "pagination-info").text.split(" ")[-2]),
+                                int(_p53_paralogs),
+                                "nr of paralogs in table too small")
 
 
 
