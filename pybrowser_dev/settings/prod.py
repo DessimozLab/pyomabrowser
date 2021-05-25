@@ -46,6 +46,12 @@ FASTMAP = {
     "engine": "cluster"
 }
 
+CELERY_TASK_ROUTES = {
+    'oma.tasks.assign_go_function_to_user_sequences': {'queue': 'long'},
+    'oma.tasks.compute_msa': {'queue': 'async_web'},
+    'oma.tasks.export_marker_genes': {'queue': 'long'},
+}
+
 # beat scheduler for export app
 CELERY_BEAT_SCHEDULE = {
     'task-update-omastandalone-exports': {

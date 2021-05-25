@@ -146,11 +146,6 @@ TEMPLATES = [
 ]
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER', None)
-CELERY_TASK_ROUTES = {
-    'oma.tasks.assign_go_function_to_user_sequences': {'queue': 'long'},
-    'oma.tasks.compute_msa': {'queue': 'async_web'},
-    'oma.tasks.export_marker_genes': {'queue': 'long'},
-}
 # for backward compability reasons
 BROKER_URL = CELERY_BROKER_URL
 # CORS stuff to allow iHAM integration on other sites
@@ -198,6 +193,8 @@ USE_L10N = True
 
 USE_TZ = True
 
+CONTACT_EMAIL = "contact@omabrowser.org"
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
@@ -206,10 +203,10 @@ if 'DARWIN_BROWSERSTATIC_PATH' in os.environ:
     STATIC_ROOT = os.environ['DARWIN_BROWSERSTATIC_PATH']
 else:
     STATIC_ROOT = os.path.join(
-    os.getenv('DARWIN_BROWSER_REPO_PATH',
-              os.path.join(os.path.expanduser("~"), "Browser")),
-    "htdocs",
-    "static")
+        os.getenv('DARWIN_BROWSER_REPO_PATH',
+                  os.path.join(os.path.expanduser("~"), "Browser")),
+        "htdocs",
+        "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, '../../media'))
 
