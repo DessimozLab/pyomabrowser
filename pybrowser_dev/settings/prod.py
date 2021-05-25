@@ -43,7 +43,8 @@ LOGGING['loggers'].update({
 })
 
 FASTMAP = {
-    "engine": "cluster"
+    "engine": "cluster",
+    "store_files_in_days": 8,
 }
 
 CELERY_TASK_ROUTES = {

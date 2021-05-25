@@ -46,6 +46,7 @@ def submit_mapping(data_id, input_file, map_method=None, target=None):
 
     res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.txt.gz".format(data_id))
     res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
+    logger.debug(f"submit process: engine: {engine}, res_file_abs: {res_file_abs}, hash: {data_id}")
     if engine == "celery":
         r = FastMappingJobs(data_hash=data_id, state="pending", result=res_file_rel,
                             map_method=map_method, fasta=os.path.basename(input_file),
@@ -192,5 +193,5 @@ def update_running_jobs():
 
 @task()
 def purge_old_fastmap():
-    time_threshold = datetime.now() - timedelta(days=8)
+    time_threshold = datetime.now() - timedelta(days=int(settings.FASTMAP.get('store_files_in_days', 8)))
     FastMappingJobs.objects.filter(create_time__lt=time_threshold).delete()
