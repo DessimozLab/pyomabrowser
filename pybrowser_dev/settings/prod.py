@@ -42,6 +42,10 @@ LOGGING['loggers'].update({
     }
 })
 
+FASTMAP = {
+    "engine": "cluster"
+}
+
 # beat scheduler for export app
 CELERY_BEAT_SCHEDULE = {
     'task-update-omastandalone-exports': {

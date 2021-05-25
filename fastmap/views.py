@@ -1,9 +1,8 @@
 from django.shortcuts import render
 from django.urls import reverse
-from . import views
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, never_cache
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 from django.http import HttpResponseRedirect, Http404
 from django.conf import settings
 from . import forms
@@ -11,9 +10,8 @@ from . import forms
 from .models import FastMappingJobs
 from .tasks import submit_mapping
 from oma import misc
-import hashlib
 import os
-import json
+import hashlib
 
 
 # Create your views here.
@@ -21,7 +19,8 @@ def fastmapping(request):
     if request.method == 'POST':
         form = forms.FastMappingUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            user_file_info = misc.handle_uploaded_file(request.FILES['file'])
+            upload_dir = os.path.join(settings.MEDIA_ROOT, "uploads")
+            user_file_info = misc.handle_uploaded_file(request.FILES['file'], dir=upload_dir)
             map_method = form.cleaned_data['map_method']
             target = form.cleaned_data['target']
             h = hashlib.md5(user_file_info['md5'].encode('utf-8'))
@@ -35,12 +34,7 @@ def fastmapping(request):
             except FastMappingJobs.DoesNotExist:
                 do_compute = True
             if do_compute:
-                res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.txt.gz".format(data_id))
-                res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
-                res = submit_mapping(data_id, res_file_abs, user_file_info['fname'], map_method, target)
-                r = FastMappingJobs(data_hash=data_id, state=res.state, result=res_file_rel,
-                                    map_method=map_method, fasta=request.FILES['file'], processing=False)
-                r.save()
+                submit_mapping(data_id, user_file_info['fname'], map_method, target)
             return HttpResponseRedirect(reverse('fastmapping-download', args=(data_id,)))
 
     else:
