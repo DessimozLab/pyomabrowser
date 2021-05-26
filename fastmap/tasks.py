@@ -41,7 +41,7 @@ class JobStatus(object):
             self.state = "error"
 
 
-def submit_mapping(data_id, input_file, map_method=None, target=None):
+def submit_mapping(data_id, input_file, map_method=None, target=None, job_name=""):
     engine = settings.FASTMAP.get('engine', 'celery').lower()
     if engine not in ("celery", "cluster"):
         raise django.conf.ImproperlyConfigured("invalid engine setting in FASTMAP configuration")
@@ -52,14 +52,14 @@ def submit_mapping(data_id, input_file, map_method=None, target=None):
     if engine == "celery":
         r = FastMappingJobs(data_hash=data_id, state="pending", result=res_file_rel,
                             map_method=map_method, fasta=os.path.basename(input_file),
-                            processing=False)
+                            name=job_name, processing=False)
         r.save()
         compute_mapping_with_celery.delay(data_id, res_file_abs, input_file, map_method, target)
     elif engine == "cluster":
         res = submit_mapping_on_cluster(data_id, res_file_abs, input_file, map_method, target)
         r = FastMappingJobs(data_hash=data_id, state=res.state, result=res_file_rel,
                             map_method=map_method, fasta=os.path.basename(input_file),
-                            processing=False)
+                            name=job_name, processing=False)
         r.save()
 
 
@@ -214,3 +214,4 @@ def send_notification_email(job: FastMappingJobs):
     msg = EmailMessage(subj, message, to=[job.email], from_email=sender)
     msg.content_subtype = "html"
     msg.send()
+    logger.info(f"notification message sent to {job.email}")
