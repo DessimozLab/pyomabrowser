@@ -37,8 +37,15 @@ def fastmapping(request):
             except FastMappingJobs.DoesNotExist:
                 do_compute = True
             logger.info(f"received fasta file {request.FILES['file']} for fastmapping: map_method {map_method}, hash {data_id}, need computing: {do_compute}")
+            result_page_url = reverse('fastmapping-download', args=(data_id,))
             if do_compute:
-                submit_mapping(data_id, user_file_info['fname'], map_method, target, job_name, email)
+                res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.txt.gz".format(data_id))
+                # instantiate job, but don't save so far
+                job = FastMappingJobs(data_hash=data_id, state="pending", result=res_file_rel,
+                                      map_method=map_method, fasta=os.path.basename(user_file_info['fname']),
+                                      name=job_name, email=email, processing=False,
+                                      result_url=request.build_absolute_uri(result_page_url))
+                submit_mapping(job, user_file_info['fname'], map_method, target)
             return HttpResponseRedirect(reverse('fastmapping-download', args=(data_id,)))
 
     else:

@@ -42,26 +42,19 @@ class JobStatus(object):
             self.state = "error"
 
 
-def submit_mapping(data_id, input_file, map_method=None, target=None, job_name=None, email=None):
+def submit_mapping(job: FastMappingJobs, input_file, map_method=None, target=None):
     engine = settings.FASTMAP.get('engine', 'celery').lower()
     if engine not in ("celery", "cluster"):
         raise django.conf.ImproperlyConfigured("invalid engine setting in FASTMAP configuration")
 
-    res_file_rel = os.path.join("FastMappingExport", "FastMapping-{}.txt.gz".format(data_id))
-    res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
-    logger.debug(f"submit process: engine: {engine}, res_file_abs: {res_file_abs}, hash: {data_id}")
+    logger.debug(f"submit process: engine: {engine}, abs_path for result: {job.result.path}, hash: {job.data_hash}")
     if engine == "celery":
-        r = FastMappingJobs(data_hash=data_id, state="pending", result=res_file_rel,
-                            map_method=map_method, fasta=os.path.basename(input_file),
-                            name=job_name, email=email, processing=False)
-        r.save()
-        compute_mapping_with_celery.delay(data_id, res_file_abs, input_file, map_method, target)
+        job.save()
+        compute_mapping_with_celery.delay(job.data_hash, job.result.path, input_file, map_method, target)
     elif engine == "cluster":
-        res = submit_mapping_on_cluster(data_id, res_file_abs, input_file, map_method, target)
-        r = FastMappingJobs(data_hash=data_id, state=res.state, result=res_file_rel,
-                            map_method=map_method, fasta=os.path.basename(input_file),
-                            name=job_name, email=email, processing=False)
-        r.save()
+        res = submit_mapping_on_cluster(job.data_hash, job.result.path, input_file, map_method, target)
+        job.state = res.state
+        job.save()
 
 
 @shared_task(soft_time_limit=24*3600)
@@ -207,11 +200,11 @@ def purge_old_fastmap():
 
 
 def send_notification_email(job: FastMappingJobs):
-    if job.email is None:
+    if job.email == "":
         return
     context = {'job': job,
                'time_until_delete': settings.FASTMAP.get('store_files_in_days', 7),
-               "result_url": reverse("fastmapping-download", args=(job.data_hash,))}
+              }
     message = get_template('email_dataset_ready.html').render(context)
 
     sender = settings.CONTACT_EMAIL

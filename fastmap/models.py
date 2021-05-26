@@ -32,6 +32,7 @@ class FastMappingJobs(models.Model):
     processing = models.BooleanField(False)
     email = models.EmailField(blank=True)
     name = models.CharField(max_length=64, blank=True)
+    result_url = models.URLField(blank=True)
 
     def remove_erroneous_or_long_pending(self):
         PENDING_TIMEOUT = 600
