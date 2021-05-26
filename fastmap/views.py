@@ -6,12 +6,13 @@ from django.views.generic import TemplateView
 from django.http import HttpResponseRedirect, Http404
 from django.conf import settings
 from . import forms
-
 from .models import FastMappingJobs
 from .tasks import submit_mapping
 from oma import misc
 import os
 import hashlib
+import logging
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -33,6 +34,7 @@ def fastmapping(request):
                 do_compute = r.remove_erroneous_or_long_pending()
             except FastMappingJobs.DoesNotExist:
                 do_compute = True
+            logger.info(f"received fasta file {request.FILES['file']} for fastmapping: map_method {map_method}, hash {data_id}, need computing: {do_compute}")
             if do_compute:
                 submit_mapping(data_id, user_file_info['fname'], map_method, target)
             return HttpResponseRedirect(reverse('fastmapping-download', args=(data_id,)))

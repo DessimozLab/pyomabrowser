@@ -14,6 +14,8 @@ from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
+from django.core.mail import EmailMessage
+from django.template.loader import get_template
 from pyoma.browser.db import ClosestSeqMapper
 from pyoma.common import auto_open
 
@@ -128,6 +130,7 @@ def compute_mapping_with_celery(data_id, res_file_absolute, input_file, map_meth
             tot_time = time.time() - t0
             logger.info('finished fastmapping task {} (inputfile {}). took {:.1f}sec'.format(
                 data_id, input_file, tot_time))
+            send_notification_email(db_entry)
 
     except SoftTimeLimitExceeded as e:
         logger.warning('computing fastmapping timed out for dataset: {} (inputfile {})'
@@ -189,9 +192,25 @@ def update_running_jobs():
         job.create_time = timezone.now()
         job.processing = False
         job.save()
+        if job.state == "done":
+            try:
+                send_notification_email(job)
+            except Exception as e:
+                logger.exception("cannot send notification mail for job {}".format(job))
 
 
 @task()
 def purge_old_fastmap():
     time_threshold = datetime.now() - timedelta(days=int(settings.FASTMAP.get('store_files_in_days', 8)))
     FastMappingJobs.objects.filter(create_time__lt=time_threshold).delete()
+
+
+def send_notification_email(job: FastMappingJobs):
+    context = {'job': job, 'time_until_delete': settings.FASTMAP.get('store_files_in_days', None)}
+    message = get_template('email_dataset_ready.html').render(context)
+
+    sender = settings.CONTACT_EMAIL
+    subj = "[OMA] Results of sequence mapping job {} ready".format(job.name)
+    msg = EmailMessage(subj, message, to=[job.email], from_email=sender)
+    msg.content_subtype = "html"
+    msg.send()
