@@ -25,6 +25,7 @@ def fastmapping(request):
             map_method = form.cleaned_data['map_method']
             target = form.cleaned_data['target']
             job_name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
             h = hashlib.md5(user_file_info['md5'].encode('utf-8'))
             h.update(map_method.encode('utf-8'))
             h.update(target.encode('utf-8'))
@@ -37,7 +38,7 @@ def fastmapping(request):
                 do_compute = True
             logger.info(f"received fasta file {request.FILES['file']} for fastmapping: map_method {map_method}, hash {data_id}, need computing: {do_compute}")
             if do_compute:
-                submit_mapping(data_id, user_file_info['fname'], map_method, target, job_name)
+                submit_mapping(data_id, user_file_info['fname'], map_method, target, job_name, email)
             return HttpResponseRedirect(reverse('fastmapping-download', args=(data_id,)))
 
     else:
