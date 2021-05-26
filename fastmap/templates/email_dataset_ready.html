@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>[OMA] Results of sequence mapping job {{ job.name }} ready</title>
+    <title>[OMA] Results of sequence mapping job "{{ job.name }}" ready</title>
 </head>
 <body>
-<h1>Results of sequence mapping {% if job.name %} for job '{{ job.name }}' {% endif %}ready</h1>
+<h1>Results of sequence mapping {% if job.name %} job '{{ job.name }}' {% endif %}ready</h1>
 <p>Your submitted job to the OMA Browser to map sequences for your uploaded dataset
     {% if job.name %}"{{ job.name }}" {% endif %} are now ready. </p>
 {% if result_url %}

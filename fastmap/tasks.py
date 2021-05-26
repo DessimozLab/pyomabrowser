@@ -14,6 +14,7 @@ from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
+from django.urls import reverse
 from django.core.mail import EmailMessage
 from django.template.loader import get_template
 from pyoma.browser.db import ClosestSeqMapper
@@ -206,7 +207,11 @@ def purge_old_fastmap():
 
 
 def send_notification_email(job: FastMappingJobs):
-    context = {'job': job, 'time_until_delete': settings.FASTMAP.get('store_files_in_days', None)}
+    if job.email is None:
+        return
+    context = {'job': job,
+               'time_until_delete': settings.FASTMAP.get('store_files_in_days', 7),
+               "result_url": reverse("fastmapping-download", args=(job.data_hash,))}
     message = get_template('email_dataset_ready.html').render(context)
 
     sender = settings.CONTACT_EMAIL
