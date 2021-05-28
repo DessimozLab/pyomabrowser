@@ -37,38 +37,38 @@ urlpatterns = [
 
     url(r'^hog/(?P<hog_id>[\w.:]+)/similar/domain/json/$', views.HOGDomainsJson.as_view(), name='hog_domains_json'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/similar/domain/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/domain/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/similar/domain/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
 
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/profile/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/similar/profile/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/similar/profile/$', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/profile/json/$', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/similar/profile/json/$', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/similar/profile/json/$', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
 
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/pairwise/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/similar/pairwise/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/similar/pairwise/$', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/similar/pairwise/json/$',views.HOGSimilarPairwiseJSON.as_view(), name='hog_similar_pairwise_json'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/similar/pairwise/json/$',views.HOGSimilarPairwiseJSON.as_view(), name='hog_similar_pairwise_json'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/similar/pairwise/json/$', views.HOGSimilarPairwiseJSON.as_view(), name='hog_similar_pairwise_json'),
 
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
 
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/msa/$', views.HOGsMSA.as_view(), name='hog_msa'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/msa/$', views.HOGsMSA.as_view(), name='hog_msa'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/msa/$', views.HOGsMSA.as_view(), name='hog_msa'),
 
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/table/$', views.HOGtable.as_view(), name='hog_table'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/table/$', views.HOGtable.as_view(), name='hog_table'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/table/$', views.HOGtable.as_view(), name='hog_table'),
 
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/synteny/$', views.HOGSynteny.as_view(), name='hog_synteny'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/synteny/$', views.HOGSynteny.as_view(), name='hog_synteny'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/synteny/$', views.HOGSynteny.as_view(), name='hog_synteny'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/orthoxml/$', views.HOGsOrthoXMLView.as_view(), name="hogs_orthoxml"),
     url(r'^hog/(?P<hog_id>[\w.:]+)/orthoxml/(?P<file_type>[\w.:]+)/$', views.HOGsOrthoXMLView.as_view(), name="hogs_orthoxml"),
 
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/info/$', views.HOGInfo.as_view(),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/info/$', views.HOGInfo.as_view(),
         name='hog_info'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/info/$', views.HOGInfo.as_view(), name='hog_info'),
-    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.HOGviewer.as_view(), name="hog_base"),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/$', views.HOGviewer.as_view(), name="hog_base"),
     url(r'^hog/(?P<hog_id>[\w.:]+)/$', views.HOGviewer.as_view(), name="hog_base"),
 
     #roothog
@@ -105,7 +105,7 @@ urlpatterns = [
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGtableFromEntry.as_view(), name='hog_table_from_entry'),
     url(r'^hogs/(?P<entry_id>\w+)/vis/$', views.HOGiHamFromEntry.as_view(), name='hog_viewer_from_entry'),
     url(r'^hogs/(?P<entry_id>\w+)/iham/$', views.HOGiHamFromEntry.as_view(), name='hog_viewer_from_entry'),
-    url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-]+)/$',
+    url(r'^hogs/(?P<entry_id>\w+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/$',
         views.HOGtableFromEntry.as_view(), name='hog_table_from_entry'),
 
     #not sure if those are still needed somewhere. keep for now.
