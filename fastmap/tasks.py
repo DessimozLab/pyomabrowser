@@ -1,15 +1,27 @@
-from __future__ import absolute_import
-from __future__ import division
+import csv
 import logging
 import os
 import re
-from django.db.models import Q
-from .models import FastMappingJobs
 import shutil
-from django.utils import timezone
-from datetime import datetime, timedelta
-from celery import task
 import subprocess
+import time
+from datetime import datetime, timedelta
+
+import Bio.SeqIO
+import django.conf
+from celery import task, shared_task
+from celery.exceptions import SoftTimeLimitExceeded
+from django.conf import settings
+from django.db.models import Q
+from django.utils import timezone
+from django.urls import reverse
+from django.core.mail import EmailMessage
+from django.template.loader import get_template
+from pyoma.browser.db import ClosestSeqMapper
+from pyoma.common import auto_open
+
+from oma import utils
+from .models import FastMappingJobs
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +42,102 @@ class JobStatus(object):
             self.state = "error"
 
 
-def submit_mapping(session, res_file=None, fasta=None, map_method=None, target=None):
+def submit_mapping(job: FastMappingJobs, input_file, map_method=None, target=None):
+    engine = settings.FASTMAP.get('engine', 'celery').lower()
+    if engine not in ("celery", "cluster"):
+        raise django.conf.ImproperlyConfigured("invalid engine setting in FASTMAP configuration")
+
+    logger.debug(f"submit process: engine: {engine}, abs_path for result: {job.result.path}, hash: {job.data_hash}")
+    if engine == "celery":
+        job.save()
+        compute_mapping_with_celery.delay(job.data_hash, job.result.path, input_file, map_method, target)
+    elif engine == "cluster":
+        res = submit_mapping_on_cluster(job.data_hash, job.result.path, input_file, map_method, target)
+        job.state = res.state
+        job.save()
+
+
+@shared_task(soft_time_limit=24*3600)
+def compute_mapping_with_celery(data_id, res_file_absolute, input_file, map_method, target):
+    t0 = time.time()
+    logger.info('starting computing fastmapping of {}'.format(input_file))
+    db_entry = FastMappingJobs.objects.get(data_hash=data_id)
+    db_entry.state = "running"
+    db_entry.save()
+
+    try:
+        if map_method in ('s', 'st'):
+            mapper = ClosestSeqMapper(utils.db)
+        else:
+            raise ValueError("Invalid mapping method: {}".format(map_method))
+        if target in ("all", ""):
+            target = None
+
+        if not os.path.isdir(os.path.dirname(res_file_absolute)):
+            os.makedirs(os.path.dirname(res_file_absolute))
+        with auto_open(res_file_absolute, "wt") as fout:
+            csv_writer = csv.writer(fout, delimiter="\t")
+            csv_writer.writerow(
+                [
+                    "query",
+                    "target",
+                    "is_main_isoform",
+                    "HOG",
+                    "OMA_group",
+                    "PAM_distance",
+                    "Alignment_score",
+                ]
+            )
+
+            with auto_open(input_file, "rt") as fin:
+                seqs = Bio.SeqIO.parse(fin, "fasta")
+                it = mapper.imap_sequences(seqs, target_species=target)
+                seen_queries = set([])
+                for map_res in it:
+                    if map_res.query in seen_queries:
+                        continue  # we keep just the very best mapping
+                    seen_queries.add(map_res.query)
+                    if map_res.target.hog_family_nr != 0:
+                        hog_id = utils.db.format_hogid(map_res.target.hog_family_nr)
+                    else:
+                        hog_id = "n/a"
+                    if map_res.target.oma_group != 0:
+                        oma_grp = "OmaGroup:{}".format(map_res.target.oma_group)
+                    else:
+                        oma_grp = "n/a"
+                    csv_writer.writerow(
+                        [
+                            map_res.query,
+                            map_res.target.omaid,
+                            map_res.target.entry_nr == map_res.closest_entry_nr,
+                            hog_id,
+                            oma_grp,
+                            map_res.distance,
+                            map_res.score,
+                        ]
+                    )
+
+            # remove uploaded input file
+            os.remove(input_file)
+            db_entry.state = 'done'
+            db_entry.create_time = timezone.now()
+            tot_time = time.time() - t0
+            logger.info('finished fastmapping task {} (inputfile {}). took {:.1f}sec'.format(
+                data_id, input_file, tot_time))
+            send_notification_email(db_entry)
+
+    except SoftTimeLimitExceeded as e:
+        logger.warning('computing fastmapping timed out for dataset: {} (inputfile {})'
+                       .format(data_id, input_file))
+        db_entry.state = 'timeout'
+    except Exception as e:
+        logger.exception("An error occured while processing {} (inputfile {})"
+                         .format(data_id, input_file))
+        db_entry.state = "error"
+    db_entry.save()
+
+
+def submit_mapping_on_cluster(session, res_file=None, fasta=None, map_method=None, target=None):
     session_dir = '/tmp/gc3sessions'
 
     if not os.path.isdir(session_dir):
@@ -74,14 +181,35 @@ def update_running_jobs():
         job.processing = True
         job.save()
 
-        res = submit_mapping(job.data_hash, map_method=job.map_method)
+        res = submit_mapping_on_cluster(job.data_hash, map_method=job.map_method)
         job.state = res.state
         job.create_time = timezone.now()
         job.processing = False
         job.save()
+        if job.state == "done":
+            try:
+                send_notification_email(job)
+            except Exception as e:
+                logger.exception("cannot send notification mail for job {}".format(job))
 
 
 @task()
 def purge_old_fastmap():
-    time_threshold = datetime.now() - timedelta(days=8)
+    time_threshold = datetime.now() - timedelta(days=int(settings.FASTMAP.get('store_files_in_days', 8)))
     FastMappingJobs.objects.filter(create_time__lt=time_threshold).delete()
+
+
+def send_notification_email(job: FastMappingJobs):
+    if job.email == "":
+        return
+    context = {'job': job,
+               'time_until_delete': settings.FASTMAP.get('store_files_in_days', 7),
+              }
+    message = get_template('email_dataset_ready.html').render(context)
+
+    sender = settings.CONTACT_EMAIL
+    subj = "[OMA] Results of sequence mapping job {} ready".format(job.name)
+    msg = EmailMessage(subj, message, to=[job.email], from_email=sender)
+    msg.content_subtype = "html"
+    msg.send()
+    logger.info(f"notification message sent to {job.email}")

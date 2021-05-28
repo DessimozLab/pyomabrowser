@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>[OMA] Results of sequence mapping job "{{ job.name }}" ready</title>
+</head>
+<body>
+<h1>Results of sequence mapping {% if job.name %} job '{{ job.name }}' {% endif %}ready</h1>
+<p>Your submitted job to the OMA Browser to map sequences for your uploaded dataset
+    {% if job.name %}"{{ job.name }}" {% endif %} are now ready. </p>
+{% if job.result_url %}
+    <p> You can retrieve the predictions from the following URL:
+        {{ job.result_url | urlize}}</p>
+    {% if time_until_delete %}
+    <p>Note that this file will be deleted in {{ time_until_delete }} days from now.</p>
+    {% endif %}
+{% endif %}
+
+</body>
+</html>

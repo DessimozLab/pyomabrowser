@@ -100,9 +100,11 @@ def md5(fname):
     return hash_md5.hexdigest()
 
 
-def handle_uploaded_file(fh):
+def handle_uploaded_file(fh, dir=None):
+    if dir is not None:
+        os.makedirs(dir, exist_ok=True)
     base, suffix = os.path.splitext(fh.name)
-    with tempfile.NamedTemporaryFile(suffix=suffix, prefix=base, delete=False) as destination:
+    with tempfile.NamedTemporaryFile(suffix=suffix, prefix=base, delete=False, dir=dir) as destination:
         for chunk in fh.chunks():
             destination.write(chunk)
     res = {'fname': destination.name, 'md5': md5(destination.name)}

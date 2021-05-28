@@ -29,8 +29,8 @@ services:
         source: ${RELEASE_PATH_HOST}
         target: ${RELEASE_PATH}
         read_only: true
-    ports:
-      - 8000:8000
+    expose:
+      - 8000
     depends_on:
       - broker
       - db
@@ -53,7 +53,30 @@ services:
   worker:
     image: $DOCKER_REGISTRY/oma
     restart: "no"
-    command: ["celery", "worker", "--app=pybrowser_dev.celery_app", "--concurrency=1", "--hostname=worker@%h", "--loglevel=DEBUG"]
+    command: ["celery", "worker", "--app=pybrowser_dev.celery_app", "--concurrency=1",
+              "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=DEBUG"]
+    env_file:
+      - env
+    volumes:
+      # uncomment the following line if you want to use transparently the current checkout mounted
+      # into your docker image. convenient for development, but not encouraged in production
+      - ..:/usr/src/pyomabrowser
+      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
+      #- release_volume:${RELEASE_PATH}
+      # use a bind mount if you have the browser data on the host filesystem
+      - type: bind
+        source: ${RELEASE_PATH_HOST}
+        target: ${RELEASE_PATH}
+        read_only: true
+    depends_on:
+      - broker
+      - db
+
+  worker_long:
+    image: $DOCKER_REGISTRY/oma
+    restart: "no"
+    command: ["celery", "worker", "--app=pybrowser_dev.celery_app", "--concurrency=1",
+              "--queues=celery,async_web,long", "--hostname=worker@%h", "--loglevel=DEBUG"]
     env_file:
       - env
     volumes:
@@ -101,8 +124,8 @@ services:
     image: $DOCKER_REGISTRY/legacy
     env_file:
       - env
-    ports:
-      - 8001:8000
+    expose:
+      - 8000
     restart: "no"
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
