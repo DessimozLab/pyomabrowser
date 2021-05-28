@@ -23,7 +23,7 @@ class RestrictedFileField(forms.FileField):
         return data
 
 
-class FastMappingUploadForm(forms.Form):
+class FastMappingUploadFormWithoutReCaptcha(forms.Form):
     required_css_class = 'required'
     email = forms.EmailField(label='Email', required=False,
                              help_text="We will send an email to this address once the predictions are ready.")
@@ -31,4 +31,7 @@ class FastMappingUploadForm(forms.Form):
     map_method = forms.ChoiceField(label="Mapping method", choices=FastMappingJobs.MAP_METHODS, required=True)
     target = forms.CharField(label="Mapping restricted to target", max_length=5, required=False)
     file = RestrictedFileField(label='Sequence File (fasta format)', required=True)
+
+
+class FastMappingUploadForm(FastMappingUploadFormWithoutReCaptcha):
     captcha = ReCaptchaField()

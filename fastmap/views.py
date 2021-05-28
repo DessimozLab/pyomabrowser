@@ -15,10 +15,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+if 'captcha' in settings.INSTALLED_APPS:
+    fastmap_form_cls = forms.FastMappingUploadForm
+else:
+    fastmap_form_cls = forms.FastMappingUploadFormWithoutReCaptcha
+
+
 # Create your views here.
 def fastmapping(request):
     if request.method == 'POST':
-        form = forms.FastMappingUploadForm(request.POST, request.FILES)
+        form = fastmap_form_cls(request.POST, request.FILES)
         if form.is_valid():
             upload_dir = os.path.join(settings.MEDIA_ROOT, "uploads")
             user_file_info = misc.handle_uploaded_file(request.FILES['file'], dir=upload_dir)
@@ -49,7 +55,7 @@ def fastmapping(request):
             return HttpResponseRedirect(reverse('fastmapping-download', args=(data_id,)))
 
     else:
-        form = forms.FastMappingUploadForm()
+        form = fastmap_form_cls()
 
     return render(request, "fastmapping.html",
                   {'form': form, 'max_upload_size': form.fields['file'].max_upload_size / (2**20)})
