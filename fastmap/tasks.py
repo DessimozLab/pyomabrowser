@@ -124,7 +124,10 @@ def compute_mapping_with_celery(data_id, res_file_absolute, input_file, map_meth
             tot_time = time.time() - t0
             logger.info('finished fastmapping task {} (inputfile {}). took {:.1f}sec'.format(
                 data_id, input_file, tot_time))
-            send_notification_email(db_entry)
+            try:
+                send_notification_email(db_entry)
+            except OSError as e:
+                logger.error("cannot send notification mail: {}".format(e))
 
     except SoftTimeLimitExceeded as e:
         logger.warning('computing fastmapping timed out for dataset: {} (inputfile {})'
