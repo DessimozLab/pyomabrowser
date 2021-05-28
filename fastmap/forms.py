@@ -29,6 +29,6 @@ class FastMappingUploadForm(forms.Form):
                              help_text="We will send an email to this address once the predictions are ready.")
     name = forms.CharField(label='Name of Dataset', max_length=64, required=False)
     map_method = forms.ChoiceField(label="Mapping method", choices=FastMappingJobs.MAP_METHODS, required=True)
-    target = forms.CharField(label="Mapping restricted to target", max_length=128, required=False)
+    target = forms.CharField(label="Mapping restricted to target", max_length=5, required=False)
     file = RestrictedFileField(label='Sequence File (fasta format)', required=True)
     captcha = ReCaptchaField()
