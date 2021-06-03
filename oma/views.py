@@ -3028,8 +3028,7 @@ class Searcher(View):
 
     def logic_genomes(self, request, context, terms):
 
-        def _add_genomes(genomes,search_data ,total_search, search_meta ):
-
+        def _add_genomes(genomes, search_data, total_search, search_meta):
             search_data[selector] += genomes
             total_search += len(genomes)
             search_meta[selector] = len(genomes)
@@ -3043,7 +3042,7 @@ class Searcher(View):
         # store per term information for specificity widget
         search_term_meta = {}
         for term in terms:
-            search_term_meta[term] = {select:0 for select in self._genome_selector}
+            search_term_meta[term] = {select: 0 for select in self._genome_selector}
             search_term_meta[term]['taxon'] = 0
 
         # for each method to search an extant genome store info
@@ -3064,8 +3063,8 @@ class Searcher(View):
 
 
         # for each method to search a taxon
-        taxon_search = {select:[] for select in self._genome_selector}
-        search_taxon_meta = {select:0 for select in self._genome_selector}
+        taxon_search = {select: [] for select in self._genome_selector}
+        search_taxon_meta = {select: 0 for select in self._genome_selector}
         total_search_taxon = 0
 
         for selector in self._genome_selector:
@@ -3073,7 +3072,6 @@ class Searcher(View):
             # for each terms we get the raw results
             for term in terms:
                 r = self.search_taxon(request, term, selector=[selector])
-
 
                 search_term_meta[term][selector] += len(r)
                 _add_genomes(r, taxon_search, total_search_taxon, search_taxon_meta)
@@ -3115,9 +3113,9 @@ class Searcher(View):
         cleaned_taxon = []
         seen = []
         for obj in sorted_results_taxon:
-            if obj['taxid'] not in seen:
+            if obj['ncbi'] not in seen:
                 cleaned_taxon.append(obj)
-                seen.append(obj['taxid'])
+                seen.append(obj['ncbi'])
 
         search_ext_meta['shown'] = len(cleaned_genome)
         search_taxon_meta['shown'] = len(cleaned_taxon)
