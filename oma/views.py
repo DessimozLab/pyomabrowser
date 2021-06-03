@@ -3080,7 +3080,7 @@ class Searcher(View):
 
                 for taxo in r:
                     subtax = utils.db.tax
-                    if taxo['ncbi'] == 0:
+                    if taxo['ncbi'] != 0:
                         subtax = subtax.get_subtaxonomy_rooted_at(taxo['ncbi'])
                     induced_genome = self._genomes_from_taxonomy(subtax)
 
