@@ -1226,7 +1226,7 @@ class AncestralGenomeBase(ContextMixin):
         try:
             def iterdict(d, search, query):
                 for k, v in d.items():
-                    if k == 'taxid' or  k == 'name':
+                    if k == 'taxid' or k == 'name':
                         if str(v).lower() == str(query).lower():
                             search = d
                     if k == 'children':
@@ -1244,16 +1244,16 @@ class AncestralGenomeBase(ContextMixin):
                     cpt = 1
                 return cpt
 
-
             genomes_json = utils.load_genomes_json_file()
             search = iterdict(genomes_json, False, species_id)
-
             if search:
-                context['taxid'] = search['taxid']
+                try:
+                    context['taxid'] = search['taxid']
+                except KeyError:
+                    context['taxid'] = 0
                 context['genome_name'] = search['name']
                 context['nr_hogs'] = search['nr_hogs']
                 context['nbr_species'] = count_species(search)
-
             else:
                 raise ValueError("Could not find ancestral genome {}".format(species_id))
         except ValueError as e:
@@ -1266,7 +1266,11 @@ class AncestralGenomeCentricInfo(AncestralGenomeBase, TemplateView):
 
     def get_context_data(self, species_id, **kwargs):
         context = super(AncestralGenomeCentricInfo, self).get_context_data(species_id, **kwargs)
-        subtax = utils.tax.get_subtaxonomy_rooted_at(context['taxid'])
+        if context['taxid'] == 0:
+            subtax = utils.tax
+        else:
+            subtax = utils.tax.get_subtaxonomy_rooted_at(context['taxid'])
+
         ext_genomes = []
         for taxid in subtax.get_taxid_of_extent_genomes():
             ext_genomes.append(utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid)))
@@ -1282,19 +1286,23 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
     def get_context_data(self, species_id, level=None, **kwargs):
         context = super(AncestralGenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
-
         ## get list lineage up
         #  get an extant genome lineage
-        taxid = utils.tax.get_subtaxonomy_rooted_at(context['taxid']).get_taxid_of_extent_genomes()[0]
-        extant = utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid))
-        full_lineage = extant.lineage
+        if context['taxid'] != 0:
+            taxid = utils.tax.get_subtaxonomy_rooted_at(context['taxid']).get_taxid_of_extent_genomes()[0]
+            extant = utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid))
+            full_lineage = extant.lineage
 
-        # cut before current level
-        index = full_lineage.index(context['genome_name'])
-        lineage = full_lineage[index+1:]
+            # cut before current level
+            index = full_lineage.index(context['genome_name'])
+            lineage = full_lineage[index+1:]
+        else:
+            lineage = []
 
-        context.update({'tab': 'genes', 'level': level, 'api_url' :'/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
-                        'lineage': lineage })
+        context.update({'tab': 'genes',
+                        'level': level,
+                        'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
+                        'lineage': lineage})
         return context
 
 
@@ -3020,8 +3028,7 @@ class Searcher(View):
 
     def logic_genomes(self, request, context, terms):
 
-        def _add_genomes(genomes,search_data ,total_search, search_meta ):
-
+        def _add_genomes(genomes, search_data, total_search, search_meta):
             search_data[selector] += genomes
             total_search += len(genomes)
             search_meta[selector] = len(genomes)
@@ -3035,7 +3042,7 @@ class Searcher(View):
         # store per term information for specificity widget
         search_term_meta = {}
         for term in terms:
-            search_term_meta[term] = {select:0 for select in self._genome_selector}
+            search_term_meta[term] = {select: 0 for select in self._genome_selector}
             search_term_meta[term]['taxon'] = 0
 
         # for each method to search an extant genome store info
@@ -3056,8 +3063,8 @@ class Searcher(View):
 
 
         # for each method to search a taxon
-        taxon_search = {select:[] for select in self._genome_selector}
-        search_taxon_meta = {select:0 for select in self._genome_selector}
+        taxon_search = {select: [] for select in self._genome_selector}
+        search_taxon_meta = {select: 0 for select in self._genome_selector}
         total_search_taxon = 0
 
         for selector in self._genome_selector:
@@ -3066,14 +3073,14 @@ class Searcher(View):
             for term in terms:
                 r = self.search_taxon(request, term, selector=[selector])
 
-
                 search_term_meta[term][selector] += len(r)
                 _add_genomes(r, taxon_search, total_search_taxon, search_taxon_meta)
 
                 for taxo in r:
-
-                    induced_genome = self._genomes_from_taxonomy(
-                        utils.db.tax.get_subtaxonomy_rooted_at(taxo['taxid']))
+                    subtax = utils.db.tax
+                    if taxo['ncbi'] != 0:
+                        subtax = subtax.get_subtaxonomy_rooted_at(taxo['ncbi'])
+                    induced_genome = self._genomes_from_taxonomy(subtax)
 
                     for it in induced_genome:
                         it.found_by = 'Ancestral genome'
@@ -3106,9 +3113,9 @@ class Searcher(View):
         cleaned_taxon = []
         seen = []
         for obj in sorted_results_taxon:
-            if obj['taxid'] not in seen:
+            if obj['ncbi'] not in seen:
                 cleaned_taxon.append(obj)
-                seen.append(obj['taxid'])
+                seen.append(obj['ncbi'])
 
         search_ext_meta['shown'] = len(cleaned_genome)
         search_taxon_meta['shown'] = len(cleaned_taxon)
@@ -3439,6 +3446,7 @@ class Searcher(View):
                             # create flat copy without children if found
                             result = {k: v for k, v in d.items() if k != "children"}
                             found_by = key
+                            result = build_result_dict(result, key)
                             break
                     except KeyError:
                         pass
@@ -3450,6 +3458,24 @@ class Searcher(View):
                             break
             return result, found_by
 
+        def build_result_dict(sp, found_by):
+            res = {
+                "kingdom": "",
+                "uniprot_species_code": "",
+                "sciname": sp['name'],
+                "common_name": "",
+                "last_modified": "",
+                "prots": sp["nr_hogs"],
+                "type": "Ancestral",
+                "found_by": found_by
+            }
+            res.update(sp)
+            try:
+                res['ncbi'] = sp['taxid']
+            except KeyError:
+                res['ncbi'] = 0
+            return res
+
         start = time.time()
         query = str(query).lower()
         genomes_json = utils.load_genomes_json_file()
@@ -3459,34 +3485,18 @@ class Searcher(View):
 
         data = []
         if search_result:
+
             if redirect_valid:
-                return redirect('ancestralgenome_info', search_result['taxid'])
-            search_result["kingdom"] = ""
-            search_result["uniprot_species_code"] = ""
-            search_result["ncbi"] = search_result["taxid"]
-            search_result["sciname"] = search_result["name"]
-            search_result["common_name"] = ""
-            search_result["last_modified"] = ""
-            search_result["prots"] = search_result["nr_hogs"]
-            search_result["type"] = "Ancestral"
-            search_result["found_by"] = found_by
+                arg = search_result['taxid'] if 'taxid' in search_result else search_result['sciname']
+                return redirect('ancestralgenome_info', arg)
             data.append(search_result)
         else:
             if 'name' in selector:
                 amb_taxon = utils.tax.approx_search(query)
                 for amb_taxa in amb_taxon:
                     query = str(amb_taxa[1]).lower()
-                    search_result, found_by = search_in_nested_dict(genomes_json, str(query).lower())
+                    search_result, found_by = search_in_nested_dict(genomes_json, query)
                     if search_result:
-                        search_result["kingdom"] = ""
-                        search_result["uniprot_species_code"] = ""
-                        search_result["ncbi"] = search_result["taxid"]
-                        search_result["sciname"] = search_result["name"]
-                        search_result["common_name"] = ""
-                        search_result["last_modified"] = ""
-                        search_result["prots"] = search_result["nr_hogs"]
-                        search_result["type"] = "Ancestral"
-                        search_result["found_by"] = found_by
                         data.append(search_result)
         return data
 
