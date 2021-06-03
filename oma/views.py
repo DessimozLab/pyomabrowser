@@ -1226,7 +1226,7 @@ class AncestralGenomeBase(ContextMixin):
         try:
             def iterdict(d, search, query):
                 for k, v in d.items():
-                    if k == 'taxid' or  k == 'name':
+                    if k == 'taxid' or k == 'name':
                         if str(v).lower() == str(query).lower():
                             search = d
                     if k == 'children':
@@ -1249,11 +1249,13 @@ class AncestralGenomeBase(ContextMixin):
             search = iterdict(genomes_json, False, species_id)
 
             if search:
-                context['taxid'] = search['taxid']
+                try:
+                    context['taxid'] = search['taxid']
+                except KeyError:
+                    context['taxid'] = 0
                 context['genome_name'] = search['name']
                 context['nr_hogs'] = search['nr_hogs']
                 context['nbr_species'] = count_species(search)
-
             else:
                 raise ValueError("Could not find ancestral genome {}".format(species_id))
         except ValueError as e:
@@ -3439,6 +3441,7 @@ class Searcher(View):
                             # create flat copy without children if found
                             result = {k: v for k, v in d.items() if k != "children"}
                             found_by = key
+                            result = build_result_dict(result, key)
                             break
                     except KeyError:
                         pass
@@ -3450,6 +3453,24 @@ class Searcher(View):
                             break
             return result, found_by
 
+        def build_result_dict(sp, found_by):
+            res = {
+                "kingdom": "",
+                "uniprot_species_code": "",
+                "sciname": sp['name'],
+                "common_name": "",
+                "last_modified": "",
+                "prots": sp["nr_hogs"],
+                "type": "Ancestral",
+                "found_by": found_by
+            }
+            res.update(sp)
+            try:
+                res['ncbi'] = sp['taxid']
+            except KeyError:
+                res['ncbi'] = 0
+            return res
+
         start = time.time()
         query = str(query).lower()
         genomes_json = utils.load_genomes_json_file()
@@ -3459,34 +3480,18 @@ class Searcher(View):
 
         data = []
         if search_result:
+
             if redirect_valid:
-                return redirect('ancestralgenome_info', search_result['taxid'])
-            search_result["kingdom"] = ""
-            search_result["uniprot_species_code"] = ""
-            search_result["ncbi"] = search_result["taxid"]
-            search_result["sciname"] = search_result["name"]
-            search_result["common_name"] = ""
-            search_result["last_modified"] = ""
-            search_result["prots"] = search_result["nr_hogs"]
-            search_result["type"] = "Ancestral"
-            search_result["found_by"] = found_by
+                arg = search_result['taxid'] if 'taxid' in search_result else search_result['sciname']
+                return redirect('ancestralgenome_info', arg)
             data.append(search_result)
         else:
             if 'name' in selector:
                 amb_taxon = utils.tax.approx_search(query)
                 for amb_taxa in amb_taxon:
                     query = str(amb_taxa[1]).lower()
-                    search_result, found_by = search_in_nested_dict(genomes_json, str(query).lower())
+                    search_result, found_by = search_in_nested_dict(genomes_json, query)
                     if search_result:
-                        search_result["kingdom"] = ""
-                        search_result["uniprot_species_code"] = ""
-                        search_result["ncbi"] = search_result["taxid"]
-                        search_result["sciname"] = search_result["name"]
-                        search_result["common_name"] = ""
-                        search_result["last_modified"] = ""
-                        search_result["prots"] = search_result["nr_hogs"]
-                        search_result["type"] = "Ancestral"
-                        search_result["found_by"] = found_by
                         data.append(search_result)
         return data
 
