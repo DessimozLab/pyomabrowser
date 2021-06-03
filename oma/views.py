@@ -1244,10 +1244,8 @@ class AncestralGenomeBase(ContextMixin):
                     cpt = 1
                 return cpt
 
-
             genomes_json = utils.load_genomes_json_file()
             search = iterdict(genomes_json, False, species_id)
-
             if search:
                 try:
                     context['taxid'] = search['taxid']
@@ -1268,7 +1266,11 @@ class AncestralGenomeCentricInfo(AncestralGenomeBase, TemplateView):
 
     def get_context_data(self, species_id, **kwargs):
         context = super(AncestralGenomeCentricInfo, self).get_context_data(species_id, **kwargs)
-        subtax = utils.tax.get_subtaxonomy_rooted_at(context['taxid'])
+        if context['taxid'] == 0:
+            subtax = utils.tax
+        else:
+            subtax = utils.tax.get_subtaxonomy_rooted_at(context['taxid'])
+
         ext_genomes = []
         for taxid in subtax.get_taxid_of_extent_genomes():
             ext_genomes.append(utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid)))
@@ -1284,19 +1286,23 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
     def get_context_data(self, species_id, level=None, **kwargs):
         context = super(AncestralGenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
-
         ## get list lineage up
         #  get an extant genome lineage
-        taxid = utils.tax.get_subtaxonomy_rooted_at(context['taxid']).get_taxid_of_extent_genomes()[0]
-        extant = utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid))
-        full_lineage = extant.lineage
+        if context['taxid'] != 0:
+            taxid = utils.tax.get_subtaxonomy_rooted_at(context['taxid']).get_taxid_of_extent_genomes()[0]
+            extant = utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid))
+            full_lineage = extant.lineage
 
-        # cut before current level
-        index = full_lineage.index(context['genome_name'])
-        lineage = full_lineage[index+1:]
+            # cut before current level
+            index = full_lineage.index(context['genome_name'])
+            lineage = full_lineage[index+1:]
+        else:
+            lineage = []
 
-        context.update({'tab': 'genes', 'level': level, 'api_url' :'/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
-                        'lineage': lineage })
+        context.update({'tab': 'genes',
+                        'level': level,
+                        'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
+                        'lineage': lineage})
         return context
 
 
@@ -3073,9 +3079,10 @@ class Searcher(View):
                 _add_genomes(r, taxon_search, total_search_taxon, search_taxon_meta)
 
                 for taxo in r:
-
-                    induced_genome = self._genomes_from_taxonomy(
-                        utils.db.tax.get_subtaxonomy_rooted_at(taxo['taxid']))
+                    subtax = utils.db.tax
+                    if taxo['ncbi'] == 0:
+                        subtax = subtax.get_subtaxonomy_rooted_at(taxo['ncbi'])
+                    induced_genome = self._genomes_from_taxonomy(subtax)
 
                     for it in induced_genome:
                         it.found_by = 'Ancestral genome'
