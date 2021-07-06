@@ -1137,7 +1137,7 @@ class GenomeBase(ContextMixin):
             context['genome'] = genome_obj
             context['genome_meta'] = meta
             context['supported_ancestral_levels'] = set(l.decode() for l in utils.tax.all_hog_levels).intersection(genome_obj.lineage)
-        except db.InvalidId as e:
+        except db.UnknownSpecies as e:
             raise Http404(e)
         return context
 
