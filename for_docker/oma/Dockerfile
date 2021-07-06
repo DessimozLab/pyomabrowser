@@ -36,7 +36,7 @@ ONBUILD RUN git clone ssh://gitolite@lab.dessimoz.org:2222/pyomabrowser \
 FROM build_${PYOMABROWSER_CODEBASE}
 # install dependencies
 RUN pip3 install --no-cache-dir --upgrade pip
-RUN pip3 install --no-cache-dir psycopg2
+RUN pip3 install --no-cache-dir 'psycopg2<2.9'
 RUN pip3 install --no-cache-dir uwsgi
 RUN --mount=type=ssh pip3 install --no-cache-dir -r $SRC_DIR/requirements.txt --src /usr/local/src
 RUN /bin/date | /usr/bin/md5sum > secret_key.txt
