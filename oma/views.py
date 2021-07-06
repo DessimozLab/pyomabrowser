@@ -1151,7 +1151,7 @@ class GenomeCentricInfo(GenomeBase, TemplateView):
         prot_in_group = context['genome_meta'].get_nr_genes_in_group(group_type="OMAGroup")
         prot_in_hogs = context['genome_meta'].get_nr_genes_in_group(group_type="HOG")
 
-        context.update({'tab': 'information', "prot_in_group":prot_in_group, "prot_in_hogs" :prot_in_hogs })
+        context.update({'tab': 'information', "prot_in_group": prot_in_group, "prot_in_hogs": prot_in_hogs})
         return context
 
 
@@ -1161,7 +1161,9 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
     def get_context_data(self, species_id, **kwargs):
         context = super(GenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
-        context.update({'tab': 'genes', 'api_base': 'genome', 'amuse_bouche': '/api/genome/{}/proteins/?&per_page=2500000'.format(species_id), 'api_url': '/api/genome/{}/proteins/?&per_page=25'.format(species_id)})
+        context.update({'tab': 'genes', 'api_base': 'genome',
+                        'amuse_bouche': '/api/genome/{}/proteins/?&per_page=2500000'.format(species_id),
+                        'api_url': '/api/genome/{}/proteins/?&per_page=25'.format(species_id)})
         return context
 
 
@@ -1174,14 +1176,16 @@ class GenomeCentricClosestGroups(GenomeBase, TemplateView):
         gr_close_raw = context['genome_meta'].get_most_similar_species(limit=10, group_type='OMAGroup')
         gr_close = []
         for g in gr_close_raw:
-            gr_close.append({'genome':models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr':g[1]})
+            gr_close.append({'genome': utils.Genome(utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])),
+                             'nbr': g[1]})
 
         gr_least_raw = context['genome_meta'].get_least_similar_species(limit=11, group_type='OMAGroup')
         gr_least = []
         for g in gr_least_raw:
-            gr_least.append({'genome': models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr': g[1]})
+            gr_least.append({'genome': utils.Genome(utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])),
+                             'nbr': g[1]})
 
-        context.update({'tab': 'closest', 'subtab':'groups', 'closest':gr_close, 'least':gr_least })
+        context.update({'tab': 'closest', 'subtab': 'groups', 'closest': gr_close, 'least': gr_least})
         return context
 
 
@@ -1195,11 +1199,11 @@ class GenomeCentricClosestHOGs(GenomeBase, TemplateView):
 
         hog_closest = []
         for g in hog_closest_raw:
-            hog_closest.append({'genome':models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr':g[1]})
+            hog_closest.append({'genome': models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr': g[1]})
 
         hog_least = []
         for g in hog_least_raw:
-            hog_least.append({'genome':models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr':g[1]})
+            hog_least.append({'genome': models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr': g[1]})
 
 
         context.update({'tab': 'closest', 'subtab':'hogs', 'closest':hog_closest, 'least':hog_least })
