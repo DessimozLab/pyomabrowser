@@ -2676,7 +2676,7 @@ class Searcher(View):
 
         @timethis(logging.INFO)
         def search_crossref_and_desc(terms):
-            hits_by_entry = {}
+            hits_by_entry = collections.defaultdict(list)
             intersect_id = None
             intersect_xref = None
 
