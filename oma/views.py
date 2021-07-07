@@ -44,6 +44,7 @@ from . import misc
 from . import forms
 from .models import FileResult
 from pyoma.browser import db, models
+from pyoma.browser.decorators import timethis
 
 logger = logging.getLogger(__name__)
 
@@ -2505,7 +2506,7 @@ class HOGSearchJson(JsonModelMixin):
         'hog_id': 'group_nr',
         'level': 'level',
         'nr_member_genes': 'size',
-        'type':'type',
+        'type': 'type',
         'fingerprint': 'fingerprint',
         "found_by": "found_by"}
 
@@ -2537,8 +2538,6 @@ def search_fulltext(query):
             missing_terms.append(term)
         entry_cands.update(enr)
         logger.info("term: '{}' matched {} entries".format(term, len(enr)))
-
-
     if len(entry_cands) == 0:
         return []
     else:
@@ -2599,7 +2598,7 @@ class Searcher(View):
             return redirect('home')
         terms = shlex.split(query)
 
-        context = {'query': query, 'type': type, 'terms':terms, "outdated_HOG" : False}
+        context = {'query': query, 'type': type, 'terms': terms, "outdated_HOG": False}
 
         redir = (type != 'all' and len(terms) == 1)
 
@@ -2609,11 +2608,11 @@ class Searcher(View):
             data_type = type.split("_")[0]  # Entry, OG, HOG, Genome, Ancestral genome
             selector = [type.split("_")[1]]  # ID, sequence, Fingerprint, etc...
 
-            meth = getattr(self, "search_" + data_type )
+            meth = getattr(self, "search_" + data_type)
             logger.debug("calling shortcut {} with query: {}".format(meth, terms[0]))
-            resp = meth(request, terms[0], selector=selector, redirect_valid=True) # deal return if error
+            resp = meth(request, terms[0], selector=selector, redirect_valid=True)  # deal return if error
 
-            if isinstance(resp,  HttpResponseRedirect):
+            if isinstance(resp, HttpResponseRedirect):
                 return resp
 
         # Otherwise apply the "All" Strategy with non redundant query
@@ -2658,12 +2657,10 @@ class Searcher(View):
 
         return render(request, 'search_test.html', context=context)
 
-    def logic_entry(self,request, context, terms, scope = None, redirect_valid=False):
-
+    def logic_entry(self,request, context, terms, scope=None, redirect_valid=False):
         logger.info("Start entry search")
-
         if scope:
-            scope=set(scope)
+            scope = set(scope)
 
         # store per term information
         search_term_meta = {}
@@ -2677,76 +2674,54 @@ class Searcher(View):
         union_entry = None
 
 
-        align_info = []
-        align_term = {}
-        match= None
+        @timethis(logging.INFO)
+        def search_crossref_and_desc(terms):
+            hits_by_entry = {}
+            intersect_id = None
+            intersect_xref = None
 
+            def update_intersections(iset, add_set):
+                if iset is None:
+                    return set(add_set)
+                else:
+                    return iset.intersection(add_set)
 
-        # search by OMAID/numeric_id or Xref/
-        raw_hits_id = []
-        raw_hits_xref = []
-        start = time.time()
-        # for each terms we get the raw results
-        for term in terms:
-            term_hit_id = []
-            term_hit_xref = []
-            hits = utils.id_resolver.search_protein(term)
-            for id, hit in hits.items():
-                for accessor, value in hit.items():
-                    if accessor == "numeric_id" or accessor == "omaid":
-                        term_hit_id.append(id)
-                    else:
-                        term_hit_xref.append(id)
+            def update_result_dicts(iset, type):
+                # lets order the intersection set according to the number of hits
+                res = sorted(list(iset), key=lambda id: -len(hits_by_entry[id]))
+                entry_search[type] = res
+                search_entry_meta[type] = len(res)
 
-            if scope:
-                term_hit_id = scope.intersection(set(term_hit_id))
-                term_hit_xref = scope.intersection(set(term_hit_xref))
+            # for each terms we get the raw results
+            only_one_term = len(terms) == 1
+            for term in terms:
+                term_hit_id = set([])
+                term_hit_xref = set([])
+                # TODO: if only_one_term, then we can limit to fewer results, but need to know
+                # how many in total would be found. requires alternative interface for search_id?!
+                hits = utils.id_resolver.search_protein(term)
+                # filter hits to proteins outside our scope of interest
+                if scope:
+                    hits = {id: hit for id, hit in hits.items() if id in scope}
+                for id, hit in hits.items():
+                    for accessor, value in hit.items():
+                        hits_by_entry[id].append((term, accessor, value))
+                        if accessor == "numeric_id" or accessor == "omaid":
+                            term_hit_id.add(id)
+                        else:
+                            term_hit_xref.add(id)
+                search_term_meta[term]["id"] += len(term_hit_id)
+                search_term_meta[term]["crossref"] += len(term_hit_xref)
+                intersect_id = update_intersections(intersect_id, term_hit_id)
+                intersect_xref = update_intersections(intersect_xref, term_hit_xref)
+            update_result_dicts(intersect_id, "id")
+            update_result_dicts(intersect_xref, "crossref")
+            return hits_by_entry
 
-            term_hit_id = set(term_hit_id)
-            term_hit_xref = set(term_hit_xref)
+        # search terms in ids and crossrefs,
+        # updates entry_search and search_entry_meta
+        id_hits_by_entry = search_crossref_and_desc(terms)
 
-            raw_hits_id.append(term_hit_id)
-            raw_hits_xref.append(term_hit_xref)
-
-            search_term_meta[term]["id"] += len(term_hit_id)
-            search_term_meta[term]["crossref"] += len(term_hit_xref)
-
-        # Get the intersection of the raw id results
-        if raw_hits_id:
-
-            s = set(raw_hits_id[0])
-            ss = [set(e) for e in raw_hits_id[1:]]
-
-
-            result = list(s.intersection(*ss))
-            union_entry = list(s.union(*ss))
-
-            entry_search["id"] = result
-            total_search += len(result)
-            search_entry_meta["id"] = len(result)
-        else:
-            entry_search["id"] = []
-            total_search += 0
-            search_entry_meta["id"] = 0
-
-        # Get the intersection of the raw xref results
-        if raw_hits_xref:
-
-            s = set(raw_hits_xref[0])
-            ss = [set(e) for e in raw_hits_xref[1:]]
-
-            result = list(s.intersection(*ss))
-            union_entry = list(s.union(*ss))
-
-            entry_search["crossref"] = result
-            total_search += len(result)
-            search_entry_meta["crossref"] = len(result)
-        else:
-            entry_search["crossref"] = []
-            total_search += 0
-            search_entry_meta["crossref"] = 0
-        end = time.time()
-        logger.info("Search entry by IDs took {} sec".format(start - end))
 
         # search by Sequence
         start = time.time()
@@ -2807,20 +2782,20 @@ class Searcher(View):
         # Look for the intersection of sequence with ids if more than one terms
         # TODO: does this make sense? I wouldn't thinking len(terms)>1 is correct...
         if len(terms) > 1:
-            s1 = set(union_entry)
+            s1 = set(id_hits_by_entry)
             s2 = set(entry_search['sequence'])
             entry_search['sequence'] = list(s1.intersection(s2))
+        # sort sequence search results according to alignment score
+        entry_search['sequence'] = sorted(entry_search['sequence'], key=lambda enr: -align_data[enr]['score'])
 
         # select the top best 50 results
         filtered_entries = []
         for k in sorted(entry_search, key=lambda k: len(entry_search[k])):
             res = entry_search[k]
             if len(res) >= 15:
-                res = sorted(res, key=lambda enr: -align_data[enr]['score'])
                 res = res[:15]
             for r in res:
                 filtered_entries.append([r, k])
-
         search_entry_meta['shown'] = len(filtered_entries)
 
         # encode entry data to json
