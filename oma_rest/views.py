@@ -1167,14 +1167,14 @@ class SharedAncestrySummaryAPIView(APIView):
         pass
 
     def _by_vps(self, g1, g2):
-        rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/VPairs'.format(g1.uniprot_species_code))
+        vp_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/VPairs'.format(g1.uniprot_species_code))
         range1 = g1.entry_nr_offset + 1, g1.entry_nr_offset + len(g1)
         range2 = g2.entry_nr_offset + 1, g2.entry_nr_offset + len(g2)
         query = '(EntryNr1 >= {0[0]}) & (EntryNr1 <= {0[1]}) ' \
                 '& (EntryNr2 >= {1[0]}) & (EntryNr2 <= {1[1]})'.format(range1, range2)
-        try:
-            nr_orthologs = db.count_elements(rel_tab.where(query))
-        except (TypeError, ValueError):
-            nr_orthologs = 0
-        return nr_orthologs
+        genes1, genes2 = set([]), set([])
+        for pw in vp_tab.where(query):
+            genes1.add(pw['EntryNr1'])
+            genes2.add(pw['EntryNr2'])
+        return len(genes1), len(genes2)
 
