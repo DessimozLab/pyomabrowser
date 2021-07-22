@@ -1173,8 +1173,8 @@ class SharedAncestrySummaryAPIView(APIView):
             genes_allinfo = utils.db.main_isoforms(genome.uniprot_species_code)
             genes = genes_allinfo['OmaHOG']
             idx = hogs.searchsorted(genes, side='right')
-            existed = numpy.fromiter(map(lambda i, gene: gene.startswith(hogs[idx[i]-1]), zip(idx, genes)),
-                                     dtype=numpy.bool)
+            existed = numpy.fromiter(map(lambda i, gene: gene.startswith(hogs[i-1]), idx, genes),
+                                     dtype=bool)
             return genes_allinfo[existed]
 
         return len(genes_in_ancestral_hogs(g1)), len(genes_in_ancestral_hogs(g2))
