@@ -1119,11 +1119,10 @@ class PropagateFunctionAPIView(APIView):
         return Response(annotations)
 
 
-class SummaryStatsViewSet(ViewSet):
+class SharedAncestrySummaryAPIView(APIView):
     schema = DocStringSchemaExtractor()
 
-    @action(detail=True)
-    def shared_ancestry(self, request, genome_id1, genome_id2, format=None):
+    def get(self, request, genome_id1, genome_id2, format=None):
         """Returns the fraction of shared ancestry between to species of interest.
 
         ---
