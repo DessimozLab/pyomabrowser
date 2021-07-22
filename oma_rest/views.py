@@ -3,6 +3,7 @@ import operator
 import itertools
 import os
 
+import numpy
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 try:
@@ -1150,21 +1151,34 @@ class SharedAncestrySummaryAPIView(APIView):
             raise NotFound(e)
         orthology_type = request.query_params.get('type', 'hogs').lower()
         if orthology_type == 'vps':
-            details = [{'species': g1.uniprot_species_code,
-                        'nr_genes': g1.nr_genes,
-                        'nr_orthologs': self._by_vps(g1, g2)} for g1, g2 in ((genome1, genome2), (genome2, genome1))]
+            fun = self._by_vps
         elif orthology_type == 'hogs':
-            details = [{'species': g1.uniprot_species_code,
-                        'nr_genes': g1.nr_genes,
-                        'nr_orthologs': self._by_hogs(g1, g2)} for g1, g2 in ((genome1, genome2), (genome2, genome1))]
+            fun = self._by_hogs
         else:
             raise ParseError("type parameter invalid. Must be one of 'hogs' or 'vps'.")
+        details = [{'species': g.uniprot_species_code,
+                    'nr_genes': g.nr_genes,
+                    'nr_orthologs': nr_genes_w_orthologs}
+                   for g, nr_genes_w_orthologs in zip((genome1, genome2), fun(genome1, genome2))]
         res = {'fraction': sum(z['nr_orthologs']/z['nr_genes'] for z in details) / len(details),
                'details': details}
         return Response(res)
 
     def _by_hogs(self, g1, g2):
-        pass
+        subtax = utils.tax.get_induced_taxonomy([g1.ncbi_taxon_id, g2.ncbi_taxon_id], augment_parents=True)
+        level = subtax._get_root_taxon()['Name']
+        hogs = numpy.sort(utils.db.get_all_hogs_at_level(level)['ID'])
+
+        def genes_in_ancestral_hogs(genome):
+            genes_allinfo = utils.db.main_isoforms(genome.uniprot_species_code)
+            genes = genes_allinfo['OmaHOG']
+            idx = hogs.searchsorted(genes, side='right')
+            existed = numpy.fromiter(map(lambda i, gene: gene.startswith(hogs[idx[i]-1]), zip(idx, genes)),
+                                     dtype=numpy.bool)
+            return genes_allinfo[existed]
+
+        return len(genes_in_ancestral_hogs(g1)), len(genes_in_ancestral_hogs(g2))
+
 
     def _by_vps(self, g1, g2):
         vp_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/VPairs'.format(g1.uniprot_species_code))
