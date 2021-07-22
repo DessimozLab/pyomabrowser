@@ -1086,6 +1086,7 @@ class IdentifiySequenceAPIView(APIView):
 
 class PropagateFunctionAPIView(APIView):
     schema = DocStringSchemaExtractor()
+
     def get(self, request, format=None):
         """Annotate a sequence with GO functions based on all
         annotations in OMA. The sequence is expected to be a
@@ -1116,3 +1117,65 @@ class PropagateFunctionAPIView(APIView):
             anno['GO_name'] = utils.db.gene_ontology.term_by_id(anno['GO_ID']).name
             annotations.append(anno)
         return Response(annotations)
+
+
+class SummaryStatsViewSet(ViewSet):
+    schema = DocStringSchemaExtractor()
+
+    @action(detail=True)
+    def shared_ancestry(self, request, genome_id1, genome_id2, format=None):
+        """Returns the fraction of shared ancestry between to species of interest.
+
+        ---
+        parameters:
+          - name: genome_id1
+            description: an unique identifier for the first genome
+                         - either its ncbi taxon id or the UniProt
+                         species code
+
+          - name: genome_id2
+            description: an unique identifier for the second genome
+                         - either its ncbi taxon id or the UniProt
+                         species code
+
+          - name: type
+            description: type of orthology information to compute the
+                         fraction of shared ancestry, either 'hogs' (default)
+                         or 'vps'.
+            location: query
+        """
+        try:
+            genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id1))
+            genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id2))
+        except db.UnknownSpecies as e:
+            raise NotFound(e)
+        orthology_type = request.query_params.get('type', 'hogs').lower()
+        if orthology_type == 'vps':
+            details = [{'species': g1.uniprot_species_code,
+                        'nr_genes': g1.nr_genes,
+                        'nr_orthologs': self._by_vps(g1, g2)} for g1, g2 in ((genome1, genome2), (genome2, genome1))]
+        elif orthology_type == 'hogs':
+            details = [{'species': g1.uniprot_species_code,
+                        'nr_genes': g1.nr_genes,
+                        'nr_orthologs': self._by_hogs(g1, g2)} for g1, g2 in ((genome1, genome2), (genome2, genome1))]
+        else:
+            raise ParseError("type parameter invalid. Must be one of 'hogs' or 'vps'.")
+        res = {'fraction': sum(z['nr_orthologs']/z['nr_genes'] for z in details) / len(details),
+               'details': details}
+        return Response(res)
+
+    def _by_hogs(self, g1, g2):
+        pass
+
+    def _by_vps(self, g1, g2):
+        rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/VPairs'.format(g1.uniprot_species_code))
+        range1 = g1.entry_nr_offset + 1, g1.entry_nr_offset + len(g1)
+        range2 = g2.entry_nr_offset + 1, g2.entry_nr_offset + len(g2)
+        query = '(EntryNr1 >= {0[0]}) & (EntryNr1 <= {0[1]}) ' \
+                '& (EntryNr2 >= {1[0]}) & (EntryNr2 <= {1[1]})'.format(range1, range2)
+        try:
+            nr_orthologs = db.count_elements(rel_tab.where(query))
+        except (TypeError, ValueError):
+            nr_orthologs = 0
+        return nr_orthologs
+
