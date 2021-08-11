@@ -177,9 +177,50 @@ $(document).on("click",".toggle-visibility", function () {
 
 
 
-<h4 >Local Synteny Conservation
-       <span class="float-right"> <h5><a href="#" class="badge badge-pill badge-dark" role="button" data-toggle="modal" data-target="#myModal"
-           id="modalhelp">Help ?</a></h5></span></h4>
+    <div style="margin: 8px">
+
+    <h4 style="display: inline">Local Synteny Conservation
+        <span class="float-right">
+
+           <h5><a href="#" class="badge badge-pill badge-dark" role="button" data-toggle="modal" data-target="#myModal"
+           id="modalhelp">Help ?</a></h5>
+
+
+
+       </span></h4>
+
+     <div style="display: inline; font-size: 16px" class="dropdown">
+  <button class="btn  btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+   Select numbers genes displayed
+  </button>
+  <div style="z-index: 99999999999999" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="{% url 'synteny' entry.query_id 4 4 %}">9</a>
+    <a class="dropdown-item" href="{% url 'synteny' entry.query_id 5 5 %}">11 (Default)</a>
+    <a class="dropdown-item" href="{% url 'synteny' entry.query_id 6 6 %}">13</a>
+    <a class="dropdown-item" href="{% url 'synteny' entry.query_id 7 7 %}">15</a>
+    <a class="dropdown-item" href="{% url 'synteny' entry.query_id 8 8 %}">17</a>
+    <a class="dropdown-item" href="{% url 'synteny' entry.query_id 9 9 %}">19</a>
+
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
 
         <div class="twotables"><!-- .twotables -->
             <table class="table table-condensed table-striped syntenytable">
