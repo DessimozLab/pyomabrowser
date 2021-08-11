@@ -43,7 +43,7 @@
                 <div class="card-body">
 
 
-                    <h3>Fast Mapping</h3>
+                    <h3> <a href="{% url 'fastmapping' %}">Fast Mapping</a></h3>
 
 
                     <p class="text-justify">
@@ -68,9 +68,9 @@
 
                     <br>
 
+                    <h3> <a href="{% url 'export_markers' %}">Phylogenetic Marker Gene Export</a></h3>
 
-                    <h3>Phylogenetic Marker Gene Export
-</h3>
+
 
 
                     <p class="text-justify">To infer a phylogenetic species tree, it is first necessary to identify sets of orthologous genes among the genomes of interest. One of the outputs of the OMA database are OMA Groups, or sets of genes which are all orthologous to each other. Since genes in OMA Groups are related exclusively by speciation events, there is at most one sequence per species in each OMA group. In contrast to most other phylogenetic methods, OMA makes no assumption about species relationships when inferring OMA Groups. This makes OMA Groups particularly useful for phylogenetic species tree inference. </p>
@@ -111,8 +111,9 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
                     <br>
 
-                    <h3>Synteny Dot Plot
-</h3>
+                      <h3> <a href="{% url 'land_syntenyDP' %}">Synteny Dot Plot</a></h3>
+
+
 
                     <p class="text-justify"> When comparing two related species, the position of orthologous genes is often conserved. Positional conservation can be at the chromosomal level—e.g. when there are entire chromosomes or chromosomal segments that are orthologous between species; or it can be more local—e.g. neighboring genes in one genome are orthologous to neighboring genes in the other genome. In OMA, we refer to global synteny for the former, and local synteny for the latter (local synteny is sometimes also referred to as ‘colinerarity’). The Synteny Dot Plot complements the
                        <a href="{% url 'uses' %}#localsynteny">Local Synteny Viewer</a>  by providing a more global and interactive view of positional conservation.
@@ -143,9 +144,8 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
                     <br>
 
-                    <h3>GO Functional Annotation
+                     <h3> <a href="{% url 'landAnnotation' %}">GO Functional Annotation</a></h3>
 
-</h3>
 
                     <p class="text-justify"> An important application of orthology is the ability to transfer gene function annotations from the few well-studied model organisms to the large number of poorly studied genomes. We previously described our approach to predict Gene Ontology (GO) annotations from OMA Groups <a href="">(Altenhoff et al. 2015)</a>.
  </p>
@@ -167,9 +167,8 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
                     <br>
 
-                    <h3>Orthologs between two genomes (Genome Pair View)
+                     <h3> <a href="{% url 'genomePW' %}">Orthologs between two genomes (Genome Pair View)</a></h3>
 
-</h3>
 
                     <p class="text-justify"> Use the following form to download the list of all predicted orthologs between a pair of genomes of interest. Since orthologs are sometimes 1:many or many:many relations, this download will return more orthologs than what is covered by the OMA groups. The result is returned as a tab-separated text file, each line corresponding to one orthologous relation. The columns are the two IDs, the type of orthology (1:1, 1:n, m:1 or m:n) and (if available) the OMA group containing both sequences.
                     </p>
@@ -227,7 +226,9 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 
 
-                    <h3>OMA Standalone</h3>
+
+                     <h3> <a href="https://omabrowser.org/standalone/">OMA Standalone</a></h3>
+
 
                                         <p class="text-justify">OMA standalone takes as input the coding sequences of genomes or transcriptomes, in FASTA format. The recommended input type is amino acid sequences, but OMA also supports nucleotide sequences. With amino acid sequences, users can combine their own data with publicly available genomes from the OMA database, including precomputed all-against-all sequence comparisons (the first and computationally most intensive step), using the export function on the OMA website (<a
                                                 href="http://omabrowser.org/export">http://omabrowser.org/export</a>).</p>
@@ -246,8 +247,8 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
                     <br>
 
-                    <h3>pyHam
-</h3>
+                    <h3> <a href="https://github.com/dessimozlab/pyham">pyHam</a></h3>
+
 
                     <p class="text-justify">We have developed a python tool called pyham (Python HOG Analysis Method), which makes it possible to extract useful information from HOGs encoded in standard OrthoXML format. It is available both as a python library and as a set of command-line scripts. Input HOGs in OrthoXML format are available from multiple bioinformatics resources, including OMA, Ensembl and HieranoidDB.
 </p>
@@ -326,7 +327,10 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
                 <div class="card-body">
 
 
-                    <h3>iHam (Graphical Viewer)</h3>
+
+                     <h3> <a href="https://github.com/dessimozlab/iham">iHam (Graphical Viewer)</a></h3>
+
+
 
 
                     <p class="text-justify">
@@ -373,8 +377,7 @@ The tree-guided matrix representation of HOGs facilitates:
 
                     <br>
 
-                    <h3>Phylo.io
-</h3>
+                    <h3> <a href="https://phylo.io/">Phylo.io</a></h3>
 
                     <p class="text-justify">
 
@@ -417,10 +420,7 @@ The tool can be freely accessed at <a href="http://phylo.io">http://phylo.io</a>
 
                      <p class="text-justify">
                     For more information:
-
                          <ul>
-
-
   <li>Paper: (Robinson et al. 2016) </li>
   <li>Github: The code for the associated JavaScript library is available at https://github.com/DessimozLab/phylo-io under an MIT open source license. </li>
   <li>Manual: <a href="http://phylo.io/manual.html">http://phylo.io/manual.html</a> </li>
