@@ -75,7 +75,7 @@ class HOGPageTest(FunctionalTest):
     def test_iham(self):
 
         # Jean-Claude go to the oma browser
-        # select the first example "Entry HUMAN22168"
+        # select the first example "Entry HUMAN22169"
         # JC wait that the amuse bouche is over and all the data is loaded into the table
         # click on the group button adn select hog
         self.goto_hog_by_example(2)
