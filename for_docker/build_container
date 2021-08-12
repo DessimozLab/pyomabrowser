@@ -32,7 +32,8 @@ def build(conf):
             pass
         if 'args' in build_conf:
             cmd.append("--build-arg")
-            build_args=",".join(["{}={}".format(arg,val) for arg, val in build_conf['args']])
+            print(build_conf['args'])
+            build_args=",".join(["{}={}".format(arg,val) for arg, val in build_conf['args'].items()])
             cmd.append(build_args)
         image_tag = configs['image']
         if not ":" in image_tag:
