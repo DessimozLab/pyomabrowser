@@ -82,11 +82,14 @@ dotplot_theme = function () {
         this.set_filter_relation = function (relTypeSet) {
 
 
+            $('#dropdown-reltype a ').remove()
+
+
 
             relTypeSet.forEach(function (d) {
 
 
-                var li = '<a class="dropdown-item export_dropdown-li" id="' + d +'"  data-value="' + d +'" tabIndex="-1"><input type="checkbox" checked/>&nbsp;' + d +'</a>';
+                var li = '<a class="dropdown-item dropdown-reltype-li" id="' + d +'"  data-value="' + d +'" tabIndex="-1"><input type="checkbox" checked/>&nbsp;' + d +'</a>';
                  $('#dropdown-reltype').append(li);
             });
 
@@ -109,8 +112,6 @@ dotplot_theme = function () {
 
                        $( event.target ).blur();
 
-                       console.log( type_selected );
-
                        dotplot.update_visibility_dot();
 
                        return false;
@@ -122,7 +123,6 @@ dotplot_theme = function () {
         this.add_legend_color = function () {
 
 
-            console.log('start');
 
 
             svg_dotplot.selectAll(".legend").remove();
@@ -168,7 +168,7 @@ dotplot_theme = function () {
         };
         this.update_color_scales = function () {
             var color_domain = [filter_min_distance, filter_max_distance];
-            var color_range = ['#90ee90', '#000080'];
+            var color_range = ['#88DEB0', '#000080'];
             //color_range = ['#ffbdbd', '#e1f7d5'];
             color_threshold = d3.scaleLinear().domain(color_domain).range(color_range);
         };
