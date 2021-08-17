@@ -1414,6 +1414,7 @@ class HOGSimilarProfile(HOGBase, TemplateView):
         context.update({'tab': 'similar',
                         'subtab': 'profile',
                         'run_prof': run_prof,
+                        "sim_hogs": results.jaccard_distance.keys(),
                         'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,)),
                         'lineage_link_name': 'hog_similar_profile',
                         })
@@ -1457,7 +1458,6 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
                              "description": models.HOG(utils.db, id_hog).keyword
                              })
         data = {"profile": sim_hogs,
-                "sim_hogs": sim_hogs,
                 "tax": results.tax_classes,
                 "species": results.species_names,
                 }
@@ -1542,6 +1542,7 @@ class HOGSimilarPairwise(HOGBase, TemplateView):
             'tab': 'similar',
             'subtab': 'pairwise',
             'similar': data,
+            "sim_hogs": sorted_HOGs,
             'lineage_link_name': 'hog_similar_pairwise',
             'similar_hogs': sorted_HOGs})
 
@@ -1566,7 +1567,6 @@ class HOGSimilarPairwiseJSON(HOGSimilarPairwise, View):
                 hdata = {"rank": cpt,
                         "HOG ID": hog.hog_id,
                         "nbr_orthologs": h[0],
-                        "sim_hogs": context['similar_hogs'],
                         "nbr_members": hog.nr_member_genes,
                         "Description": hog.keyword,
                         }
