@@ -1457,6 +1457,7 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
                              "description": models.HOG(utils.db, id_hog).keyword
                              })
         data = {"profile": sim_hogs,
+                "sim_hogs": sim_hogs,
                 "tax": results.tax_classes,
                 "species": results.species_names,
                 }
@@ -1565,6 +1566,7 @@ class HOGSimilarPairwiseJSON(HOGSimilarPairwise, View):
                 hdata = {"rank": cpt,
                         "HOG ID": hog.hog_id,
                         "nbr_orthologs": h[0],
+                        "sim_hogs": context['similar_hogs'],
                         "nbr_members": hog.nr_member_genes,
                         "Description": hog.keyword,
                         }
