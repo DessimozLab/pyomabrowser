@@ -2208,7 +2208,11 @@ class ArchiveView(CurrentView):
 
 # synteny viewer DotPlot
 def DotplotViewer(request, g1, g2, chr1, chr2):
-    return render(request, 'dotplot_viewer.html', {'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2})
+
+    len1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(g1)).approx_chromosome_length(chr1)
+    len2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(g2)).approx_chromosome_length(chr2)
+
+    return render(request, 'dotplot_viewer.html', {'len_genome1':len1,'len_genome2':len2,   'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2})
 
 
 class ChromosomeJson(JsonModelMixin, View):
