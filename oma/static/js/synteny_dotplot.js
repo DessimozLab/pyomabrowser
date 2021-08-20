@@ -467,7 +467,7 @@ dotplot_theme = function () {
             var min_position_x = 0
             var max_position_x
             if (len1 !== false){
-                max_position_x  = len2
+                max_position_x  = len1
             }
             else{
                 max_position_x = d3.max(data, function (d) {
