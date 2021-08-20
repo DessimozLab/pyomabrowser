@@ -2690,6 +2690,8 @@ class Searcher(View):
 
             def update_result_dicts(iset, type):
                 # lets order the intersection set according to the number of hits
+                if iset is None:
+                    iset = []
                 res = sorted(list(iset), key=lambda id: -len(hits_by_entry[id]))
                 entry_search[type] = res
                 search_entry_meta[type] = len(res)
