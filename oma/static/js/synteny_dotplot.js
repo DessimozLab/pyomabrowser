@@ -139,7 +139,7 @@ dotplot_theme = function () {
                 .attr("class", "legend")
                 .attr("visibility", "visible")
                 .attr("transform", function (d, i) {
-                    return "translate(" + (width - 30) + "," + (50 + i * 10) + ")";
+                    return "translate(" + (width) + "," + (50 + i * 10) + ")";
                 });
 
             legend.append("rect")
@@ -159,7 +159,7 @@ dotplot_theme = function () {
 
             svg_dotplot.append("text")
                 .attr("class", "label color_legend_text")
-                .attr("x", width - 20)
+                .attr("x", width + 10)
                 .attr("y", 40)
                 .attr("dy", ".35em")
                 .style("text-anchor", "middle")
@@ -462,12 +462,15 @@ dotplot_theme = function () {
             var min_position_x = d3.min(data, function (d) {
                 return d.entry_1.locus.start;
             });
+
+            min_position_x = 0
             var max_position_x = d3.max(data, function (d) {
                 return d.entry_1.locus.start;
             });
             var min_position_y = d3.min(data, function (d) {
                 return d.entry_2.locus.start;
             });
+            min_position_y = 0
             var max_position_y = d3.max(data, function (d) {
                 return d.entry_2.locus.start;
             });
