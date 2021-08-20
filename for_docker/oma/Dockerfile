@@ -67,7 +67,7 @@ RUN mkdir -p /src/hdf5 \
     && git clone https://github.com/PyTables/PyTables.git \
     && ( cd PyTables \
          && pip3 install --no-cache-dir cython numpy numexpr \
-         && python3 setup.py install ) \
+         && env HDF5_DIR=/usr CLFAGS="--std=gnu99" pip3 install . ) \
     && rm -rf /src
 
 FROM base_web as special_pytables_no

@@ -15,7 +15,7 @@ services:
       context: ..
       dockerfile: for_docker/oma/Dockerfile
       args: 
-        SPECIAL_PYTABLES: "yes"
+        SPECIAL_PYTABLES: "src"
         PYOMABROWSER_CODEBASE: "from_git"
     command: /entrypoint.sh uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi --vacuum --max-requests=500
     env_file:
