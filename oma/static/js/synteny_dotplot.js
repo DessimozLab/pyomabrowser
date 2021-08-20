@@ -2,7 +2,10 @@ var dotplot_theme;
 
 dotplot_theme = function () {
 
-    function DotPlot(container_id, data, genome1, genome2, chromosome1, chromosome2) {
+    function DotPlot(container_id, data, genome1, genome2, chromosome1, chromosome2, len1, len2) {
+
+        var len1 = (typeof len1 !== 'undefined') ? parseInt(len1) : false;
+        var len2 = (typeof len2 !== 'undefined') ? parseInt(len2) : false;
 
         /////////////
         // METHODS //
@@ -459,21 +462,32 @@ dotplot_theme = function () {
             var max_distance = d3.max(data, function (d) {
                 return parseFloat(d[metric_option.accessor]);
             });
-            var min_position_x = d3.min(data, function (d) {
-                return d.entry_1.locus.start;
-            });
 
-            min_position_x = 0
-            var max_position_x = d3.max(data, function (d) {
+
+            var min_position_x = 0
+            var max_position_x
+            if (len1 !== false){
+                max_position_x  = len2
+            }
+            else{
+                max_position_x = d3.max(data, function (d) {
                 return d.entry_1.locus.start;
             });
-            var min_position_y = d3.min(data, function (d) {
+            }
+
+
+            var min_position_y = 0
+
+            var max_position_y
+            if (len2 !== false){
+                max_position_y  = len2
+            }
+            else{
+                max_position_y = d3.max(data, function (d) {
                 return d.entry_2.locus.start;
             });
-            min_position_y = 0
-            var max_position_y = d3.max(data, function (d) {
-                return d.entry_2.locus.start;
-            });
+            }
+
 
             // set the inital filtering boundaries to extremum values
             filter_max_distance = max_distance;
