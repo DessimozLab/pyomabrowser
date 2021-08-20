@@ -31,10 +31,10 @@ def build(conf):
         except KeyError:
             pass
         if 'args' in build_conf:
-            cmd.append("--build-arg")
             print(build_conf['args'])
-            build_args=",".join(["{}={}".format(arg,val) for arg, val in build_conf['args'].items()])
-            cmd.append(build_args)
+            for arg, val in build_conf['args'].items():
+                cmd.append("--build-arg")
+                cmd.append("{}={}".format(arg, val))
         image_tag = configs['image']
         if not ":" in image_tag:
             image_tag += ":latest"
