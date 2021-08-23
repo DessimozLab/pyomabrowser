@@ -21,7 +21,9 @@ RUN mkdir -m 700 /root/.ssh/ \
 # install dependencies
 RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 install --no-cache-dir 'psycopg2<2.9'
-RUN pip3 install --no-cache-dir uwsgi
+RUN pip3 install --no-cache-dir uwsgi \
+    'numexpr==2.7.3' \
+    'numpy==1.20.2'
 
 FROM oma_basis as special_pytables_yes
 COPY for_docker/oma/tables-3.6.2.dev0-cp38-cp38-manylinux2010_x86_64.whl /
@@ -38,11 +40,10 @@ RUN apt-get -qq update \
 
 RUN mkdir -p /src/hdf5 \
     && cd /src/hdf5 \
-    && wget -O hdf5lib-1.10.4.tar.gz https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.4/src/hdf5-1.10.4.tar.gz \
-    && tar xzf hdf5lib-1.10.4.tar.gz \ 
-    && (cd hdf5-1.10.4 \
+    && wget -O hdf5lib-1.10.7.tar.gz https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.7/src/hdf5-1.10.7.tar.gz \
+    && tar xzf hdf5lib-1.10.7.tar.gz \ 
+    && (cd hdf5-1.10.7 \
         && ./configure --prefix /usr --disable-hl --enable-threadsafe \
-           --enable-unsupported --with-pthread=yes \
         && make -j4 \
         && make install ) \
     && cd /src \
@@ -74,7 +75,10 @@ RUN --mount=type=ssh \
 
 FROM build_${PYOMABROWSER_CODEBASE}
 #COPY requirements.txt $SRC_DIR/requirements.txt
-RUN --mount=type=ssh pip3 install --no-cache-dir -r $SRC_DIR/requirements.txt --src /usr/local/src
+COPY for_docker/oma/requirements-frozen.txt $SRC_DIR/reqs.txt
+RUN --mount=type=ssh pip3 install --no-cache-dir -r $SRC_DIR/reqs.txt --src /usr/local/src
+
+#RUN --mount=type=ssh pip3 install --no-cache-dir -r $SRC_DIR/requirements.txt --src /usr/local/src
 RUN /bin/date | /usr/bin/md5sum > secret_key.txt
 
 COPY for_docker/oma/entrypoint.sh /
