@@ -22,6 +22,8 @@ urlpatterns = [
         views.PairwiseRelationAPIView.as_view(), name='pairs'),
     path('pairs/<slug:genome_id1>/<slug:genome_id2>/minimal/',
         views.MinimalPairwiseRelation.as_view(), name="minimal-pairs"),
+    path('summary/shared_ancestry/<slug:genome_id1>/<slug:genome_id2>/',
+         views.SharedAncestrySummaryAPIView.as_view(), name='shared-ancestry-summary'),
     path('sequence/', views.IdentifiySequenceAPIView.as_view(), name='sequence'),
     path('function/', views.PropagateFunctionAPIView.as_view(), name='function-propagation'),
     path('schema/', get_schema_view(title="OMA REST API")),

@@ -710,7 +710,7 @@
                             var yPos = (my > ($(window).height() - 60)) ? d3.event.pageY - 55 : d3.event.pageY + 15;
 
                             var ttText = "Chromosome: " + chromosomes1[i].id + ":" + chromosomes2[d.row].id;
-                            ttText += "<br>Value: " + d.value;
+                            ttText += "<br>Nb. orthologs: " + d.value;
                             div.transition()
                                 .duration(50)
                                 .style("opacity", .9);

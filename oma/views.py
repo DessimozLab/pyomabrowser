@@ -253,7 +253,7 @@ class LocalSyntenyView(InfoBase, TemplateView):
     the window paramter is used to select the size of the
     neighborhood."""
 
-    def get_context_data(self, entry_id, mod=4, windows=4, **kwargs):
+    def get_context_data(self, entry_id, mod=5, windows=5, **kwargs):
         context = super(LocalSyntenyView, self).get_context_data(entry_id, **kwargs)
         entry = context['reference_entry']
         taxa = entry.genome.lineage
@@ -1138,7 +1138,7 @@ class GenomeBase(ContextMixin):
             context['genome'] = genome_obj
             context['genome_meta'] = meta
             context['supported_ancestral_levels'] = set(l.decode() for l in utils.tax.all_hog_levels).intersection(genome_obj.lineage)
-        except db.InvalidId as e:
+        except db.UnknownSpecies as e:
             raise Http404(e)
         return context
 
@@ -1414,6 +1414,7 @@ class HOGSimilarProfile(HOGBase, TemplateView):
         context.update({'tab': 'similar',
                         'subtab': 'profile',
                         'run_prof': run_prof,
+                        "sim_hogs": results.jaccard_distance.keys(),
                         'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,)),
                         'lineage_link_name': 'hog_similar_profile',
                         })
@@ -1541,6 +1542,7 @@ class HOGSimilarPairwise(HOGBase, TemplateView):
             'tab': 'similar',
             'subtab': 'pairwise',
             'similar': data,
+            "sim_hogs": sorted_HOGs,
             'lineage_link_name': 'hog_similar_pairwise',
             'similar_hogs': sorted_HOGs})
 
@@ -2206,7 +2208,11 @@ class ArchiveView(CurrentView):
 
 # synteny viewer DotPlot
 def DotplotViewer(request, g1, g2, chr1, chr2):
-    return render(request, 'dotplot_viewer.html', {'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2})
+
+    len1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(g1)).approx_chromosome_length(chr1)
+    len2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(g2)).approx_chromosome_length(chr2)
+
+    return render(request, 'dotplot_viewer.html', {'len_genome1':len1,'len_genome2':len2,   'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2})
 
 
 class ChromosomeJson(JsonModelMixin, View):

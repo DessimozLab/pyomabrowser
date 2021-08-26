@@ -77,7 +77,7 @@
   </a>
 
       <a style="{% if subtab == 'pairwise' %}  border-radius: 8px;  background-color: #336799 !important; color:white !important; {% else %}  background-color: #fff !important; {%endif%}border:none;  padding: .75rem 1.25rem  !important;" href="{% if level != None %}  {% url 'hog_similar_pairwise' hog_id  level%}  {%else%}  {% url 'hog_similar_pairwise' hog_id  %} {%endif%}" class="list-group-item list-group-item-action {% if subtab == 'pairwise' %} active {%endif%}">
-    Sequence similarity
+    Shared orthologs
   </a>
 
       <a style="{% if subtab == 'profile' %} border-radius: 8px;   background-color: #336799 !important;  color:white !important; {% else %}  background-color: #fff !important; {%endif%}border:none;  padding: .75rem 1.25rem  !important;" href="{% if level != None %}  {% url 'hog_similar_profile' hog_id  level%}  {%else%}  {% url 'hog_similar_profile' hog_id  %} {%endif%}" class="list-group-item list-group-item-action {% if subtab == 'profile' %} active {%endif%}">

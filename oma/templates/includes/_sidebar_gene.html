@@ -172,9 +172,9 @@
             </span>
         </div>
 
-        <div class="menu-tab  col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}" style="cursor: pointer;" {% if tab != 'synteny' %}  onclick="window.location='{% url 'synteny' entry.omaid 4 4 %}'" {%endif%}
+        <div class="menu-tab  col-6 col-sm-12 {% if tab == 'synteny' %} active selected {%endif%}" style="cursor: pointer;" {% if tab != 'synteny' %}  onclick="window.location='{% url 'synteny' entry.omaid 5 5 %}'" {%endif%}
              {% if tab == 'synteny' %} data-toggle="collapse" data-target="#collapseSynteny" aria-expanded="true" aria-controls="#collapseSynteny"{%endif%}>
-            <span class=""><a href="{% url 'synteny' entry.omaid 4 4 %}" >Local synteny</a> <i class="fa chevron_alias float-right" aria-hidden="true"></i>  </span>
+            <span class=""><a href="{% url 'synteny' entry.omaid 5 5 %}" >Local synteny</a> <i class="fa chevron_alias float-right" aria-hidden="true"></i>  </span>
         </div>
         <div id="collapseSynteny" class="collapse  pt-0{% if tab == 'synteny' %} show{%endif%}" aria-labelledby="headingOne" data-parent="#accordion">
 

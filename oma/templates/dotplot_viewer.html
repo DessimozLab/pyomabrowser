@@ -232,7 +232,7 @@
                     return;
                 }
                 var data = d3.merge(data_parts);
-                console.log(data_parts);
+
                 $("#loader").hide();
                 launch_dotplot();
 
@@ -254,7 +254,7 @@
                 function launch_dotplot() {
 
 
-                    var dotplot = new DotPlot(container, data, genome1, genome2, chromosome1, chromosome2);
+                    var dotplot = new DotPlot(container, data, genome1, genome2, chromosome1, chromosome2,"{{ len_genome1 }}" , "{{ len_genome2 }}" );
 
 
                     $('#table_selection').bootstrapTable({
@@ -314,10 +314,35 @@
                             title: 'Alignment Score',
                             formatter: tablehooks.format_float_value,
                             sortable: true
-                        }]
+                        },{
+                            field: 'entry_1.oma_hog_id',
+                            title: genome1 + ' HOG',
+                            formatter: tablehooks.format_hogid_vis,
+                            sortable: true
+                        }, {
+                            field: 'entry_2.oma_hog_id',
+                            title: genome2 + ' HOG',
+                            formatter: tablehooks.format_hogid_vis,
+                            sortable: true
+                        }
+                        ]
                     });
 
                     $('#container_table_selection').hide();
+
+
+                    $('#table_selection').on('post-body.bs.table', function (res) {
+
+                        console.log('test')
+
+                        var anchors = document.getElementById('table_selection').getElementsByTagName('a');
+                              for (var i=0; i<anchors.length; i++){
+                                anchors[i].setAttribute('target', '_blank');
+                              }
+
+                        console.log(anchors)
+
+                    })
 
 
                 }
