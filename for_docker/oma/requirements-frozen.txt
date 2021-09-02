@@ -53,7 +53,7 @@ property-manager==3.0
 ptyprocess==0.7.0
 pyfaidx==0.5.9.5
 Pygments==2.8.1
-git+https://oma-vm:Dinja+17@git.lab.dessimoz.org/git/pyoma@develop#egg=pyoma
+git+https://oma-vm:Dinja+17@git.lab.dessimoz.org/git/pyoma@master#egg=pyoma
 pyopa==0.8.0
 pyparsing==2.4.7
 PySocks==1.7.1
