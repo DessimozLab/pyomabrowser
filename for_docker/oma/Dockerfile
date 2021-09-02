@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:experimental
 ARG PYOMABROWSER_CODEBASE=from_local
 ARG SPECIAL_PYTABLES=no
+ARG PYOMABROWSER_GITTAG
 
 # pull official base image
 FROM python:3.8-slim as oma_basis
