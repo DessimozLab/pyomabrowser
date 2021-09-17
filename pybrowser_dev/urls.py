@@ -23,6 +23,10 @@ if 'academy' in settings.INSTALLED_APPS:
     urlpatterns.append(
         path('oma/academy/', include('academy.urls'))
     )
+if "omamo" in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path("oma/omamo/", include('omamo.urls'))
+    )
 
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView

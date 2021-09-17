@@ -17,6 +17,7 @@ INSTALLED_APPS.extend([
     'captcha',
     'export',
     'fastmap',
+    'omamo',
 ])
 
 MIDDLEWARE.extend([
@@ -51,6 +52,10 @@ CELERY_TASK_ROUTES = {
     'oma.tasks.assign_go_function_to_user_sequences': {'queue': 'long'},
     'oma.tasks.compute_msa': {'queue': 'async_web'},
     'oma.tasks.export_marker_genes': {'queue': 'long'},
+}
+
+OMAMO = {
+    'CSV': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], "omamo_df.csv"),
 }
 
 # beat scheduler for export app

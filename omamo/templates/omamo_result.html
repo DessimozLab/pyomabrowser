@@ -1,0 +1,80 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+{% load bootstrap4 %}
+
+{% block title %}OMAMO - finding model organism for specific biological processes{% endblock %}
+
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+            <h1>OMAMO: Result for {{ goterm }} - {{ goterm.name }}</h1>
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+            {{ result|json_script:"model_orgs" }}
+
+            <table class="table table-hover" id="omamo_result_table"
+               data-show-toggle="false"
+               data-show-columns="true" data-search="true" data-show-export="true"
+               data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
+               data-mobile-responsive="true" data-check-on-init="true"
+               data-undefined-text=""
+               data-checkbox-header="true"
+               data-group-by="true"
+               {% if toolbar %}
+               data-toolbar="#toolbar"
+               {% endif %}
+               data-group-by-field="DivergenceLevel"
+               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
+               data-url="{{ table_data_url }}">
+            <thead>
+                <tr>
+                    <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                        data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life"><span >Domains</span></th>
+                    <th data-field="Species" data-sortable="true" data-filter-control="select"
+                        data-formatter="tablehooks.format_species_code" data-title-tooltip="UniProt mnemonic species code">Species</th>
+                    <th data-field="taxon" data-sortable="true" data-filter-control="input"
+                        data-formatter="tablehooks.format_sciname">Taxon</th>
+                    <th data-field="No. of OGs" data-sortable="true" data-filter-control="select"
+                        data-title-tooltip="Nr of shared orthologs">No. of OGs</th>
+                    <th data-field="Average func. similarity ± st. dev.">Average func. similarity</th>
+                    <th data-field="Score" data-sortable="true">Score</th>
+                </tr>
+            </thead>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<script src="{% static "js/bootstrap-table.min.js" %}"></script>
+<link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+<script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+<script src="{% static "js/tableExport.min.js" %}"></script>
+
+<script>
+    var tab = $("#omamo_result_table");
+    var data = JSON.parse(document.getElementById('model_orgs').textContent);
+    tab.bootstrapTable({
+        data: data,
+        reorderableColumns: true,
+        clickToSelect: false,
+        showMultiSort: true,
+    });
+    var icons = tab.bootstrapTable('getOptions').icons;
+    $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+    tab.bootstrapTable('refreshOptions', {'icons': icons});
+</script>
+
+
+{% endblock content %}
