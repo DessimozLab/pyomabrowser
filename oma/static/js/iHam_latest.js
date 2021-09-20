@@ -10378,10 +10378,13 @@ module.exports = {
         fetch_annots(this, gene.gene.protid, mouseover);
       }
 
+
+
+
       obj.rows = [];
       obj.rows.push({
         label: "Cross reference",
-        value: gene.gene.xrefid
+        value:  '<a href="/oma/vps/' + gene.gene.xrefid +'/">' +  gene.gene.xrefid + ' </a>',
       });
       obj.rows.push({ label: "GO Annotations" });
       $.each(gene.gene.go_terms, function (i, item) {
