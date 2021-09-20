@@ -1,8 +1,8 @@
-from django.urls import path, include
+from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('search/', views.search, name='search'),
+    path('search/', views.search, name='omamo-search'),
 ]
 
 
