@@ -74,6 +74,9 @@
            data-mobile-responsive="true" data-check-on-init="true"
            data-undefined-text=""
            data-checkbox-header="true"
+           data-detail-view="true"
+           data-detail-view-icon="false"
+           data-detail-formatter="detailSpeciesInfo"
            data-group-by="true"
            {% if toolbar %}
            data-toolbar="#toolbar"
@@ -90,7 +93,7 @@
                 <th data-field="taxon" data-sortable="true" data-filter-control="input"
                     data-formatter="tablehooks.format_sciname">Taxon</th>
                 <th data-field="No. of OGs" data-sortable="true" data-filter-control="select"
-                    data-title-tooltip="Nr of shared orthologs">No. of OGs</th>
+                    data-title-tooltip="Nr of shared orthologs">No. of orthologs</th>
                 <th data-field="Average func. similarity ± st. dev." data-sortable="true">Average func. similarity</th>
                 <th data-field="Score" data-sortable="true">Score</th>
             </tr>
@@ -105,7 +108,21 @@
 <script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
 <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
 <script src="{% static "js/tableExport.min.js" %}"></script>
-
+<script>
+function detailSpeciesInfo(index, row){
+    var buf = ["<b>Human genes: </b>"];
+    for (let i=0; i<row['Human Genes'].length; i++) {
+        buf.push('<a href="/oma/info/' + row['Human Genes'][i] + '/">' + row['Human Genes'][i] + '</a> ');
+    }
+    buf.push("<br>");
+    buf.push("<b>"+row.Species+" genes: </b>");
+    const arr = row["Species Genes"];
+    for (let i=0; i<arr.length; i++) {
+        buf.push('<a href="/oma/info/' + arr[i] + '/">' + arr[i] + '</a> ');
+    }
+    return buf.join(" ");
+}
+</script>
 <script>
     var tab = $("#omamo_result_table");
     var data = JSON.parse(document.getElementById('model_orgs').textContent);
