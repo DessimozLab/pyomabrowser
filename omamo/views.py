@@ -7,6 +7,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def uniq(seq):
+    """return uniq elements of a list, preserving order
+    :param seq: an iterable to be analyzed
+    """
+    seen = set()
+    return [x for x in seq if not (x in seen or seen.add(x))]
+
+
 def search(request):
     # build a lookup table for the biological process terms for the autocomplete
     go_lookup = [{'value': "{} - {}".format(val, val.name), 'data': val.id}
@@ -22,8 +30,8 @@ def search(request):
         res = []
         for rid, row in process.iterrows():
             row = row.to_dict()
-            row['Human Genes'] = row['Human Genes'].split(",")
-            row["Species Genes"] = row["Species Genes"].split(",")
+            row['Human Genes'] = uniq(row['Human Genes'].split(","))
+            row["Species Genes"] = uniq(row["Species Genes"].split(","))
             species = utils.Genome(utils.id_mapper['OMA'].genome_from_UniProtCode(row['Species']))
             row['taxon'] = species.species_and_strain_as_dict
             row['kingdom'] = species.kingdom
