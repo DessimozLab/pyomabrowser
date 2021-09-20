@@ -1,0 +1,150 @@
+{% extends  "base_template.html" %}
+{% load static %}
+{% load humanize %}
+
+
+{% block title %}OMAMO - finding model organism for specific biological processes {% endblock %}
+{% block meta_description %}Find the best simple model organism for a specific biological process of interest{% endblock %}
+{% block meta_hook %} <meta name="keywords" content="orthology,evolutionary gene relations,evolution,paralogy,inference"> {% endblock %}
+
+{% block js_hook %}{{ block.super }}
+{% endblock js_hook %}
+{% block css_hook %}{{ block.super }}
+ <style>
+     .logo-omamo-lg {
+         width: 500px;
+         height: 200px;
+         background: url({% static "image/logo-omamo.svg" %}) no-repeat center center / contain;
+         margin: 0 auto;
+     }
+ </style>
+
+{% endblock css_hook %}
+
+{% block content %}
+
+    <div class="container">
+
+        {% if not result_tab %}
+        <div class="logo-omamo-lg"></div>
+            <p>OMAMO is a web tool that allows the user to find the best simple model organism for a biological process of interest. The set of species consists 50 lower organisms including bacteria, unicellular eukaryotes and fungi. Please enter the biological process as a GO ID or a GO term.</p>
+        {% endif %}
+
+        <div class="oma-search">
+            <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
+                <input id='omamo_input' name="query" type="text" class="" placeholder='{% block search_placeholder %}Search a biological process GO term or GO id{% endblock search_placeholder %}'/>
+                <button id="submit_home"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
+            </form>
+        </div>
+
+        <!--<div class="oma-quick-start">
+            <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/>
+            <p>
+                <strong>Examples:</strong>
+                {% block search_examples %}
+                    <span class="ex" onclick="fillExample('HUMAN22169')">Entry HUMAN22169</span> -
+                    <span class="ex" onclick="fillExample('P53_RAT')">Entry P53_RAT</span> -
+                    <span class="ex" onclick="fillExample(photoreceptor')">Search for "photoreceptor"</span> -
+                    <span class="ex" onclick="fillExample('Drosophila')">"Drosophila" species</span>
+                {% endblock search_examples %}
+            </p>
+        </div> -->
+
+    {% if result_tab %}
+    <div id="oma-generic-container">
+        <div class="container">
+            <div class="jumbotron">
+                <div class="oma-seperator">
+                    <span class="colour1"></span>
+                    <span class="colour2"></span>
+                    <span class="colour3"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {{ result|json_script:"model_orgs" }}
+    <h2>{{ goterm }} - {{ goterm.name }}</h2>
+    <div>
+        <table class="table table-hover" id="omamo_result_table"
+           data-show-toggle="false"
+           data-show-columns="true" data-search="true" data-show-export="true"
+           data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
+           data-mobile-responsive="true" data-check-on-init="true"
+           data-undefined-text=""
+           data-checkbox-header="true"
+           data-group-by="true"
+           {% if toolbar %}
+           data-toolbar="#toolbar"
+           {% endif %}
+           data-group-by-field="DivergenceLevel"
+           data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs"
+           data-url="{{ table_data_url }}">
+        <thead>
+            <tr>
+                <th data-field="kingdom" data-sortable="true" data-filter-control="select"
+                    data-formatter="tablehooks.format_as_kingdom_tag" data-title-tooltip="Domain of Life"><span >Domains</span></th>
+                <th data-field="Species" data-sortable="true" data-filter-control="select"
+                    data-formatter="tablehooks.format_species_code" data-title-tooltip="UniProt mnemonic species code">Species</th>
+                <th data-field="taxon" data-sortable="true" data-filter-control="input"
+                    data-formatter="tablehooks.format_sciname">Taxon</th>
+                <th data-field="No. of OGs" data-sortable="true" data-filter-control="select"
+                    data-title-tooltip="Nr of shared orthologs">No. of OGs</th>
+                <th data-field="Average func. similarity ± st. dev.">Average func. similarity</th>
+                <th data-field="Score" data-sortable="true">Score</th>
+            </tr>
+        </thead>
+        </table>
+    </div>
+
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<script src="{% static "js/bootstrap-table.min.js" %}"></script>
+<link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+<script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+<script src="{% static "js/tableExport.min.js" %}"></script>
+
+<script>
+    var tab = $("#omamo_result_table");
+    var data = JSON.parse(document.getElementById('model_orgs').textContent);
+    tab.bootstrapTable({
+        data: data,
+        reorderableColumns: true,
+        clickToSelect: false,
+        showMultiSort: true,
+    });
+    var icons = tab.bootstrapTable('getOptions').icons;
+    $.extend(icons, {export: 'fa-download'});
+    tab.bootstrapTable('refreshOptions', {'icons': icons});
+</script>
+    {% endif %}
+
+    </div>
+
+
+
+
+{{ go_auto_data | json_script:"go_data" }}
+
+<script type="text/javascript">
+function fillExample( term){
+    $("#omamo_input").val(term).focus();
+}
+var go_data = JSON.parse(document.getElementById('go_data').textContent);
+var go_auto_options = {
+    minChars: 3,
+    triggerSelectOnValidInput: false,
+    lookup: go_data,
+    onSelect: function(item){
+        window.location.href = "/oma/omamo/search/?query=" + item.data;
+        return false;
+    },
+};
+
+$('#omamo_input').autocomplete(go_auto_options);
+$('#omamo_input').autocomplete("enable")
+</script>
+
+{% endblock content %}

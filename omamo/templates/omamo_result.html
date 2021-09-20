@@ -72,9 +72,8 @@
         showMultiSort: true,
     });
     var icons = tab.bootstrapTable('getOptions').icons;
-    $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+    $.extend(icons, {export: 'fa-download'});
     tab.bootstrapTable('refreshOptions', {'icons': icons});
 </script>
-
 
 {% endblock content %}
