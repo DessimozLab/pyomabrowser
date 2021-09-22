@@ -56,6 +56,7 @@ CELERY_TASK_ROUTES = {
 
 OMAMO = {
     'CSV': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], "omamo_df.csv"),
+    "H5": os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], "omamo.h5"),
 }
 
 # beat scheduler for export app
