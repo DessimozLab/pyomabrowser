@@ -116,7 +116,7 @@ function detailSpeciesInfo(index, row){
         buf.push('<a href="/oma/info/' + arr[i]['omaid'] + '/">' + arr[i]['label'] + '</a> ');
     }
     buf.push("<br>");
-    buf.push("<b>"+row.Species+" genes: </b>");
+    buf.push("<b>"+row.species+" genes: </b>");
     arr = row["species_genes"];
     for (let i=0; i<arr.length; i++) {
         buf.push('<a href="/oma/info/' + arr[i]['omaid'] + '/">' + arr[i]['label'] + '</a> ');
