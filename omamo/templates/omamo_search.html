@@ -17,43 +17,74 @@
          background: url({% static "image/logo-omamo.svg" %}) no-repeat center center / contain;
          margin: 0 auto;
      }
+      @media screen and (max-width: 575px){
+          .logo-omamo-lg {
+              width: 240px;
+              height: 120px;
+          }
+      }
+     .omamo-quick-start {
+	    background: #ebf1f5;
+	    margin: 10px auto 0;
+	    padding: 10px 20px;
+	    border-radius: 30px;
+	    text-align: left;
+	    display: inline-flex;
+	    align-items: center;
+    }
+    .omamo-quick-start p {
+	    margin: 0;
+    }
+    .omamo-quick-start img {
+         width: 20px;
+         margin: 0 10px 0 0;
+    }
+    body #oma-search-container {
+		 padding: 5px 0 30px;
+		 left: 0;
+		 width: 100%;
+		 border-radius: 0;
+	}
  </style>
 
 {% endblock css_hook %}
 
 {% block content %}
-
+<div id="oma-search-container">
     <div class="container">
 
         {% if not result_tab %}
+
         <div class="logo-omamo-lg"></div>
-            <p>OMAMO is a web tool that allows the user to find the best simple model organism for a biological process of interest. The set of species consists 50 lower organisms including bacteria, unicellular eukaryotes and fungi. Please enter the biological process as a GO ID or a GO term.</p>
+            <p>OMAMO is a web tool that allows the user to find the best simple model organism for a biological process of interest. The set of species consists 50 less complex organisms including bacteria, unicellular eukaryotes and fungi.</p>
+            <p>Please enter the biological process as a GO ID or a GO term.</p>
         {% endif %}
 
         <div class="oma-search">
-            <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
+            <form role="search" id="searchForm" action="{% url 'omamo-search' %}" method="GET">
                 <input id='omamo_input' name="query" type="text" class="" placeholder='{% block search_placeholder %}Search a biological process GO term or GO id{% endblock search_placeholder %}'/>
-                <button id="submit_home"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
+                <button id="submit_omamo" type="submit"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
             </form>
         </div>
 
-        <!--<div class="oma-quick-start">
+        <div class="omamo-quick-start">
             <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/>
             <p>
                 <strong>Examples:</strong>
                 {% block search_examples %}
-                    <span class="ex" onclick="fillExample('HUMAN22169')">Entry HUMAN22169</span> -
-                    <span class="ex" onclick="fillExample('P53_RAT')">Entry P53_RAT</span> -
-                    <span class="ex" onclick="fillExample(photoreceptor')">Search for "photoreceptor"</span> -
-                    <span class="ex" onclick="fillExample('Drosophila')">"Drosophila" species</span>
+                    <span class="ex" onclick="fillExample('GO:0006281')">GO:0006281 - DNA repair</span> -
+                    <span class="ex" onclick="fillExample('GO:0009060')">GO:0009060 - aerobic respiration</span> -
                 {% endblock search_examples %}
             </p>
-        </div> -->
+        </div>
+    </div>
+</div>
 
+<div class="container">
     {% if result_tab %}
-    <div id="oma-generic-container">
+    <div id="oma-generic-container" style="margin: 0px;">
         <div class="container">
-            <div class="jumbotron">
+            <div class="jumbotron" style="padding: 0px;">
                 <div class="oma-seperator">
                     <span class="colour1"></span>
                     <span class="colour2"></span>
