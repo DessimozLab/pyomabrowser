@@ -17,6 +17,7 @@ def oma_instance(request):
         "oma_academy_enabled": "academy" in settings.INSTALLED_APPS,
         "fastmap_enabled": "fastmap" in settings.INSTALLED_APPS,
         "export_enabled": "export" in settings.INSTALLED_APPS,
+        "omamo_enabled": "omamo" in settings.INSTALLED_APPS,
     }
     try:
         res["google_tracker_code"] = settings.GOOGLE_ANALYTICS["google_analytics_id"]

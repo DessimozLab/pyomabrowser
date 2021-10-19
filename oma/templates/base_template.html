@@ -160,6 +160,7 @@
                         <a class="dropdown-item" href="{% url 'function-projection-input' %}">Functional prediction</a>
                         <a class="dropdown-item" href="{% url 'land_syntenyDP' %}">Synteny dotplot</a>
                         <a class="dropdown-item" href="{% url 'genomePW' %}">Genome pair orthology</a>
+                        {% if omamo_enabled %}<a class="dropdown-item" href="{% url "omamo-search" %}">OMA-MO: Finding model organism</a>{% endif %}
 
                         <div class="dropdown-divider"></div>
 
