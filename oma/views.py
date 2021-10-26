@@ -2602,10 +2602,12 @@ class Searcher(View):
     def analyse_search(self, request, type, query):
         if query == "":
             return redirect('home')
-        terms = shlex.split(query)
+        if type.endswith("_sequence"):
+            terms = [query]
+        else:
+            terms = shlex.split(query)
 
         context = {'query': query, 'type': type, 'terms': terms, "outdated_HOG": False}
-
         redir = (type != 'all' and len(terms) == 1)
 
         # if specific selector chosen (entry by protId) try to instant redirection if correct query
