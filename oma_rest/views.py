@@ -1150,23 +1150,27 @@ class SharedAncestrySummaryAPIView(APIView):
         except db.UnknownSpecies as e:
             raise NotFound(e)
         orthology_type = request.query_params.get('type', 'hogs').lower()
+        root = None
         if orthology_type == 'vps':
-            fun = self._by_vps
+            nr_genes_with_orthologs = self._by_vps(genome1, genome2)
         elif orthology_type == 'hogs':
-            fun = self._by_hogs
+            nr_genes_with_orthologs, root = self._by_hogs(genome1, genome2)
         else:
             raise ParseError("type parameter invalid. Must be one of 'hogs' or 'vps'.")
         details = [{'species': g.uniprot_species_code,
                     'nr_genes': g.nr_genes,
                     'nr_orthologs': nr_genes_w_orthologs}
-                   for g, nr_genes_w_orthologs in zip((genome1, genome2), fun(genome1, genome2))]
+                   for g, nr_genes_w_orthologs in zip((genome1, genome2), nr_genes_with_orthologs)]
         res = {'fraction': sum(z['nr_orthologs']/z['nr_genes'] for z in details) / len(details),
                'details': details}
+        if root is not None:
+            res['mrca'] = {'taxon_id': int(root['NCBITaxonId']), 'name': root['Name'].decode()}
         return Response(res)
 
     def _by_hogs(self, g1, g2):
         subtax = utils.tax.get_induced_taxonomy([g1.ncbi_taxon_id, g2.ncbi_taxon_id], augment_parents=True)
-        level = subtax._get_root_taxon()['Name']
+        root = subtax._get_root_taxon()
+        level = root['Name']
         hogs = numpy.sort(utils.db.get_all_hogs_at_level(level)['ID'])
 
         def genes_in_ancestral_hogs(genome):
@@ -1177,8 +1181,7 @@ class SharedAncestrySummaryAPIView(APIView):
                                      dtype=bool)
             return genes_allinfo[existed]
 
-        return len(genes_in_ancestral_hogs(g1)), len(genes_in_ancestral_hogs(g2))
-
+        return (len(genes_in_ancestral_hogs(g1)), len(genes_in_ancestral_hogs(g2))), root
 
     def _by_vps(self, g1, g2):
         vp_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/VPairs'.format(g1.uniprot_species_code))
