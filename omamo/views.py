@@ -5,6 +5,7 @@ import tables
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponseBadRequest
+from django.utils.html import escape
 from oma import utils
 import pandas
 import logging
@@ -26,10 +27,11 @@ def search(request):
     # build a lookup table for the biological process terms for the autocomplete
     context = {'go_auto_data': GO_LOOKUP}
     if request.method == 'GET' and 'query' in request.GET:
+        query = request.GET.get('query')
         try:
-            goterm = utils.db.gene_ontology.term_by_id(request.GET.get('query'))
+            goterm = utils.db.gene_ontology.term_by_id(query)
         except ValueError as e:
-            return HttpResponseBadRequest(str(e))
+            return HttpResponseBadRequest(escape(str(e)))
         res = []
         with tables.open_file(settings.OMAMO["H5"]) as h5:
             sum_iter = h5.get_node("/omamo/Summary").where("GOnr == {}".format(goterm.id))
