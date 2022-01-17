@@ -9,6 +9,7 @@ ENV DARWIN_BROWSER_REPO_PATH "/browser"
 ENV DARWIN_OMA_REPO_PATH "/OMA"
 ENV DARWIN_RUN_PATH "/run"
 ENV DARWIN_LOG_PATH "/var/log"
+WORKDIR /
 
 RUN apt-get -qq update \
     && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Zurich" apt-get install -y --no-install-recommends \
