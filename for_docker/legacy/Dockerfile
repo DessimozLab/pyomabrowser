@@ -11,11 +11,14 @@ ENV DARWIN_RUN_PATH "/run"
 ENV DARWIN_LOG_PATH "/var/log"
 
 RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
-       uwsgi \
-       uwsgi-core \
-       uwsgi-plugin-python3 \
-       libcgi-session-perl \
+    && DEBIAN_FRONTEND="noninteractive" TZ="Europe/Zurich" apt-get install -y --no-install-recommends \
+        uwsgi \
+        uwsgi-core \
+        uwsgi-plugin-python3 \
+        libcgi-session-perl \
+        git \
+    && apt-get install -y  --reinstall ca-certificates \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY uwsgi.conf /etc/oma-uwsgi.conf
