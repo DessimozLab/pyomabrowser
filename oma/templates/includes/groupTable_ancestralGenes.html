@@ -79,7 +79,7 @@ var hide_column_event = true
 
     {% else %}
 
-         $.getJSON("{{api_url}}", function (jsonData) {
+         $.getJSON("{{api_url|safe}}", function (jsonData) {
 {% endif %}
 
 
