@@ -70,7 +70,7 @@ six==1.15.0
 soupsieve==2.2.1
 sqlparse==0.4.1
 structlog==21.1.0
-tables==3.6.2.dev0
+tables==3.7.1.dev0
 texttable==1.6.3
 threadpoolctl==2.1.0
 tqdm==4.60.0
