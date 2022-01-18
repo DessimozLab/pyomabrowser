@@ -115,7 +115,7 @@
 
 
     exports.format_taxonid_as_link = function(value, row){
-        return '<a class="external" href="https://uniprot.org/taxonomy/' + value +'">' + value + "</a>"
+        return '<a class="external" target="_blank" href="https://uniprot.org/taxonomy/' + value +'">' + value + "</a>"
     };
 
     exports.format_entry_sequence_matches = function(value, row){
@@ -308,7 +308,7 @@
         var buf = "";
         $.each(xref_re, function (src, obj) {
             if (obj.re.test(value)) {
-                buf = '<a class="external" href="' + obj.url(value)
+                buf = '<a class="external" target="_blank" href="' + obj.url(value)
                     + '" title="' + src + '">';
                 if (obj.img) {
                     buf += '<img src="'+ static_root + 'image/' + obj.img + '" alt="' + src + '" />&nbsp;'
