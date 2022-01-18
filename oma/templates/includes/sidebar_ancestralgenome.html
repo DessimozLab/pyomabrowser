@@ -187,6 +187,8 @@
 
          $('#grpTable').bootstrapTable('refresh', {url: new_url  } )
 
+         $('#grpTable').bootstrapTable('showColumn', 'event');
+
 
 
      }
@@ -200,6 +202,7 @@
 
 
          $('#grpTable').bootstrapTable('refresh', {url:  "{{api_url}}"  } )
+         $('#grpTable').bootstrapTable('hideColumn', 'event');
 
 
 

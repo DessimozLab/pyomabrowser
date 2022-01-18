@@ -68,11 +68,13 @@
 
 <script>
 
+var hide_column_event = true
 
 console.log("{{ level }}")
 
 
     {% if level  %}
+        hide_column_event = false
         $.getJSON("{{ api_url|safe }}" + "&compare_with={{level}}" , function (jsonData) {
 
     {% else %}
@@ -111,6 +113,12 @@ console.log("{{ level }}")
         refreshOptions: {'icons': icons}
 
     });
+
+ if (hide_column_event){
+    tab.bootstrapTable('hideColumn', 'event');
+ }
+
+
 
 });
 
