@@ -48,7 +48,7 @@ RUN mkdir -p /src/hdf5 \
         && make -j4 \
         && make install ) \
     && cd /src \
-    && git clone https://github.com/PyTables/PyTables.git \
+    && git clone --recurse-submodules https://github.com/PyTables/PyTables.git \
     && ( cd PyTables \
          && pip3 install --no-cache-dir cython numpy numexpr \
          && env HDF5_DIR=/usr CLFAGS="--std=gnu99" pip3 install . ) \

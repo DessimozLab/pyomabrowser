@@ -3,6 +3,7 @@
         <table class="table table-hover" id="grpTable"
                data-show-toggle="false"
                data-show-columns="true" data-search="true" data-show-export="true"
+               data-export-data-type="all"
                data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
                data-mobile-responsive="true" data-check-on-init="true"
                data-undefined-text=""
@@ -68,16 +69,17 @@
 
 <script>
 
+var hide_column_event = true
 
-console.log("{{ level }}")
 
 
     {% if level  %}
+        hide_column_event = false
         $.getJSON("{{ api_url|safe }}" + "&compare_with={{level}}" , function (jsonData) {
 
     {% else %}
 
-         $.getJSON("{{api_url}}", function (jsonData) {
+         $.getJSON("{{api_url|safe}}", function (jsonData) {
 {% endif %}
 
 
@@ -111,6 +113,12 @@ console.log("{{ level }}")
         refreshOptions: {'icons': icons}
 
     });
+
+ if (hide_column_event){
+    tab.bootstrapTable('hideColumn', 'event');
+ }
+
+
 
 });
 
