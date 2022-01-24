@@ -9,25 +9,13 @@
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
 
-<!-- d3 -->
-<script src="{% static "js/d3.v3.min.js" %}" charset="utf-8"></script>
 
-<!-- TnT -->
-<link rel="stylesheet" href="http://tntvis.github.io/tnt/build/tnt.css" type="text/css"/>
-    <script src="http://tntvis.github.io/tnt/build/tnt.js" charset="utf-8"></script>
-
-<!-- TnT Tooltip-->
-<link rel="stylesheet" href='{% static "css/tnt.css" %}' type="text/css" />
-<link rel="stylesheet" href='{% static "css/hog.css" %}' type="text/css" />
-<link rel="stylesheet" href='{% static "css/tnt.tooltip.css" %}' type="text/css" />
-<script src="{% static 'js/tnt.min.js' %}" charset="utf-8"></script>
-<script src="{% static 'js/tnt.tooltip.min.js' %}" charset="UTF-8"></script>
 
 <!-- Load the javascript -->
-<script src="{% static 'js/iHam_latest.js' %}" charset="UTF-8"></script>
+<script src="{% static 'js/iHam.js' %}" charset="UTF-8"></script>
 
 <!-- Load the stylesheet -->
-<link rel="stylesheet" href='{% static "css/iHam_latest.css" %}' />
+<link rel="stylesheet" href='{% static "css/iHam.css" %}' />
 
 <script src="{% static 'js/orthoxml-hogvis.min.js' %}" charset="UTF-8"></script>
 
@@ -217,7 +205,6 @@
 
             fam_data = JSON.parse(fam_data[0]);
 
-
             var iham = iHam()
                 .newick(speciestree[0])
                 .orthoxml(orthoxml[0])
@@ -226,6 +213,7 @@
                     d3.select('#current_level_text')
                         .text(node.node_name());
                 })
+                .start_opened_at("{{ level }}")
                 .show_oma_link(true)
                 .remote_data(true)
                 .augmented_orthoxml(true)
