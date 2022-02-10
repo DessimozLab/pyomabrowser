@@ -45,6 +45,12 @@
 		 width: 100%;
 		 border-radius: 0;
 	}
+    .omamo-suggest {
+        padding: 20px 30px 20px 30px;
+        margin: 20px 0px 20px 0px;
+        text-align: left;
+        align-items: flex-start;
+    }
  </style>
 
 {% endblock css_hook %}
@@ -77,6 +83,23 @@
                 {% endblock search_examples %}
             </p>
         </div>
+
+        {% if suggested_go_terms %}
+            <div class="omamo-suggest alert alert-warning">
+                <p>Your search term is {{ suggest_reason }}. Consider searching for
+            {% if suggest_reason == "too general" %}
+                some more specific Gene Ontology terms:
+            {% else %}
+                some more general terms descibing this process:
+            {% endif %}
+            </p>
+            <ul>
+                {% for t in suggested_go_terms %}
+                    <li><a href="{% url "omamo-search" %}?query={{ t }}">{{ t }} - {{ t.name }}</a></li>
+                {% endfor %}
+            </ul>
+            </div>
+        {% endif  %}
     </div>
 </div>
 

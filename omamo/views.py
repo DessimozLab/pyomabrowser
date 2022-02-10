@@ -15,14 +15,6 @@ GO_LOOKUP = [{'value': "{} - {}".format(val, val.name), 'data': val.id}
              for key, val in utils.db.gene_ontology.terms.items() if val.aspect == 1]
 
 
-def uniq(seq):
-    """return uniq elements of a list, preserving order
-    :param seq: an iterable to be analyzed
-    """
-    seen = set()
-    return [x for x in seq if not (x in seen or seen.add(x))]
-
-
 def search(request):
     # build a lookup table for the biological process terms for the autocomplete
     context = {'go_auto_data': GO_LOOKUP}
@@ -30,6 +22,8 @@ def search(request):
         query = request.GET.get('query')
         try:
             goterm = utils.db.gene_ontology.term_by_id(query)
+            if goterm.aspect != 1:  # not a BP term
+                raise ValueError("Requested GO term '{}' is not part of the biological_process ontology".format(goterm))
         except ValueError as e:
             return HttpResponseBadRequest(escape(str(e)))
         res = []
@@ -56,9 +50,35 @@ def search(request):
                         }
                 res.append(data)
 
+            if len(res) == 0:
+                def filter_existing_goterms(terms):
+                    n = h5.get_node('/omamo/Summary')
+                    for t in terms:
+                        try:
+                            dummy = next(n.where('GOnr == {}'.format(t.id)))
+                            yield t
+                        except StopIteration:
+                            pass
+
+                ic = {row['GOnr']: row['ic'] for row in h5.get_node('/ic')[:]}
+                if ic[goterm.id] < 5:
+                    # too low IC, report possible children terms
+                    go = utils.db.gene_ontology
+                    subterms = (t for t in go.get_subterms(goterm, max_steps=2) if ic.get(t.id, 0) >= 5)
+                    context['suggested_go_terms'] = list(filter_existing_goterms(subterms))
+                    context['suggest_reason'] = 'too general'
+                else:
+                    parent_terms = (t for t in utils.db.gene_ontology.get_superterms_incl_queryterm(goterm)
+                                    if ic.get(t.id, 0) >= 5)
+                    context['suggested_go_terms'] = list(filter_existing_goterms(parent_terms))
+                    context['suggest_reason'] = "too specific"
+
+
+
+
         context['goterm'] = goterm
         context['result'] = res
-        context['result_tab'] = True
+        context['result_tab'] = ("suggested_go_terms" not in context) or (len(context['suggested_go_terms']) == 0)
     else:
         context['result_tab'] = False
 
