@@ -193,6 +193,7 @@ function detailSpeciesInfo(index, row){
         reorderableColumns: true,
         clickToSelect: false,
         showMultiSort: true,
+        formatNoMatches: function(){ return "No suitable model organism found"}
     });
     var icons = tab.bootstrapTable('getOptions').icons;
     $.extend(icons, {export: 'fa-download'});
