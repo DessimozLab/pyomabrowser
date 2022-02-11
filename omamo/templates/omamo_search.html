@@ -85,21 +85,22 @@
         </div>
 
         {% if suggested_go_terms %}
-            <div class="omamo-suggest alert alert-warning">
-                <p>Your search term is {{ suggest_reason }}. Consider searching for
+        <div class="omamo-suggest alert alert-warning">
+            <p>Your search term {{ goterm }} - {{ goterm.name }} is {{ suggest_reason }}. Thus we are not able to suggest any model organism. Consider searching for
             {% if suggest_reason == "too general" %}
-                some more specific Gene Ontology terms:
+                a more specific Gene Ontology term:
             {% else %}
-                some more general terms descibing this process:
+                a more general Gene Ontology term describing your process of interest:
             {% endif %}
             </p>
             <ul>
-                {% for t in suggested_go_terms %}
-                    <li><a href="{% url "omamo-search" %}?query={{ t }}">{{ t }} - {{ t.name }}</a></li>
-                {% endfor %}
+            {% for t in suggested_go_terms %}
+                <li><a href="{% url "omamo-search" %}?query={{ t }}">{{ t }} - {{ t.name }}</a></li>
+            {% endfor %}
             </ul>
-            </div>
+        </div>
         {% endif  %}
+
     </div>
 </div>
 
@@ -120,6 +121,7 @@
 
     {{ result|json_script:"model_orgs" }}
     <h2>{{ goterm }} - {{ goterm.name }}</h2>
+    <p><b>Definition:</b>{{ goterm.definition }}</p>
     <div>
         <table class="table table-hover" id="omamo_result_table"
            data-show-toggle="false"
