@@ -92,9 +92,9 @@
 
         {% if suggested_go_terms %}
         <div class="omamo-suggest alert alert-warning">
-            <p>Your search term {{ goterm }} - {{ goterm.name }} is {{ suggest_reason }}. Thus we are not able to suggest any model organism. Consider searching for
+            <p>Your search term {{ goterm }} - {{ goterm.name }} has not been assigned to any of the species in the database. Consider searching for
             {% if suggest_reason == "too general" %}
-                a more specific Gene Ontology term:
+                a more specific Gene Ontology term describing the process:
             {% else %}
                 a more general Gene Ontology term describing your process of interest:
             {% endif %}
