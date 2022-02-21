@@ -28,6 +28,11 @@ if "omamo" in settings.INSTALLED_APPS:
         path("oma/omamo/", include('omamo.urls'))
     )
 
+if "expasysearch" in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path("oma/expasy/", include('expasysearch.urls'))
+    )
+
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView
     from django.urls import re_path
