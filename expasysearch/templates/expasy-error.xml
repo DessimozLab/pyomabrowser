@@ -1,0 +1,4 @@
+{% extends  "expasy-result.xml" %}
+
+{% block result %}
+<error type="{{ errortype }}">{{ message }}</error>{% endblock %}
