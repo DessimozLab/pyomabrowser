@@ -18,6 +18,7 @@ INSTALLED_APPS.extend([
     'export',
     'fastmap',
     'omamo',
+    'expasysearch',
 ])
 
 MIDDLEWARE.extend([
