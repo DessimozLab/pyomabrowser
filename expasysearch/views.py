@@ -29,13 +29,13 @@ def expasy_search(request):
             if len(res) > 1:
                 url = reverse('search') + "?" + urlencode({"type": "Entry_sequence", "query": query})
             else:
-                url = reverse('entry_info', args=[res[0].oma_id])
+                url = reverse('entry_info', args=[res[0].omaid])
             context = {"count": len(res), "url": request.build_absolute_uri(url)}
         else:
             ref_term = search.XRefSearch(utils.db, query, max_matches=30)
             if ref_term.estimated_occurrences < 30:
                 res = ref_term.search_entries()
-                oma_ids = set(p.get_main_isoform().oma_id for p in res)
+                oma_ids = set(p.get_main_isoform().omaid for p in res)
                 if len(oma_ids) == 1:
                     url = reverse('entry_info', args=[oma_ids.pop()])
                     count = 1
