@@ -311,7 +311,9 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
             members = [models.ProteinEntry(utils.db, m) for m in memb]
             data = utils.db.oma_group_metadata(members[0].oma_group)
             fingerprint = data['fingerprint']
-            group = rest_models.OMAGroup(GroupNr=data['group_nr'], members=members, fingerprint=fingerprint)
+            kw = data['keywords']
+            group = rest_models.OMAGroup(GroupNr=data['group_nr'], members=members,
+                                         fingerprint=fingerprint, description=kw)
 
         serializer = serializers.OmaGroupSerializer(
             instance=group, context={'request': request})

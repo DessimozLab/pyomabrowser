@@ -194,6 +194,7 @@ class ChromosomeInfoSerializer(ReadOnlySerializer):
 class OmaGroupSerializer(ReadOnlySerializer):
     group_nr = serializers.IntegerField(source='GroupNr')
     fingerprint = serializers.CharField()
+    description = serializers.CharField()
     related_groups = serializers.HyperlinkedIdentityField(
         view_name='group-close-groups',
         lookup_field='GroupNr',
@@ -255,10 +256,14 @@ class HOGsBaseSerializer(ReadOnlySerializer):
 
 class HOGsListSerializer(HOGsBaseSerializer):
     roothog_id = serializers.IntegerField()
+    description = serializers.SerializerMethodField(method_name=None)
     similar_profile_hogs = serializers.HyperlinkedIdentityField(
         view_name="hog-similar-profile-hogs",
         lookup_field="roothog_id",
         lookup_url_kwarg="hog_id")
+
+    def get_description(self, obj):
+        db.get_roothog_keywords(obj.roothog_id)
 
 
 class HOGsCompareListSerializer(HOGsListSerializer):
