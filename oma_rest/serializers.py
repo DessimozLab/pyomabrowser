@@ -263,7 +263,7 @@ class HOGsListSerializer(HOGsBaseSerializer):
         lookup_url_kwarg="hog_id")
 
     def get_description(self, obj):
-        db.get_roothog_keywords(obj.roothog_id)
+        return db.get_roothog_keywords(obj.roothog_id)
 
 
 class HOGsCompareListSerializer(HOGsListSerializer):
