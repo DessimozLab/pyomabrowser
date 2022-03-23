@@ -1257,7 +1257,10 @@ class AncestralGenomeBase(ContextMixin):
                 except KeyError:
                     context['taxid'] = 0
                 context['genome_name'] = search['name']
-                context['nr_hogs'] = search['nr_hogs']
+                try:
+                    context['nr_hogs'] = search['nr_hogs']
+                except KeyError:
+                    context['nr_hogs'] = len(utils.db.get_all_hogs_at_level(search['name']))
                 context['nbr_species'] = count_species(search)
             else:
                 raise ValueError("Could not find ancestral genome {}".format(species_id))
@@ -3454,7 +3457,7 @@ class Searcher(View):
                 "sciname": sp['name'],
                 "common_name": "",
                 "last_modified": "",
-                "prots": sp["nr_hogs"],
+                "prots": sp.get("nr_hogs", 0),
                 "type": "Ancestral",
                 "found_by": found_by
             }
