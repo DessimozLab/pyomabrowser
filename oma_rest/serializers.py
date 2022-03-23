@@ -121,6 +121,7 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
 
     sequence = serializers.CharField()
     cdna = serializers.CharField()
+    description = serializers.CharField()
     domains = serializers.HyperlinkedIdentityField(view_name='protein-domains', read_only=True,
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
     xref = serializers.HyperlinkedIdentityField(view_name='protein-xref', read_only=True, lookup_field='entry_nr',
