@@ -64,8 +64,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'oma_rest.pagination.LinkHeaderPagination',
     'PAGE_SIZE': 100,
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning',
-    'DEFAULT_VERSION': '1.7',
-    'ALLOWED_VERSIONS': ('1.0', '1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7'),
+    'DEFAULT_VERSION': '1.8',
+    'ALLOWED_VERSIONS': ('1.0', '1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8'),
 }
 
 
