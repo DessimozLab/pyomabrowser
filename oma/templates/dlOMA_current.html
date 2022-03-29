@@ -443,9 +443,8 @@
                         </dd>
                     </dl>
 
-                     <hr>
-
-{% if "OmaServer.h5" in existing_download_files %}
+                {% if "OmaServer.h5" in existing_download_files %}
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">OMA Browser database (as hdf5)</dt>
                         <dd class="col-sm-6">
@@ -462,12 +461,21 @@
                         </dd>
                     </dl>
 
-                    {% endif %}
-
-
+                {% endif %}
+                {% if "oma-rdf-triples.tgz" in existing_download_files %}
+                    <hr>
+                    <dl class="row">
+                        <dt class="col-sm-6">OMA Browser database (as hdf5)</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-rdf-turtle.tgz">
+                                <i class="fas fa-download"></i>
+                                RDF turtle dumps
+                            </a>
+                        </dd>
+                    </dl>
+                {% endif %}
                 </div>
             </div>
-
 
             {% endblock Other %}
 
