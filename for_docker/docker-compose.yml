@@ -134,7 +134,7 @@ services:
     image: $DOCKER_REGISTRY/legacy
     env_file:
       - env
-    expose:
+    ports:
       - 8000
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
