@@ -33,6 +33,9 @@ DEPLOYMENT_TYPE=DEV
 PYOMABROWSER_CODEBASE=from_local
 # PYOMABROWSER_GITTAG=master
 
+# if you don't want containers to be restarted after reboots, uncomment next line
+#RESTART_CONTAINERS="no"
+
 
 # rabbitmq user, password and broker url to which celery will connect
 # You can change as you wish, but don't forget to update the rabbitmq

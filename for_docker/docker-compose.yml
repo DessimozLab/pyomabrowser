@@ -9,7 +9,7 @@ volumes:
 
 services:
   web:
-    restart: always
+    restart: ${RESTART_CONTAINERS:-"unless-stopped"}
     image: $DOCKER_REGISTRY/oma
     build:
       context: ..
@@ -40,6 +40,7 @@ services:
       - db
 
   db:
+    restart: ${RESTART_CONTAINERS:-"unless-stopped"}
     image: postgres:alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -48,6 +49,7 @@ services:
     shm_size: 256M
 
   broker:
+    restart: ${RESTART_CONTAINERS:-"unless-stopped"}
     image: rabbitmq:3
     env_file:
       - env
@@ -55,6 +57,7 @@ services:
       - 5672:5672
 
   worker:
+    restart: ${RESTART_CONTAINERS:-"unless-stopped"}
     image: $DOCKER_REGISTRY/oma
     restart: "no"
     command: ["celery", "worker", "--app=pybrowser_dev.celery_app", "--concurrency=1",
@@ -77,6 +80,7 @@ services:
       - db
 
   worker_long:
+    restart: ${RESTART_CONTAINERS:-"unless-stopped"}
     image: $DOCKER_REGISTRY/oma
     restart: "no"
     command: ["celery", "worker", "--app=pybrowser_dev.celery_app", "--concurrency=1",
@@ -99,6 +103,7 @@ services:
       - db
 
   nginx:
+    restart: ${RESTART_CONTAINERS:-"unless-stopped"}
     image: $DOCKER_REGISTRY/nginx
     build:
       context: ./nginx
@@ -123,14 +128,14 @@ services:
 
 
   legacy:
+    restart: ${RESTART_CONTAINERS:-"unless-stopped"}
     build:
       context: ./legacy/
     image: $DOCKER_REGISTRY/legacy
     env_file:
       - env
-    expose:
+    ports:
       - 8000
-    restart: "no"
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       #- release_volume:${RELEASE_PATH}
