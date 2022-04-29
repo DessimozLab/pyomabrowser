@@ -75,11 +75,7 @@ RUN --mount=type=ssh \
 
 
 FROM build_${PYOMABROWSER_CODEBASE}
-#COPY requirements.txt $SRC_DIR/requirements.txt
-COPY for_docker/oma/requirements-frozen.txt $SRC_DIR/reqs.txt
-RUN --mount=type=ssh pip3 install --no-cache-dir -r $SRC_DIR/reqs.txt --src /usr/local/src
-
-#RUN --mount=type=ssh pip3 install --no-cache-dir -r $SRC_DIR/requirements.txt --src /usr/local/src
+RUN --mount=type=ssh pip3 install --no-cache-dir -r $SRC_DIR/requirements.txt --src /usr/local/src
 RUN /bin/date | /usr/bin/md5sum > secret_key.txt
 
 COPY for_docker/oma/entrypoint.sh /
