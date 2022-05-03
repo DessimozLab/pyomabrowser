@@ -143,3 +143,7 @@ services:
         source: "${RELEASE_PATH_HOST}/data"
         target: ${DARWIN_BROWSERDATA_PATH}
         read_only: true
+    ulimits:
+      stack: 
+        soft: 64000000
+        hard: 64000000
