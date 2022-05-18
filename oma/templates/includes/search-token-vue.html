@@ -1,0 +1,26 @@
+{% load staticfiles %}
+
+<script src="{% static 'search-token/vue.js' %}"></script>
+
+
+<script type="module">
+
+const { createApp } = Vue
+
+createApp({
+  data() {
+    return {
+      count: 0
+    }
+  },
+  compilerOptions: {
+    delimiters: ["$[", "]$"]
+  }
+}).mount('#search-token')
+</script>
+
+
+<div id="search-token">
+  $[ count ]$
+  <button @click="count++">Count</button>
+</div>

@@ -116,6 +116,7 @@ urlpatterns = [
 
 
     # Search Widget
+    url(r'^search-token/$', TemplateView.as_view(template_name='search_token.html'), name='search_token'),
     url(r'^search/$', views.Searcher.as_view(), name='search'),
     url(r'^search/fulltext/(?P<query>[A-Za-z0-9 _.:()-/+"]+)/$', views.FullTextJson.as_view(), name="fulltext_json"),
 
