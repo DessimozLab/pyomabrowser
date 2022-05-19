@@ -80,18 +80,38 @@
     createApp({
         data() {
             return {
-
-                prefix_error: false,
-                tokens: [{query: 'HUMAN', single_term: true, prefix: "Species"}],
-                prefixes: [{handle: 'Sequence'}, {handle: 'HOG'}, {handle: 'Species'},],
-                prefixes_accepted: ['Sequence', 'HOG', 'Species'],
-                default_prefix : 'Sequence'
+                tokens: [], //{query: 'HUMAN', single_term: true, prefix: "Species"}
+                prefixes: {
+                    'Protein': ['ProteinID','XRef','GO','EC','Description','Domain','Seq'],
+                    'Taxon': ['Name','TaxId'],
+                    'HOG': ['HOG'],
+                    'OMA Group': ['Number', 'Fingerprint'],
+                },
+                default_prefix : 'Description',
+                show_error: false,
+                error_message : " Error.",
             }
         },
         compilerOptions: {
             delimiters: ["$[", "]$"]
         },
         methods: {
+            get_list_prefixes(){
+                return [].concat(...Object.values(this.prefixes))
+            },
+            get_prefix_used(){
+                return this.tokens.map(x => this.get_type_prefix(x.prefix));
+            },
+            get_type_prefix(prefix){
+                for (var key in this.prefixes) {
+                    if (this.prefixes.hasOwnProperty(key)) {
+                        if (this.prefixes[key].includes(prefix)){
+                            return key
+                        }
+                    }
+                }
+                return null
+            },
             addToken(event) {
 
                 event.preventDefault()
@@ -101,20 +121,25 @@
                 var multi_term_closed = (val.length > 1 && val[val.length - 1] == '"')
                 var has_prefix = val.includes(':')
                 var prefix_end = val[val.length - 1] == ':'
-
                 var p = has_prefix ? val.split(':')[0] : this.default_prefix;
 
-                if (has_prefix && !this.prefixes_accepted.includes(p)) {
-                    this.prefix_error = true;
+
+                // If prefix but not valid
+                if (has_prefix && !this.get_list_prefixes().includes(p)) {
+                    this.show_error = true;
+                    this.error_message = "Error: Incorrect prefix."
                     return;
                 } else {
-                    this.prefix_error = false;
+                    this.show_error = false;
                 }
 
-
+                // If something typed
                 if (val.length > 0) {
 
+                    // Multiple word query
                     if (!sinle_term) {
+
+                        // STOP if multiple not closed
                         if (!multi_term_closed) {
 
                             if (event.code == "Space") {
@@ -124,26 +149,30 @@
                         }
                     }
 
+                    // STOP if the prefix is fine and we are at :
                     if (prefix_end) {
                         return
                     }
 
+                    // has a prefix
                     if (has_prefix) {
 
                         var tmp = val.split(':')[1]
                         sinle_term = tmp[0] != '"';
                         multi_term_closed = (val.length > 1 && tmp[tmp.length - 1] == '"')
 
+
+                        // multiple term
                         if (!sinle_term) {
 
+                            // STOP if not closed
                             if (!multi_term_closed) {
-
-
                                 if (event.code == "Space") {
                                     event.target.value = val + ' '
                                 }
                                 return
                             }
+
 
                             tmp = tmp.slice(1, -1);
 
@@ -151,9 +180,12 @@
                         val = tmp
                     }
 
+                    if (this.validate_token(val, sinle_term, p )){
+                        this.tokens.push({query: val, single_term: sinle_term, prefix: p});
+                        event.target.value = '';
+                    }
 
-                    this.tokens.push({query: val, single_term: sinle_term, prefix: p})
-                    event.target.value = ''
+
                 }
 
             },
@@ -179,6 +211,35 @@
                 input_token_search.value =  token_str
 
 
+            },
+            on_change_prefix(prefix, t){
+                t.prefix = prefix
+            },
+            validate_token(val, sinle_term, p ){
+
+                // Validate type val is valid for p
+
+                // validate prefix not in conflict with other prefix
+                var pu = this.get_prefix_used();
+                var current_prefix_type = this.get_type_prefix(p)
+
+
+
+
+                if (current_prefix_type != 'Taxon'){
+
+                    var no_taxon = pu.filter(x => x !== 'Taxon');
+
+                    if (no_taxon.length > 0){
+                        this.show_error = true;
+                            this.error_message = "Error: You can't have twice the same prefix except for Taxon."
+                            return false
+                    }
+
+                }
+
+                return true
+
             }
         },
     }).mount('#token-input')
@@ -193,18 +254,24 @@
 
     <span v-for="token, index in tokens" :key="token" class="token-input__tag">
 
-        <select class="prefix-dropdown">
-            <option v-for="prefix in prefixes" :key="prefix" :selected="prefix.handle == token.prefix">
-                $[ prefix.handle ]$
+
+        <select class="prefix-dropdown" @change="on_change_prefix($event.target.value, token)">
+
+               <template v-for="(prefixes_list, prefix_type) in prefixes">
+    <optgroup :label="prefix_type" >
+    <option v-for="prefix in prefixes_list" :key="prefix" :selected="prefix == token.prefix">
+                $[ prefix ]$
             </option>
+         </optgroup>
+  </template>
+
+
+
         </select>
 
         <span class="vl"></span>
 
-
         <p style="display: inline" @click='detokenize(index)'>$[ token.query ]$</p>
-
-
 
         <span @click='removeToken(index)' class="token-delete">X</span>
 
@@ -212,7 +279,7 @@
 
     </span>
 
-        </div>
+    </div>
 
     <input type='text' placeholder="Enter your query" class='token-input__text' id="input_token_search"
            @keydown.enter='addToken'
@@ -224,8 +291,7 @@
         <img  style='width: 24px;' src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/>
     </button>
 
-
-    <p style="color: red" v-show="prefix_error"> Error: Incorrect prefix $[this.prefixes_accepted]$. </p>
+    <p style="color: red" v-show="show_error"> $[this.error_message]$  </p>
 
 
 </div>
