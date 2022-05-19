@@ -4,6 +4,13 @@
 
 <style>
 
+    .button_search {
+        height: 100%;
+        background-color: transparent;
+        border: none;
+        margin-right: 4px;
+    }
+
     .prefix-dropdown {
         border: none;
         background-color: transparent;
@@ -15,18 +22,19 @@
         margin-right: 4px;
     }
 
-    .token-input {
+    #token-input {
         width: 100%;
         border: 1px solid #eee;
         font-size: 0.9em;
         height: 50px;
         box-sizing: border-box;
-        padding: 0 10px;
+        padding: 0 0 0 10px;
+        border-radius: 8px;
     }
 
     .token-input__tag {
         height: 30px;
-        float: left;
+        display: inline-block;
         margin-right: 10px;
         background-color: #eee;
         margin-top: 10px;
@@ -46,11 +54,20 @@
         font-size: 0.9em;
         line-height: 50px;
         background: none;
+        width: calc(40% - 48px);
     }
 
-    .token-delete{
-        margin-left: 4px ;
+    .token-delete {
+        margin-left: 4px;
         color: red;
+    }
+
+    #token-container{
+        white-space: nowrap;
+        float:left;
+        max-width: 60%;
+        overflow: scroll;
+        display: inline;
     }
 
 </style>
@@ -63,8 +80,12 @@
     createApp({
         data() {
             return {
+
+                prefix_error: false,
                 tokens: [{query: 'HUMAN', single_term: true, prefix: "Species"}],
-                prefixes: [{handle: 'Sequence'},{handle: 'HOG'},{handle: 'Species'},  ]
+                prefixes: [{handle: 'Sequence'}, {handle: 'HOG'}, {handle: 'Species'},],
+                prefixes_accepted: ['Sequence', 'HOG', 'Species'],
+                default_prefix : 'Sequence'
             }
         },
         compilerOptions: {
@@ -77,35 +98,64 @@
                 var val = event.target.value.trim()
 
                 var sinle_term = val[0] != '"';
-                var multi_term_closed = val[val.length-1] == '"'
+                var multi_term_closed = (val.length > 1 && val[val.length - 1] == '"')
                 var has_prefix = val.includes(':')
-                var prefix_end = val[val.length-1] == ':'
+                var prefix_end = val[val.length - 1] == ':'
+
+                var p = has_prefix ? val.split(':')[0] : this.default_prefix;
+
+                if (has_prefix && !this.prefixes_accepted.includes(p)) {
+                    this.prefix_error = true;
+                    return;
+                } else {
+                    this.prefix_error = false;
+                }
+
 
                 if (val.length > 0) {
 
-                    if (!sinle_term){
-                         if (!multi_term_closed ){
+                    if (!sinle_term) {
+                        if (!multi_term_closed) {
 
-                              if (event.code == "Space"){
-                                 event.target.value = val + ' '
-                              }
-                             return
-                         }
+                            if (event.code == "Space") {
+                                event.target.value = val + ' '
+                            }
+                            return
+                        }
                     }
 
-                    if (prefix_end){
+                    if (prefix_end) {
                         return
                     }
 
+                    if (has_prefix) {
 
-                    var q = has_prefix ? val.split(':')[1] : val
-                    var p = has_prefix ? val.split(':')[0] : ""
+                        var tmp = val.split(':')[1]
+                        sinle_term = tmp[0] != '"';
+                        multi_term_closed = (val.length > 1 && tmp[tmp.length - 1] == '"')
+
+                        if (!sinle_term) {
+
+                            if (!multi_term_closed) {
 
 
+                                if (event.code == "Space") {
+                                    event.target.value = val + ' '
+                                }
+                                return
+                            }
 
-                    this.tokens.push({query: q, single_term: sinle_term, prefix: p})
+                            tmp = tmp.slice(1, -1);
+
+                        }
+                        val = tmp
+                    }
+
+
+                    this.tokens.push({query: val, single_term: sinle_term, prefix: p})
                     event.target.value = ''
                 }
+
             },
             removeToken(index) {
                 this.tokens.splice(index, 1)
@@ -114,6 +164,21 @@
                 if (event.target.value.length === 0) {
                     this.removeToken(this.tokens.length - 1)
                 }
+            },
+            collect_token(){
+                alert(JSON.stringify(this.tokens));
+            },
+            detokenize(index){
+                var token = this.tokens.splice(index, 1)[0];
+                var input_token_search = document.getElementById('input_token_search');
+                var token_str = token.prefix + ': '
+                token_str += token.single_term ? '' : '"'
+                token_str += token.query
+                token_str += token.single_term ? '' : '"'
+
+                input_token_search.value =  token_str
+
+
             }
         },
     }).mount('#token-input')
@@ -124,29 +189,43 @@
 
 <div id="token-input">
 
-    <div v-for="token, index in tokens" :key="token" class="token-input__tag">
+    <div id="token-container">
+
+    <span v-for="token, index in tokens" :key="token" class="token-input__tag">
 
         <select class="prefix-dropdown">
-            <option v-for="prefix in prefixes" :key="prefix" :selected= "prefix.handle == token.prefix">
+            <option v-for="prefix in prefixes" :key="prefix" :selected="prefix.handle == token.prefix">
                 $[ prefix.handle ]$
             </option>
         </select>
 
         <span class="vl"></span>
 
-        $[ token.query ]$
 
-        <span @click='removeToken(index)'  class="token-delete">X</span>
+        <p style="display: inline" @click='detokenize(index)'>$[ token.query ]$</p>
+
+
+
+        <span @click='removeToken(index)' class="token-delete">X</span>
 
         </select>
 
-    </div>
+    </span>
 
-        <input type='text' placeholder="Enter your query" class='token-input__text'
-               @keydown.enter='addToken'
-               @keydown.space='addToken'
-               @keydown.delete='removeLastToken'
-        />
+        </div>
+
+    <input type='text' placeholder="Enter your query" class='token-input__text' id="input_token_search"
+           @keydown.enter='addToken'
+           @keydown.space='addToken'
+           @keydown.delete='removeLastToken'
+    />
+
+    <button class=" button_search float-right" @click='collect_token()'>
+        <img  style='width: 24px;' src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/>
+    </button>
+
+
+    <p style="color: red" v-show="prefix_error"> Error: Incorrect prefix $[this.prefixes_accepted]$. </p>
 
 
 </div>

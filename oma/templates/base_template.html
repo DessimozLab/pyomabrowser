@@ -76,19 +76,15 @@
 
     {% if request.get_full_path != home %}
 
-    <div class="oma-main-search-header">
 
-        <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
-                <div class="oma-search-select">
-                    <select id="selectBrowser" class=" btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
-                        {% include "includes/search_select.html" %}
-                    </select>
-                </div>
-                <input style="font: small;" type="text" id="inputBrowser" class="" name="query" placeholder='{% if oma_instance_name != "basf" %}P53_RAT | Fungi | "auxin response factor"{% else %}PLDB2_ARATH | "auxin response factor" | psbC Brassicaceae{% endif %}'/>
-                <button><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
-            </form>
+        <span style="width: 60%">
 
-    </div>
+        {% include "includes/search-token-vue.html" %}
+
+
+        </span>
+
+
 
     {% endif %}
 
