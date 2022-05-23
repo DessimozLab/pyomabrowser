@@ -2468,7 +2468,20 @@ class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
 
 # //</editor-fold>
 
+def token_search(request):
+
+    context = {'results': 'Empty'}
+
+    if request.method == 'POST':
+        context['results'] = request.POST.get("hidden_query", "")
+
+
+    return render(request, 'search_token.html', context)
+
+
 #<editor-fold desc="Search Widget">
+
+
 
 
 class EntrySearchJson(JsonModelMixin):
@@ -3661,5 +3674,6 @@ class Searcher(View):
             return meth(request, query)
         except ValueError as e:
             return HttpResponseBadRequest(str(e))
+
 
 # //</editor-fold>

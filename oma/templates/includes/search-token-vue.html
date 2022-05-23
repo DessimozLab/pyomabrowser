@@ -23,7 +23,7 @@
     }
 
     #token-input {
-        width: 100%;
+        width: 80%;
         border: 1px solid #eee;
         font-size: 0.9em;
         height: 50px;
@@ -90,6 +90,7 @@
                 default_prefix : 'Description',
                 show_error: false,
                 error_message : " Error.",
+                post_query: ''
             }
         },
         compilerOptions: {
@@ -198,7 +199,7 @@
                 }
             },
             collect_token(){
-                alert(JSON.stringify(this.tokens));
+                this.post_query = JSON.stringify(this.tokens)
             },
             detokenize(index){
                 var token = this.tokens.splice(index, 1)[0];
@@ -247,8 +248,12 @@
 
 </script>
 
+ <form method="POST" action="{% url 'search_token' %}" >
+            {% csrf_token %}
 
 <div id="token-input">
+
+
 
     <div id="token-container">
 
@@ -281,17 +286,25 @@
 
     </div>
 
-    <input type='text' placeholder="Enter your query" class='token-input__text' id="input_token_search"
+
+
+        <input type="hidden" name="hidden_query" :value="post_query">
+
+    <input type='text' placeholder="Enter your query"  class='token-input__text' id="input_token_search"
            @keydown.enter='addToken'
            @keydown.space='addToken'
            @keydown.delete='removeLastToken'
     />
 
-    <button class=" button_search float-right" @click='collect_token()'>
+    <button class=" button_search float-right" @click='collect_token()' type="submit">
         <img  style='width: 24px;' src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/>
     </button>
+
+
 
     <p style="color: red" v-show="show_error"> $[this.error_message]$  </p>
 
 
 </div>
+
+ </form>
