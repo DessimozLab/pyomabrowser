@@ -43,7 +43,7 @@ from . import utils
 from . import misc
 from . import forms
 from .models import FileResult
-from pyoma.browser import db, models
+from pyoma.browser import db, models, search
 from pyoma.browser.decorators import timethis
 
 logger = logging.getLogger(__name__)
@@ -2470,10 +2470,52 @@ class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
 
 def token_search(request):
 
-    context = {'results': 'Empty'}
+    def generate_type(prefix):
+
+        function_mapper  = {
+            search.XRefSearch : ["description", "proteinid", "xref"],
+            search.TaxSearch: ["taxon", "species", "taxid"],
+            search.HogIDSearch: ["hog"],
+            search.GOSearch: ["go"],
+            search.ECSearch: ["ec"],
+            search.SequenceSearch: ["sequence"],
+            search.OmaGroupSearch: ["og", 'fingerprint'],
+        }
+
+        for fn, prefixes in function_mapper.items():
+            if prefix.lower() in prefixes:
+                return fn
+
+    _max_proteins_shown = 15
+    context = {
+        'results': None,
+        'search':None,
+        'meta':[],
+    }
+
 
     if request.method == 'POST':
-        context['results'] = request.POST.get("hidden_query", "")
+        # Process tokens
+        raw_tokens = json.loads(request.POST.get("hidden_query", ""))
+        tokens = [generate_type(z['prefix'])(utils.db, z['query']) for z in raw_tokens]
+
+        # Do the search
+        search_result = search.search(tokens)
+        context['results'] = search_result
+        context['search'] = json.dumps(raw_tokens)
+        context['search_raw'] = raw_tokens
+        context['meta'] = {
+            'max_entries_shown': _max_proteins_shown
+        }
+
+        # Prepare entry results
+        es =  list(search_result.entries.values())[:_max_proteins_shown]
+
+        ces = []
+        for ev in es:
+            ces.append(models.ProteinEntry.from_entry_nr(utils.db, ev.entry_nr))
+
+        context['data_entry'] = json.dumps(EntrySearchJson().as_json(ces))
 
 
     return render(request, 'search_token.html', context)
@@ -2483,7 +2525,7 @@ def token_search(request):
 
 
 
-
+'''
 class EntrySearchJson(JsonModelMixin):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
@@ -2492,6 +2534,13 @@ class EntrySearchJson(JsonModelMixin):
                    'description': None,
                    "found_by": "found_by",
                    "sequence" : "sequence"}
+ '''
+class EntrySearchJson(JsonModelMixin):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'oma_group': None,
+                   'hog_family_nr': 'roothog', 'xrefs': None,
+                   'description': None}
 
 
 class GenomeModelJsonMixin(JsonModelMixin):

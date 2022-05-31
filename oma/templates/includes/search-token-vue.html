@@ -23,7 +23,7 @@
     }
 
     #token-input {
-        width: 80%;
+
         border: 1px solid #eee;
         font-size: 0.9em;
         height: 50px;
@@ -72,22 +72,21 @@
 
 </style>
 
-
 <script type="module">
 
     const {createApp} = Vue
 
-    createApp({
+    window.search_token_vue = createApp({
         data() {
             return {
-                tokens: [], //{query: 'HUMAN', single_term: true, prefix: "Species"}
+                tokens: [], //{query: 'HUMAN', single_term: true, prefix: "Species", type: "Taxon"}
                 prefixes: {
-                    'Protein': ['ProteinID','XRef','GO','EC','Description','Domain','Seq'],
-                    'Taxon': ['Name','TaxId'],
-                    'HOG': ['HOG'],
-                    'OMA Group': ['Number', 'Fingerprint'],
+                    'Protein': ['proteinID','xref','go','ec','description','domain','sequence'],
+                    'Taxon': ['species','taxid', 'taxon'],
+                    'HOG': ['hog'],
+                    'OMA Group': ['og', 'fingerprint'],
                 },
-                default_prefix : 'Description',
+                default_prefix : 'description',
                 show_error: false,
                 error_message : " Error.",
                 post_query: ''
@@ -97,8 +96,15 @@
             delimiters: ["$[", "]$"]
         },
         methods: {
-            get_list_prefixes(){
-                return [].concat(...Object.values(this.prefixes))
+            get_list_prefixes(lowercase=false){
+
+                var lp = [].concat(...Object.values(this.prefixes))
+
+                if (lowercase){
+
+                    lp = lp.map(element => {return element.toLowerCase();});
+                }
+                return lp
             },
             get_prefix_used(){
                 return this.tokens.map(x => this.get_type_prefix(x.prefix));
@@ -106,7 +112,7 @@
             get_type_prefix(prefix){
                 for (var key in this.prefixes) {
                     if (this.prefixes.hasOwnProperty(key)) {
-                        if (this.prefixes[key].includes(prefix)){
+                        if (this.prefixes[key].includes(prefix.toLowerCase())){
                             return key
                         }
                     }
@@ -126,7 +132,7 @@
 
 
                 // If prefix but not valid
-                if (has_prefix && !this.get_list_prefixes().includes(p)) {
+                if (has_prefix && !this.get_list_prefixes(true).includes(p.toLowerCase())) {
                     this.show_error = true;
                     this.error_message = "Error: Incorrect prefix."
                     return;
@@ -158,7 +164,7 @@
                     // has a prefix
                     if (has_prefix) {
 
-                        var tmp = val.split(':')[1]
+                        var tmp = val.split(':')[1].trim()
                         sinle_term = tmp[0] != '"';
                         multi_term_closed = (val.length > 1 && tmp[tmp.length - 1] == '"')
 
@@ -175,14 +181,15 @@
                             }
 
 
-                            tmp = tmp.slice(1, -1);
-
                         }
                         val = tmp
                     }
 
+                    val = val.replaceAll('"', '')
+
                     if (this.validate_token(val, sinle_term, p )){
-                        this.tokens.push({query: val, single_term: sinle_term, prefix: p});
+                        console.log(val, sinle_term, p)
+                        this.tokens.push({query: val, single_term: sinle_term, prefix: p, type:this.get_type_prefix(p)});
                         event.target.value = '';
                     }
 
@@ -214,7 +221,7 @@
 
             },
             on_change_prefix(prefix, t){
-                t.prefix = prefix
+                t.prefix = prefix.toLowerCase()
             },
             validate_token(val, sinle_term, p ){
 
@@ -223,9 +230,6 @@
                 // validate prefix not in conflict with other prefix
                 var pu = this.get_prefix_used();
                 var current_prefix_type = this.get_type_prefix(p)
-
-
-
 
                 if (current_prefix_type != 'Taxon'){
 
@@ -241,6 +245,14 @@
 
                 return true
 
+            },
+            preload_token(tokens){
+                for (var i in tokens) {
+                    var token = tokens[i]
+                    if (this.validate_token(token.query, token.sinle_term, token.prefix )){
+                        this.tokens.push({query: token.query, single_term: token.sinle_term, prefix: token.prefix, type:token.type});
+                    }
+                }
             }
         },
     }).mount('#token-input')
@@ -248,12 +260,10 @@
 
 </script>
 
- <form method="POST" action="{% url 'search_token' %}" >
+<form method="POST" action="{% url 'search_token' %}" >
             {% csrf_token %}
 
 <div id="token-input">
-
-
 
     <div id="token-container">
 
