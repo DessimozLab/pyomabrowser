@@ -185,10 +185,11 @@
                         val = tmp
                     }
 
-                    val = val.replaceAll('"', '')
 
-                    if (this.validate_token(val, sinle_term, p )){
-                        console.log(val, sinle_term, p)
+
+                    if (this.validate_token(val.replaceAll('"', ''), sinle_term, p )){
+                        val = val.replaceAll('"', '')
+                         console.log(val, sinle_term, p)
                         this.tokens.push({query: val, single_term: sinle_term, prefix: p, type:this.get_type_prefix(p)});
                         event.target.value = '';
                     }

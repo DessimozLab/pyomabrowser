@@ -6,25 +6,25 @@
     <style>
 
 
-.fixed-table-body{
-        max-height: 400px;
-    }
+        .fixed-table-body{
+            max-height: 400px;
+        }
 
 
-.bootstrap-table {
-	padding: 24px;
-}
+        .bootstrap-table {
+            padding: 24px;
+        }
 
-    .blinking-red{
-    animation:blinkingText 1.2s infinite;
-}
-@keyframes blinkingText{
-    0%{     background-color: #dc3545;    }
-    49%{    background-color: #dc3545; }
-    60%{    background-color: transparent; }
-    99%{    background-color:transparent;  }
-    100%{   background-color: #dc3545;    }
-}
+        .blinking-red{
+            animation:blinkingText 1.2s infinite;
+        }
+        @keyframes blinkingText{
+            0%{     background-color: #dc3545;    }
+            49%{    background-color: #dc3545; }
+            60%{    background-color: transparent; }
+            99%{    background-color:transparent;  }
+            100%{   background-color: #dc3545;    }
+        }
     </style>
 
     <!--suppress ALL -->
@@ -41,15 +41,11 @@
                         <h3><strong>Search results matching for
                         </strong>
 
-
-
-
                             <span>
 
                                 {% for e in search_raw %}
-                                    "{{ e.query }}" as {{ e.prefix }} [{{ e.type }}]  {% if not forloop.last %}
-                    ,
-                {% endif %}
+                                    "{{ e.query }}" as {{ e.prefix }} [{{ e.type }}]
+                                    {% if not forloop.last %} ,  {% endif %}
                                 {% endfor %}
                             </span>
                         </h3>
@@ -72,107 +68,22 @@
                                     <b class="float-right ">
 
 
-                                        {% if results.entries|length <= meta.max_entries_shown %}
-                                            <span id="total_entry">{{ results.entries|length }}</span>
-                                            {% if results.entries|length == 1 or results.entries|length == 0 %}  entry
+                                        {% if meta.entries_founded <= max_proteins_shown %}
+                                            <span id="total_entry">{{ meta.entries_founded }}</span>
+                                            {% if meta.entries_founded == 1 or meta.entries_founded == 0 %}  entry
                                             {% else %} entries {% endif %}  found
 
-                                        {% else %} Best <span id="total_entry">{{ meta.max_entries_shown }}</span>
-                                            {% if results.entries|length == 1 %}  entry
-                                            {% else %} entries
-                                            {% endif %}  shown out of {{ results.entries|length }} entries
+                                        {% else %} Best <span id="total_entry">{{ max_proteins_shown }}</span>
+                                             entries shown out of {{ meta.entries_founded }} entries
 
                                         {% endif %}
 
-                                        {% if results.entries|length > 0 %}
+                                        {% if meta.entries_founded > 0 %}
 
                                             <button id="entry_stat" type="button" class="btn btn-sm "
                                                     data-container="body"
                                                     data-toggle="popover" data-placement="bottom">See details
                                             </button>
-
-                                            <script>
-                                                $(function () {
-
-                                                    var title = document.createElement("div");
-                                                    title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
-
-                                                    var content = document.createElement("div");
-                                                    content.style.display = 'none';
-                                                    content.id = "popover-content-entry";
-
-
-                                                    var term = document.createElement("h5");
-                                                    term.innerHTML = 'T-one<br>'
-
-                                                    content.appendChild(term);
-
-
-                                                    var ul = document.createElement("ul");
-                                                    ul.className = "list-unstyled"
-
-
-                                                    var li = document.createElement("li");
-                                                    li.className = "list-group-item";
-                                                    li.innerHTML = '<span class="dot  bg-light    "></span>  <small   {% if value == 0  %} style="color: #9d9d9d;"  {% endif %}> <b class="text-capitalize" >Test:</b> 0 hits </small>'
-                                                    li.style.border = 'none';
-                                                    li.style.padding = ".2rem 1.25rem"
-                                                    ul.appendChild(li)
-
-
-                                                    var li = document.createElement("li");
-                                                    li.className = "list-group-item";
-                                                    li.innerHTML = '<span class="dot  bg-success  "></span>  <small > <b class="text-capitalize" >test:</b> 5 hits </small>'
-                                                    li.style.border = 'none';
-                                                    li.style.padding = ".2rem 1.25rem"
-                                                    ul.appendChild(li)
-
-
-                                                    content.appendChild(ul)
-
-                                                    document.body.appendChild(content)
-
-                                                    var term = document.createElement("h5");
-                                                    term.innerHTML = 'T-TWO<br>'
-
-                                                    content.appendChild(term);
-
-
-                                                    var ul = document.createElement("ul");
-                                                    ul.className = "list-unstyled"
-
-
-                                                    var li = document.createElement("li");
-                                                    li.className = "list-group-item";
-                                                    li.innerHTML = '<span class="dot  bg-light    "></span>  <small   {% if value == 0  %}  style="color: #9d9d9d;"  {% endif %}> <b class="text-capitalize" >Test:</b> 0 hits </small>'
-                                                    li.style.border = 'none';
-                                                    li.style.padding = ".2rem 1.25rem"
-                                                    ul.appendChild(li)
-
-
-                                                    var li = document.createElement("li");
-                                                    li.className = "list-group-item";
-                                                    li.innerHTML = '<span class="dot  bg-danger  "></span>  <small > <b class="text-capitalize" >test:</b> 500 hits </small>'
-                                                    li.style.border = 'none';
-                                                    li.style.padding = ".2rem 1.25rem"
-                                                    ul.appendChild(li)
-
-
-                                                    content.appendChild(ul)
-
-                                                    document.body.appendChild(content)
-
-
-                                                    $('#entry_stat').popover({
-                                                        title: title,
-                                                        html: true,
-                                                        content: function () {
-                                                            return $('#popover-content-entry').html();
-                                                        }
-                                                    })
-
-
-                                                })</script>
 
                                             <br>
                                             <br>
@@ -184,7 +95,7 @@
                                 </div>
 
 
-                                {% if results.entries|length > 0 %}
+                                {% if meta.entries_founded  > 0 %}
                                     <div class="col-md-12">
 
 
@@ -238,76 +149,191 @@
                                     </div>
 
 
-                                     {% if results.entries|length > meta.max_entries_shown %}
+                                    {% if meta.entries_founded  > max_entries_shown %}
 
-                                         <div class=" col-md-10 offset-md-1">
+                                        <div class=" col-md-10 offset-md-1">
 
                                             <p style="color: red">
-                                        Your query fetch a lots of matching proteins. If you want to be more specific, click to add a taxonomic range and filter out some unnecessary entries:
+                                                Your query fetch a lots of matching proteins. If you want to be more specific, click to add a taxonomic range and filter out some unnecessary entries:
                                                 <strong style='cursor: pointer' onclick="add_taxa_token('Tetrapoda', true, 'taxon', 'taxon')">Tetrapoda</strong> or
                                                 <strong style='cursor: pointer' onclick="add_taxa_token('HUMAN', true, 'species', 'taxon')">HUMAN</strong>
-                                    </p>
+                                            </p>
 
-                                         </div>
+                                        </div>
 
 
-                                        {% endif %}
+                                    {% endif %}
 
                                 {% endif %}
 
-    </div>
+                            </div>
                         </div>
                     </div>
 
+                    <br>
 
-            <br>
+                    <div class="card search_group" >
 
-            <div class="card search_group">
+                          <div class="card-body">
+
+
+                              <div class="row">
+
+
+
+                              <div class="col-md-8 offset-md-2">
+
+
+                            <h5 class="card-title">Orthologous Groups <small>(OMA Groups & HOGs)</small>  </h5>
+
+
+
+                              <b class="float-right "> {% if meta.groups_founded <= max_groups_shown %}   <span id="total_group">{{meta.groups_founded}}</span>  {% if meta.groups_founded == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best <span id="total_group">{{max_groups_shown}}</span> {% if meta.groups_founded == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta.groups_founded}}
+{% endif %}
+
+
+                                  {% if meta.groups_founded > 0%}
+
+
+
+
+                                  <button id="group_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
+
+
+
+                                  <br>
+
+                                   {% endif %}
+
+                                  </b>
+
+
+
+                            </div>
+
+                              </div>
+
+
+                              {% if meta.groups_founded > 0%}
+
+
+
+                              <div class="row">
+
+
+
+                                  <div class="col-md-12 ">
+
+                                       <table class="table table-hover" id="matchTable_group"
+                   data-mobile-responsive="true" data-check-on-init="true"
+                   data-undefined-text=""
+                   data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                <thead>
+                    <tr>
+                        <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_generic_group_id">Group ID</th>
+                        <th data-field="type" data-sortable="true" >Type</th>
+                        <th data-field="size" data-sortable="true" >Nr genes in Group</th>
+                        <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_group_aux">Auxiliary Data</th>
+
+
+                    </tr>
+                </thead>
+
+                <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">Genes not present in selected taxon have been filtered out as per settings. <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a></div>
+            </table>
+
+
+
+
+
+
+                              </div>
+
+
+                                   </div>
+
+                               {% endif %}
+
+
+
+
+                          </div>
+                         </div>
+
+                    <br>
+
+                    <div class="card search_genome" >
+
                 <div class="card-body">
 
-                    <div class="row">
+                              <div class="row">
 
 
-                        <div class="col-md-8 offset-md-2">
+                              <div class="col-md-8 offset-md-2">
 
-                            <h5 class="card-title">
-                                Groups
-                            </h5>
 
-                            {{ results.groups }}
+                            <h5 class="card-title">Genomes </h5>
 
-                        </div>
-                    </div>
+                              <b class="float-right ">   <span id="total_genome">{{meta.taxon_founded}}</span>  {% if meta.taxon_founded == 1 %}  genome {% else %} genomes {% endif %}  found
+
+                                  {% if meta.taxon_founded > 0%}
+
+                                  <button id="genome_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
+
+                                  {% endif %}
+
+                              </b>
+
+
+                              <br>
+
+       </div>
+
+                              </div>
+
+                              {% if meta.taxon_founded > 0 %}
+
+
+                              <div class="row">
+
+                                  <div class="col-md-12 ">
+
+                                       <table class="table table-hover" id="matchTable_genome"
+
+                   data-mobile-responsive="true" data-check-on-init="true"
+                   data-undefined-text=""
+                   data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                <thead>
+                    <tr>
+                        <th data-field="type" data-sortable="true" data-formatter="tablehooks.format_generic_genome_link">Code/Name</th>
+                        <th data-field="ncbi" data-sortable="true" data-formatter="tablehooks.format_taxonid_as_link">NCBI Taxon ID</th>
+                        <th data-field="prots" data-sortable="true"># of Sequences/Genes</th>
+                        <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname_genomes">Scientific Name</th>
+                        <th data-field="common_name" data-sortable="true" data-formatter="tablehooks.format_species_common">Common Name</th>
+                        <th data-field="uniprot_species_code" data-sortable="true" data-formatter="tablehooks.format_species_code">Code</th>
+                        <th data-field="kingdom" data-sortable="true" data-formatter="tablehooks.format_as_kingdom_tag" title="Domain of Life"><span >Domains</span></th>
+
+                    </tr>
+                </thead>
+
+                   </table>
+                                   </div>
+
+                              </div>
+
+                              {% endif %}
+
+
+                          </div>
+                         </div>
+
+
+
                 </div>
+
             </div>
-
-            <br>
-
-            <div class="card search_genome">
-                <div class="card-body">
-
-                    <div class="row">
-
-
-                        <div class="col-md-8 offset-md-2">
-
-                            <h5 class="card-title">
-                                Genomes </h5>
-
-                            {{ results.species }}<br>
-                            {{ results.ancestral_genomes }}
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
 
         </div>
-
-    </div>
-
-    </div>
 
     </div>
 
@@ -321,12 +347,12 @@
     <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
 
     <script type="module">
-            window.search_token_vue.preload_token({{ search  | safe }})
+        window.search_token_vue.preload_token({{ search  | safe }})
     </script>
 
     <script >
 
-    function add_taxa_token(query, single_term, prefix, type){
+        function add_taxa_token(query, single_term, prefix, type){
             var tt = {query: query, single_term: single_term, prefix: prefix, type: type}
             window.search_token_vue.preload_token([tt])
         }
@@ -344,6 +370,46 @@
                 var element = $("th span:contains('Domains')")[0];
                 element.style.writingMode = "vertical-lr"
                 document.getElementById("total_entry").innerHTML = d.length;
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+
+        // GENOME RESULT TABLE
+
+        var data_genome = {{ data_genomes | safe }};
+
+        var tab = $("#matchTable_genome");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data_genome ,
+            onPostBody: function(d){
+                var element = $( "th span:contains('Domains')" )[0];
+                element.style.writingMode = "vertical-lr"
+                document.getElementById("total_genome").innerHTML = d.length;
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+
+        // GROUP RESULT TABLES
+
+        var data = {{ data_group | safe }};
+
+        var tab = $("#matchTable_group");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data ,
+            onPostBody: function(d){
+                document.getElementById("total_group").innerHTML = d.length;
             }
         });
         var icons = tab.bootstrapTable('getOptions').icons;

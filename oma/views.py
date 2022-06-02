@@ -2486,37 +2486,85 @@ def token_search(request):
             if prefix.lower() in prefixes:
                 return fn
 
-    _max_proteins_shown = 15
     context = {
         'results': None,
-        'search':None,
-        'meta':[],
+        'search': None,
+        'data_entry': [],
+        'data_group': [],
+        'data_genomes': [],
+        'max_proteins_shown':  15,
+        'max_groups_shown':  10,
+        'max_genomes_shown':  False,
+        'meta': {
+            'taxon_founded':0,
+            'entries_founded':0,
+            'groups_founded':0,
+        },
     }
 
-
     if request.method == 'POST':
-        # Process tokens
+
+        ## Process tokens
         raw_tokens = json.loads(request.POST.get("hidden_query", ""))
         tokens = [generate_type(z['prefix'])(utils.db, z['query']) for z in raw_tokens]
-
-        # Do the search
-        search_result = search.search(tokens)
-        context['results'] = search_result
-        context['search'] = json.dumps(raw_tokens)
+        context['search'] = json.dumps(raw_tokens) # this can be reuse by js directly
         context['search_raw'] = raw_tokens
-        context['meta'] = {
-            'max_entries_shown': _max_proteins_shown
-        }
 
-        # Prepare entry results
-        es =  list(search_result.entries.values())[:_max_proteins_shown]
+        ## Only run the search if tokens
+        if tokens:
+            context['results'] = search.search(tokens)
 
-        ces = []
-        for ev in es:
-            ces.append(models.ProteinEntry.from_entry_nr(utils.db, ev.entry_nr))
+            # quick access
+            E = context['results'].entries
+            G = context['results'].groups
+            S = context['results'].species
+            A = context['results'].ancestral_genomes
 
-        context['data_entry'] = json.dumps(EntrySearchJson().as_json(ces))
+            context['meta']['entries_founded'] = len(E) if E else 0
+            context['meta']['groups_founded'] = len(G) if G else 0
+            context['meta']['taxon_founded'] = (len(S) if S else 0) + (len(A) if A else 0)
 
+            # Prepare entry results
+            if E:
+                entries = [models.ProteinEntry.from_entry_nr(utils.db, e.entry_nr) for e in list(E.values())[:context['max_proteins_shown']] ]
+                context['data_entry'] = json.dumps(EntrySearchJson().as_json(entries)) # todo sequence in EntrySearchJson  ?
+
+            # Prepare groups results todo filter top x
+            if G:
+                hogs = []
+                ogs = []
+
+                for group in G.values():
+                    if isinstance(group, models.HOG):
+                        group.fingerprint = None
+                        group.type = 'HOG'
+                        hogs.append(group)
+                    elif isinstance(group, models.OmaGroup):
+                        group.level = 'God' # todo ?
+                        group.type = 'OMA group'
+                        ogs.append(group)
+                    else:
+                        logger.error("Search groups: {} can't be assign as HOG or OmaGroup".format(group))
+
+                context['data_group'] = json.dumps(HOGSearchJson().as_json(hogs) + OGSearchJson().as_json(ogs))
+
+            # Prepare genomes results todo filter top x
+            if S or A:
+
+                def augment_ancestral_genomes(ag): #todo better
+                    ag.uniprot_species_code = ''
+                    ag.species_and_strain_as_dict = ag.sciname
+                    ag.common_name = ''
+                    ag.last_modified = ''
+                    ag.nr_entries = 99999
+                    ag.type = "Ancestral"
+                    return ag
+
+
+                json_species = GenomeModelJsonMixin().as_json(S.values())
+                json_ancestal_genomes = GenomeModelJsonMixin().as_json([augment_ancestral_genomes(ag) for ag in A.values()])
+
+                context['data_genomes'] = json.dumps(json_species + json_ancestal_genomes)
 
     return render(request, 'search_token.html', context)
 
@@ -2525,22 +2573,14 @@ def token_search(request):
 
 
 
-'''
-class EntrySearchJson(JsonModelMixin):
-    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
-                   'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'oma_group': None,
-                   'hog_family_nr': 'roothog', 'xrefs': None,
-                   'description': None,
-                   "found_by": "found_by",
-                   "sequence" : "sequence"}
- '''
 class EntrySearchJson(JsonModelMixin):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'oma_group': None,
                    'hog_family_nr': 'roothog', 'xrefs': None,
                    'description': None}
+                   #"sequence" : "sequence"}
+
 
 
 class GenomeModelJsonMixin(JsonModelMixin):
@@ -2548,11 +2588,10 @@ class GenomeModelJsonMixin(JsonModelMixin):
                    "species_and_strain_as_dict": 'sciname',
                    'ncbi_taxon_id': "ncbi",
                    "common_name": None,
-                   "nr_entries": "prots", "kingdom": None,
-                   "last_modified": None,
-                   "found_by": "found_by",
-                   "type": "type"}
-
+                   "nr_entries": "prots",
+                    "kingdom": None,
+                   "last_modified": None}
+                   #"type": "type"}
 
 class GenomeModelJsonTableMixin(JsonModelMixin):
     json_fields = {'uniprot_species_code': None,
@@ -2578,8 +2617,17 @@ class HOGSearchJson(JsonModelMixin):
         'level': 'level',
         'nr_member_genes': 'size',
         'type': 'type',
-        'fingerprint': 'fingerprint',
-        "found_by": "found_by"}
+        'fingerprint': 'fingerprint'}
+
+
+class OGSearchJson(JsonModelMixin):
+
+    json_fields = {
+        'group_nbr': 'group_nr',
+        'level': 'level',
+        'nr_member_genes': 'size',
+        'type': 'type',
+        'fingerprint': 'fingerprint'}
 
 
 class FullTextJson(JsonModelMixin, View):
