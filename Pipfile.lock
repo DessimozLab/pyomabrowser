@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "5acbaf847fe19ef9aad4eb04ff9623fb77ae8ed3781653f6023126f331ad082f"
+            "sha256": "0c9b83a38453849331828de44c4e18966c115f806f6c85aad5e7889603225aa6"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -634,7 +634,7 @@
         },
         "pyoma": {
             "git": "ssh://gitolite@lab.dessimoz.org:2222/pyoma",
-            "ref": "b94009a21c5064b78f4d0d7ff69d1922d62294c7"
+            "ref": "1de304150bf3daf9bc64716765d7cc2737e67756"
         },
         "pyopa": {
             "hashes": [
@@ -1068,7 +1068,7 @@
         },
         "zoo": {
             "git": "ssh://gitolite@lab.dessimoz.org:2222/zoo",
-            "ref": "b81e06cd50a0810711a6319cbb6a827401988ad2"
+            "ref": "a6db7f4592110de8c53443edc87485e26b3b3e82"
         }
     },
     "develop": {}
