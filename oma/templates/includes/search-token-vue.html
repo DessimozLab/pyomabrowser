@@ -9,6 +9,8 @@
         background-color: transparent;
         border: none;
         margin-right: 4px;
+        margin-left: auto;
+        order: 2;
     }
 
     .prefix-dropdown {
@@ -22,8 +24,9 @@
         margin-right: 4px;
     }
 
-    #token-input {
+    #{{unique_id}} {
 
+        display: flex;
         border: 1px solid #eee;
         font-size: 0.9em;
         height: 50px;
@@ -53,8 +56,8 @@
         outline: none;
         font-size: 0.9em;
         line-height: 50px;
-        background: none;
-        width: calc(40% - 48px);
+        flex-grow: 1;
+        background: transparent;
     }
 
     .token-delete {
@@ -62,12 +65,11 @@
         color: red;
     }
 
-    #token-container{
+    #token-container_{{ unique_id }}{
         white-space: nowrap;
-        float:left;
-        max-width: 60%;
         overflow: scroll;
         display: inline;
+
     }
 
 </style>
@@ -212,7 +214,7 @@
             },
             detokenize(index){
                 var token = this.tokens.splice(index, 1)[0];
-                var input_token_search = document.getElementById('input_token_search');
+                var input_token_search = document.getElementById('input_token_search_{{ unique_id }}');
                 var token_str = token.prefix + ': '
                 token_str += token.single_term ? '' : '"'
                 token_str += token.query
@@ -305,9 +307,7 @@
 
     </div>
 
-
-
-        <input type="hidden" name="hidden_query" :value="post_query">
+    <input type="hidden" name="hidden_query" :value="post_query">
 
     <input type='text' placeholder="Enter your query"  class='token-input__text' id="input_token_search_{{ unique_id }}"
            @keydown.enter='addToken'
