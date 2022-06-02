@@ -76,20 +76,21 @@
 
     const {createApp} = Vue
 
-    window.search_token_vue = createApp({
+    window.search_token_vue_{{ unique_id }} = createApp({
         data() {
             return {
                 tokens: [], //{query: 'HUMAN', single_term: true, prefix: "Species", type: "Taxon"}
                 prefixes: {
                     'Protein': ['proteinID','xref','go','ec','description','domain','sequence'],
                     'Taxon': ['species','taxid', 'taxon'],
-                    'HOG': ['hog'],
-                    'OMA Group': ['og', 'fingerprint'],
+                    'HOG': ['hog','sequence'],
+                    'OMA Group': ['og', 'fingerprint','sequence'],
                 },
                 default_prefix : 'description',
                 show_error: false,
                 error_message : " Error.",
-                post_query: ''
+                post_query: '',
+                wild_card: 'sequence'
             }
         },
         compilerOptions: {
@@ -226,19 +227,26 @@
             },
             validate_token(val, sinle_term, p ){
 
-                // Validate type val is valid for p
+                if (this.wild_card.includes(p)){
+                    return true
+                }
+
+                // todo Validate type val is valid for p
 
                 // validate prefix not in conflict with other prefix
                 var pu = this.get_prefix_used();
                 var current_prefix_type = this.get_type_prefix(p)
 
+
+
                 if (current_prefix_type != 'Taxon'){
 
                     var no_taxon = pu.filter(x => x !== 'Taxon');
 
-                    if (no_taxon.length > 0){
+                    if (no_taxon.length > 0 && no_taxon[0] != current_prefix_type ) {
                         this.show_error = true;
-                            this.error_message = "Error: You can't have twice the same prefix except for Taxon."
+                            this.error_message = "Warning: You are searching for " + no_taxon[0] +
+                                " you can't add token for " + current_prefix_type
                             return false
                     }
 
@@ -256,7 +264,7 @@
                 }
             }
         },
-    }).mount('#token-input')
+    }).mount('#{{ unique_id }}')
 
 
 </script>
@@ -264,9 +272,9 @@
 <form method="POST" action="{% url 'search_token' %}" >
             {% csrf_token %}
 
-<div id="token-input">
+<div id="{{ unique_id }}">
 
-    <div id="token-container">
+    <div id="token-container_{{ unique_id }}">
 
     <span v-for="token, index in tokens" :key="token" class="token-input__tag">
 
@@ -301,7 +309,7 @@
 
         <input type="hidden" name="hidden_query" :value="post_query">
 
-    <input type='text' placeholder="Enter your query"  class='token-input__text' id="input_token_search"
+    <input type='text' placeholder="Enter your query"  class='token-input__text' id="input_token_search_{{ unique_id }}"
            @keydown.enter='addToken'
            @keydown.space='addToken'
            @keydown.delete='removeLastToken'

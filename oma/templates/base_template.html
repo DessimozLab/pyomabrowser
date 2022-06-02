@@ -43,6 +43,8 @@
     <script>var static_root = "{% static "" %}";</script>
 
 
+
+
     <!-- AA: not sure which of those libs will still be needed. I suspect autocomplete.min.js for sure, rest probably not  -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
 
@@ -79,7 +81,7 @@
 
         <span class="oma-main-search-header">
 
-        {% include "includes/search-token-vue.html" %}
+        {% include "includes/search-token-vue.html" with unique_id='search_nav' %}
 
 
         </span>
@@ -103,15 +105,8 @@
 
             <div class="search">
                 <h3>Search</h3>
-                <form class="oma-search-mobile" id="searchNavForm" role="search" action="{% url 'search' %}" method="POST">
-                    <div class="oma-search-select">
-                        <select id="selectNav" class=" btn-mini" name="type" onchange="update_autocomplete_enableing('searchNavForm')">
-                             {% include "includes/search_select.html" %}
-                        </select>
-                    </div>
-                    <input type="text" id="textNav" class="" name="query" placeholder='{% if oma_instance_name != "basf" %}P53_RAT | Fungi | "auxin response factor"{% else %}PLDB2_ARATH | "auxin response factor" | psbC Brassicaceae{% endif %}'/>
-                    <button type="submit"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
-                </form>
+
+              {% include "includes/search-token-vue.html" with unique_id='search_min' %}
             </div>
 
             <ul class="navbar-nav">
@@ -332,9 +327,9 @@
         }
 
     };
-    $('#textNav').autocomplete(autocomplete_opts);
-    $('#inputBrowser').autocomplete(autocomplete_opts);
-    update_autocomplete_enableing('searchNavForm');
+    //$('#textNav').autocomplete(autocomplete_opts);
+    //$('#inputBrowser').autocomplete(autocomplete_opts);
+   // update_autocomplete_enableing('searchNavForm');
 </script>
 
 {% block content %}{% endblock %}
