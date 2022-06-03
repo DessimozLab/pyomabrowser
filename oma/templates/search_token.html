@@ -38,16 +38,59 @@
 
                     <div class="col-md-8 offset-md-2">
 
-                        <h3><strong>Search results matching for
+
+                        <h3><strong>Results for searching:
                         </strong>
 
-                            <span>
 
-                                {% for e in search_raw %}
-                                    "{{ e.query }}" as {{ e.prefix }} [{{ e.type }}]
-                                    {% if not forloop.last %} ,  {% endif %}
-                                {% endfor %}
-                            </span>
+                            {% if search_organised.Taxon_count > 0 and search_organised.Others == 0 and  search_organised.wildcard_count == 0    %}
+
+                                <span> ONLY TAXON </span>
+
+                            {% elif  search_organised.Others == 0 and  search_organised.wildcard_count > 0  %}
+
+                                {% if search_organised.Taxon_count > 0 %}
+
+                                    <span>  WILDCARD + Taxon </span>
+
+                                {% else %}
+
+                                    <span> ONLY WILDCARD </span>
+
+                                {% endif %}
+
+
+                            {% elif  search_organised.Others > 0   %}
+
+                                {% if search_organised.wildcard_count > 0 %}
+
+                                     {% if search_organised.Taxon_count > 0 %}
+
+                                    <span>  TYPE + WILDCARD  + Taxon </span>
+
+                                {% else %}
+
+                                    <span> TYPE + WILDCARD  </span>
+
+                                {% endif %}
+
+                                {% else %}
+
+                                    {% if search_organised.Taxon_count > 0 %}
+
+                                    <span>  ONLY TYPE   + Taxon </span>
+
+                                {% else %}
+
+                                    <span> ONLY TYPE   </span>
+
+                                {% endif %}
+
+                                {% endif %}
+
+                            {% endif %}
+
+
                         </h3>
                     </div>
 
@@ -327,13 +370,35 @@
                           </div>
                          </div>
 
+                    <br>
+                    <br>
+                <br>
 
+                  <div class="row">
+                      <div class="col-md-6 offset-md-3">
+                          <div class="card">
+                                <div class="card-body">
+    <h5 class="card-title" style="font-size: large">It seems you reached the end...</h5>
+    <h6 class="card-subtitle mb-2 text-muted">...but no worries!</h6>
+    <p class="card-text">If you have not founded what you were looking for we invite you to read our
+        "how to search?" tutorial or to contact us if you have a specific request.</p>
+    <a href="#" class="card-link">Read the search manual</a>
+    <a href="#" class="card-link">Contact us</a>
+  </div>
+                          </div>
+                      </div>
+
+                  </div>
+
+                {{ search_organised }}
 
                 </div>
 
             </div>
 
         </div>
+
+
 
     </div>
 

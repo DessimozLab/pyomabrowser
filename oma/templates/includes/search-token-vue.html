@@ -24,7 +24,7 @@
         margin-right: 4px;
     }
 
-    #{{unique_id}} {
+    #{{ unique_id }}_input_part {
 
         display: flex;
         border: 1px solid #eee;
@@ -83,7 +83,7 @@
             return {
                 tokens: [], //{query: 'HUMAN', single_term: true, prefix: "Species", type: "Taxon"}
                 prefixes: {
-                    'Protein': ['proteinID','xref','go','ec','description','domain','sequence'],
+                    'Protein': ['proteinid','xref','go','ec','description','domain','sequence'],
                     'Taxon': ['species','taxid', 'taxon'],
                     'HOG': ['hog','sequence'],
                     'OMA Group': ['og', 'fingerprint','sequence'],
@@ -192,7 +192,6 @@
 
                     if (this.validate_token(val.replaceAll('"', ''), sinle_term, p )){
                         val = val.replaceAll('"', '')
-                         console.log(val, sinle_term, p)
                         this.tokens.push({query: val, single_term: sinle_term, prefix: p, type:this.get_type_prefix(p)});
                         event.target.value = '';
                     }
@@ -239,8 +238,6 @@
                 var pu = this.get_prefix_used();
                 var current_prefix_type = this.get_type_prefix(p)
 
-
-
                 if (current_prefix_type != 'Taxon'){
 
                     var no_taxon = pu.filter(x => x !== 'Taxon');
@@ -268,6 +265,59 @@
         },
     }).mount('#{{ unique_id }}')
 
+    var autocomplete_opts = {
+
+        paramName: 'search',
+        serviceUrl: '/api/xref/',
+        minChars: 3,
+        triggerSelectOnValidInput: false,
+        deferRequestBy: 200,
+        transformResult: function (response) {
+            var json = JSON.parse(response);
+            var xref_source_order = {{ xref_order | safe }};
+            json.sort(function (a, b){
+                var idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
+                if (idx_a === idx_b){
+                    return a.xref > b.xref ? 1 : -1;
+                }
+                return idx_a - idx_b;
+            });
+            return {
+                suggestions: $.map(json, function (dataItem) {
+                    return {value: dataItem.xref, data: dataItem};
+                })
+            };
+        },
+        groupBy: 'source',
+        formatResult: function(suggestion, currentValue) {
+            // Do not replace anything if there current value is empty
+            if (!currentValue) {
+                return suggestion.value;
+            }
+            // escape any special char
+            var pattern = '(' + currentValue.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&") + ')';
+            var highlight_and_escape = function(val){
+                return val.replace(new RegExp(pattern, 'gi'), '<strong>$1<\/strong>')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/&lt;(\/?strong)&gt;/g, '<$1>');
+            };
+            var label = '<span class="auto-xref">' + highlight_and_escape(suggestion.data.xref) +'</span> &nbsp;'+
+                        '<span class="auto-omaid">' + suggestion.data.omaid + '</span>'+
+                        '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
+            return label;
+        },
+        onSelect: function(item){
+            window.location.href = "/oma/vps/" + item.data.entry_nr;
+            return false;
+        },
+        response: function( event, ui ) {console.log('HOG')}
+
+    };
+    $('#input_token_search_{{ unique_id }}').autocomplete(autocomplete_opts);
+
 
 </script>
 
@@ -276,7 +326,8 @@
 
 <div id="{{ unique_id }}">
 
-    <div id="token-container_{{ unique_id }}">
+    <div id="{{ unique_id }}_input_part">
+            <div id="token-container_{{ unique_id }}">
 
     <span v-for="token, index in tokens" :key="token" class="token-input__tag">
 
@@ -319,9 +370,13 @@
         <img  style='width: 24px;' src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/>
     </button>
 
+    </div>
 
 
-    <p style="color: red" v-show="show_error"> $[this.error_message]$  </p>
+    <div style="display: flex" v-show="show_error">
+        <p style="color: red; margin-right: auto;" > $[this.error_message]$  </p>
+    </div>
+
 
 
 </div>

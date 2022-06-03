@@ -2489,6 +2489,8 @@ def token_search(request):
     context = {
         'results': None,
         'search': None,
+        'search_raw': None,
+        'search_organised': None,
         'data_entry': [],
         'data_group': [],
         'data_genomes': [],
@@ -2509,6 +2511,29 @@ def token_search(request):
         tokens = [generate_type(z['prefix'])(utils.db, z['query']) for z in raw_tokens]
         context['search'] = json.dumps(raw_tokens) # this can be reuse by js directly
         context['search_raw'] = raw_tokens
+
+        context['search_organised'] = {
+            'Protein':[],
+            'Taxon':[],
+            'HOG':[],
+            'OMA Group':[],
+            'wildcard': [],
+            'Taxon_count': 0,
+            'Others': 0,
+            'wildcard_count': 0
+        }
+        wild_card= ['sequence']
+        for t in raw_tokens:
+            if t['prefix'] in wild_card:
+                context['search_organised']['wildcard'].append(t)
+                context['search_organised']['wildcard_count'] +=1
+            else:
+                context['search_organised'][t['type']].append(t)
+
+                if t['type'] == 'Taxon':
+                    context['search_organised']['Taxon_count'] += 1
+                else:
+                    context['search_organised']['Others'] += 1
 
         ## Only run the search if tokens
         if tokens:
