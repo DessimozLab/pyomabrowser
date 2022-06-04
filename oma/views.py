@@ -2544,15 +2544,23 @@ def token_search(request):
             G = context['results'].groups
             S = context['results'].species
             A = context['results'].ancestral_genomes
+            T = context['search_organised']
 
             context['meta']['entries_founded'] = len(E) if E else 0
             context['meta']['groups_founded'] = len(G) if G else 0
             context['meta']['taxon_founded'] = (len(S) if S else 0) + (len(A) if A else 0)
 
-            # Prepare entry results
+            # Prepare entry results todo filter top X
             if E:
                 entries = [models.ProteinEntry.from_entry_nr(utils.db, e.entry_nr) for e in list(E.values())[:context['max_proteins_shown']] ]
+
+                # redirect to entry page is only searching for protein and get one match
+                if (len(entries) == 1 and not T['OMA Group'] and not T['HOG'] and not T['wildcard']):
+                    return redirect('pairs', entries[0].entry_nr)
+
+                # Build json data for table
                 context['data_entry'] = json.dumps(EntrySearchJson().as_json(entries)) # todo sequence in EntrySearchJson  ?
+
 
             # Prepare groups results todo filter top x
             if G:
@@ -2571,6 +2579,14 @@ def token_search(request):
                     else:
                         logger.error("Search groups: {} can't be assign as HOG or OmaGroup".format(group))
 
+                # redirect to hog page is only searching for hog and get one match
+                if (len(hogs) == 1 and len(ogs) ==0 and  not T['OMA Group'] and not T['Protein'] and not T['wildcard']):
+                    return redirect('hog_viewer',  hogs[0].hog_id)
+
+                # redirect to omagroup page is only searching for og and get one match
+                if (len(hogs) == 0 and len(ogs) == 1 and not T['HOG'] and not T['Protein'] and not T['wildcard']):
+                    return redirect('omagroup_members', ogs[0].group_nbr)
+
                 context['data_group'] = json.dumps(HOGSearchJson().as_json(hogs) + OGSearchJson().as_json(ogs))
 
             # Prepare genomes results todo filter top x
@@ -2586,9 +2602,22 @@ def token_search(request):
                     return ag
 
 
+                # easy peasy
+                number_species = len(S.values()) if S else 0
+                number_ancestral = len(A.values()) if A else 0
+
+                # redirect to genome page is only searching for genome and get one match
+                if (number_species == 1 and number_ancestral == 0 and not T['OMA Group'] and not T['HOG'] and not T['wildcard'] and not T['Protein']):
+                    return redirect('genome_info', S.values()[0].uniprot_species_code)
+
+                # redirect to ancestral genome page is only searching for genome and get one match
+                if (number_species == 0 and number_ancestral == 1 and not T['OMA Group'] and not T['HOG'] and not T[
+                    'wildcard'] and not T['Protein']):
+                    return redirect('ancestralgenome_info', A.values()[0].ncbi_taxon_id)
+
+                # build json for genomes tables
                 json_species = GenomeModelJsonMixin().as_json(S.values())
                 json_ancestal_genomes = GenomeModelJsonMixin().as_json([augment_ancestral_genomes(ag) for ag in A.values()])
-
                 context['data_genomes'] = json.dumps(json_species + json_ancestal_genomes)
 
     return render(request, 'search_token.html', context)
