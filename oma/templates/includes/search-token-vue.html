@@ -223,8 +223,15 @@
 
 
             },
-            on_change_prefix(prefix, t){
-                t.prefix = prefix.toLowerCase()
+            on_change_prefix(target, t){
+                var prefix = target.value
+                if (this.validate_token(t.query, t.single_term,prefix)){
+                    t.prefix = prefix.toLowerCase()
+                }
+                else {
+                    target.value = t.prefix;
+                }
+
             },
             validate_token(val, sinle_term, p ){
 
@@ -332,7 +339,7 @@
     <span v-for="token, index in tokens" :key="token" class="token-input__tag">
 
 
-        <select class="prefix-dropdown" @change="on_change_prefix($event.target.value, token)">
+        <select class="prefix-dropdown" @change="on_change_prefix($event.target, token)">
 
                <template v-for="(prefixes_list, prefix_type) in prefixes">
     <optgroup :label="prefix_type" >
@@ -341,8 +348,6 @@
             </option>
          </optgroup>
   </template>
-
-
 
         </select>
 
