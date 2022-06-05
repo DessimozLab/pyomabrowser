@@ -50,10 +50,16 @@
 
     <script src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
 
-    {% block js_hook %}{% endblock %}
+    {{ release_char|json_script:"release_char-data" }}
+
+    {% block js_hook %}
+
+
+    {% endblock %}
 </head>
 
-{{ release_char|json_script:"release_char-data" }}
+
+
 
 {% url 'home' as home %}
 <body class="{% if request.get_full_path == home %}landing{% endif %}">

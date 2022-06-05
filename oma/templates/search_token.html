@@ -1,6 +1,16 @@
 {% extends  "base_template.html" %}
 {% load staticfiles %}
 
+{% block css_hook %}
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
+{% endblock %}
+
+{% block js_hook %}
+     <!-- bootstrap-table -->
+    <script src='{% static "js/tablehooks.js" %}' type="text/javascript"></script>
+    <script src='{% static "js/highlight.js" %}'></script>
+{% endblock %}
+
 {% block content %}
 
     <style>
@@ -36,7 +46,7 @@
 
                 <div class="card-body ">
 
-                    <div class="col-md-8 offset-md-2">
+                    <div id='search_title' class="col-md-8 offset-md-2">
 
 
                         <h3><strong>Results for searching:
@@ -45,7 +55,16 @@
 
                             {% if search_organised.Taxon_count > 0 and search_organised.Others == 0 and  search_organised.wildcard_count == 0    %}
 
-                                <span> ONLY TAXON </span>
+
+
+                                   {% for token in search_organised.Taxon %}
+
+                                       <p style="display: inline-block"> "{{ token.query }}" as <i>{{ token.prefix }}</i> ({{token.type  }})
+                                        {% if not forloop.last %},{% endif %}
+                                       </p>
+
+
+                                   {% endfor %}
 
                             {% elif  search_organised.Others == 0 and  search_organised.wildcard_count > 0  %}
 
@@ -402,13 +421,6 @@
 
     </div>
 
-
-
-    <!-- bootstrap-table -->
-    <script src='{% static "js/tablehooks.js" %}' type="text/javascript"></script>
-
-    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
-
     <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
         <script type="module">
         window.search_token_vue_search_nav.preload_token({{ search  | safe }})
@@ -422,7 +434,6 @@
             var tt = {query: query, single_term: single_term, prefix: prefix, type: type}
             window.search_token_vue.preload_token([tt])
         }
-
 
         // ENTRY RESULT TABLE
         var data = {{ data_entry | safe }};
@@ -446,7 +457,6 @@
         // GENOME RESULT TABLE
 
         var data_genome = {{ data_genomes | safe }};
-
         var tab = $("#matchTable_genome");
         tab.bootstrapTable({
             reorderableColumns: true,
@@ -465,9 +475,7 @@
 
 
         // GROUP RESULT TABLES
-
         var data = {{ data_group | safe }};
-
         var tab = $("#matchTable_group");
         tab.bootstrapTable({
             reorderableColumns: true,
@@ -482,6 +490,26 @@
         $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
         tab.bootstrapTable('refreshOptions', {'icons': icons});
 
+    </script>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", function(e) {
+
+            var tkns = {{ search  | safe }}
+            var hilitor_query = '' // separate by @
+
+            for (var idx in tkns ) {
+                hilitor_query += tkns[idx].query + '@'
+            }
+
+
+
+            var hilitor = new Hilitor('oma-generic-container');
+            hilitor.setBreakRegExp(new RegExp('[^\\w\' -]+', "g"));
+            hilitor.setMatchType("open");
+            hilitor.apply(hilitor_query);
+
+        }, false);
     </script>
 
 
