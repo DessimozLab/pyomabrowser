@@ -2516,7 +2516,7 @@ def token_search(request):
             'Protein':[],
             'Taxon':[],
             'HOG':[],
-            'OMA Group':[],
+            'OMA_Group':[],
             'wildcard': [],
             'Taxon_count': 0,
             'Others': 0,
@@ -2555,7 +2555,7 @@ def token_search(request):
                 entries = [models.ProteinEntry.from_entry_nr(utils.db, e.entry_nr) for e in list(E.values())[:context['max_proteins_shown']] ]
 
                 # redirect to entry page is only searching for protein and get one match
-                if (len(entries) == 1 and not T['OMA Group'] and not T['HOG'] and not T['wildcard']):
+                if (len(entries) == 1 and not T['OMA_Group'] and not T['HOG'] and not T['wildcard']):
                     return redirect('pairs', entries[0].entry_nr)
 
                 # Build json data for table
@@ -2574,13 +2574,13 @@ def token_search(request):
                         hogs.append(group)
                     elif isinstance(group, models.OmaGroup):
                         group.level = 'God' # todo ?
-                        group.type = 'OMA group'
+                        group.type = 'OMA_group'
                         ogs.append(group)
                     else:
                         logger.error("Search groups: {} can't be assign as HOG or OmaGroup".format(group))
 
                 # redirect to hog page is only searching for hog and get one match
-                if (len(hogs) == 1 and len(ogs) ==0 and  not T['OMA Group'] and not T['Protein'] and not T['wildcard']):
+                if (len(hogs) == 1 and len(ogs) ==0 and  not T['OMA_Group'] and not T['Protein'] and not T['wildcard']):
                     return redirect('hog_viewer',  hogs[0].hog_id)
 
                 # redirect to omagroup page is only searching for og and get one match
@@ -2607,11 +2607,11 @@ def token_search(request):
                 number_ancestral = len(A.values()) if A else 0
 
                 # redirect to genome page is only searching for genome and get one match
-                if (number_species == 1 and number_ancestral == 0 and not T['OMA Group'] and not T['HOG'] and not T['wildcard'] and not T['Protein']):
+                if (number_species == 1 and number_ancestral == 0 and not T['OMA_Group'] and not T['HOG'] and not T['wildcard'] and not T['Protein']):
                     return redirect('genome_info', S.values()[0].uniprot_species_code)
 
                 # redirect to ancestral genome page is only searching for genome and get one match
-                if (number_species == 0 and number_ancestral == 1 and not T['OMA Group'] and not T['HOG'] and not T[
+                if (number_species == 0 and number_ancestral == 1 and not T['OMA_Group'] and not T['HOG'] and not T[
                     'wildcard'] and not T['Protein']):
                     return redirect('ancestralgenome_info', A.values()[0].ncbi_taxon_id)
 
