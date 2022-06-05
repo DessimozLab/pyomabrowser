@@ -93,7 +93,8 @@
                 error_message : " Error.",
                 post_query: '',
                 wild_card: 'sequence',
-                placeholder: 'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
+                placeholder: 'proteinid | xref | go | ec | description | domain | sequence | species  | taxid | taxon | hog | og | fingerprint',  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
+                placeholder_default: 'proteinid | xref | go | ec | description | domain | sequence | species  | taxid | taxon | hog | og | fingerprint'  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
             }
         },
         compilerOptions: {
@@ -271,8 +272,8 @@
                         this.tokens.push({query: token.query, single_term: token.sinle_term, prefix: token.prefix, type:token.type});
                     }
                 }
-
                 this.placeholder = ''
+
             },
             is_empty(){return tokens.length == 0 ? true : false}
         },
@@ -385,7 +386,7 @@
 
 
     <div style="display: flex" v-show="show_error">
-        <p style="color: red; margin-right: auto;" > $[this.error_message]$  </p>
+        <small style="color: red; margin-right: auto;" > $[this.error_message]$  </small>
     </div>
 
 

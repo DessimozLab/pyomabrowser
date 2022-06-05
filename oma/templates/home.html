@@ -62,8 +62,8 @@
             <p>
                 <strong>Examples:</strong>
                 {% block search_examples %}
-                    <span class="ex" onclick="window.search_token_vue_search_nav.preload_token([{query: 'HUMAN22169', single_term: true, prefix: 'proteinid', type: 'Protein'}])">Entry HUMAN22169</span> -
                     <span class="ex" onclick="window.search_token_vue_search_nav.preload_token([{query: 'P53_RAT', single_term: true, prefix: 'proteinid', type: 'Protein'}])">Entry P53_RAT</span> -
+                    <span class="ex" onclick="window.search_token_vue_search_nav.preload_token([{query: 'EWGKQSF', single_term: true, prefix: 'sequence', type: 'Protein'},{query: 'Tetraodon', single_term: true, prefix: 'species', type: 'Taxon'}])">'EWGKQSF' in Tetraodon</span> -
                     <span class="ex" onclick="window.search_token_vue_search_nav.preload_token([{query: 'Blue-light photoreceptor', single_term: false, prefix: 'description', type: 'Protein'}])">Search for "Blue-light photoreceptor"</span> -
                     <span class="ex" onclick="window.search_token_vue_search_nav.preload_token([{query: 'Drosophila melanogaster', single_term: false, prefix: 'species', type: 'Taxon'}])">"Drosophila melanogaster" species</span>
                 {% endblock search_examples %}
