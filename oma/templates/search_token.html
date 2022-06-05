@@ -420,17 +420,25 @@
                                 <div class="card-body">
                                     <h5 class="card-title" style="font-size: large">It seems you reached the end...</h5>
                                     <h6 class="card-subtitle mb-2 text-muted">...but no worries!</h6>
-                                    <p class="card-text">If you have not founded what you were looking for we invite you to read our
-                                        "how to search?" tutorial or to contact us if you have a specific request.</p>
-                                    <a href="#" class="card-link">Read the search manual</a>
-                                    <a href="#" class="card-link">Contact us</a>
+
+                                    <p class="card-text">
+                                        A small tutorial is available to help you use the search in OMA.
+                                    </p>
+
+                                    <p class="card-text">
+                                        You can also help us to improve this service by letting us know what
+                                        you searched and what you expected to find.
+
+                                    </p>
+                                    <a href="{% url "uses" %}#search_manual_token" class="card-link">Read the search tutorial</a>
+                                    <a href="mailto:contact@omabrowser.org" class="card-link">Contact us</a>
                                 </div>
                             </div>
                         </div>
 
                     </div>
 
-                    {{ search_organised }}
+
 
                 </div>
 

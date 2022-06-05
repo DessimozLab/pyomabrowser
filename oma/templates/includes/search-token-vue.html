@@ -92,7 +92,8 @@
                 show_error: false,
                 error_message : " Error.",
                 post_query: '',
-                wild_card: 'sequence'
+                wild_card: 'sequence',
+                placeholder: 'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
             }
         },
         compilerOptions: {
@@ -199,6 +200,7 @@
 
                 }
 
+
             },
             removeToken(index) {
                 this.tokens.splice(index, 1)
@@ -262,13 +264,17 @@
 
             },
             preload_token(tokens){
+                this.tokens = []
                 for (var i in tokens) {
                     var token = tokens[i]
                     if (this.validate_token(token.query, token.sinle_term, token.prefix )){
                         this.tokens.push({query: token.query, single_term: token.sinle_term, prefix: token.prefix, type:token.type});
                     }
                 }
-            }
+
+                this.placeholder = ''
+            },
+            is_empty(){return tokens.length == 0 ? true : false}
         },
     }).mount('#{{ unique_id }}')
 
@@ -365,7 +371,7 @@
 
     <input type="hidden" name="hidden_query" :value="post_query">
 
-    <input type='text' placeholder="Enter your query"  class='token-input__text' id="input_token_search_{{ unique_id }}"
+    <input type='text' :placeholder='placeholder'  class='token-input__text' id="input_token_search_{{ unique_id }}"
            @keydown.enter='addToken'
            @keydown.space='addToken'
            @keydown.delete='removeLastToken'
