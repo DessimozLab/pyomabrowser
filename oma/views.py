@@ -2495,7 +2495,7 @@ def token_search(request):
         'data_group': [],
         'data_genomes': [],
         'max_proteins_shown':  15,
-        'max_groups_shown':  10,
+        'max_groups_shown':  99999,
         'max_genomes_shown':  False,
         'meta': {
             'taxon_founded':0,
@@ -2552,7 +2552,39 @@ def token_search(request):
 
             # Prepare entry results todo filter top X
             if E:
-                entries = [models.ProteinEntry.from_entry_nr(utils.db, e.entry_nr) for e in list(E.values())[:context['max_proteins_shown']] ]
+                entries_all = [models.ProteinEntry.from_entry_nr(utils.db, e.entry_nr) for e in list(E.values()) ]
+
+
+                if len(entries_all) > context['max_proteins_shown']:
+
+                    # if we found a main isoform marked all the alternative to be removed
+                    isoforms = []
+                    for e in entries_all:
+                        if e.is_main_isoform:
+                            for ai in e.alternative_isoforms:
+                                isoforms.append(ai.entry_nr)
+
+                    for p in entries_all:
+                        p.score = 0
+
+                        if '_' in p.canonicalid:
+                            p.score += 10
+
+                        if p.oma_group != 0:
+                            p.score += 1
+
+                        if p.oma_hog != 0:
+                            p.score += 1
+
+                        if p.entry_nr in isoforms:
+                            p.score = -1
+
+                    sorted_entries = sorted(entries_all, key=lambda x: x.score, reverse=True)
+                    entries = sorted_entries[:context['max_proteins_shown']]
+
+                else:
+                    entries = entries_all
+
 
                 # redirect to entry page is only searching for protein and get one match
                 if (len(entries) == 1 and not T['OMA_Group'] and not T['HOG'] and not T['wildcard']):
@@ -2562,7 +2594,7 @@ def token_search(request):
                 context['data_entry'] = json.dumps(EntrySearchJson().as_json(entries)) # todo sequence in EntrySearchJson  ?
 
 
-            # Prepare groups results todo filter top x
+            # Prepare groups results
             if G:
                 hogs = []
                 ogs = []
@@ -2589,7 +2621,7 @@ def token_search(request):
 
                 context['data_group'] = json.dumps(HOGSearchJson().as_json(hogs) + OGSearchJson().as_json(ogs))
 
-            # Prepare genomes results todo filter top x
+            # Prepare genomes results
             if S or A:
 
                 def augment_ancestral_genomes(ag): #todo better

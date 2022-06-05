@@ -2,11 +2,11 @@
 {% load staticfiles %}
 
 {% block css_hook %}
-        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
 {% endblock %}
 
 {% block js_hook %}
-     <!-- bootstrap-table -->
+    <!-- bootstrap-table -->
     <script src='{% static "js/tablehooks.js" %}' type="text/javascript"></script>
     <script src='{% static "js/highlight.js" %}'></script>
 {% endblock %}
@@ -52,84 +52,84 @@
                         <h3><strong>Results for searching:
                         </strong>
 
-                         {% if  search_organised.wildcard_count > 0  %}
+                            {% if  search_organised.wildcard_count > 0  %}
 
-                             {% for token in search_organised.wildcard %}
+                                {% for token in search_organised.wildcard %}
 
-                                       <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                    <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
                                         {% if not forloop.last %},{% endif %}
-                                       </p>
+                                    </p>
 
 
-                        {% endfor %}
+                                {% endfor %}
 
                                 {% if  search_organised.Others > 0   %}
                                     ,
                                 {% endif %}
 
-                         {% endif %}
-
-                        {% if  search_organised.Others > 0  %}
-
-                            {% for token in search_organised.Protein %}
-
-                                           <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
-                                            {% if not forloop.last %},{% endif %}
-                                           </p>
-
-
-                            {% endfor %}
-
-                                       {% if search_organised.Protein > 0 %}
-                                {% if search_organised.HOG|length > 0 or search_organised.OMA_Group|length > 0  %}
-                                    ,
-                                {% endif %}
                             {% endif %}
 
-                            {% for token in search_organised.HOG %}
+                            {% if  search_organised.Others > 0  %}
 
-                                           <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
-                                            {% if not forloop.last %},{% endif %}
-                                           </p>
+                                {% for token in search_organised.Protein %}
+
+                                    <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                        {% if not forloop.last %},{% endif %}
+                                    </p>
 
 
-                            {% endfor %}
+                                {% endfor %}
 
-                                    {% if search_organised.HOG > 0 or search_organised.OMA_Group|length > 0  %}
+                                {% if search_organised.Protein > 0 %}
+                                    {% if search_organised.HOG|length > 0 or search_organised.OMA_Group|length > 0  %}
+                                        ,
+                                    {% endif %}
+                                {% endif %}
+
+                                {% for token in search_organised.HOG %}
+
+                                    <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                        {% if not forloop.last %},{% endif %}
+                                    </p>
+
+
+                                {% endfor %}
+
+                                {% if search_organised.HOG > 0 or search_organised.OMA_Group|length > 0  %}
                                     ,
                                 {% endif %}
 
 
-                            {% for token in search_organised.OMA_Group %}
+                                {% for token in search_organised.OMA_Group %}
 
-                                           <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
-                                            {% if not forloop.last %},{% endif %}
-                                           </p>
+                                    <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                        {% if not forloop.last %},{% endif %}
+                                    </p>
 
+
+                                {% endfor %}
+
+
+
+
+
+                            {% endif %}
+
+                            {% if  search_organised.Taxon_count > 0  %}
+
+                                {% if  search_organised.wildcard_count > 0 or search_organised.Others > 0  %}
+                                    ,
+                                {% endif %}
+
+                            {% endif %}
+
+                            {% for token in search_organised.Taxon %}
+
+                                <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                    {% if not forloop.last %},{% endif %}
+                                </p>
 
                             {% endfor %}
-
-
-
-
-
-                        {% endif %}
-
-                         {% if  search_organised.Taxon_count > 0  %}
-
-                              {% if  search_organised.wildcard_count > 0 or search_organised.Others > 0  %}
-                                  ,
-                              {% endif %}
-
-                         {% endif %}
-
-                        {% for token in search_organised.Taxon %}
-
-                                       <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
-                                        {% if not forloop.last %},{% endif %}
-                                       </p>
-
-                         {% endfor %}
 
                         </h3>
                     </div>
@@ -157,7 +157,7 @@
                                             {% else %} entries {% endif %}  found
 
                                         {% else %} Best <span id="total_entry">{{ max_proteins_shown }}</span>
-                                             entries shown out of {{ meta.entries_founded }} entries
+                                            entries shown out of {{ meta.entries_founded }} entries
 
                                         {% endif %}
 
@@ -257,180 +257,180 @@
 
                     <div class="card search_group" >
 
-                          <div class="card-body">
+                        <div class="card-body">
 
 
-                              <div class="row">
-
-
-
-                              <div class="col-md-8 offset-md-2">
-
-
-                            <h5 class="card-title">Orthologous Groups <small>(OMA Groups & HOGs)</small>  </h5>
+                            <div class="row">
 
 
 
-                              <b class="float-right "> {% if meta.groups_founded <= max_groups_shown %}   <span id="total_group">{{meta.groups_founded}}</span>  {% if meta.groups_founded == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best <span id="total_group">{{max_groups_shown}}</span> {% if meta.groups_founded == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta.groups_founded}}
-{% endif %}
+                                <div class="col-md-8 offset-md-2">
 
 
-                                  {% if meta.groups_founded > 0%}
-
-
-
-
-                                  <button id="group_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
+                                    <h5 class="card-title">Orthologous Groups <small>(OMA Groups & HOGs)</small>  </h5>
 
 
 
-                                  <br>
-
-                                   {% endif %}
-
-                                  </b>
+                                    <b class="float-right "> {% if meta.groups_founded <= max_groups_shown %}   <span id="total_group">{{meta.groups_founded}}</span>  {% if meta.groups_founded == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best <span id="total_group">{{max_groups_shown}}</span> {% if meta.groups_founded == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta.groups_founded}}
+                                    {% endif %}
 
 
+                                        {% if meta.groups_founded > 0%}
+
+
+
+
+                                            <button id="group_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
+
+
+
+                                            <br>
+
+                                        {% endif %}
+
+                                    </b>
+
+
+
+                                </div>
 
                             </div>
 
-                              </div>
 
-
-                              {% if meta.groups_founded > 0%}
-
-
-
-                              <div class="row">
+                            {% if meta.groups_founded > 0%}
 
 
 
-                                  <div class="col-md-12 ">
-
-                                       <table class="table table-hover" id="matchTable_group"
-                   data-mobile-responsive="true" data-check-on-init="true"
-                   data-undefined-text=""
-                   data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
-                <thead>
-                    <tr>
-                        <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_generic_group_id">Group ID</th>
-                        <th data-field="type" data-sortable="true" >Type</th>
-                        <th data-field="size" data-sortable="true" >Nr genes in Group</th>
-                        <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_group_aux">Auxiliary Data</th>
+                                <div class="row">
 
 
-                    </tr>
-                </thead>
 
-                <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">Genes not present in selected taxon have been filtered out as per settings. <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a></div>
-            </table>
+                                    <div class="col-md-12 ">
+
+                                        <table class="table table-hover" id="matchTable_group"
+                                               data-mobile-responsive="true" data-check-on-init="true"
+                                               data-undefined-text=""
+                                               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                                            <thead>
+                                            <tr>
+                                                <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_generic_group_id">Group ID</th>
+                                                <th data-field="type" data-sortable="true" >Type</th>
+                                                <th data-field="size" data-sortable="true" >Nr genes in Group</th>
+                                                <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_group_aux">Auxiliary Data</th>
+
+
+                                            </tr>
+                                            </thead>
+
+                                            <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">Genes not present in selected taxon have been filtered out as per settings. <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a></div>
+                                        </table>
 
 
 
 
 
 
-                              </div>
+                                    </div>
 
 
-                                   </div>
+                                </div>
 
-                               {% endif %}
-
-
+                            {% endif %}
 
 
-                          </div>
-                         </div>
+
+
+                        </div>
+                    </div>
 
                     <br>
 
                     <div class="card search_genome" >
 
-                <div class="card-body">
+                        <div class="card-body">
 
-                              <div class="row">
-
-
-                              <div class="col-md-8 offset-md-2">
+                            <div class="row">
 
 
-                            <h5 class="card-title">Genomes </h5>
-
-                              <b class="float-right ">   <span id="total_genome">{{meta.taxon_founded}}</span>  {% if meta.taxon_founded == 1 %}  genome {% else %} genomes {% endif %}  found
-
-                                  {% if meta.taxon_founded > 0%}
-
-                                  <button id="genome_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
-
-                                  {% endif %}
-
-                              </b>
+                                <div class="col-md-8 offset-md-2">
 
 
-                              <br>
+                                    <h5 class="card-title">Genomes </h5>
 
-       </div>
+                                    <b class="float-right ">   <span id="total_genome">{{meta.taxon_founded}}</span>  {% if meta.taxon_founded == 1 %}  genome {% else %} genomes {% endif %}  found
 
-                              </div>
+                                        {% if meta.taxon_founded > 0%}
 
-                              {% if meta.taxon_founded > 0 %}
+                                            <button id="genome_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
 
+                                        {% endif %}
 
-                              <div class="row">
-
-                                  <div class="col-md-12 ">
-
-                                       <table class="table table-hover" id="matchTable_genome"
-
-                   data-mobile-responsive="true" data-check-on-init="true"
-                   data-undefined-text=""
-                   data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
-                <thead>
-                    <tr>
-                        <th data-field="type" data-sortable="true" data-formatter="tablehooks.format_generic_genome_link">Code/Name</th>
-                        <th data-field="ncbi" data-sortable="true" data-formatter="tablehooks.format_taxonid_as_link">NCBI Taxon ID</th>
-                        <th data-field="prots" data-sortable="true"># of Sequences/Genes</th>
-                        <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname_genomes">Scientific Name</th>
-                        <th data-field="common_name" data-sortable="true" data-formatter="tablehooks.format_species_common">Common Name</th>
-                        <th data-field="uniprot_species_code" data-sortable="true" data-formatter="tablehooks.format_species_code">Code</th>
-                        <th data-field="kingdom" data-sortable="true" data-formatter="tablehooks.format_as_kingdom_tag" title="Domain of Life"><span >Domains</span></th>
-
-                    </tr>
-                </thead>
-
-                   </table>
-                                   </div>
-
-                              </div>
-
-                              {% endif %}
+                                    </b>
 
 
-                          </div>
-                         </div>
+                                    <br>
+
+                                </div>
+
+                            </div>
+
+                            {% if meta.taxon_founded > 0 %}
+
+
+                                <div class="row">
+
+                                    <div class="col-md-12 ">
+
+                                        <table class="table table-hover" id="matchTable_genome"
+
+                                               data-mobile-responsive="true" data-check-on-init="true"
+                                               data-undefined-text=""
+                                               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                                            <thead>
+                                            <tr>
+                                                <th data-field="type" data-sortable="true" data-formatter="tablehooks.format_generic_genome_link">Code/Name</th>
+                                                <th data-field="ncbi" data-sortable="true" data-formatter="tablehooks.format_taxonid_as_link">NCBI Taxon ID</th>
+                                                <th data-field="prots" data-sortable="true"># of Sequences/Genes</th>
+                                                <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname_genomes">Scientific Name</th>
+                                                <th data-field="common_name" data-sortable="true" data-formatter="tablehooks.format_species_common">Common Name</th>
+                                                <th data-field="uniprot_species_code" data-sortable="true" data-formatter="tablehooks.format_species_code">Code</th>
+                                                <th data-field="kingdom" data-sortable="true" data-formatter="tablehooks.format_as_kingdom_tag" title="Domain of Life"><span >Domains</span></th>
+
+                                            </tr>
+                                            </thead>
+
+                                        </table>
+                                    </div>
+
+                                </div>
+
+                            {% endif %}
+
+
+                        </div>
+                    </div>
 
                     <br>
                     <br>
-                <br>
+                    <br>
 
-                  <div class="row">
-                      <div class="col-md-6 offset-md-3">
-                          <div class="card">
+                    <div class="row">
+                        <div class="col-6 offset-3">
+                            <div class="card">
                                 <div class="card-body">
-    <h5 class="card-title" style="font-size: large">It seems you reached the end...</h5>
-    <h6 class="card-subtitle mb-2 text-muted">...but no worries!</h6>
-    <p class="card-text">If you have not founded what you were looking for we invite you to read our
-        "how to search?" tutorial or to contact us if you have a specific request.</p>
-    <a href="#" class="card-link">Read the search manual</a>
-    <a href="#" class="card-link">Contact us</a>
-  </div>
-                          </div>
-                      </div>
+                                    <h5 class="card-title" style="font-size: large">It seems you reached the end...</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">...but no worries!</h6>
+                                    <p class="card-text">If you have not founded what you were looking for we invite you to read our
+                                        "how to search?" tutorial or to contact us if you have a specific request.</p>
+                                    <a href="#" class="card-link">Read the search manual</a>
+                                    <a href="#" class="card-link">Contact us</a>
+                                </div>
+                            </div>
+                        </div>
 
-                  </div>
+                    </div>
 
-                {{ search_organised }}
+                    {{ search_organised }}
 
                 </div>
 
@@ -443,7 +443,7 @@
     </div>
 
     <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
-        <script type="module">
+    <script type="module">
         window.search_token_vue_search_nav.preload_token({{ search  | safe }})
         window.search_token_vue_search_min.preload_token({{ search  | safe }})
 
