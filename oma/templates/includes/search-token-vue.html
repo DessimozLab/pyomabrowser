@@ -13,6 +13,14 @@
         order: 2;
     }
 
+
+    .help_icon {
+        font-size: 1.5em;
+        transform: translate(0,25%);
+         margin: 4px;
+        cursor: pointer;
+    }
+
     .prefix-dropdown {
         border: none;
         background-color: transparent;
@@ -31,8 +39,8 @@
         font-size: 0.9em;
         height: 50px;
         box-sizing: border-box;
-        padding: 0 0 0 10px;
-        border-radius: 8px;
+        padding: 0 0 0 4px;
+        border-radius: 500px;
     }
 
     .token-input__tag {
@@ -275,7 +283,11 @@
                 this.placeholder = ''
 
             },
-            is_empty(){return tokens.length == 0 ? true : false}
+            is_empty(){return tokens.length == 0 ? true : false},
+            modal_clicked(){
+                console.log('clicked')
+                $('#exampleModal_{{ unique_id }}').modal('show')
+            }
         },
     }).mount('#{{ unique_id }}')
 
@@ -335,13 +347,53 @@
 
 </script>
 
+
+<!-- Modal -->
+<div class="modal fade" data-backdrop="false" id="exampleModal_{{ unique_id }}" tabindex="-1" aria-labelledby="exampleModalLabel{{ unique_id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel{{ unique_id }}">How to use the search in OMA Browser ?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+          <ul class="list-group list-group-flush">
+      <li class="list-group-item"> <b>Protein </b> proteinid - xref - go - ec - description - domain - sequence </li>
+      <li class="list-group-item"><b>Taxon </b>  species - taxid - taxon</li>
+      <li class="list-group-item"><b>HOG </b>  hog - sequence</li>
+      <li class="list-group-item"><b>OMA Group </b>og - fingerprint - sequence</li>
+
+    </ul>
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <form method="POST" action="{% url 'search_token' %}" >
             {% csrf_token %}
 
 <div id="{{ unique_id }}">
 
     <div id="{{ unique_id }}_input_part">
-            <div id="token-container_{{ unique_id }}">
+
+
+        <span class="material-symbols-outlined help_icon" @click="modal_clicked">
+help
+</span>
+
+
+        <div id="token-container_{{ unique_id }}">
+
+
 
     <span v-for="token, index in tokens" :key="token" class="token-input__tag">
 
