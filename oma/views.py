@@ -2550,12 +2550,10 @@ def token_search(request):
             context['meta']['groups_found'] = len(G) if G else 0
             context['meta']['taxon_found'] = (len(S) if S else 0) + (len(A) if A else 0)
 
-            # Prepare entry results todo filter top X
+            # Prepare entry results
             if E:
                 entries_all = list(E.values())
-
                 if len(entries_all) > context['max_proteins_shown']:
-
                     # if we found a main isoform marked all the alternative to be removed
                     isoforms = []
                     for e in entries_all:
@@ -2564,33 +2562,31 @@ def token_search(request):
                                 isoforms.append(ai.entry_nr)
 
                     for p in entries_all:
-                        p.score = 0
+                        p.importance_score = 0
 
                         if '_' in p.canonicalid:
-                            p.score += 10
+                            p.importance_score += 10
 
                         if p.oma_group != 0:
-                            p.score += 1
+                            p.importance_score += 1
 
                         if p.oma_hog != 0:
-                            p.score += 1
+                            p.importance_score += 1
 
                         if p.entry_nr in isoforms:
-                            p.score = -1
+                            p.importance_score = -1
 
-                    sorted_entries = sorted(entries_all, key=lambda x: x.score, reverse=True)
+                    sorted_entries = sorted(entries_all, key=lambda x: x.importance_score, reverse=True)
                     entries = sorted_entries[:context['max_proteins_shown']]
-
                 else:
                     entries = entries_all
-
 
                 # redirect to entry page is only searching for protein and get one match
                 if (len(entries) == 1 and not T['OMA_Group'] and not T['HOG'] and not T['wildcard']):
                     return redirect('pairs', entries[0].entry_nr)
 
                 # Build json data for table
-                context['data_entry'] = json.dumps(EntrySearchJson().as_json(entries)) # todo sequence in EntrySearchJson  ?
+                context['data_entry'] = json.dumps(EntrySearchJson().as_json(entries))  # todo sequence in EntrySearchJson  ?
 
 
             # Prepare groups results
@@ -2611,11 +2607,11 @@ def token_search(request):
                         logger.error("Search groups: {} can't be assign as HOG or OmaGroup".format(group))
 
                 # redirect to hog page is only searching for hog and get one match
-                if (len(hogs) == 1 and len(ogs) ==0 and  not T['OMA_Group'] and not T['Protein'] and not T['wildcard']):
+                if len(hogs) == 1 and len(ogs) == 0 and not T['OMA_Group'] and not T['Protein'] and not T['wildcard']:
                     return redirect('hog_viewer',  hogs[0].hog_id)
 
-                # redirect to omagroup page is only searching for og and get one match
-                if (len(hogs) == 0 and len(ogs) == 1 and not T['HOG'] and not T['Protein'] and not T['wildcard']):
+                # redirect to omagroup page if only searching for og and get one match
+                if len(hogs) == 0 and len(ogs) == 1 and not T['HOG'] and not T['Protein'] and not T['wildcard']:
                     return redirect('omagroup_members', ogs[0].group_nbr)
 
                 context['data_group'] = json.dumps(HOGSearchJson().as_json(hogs) + OGSearchJson().as_json(ogs))
@@ -2634,8 +2630,8 @@ def token_search(request):
 
 
                 # easy peasy
-                number_species = len(S.values()) if S else 0
-                number_ancestral = len(A.values()) if A else 0
+                number_species = len(S) if S else 0
+                number_ancestral = len(A) if A else 0
 
                 # redirect to genome page is only searching for genome and get one match
                 if (number_species == 1 and number_ancestral == 0 and not T['OMA_Group'] and not T['HOG'] and not T['wildcard'] and not T['Protein']):
@@ -2674,7 +2670,7 @@ class GenomeModelJsonMixin(JsonModelMixin):
                    'ncbi_taxon_id': "ncbi",
                    "common_name": None,
                    "nr_entries": "prots",
-                    "kingdom": None,
+                   "kingdom": None,
                    "last_modified": None}
                    #"type": "type"}
 
