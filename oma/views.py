@@ -2552,8 +2552,7 @@ def token_search(request):
 
             # Prepare entry results todo filter top X
             if E:
-                entries_all = [models.ProteinEntry.from_entry_nr(utils.db, e.entry_nr) for e in list(E.values()) ]
-
+                entries_all = list(E.values())
 
                 if len(entries_all) > context['max_proteins_shown']:
 
