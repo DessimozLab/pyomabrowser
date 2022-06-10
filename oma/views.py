@@ -2498,9 +2498,9 @@ def token_search(request):
         'max_groups_shown':  99999,
         'max_genomes_shown':  False,
         'meta': {
-            'taxon_founded':0,
-            'entries_founded':0,
-            'groups_founded':0,
+            'taxon_found': 0,
+            'entries_found': 0,
+            'groups_found': 0,
         },
     }
 
@@ -2509,20 +2509,20 @@ def token_search(request):
         ## Process tokens
         raw_tokens = json.loads(request.POST.get("hidden_query", ""))
         tokens = [generate_type(z['prefix'])(utils.db, z['query']) for z in raw_tokens]
-        context['search'] = json.dumps(raw_tokens) # this can be reuse by js directly
+        context['search'] = json.dumps(raw_tokens)  # this can be reuse by js directly
         context['search_raw'] = raw_tokens
 
         context['search_organised'] = {
-            'Protein':[],
-            'Taxon':[],
-            'HOG':[],
-            'OMA_Group':[],
+            'Protein': [],
+            'Taxon': [],
+            'HOG': [],
+            'OMA_Group': [],
             'wildcard': [],
             'Taxon_count': 0,
             'Others': 0,
             'wildcard_count': 0
         }
-        wild_card= ['sequence']
+        wild_card = ['sequence']
         for t in raw_tokens:
             if t['prefix'] in wild_card:
                 context['search_organised']['wildcard'].append(t)
@@ -2546,9 +2546,9 @@ def token_search(request):
             A = context['results'].ancestral_genomes
             T = context['search_organised']
 
-            context['meta']['entries_founded'] = len(E) if E else 0
-            context['meta']['groups_founded'] = len(G) if G else 0
-            context['meta']['taxon_founded'] = (len(S) if S else 0) + (len(A) if A else 0)
+            context['meta']['entries_found'] = len(E) if E else 0
+            context['meta']['groups_found'] = len(G) if G else 0
+            context['meta']['taxon_found'] = (len(S) if S else 0) + (len(A) if A else 0)
 
             # Prepare entry results todo filter top X
             if E:
@@ -3354,7 +3354,7 @@ class Searcher(View):
 
                 if redirect_valid and len(list(entry_nr.keys()))==1:
 
-                    # check if query is in founded match (e.g if search "DHE5_YEAST" we prefer keep this in url than "12")
+                    # check if query is in found match (e.g if search "DHE5_YEAST" we prefer keep this in url than "12")
                     entry_nr, matches = list(entry_nr.items())[0]
                     original_query = False
 
@@ -3444,7 +3444,7 @@ class Searcher(View):
         :param request: 
         :param query: 
         :param selector: array of restricted search to perform
-        :param redirect_valid: if a perfect matched if founded we directly goes to the related page
+        :param redirect_valid: if a perfect matched if found we directly goes to the related page
         :param loaded_entries: array of entries already searched for this query, shortcut all entries search module 
         :return: 
         """
@@ -3510,7 +3510,7 @@ class Searcher(View):
         :param request:
         :param query:
         :param selector: array of restricted search to perform
-        :param redirect_valid: if a perfect matched if founded we directly goes to the related page
+        :param redirect_valid: if a perfect matched if found we directly goes to the related page
         :param loaded_entries: array of entries already searched for this query, shortcut all entries search module
         :return:
         """

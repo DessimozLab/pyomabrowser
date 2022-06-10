@@ -151,17 +151,17 @@
                                     <b class="float-right ">
 
 
-                                        {% if meta.entries_founded <= max_proteins_shown %}
-                                            <span id="total_entry">{{ meta.entries_founded }}</span>
-                                            {% if meta.entries_founded == 1 or meta.entries_founded == 0 %}  entry
+                                        {% if meta.entries_found <= max_proteins_shown %}
+                                            <span id="total_entry">{{ meta.entries_found }}</span>
+                                            {% if meta.entries_found == 1 or meta.entries_found == 0 %}  entry
                                             {% else %} entries {% endif %}  found
 
                                         {% else %} Best <span id="total_entry">{{ max_proteins_shown }}</span>
-                                            entries shown out of {{ meta.entries_founded }} entries
+                                            entries shown out of {{ meta.entries_found }} entries
 
                                         {% endif %}
 
-                                        {% if meta.entries_founded > 0 %}
+                                        {% if meta.entries_found > 0 %}
 
                                             <button id="entry_stat" type="button" class="btn btn-sm "
                                                     data-container="body"
@@ -178,7 +178,7 @@
                                 </div>
 
 
-                                {% if meta.entries_founded  > 0 %}
+                                {% if meta.entries_found  > 0 %}
                                     <div class="col-md-12">
 
 
@@ -232,7 +232,7 @@
                                     </div>
 
 
-                                    {% if meta.entries_founded  > max_entries_shown %}
+                                    {% if meta.entries_found  > max_entries_shown %}
 
                                         <div class=" col-md-10 offset-md-1">
 
@@ -271,11 +271,11 @@
 
 
 
-                                    <b class="float-right "> {% if meta.groups_founded <= max_groups_shown %}   <span id="total_group">{{meta.groups_founded}}</span>  {% if meta.groups_founded == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best <span id="total_group">{{max_groups_shown}}</span> {% if meta.groups_founded == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta.groups_founded}}
+                                    <b class="float-right "> {% if meta.groups_found <= max_groups_shown %}   <span id="total_group">{{meta.groups_found}}</span>  {% if meta.groups_found == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best <span id="total_group">{{max_groups_shown}}</span> {% if meta.groups_found == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta.groups_found}}
                                     {% endif %}
 
 
-                                        {% if meta.groups_founded > 0%}
+                                        {% if meta.groups_found > 0%}
 
 
 
@@ -297,7 +297,7 @@
                             </div>
 
 
-                            {% if meta.groups_founded > 0%}
+                            {% if meta.groups_found > 0%}
 
 
 
@@ -357,9 +357,9 @@
 
                                     <h5 class="card-title">Genomes </h5>
 
-                                    <b class="float-right ">   <span id="total_genome">{{meta.taxon_founded}}</span>  {% if meta.taxon_founded == 1 %}  genome {% else %} genomes {% endif %}  found
+                                    <b class="float-right ">   <span id="total_genome">{{meta.taxon_found}}</span>  {% if meta.taxon_found == 1 %}  genome {% else %} genomes {% endif %}  found
 
-                                        {% if meta.taxon_founded > 0%}
+                                        {% if meta.taxon_found > 0%}
 
                                             <button id="genome_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
 
@@ -374,7 +374,7 @@
 
                             </div>
 
-                            {% if meta.taxon_founded > 0 %}
+                            {% if meta.taxon_found > 0 %}
 
 
                                 <div class="row">
