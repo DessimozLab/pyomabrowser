@@ -46,10 +46,10 @@
 
                 <div class="card-body ">
 
-                    <div id='search_title' class="col-md-8 offset-md-2">
+                    <div id='search_title' class="col-md-10 offset-md-1">
 
 
-                        <h3><strong>Results for searching:
+                        <h3><strong style="line-height: 2em">Results for searching:
                         </strong>
 
                             {% if  search_organised.wildcard_count > 0  %}
@@ -168,6 +168,42 @@
                                                     data-toggle="popover" data-placement="bottom">See details
                                             </button>
 
+                                              <script>
+                                      $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content-entry";
+
+
+
+                                              {% for d in E_details %}
+
+                                              var term = document.createElement("p");
+                                              term.innerHTML = '{{d}}<br>'
+
+                                          content.appendChild(term);
+
+                                          document.body.appendChild(content)
+
+
+                                      {% endfor %}
+
+                              $('#entry_stat').popover({
+                                  title: title,
+                                  html: true,
+                                  content: function() {
+                                  return $('#popover-content-entry').html();
+                                }
+                              })
+
+
+
+                            })</script>
+
                                             <br>
                                             <br>
 
@@ -218,6 +254,9 @@
                                                 <th data-field="crossref" data-sortable="true"
                                                     data-formatter="format_result_refs">Matching Crossreferences
                                                 </th>
+
+                                                <th data-field="sequence" data-sortable="true" data-formatter="tablehooks.format_entry_sequence_matches" >Matching sequences</th>
+
 
 
                                             </tr>
@@ -459,6 +498,21 @@
 
     <script >
 
+     format_result_refs = function(value, row){
+
+
+            var qterms = {{ search | safe }}.map(({ query }) => query)
+
+            var all_evids = [];
+            if (row.hasOwnProperty('xrefs')){
+                all_evids = row.xrefs.map(x => x['source'] + ": " + x['xref']);
+            }
+            var keep = all_evids.filter(function(token){
+                return qterms.some(term => token.match(term));
+            });
+            return keep.join('<br>');
+        };
+
         function add_taxa_token(query, single_term, prefix, type){
             var tt = {query: query, single_term: single_term, prefix: prefix, type: type}
             window.search_token_vue.preload_token([tt])
@@ -473,8 +527,8 @@
             showMultiSort: true,
             data: data,
             onPostBody: function (d) {
-                var element = $("th span:contains('Domains')")[0];
-                element.style.writingMode = "vertical-lr"
+                //var element = $("th span:contains('Domains')")[0];
+                //element.style.writingMode = "vertical-lr"
                 document.getElementById("total_entry").innerHTML = d.length;
             }
         });
@@ -493,8 +547,8 @@
             showMultiSort: true,
             data: data_genome ,
             onPostBody: function(d){
-                var element = $( "th span:contains('Domains')" )[0];
-                element.style.writingMode = "vertical-lr"
+                //var element = $( "th span:contains('Domains')" )[0];
+                //element.style.writingMode = "vertical-lr"
                 document.getElementById("total_genome").innerHTML = d.length;
             }
         });

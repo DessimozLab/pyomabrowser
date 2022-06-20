@@ -101,8 +101,8 @@
                 error_message : " Error.",
                 post_query: '',
                 wild_card: 'sequence',
-                placeholder: 'proteinid | xref | go | ec | description | domain | sequence | species  | taxid | taxon | hog | og | fingerprint',  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
-                placeholder_default: 'proteinid | xref | go | ec | description | domain | sequence | species  | taxid | taxon | hog | og | fingerprint'  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
+                placeholder: ' "Blue-light photoreceptor" | proteinid:P53_RAT  | species:"Drosophila melanogaster" ',  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
+                placeholder_default: 'proteinid:P53_RAT | "Blue-light photoreceptor" | species:"Drosophila melanogaster" '  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
             }
         },
         compilerOptions: {
@@ -137,76 +137,88 @@
                 event.preventDefault()
                 var val = event.target.value.trim()
 
-                var sinle_term = val[0] != '"';
-                var multi_term_closed = (val.length > 1 && val[val.length - 1] == '"')
-                var has_prefix = val.includes(':')
-                var prefix_end = val[val.length - 1] == ':'
-                var p = has_prefix ? val.split(':')[0] : this.default_prefix;
 
-
-                // If prefix but not valid
-                if (has_prefix && !this.get_list_prefixes(true).includes(p.toLowerCase())) {
-                    this.show_error = true;
-                    this.error_message = "Error: Incorrect prefix."
-                    return;
-                } else {
-                    this.show_error = false;
+                if (val.length == 0 && this.tokens.length > 0){
+                    this.collect_token()
+                    // wanted to auto search if press and empty + token but post request miss post_query data
                 }
+                else {
 
-                // If something typed
-                if (val.length > 0) {
+                    var sinle_term = val[0] != '"';
+                    var multi_term_closed = (val.length > 1 && val[val.length - 1] == '"')
+                    var has_prefix = val.includes(':')
+                    var prefix_end = val[val.length - 1] == ':'
+                    var p = has_prefix ? val.split(':')[0] : this.default_prefix;
 
-                    // Multiple word query
-                    if (!sinle_term) {
 
-                        // STOP if multiple not closed
-                        if (!multi_term_closed) {
-
-                            if (event.code == "Space") {
-                                event.target.value = val + ' '
-                            }
-                            return
-                        }
+                    // If prefix but not valid
+                    if (has_prefix && !this.get_list_prefixes(true).includes(p.toLowerCase())) {
+                        this.show_error = true;
+                        this.error_message = "Error: Incorrect prefix."
+                        return;
+                    } else {
+                        this.show_error = false;
                     }
 
-                    // STOP if the prefix is fine and we are at :
-                    if (prefix_end) {
-                        return
-                    }
+                    // If something typed
+                    if (val.length > 0) {
 
-                    // has a prefix
-                    if (has_prefix) {
-
-                        var tmp = val.split(':')[1].trim()
-                        sinle_term = tmp[0] != '"';
-                        multi_term_closed = (val.length > 1 && tmp[tmp.length - 1] == '"')
-
-
-                        // multiple term
+                        // Multiple word query
                         if (!sinle_term) {
 
-                            // STOP if not closed
+                            // STOP if multiple not closed
                             if (!multi_term_closed) {
+
                                 if (event.code == "Space") {
                                     event.target.value = val + ' '
                                 }
                                 return
                             }
-
-
                         }
-                        val = tmp
+
+                        // STOP if the prefix is fine and we are at :
+                        if (prefix_end) {
+                            return
+                        }
+
+                        // has a prefix
+                        if (has_prefix) {
+
+                            var tmp = val.split(':')[1].trim()
+                            sinle_term = tmp[0] != '"';
+                            multi_term_closed = (val.length > 1 && tmp[tmp.length - 1] == '"')
+
+
+                            // multiple term
+                            if (!sinle_term) {
+
+                                // STOP if not closed
+                                if (!multi_term_closed) {
+                                    if (event.code == "Space") {
+                                        event.target.value = val + ' '
+                                    }
+                                    return
+                                }
+
+
+                            }
+                            val = tmp
+                        }
+
+
+                        if (this.validate_token(val.replaceAll('"', ''), sinle_term, p)) {
+                            val = val.replaceAll('"', '')
+                            this.tokens.push({
+                                query: val,
+                                single_term: sinle_term,
+                                prefix: p,
+                                type: this.get_type_prefix(p)
+                            });
+                            event.target.value = '';
+                        }
+
+
                     }
-
-
-
-                    if (this.validate_token(val.replaceAll('"', ''), sinle_term, p )){
-                        val = val.replaceAll('"', '')
-                        this.tokens.push({query: val, single_term: sinle_term, prefix: p, type:this.get_type_prefix(p)});
-                        event.target.value = '';
-                    }
-
-
                 }
 
 
@@ -353,20 +365,56 @@
   <div class="modal-dialog modal-lg modal-dialog-centered" >
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel{{ unique_id }}">How to use the search in OMA Browser ?</h5>
+        <h4 class="modal-title" id="exampleModalLabel{{ unique_id }}">How to use the search in OMA Browser ?</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="text-align: justify">
 
-          <ul class="list-group list-group-flush">
-      <li class="list-group-item"> <b>Protein </b> proteinid - xref - go - ec - description - domain - sequence </li>
-      <li class="list-group-item"><b>Taxon </b>  species - taxid - taxon</li>
-      <li class="list-group-item"><b>HOG </b>  hog - sequence</li>
-      <li class="list-group-item"><b>OMA Group </b>og - fingerprint - sequence</li>
+          <strong>How did the search works ?</strong>
 
-    </ul>
+          <p>It works like a normal input field but everytime you press "Space" or "Enter" after a word, a token will be
+              created composed of the inputted term and of a prefix that  describe how the term should be treated.</p>
+
+          <strong>But how can I search for a multi word query then?</strong>
+
+          <p>If your query term is composed of multiple word (e.g homo sapiens) you can use " " to encapsulate it. Of there is an open " the space and enter
+          key will not triggered the tokenisation until a closing " is present!</p>
+
+          <strong>But how many tokens can i can have ? Is there different types ?</strong>
+
+          <p>There is not limit on the number of tokens but there is some rules to respect.
+          Each tokens is associated to one of the four big categories of entries in OMA browser: Genes, HOGs, OMA groups and Taxon with their
+              associated prefix:
+              <ul>
+          <li><b>Genes:</b> 'proteinid', 'xref', 'go', 'ec', 'description', 'domain', 'sequence'</li>
+          <li><b>HOGs:</b> 'species', 'taxid', 'taxon'</li>
+          <li><b>OMA groups:</b> 'hog', 'sequence'</li>
+          <li><b>Taxon:</b> 'og', 'fingerprint', 'sequence'</li>
+      </ul>
+
+          Except for taxon that you can combined or use alone, you can't search for more that one type at once
+          (e.g hog:12 with xref:HUMAN_1234 don't make sense but fingerprint:'EWGKQSF' in species:Tetraodon is fine).
+          </p>
+
+
+          <strong>Oups a typo !</strong>
+
+          <p>No problems, you edit your token. Click on the term, the token will be stringify so you can modify it.
+
+              <br>
+              The prefix is not correct ? You can click on the dropdown icon to select an other one.
+
+              <br>
+              I dont want this token.. Just clikc on the x to delete it.
+
+          </p>
+
+
+
+
+
 
 
       </div>
@@ -378,7 +426,7 @@
 </div>
 
 
-<form method="POST" action="{% url 'search_token' %}" >
+<form method="POST" id='form_' action="{% url 'search_token' %}" >
             {% csrf_token %}
 
 <div id="{{ unique_id }}">
@@ -430,7 +478,7 @@ help
            @keydown.delete='removeLastToken'
     />
 
-    <button class=" button_search float-right" @click='collect_token()' type="submit">
+    <button class=" button_search float-right" id="button_submit" @click='collect_token()' type="submit">
         <img  style='width: 24px;' src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/>
     </button>
 

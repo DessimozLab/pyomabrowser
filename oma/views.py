@@ -2470,17 +2470,17 @@ class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
 
 def token_search(request):
 
-    def generate_type(prefix):
+    function_mapper = {
+        search.XRefSearch: ["description", "proteinid", "xref"],
+        search.TaxSearch: ["taxon", "species", "taxid"],
+        search.HogIDSearch: ["hog"],
+        search.GOSearch: ["go"],
+        search.ECSearch: ["ec"],
+        search.SequenceSearch: ["sequence"],
+        search.OmaGroupSearch: ["og", 'fingerprint'],
+    }
 
-        function_mapper  = {
-            search.XRefSearch : ["description", "proteinid", "xref"],
-            search.TaxSearch: ["taxon", "species", "taxid"],
-            search.HogIDSearch: ["hog"],
-            search.GOSearch: ["go"],
-            search.ECSearch: ["ec"],
-            search.SequenceSearch: ["sequence"],
-            search.OmaGroupSearch: ["og", 'fingerprint'],
-        }
+    def generate_type(prefix):
 
         for fn, prefixes in function_mapper.items():
             if prefix.lower() in prefixes:
@@ -2585,9 +2585,20 @@ def token_search(request):
                 if (len(entries) == 1 and not T['OMA_Group'] and not T['HOG'] and not T['wildcard']):
                     return redirect('pairs', entries[0].entry_nr)
 
-                # Build json data for table
-                context['data_entry'] = json.dumps(EntrySearchJson().as_json(entries))  # todo sequence in EntrySearchJson  ?
+                # looking at entries founded by protein for mode and aligned part
 
+                for tok in tokens:
+                    if isinstance(tok, search.SequenceSearch):
+                        for key, entry_aligned in tok.get_matched_seqs().items():
+                            e = [i for i in entries if i.entry_nr == key][0]
+                            if type(entry_aligned.alignment) is tuple:
+                                a = entry_aligned.alignment[0][0]
+                            else:
+                                a = str(entry_aligned.alignment, 'utf-8')
+                            e.sequence = {"sequence": entry_aligned.sequence, 'align': a}
+
+                # Build json data for table
+                context['data_entry'] = json.dumps(EntrySearchJson().as_json(entries))
 
             # Prepare groups results
             if G:
@@ -2647,8 +2658,13 @@ def token_search(request):
                 json_ancestal_genomes = GenomeModelJsonMixin().as_json([augment_ancestral_genomes(ag) for ag in A.values()])
                 context['data_genomes'] = json.dumps(json_species + json_ancestal_genomes)
 
-    return render(request, 'search_token.html', context)
+            # Prepare details per term
+            E_details = []
+            for to in tokens:
+                E_details.append("{} {}: {} hits".format(to.term, function_mapper[type(to)], to.count_entries() ))
+            context['E_details'] = E_details
 
+    return render(request, 'search_token.html', context)
 
 #<editor-fold desc="Search Widget">
 
@@ -2659,8 +2675,8 @@ class EntrySearchJson(JsonModelMixin):
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'oma_group': None,
                    'hog_family_nr': 'roothog', 'xrefs': None,
-                   'description': None}
-                   #"sequence" : "sequence"}
+                   'description': None,
+                   "sequence" : "sequence"}
 
 
 

@@ -119,7 +119,37 @@
     };
 
     exports.format_entry_sequence_matches = function(value, row){
+
+
+
         if (value !== ""){
+
+            if (!value.hasOwnProperty('align')){
+                return ""
+            }
+
+            var seq = value.sequence;
+            var pos_start = seq.indexOf(value.align)
+
+            var endcut = pos_start + value.align.length  + 20
+            if (endcut < seq.length ){
+                seq = seq.slice(0,endcut);
+                seq += '...'
+            }
+
+            var startcut = pos_start - 20
+            if (startcut > 0 ){
+                seq = seq.slice(startcut);
+                seq = '...' + seq
+            }
+
+            seq = seq.replace(value.align, "<b>" + value.align + "</b>")
+
+            return seq
+
+
+
+
             var a = value.sequence;
             var b1 = "</b>";
             var b2 = "<b>";
@@ -255,6 +285,7 @@
     exports.format_exons_isoforms = function(value, row){return value.length};
 
     exports.seq_search_alignment_formatter = function(value, row){
+
         var seq = row.sequence;
         var alignment = row.alignment;
         if (seq === undefined || alignment === undefined) return "n/a";
