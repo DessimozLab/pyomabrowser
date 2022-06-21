@@ -436,6 +436,44 @@
 
                                             <button id="genome_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
 
+
+                                                 <script>
+ $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content-species";
+
+
+
+                                              {% for d in S_details %}
+
+                                              var term = document.createElement("p");
+                                              term.innerHTML = '{{d}}<br>'
+
+                                          content.appendChild(term);
+
+                                          document.body.appendChild(content)
+
+
+                                      {% endfor %}
+
+                              $('#genome_stat').popover({
+                                  title: title,
+                                  html: true,
+                                  content: function() {
+                                  return $('#popover-content-species').html();
+                                }
+                              })
+
+
+
+                            })
+                                            </script>
+
                                         {% endif %}
 
                                     </b>
@@ -462,6 +500,8 @@
                                             <thead>
                                             <tr>
                                                 <th data-field="type" data-sortable="true" data-formatter="tablehooks.format_generic_genome_link">Code/Name</th>
+                                                                        <th data-field="type" data-sortable="true">Type</th>
+
                                                 <th data-field="ncbi" data-sortable="true" data-formatter="tablehooks.format_taxonid_as_link">NCBI Taxon ID</th>
                                                 <th data-field="prots" data-sortable="true"># of Sequences/Genes</th>
                                                 <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname_genomes">Scientific Name</th>
@@ -495,7 +535,7 @@
                                     <h6 class="card-subtitle mb-2 text-muted">...but no worries!</h6>
 
                                     <p class="card-text">
-                                        A small tutorial is available to help you use the search in OMA.
+                                        A small tutorial is available <a href="{% url "uses" %}#search_manual_token" class="card-link">here </a> to help you use the search in OMA.
                                     </p>
 
                                     <p class="card-text">
@@ -503,8 +543,31 @@
                                         you searched and what you expected to find.
 
                                     </p>
-                                    <a href="{% url "uses" %}#search_manual_token" class="card-link">Read the search tutorial</a>
-                                    <a href="mailto:contact@omabrowser.org" class="card-link">Contact us</a>
+
+                                    <div class="form-area">
+
+                                        <form method="POST" id="form_contact_suggestion" name="form_contact_suggestion" action="{% url 'search_token' %}">
+
+
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Email address</label>
+                        <input type="text" class="form-control" id="email" name="email" placeholder="Email" required>
+                    </div>
+
+              <div class="form-group">
+                    <label for="exampleInputEmail1">Query (auto filled)</label>
+                        <input type="text" class="form-control" id="subject" name="query" placeholder="Query" maxlength="70" required value="{{ search }}">
+                    </div>
+
+                                            {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Email</label>
+                    <textarea class="form-control"  required type="textarea" name="message" id="message" placeholder="Message" maxlength="300" rows="7"></textarea>
+                    </div>
+
+        <button type="submit" id="submit_contact_suggestion" name="submit_contact_suggestion" class="btn btn-m btn-secondary">Submit Form</button>
+        </form>
                                 </div>
                             </div>
                         </div>
