@@ -29,36 +29,9 @@
             {% include "includes/search-token-vue.html" with unique_id='search_nav' %}
         </div>
 
-        <p><a href="#" data-toggle="modal" data-target="#largeTextareaModal">Expand (e.g. to paste a long amino-acid
-            sequence)</a></p>
-
-        <!-- Modal Textarea -->
-        <div class="modal fade" id="largeTextareaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-             aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-body oma-search">
-                        <img src="{% static "image/logo-oma-o.svg" %}" alt="Icon OMA"/>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-                        <form class="search-long-string" role="search" id="searchFormModal" action="{% url 'search' %}" method="POST">{% csrf_token %}
-                            <div class="oma-search-select">
-                                 <select id="selectBrowserModal" class="btn-mini" name="type" onchange="update_autocomplete_enableing('searchFormModal')">
-                                    {% include "includes/search_select.html" %}
-                                </select>
-                            </div>
-                            <textarea id='inputBrowserModal' name="query" type="text" class="" placeholder='P53_RAT | Fungi | Insulin HUMAN | "auxin response factor"'></textarea>
-                            <button type="submit" class="btn btn-lg btn-block btn-primary">Search</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- End Modal Textarea -->
 
         <div class="oma-quick-start">
-            <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/>
+            <!-- <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/> -->
             <p>
                 <strong>Examples:</strong>
                 {% block search_examples %}

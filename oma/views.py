@@ -2506,6 +2506,14 @@ def token_search(request):
 
     if request.method == 'POST':
 
+        if request.POST.__contains__('submit_contact_suggestion'):
+
+            msg = EmailMessage(request.POST.get('query'), request.POST.get('message'), to=[request.POST.get('email')], from_email='contact@omabrowser.org')
+            msg.content_subtype = "html"
+            msg.send()
+
+            return redirect('search_suggestion_thanks')
+
         ## Process tokens
         raw_tokens = json.loads(request.POST.get("hidden_query", ""))
         tokens = [generate_type(z['prefix'])(utils.db, z['query']) for z in raw_tokens]
@@ -2612,7 +2620,7 @@ def token_search(request):
                         hogs.append(group)
                     elif isinstance(group, models.OmaGroup):
                         group.level = 'God' # todo ?
-                        group.type = 'OMA_group'
+                        group.type = 'OMA group'
                         ogs.append(group)
                     else:
                         logger.error("Search groups: {} can't be assign as HOG or OmaGroup".format(group))
@@ -2635,7 +2643,7 @@ def token_search(request):
                     ag.species_and_strain_as_dict = ag.sciname
                     ag.common_name = ''
                     ag.last_modified = ''
-                    ag.nr_entries = 99999
+                    ag.nr_entries = 99999 # todo model.nr_prots
                     ag.type = "Ancestral"
                     return ag
 
@@ -2653,16 +2661,29 @@ def token_search(request):
                     'wildcard'] and not T['Protein']):
                     return redirect('ancestralgenome_info', A.values()[0].ncbi_taxon_id)
 
+                species_augmented = S.values()
+                for s_aug in species_augmented:
+                    s_aug.type = "Extant"
+
                 # build json for genomes tables
-                json_species = GenomeModelJsonMixin().as_json(S.values())
+                json_species = GenomeModelJsonMixin().as_json(species_augmented)
                 json_ancestal_genomes = GenomeModelJsonMixin().as_json([augment_ancestral_genomes(ag) for ag in A.values()])
                 context['data_genomes'] = json.dumps(json_species + json_ancestal_genomes)
 
             # Prepare details per term
             E_details = []
+            G_details = []
+            S_details = []
             for to in tokens:
-                E_details.append("{} {}: {} hits".format(to.term, function_mapper[type(to)], to.count_entries() ))
+                E_details.append("{} {}: {} proteins".format(to.term, function_mapper[type(to)], to.count_entries()))
+                G_details.append("{} {}: {} groups".format(to.term, function_mapper[type(to)], to.count_groups()))
+                S_details.append("{} {}: {} extant species".format(to.term, function_mapper[type(to)], to.count_species()))
+                S_details.append("{} {}: {} ancestral species".format(to.term, function_mapper[type(to)], to.count_ancestral_genomes()))
             context['E_details'] = E_details
+            context['G_details'] = G_details
+            context['S_details'] = S_details
+
+
 
     return render(request, 'search_token.html', context)
 
@@ -2687,8 +2708,8 @@ class GenomeModelJsonMixin(JsonModelMixin):
                    "common_name": None,
                    "nr_entries": "prots",
                    "kingdom": None,
-                   "last_modified": None}
-                   #"type": "type"}
+                   "last_modified": None,
+                   "type": "type"}
 
 class GenomeModelJsonTableMixin(JsonModelMixin):
     json_fields = {'uniprot_species_code': None,
