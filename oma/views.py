@@ -2643,7 +2643,7 @@ def token_search(request):
                     ag.species_and_strain_as_dict = ag.sciname
                     ag.common_name = ''
                     ag.last_modified = ''
-                    ag.nr_entries = 99999 # todo model.nr_prots
+                    ag.nr_entries = ag.nr_genes
                     ag.type = "Ancestral"
                     return ag
 
