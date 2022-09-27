@@ -6,8 +6,11 @@
 
         <input type="button" value="Refresh Page" onClick="window.location.reload()">
     {% elif msa_file_obj.state == "error" %}
-        An server error occured. The functionality to compute MSAs is
-        currently not available. Please come back later.
+        <p>An server error occurred. The functionality to compute MSAs is
+            currently not available. Please come back later.</p>
+    {% elif msa_file_obj.state == "timeout" %}
+        <p>This msa cannot be computed online as it is taking too much time. If you really need to have it, either compute it
+        yourself on your local computer, or contact us on contact@omabrowser.org.</p>
     {% else %}
         <div id="msa_div">Loading...</div>
         <script>
