@@ -2188,6 +2188,7 @@ class CurrentView(TemplateView):
         context['release_with_backlinks'] = self._get_previous_releases(context['release'], context['all_releases'])
         context['download_root'] = self.download_root(context)
         context['existing_download_files'] = self.existing_download_files(context['release'])
+        logger.debug("context data: {}".format(context))
         return context
 
 
