@@ -80,9 +80,10 @@ FROM build_${PYOMABROWSER_CODEBASE} as src_image
 FROM src_image as final_builder
 WORKDIR $SRC_DIR
 
-RUN pipenv lock -r > requirements.pipenv.txt
+RUN pipenv requirements > requirements.pipenv.txt
 RUN echo "psycopg2==2.9.1\nuwsgi" >> requirements.pipenv.txt
-RUN --mount=type=cache,id=wheels,target=/usr/src/app/wheels \
+RUN --mount=type=cache,id=wheels-oma,target=/usr/src/app/wheels \
+    --mount=type=ssh \
     pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.pipenv.txt
 
 FROM python:3.8-slim as runtime
@@ -100,12 +101,13 @@ RUN apt-get -qq update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip
-COPY --from=src_image $SRC_DIR $SRC_DIR
+COPY --from=final_builder $SRC_DIR $SRC_DIR
 
 # set work directory
 WORKDIR $SRC_DIR
-RUN --mount=type=cache,id=wheels,target=/wheels \
-    pip install --no-cache /wheels/*
+RUN --mount=type=cache,id=wheels-oma,target=/wheels \
+    ls /wheels \
+    && pip install --no-cache /wheels/*
 
 RUN /bin/date | /usr/bin/md5sum > secret_key.txt
 
