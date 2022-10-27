@@ -1,0 +1,33 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numexpr = ">=2.7"
+numpy = ">1.19.0"
+tables = "<4.0,>=3.7.0"
+future = ">=0.12.3"
+django-bootstrap4 = "*"
+tweepy = ">=2.3.0"
+django-recaptcha = "==1.3.1"
+celery = ">=4,<5"
+biopython = "<2.0,>1.78"
+djangorestframework = "<3.14,>=3.10"
+coreapi = "*"
+scikit-learn = "*"
+djangorestframework-link-header-pagination = "*"
+django-cors-headers = "*"
+django-google-analytics-app = {ref = "master", git = "https://github.com/alpae/django-google-analytics.git"}
+pyoma = {ref = "feature-search", git = "ssh://gitolite@lab.dessimoz.org:2222/pyoma"}
+zoo = {ref = "master", git = "ssh://gitolite@lab.dessimoz.org:2222/zoo"}
+oma-academy-app = {ref = "master", git = "ssh://gitolite@lab.dessimoz.org:2222/oma-academy"}
+Django = "<3.0,>=2.2.0"
+Pygments = "*"
+Markdown = "*"
+PyYAML = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"

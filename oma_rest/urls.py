@@ -6,13 +6,13 @@ from rest_framework.documentation import include_docs_urls
 from django.template.loader import render_to_string
 
 router = DefaultRouter()
-router.register(r'protein', views.ProteinEntryViewSet, base_name='protein')
-router.register(r'group', views.OmaGroupViewSet, base_name='group')
-router.register(r'version', views.APIVersion, base_name='version')
-router.register(r'xref', views.XRefsViewSet, base_name='xref')
-router.register(r'genome', views.GenomeViewSet, base_name='genome')
-router.register(r'hog', views.HOGViewSet, base_name='hog')
-router.register(r'taxonomy', views.TaxonomyViewSet, base_name='taxonomy')
+router.register(r'protein', views.ProteinEntryViewSet, basename='protein')
+router.register(r'group', views.OmaGroupViewSet, basename='group')
+router.register(r'version', views.APIVersion, basename='version')
+router.register(r'xref', views.XRefsViewSet, basename='xref')
+router.register(r'genome', views.GenomeViewSet, basename='genome')
+router.register(r'hog', views.HOGViewSet, basename='hog')
+router.register(r'taxonomy', views.TaxonomyViewSet, basename='taxonomy')
 
 # create docu-description from template
 desc = render_to_string("oma_rest/documentation_description.html", {})

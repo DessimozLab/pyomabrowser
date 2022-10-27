@@ -6,15 +6,19 @@ import os
 from subprocess import run, PIPE
 
 
-def load_compose():
-    res = run(["docker-compose", "config"], stdout=PIPE)
+def load_compose(compose_file=None):
+    cmd = ["docker-compose"]
+    if compose_file is not None:
+        cmd.extend(["-f", compose_file])
+    cmd.append("config")
+    res = run(cmd, stdout=PIPE)
     res.check_returncode()
     comp = yaml.safe_load(res.stdout)
     return comp
 
 
 def build(conf):
-    services = load_compose()['services']
+    services = load_compose(conf.compose_file)['services']
     for service, configs in services.items():
         if len(conf.service) > 0 and service not in conf.service:
             continue
@@ -51,6 +55,7 @@ def build(conf):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="build docker images")
     parser.add_argument('--no-cache', action="store_true", help="do not use cached images")
+    parser.add_argument('-c', '--compose-file', help="alternative docker-compose.yml file")
     parser.add_argument('service', nargs='*', help="names of services to build")
     conf = parser.parse_args()
 

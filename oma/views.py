@@ -1944,8 +1944,8 @@ def home(request):
 
         api = tweepy.API(auth)
 
-        public_tweets = api.user_timeline('@OMABrowser', exclude_replies=True,
-                                          trim_user=True, include_rts=False, include_entities=True)
+        public_tweets = api.user_timeline(user_id='@OMABrowser', exclude_replies=True,
+                                          trim_user=True, include_rts=False)
         tweets = []
         for tweet in public_tweets[:n_latest_tweets]:
             text = tweet.text
@@ -1955,7 +1955,7 @@ def home(request):
                         '<a href="' + url['expanded_url'] + '">' + url['expanded_url'] + '</a>' +
                         text[url['indices'][1]:])
             tweets.append(text)
-    except (AttributeError, tweepy.TweepError) as err:
+    except (AttributeError, tweepy.TweepyException) as err:
         # attribute errors occur if TWITTER settings are not assigned
         tweets = ['Currently no tweets found']
 
@@ -2188,6 +2188,7 @@ class CurrentView(TemplateView):
         context['release_with_backlinks'] = self._get_previous_releases(context['release'], context['all_releases'])
         context['download_root'] = self.download_root(context)
         context['existing_download_files'] = self.existing_download_files(context['release'])
+        logger.debug("context data: {}".format(context))
         return context
 
 

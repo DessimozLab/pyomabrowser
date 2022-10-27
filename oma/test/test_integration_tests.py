@@ -28,15 +28,14 @@ class VPairsViews_Test(TestCase):
         reply = self.client.get(reverse('pairs', args=[query]))
         self.assertEqual(reply.status_code, 200)
         content = decode_replycontent(reply)
-        vps = [z.omaid for z in reply.context['vps']]
-        self.assertGreater(len(vps), 0)
-        api_url = re.search(r'data-url="(?P<url>[^"]*)"', content)
+        nr_vps = reply.context['nr_vps']
+        self.assertGreater(nr_vps, 0)
+        api_url = reply.context['table_data_url']
         self.assertIsNotNone(api_url)
-        api_data = self.client.get(api_url.group('url'))
+        api_data = self.client.get(api_url)
         self.assertEqual(api_data.status_code, 200)
-        api_data = decode_replycontent(api_data)
-        for vp in vps:
-            self.assertIn(vp, api_data, 'VP {} not found on page.'.format(vp))
+        api_data = json.loads(decode_replycontent(api_data))
+        self.assertGreaterEqual(len(api_data), nr_vps)
 
     def test_inexistant_query_genome(self):
         query = 'ECOLI00411'
@@ -48,7 +47,7 @@ class HogFastaView_Test(TestCase):
     def get_fasta_and_verify_sequences_and_nr_members(self, query, level, seqs, nr_expected_members):
         if isinstance(seqs, str):
             seqs = [seqs]
-        reply = self.client.get(reverse('hogs_fasta', args=[query, level]))
+        reply = self.client.get(reverse('hog_fasta', args=[query, level]))
         self.assertEqual(reply.status_code, 200)
         content = reply.content.decode()
         self.assertEqual(content.count('>'), nr_expected_members)
@@ -56,11 +55,11 @@ class HogFastaView_Test(TestCase):
             self.assertIn(seq, content, 'sequence {!r} not in reply')
 
     def test_query_sequence_in_result_at_fungi(self):
-        self.get_fasta_and_verify_sequences_and_nr_members('YEAST00012', 'Fungi',
+        self.get_fasta_and_verify_sequences_and_nr_members('HOG:0000002', 'Fungi',
                                                            ['MTSEPEFQQAYDEIVSSVEDSKIF', 'KRVLPIISIPERVLEFRVTWEDD'], 3)
 
     def test_query_sequence_in_result_at_eukaryota(self):
-        self.get_fasta_and_verify_sequences_and_nr_members('YEAST00012', 'Eukaryota',
+        self.get_fasta_and_verify_sequences_and_nr_members('HOG:0000002', 'Eukaryota',
                                                            ['MILYSCVVCFIVFVFHVKAYSKNKVLKYAK',
                                                             'KRVLPIISIPERVLEFRVTWEDD'], 5)
 
@@ -68,36 +67,42 @@ class HogFastaView_Test(TestCase):
 class HogView_Test(TestCase):
     def test_orthoxml(self):
         """Test retrieval of an individual orthoxml"""
-        query = 'YEAST00012'
+        query = "HOG:0000002"
         reply = self.client.get(reverse('hogs_orthoxml', args=[query]))
         self.assertEqual(reply.status_code, 200)
         content = decode_replycontent(reply)
         self.assertIn(query, content)
         self.assertIn('orthoXML', content)
 
+    def test_hog_by_proteinid_redirect(self):
+        query, exp_hog = "YEAST00012", "HOG:0000002"
+        reply = self.client.get(reverse('hog_table_from_entry', args=[query]))
+        self.assertEqual(reply.status_code, 302)
+        self.assertIn(exp_hog, reply.url)
+
     def test_hog_success_page(self):
-        query = 'YEAST00012'
-        reply = self.client.get(reverse('hogs', args=[query, 'Eukaryota']))
+        query = "HOG:0000002"
+        reply = self.client.get(reverse('hog_table', args=[query, 'Eukaryota']), follow=True)
         self.assertEqual(reply.status_code, 200)
-        self.assertEqual(len(reply.context['hog_members']), 5)
+        self.assertEqual(len(reply.context['hog'].members), 5)
         self.assertIn(query, decode_replycontent(reply))
 
     def test_basehog_without_orthologs(self):
-        """test that page returns doesn't belong to any hog message"""
-        reply = self.client.get(reverse('hogs', args=['YEAST10']))
+        """test that redirect to vps page if not part of a hog"""
+        reply = self.client.get(reverse('hog_table_from_entry', args=['YEAST10']), follow=True)
         self.assertEqual(reply.status_code, 200)
-        self.assertIn("not part of any hierarchical orthologous group", decode_replycontent(reply))
+        self.assertIn('vps', reply.redirect_chain[0][0])
 
     def test_invalid_level(self):
         """test that an invalid level (level not belonging to species) will return an error message"""
-        reply = self.client.get(reverse('hogs', args=['YEAST12', 'Mammalia']))
+        reply = self.client.get(reverse('hog_table', args=["HOG:0000002", 'Mammalia']))
         self.assertEqual(reply.status_code, 404)
 
 
 class HogVisViewTest(TestCase):
     def test_return_right_orthoxml_link(self):
-        query = 'YEAST00012'
-        reply = self.client.get(reverse('hog_vis', args=[query]))
+        query, member_prot = 'HOG:0000002', "YEAST00012"
+        reply = self.client.get(reverse('hog_viewer', args=[query]))
         self.assertEqual(reply.status_code, 200)
         #self.assertTemplateUsed(reply, "hog_iHam.html")
         expected_orthoxml_url = reverse('hogs_orthoxml', args=[query])
@@ -108,13 +113,12 @@ class HogVisViewTest(TestCase):
         # test that orthoxml has query gene
         orthoxml = self.client.get(expected_orthoxml_url)
         self.assertEqual(orthoxml.status_code, 200)
-        self.assertIn('protId="{}"'.format(query).encode('utf-8'), orthoxml.content)
+        self.assertIn('protId="{}"'.format(member_prot).encode('utf-8'), orthoxml.content)
 
     def test_access_singleton_protein(self):
         query = 'YEAST11'  # this protein is not part of any HOG
-        reply = self.client.get(reverse('hog_vis', args=[query]))
-        self.assertEqual(200, reply.status_code)
-        self.assertIn('is not part of any hierarchical', decode_replycontent(reply))
+        reply = self.client.get(reverse('hog_viewer', args=[query]))
+        self.assertEqual(404, reply.status_code)
 
 
 class SyntenyViewTester(TestCase):
@@ -160,7 +164,7 @@ class SyntenyViewTester(TestCase):
         query = 'SCHPO04241'
         reply = self.client.get(reverse('synteny', args=[query]))
         context = decode_replycontent(reply)
-        self.assertIn('btn-0-4-', context)
+        self.assertIn('btn-4', context)
         self.verify_colors(query, 4)
 
 

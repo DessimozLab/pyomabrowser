@@ -11,7 +11,7 @@ biopython>1.78,<2.0
 djangorestframework<3.10
 coreapi
 pygments
-markdown
+markdown<3.4  #drf checks removed version()
 scikit-learn
 djangorestframework-link-header-pagination
 django-cors-headers
