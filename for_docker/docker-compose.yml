@@ -14,10 +14,6 @@ services:
     build:
       context: ..
       dockerfile: for_docker/oma/Dockerfile
-      args: 
-        SPECIAL_PYTABLES: "no"
-        PYOMABROWSER_CODEBASE: "from_local"    # from_local or from_git
-        PYOMABROWSER_GITTAG: "master"        # if "from_git", take branch/commit for building docker image
     command: /entrypoint.sh uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi --vacuum --max-requests=500
     env_file:
       - env
@@ -143,3 +139,7 @@ services:
         source: "${RELEASE_PATH_HOST}/data"
         target: ${DARWIN_BROWSERDATA_PATH}
         read_only: true
+    ulimits:
+      stack: 
+        soft: 64000000
+        hard: 64000000

@@ -1944,8 +1944,8 @@ def home(request):
 
         api = tweepy.API(auth)
 
-        public_tweets = api.user_timeline('@OMABrowser', exclude_replies=True,
-                                          trim_user=True, include_rts=False, include_entities=True)
+        public_tweets = api.user_timeline(user_id='@OMABrowser', exclude_replies=True,
+                                          trim_user=True, include_rts=False)
         tweets = []
         for tweet in public_tweets[:n_latest_tweets]:
             text = tweet.text
@@ -1955,7 +1955,7 @@ def home(request):
                         '<a href="' + url['expanded_url'] + '">' + url['expanded_url'] + '</a>' +
                         text[url['indices'][1]:])
             tweets.append(text)
-    except (AttributeError, tweepy.TweepError) as err:
+    except (AttributeError, tweepy.TweepyException) as err:
         # attribute errors occur if TWITTER settings are not assigned
         tweets = ['Currently no tweets found']
 
