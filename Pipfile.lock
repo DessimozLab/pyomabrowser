@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d7d248e15467c75a9387babcd9fb2d8d9901b08877f247369a81261f63707fd8"
+            "sha256": "a2d7d6d22cae707076cab98eae1462f2817289a260684c91577f548aa21b7601"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -176,6 +176,14 @@
             ],
             "index": "pypi",
             "version": "==3.11.0"
+        },
+        "django-debug-toolbar": {
+            "hashes": [
+                "sha256:644bbd5c428d3283aa9115722471769cac1bec189edf3a0c855fd8ff870375a9",
+                "sha256:6b633b6cfee24f232d73569870f19aa86c819d750e7f3e833f2344a9eb4b4409"
+            ],
+            "index": "pypi",
+            "version": "==3.2.4"
         },
         "django-google-analytics-app": {
             "git": "https://github.com/alpae/django-google-analytics.git",

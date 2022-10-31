@@ -1,4 +1,4 @@
-from .prod import *
+from .profiling import *
 
 EMAIL_HOST = "whippee.com"
 EMAIL_PORT = 8025

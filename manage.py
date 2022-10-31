@@ -7,7 +7,10 @@ if __name__ == "__main__":
         if os.environ['OMA_INSTANCE'].upper() == "BASF":
             os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pybrowser_dev.settings.basf')
         elif os.environ['OMA_INSTANCE'].upper() in ("", "FULL"):
-            os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pybrowser_dev.settings.prod')
+            if os.getenv("DEPLOYMENT_TYPE", "").upper()[:3] == "DEV":
+                os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pybrowser_dev.settings.profiling")
+            else:
+                os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pybrowser_dev.settings.prod')
         elif os.environ['OMA_INSTANCE'].upper() in ("TEST", "TESTING"):
             os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pybrowser_dev.settings.testing')
     else:
