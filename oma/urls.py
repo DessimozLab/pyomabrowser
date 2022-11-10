@@ -181,8 +181,8 @@ if settings.OMA_INSTANCE_NAME != "basf":
 if settings.DEBUG:
     try:
         import debug_toolbar
-        urlpatterns.extend([
-            url(r'^__debug__/', include(debug_toolbar.urls)),
-        ])
+        #urlpatterns.extend([
+        #    url(r'^__debug__/', include(debug_toolbar.urls)),
+        #])
     except ImportError:
         pass
