@@ -45,7 +45,7 @@ pandas==1.5.1 ; python_version >= '3.8'
 property-manager==3.0 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 pyfaidx==0.7.1
 pygments==2.13.0
-git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@a2492f3b877789dfd490b5c09c2f48acfae1a63e#egg=pyoma
+git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@aba8354df670b1b35eb5dff2c510aed5d047b81c#egg=pyoma
 pyopa==0.8.2
 pyparsing==3.0.9 ; python_full_version >= '3.6.8'
 python-dateutil==2.8.2 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
@@ -57,7 +57,7 @@ requests-oauthlib==1.3.1 ; python_version >= '2.7' and python_version not in '3.
 scikit-learn==1.1.3
 scipy==1.9.3 ; python_version >= '3.8'
 setuptools==65.5.1 ; python_version >= '3.7'
-simplejson==3.17.6 ; python_version >= '2.5' and python_version not in '3.0, 3.1, 3.2, 3.3'
+simplejson==3.18.0 ; python_version >= '2.5' and python_version not in '3.0, 3.1, 3.2, 3.3'
 six==1.16.0 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 soupsieve==2.3.2.post1 ; python_version >= '3.6'
 sqlparse==0.4.3 ; python_version >= '3.5'
