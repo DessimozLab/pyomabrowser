@@ -111,7 +111,7 @@
         methods: {
             get_list_prefixes(lowercase=false){
 
-                var lp = [].concat(...Object.values(this.prefixes))
+                let lp = [].concat(...Object.values(this.prefixes));
 
                 if (lowercase){
 
@@ -135,19 +135,19 @@
             addToken(event) {
 
                 event.preventDefault()
-                var val = event.target.value.trim()
+                let val = event.target.value.trim();
 
 
-                if (val.length == 0 && this.tokens.length > 0){
+                if (val.length === 0 && this.tokens.length > 0){
                     this.collect_token()
                     // wanted to auto search if press and empty + token but post request miss post_query data
                 }
                 else {
 
-                    var sinle_term = val[0] != '"';
-                    var multi_term_closed = (val.length > 1 && val[val.length - 1] == '"')
+                    var sinle_term = val[0] !== '"';
+                    var multi_term_closed = (val.length > 1 && val[val.length - 1] === '"')
                     var has_prefix = val.includes(':')
-                    var prefix_end = val[val.length - 1] == ':'
+                    var prefix_end = val[val.length - 1] === ':'
                     var p = has_prefix ? val.split(':')[0] : this.default_prefix;
 
 
@@ -169,7 +169,7 @@
                             // STOP if multiple not closed
                             if (!multi_term_closed) {
 
-                                if (event.code == "Space") {
+                                if (event.code === "Space") {
                                     event.target.value = val + ' '
                                 }
                                 return
@@ -185,8 +185,8 @@
                         if (has_prefix) {
 
                             var tmp = val.split(':')[1].trim()
-                            sinle_term = tmp[0] != '"';
-                            multi_term_closed = (val.length > 1 && tmp[tmp.length - 1] == '"')
+                            sinle_term = tmp[0] !== '"';
+                            multi_term_closed = (val.length > 1 && tmp[tmp.length - 1] === '"')
 
 
                             // multiple term
@@ -194,7 +194,7 @@
 
                                 // STOP if not closed
                                 if (!multi_term_closed) {
-                                    if (event.code == "Space") {
+                                    if (event.code === "Space") {
                                         event.target.value = val + ' '
                                     }
                                     return
@@ -268,11 +268,11 @@
                 var pu = this.get_prefix_used();
                 var current_prefix_type = this.get_type_prefix(p)
 
-                if (current_prefix_type != 'Taxon'){
+                if (current_prefix_type !== 'Taxon'){
 
                     var no_taxon = pu.filter(x => x !== 'Taxon');
 
-                    if (no_taxon.length > 0 && no_taxon[0] != current_prefix_type ) {
+                    if (no_taxon.length > 0 && no_taxon[0] !== current_prefix_type ) {
                         this.show_error = true;
                             this.error_message = "Warning: You are searching for " + no_taxon[0] +
                                 " you can't add token for " + current_prefix_type
@@ -295,7 +295,7 @@
                 this.placeholder = ''
 
             },
-            is_empty(){return tokens.length == 0 ? true : false},
+            is_empty(){return tokens.length === 0},
             modal_clicked(){
                 console.log('clicked')
                 $('#exampleModal_{{ unique_id }}').modal('show')
@@ -314,7 +314,7 @@
             var json = JSON.parse(response);
             var xref_source_order = {{ xref_order | safe }};
             json.sort(function (a, b){
-                var idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
+                const idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
                 if (idx_a === idx_b){
                     return a.xref > b.xref ? 1 : -1;
                 }
@@ -342,10 +342,9 @@
                     .replace(/"/g, '&quot;')
                     .replace(/&lt;(\/?strong)&gt;/g, '<$1>');
             };
-            var label = '<span class="auto-xref">' + highlight_and_escape(suggestion.data.xref) +'</span> &nbsp;'+
-                        '<span class="auto-omaid">' + suggestion.data.omaid + '</span>'+
-                        '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
-            return label;
+            return '<span class="auto-xref">' + highlight_and_escape(suggestion.data.xref) + '</span> &nbsp;' +
+                '<span class="auto-omaid">' + suggestion.data.omaid + '</span>' +
+                '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
         },
         onSelect: function(item){
             window.location.href = "/oma/vps/" + item.data.entry_nr;
@@ -394,6 +393,7 @@
           <li><b>Taxon:</b> 'og', 'fingerprint', 'sequence'</li>
       </ul>
 
+          <p>
           Except for taxon that you can combined or use alone, you can't search for more that one type at once
           (e.g hog:12 with xref:HUMAN_1234 don't make sense but fingerprint:'EWGKQSF' in species:Tetraodon is fine).
           </p>
@@ -401,13 +401,13 @@
 
           <strong>Oups a typo !</strong>
 
-          <p>No problems, you edit your token. Click on the term, the token will be stringify so you can modify it.
+          <p>No problems, you edit your token. Click on the term, the token will be stringified, so you can modify it.
 
               <br>
-              The prefix is not correct ? You can click on the dropdown icon to select an other one.
+              The prefix is not correct ? You can click on the dropdown icon to select another one.
 
               <br>
-              I dont want this token.. Just clikc on the x to delete it.
+              I don't want this token... Just click on the x to delete it.
 
           </p>
 
