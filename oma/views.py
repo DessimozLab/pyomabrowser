@@ -2506,7 +2506,7 @@ def token_search(request):
     }
 
     if request.method == 'POST':
-
+        t0 = time.time()
         if request.POST.__contains__('submit_contact_suggestion'):
 
             msg = EmailMessage(request.POST.get('query'), request.POST.get('message'), to=[request.POST.get('email')], from_email='contact@omabrowser.org')
@@ -2543,11 +2543,14 @@ def token_search(request):
                     context['search_organised']['Taxon_count'] += 1
                 else:
                     context['search_organised']['Others'] += 1
-
+        logger.debug(f"search-prep: {time.time() - t0}sec")
         ## Only run the search if tokens
         if tokens:
+            t1 = time.time()
             context['results'] = search.search(tokens)
+            logger.debug(f"search pyoma: {time.time() - t1}")
 
+            t1 = time.time()
             # quick access
             E = context['results'].entries
             G = context['results'].groups
@@ -2683,6 +2686,8 @@ def token_search(request):
             context['E_details'] = E_details
             context['G_details'] = G_details
             context['S_details'] = S_details
+            logger.debug(f"search-post-pyoma: {time.time() - t1}sec")
+        logger.debug(f"overall search: {time.time()-t0}sec")
 
 
 
