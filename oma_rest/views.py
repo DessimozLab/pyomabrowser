@@ -445,10 +445,17 @@ class HOGViewSet(PaginationMixin, ViewSet):
                     raise ValueError("Invalid level for \"compare_level\" parameter.")
             hogs = utils.db.get_all_hogs_at_level(level, compare_with=compare_level)
             if compare_level is None:
-                queryset = [rest_models.HOG(hog_id=h['ID'].decode(), level=h['Level'].decode()) for h in hogs]
+                queryset = [rest_models.HOG(hog_id=h['ID'].decode(),
+                                            level=h['Level'].decode(),
+                                            completeness_score=h['CompletenessScore'])
+                            for h in hogs]
                 serializer_cls = serializers.HOGsListSerializer
             else:
-                queryset = [rest_models.HOG(hog_id=h['ID'].decode(), level=h['Level'].decode(), event=h['Event'].decode()) for h in hogs]
+                queryset = [rest_models.HOG(hog_id=h['ID'].decode(),
+                                            level=h['Level'].decode(),
+                                            completeness_score=h['CompletenessScore'],
+                                            event=h['Event'].decode())
+                            for h in hogs]
                 serializer_cls = serializers.HOGsCompareListSerializer
         else:
             # list of all the rootlevel hogs
@@ -644,7 +651,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         fam_nr = self._validate_hogid(hog_id)
         try:
             nr_profiles = float(self.request.query_params.get('max_results', "10"))
-            if 1 < nr_profiles > 50:
+            if not (1 <= nr_profiles <= 50):
                 raise ParseError("max_results must be positive value <= 50")
         except ValueError:
             raise ParseError("max_results must be positive value <= 50")
