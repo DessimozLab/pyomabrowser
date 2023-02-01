@@ -175,17 +175,14 @@ const apply_filter = function(){
 
         var f_t = d3.select("#set_min_coverage").property("value");
 
-        console.log(f_t)
         var ids_to_keep = [];
 
 
-            console.log('filter:', data_original)
 
             for (const element of data_original ) {
 
                 if (!hide_column_event){
                     if (filter_parameters.includes(element.event) && parseFloat(element.completeness_score) >= f_t){
-                        console.log(element.hog_id, parseFloat(element.completeness_score), f_t)
                         ids_to_keep.push(element.hog_id)
 
                     }
@@ -230,7 +227,6 @@ const apply_filter = function(){
 data_original = jsonData
 
 
-    console.log('init:', data_original)
 
 
         var tab = $("#grpTable");
@@ -251,7 +247,6 @@ data_original = jsonData
             },
             onLoadSuccess: function (data) {
                 data_original = data
-                console.log('load success:', data)
 
                 tab.bootstrapTable('hideLoading');
         },
