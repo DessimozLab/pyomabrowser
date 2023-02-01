@@ -79,6 +79,7 @@
 <script>
 
 var data_original;
+var need_apply_filter = true
 
 var hide_column_event = true
 var apply_filter_retained = true;
@@ -173,28 +174,37 @@ const apply_filter = function(){
 
 
         var f_t = d3.select("#set_min_coverage").property("value");
+
+        console.log(f_t)
         var ids_to_keep = [];
 
 
+            console.log('filter:', data_original)
 
+            for (const element of data_original ) {
 
-    for (const element of data_original ) {
+                if (!hide_column_event){
+                    if (filter_parameters.includes(element.event) && parseFloat(element.completeness_score) >= f_t){
+                        console.log(element.hog_id, parseFloat(element.completeness_score), f_t)
+                        ids_to_keep.push(element.hog_id)
 
+                    }
+                }
 
-              if (parseFloat(element.completeness_score) >= f_t) {
+                else {
+                    if (parseFloat(element.completeness_score) >= f_t) {
 
                   ids_to_keep.push(element.hog_id)
               }
-          }
+                }
 
 
 
-          if (hide_column_event){
-              $('#grpTable').bootstrapTable('filterBy', {hog_id: ids_to_keep} )
           }
-          else{
-              $('#grpTable').bootstrapTable('filterBy', {event: filter_parameters, hog_id: ids_to_keep} )
-          }
+
+
+            $('#grpTable').bootstrapTable('filterBy', {hog_id: ids_to_keep} )
+
 
 
 
@@ -220,6 +230,9 @@ const apply_filter = function(){
 data_original = jsonData
 
 
+    console.log('init:', data_original)
+
+
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
         $.extend(icons, {export: 'fa-download'});
@@ -229,11 +242,18 @@ data_original = jsonData
             clickToSelect: false,
             showMultiSort: true,
             showLoading: true,
-            onPostBody: function () {
+            onPostBody: function (data) {
+                if (need_apply_filter){
+                    need_apply_filter = false
+                    apply_filter()
+                }
+
             },
             onLoadSuccess: function (data) {
                 data_original = data
-            tab.bootstrapTable('hideLoading');
+                console.log('load success:', data)
+
+                tab.bootstrapTable('hideLoading');
         },
         refreshOptions: {'icons': icons},
 

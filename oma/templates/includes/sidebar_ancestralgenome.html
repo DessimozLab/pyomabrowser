@@ -179,11 +179,12 @@
 
              hide_column_event = false
 
+        need_apply_filter = true
+
          $('#grpTable').bootstrapTable('refresh', {url: new_url  } )
 
          $('#grpTable').bootstrapTable('showColumn', 'event');
 
-         apply_filter()
 
 
      }
@@ -197,10 +198,11 @@
 
         hide_column_event = true
 
-         $('#grpTable').bootstrapTable('refresh', {url:  "{{api_url}}"  } )
+        need_apply_filter = true
+
+         $('#grpTable').bootstrapTable('refresh', {url:  "{{api_url|safe}}"  } )
          $('#grpTable').bootstrapTable('hideColumn', 'event');
 
-         apply_filter()
 
 
 
