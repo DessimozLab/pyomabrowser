@@ -244,6 +244,7 @@ class RelatedGroupsSerializer(GroupListSerializer):
 
 class HOGsBaseSerializer(ReadOnlySerializer):
     hog_id = serializers.CharField()
+    completeness_score = serializers.CharField()
     level = serializers.CharField(required=False)
     levels_url = QueryParamHyperlinkedIdentityField(view_name='hog-detail',
                                                     lookup_field='hog_id',

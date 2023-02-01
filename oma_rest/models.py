@@ -1,5 +1,6 @@
 from rest_framework.exceptions import APIException, status
 import re
+import random
 re_hogid = re.compile(r"HOG:(?P<rel>[A-Z]*)(?P<fam>\d+)(?P<subhog>[a-z0-9.]+)?")
 
 
@@ -11,6 +12,8 @@ class HOG(object):
         if hog_id is not None:
             m = re_hogid.match(hog_id)
             self.roothog_id = int(m.group("fam"))
+
+        self.completeness_score = round(random.random(),2)
 
 
 class OMAGroup(object):
