@@ -24,6 +24,7 @@
                 <th  data-field="hog_id" data-sortable="true"  data-formatter="tablehooks.format_hog_api">HOG ID</th>
                 <th  data-field="roothog_id" data-sortable="true" data-formatter="tablehooks.format_roothog">Root HOG ID</th>
                 <th  data-field="event" data-sortable="true" >Phylogenetic event</th>
+
                  <th  data-field="completeness_score" data-sortable="true" >Completeness</th>
 
             </tr>
@@ -77,7 +78,127 @@
 
 <script>
 
+var data_original;
+
 var hide_column_event = true
+var apply_filter_retained = true;
+var apply_filter_duplicated = true;
+var apply_filter_lost = true;
+var apply_filter_gained = true;
+
+function set_filter_retained(){
+
+         // Get the checkbox
+      var checkBox = document.getElementById("Retained");
+
+      // If the checkbox is checked, display the output text
+      if (checkBox.checked == true){
+        apply_filter_retained = true;
+      } else {
+        apply_filter_retained = false;
+      }
+
+      apply_filter();
+
+
+     }
+function set_filter_gained(){
+
+ // Get the checkbox
+var checkBox = document.getElementById("Gained");
+
+// If the checkbox is checked, display the output text
+if (checkBox.checked == true){
+apply_filter_gained = true;
+} else {
+apply_filter_gained = false;
+}
+
+apply_filter();
+
+
+}
+function set_filter_duplicated(){
+
+ // Get the checkbox
+var checkBox = document.getElementById("Duplicated");
+
+// If the checkbox is checked, display the output text
+if (checkBox.checked == true){
+apply_filter_duplicated = true;
+} else {
+apply_filter_duplicated = false;
+}
+
+apply_filter();
+
+
+}
+function set_filter_lost(){
+
+ // Get the checkbox
+var checkBox = document.getElementById("Lost");
+
+// If the checkbox is checked, display the output text
+if (checkBox.checked == true){
+apply_filter_lost = true;
+} else {
+apply_filter_lost = false;
+}
+
+apply_filter();
+
+
+}
+
+const apply_filter = function(){
+
+        var filter_parameters = [];
+
+        if (apply_filter_retained){
+            filter_parameters.push("retained")
+        }
+
+        if (apply_filter_duplicated){
+            filter_parameters.push("duplicated")
+        }
+
+        if (apply_filter_lost){
+            filter_parameters.push("lost")
+        }
+
+        if (apply_filter_gained){
+            filter_parameters.push("gained")
+        }
+
+
+        var f_t = d3.select("#set_min_coverage").property("value");
+        var ids_to_keep = [];
+
+
+
+
+    for (const element of data_original ) {
+
+
+              if (parseFloat(element.completeness_score) >= f_t) {
+
+                  ids_to_keep.push(element.hog_id)
+              }
+          }
+
+
+
+          if (hide_column_event){
+              $('#grpTable').bootstrapTable('filterBy', {hog_id: ids_to_keep} )
+          }
+          else{
+              $('#grpTable').bootstrapTable('filterBy', {event: filter_parameters, hog_id: ids_to_keep} )
+          }
+
+
+
+}
 
 
 
@@ -86,13 +207,8 @@ var hide_column_event = true
         $.getJSON("{{ api_url|safe }}" + "&compare_with={{level}}" , function (jsonData) {
 
     {% else %}
-
          $.getJSON("{{api_url|safe}}", function (jsonData) {
 {% endif %}
-
-
-
-
 
 
         $("#loader").hide();
@@ -101,50 +217,41 @@ var hide_column_event = true
             select_genome("{{ level }}", true )
          {% endif %}
 
+data_original = jsonData
+
 
         var tab = $("#grpTable");
         var icons = tab.bootstrapTable('getOptions').icons;
         $.extend(icons, {export: 'fa-download'});
         tab.bootstrapTable({
-        data : jsonData,
-        reorderableColumns: true,
-        clickToSelect: false,
-        showMultiSort: true,
-        showLoading: true,
-        onPostBody: function () {
-        },
-        onLoadSuccess: function () {
+            data : jsonData,
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            showLoading: true,
+            onPostBody: function () {
+            },
+            onLoadSuccess: function (data) {
+                data_original = data
             tab.bootstrapTable('hideLoading');
-
-
         },
-        refreshOptions: {'icons': icons}
+        refreshOptions: {'icons': icons},
+
 
     });
+
+        apply_filter()
 
  if (hide_column_event){
     tab.bootstrapTable('hideColumn', 'event');
  }
 
 
-
  d3.select("#set_min_coverage").on("input", function () {
 
-     var f_t = parseFloat(d3.select(this).property("value"));
-     var ids_to_keep = [];
-
-
-      for (const element of jsonData) {
-          if (parseFloat(element.completeness_score) >= f_t) {
-              ids_to_keep.push(element.hog_id)
-          }
-      }
-
-     $("#grpTable").bootstrapTable('filterBy', {hog_id: ids_to_keep})
-
+     apply_filter()
 
  });
-
 
 
 })

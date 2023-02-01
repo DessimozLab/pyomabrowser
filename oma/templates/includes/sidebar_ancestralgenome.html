@@ -157,19 +157,13 @@
 
 <script>
 
-    var apply_filter_retained = true;
-    var apply_filter_duplicated = true;
-    var apply_filter_lost = true;
-    var apply_filter_gained = true;
-
-     $(function () {
+    $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 });
 
-     function select_genome(genome, no_reload ){
+    function select_genome(genome, no_reload ){
 
          no_reload = (typeof no_reload === 'undefined') ? false : no_reload;
-
 
          document.getElementById("selected_genome_name").innerHTML =  genome
 
@@ -183,119 +177,37 @@
 
          var new_url = "{{ api_url|safe }}" + "&compare_with=" + genome
 
-         console.log(new_url)
+             hide_column_event = false
 
          $('#grpTable').bootstrapTable('refresh', {url: new_url  } )
 
          $('#grpTable').bootstrapTable('showColumn', 'event');
 
+         apply_filter()
 
 
      }
 
-     function reset_selection(){
+    function reset_selection(){
 
          $("#genome_selector").show()
          $("#genome_selected").hide()
          $("#table_filter").hide()
 
 
+        hide_column_event = true
 
          $('#grpTable').bootstrapTable('refresh', {url:  "{{api_url}}"  } )
          $('#grpTable').bootstrapTable('hideColumn', 'event');
 
+         apply_filter()
 
 
-     }
 
-     function set_filter_retained(){
-
-         // Get the checkbox
-      var checkBox = document.getElementById("Retained");
-
-      // If the checkbox is checked, display the output text
-      if (checkBox.checked == true){
-        apply_filter_retained = true;
-      } else {
-        apply_filter_retained = false;
-      }
-
-      apply_filter();
-
-
-     }
-     function set_filter_gained(){
-
-         // Get the checkbox
-      var checkBox = document.getElementById("Gained");
-
-      // If the checkbox is checked, display the output text
-      if (checkBox.checked == true){
-        apply_filter_gained = true;
-      } else {
-        apply_filter_gained = false;
-      }
-
-      apply_filter();
-
-
-     }
-     function set_filter_duplicated(){
-
-         // Get the checkbox
-      var checkBox = document.getElementById("Duplicated");
-
-      // If the checkbox is checked, display the output text
-      if (checkBox.checked == true){
-        apply_filter_duplicated = true;
-      } else {
-        apply_filter_duplicated = false;
-      }
-
-      apply_filter();
-
-
-     }
-     function set_filter_lost(){
-
-         // Get the checkbox
-      var checkBox = document.getElementById("Lost");
-
-      // If the checkbox is checked, display the output text
-      if (checkBox.checked == true){
-        apply_filter_lost = true;
-      } else {
-        apply_filter_lost = false;
-      }
-
-      apply_filter();
 
 
      }
 
-     function apply_filter(){
-
-        var filter_parameters = [];
-
-        if (apply_filter_retained){
-            filter_parameters.push("retained")
-        }
-
-        if (apply_filter_duplicated){
-            filter_parameters.push("duplicated")
-        }
-
-        if (apply_filter_lost){
-            filter_parameters.push("lost")
-        }
-
-        if (apply_filter_gained){
-            filter_parameters.push("gained")
-        }
-
-        $('#grpTable').bootstrapTable('filterBy', {event: filter_parameters} )
-
-}
 
 </script>
 
