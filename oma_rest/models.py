@@ -13,8 +13,6 @@ class HOG(object):
             m = re_hogid.match(hog_id)
             self.roothog_id = int(m.group("fam"))
 
-        self.completeness_score = round(random.random(),2)
-
 
 class OMAGroup(object):
     def __init__(self, GroupNr=None, fingerprint=None, members=None, **kwargs):
