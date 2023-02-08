@@ -502,24 +502,24 @@ class HOGViewSet(PaginationMixin, ViewSet):
         fam_nr = self._validate_hogid(hog_id)
         level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
         if level is None:
-            levs = frozenset(
-                [row['Level'].decode() for row in utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')])
-            if 'LUCA' in levs:
+            hog_lev_iter = utils.db.get_hdf5_handle().get_node("/HogLevel").where('(ID==hog_id)')
+            lev2score = {row['Level'].decode(): row['CompletenessScore'] for row in hog_lev_iter}
+            if 'LUCA' in lev2score:
                 level = 'LUCA'
             else:
                 pe = next(utils.db.iter_members_of_hog_id(hog_id))
                 lin = pe.genome.lineage
                 for level in lin[::-1]:
-                    if level in levs:
+                    if level in lev2score:
                         break
-            result_data = [rest_models.HOG(hog_id=hog_id, level=level)]
+            result_data = [rest_models.HOG(hog_id=hog_id, level=level, completeness_score=lev2score[level])]
         else:
-            subhogs = utils.db.get_subhogids_at_level(fam_nr, level)
+            subhogs = utils.db.get_subhogs_at_level(fam_nr, level)
             result_data = []
-            for h in subhogs:
-                h = h.decode()
+            for hog in subhogs:
+                h = hog['ID'].decode()
                 if hog_id.startswith(h) or h.startswith(hog_id):
-                    result_data.append(rest_models.HOG(hog_id=h, level=level))
+                    result_data.append(rest_models.HOG(hog_id=h, level=level, conpleteness_score=hog['CompletenessScore']))
 
         querys = {q.hog_id: i for i, q in enumerate(result_data)}
         parents = [collections.defaultdict(set)] * len(result_data)
