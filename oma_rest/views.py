@@ -519,7 +519,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
             for hog in subhogs:
                 h = hog['ID'].decode()
                 if hog_id.startswith(h) or h.startswith(hog_id):
-                    result_data.append(rest_models.HOG(hog_id=h, level=level, conpleteness_score=hog['CompletenessScore']))
+                    result_data.append(rest_models.HOG(hog_id=h, level=level, completeness_score=hog['CompletenessScore']))
 
         querys = {q.hog_id: i for i, q in enumerate(result_data)}
         parents = [collections.defaultdict(set)] * len(result_data)
