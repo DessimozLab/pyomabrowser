@@ -167,7 +167,7 @@
             img: '<img src="'+static_root+'/image/pdb.gif" alt="PDB" />'
         },
         'EntrezGene': {
-            url: function(id){return "///www.ncbi.nlm.nih.gov/protein/"+id;},
+            url: function(id){return "///www.ncbi.nlm.nih.gov/gene/"+id;},
             img: '<img src="'+static_root+'/image/ncbi.gif" alt="NCBI" />'
         },
         'FlyBase':{

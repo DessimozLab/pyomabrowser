@@ -16,18 +16,22 @@
 
 <div id="oma-generic-container">
 
-
-
-
-        <div class="container-fluid" id="phyphy" style="height: calc(100vh - 110px)">
-
-
+        <div class="container-fluid" id="phyphy" style="height: calc(100vh - 70px)">
 
         </div>
 
 
+<div style="position: fixed; bottom: 0; left: 20px; width: 90%;" class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong>Filtered HOGs</strong>. We only show HOGs with a completeness score above 30%. To turn off: Settings > Bar Graph > 'Remove...'
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 
+
+
+
+</div>
+
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css' rel='stylesheet' type='text/css'>
 
     <script src="{% static 'phylostratigraphy/phylo.js' %}"></script>
 
@@ -37,57 +41,22 @@
 
     phylo.settings.phylostratigraphy = true
 
-    $.getJSON( "/All/genomes.json", function( jsonData ) {
-
-
-
     var c1 = phylo.create_container("phyphy")
 
     var custom_settings = {
-        'display_leaves' : true,
-        'mirror': false,
         'name': 'phylostratigraphy',
-        'first_time_render': true,
         'data_type' : 'json',
         'use_branch_lenght' : false,
-        'show_tooltips' : true,
-        'subsample_label' : true,
-        'display_internal_label' : false,
-        'display_internal_label_left_top' : false,
-        'display_internal_label_left_bottom' : false,
-        'display_duplication' : false,
-        'has_branch_lenght' : false,
-        'has_duplications' : false,
-        'multiple_search':false,
         'show_histogram' : true,
-        'align_tip' : false,
         'has_histogram_data' : true,
-        'style': {
-            'font_size_internal' : 14,
-            'color_accessor' : null,
-            'color_extent_min': {},
-            'color_extent_max':{},
-            'number_domain':'5',
-            'color_domain':['#253494', '#2C7FB8', '#41B6C4', '#C7E9B4', '#FFFFCC'],
-            'color_domain_default':['#253494', '#2C7FB8', '#41B6C4', '#C7E9B4', '#FFFFCC'],
-
-        },
-        'tree': {
-            'node_vertical_size' : 50,
-            'node_horizontal_size' : 120,
-            'node_radius' : 6, // move to style
-            'line_width' : 3,// move to style
-            'font_size':14, // move to style
-            'max_depth' : 0,
-        },
         'collapse_level': 1,
         'stack' : {
-            'type': 'genes',//'events',
+            'type': 'genes',// or 'events',
             'showHistogramValues' : false,
             'showHistogramSummaryValue' : true,
             'legendTxtSize' : 12,
             'margin' : 8,
-            'xInitialRightMargin' : 25,
+            'xInitialRightMargin' : 15,
             'stackHeight' : 200,
             'stackWidth' : 50,
             'maxStackHeight': 'max', // ratio -> stack height fixed | max -> largest data = stack height
@@ -95,11 +64,22 @@
         },
     }
 
-    c1.add_tree(jsonData,custom_settings)
+     $.getJSON( "/All/genomes.json", function( jsonData ) {
+
+         c1.add_tree(jsonData,custom_settings)
+
+         c1.models[0].settings.show_tooltips = true;
+         c1.models[0].settings.stack.has_support = true;
+         c1.models[0].settings.stack.only_support = true;
+
+
 
     phylo.start()
 
-    })
+     })
+
+
+
 
     </script>
 
