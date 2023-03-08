@@ -1,9 +1,11 @@
 from django.conf import settings  # import the settings file
 from .utils import id_mapper, db
 
-def release_char(request):
-    # provide xref_order variable in every template
-    return {"release_char": db.release_char}
+def release_info(request):
+    # provide release information in every template
+    return {"release_char": db.release_char,
+            "oma_release": db.get_release_name(),
+           }
 
 def xref_order(request):
     # provide xref_order variable in every template
