@@ -2295,7 +2295,14 @@ class OgCentricMixin(object):
                 if entry['OmaGroup'] == 0:
                     raise db.InvalidId("Protein '{}' is not part of any oma group".format(group_id))
                 og = entry['OmaGroup']
-            except (db.InvalidId, db.AmbiguousID) as e:
+            except db.AmbiguousID as e:
+                group_nrs = {utils.db.entry_by_entry_nr(nr)["OmaGroup"] for nr in e.candidates}
+                group_nrs.discard(0)
+                if len(group_nrs) == 1:
+                    og = int(group_nrs.pop())
+                else:
+                    raise Http404(str(e))
+            except db.InvalidId as e:
                 raise Http404(str(e))
         except db.AmbiguousID as e:
             raise Http404(e)
