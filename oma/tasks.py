@@ -95,16 +95,17 @@ class FastaTarballResultBuilder(object):
         self.tar.addfile(t)
 
         for grp_key, membs in groups.items():
-            grpfile = io.BytesIO(self._group_to_fasta(membs).encode('utf-8'))
-            t = tarfile.TarInfo('{}/{}{}.fa'.format(
-                self.prefix, self.grouptype, grp_key))
-            t.size = len(grpfile.getvalue())
-            t.type = tarfile.REGTYPE
-            t.mode = 0o644
-            t.uid = 501
-            t.gid = 20
-            t.mtime = time.time()
-            self.tar.addfile(t, grpfile)
+            for ext, content in zip(["fa", "fna"], self._group_to_fasta(membs)):
+                grpfile = io.BytesIO(content.encode('utf-8'))
+                t = tarfile.TarInfo('{}/{}{}.{}'.format(
+                    self.prefix, self.grouptype, grp_key, ext))
+                t.size = len(grpfile.getvalue())
+                t.type = tarfile.REGTYPE
+                t.mode = 0o644
+                t.uid = 501
+                t.gid = 20
+                t.mtime = time.time()
+                self.tar.addfile(t, grpfile)
 
     def format_fasta_header(self, e):
         return " | ".join([e.omaid, 'OMA{}'.format(e.oma_group),
@@ -113,11 +114,13 @@ class FastaTarballResultBuilder(object):
     def _group_to_fasta(self, group):
         headers = []
         seqs = []
+        cds = []
         for memb in group:
             e = pyoma.browser.models.ProteinEntry.from_entry_nr(utils.db, memb)
             headers.append(self.format_fasta_header(e))
             seqs.append(e.sequence)
-        return misc.as_fasta(headers=headers, seqs=seqs)
+            cds.append(e.cdna)
+        return misc.as_fasta(headers=headers, seqs=seqs), misc.as_fasta(headers=headers, seqs=cds)
 
 
 @shared_task(soft_time_limit=800)
