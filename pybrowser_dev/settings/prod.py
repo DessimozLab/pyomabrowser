@@ -19,6 +19,7 @@ INSTALLED_APPS.extend([
     'fastmap',
     'omamo',
     'expasysearch',
+    'mailman_subscribe',
 ])
 
 MIDDLEWARE.extend([
@@ -58,6 +59,12 @@ CELERY_TASK_ROUTES = {
 OMAMO = {
     'CSV': os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], "omamo_df.csv"),
     "H5": os.path.join(os.environ['DARWIN_BROWSERDATA_PATH'], "omamo.h5"),
+}
+
+
+MAILMAN_SUBSCRIBE = {
+    "sender": "contact@omabrowser.org",
+    "mailinglist": "oma-request@lists.dessimoz.org",
 }
 
 # beat scheduler for export app

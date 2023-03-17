@@ -321,19 +321,23 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                                 <a href="http://omabrowser.blogspot.com" title="Blog">
                                     <img src="{% static "image/icon-blog-write-sm.png" %}" alt="Blog"/>
                                 </a>
+                                {% if mailinglist_enabled %}
                                 <a href="javascript:show_frame('frame_mailman');" title="Newsletter">
                                     <img src="{% static "image/icon-newspaper-sm.png" %}" alt="News"/>
                                 </a>
+                                {% endif %}
                                 <a href="https://omabrowser.blogspot.com/feeds/posts/default" title="RSS">
                                     <img src="{% static "image/icon-rss-sm.png" %}" alt="RSS"/>
                                 </a>
                             </div>
                             <span id="frame_twitter" style="display: none;"><a href="https://twitter.com/omabrowser" class="twitter-follow-button" data-show-screen-name="false" data-show-count="true">Follow</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></span>
                             <span id="frame_mailman" style="display: none;">
-                                <form action="https://lists.dessimoz.org/subscribe/oma" method="POST">
+                            {% if mailinglist_enabled %}
+                                <form action="{% url "mailman-subscribe" %}" method="POST">{% csrf_token %}
                                     Email: <input name="email" size="13"/>
                                     <input type="submit" value="Sign up" /><br/>(max 1-2 emails/month, no spam!)
                                 </form>
+                            {% endif %}
                             </span>
                             <script>
                                 function show_frame(frame){
