@@ -33,6 +33,11 @@ if "expasysearch" in settings.INSTALLED_APPS:
         path("oma/expasy/", include('expasysearch.urls'))
     )
 
+if "mailman_subscribe" in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path("oma/", include('mailman_subscribe.urls'))
+    )
+
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView
     from django.urls import re_path
