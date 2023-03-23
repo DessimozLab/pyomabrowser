@@ -1,25 +1,25 @@
 -i https://pypi.org/simple
 amqp==2.6.1 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
-argcomplete==2.0.0 ; python_version >= '3.6'
-argh==0.26.2
-beautifulsoup4==4.11.1 ; python_full_version >= '3.6.0'
+argcomplete==2.1.1 ; python_version >= '3.6'
+argh==0.28.1 ; python_version >= '3.8'
+beautifulsoup4==4.11.2 ; python_full_version >= '3.6.0'
 billiard==3.6.4.0
-biopython==1.80
+biopython==1.81
 blosc2==2.0.0 ; python_version >= '3.8' and python_version < '4'
 bs4==0.0.1
 celery==4.4.7
 certifi==2022.12.7 ; python_version >= '3.6'
-charset-normalizer==3.0.1
+charset-normalizer==3.1.0 ; python_full_version >= '3.7.0'
 coreapi==2.3.3
 coreschema==0.0.4
-cython==0.29.33 ; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2'
-datasketch==1.5.8
+cython==0.29.33 ; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
+datasketch==1.5.9
 dendropy==4.5.2
 django==2.2.28
 django-bootstrap4==22.1
 django-cors-headers==3.11.0
 django-debug-toolbar==3.2.4
-git+https://github.com/alpae/django-google-analytics.git@6fcff7ed4bbf43398f7c4183052860be93615198#egg=django-google-analytics-app
+git+https://github.com/alpae/django-google-analytics.git@9eebf381d764ee0edc912712b82225523f5ddce2#egg=django-google-analytics-app
 django-recaptcha==1.3.1
 djangorestframework==3.13.1
 djangorestframework-link-header-pagination==0.1.1
@@ -37,43 +37,43 @@ kombu==4.6.11 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2
 lxml==4.9.2 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 markdown==3.4.1
 markupsafe==2.1.2 ; python_version >= '3.7'
-msgpack==1.0.4
+msgpack==1.0.5
 networkx==3.0 ; python_version >= '3.8'
 numexpr==2.8.4
-numpy==1.24.1
+numpy==1.24.2
 oauthlib==3.2.2 ; python_version >= '3.6'
 git+ssh://gitolite@lab.dessimoz.org:2222/oma-academy@93093882b6c1a74dd15b35165d144303329c2ca6#egg=oma-academy-app
 packaging==23.0 ; python_version >= '3.7'
 pandas==1.5.3 ; python_version >= '3.8'
 property-manager==3.0 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 py-cpuinfo==9.0.0
-pyfaidx==0.7.1
+pyfaidx==0.7.2.1 ; python_version >= '3.7'
 pygments==2.14.0
-git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@e9d5aeb6401db84021fa28e9bb192ea54ce1c163#egg=pyoma
+git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@feature-search#egg=pyoma
 pyopa==0.8.2
 pyparsing==3.0.9 ; python_full_version >= '3.6.8'
-python-dateutil==2.8.2 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'
+python-dateutil==2.8.2 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pytz==2022.7.1
 pyyaml==6.0
 rapidfuzz==2.13.7 ; python_version >= '3.7'
 requests==2.28.2 ; python_version >= '3.7' and python_version < '4'
 requests-oauthlib==1.3.1 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-scikit-learn==1.2.0
-scipy==1.10.0 ; python_version < '3.12' and python_version >= '3.8'
-setuptools==66.1.1 ; python_version >= '3.7'
-simplejson==3.18.1 ; python_version >= '2.5' and python_version not in '3.0, 3.1, 3.2'
-six==1.16.0 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'
-soupsieve==2.3.2.post1 ; python_version >= '3.6'
+scikit-learn==1.2.2
+scipy==1.10.1 ; python_version < '3.12' and python_version >= '3.8'
+setuptools==67.6.0 ; python_version >= '3.7'
+simplejson==3.18.3 ; python_version >= '2.5' and python_version not in '3.0, 3.1, 3.2, 3.3'
+six==1.16.0 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+soupsieve==2.4 ; python_version >= '3.7'
 sqlparse==0.4.3 ; python_version >= '3.5'
 structlog==22.3.0 ; python_version >= '3.7'
 tables==3.8.0
 threadpoolctl==3.1.0 ; python_version >= '3.6'
-tqdm==4.64.1 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-tweepy==4.12.1
+tqdm==4.65.0 ; python_version >= '3.7'
+tweepy==4.13.0
 uritemplate==4.1.1 ; python_version >= '3.6'
 urllib3==1.26.14 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
 verboselogs==1.7
 vine==1.3.0 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 xmltodict==0.13.0 ; python_version >= '3.4'
-zipp==3.11.0 ; python_version >= '3.7'
-git+ssh://gitolite@lab.dessimoz.org:2222/zoo@5514d527d4c5e6aa877fc05309d65fd45da54ef2#egg=zoo
+zipp==3.15.0 ; python_version >= '3.7'
+git+ssh://gitolite@lab.dessimoz.org:2222/zoo@c83bc2de298c95c356fa2148851135c462d4690b#egg=zoo
