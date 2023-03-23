@@ -295,7 +295,7 @@
                 this.placeholder = ''
 
             },
-            is_empty(){return tokens.length === 0},
+            is_empty(){return this.tokens.length === 0},
             modal_clicked(){
                 console.log('clicked')
                 $('#exampleModal_{{ unique_id }}').modal('show')
@@ -478,7 +478,7 @@ help
            @keydown.delete='removeLastToken'
     />
 
-    <button class=" button_search float-right" id="button_submit" @click='collect_token()' type="submit">
+    <button class=" button_search float-right" id="button_submit" :disabled="is_empty()" @click='collect_token()' type="submit">
         <img  style='width: 24px;' src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/>
     </button>
 
