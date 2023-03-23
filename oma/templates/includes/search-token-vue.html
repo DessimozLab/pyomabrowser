@@ -272,7 +272,7 @@
 
                     var no_taxon = pu.filter(x => x !== 'Taxon');
 
-                    if (no_taxon.length > 0 && no_taxon[0] !== current_prefix_type ) {
+                    if (no_taxon.length > 1 && no_taxon[0] !== current_prefix_type ) {
                         this.show_error = true;
                             this.error_message = "Warning: You are searching for " + no_taxon[0] +
                                 " you can't add token for " + current_prefix_type
