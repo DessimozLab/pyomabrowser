@@ -299,7 +299,7 @@
 
 
 
-                                <div class="col-md-8 offset-md-2">
+                                <div class="col-md-8 offset-md-2" style="margin-bottom: 20px">
 
 
                                     <h5 class="card-title">Orthologous Groups <small>(OMA Groups & HOGs)</small>  </h5>
@@ -363,20 +363,20 @@
 
                                 </div>
 
-                            </div>
+
 
 
                             {% if meta.groups_found > 0%}
 
 
 
-                                <div class="row">
+
 
 
 
                                     <div class="col-md-12 ">
 
-                                        <table class="table table-hover" id="matchTable_group"
+                                        <table class="table table-hover mp-0 mp-md-5" id="matchTable_group"
                                                data-mobile-responsive="true" data-check-on-init="true"
                                                data-undefined-text=""
                                                data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
@@ -402,12 +402,12 @@
                                     </div>
 
 
-                                </div>
+
 
                             {% endif %}
 
 
-
+       </div>
 
                         </div>
                     </div>
@@ -421,7 +421,7 @@
                             <div class="row">
 
 
-                                <div class="col-md-8 offset-md-2">
+                                <div class="col-md-8 offset-md-2" style="margin-bottom: 20px">
 
 
                                     <h5 class="card-title">Genomes </h5>
@@ -479,16 +479,16 @@
 
                                 </div>
 
-                            </div>
+
 
                             {% if meta.taxon_found > 0 %}
 
 
-                                <div class="row">
+
 
                                     <div class="col-md-12 ">
 
-                                        <table class="table table-hover" id="matchTable_genome"
+                                        <table class="table table-hover mp-0 mp-md-5" id="matchTable_genome"
 
                                                data-mobile-responsive="true" data-check-on-init="true"
                                                data-undefined-text=""
@@ -511,9 +511,11 @@
                                         </table>
                                     </div>
 
-                                </div>
+
 
                             {% endif %}
+
+                             </div>
 
 
                         </div>
