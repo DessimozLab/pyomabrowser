@@ -16,6 +16,7 @@ scikit-learn
 djangorestframework-link-header-pagination
 django-cors-headers
 pyyaml
+django-matomo-api-tracking
 
 
 -e git+https://github.com/alpae/django-google-analytics.git@master#egg=django-google-analytics-app

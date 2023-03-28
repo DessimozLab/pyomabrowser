@@ -26,6 +26,7 @@ Django = "<3.0,>=2.2.0"
 Pygments = "*"
 Markdown = "*"
 PyYAML = "*"
+django-matomo-api-tracking = "*"
 
 [dev-packages]
 
