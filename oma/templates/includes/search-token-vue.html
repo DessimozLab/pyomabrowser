@@ -5,6 +5,7 @@
 <style>
 
     .button_search {
+        align-self: center;
         height: 100%;
         background-color: transparent;
         border: none;
@@ -15,9 +16,9 @@
 
 
     .help_icon {
+        align-self: center;
         font-size: 1.5em;
-        transform: translate(0,25%);
-         margin: 4px;
+        margin: 4px;
         cursor: pointer;
     }
 
@@ -37,11 +38,13 @@
         display: flex;
         border: 1px solid #eee;
         font-size: 0.9em;
-        height: 50px;
         box-sizing: border-box;
         padding: 0 0 0 4px;
         border-radius: 500px;
     }
+
+    .ml-input{}
+    .sl-input{height: 50px;}
 
     .token-input__tag {
         height: 30px;
@@ -74,11 +77,14 @@
     }
 
     #token-container_{{ unique_id }}{
-        white-space: nowrap;
         overflow: scroll;
         display: inline;
-
     }
+
+    .ml-token-con{margin-bottom: 8px;}
+
+    .sl-token-con{white-space: nowrap;}
+
 
 </style>
 
@@ -100,6 +106,7 @@
                 show_error: false,
                 error_message : " Error.",
                 post_query: '',
+                multiline: {{ multiline }},
                 wild_card: 'sequence',
                 placeholder: ' "Blue-light photoreceptor" | proteinid:P53_RAT  | species:"Drosophila melanogaster" ',  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
                 placeholder_default: 'proteinid:P53_RAT | "Blue-light photoreceptor" | species:"Drosophila melanogaster" '  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
@@ -356,6 +363,9 @@
     $('#input_token_search_{{ unique_id }}').autocomplete(autocomplete_opts);
 
 
+
+
+
 </script>
 
 
@@ -431,15 +441,14 @@
 
 <div id="{{ unique_id }}">
 
-    <div id="{{ unique_id }}_input_part">
+    <div id="{{ unique_id }}_input_part" :class="multiline ? 'ml-input' : 'sl-input'">
 
-
-        <span class="material-symbols-outlined help_icon" @click="modal_clicked">
+        <span class="material-symbols-outlined help_icon"   @click="modal_clicked">
 help
 </span>
 
 
-        <div id="token-container_{{ unique_id }}">
+        <div id="token-container_{{ unique_id }}" :class="multiline ? 'ml-token-con' : 'sl-token-con'" >
 
 
 
