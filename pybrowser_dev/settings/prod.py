@@ -14,6 +14,7 @@ NOCAPTCHA = True  # using No Captcha reCaptcha
 
 INSTALLED_APPS.extend([
     'google_analytics',
+    'matomo_api_tracking',
     'captcha',
     'export',
     'fastmap',
@@ -24,14 +25,15 @@ INSTALLED_APPS.extend([
 
 MIDDLEWARE.extend([
     'oma.middleware.LongRunningLogger',
+    'matomo_api_tracking.middleware.MatomoApiTrackingMiddleware',
     'google_analytics.middleware.GoogleAnalyticsMiddleware',
 ])
 
 LOGGING['loggers'].update({
     'export': {
-            'handlers': ['console'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
-            'propagate': True
+        'handlers': ['console'],
+        'level': 'DEBUG' if DEBUG else 'INFO',
+        'propagate': True
     },
     'fastmap': {
         'handlers': ['console'],
@@ -39,9 +41,14 @@ LOGGING['loggers'].update({
         'propagate': True
     },
     'google_analytics': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': True
+        'handlers': ['console'],
+        'level': 'WARNING',
+        'propagate': True
+    },
+    'matomo_api_tracking': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+        'propagate': True
     }
 })
 
@@ -65,6 +72,12 @@ OMAMO = {
 MAILMAN_SUBSCRIBE = {
     "sender": "contact@omabrowser.org",
     "mailinglist": "oma-request@lists.dessimoz.org",
+}
+
+MATOMO_API_TRACKING = {
+    'url': 'https://matomo.sib.swiss/matomo.php',
+    'site_id': 6,
+    'ignore_paths': ["/oma/",],
 }
 
 # beat scheduler for export app
