@@ -2483,6 +2483,7 @@ def token_search(request):
         search.TaxSearch: ["taxon", "species", "taxid"],
         search.HogIDSearch: ["hog"],
         search.GOSearch: ["go"],
+        search.DomainSearch: ["domain"],
         search.ECSearch: ["ec"],
         search.SequenceSearch: ["sequence"],
         search.OmaGroupSearch: ["og", 'fingerprint'],
@@ -2516,7 +2517,7 @@ def token_search(request):
         t0 = time.time()
         if request.POST.__contains__('submit_contact_suggestion'):
 
-            msg = EmailMessage(request.POST.get('query'), request.POST.get('message'), to=[request.POST.get('email')], from_email='contact@omabrowser.org')
+            msg = EmailMessage(request.POST.get('query'), request.POST.get('message'), to=['contact@omabrowser.org'], from_email=request.POST.get('email'))
             msg.content_subtype = "html"
             msg.send()
 
@@ -2631,7 +2632,7 @@ def token_search(request):
                         hogs.append(group)
                     elif isinstance(group, models.OmaGroup):
                         group.level = 'God' # todo ?
-                        group.type = 'OMA group'
+                        group.type = 'OMA_Group'
                         ogs.append(group)
                     else:
                         logger.error("Search groups: {} can't be assign as HOG or OmaGroup".format(group))
@@ -3245,7 +3246,7 @@ class Searcher(View):
             og = utils.db.oma_group_metadata(ogd[0])
 
             og["size"] = len(models.OmaGroup(utils.db, og))
-            og["type"] = 'OMA group'
+            og["type"] = 'OMA_group'
             og["found_by"] = ogd[1]
             json_og.append(og)
 

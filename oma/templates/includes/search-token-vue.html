@@ -5,6 +5,7 @@
 <style>
 
     .button_search {
+        cursor:pointer;
         align-self: center;
         height: 100%;
         background-color: transparent;
@@ -13,6 +14,10 @@
         margin-left: auto;
         order: 2;
     }
+
+    .button_search:disabled {
+    cursor:not-allowed;
+}
 
 
     .help_icon {
@@ -100,7 +105,7 @@
                     'Protein': ['proteinid','xref','go','ec','description','domain','sequence'],
                     'Taxon': ['species','taxid', 'taxon'],
                     'HOG': ['hog','sequence'],
-                    'OMA Group': ['og', 'fingerprint','sequence'],
+                    'OMA_Group': ['og', 'fingerprint','sequence'],
                 },
                 default_prefix : 'description',
                 show_error: false,
@@ -155,7 +160,7 @@
                     var multi_term_closed = (val.length > 1 && val[val.length - 1] === '"')
                     var has_prefix = val.includes(':')
                     var prefix_end = val[val.length - 1] === ':'
-                    var p = has_prefix ? val.split(':')[0] : this.default_prefix;
+                    var p = has_prefix ? val.split(':')[0].toLowerCase() : this.default_prefix;
 
 
                     // If prefix but not valid
@@ -255,15 +260,20 @@
             },
             on_change_prefix(target, t){
                 var prefix = target.value
-                if (this.validate_token(t.query, t.single_term,prefix)){
+
+
+                if (this.validate_token(t.query, t.single_term,prefix, true)){
                     t.prefix = prefix.toLowerCase()
                 }
                 else {
+
+
+
                     target.value = t.prefix;
                 }
 
             },
-            validate_token(val, sinle_term, p ){
+            validate_token(val, sinle_term, p , OnChange=false){
 
                 if (this.wild_card.includes(p)){
                     return true
@@ -279,7 +289,13 @@
 
                     var no_taxon = pu.filter(x => x !== 'Taxon');
 
-                    if (no_taxon.length > 1 && no_taxon[0] !== current_prefix_type ) {
+                    if (no_taxon.length == 0){return true}
+
+                    else if (OnChange && no_taxon.length == 1){return true}
+
+                    else if (no_taxon.length >  0 && no_taxon.includes(current_prefix_type) ){return true}
+
+                    else if (no_taxon.length > 0 && !no_taxon.includes(current_prefix_type)) {
                         this.show_error = true;
                             this.error_message = "Warning: You are searching for " + no_taxon[0] +
                                 " you can't add token for " + current_prefix_type
@@ -304,7 +320,6 @@
             },
             is_empty(){return this.tokens.length === 0},
             modal_clicked(){
-                console.log('clicked')
                 $('#exampleModal_{{ unique_id }}').modal('show')
             }
         },
@@ -381,45 +396,71 @@
       </div>
       <div class="modal-body" style="text-align: justify">
 
-          <strong>How did the search works ?</strong>
+          <strong>How does the search work?</strong>
 
-          <p>It works like a normal input field but everytime you press "Space" or "Enter" after a word, a token will be
-              created. A token is composed of a prefix describing how the query should be treated and of a query that represent the term you are looking for.</p>
+          <p>Input a query in the search field. Everytime you press Space or Enter after a word, a <b>token</b> will be created.
+              The token is composed of a <b>prefix</b>  describing how the query should be treated and the actual <b>query</b> itself.</p>
 
-          <strong>But how can I search for a multi-word query then?</strong>
+          <strong>What are the different types of tokens?</strong>
 
-          <p>If your query term is composed of multiple word (e.g homo sapiens) you can use " " to encapsulate it. Once you have a ", the space and enter
-          key will not triggered the tokenisation until a closing " is entered!</p>
+          <p>Each token represents either a Gene, HOG, OMA group, or Taxon. Prefixes are used to specify which category to associate with the query term.
+</p>
 
-          <strong>But how many tokens can I can have ? Is there different types ?</strong>
+          <table class="table table-bordered">
+  <thead>
+    <tr>
+      <th scope="col">Category</th>
+      <th scope="col">Prefixes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Genes</th>
+      <td>id, go, ec, description, domain, sequence</td>
+    </tr>
 
-          <p>There is not limit on the number of tokens but there is some rules to respect.
-          Each tokens is associated to one of the four big categories of entries in OMA browser: Genes, HOGs, OMA groups and Taxon with their
-              associated prefix:
-              <ul>
-          <li><b>Genes:</b> 'proteinid', 'xref', 'go', 'ec', 'description', 'domain', 'sequence'</li>
-          <li><b>HOGs:</b> 'species', 'taxid', 'taxon'</li>
-          <li><b>OMA groups:</b> 'hog', 'sequence'</li>
-          <li><b>Taxon:</b> 'og', 'fingerprint', 'sequence'</li>
-      </ul>
+  <tr>
+      <th scope="row">HOGs</th>
+      <td>hog, sequence</td>
+    </tr>
 
-          <p>
-          Except for taxon that you can combined or use alone, you can't search for more than one type at once
-          (e.g hog:12 with xref:HUMAN_1234 don't make sense but fingerprint:'EWGKQSF' in species:Tetraodon is fine).
-          </p>
+    <tr>
+      <th scope="row">OMA Groups</th>
+      <td>omagroup, fingerprint, sequence</td>
+    </tr>
+
+  <tr>
+      <th scope="row">Taxon</th>
+      <td>species, taxid, taxon</td>
+    </tr>
 
 
-          <strong>Oups a typo !</strong>
+  </tbody>
+</table>
 
-          <p>No problem, you can edit your tokens. Click on the token, it will be stringified, so you can modify it in the input field.
+          <small>For example, the token [go:4225] will search for genes in the OMA database annotated with the GO:0004225 gene ontology term.
+</small>
+          <br>
 
-              <br>
-              The prefix is not correct ? You can click on the dropdown icon to select another one.
+          <strong>How to search for a multi-word query?</strong>
 
-              <br>
-              I don't want this token... Just click on the x to delete it.
+          <p>If your query term is composed of multiple words (e.g homo sapiens), use " " to encapsulate it.
+</p>
 
-          </p>
+          <strong>How many tokens can I have?</strong>
+
+          <p>There is no limit on the number of tokens. It is not possible to enter multiple tokens of different categories,
+              except taxon, which can be combined with other categories. For example, you can search for 'hog:60627 species:HUMAN'
+              to return human genes found in HOG:606207.
+</p>
+
+          <strong>How to edit/delete a token?</strong>
+
+          <p>To edit a query, click on it to modify the input field. To edit a prefix, click on the dropdown icon to select another one. To remove a token, click on the x to delete it.</p>
+
+          <strong>Autosuggest</strong>
+
+          <p>Typing a query without hitting enter or space will prompt an autosuggestion for the identifier after a few seconds.</p>
 
 
 
