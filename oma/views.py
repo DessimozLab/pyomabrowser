@@ -2503,8 +2503,8 @@ def token_search(request):
         'data_entry': [],
         'data_group': [],
         'data_genomes': [],
-        'max_proteins_shown':  15,
-        'max_groups_shown':  99999,
+        'max_proteins_shown':  35,
+        'max_groups_shown':  1000,
         'max_genomes_shown':  False,
         'meta': {
             'taxon_found': 0,
@@ -2555,7 +2555,7 @@ def token_search(request):
         ## Only run the search if tokens
         if tokens:
             t1 = time.time()
-            context['results'] = search.search(tokens)
+            context['results'] = search.search(tokens, entry_limit=context['max_proteins_shown'])
             logger.debug(f"search pyoma: {time.time() - t1}")
 
             t1 = time.time()
