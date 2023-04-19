@@ -104,7 +104,7 @@ services:
     build:
       context: ./nginx
     ports:
-      - 8180:80
+      - 8080:80
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
