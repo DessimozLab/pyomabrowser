@@ -2572,6 +2572,7 @@ def token_search(request):
 
             # Prepare entry results
             if E:
+                t2 = time.time()
                 entries_all = list(E.values())
                 if len(entries_all) > context['max_proteins_shown']:
                     # if we found a main isoform marked all the alternative to be removed
@@ -2620,11 +2621,15 @@ def token_search(request):
                                 a = str(entry_aligned.alignment, 'utf-8')
                             e.sequence = {"sequence": entry_aligned.sequence, 'align': a}
 
+                logger.debug(" post-entry w/o json: {}sec".format(time.time()-t2))
+                t2 = time.time()
                 # Build json data for table
                 context['data_entry'] = json.dumps(EntrySearchJson().as_json(entries))
+                logger.debug(" post-entry json: {}sec".format(time.time() - t2))
 
             # Prepare groups results
             if G:
+                t2 = time.time()
                 hogs = []
                 ogs = []
 
@@ -2648,10 +2653,14 @@ def token_search(request):
                 if len(hogs) == 0 and len(ogs) == 1 and not T['HOG'] and not T['Protein'] and not T['wildcard']:
                     return redirect('omagroup_members', ogs[0].group_nbr)
 
+                logger.debug(" post-group w/o json: {}sec".format(time.time() - t2))
+                t2 = time.time()
                 context['data_group'] = json.dumps(HOGSearchJson().as_json(hogs) + OGSearchJson().as_json(ogs))
+                logger.debug(" post-group json: {}sec".format(time.time() - t2))
 
             # Prepare genomes results
             if S or A:
+                t2 = time.time()
 
                 def augment_ancestral_genomes(ag): #todo better
                     ag.uniprot_species_code = ''
@@ -2680,10 +2689,13 @@ def token_search(request):
                 for s_aug in species_augmented:
                     s_aug.type = "Extant"
 
+                logger.debug(" post-species w/o json: {}sec".format(time.time() - t2))
+                t2 = time.time()
                 # build json for genomes tables
                 json_species = GenomeModelJsonMixin().as_json(species_augmented)
                 json_ancestal_genomes = GenomeModelJsonMixin().as_json([augment_ancestral_genomes(ag) for ag in A.values()])
                 context['data_genomes'] = json.dumps(json_species + json_ancestal_genomes)
+                logger.debug(" post-species json: {}sec".format(time.time() - t2))
 
             # Prepare details per term
             E_details = []
