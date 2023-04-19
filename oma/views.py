@@ -2610,7 +2610,10 @@ def token_search(request):
                 for tok in tokens:
                     if isinstance(tok, search.SequenceSearch):
                         for key, entry_aligned in tok.get_matched_seqs().items():
-                            e = [i for i in entries if i.entry_nr == key][0]
+                            es = [i for i in entries if i.entry_nr == key]
+                            if len(es) == 0:
+                                continue
+                            e = es[0]
                             if type(entry_aligned.alignment) is tuple:
                                 a = entry_aligned.alignment[0][0]
                             else:
