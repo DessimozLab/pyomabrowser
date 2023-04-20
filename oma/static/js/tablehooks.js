@@ -238,7 +238,7 @@
             }
             return link_to_hog_page_with_hogid_text(row.group_nr);
         }
-        else if (row.type === "OMA group") {
+        else if (row.type === "OMA_Group") {
             return '<a href="/oma/omagroup/' + value + '/members/">' + value + '</a>';
         }
     };
@@ -248,7 +248,7 @@
         if (row.type === "HOG") {
              return " <b>Root Level: </b> " +  row.level;
         }
-        else if (row.type === "OMA group") {
+        else if (row.type === "OMA_Group") {
             return "<b>Fingerprint: </b> " +  row.fingerprint;
         }
     };
