@@ -19,7 +19,7 @@ scikit-learn = "*"
 djangorestframework-link-header-pagination = "*"
 django-cors-headers = "*"
 django-google-analytics-app = {ref = "master", git = "https://github.com/alpae/django-google-analytics.git"}
-pyoma = {ref = "feature-search", git = "ssh://gitolite@lab.dessimoz.org:2222/pyoma"}
+pyoma = {ref = "develop", git = "ssh://gitolite@lab.dessimoz.org:2222/pyoma"}
 zoo = {ref = "master", git = "ssh://gitolite@lab.dessimoz.org:2222/zoo"}
 oma-academy-app = {ref = "master", git = "ssh://gitolite@lab.dessimoz.org:2222/oma-academy"}
 Django = "<3.0,>=2.2.0"
