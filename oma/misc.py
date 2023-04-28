@@ -4,6 +4,8 @@ import tempfile
 from io import StringIO
 import logging
 import itertools
+import tweepy
+from django.conf import settings
 from future.moves.itertools import zip_longest
 
 
@@ -109,3 +111,29 @@ def handle_uploaded_file(fh, dir=None):
             destination.write(chunk)
     res = {'fname': destination.name, 'md5': md5(destination.name)}
     return res
+
+
+def retrieve_last_tweets(nr_tweets=3):
+    if settings.TWITTER_CONSUMER_KEY is None:
+        return ["twitter not configured - no tweets found"]
+    try:
+        auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
+        auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
+
+        api = tweepy.API(auth)
+
+        public_tweets = api.user_timeline(user_id='@OMABrowser', exclude_replies=True,
+                                          trim_user=True, include_rts=False)
+        tweets = []
+        for tweet in public_tweets[:nr_tweets]:
+            text = tweet.text
+            # replace t.co shortened URLs by true urls
+            for url in sorted(tweet.entities['urls'], key=lambda x: x['indices'], reverse=True):
+                text = (text[:url['indices'][0]] +
+                        '<a href="' + url['expanded_url'] + '">' + url['expanded_url'] + '</a>' +
+                        text[url['indices'][1]:])
+            tweets.append(text)
+    except (AttributeError, tweepy.TweepyException) as err:
+        # attribute errors occur if TWITTER settings are not assigned
+        tweets = ['Currently no tweets found']
+    return tweets
