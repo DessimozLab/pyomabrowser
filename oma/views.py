@@ -1654,7 +1654,7 @@ class HOGSynteny(HOGBase, TemplateView):
         context = super(HOGSynteny, self).get_context_data(hog_id, **kwargs)
 
         try:
-            graph = utils.db.get_syntentic_hogs(hog_id, context['level'], steps=2)
+            graph = utils.db.get_syntentic_hogs(hog_id=hog_id, level=context['level'], steps=2)
         except db.DBConsistencyError as e:
             raise Http404(str(e))
 
