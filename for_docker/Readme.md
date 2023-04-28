@@ -2,7 +2,8 @@
 
 ### TL;DR
 
-- adjust settings in `env` (OMA_INSTANCE, ...)
+- copy `env.template` to `env`
+- adjust settings in `env` (OMA_INSTANCE, keys, ...)
 - adjust settings in `docker-compose.yml`:
   
   - bind mount release data?
@@ -32,6 +33,10 @@ not yet supported by docker-compose directly. Because of this, the
 docker images have to be converted with an extra script named `build_container`.
 
 ### Settings in `env` file
+
+First, you need to copy the `env.template` file into `env`. The template 
+version does not contain any values about passwords and api keys which
+you might need to set.
 
 The `env` file contains most settings relevant to build and run the 
 containers. The paths variables in the beginning are the mount points 
@@ -75,10 +80,10 @@ install it systemwide with `pip install pyaml`.
 
 ### Starting services
 You should then be able to start the services with 
-`docker-compose up`. This will run things in the foreground and 
+`docker-compose up`. This will run things in the foreground, and 
 you can check the logs of the different services. The first time 
 you do this using a docker volume for the oma browser data, you
-will see error messages the the database cannot be opened. This 
+will see error messages the database cannot be opened. This 
 means you haven't yet copied the data into the volume. 
 (See next point)
 You can also start the containers in the background with `docker-compose up -d` 

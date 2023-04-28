@@ -30,7 +30,7 @@ is mostly provided by the [pyoma](https://zoo.cs.ucl.ac.uk/doc/pyoma) repository
 #### Deprecated notes how to setup omabrowser for development (kept for reference)
 
 You most probably want to use virtualenv in order to have a seperate python 
-environment for this project. Plenty of informations on how to use virtualenv
+environment for this project. Plenty of information on how to use virtualenv
 is available on the web. Do something along the lines:
 
 ```shell script
