@@ -31,9 +31,10 @@ WORKDIR $SRC_DIR
 COPY Pipfile Pipfile.lock $SRC_DIR
 RUN pipenv requirements > requirements.pipenv.txt
 RUN echo "psycopg2<2.9\nuwsgi" >> requirements.pipenv.txt
-RUN --mount=type=cache,id=wheels-oma,target=/usr/src/app/wheels \
-    --mount=type=ssh \
-    pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.pipenv.txt
+RUN python -m venv /app
+ENV PATH="/app/bin:$PATH"
+RUN --mount=type=ssh \
+    pip install -r requirements.pipenv.txt
 
 FROM python:3.8-slim as runtime
 
@@ -41,6 +42,7 @@ FROM python:3.8-slim as runtime
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV SRC_DIR="/usr/src/pyomabrowser"
+RUN useradd --system --no-create-home oma
 
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
@@ -51,16 +53,10 @@ RUN apt-get -qq update \
 
 RUN pip install --upgrade pip
 
+COPY --from=oma_basis --chown=oma /app /app
+ENV PATH="/app/bin:$PATH"
 # set work directory
 RUN mkdir $SRC_DIR
 WORKDIR $SRC_DIR
-COPY --from=oma_basis $SRC_DIR/requirements.pipenv.txt $SRC_DIR
-RUN --mount=type=cache,id=wheels-oma,target=/wheels \
-    ls /wheels \
-    && pip install  --no-cache  /wheels/*
-
 COPY . $SRC_DIR
 COPY for_docker/oma/entrypoint.sh /
-
-RUN /bin/date | /usr/bin/md5sum > secret_key.txt
-
