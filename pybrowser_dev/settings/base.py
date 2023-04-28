@@ -20,8 +20,7 @@ DEPLOYMENT = os.getenv('DEPLOYMENT_TYPE', default="DEV").upper()
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '_^j%sp*a$&+$2esy(k7oarq+kyf@#ubc!lbo@_1r5#rqidc_l_'
-
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", '_^j%sp*a$&+$2esy(k7oarq+kyf@#ubc!lbo@_1r5#rqidc_l_')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (DEPLOYMENT != "PRODUCTION")
