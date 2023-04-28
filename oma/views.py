@@ -1937,28 +1937,7 @@ def domains_json(request, entry_id):
 #<editor-fold desc="Static">
 @cache_control(max_age=1800)
 def home(request):
-    n_latest_tweets = 3
-    try:
-        auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
-        auth.set_access_token(settings.TWITTER_ACCESS_TOKEN, settings.TWITTER_ACCESS_TOKEN_SECRET)
-
-        api = tweepy.API(auth)
-
-        public_tweets = api.user_timeline(user_id='@OMABrowser', exclude_replies=True,
-                                          trim_user=True, include_rts=False)
-        tweets = []
-        for tweet in public_tweets[:n_latest_tweets]:
-            text = tweet.text
-            # replace t.co shortened URLs by true urls
-            for url in sorted(tweet.entities['urls'], key=lambda x: x['indices'], reverse=True):
-                text = (text[:url['indices'][0]] +
-                        '<a href="' + url['expanded_url'] + '">' + url['expanded_url'] + '</a>' +
-                        text[url['indices'][1]:])
-            tweets.append(text)
-    except (AttributeError, tweepy.TweepyException) as err:
-        # attribute errors occur if TWITTER settings are not assigned
-        tweets = ['Currently no tweets found']
-
+    tweets = misc.retrieve_last_tweets(3)
     if settings.OMA_INSTANCE_NAME == "full":
         template = "home.html"
     else:
