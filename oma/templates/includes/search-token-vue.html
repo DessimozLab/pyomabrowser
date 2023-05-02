@@ -239,6 +239,17 @@
 
 
             },
+            addToken_and_search(event){
+
+                this.addToken(event);
+
+                if (this.tokens.length > 0){
+                    this.collect_token()
+                    this.$refs.submit_button.click();
+
+                }
+
+            },
             removeToken(index) {
                 this.tokens.splice(index, 1)
             },
@@ -527,12 +538,12 @@ help
     <input type="hidden" name="hidden_query" :value="post_query">
 
     <input type='text' :placeholder='placeholder'  class='token-input__text' id="input_token_search_{{ unique_id }}"
-           @keydown.enter='addToken'
+           @keydown.enter='addToken_and_search'
            @keydown.space='addToken'
            @keydown.delete='removeLastToken'
     />
 
-    <button class=" button_search float-right" id="button_submit" :disabled="is_empty()" @click='collect_token()' type="submit">
+    <button class=" button_search float-right" id="button_submit" ref="submit_button" :disabled="is_empty()" @click='collect_token()' type="submit">
         <img  style='width: 24px;' src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/>
     </button>
 
