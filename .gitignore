@@ -10,4 +10,5 @@ db.sqlite3
 .ropeproject
 *.log
 docs/_build
-
+for_docker/env
+for_docker/.env
