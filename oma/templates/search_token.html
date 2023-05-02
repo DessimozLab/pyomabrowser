@@ -52,7 +52,7 @@
 
                                 {% for token in search_organised.wildcard %}
 
-                                    <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                    <p style="width: 100%;overflow-wrap: break-word;display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
                                         {% if not forloop.last %},{% endif %}
                                     </p>
 
@@ -69,7 +69,7 @@
 
                                 {% for token in search_organised.Protein %}
 
-                                    <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                    <p style="width: 100%;overflow-wrap: break-word;display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
                                         {% if not forloop.last %},{% endif %}
                                     </p>
 
@@ -84,7 +84,7 @@
 
                                 {% for token in search_organised.HOG %}
 
-                                    <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                    <p style="width: 100%;overflow-wrap: break-word;display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
                                         {% if not forloop.last %},{% endif %}
                                     </p>
 
@@ -98,7 +98,7 @@
 
                                 {% for token in search_organised.OMA_Group %}
 
-                                    <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                    <p style="width: 100%;overflow-wrap: break-word;display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
                                         {% if not forloop.last %},{% endif %}
                                     </p>
 
@@ -121,7 +121,7 @@
 
                             {% for token in search_organised.Taxon %}
 
-                                <p style="display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                <p style="width: 100%;overflow-wrap: break-word;display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
                                     {% if not forloop.last %},{% endif %}
                                 </p>
 

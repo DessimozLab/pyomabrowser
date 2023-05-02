@@ -336,6 +336,11 @@
             is_empty(){return this.tokens.length === 0},
             modal_clicked(){
                 $('#exampleModal_{{ unique_id }}').modal('show')
+            },
+            format_token_string(str){
+                if (str.length < 20){return str}
+
+                return str.slice(0, 20) + '...'
             }
         },
     }).mount('#{{ unique_id }}')
@@ -525,7 +530,7 @@ help
 
         <span class="vl"></span>
 
-        <p style="display: inline" @click='detokenize(index)'>$[ token.query ]$</p>
+        <p style="display: inline" @click='detokenize(index)'>  $[ format_token_string(token.query) ]$ </p>
 
         <span @click='removeToken(index)' class="token-delete">X</span>
 
