@@ -1938,7 +1938,7 @@ def domains_json(request, entry_id):
 @cache_control(max_age=1800)
 def home(request):
     tweets = misc.retrieve_last_tweets(3)
-    if settings.OMA_INSTANCE_NAME == "full":
+    if settings.OMA_INSTANCE_NAME in ("full", "test", "testing"):
         template = "home.html"
     else:
         template = "home-{}.html".format(settings.OMA_INSTANCE_NAME)
