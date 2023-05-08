@@ -172,7 +172,7 @@
 
                     <hr>
 
-
+                    {% if "eukaryotes.cdna.fa.gz" in existing_download_files %}
                     <dl class="row">
                         <dt class="col-sm-6">cDNA Eukaryotes</dt>
                         <dd class="col-sm-6"><a href="{{ download_root }}/eukaryotes.cdna.fa.gz">
@@ -181,11 +181,10 @@
                         </a>
                         </dd>
                     </dl>
+                    <hr>
+                    {% endif %}
 
-
-                     <hr>
-
-
+                    {% if "prokaryotes.cdna.fa.gz" in existing_download_files %}
                     <dl class="row">
                         <dt class="col-sm-6">cDNA Prokaryotes</dt>
                         <dd class="col-sm-6"><a href="{{ download_root }}/prokaryotes.cdna.fa.gz">
@@ -194,11 +193,20 @@
                         </a>
                         </dd>
                     </dl>
+                    <hr>
+                    {% endif %}
 
-
-
-
-                     <hr>
+                    {% if "viruses.cdna.fa.gz" in existing_download_files %}
+                    <dl class="row">
+                        <dt class="col-sm-6">cDNA Viruses</dt>
+                        <dd class="col-sm-6"><a href="{{ download_root }}/viruses.cdna.fa.gz">
+                            <i class="fas fa-download"></i>
+                            Fasta format
+                        </a>
+                        </dd>
+                    </dl>
+                    <hr>
+                    {% endif %}
 
 
                     <dl class="row">
