@@ -3,6 +3,7 @@ import operator
 import itertools
 import os
 
+import networkx as nx
 import numpy
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
@@ -290,7 +291,7 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
                          of its members
         """
         try:
-            # get members in case its a group id or fingerprint
+            # get members in case it is a group id or fingerprint
             memb = utils.db.oma_group_members(group_id)
         except db.AmbiguousID:
             raise NotFound("{} is not a unique id".format(group_id))
@@ -670,6 +671,96 @@ class HOGViewSet(PaginationMixin, ViewSet):
         )
         serializer = serializers.HOGsSimilarProfileSerializer(data, context={'request': request})
         return Response(serializer.data)
+
+
+class AncestralSyntenyViewSet(ViewSet):
+    schema = DocStringSchemaExtractor()
+    lookup_field = 'hog_id'
+    lookup_value_regex = r'[^/]+'
+
+    def list(self, request, format=None):
+        """List of all the ancestral "scaffolds" of an ancestral genome.
+
+        Each scaffold will contain a graph with all the ancestral genes (HOGs)
+        and their neighbors as edges (order of ancestral genes on "scaffolds")
+
+        ---
+        parameters:
+
+          - name: level
+            description: The taxonomic level at which the ancestral synteny should
+                         be retrieved. The level can be specified with its numeric
+                         taxid or the scientific name.
+            location: query
+            required: True
+
+        """
+        level = self.request.query_params.get('level', None)
+        if level is None:
+            raise ParseError("level parameter is required")
+        try:
+            graph = utils.db.get_syntenic_hogs(level=level)
+        except db.DBConsistencyError:
+            raise NotFound(f"Ancestral Synteny for {level} does not exist")
+
+        contigs = []
+        for contig in sorted(nx.connected_components(graph), key=len, reverse=True):
+            g = nx.node_link_data(graph.subgraph(contig))
+            for k in ('directed', 'multigraph', 'graph'):
+                g.pop(k, None)
+            contigs.append(g)
+        return Response(contigs)
+
+    def retrieve(self, request, hog_id):
+        """
+        Returns the ancestral synteny graph around a reference hog at a given taxonomic level.
+
+        ---
+        parameters:
+
+          - name: hog_id
+            description: a unique identifier for a hog_group starting
+                         with "HOG:"
+            example: HOG:0450897
+
+          - name: level
+            description: the taxonomic level at which the synteny graph
+                         should be extracted. If not specified, the
+                         deepest level of the given HOG is used. The level
+                         can bei either a scientific name or the numeric
+                         taxonomy identifier
+            location: query
+            example: Primates, 9604
+
+          - name: evidence
+            description: The evidence value for the ancestral synteny graph.
+                         This is used for filtering. The evidence values are
+                         `linearized` < `parsimonious` < `any`
+            location: query
+            example: parsimonious
+
+          - name: context
+            description: the size of the graph around the query HOG. By default
+                         the HOGs which are at most 2 edges apart from the query
+                         HOG are returned.
+            location: query
+
+        """
+        level = self.request.query_params.get('level', None)
+        try:
+            hog = utils.db.get_hog(hog_id=hog_id, level=level)
+        except ValueError:
+            raise NotFound(f"Invalid hog_id {hog_id}")
+        evidence = self.request.query_params.get('evidence', "any")
+        size = int(self.request.query_params.get('context', 2))
+        try:
+            graph = utils.db.get_syntenic_hogs(hog_id=hog['ID'], level=hog['Level'].decode(), evidence=evidence, steps=size)
+        except db.DBConsistencyError:
+            raise NotFound(f"Ancestral Synteny for {hog['Level']} around {hog_id} not found.")
+        graph_as_dict = nx.node_link_data(graph)
+        for k in ('directed', 'multigraph', 'graph'):
+            graph_as_dict.pop(k, None)
+        return Response(graph_as_dict)
 
 
 class APIVersion(ViewSet):
@@ -1138,12 +1229,12 @@ class SharedAncestrySummaryAPIView(APIView):
         ---
         parameters:
           - name: genome_id1
-            description: an unique identifier for the first genome
+            description: a unique identifier for the first genome
                          - either its ncbi taxon id or the UniProt
                          species code
 
           - name: genome_id2
-            description: an unique identifier for the second genome
+            description: a unique identifier for the second genome
                          - either its ncbi taxon id or the UniProt
                          species code
 

@@ -13,6 +13,7 @@ router.register(r'xref', views.XRefsViewSet, basename='xref')
 router.register(r'genome', views.GenomeViewSet, basename='genome')
 router.register(r'hog', views.HOGViewSet, basename='hog')
 router.register(r'taxonomy', views.TaxonomyViewSet, basename='taxonomy')
+router.register(r'synteny', views.AncestralSyntenyViewSet, basename="synteny")
 
 # create docu-description from template
 desc = render_to_string("oma_rest/documentation_description.html", {})
