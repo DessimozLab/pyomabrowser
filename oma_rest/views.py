@@ -16,7 +16,7 @@ import collections
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.exceptions import NotFound, ParseError, ValidationError
 from rest_framework.settings import api_settings
 from django.http import HttpResponse
 from distutils.util import strtobool
@@ -694,14 +694,25 @@ class AncestralSyntenyViewSet(ViewSet):
             location: query
             required: True
 
+          - name: evidence
+            description: The evidence value for the ancestral synteny graph.
+                         This is used for filtering. The evidence values are
+                         `linearized` < `parsimonious` < `any`
+                         By default, we only show the linearized graph
+            location: query
+            example: linearized, parsimonious, any
+
         """
         level = self.request.query_params.get('level', None)
         if level is None:
             raise ParseError("level parameter is required")
+        evidence = self.request.query_params.get('evidence', "linearized")
         try:
-            graph = utils.db.get_syntenic_hogs(level=level)
+            graph = utils.db.get_syntenic_hogs(level=level, evidence=evidence)
         except db.DBConsistencyError:
             raise NotFound(f"Ancestral Synteny for {level} does not exist")
+        except ValueError as e:
+            raise ValidationError(e)
 
         contigs = []
         for contig in sorted(nx.connected_components(graph), key=len, reverse=True):
@@ -757,6 +768,8 @@ class AncestralSyntenyViewSet(ViewSet):
             graph = utils.db.get_syntenic_hogs(hog_id=hog['ID'], level=hog['Level'].decode(), evidence=evidence, steps=size)
         except db.DBConsistencyError:
             raise NotFound(f"Ancestral Synteny for {hog['Level']} around {hog_id} not found.")
+        except ValueError as e:
+            raise ValidationError(e)
         graph_as_dict = nx.node_link_data(graph)
         for k in ('directed', 'multigraph', 'graph'):
             graph_as_dict.pop(k, None)

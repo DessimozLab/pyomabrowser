@@ -178,6 +178,18 @@ class HOGsTest(APITestCase):
         self.assertEqual(5, len(response.data['members']))
 
 
+class AncestralSyntenyTest(APITestCase):
+    def test_Fungi_ancestral_example(self):
+        response = APIClient().get('/api/synteny/', {'level': "Fungi"})
+        self.assertEqual(200, response.status_code)
+        self.assertLessEqual(200, len(response.data))
+
+    def test_Fungi_ancestral_invalid_center_hog_example(self):
+        response = APIClient().get('/api/synteny/HOG:02s.1a', {'level': "Fungi"})
+        self.assertEqual(404, response.status_code)
+
+
+
 class GroupTest(APITestCase):
     # test group member is in the correct group
     def test_group_members(self):
