@@ -23,8 +23,9 @@ RUN mkdir -m 700 /root/.ssh/ \
 RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 install --no-cache-dir 'psycopg2<2.9'
 RUN pip3 install --no-cache-dir uwsgi \
-    'numexpr==2.7.3' \
-    'numpy==1.20.2' \
+    'numexpr==2.8.4' \
+    'numpy==1.23.5' \
+    'blosc2' \
     'pipenv'
 
 WORKDIR $SRC_DIR
