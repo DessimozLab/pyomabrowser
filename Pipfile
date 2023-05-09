@@ -27,6 +27,7 @@ Pygments = "*"
 Markdown = "*"
 PyYAML = "*"
 django-matomo-api-tracking = "*"
+django-debug-toolbar = "*"
 
 [dev-packages]
 

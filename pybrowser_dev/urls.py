@@ -46,7 +46,9 @@ if settings.DEPLOYMENT != "PRODUCTION":
     ]
     try:
         import debug_toolbar
-        urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
+        if "debug_toolbar" in settings.INSTALLED_APPS:
+            urlpatterns += [path('oma/__debug__/', include(debug_toolbar.urls))]
+            print("found debug_toolbar")
     except ImportError:
         pass
 

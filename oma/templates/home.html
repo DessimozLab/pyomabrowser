@@ -25,60 +25,23 @@
         <div class="logo-oma-lg-{{ oma_instance_name }}"></div>
         {% endif %}
 
-        <div class="oma-search">
-            <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
-                <div class="oma-search-select">
-                    <select id="selectBrowser" class="btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
-                       {% include "includes/search_select.html" %}
-                    </select>
-                </div>
-                <input id='inputBrowser' name="query" type="text" class="" placeholder='{% block search_placeholder %}P53_RAT | "auxin response factor" | Fungi | Insulin Human {% endblock search_placeholder %}'/>
-                <button id="submit_home"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
-            </form>
+        <div class="oma-search ">
+            {% include "includes/search-token-vue.html" with unique_id='search_nav' multiline='true' %}
         </div>
 
-        <p><a href="#" data-toggle="modal" data-target="#largeTextareaModal">Expand (e.g. to paste a long amino-acid
-            sequence)</a></p>
-
-        <!-- Modal Textarea -->
-        <div class="modal fade" id="largeTextareaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-             aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-body oma-search">
-                        <img src="{% static "image/logo-oma-o.svg" %}" alt="Icon OMA"/>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-                        <form class="search-long-string" role="search" id="searchFormModal" action="{% url 'search' %}" method="POST">{% csrf_token %}
-                            <div class="oma-search-select">
-                                 <select id="selectBrowserModal" class="btn-mini" name="type" onchange="update_autocomplete_enableing('searchFormModal')">
-                                    {% include "includes/search_select.html" %}
-                                </select>
-                            </div>
-                            <textarea id='inputBrowserModal' name="query" type="text" class="" placeholder='P53_RAT | Fungi | Insulin HUMAN | "auxin response factor"'></textarea>
-                            <button type="submit" class="btn btn-lg btn-block btn-primary">Search</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- End Modal Textarea -->
 
         <div class="oma-quick-start">
-            <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/>
+            <!-- <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/> -->
             <p>
                 <strong>Examples:</strong>
                 {% block search_examples %}
-                    <span class="ex" onclick="fillExample('entry_id','HUMAN22169')">Entry HUMAN22169</span> -
-                    <span class="ex" onclick="fillExample('entry_id','P53_RAT')">Entry P53_RAT</span> -
-                    <span class="ex" onclick="fillExample('entry_fulltext','photoreceptor')">Search for "photoreceptor"</span> -
-                    <span class="ex" onclick="fillExample('genome_name', 'Drosophila')">"Drosophila" species</span>
+                    <span class="ex" onclick="window.search_token_vue_search_nav.preload_token([{query: 'P53_RAT', single_term: true, prefix: 'proteinid', type: 'Protein'}])">Entry P53_RAT</span> -
+                    <span class="ex" onclick="window.search_token_vue_search_nav.preload_token([{query: 'EWGKQSF', single_term: true, prefix: 'sequence', type: 'Protein'},{query: 'Tetraodon', single_term: true, prefix: 'species', type: 'Taxon'}])">'EWGKQSF' in Tetraodon</span> -
+                    <span class="ex" onclick="window.search_token_vue_search_nav.preload_token([{query: 'Blue-light photoreceptor', single_term: false, prefix: 'description', type: 'Protein'}])">Search for "Blue-light photoreceptor"</span> -
+                    <span class="ex" onclick="window.search_token_vue_search_nav.preload_token([{query: 'Drosophila melanogaster', single_term: false, prefix: 'species', type: 'Taxon'}])">"Drosophila melanogaster" species</span>
                 {% endblock search_examples %}
             </p>
         </div>
-
-
 
         <div class="d-none d-lg-block scroll4more">
 
@@ -99,19 +62,6 @@
 
     </div>
 </div>
-
-<script type="text/javascript">
-function fillExample(search_select, term){
-    $('#selectBrowser').val(search_select);
-    $("#inputBrowser").val(term).focus();
-    $("#textarea").val(term).focus();
-}
-
-
-
-$('#inputBrowser').autocomplete(autocomplete_opts);
-$('#inputBrowserModal').autocomplete(autocomplete_opts);
-</script>
 
 
 <div id="omaLandingOthersContainer">
@@ -366,8 +316,7 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                Nucleic Acids Research, gka1007,
                (doi:<a href="http://doi.org/10.1093/nar/gkaa1007">10.1093/nar/gkaa1007</a>)</p>
 
-                <a href="https://swissorthology.ch"><img style="width: 100px"
-                                                                 src="{% static "image/logo-swiss-orthology.svg" %}"></a>
+                <a href="https://swissorthology.ch"><img style="width: 100px" src="{% static "image/logo-swiss-orthology.svg" %}" alt="Logo SwissOrthology"></a>
             </div>
         </div>
     </div>

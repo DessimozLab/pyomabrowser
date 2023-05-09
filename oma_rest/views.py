@@ -5,6 +5,7 @@ import os
 
 import networkx as nx
 import numpy
+import pyoma.browser.exceptions
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 try:
@@ -817,14 +818,17 @@ class XRefsViewSet(ViewSet):
             make_genome = functools.partial(models.Genome, utils.db)
             enr_to_genome = utils.id_mapper['OMA'].genome_of_entry_nr
             xref_mapper = utils.id_mapper['XRef']
-            for ref in xref_mapper.search_xref(pattern, match_any_substring=True):
-                res.append({'entry_nr': ref['EntryNr'],
-                            'omaid': utils.id_mapper['OMA'].map_entry_nr(ref['EntryNr']),
-                            'source': xref_mapper.source_as_string(ref['XRefSource']),
-                            'seq_match': xref_mapper.verification_as_string(ref['Verification']),
-                            'xref': ref['XRefId'].decode(),
-                            'genome': make_genome(enr_to_genome(ref['EntryNr']))})
-            res = self._remove_redundant_xrefs(res)
+            try:
+                for ref in xref_mapper.search_xref(pattern, match_any_substring=True):
+                    res.append({'entry_nr': ref['EntryNr'],
+                                'omaid': utils.id_mapper['OMA'].map_entry_nr(ref['EntryNr']),
+                                'source': xref_mapper.source_as_string(ref['XRefSource']),
+                                'seq_match': xref_mapper.verification_as_string(ref['Verification']),
+                                'xref': ref['XRefId'].decode(),
+                                'genome': make_genome(enr_to_genome(ref['EntryNr']))})
+                res = self._remove_redundant_xrefs(res)
+            except pyoma.browser.exceptions.TooUnspecificQuery as e:
+                raise ValidationError(detail="Query too unspecific. Matches >{} elements".format(e.hits))
         serializer = serializers.XRefSerializer(instance=res, many=True, context={'request': request})
         return Response(serializer.data)
 

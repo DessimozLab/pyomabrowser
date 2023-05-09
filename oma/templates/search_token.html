@@ -1,0 +1,700 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block css_hook %}
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
+{% endblock %}
+
+{% block js_hook %}
+
+    <script src='{% static "js/tablehooks.js" %}' type="text/javascript"></script>
+    <script src='{% static "js/highlight.js" %}'></script>
+{% endblock %}
+
+{% block content %}
+
+    <style>
+
+
+        .fixed-table-body{
+            max-height: 400px;
+        }
+
+
+        .blinking-red{
+            animation:blinkingText 1.2s infinite;
+        }
+        @keyframes blinkingText{
+            0%{     background-color: #dc3545;    }
+            49%{    background-color: #dc3545; }
+            60%{    background-color: transparent; }
+            99%{    background-color:transparent;  }
+            100%{   background-color: #dc3545;    }
+        }
+    </style>
+
+    <!--suppress ALL -->
+    <div id="oma-generic-container">
+
+        <div class="container-fluid">
+
+            <div class="jumbotron">
+
+                <div class="card-body ">
+
+                    <div id='search_title' class="col-md-10 offset-md-1">
+
+
+                        <h3><strong style="line-height: 2em">Results for searching:
+                        </strong>
+
+                            {% if  search_organised.wildcard_count > 0  %}
+
+                                {% for token in search_organised.wildcard %}
+
+                                    <p style="width: 100%;overflow-wrap: break-word;display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                        {% if not forloop.last %},{% endif %}
+                                    </p>
+
+
+                                {% endfor %}
+
+                                {% if  search_organised.Others > 0   %}
+                                    ,
+                                {% endif %}
+
+                            {% endif %}
+
+                            {% if  search_organised.Others > 0  %}
+
+                                {% for token in search_organised.Protein %}
+
+                                    <p style="width: 100%;overflow-wrap: break-word;display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                        {% if not forloop.last %},{% endif %}
+                                    </p>
+
+
+                                {% endfor %}
+
+                                {% if search_organised.Protein > 0 %}
+                                    {% if search_organised.HOG|length > 0 or search_organised.OMA_Group|length > 0  %}
+                                        ,
+                                    {% endif %}
+                                {% endif %}
+
+                                {% for token in search_organised.HOG %}
+
+                                    <p style="width: 100%;overflow-wrap: break-word;display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                        {% if not forloop.last %},{% endif %}
+                                    </p>
+
+
+                                {% endfor %}
+
+                                {% if search_organised.HOG > 0 or search_organised.OMA_Group|length > 0  %}
+                                    ,
+                                {% endif %}
+
+
+                                {% for token in search_organised.OMA_Group %}
+
+                                    <p style="width: 100%;overflow-wrap: break-word;display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                        {% if not forloop.last %},{% endif %}
+                                    </p>
+
+
+                                {% endfor %}
+
+
+
+
+
+                            {% endif %}
+
+                            {% if  search_organised.Taxon_count > 0  %}
+
+                                {% if  search_organised.wildcard_count > 0 or search_organised.Others > 0  %}
+                                    ,
+                                {% endif %}
+
+                            {% endif %}
+
+                            {% for token in search_organised.Taxon %}
+
+                                <p style="width: 100%;overflow-wrap: break-word;display: inline-block"> "{{ token.query }}" as <b>{{ token.prefix }}</b>
+                                    {% if not forloop.last %},{% endif %}
+                                </p>
+
+                            {% endfor %}
+
+                        </h3>
+                    </div>
+
+                    <br>
+
+
+                    <div class="card search_entry ">
+
+                        <div class="card-body">
+
+                            <div class="row">
+
+                                <div class="col-md-8 offset-md-2">
+
+
+                                    <h5 class="card-title">Proteins </h5>
+
+                                    <b class="float-right ">
+
+
+                                        {% if meta.entries_found <= max_proteins_shown %}
+                                            <span id="total_entry">{{ meta.entries_found }}</span>
+                                            {% if meta.entries_found == 1 or meta.entries_found == 0 %}  entry
+                                            {% else %} entries {% endif %}  found
+
+                                        {% else %} Best <span id="total_entry">{{ max_proteins_shown }}</span>
+                                            entries shown out of {{ meta.entries_found }} entries
+
+                                        {% endif %}
+
+
+
+                                            <button id="entry_stat" type="button" class="btn btn-sm "
+                                                    data-container="body"
+                                                    data-toggle="popover" data-placement="bottom">See details
+                                            </button>
+
+                                              <script>
+                                      $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content-entry";
+
+
+
+                                              {% for d in E_details %}
+
+                                              var term = document.createElement("p");
+                                              term.innerHTML = '{{d}}<br>'
+
+                                          content.appendChild(term);
+
+                                          document.body.appendChild(content)
+
+
+                                      {% endfor %}
+
+                              $('#entry_stat').popover({
+                                  title: title,
+                                  html: true,
+                                  content: function() {
+                                  return $('#popover-content-entry').html();
+                                }
+                              })
+
+
+
+                            })</script>
+
+                                            <br>
+                                            <br>
+
+
+
+                                    </b>
+
+                                </div>
+
+
+                                {% if meta.entries_found  > 0 %}
+                                    <div class="col-md-12">
+
+
+                                        <table class="table table-hover mp-0 mp-md-5"  id="matchTable_entry"
+                                               data-mobile-responsive="true" data-check-on-init="true"
+                                               data-undefined-text=""
+                                               data-id-field="protid"
+                                               data-row-attributes="tablehooks.add_proteinrow_attrs">
+                                            <thead>
+                                            <tr>
+
+                                                <th data-field="protid" data-sortable="true"
+                                                    data-formatter="tablehooks.format_vps_link">Protein ID
+                                                </th>
+                                                <th data-field="xrefid" data-sortable="true"
+                                                    data-formatter="tablehooks.format_xref">Cross reference
+                                                </th>
+                                                <th data-field="taxon" data-sortable="true" data-filter-control="input"
+                                                    data-formatter="tablehooks.format_sciname">Taxon
+                                                </th>
+
+                                                <th data-field="kingdom" data-sortable="true"
+                                                    data-filter-control="select"
+                                                    data-formatter="tablehooks.format_as_kingdom_tag"
+                                                    data-title-tooltip="Domain of Life"><span>Domains</span>
+                                                </th>
+
+
+                                                <th data-field="roothog" data-sortable="true"
+                                                    data-formatter="tablehooks.format_roothog">HOG
+                                                </th>
+                                                <th data-field="oma_group" data-sortable="true"
+                                                    data-formatter="tablehooks.format_omagroup_members">OMA Group
+                                                </th>
+                                                <th data-field="description" data-sortable="true">Description</th>
+
+                                                <th data-field="crossref" data-sortable="true"
+                                                    data-formatter="format_result_refs">Matching Crossreferences
+                                                </th>
+
+                                                <th data-field="sequence" data-sortable="true" data-formatter="tablehooks.format_entry_sequence_matches" >Matching sequences</th>
+
+
+
+                                            </tr>
+                                            </thead>
+                                        </table>
+
+                                        <br>
+
+
+
+
+                                    </div>
+
+
+                                    {% if meta.entries_found  > max_entries_shown %}
+
+                                        <div class=" col-md-10 offset-md-1">
+
+                                            <p style="color: red">
+                                                Your query fetch a lots of matching proteins. If you want to be more specific, click to add a taxonomic range and filter out some unnecessary entries:
+                                                <strong style='cursor: pointer' onclick="add_taxa_token('Tetrapoda', true, 'taxon', 'taxon')">Tetrapoda</strong> or
+                                                <strong style='cursor: pointer' onclick="add_taxa_token('HUMAN', true, 'species', 'taxon')">HUMAN</strong>
+                                            </p>
+
+                                        </div>
+
+
+                                    {% endif %}
+
+                                {% endif %}
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="card search_group" >
+
+                        <div class="card-body">
+
+
+                            <div class="row">
+
+
+
+                                <div class="col-md-8 offset-md-2" style="margin-bottom: 20px">
+
+
+                                    <h5 class="card-title">Orthologous Groups <small>(OMA Groups & HOGs)</small>  </h5>
+
+
+
+                                    <b class="float-right "> {% if meta.groups_found <= max_groups_shown %}   <span id="total_group">{{meta.groups_found}}</span>  {% if meta.groups_found == 1 %}  orthologous group {% else %} orthologous groups {% endif %}  found {% else %} Best <span id="total_group">{{max_groups_shown}}</span> {% if meta.groups_found == 1 %}  orthologous group {% else %} orthologous groups {% endif %} shown out of {{meta.groups_found}}
+                                    {% endif %}
+
+
+
+
+
+
+
+                                            <button id="group_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
+                                            <script>
+ $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content-group";
+
+
+
+                                              {% for d in G_details %}
+
+                                              var term = document.createElement("p");
+                                              term.innerHTML = '{{d}}<br>'
+
+                                          content.appendChild(term);
+
+                                          document.body.appendChild(content)
+
+
+                                      {% endfor %}
+
+                              $('#group_stat').popover({
+                                  title: title,
+                                  html: true,
+                                  content: function() {
+                                  return $('#popover-content-group').html();
+                                }
+                              })
+
+
+
+                            })
+                                            </script>
+
+                                            <br>
+
+
+
+                                    </b>
+
+
+
+                                </div>
+
+
+
+
+                            {% if meta.groups_found > 0%}
+
+
+
+
+
+
+
+                                    <div class="col-md-12 ">
+
+                                        <table class="table table-hover mp-0 mp-md-5" id="matchTable_group"
+                                               data-mobile-responsive="true" data-check-on-init="true"
+                                               data-undefined-text=""
+                                               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                                            <thead>
+                                            <tr>
+                                                <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_generic_group_id">Group ID</th>
+                                                <th data-field="type" data-sortable="true" >Type</th>
+                                                <th data-field="size" data-sortable="true" >Nr genes in Group</th>
+                                                <th data-field="group_nr" data-sortable="true" data-formatter="tablehooks.format_group_aux">Auxiliary Data</th>
+
+
+                                            </tr>
+                                            </thead>
+
+                                            <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">Genes not present in selected taxon have been filtered out as per settings. <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a></div>
+                                        </table>
+
+
+
+
+
+
+                                    </div>
+
+
+
+
+                            {% endif %}
+
+
+       </div>
+
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="card search_genome" >
+
+                        <div class="card-body">
+
+                            <div class="row">
+
+
+                                <div class="col-md-8 offset-md-2" style="margin-bottom: 20px">
+
+
+                                    <h5 class="card-title">Genomes </h5>
+
+                                    <b class="float-right ">   <span id="total_genome">{{meta.taxon_found}}</span>  {% if meta.taxon_found == 1 %}  genome {% else %} genomes {% endif %}  found
+
+
+                                            <button id="genome_stat" type="button" class="btn btn-sm " data-container="body" data-toggle="popover" data-placement="bottom">See details</button>
+
+
+                                                 <script>
+ $(function () {
+
+                                          var title = document.createElement("div");
+                                          title.innerHTML = '<b>Term specificity  <span class="badge badge-pill badge-primary"  data-html="true" data-toggle="tooltip" data-placement="bottom" title="Report for each term how many queries are found according to search method used. The color of the dot informs about the term specificity: green for low ambiguity, orange for mild and blinking red for high ambiguity of the term or absence of hits"></span>';
+
+                                          var content = document.createElement("div");
+                                          content.style.display = 'none';
+                                          content.id="popover-content-species";
+
+
+
+                                              {% for d in S_details %}
+
+                                              var term = document.createElement("p");
+                                              term.innerHTML = '{{d}}<br>'
+
+                                          content.appendChild(term);
+
+                                          document.body.appendChild(content)
+
+
+                                      {% endfor %}
+
+                              $('#genome_stat').popover({
+                                  title: title,
+                                  html: true,
+                                  content: function() {
+                                  return $('#popover-content-species').html();
+                                }
+                              })
+
+
+
+                            })
+                                            </script>
+
+
+
+                                    </b>
+
+
+                                    <br>
+
+                                </div>
+
+
+
+                            {% if meta.taxon_found > 0 %}
+
+
+
+
+                                    <div class="col-md-12 ">
+
+                                        <table class="table table-hover mp-0 mp-md-5" id="matchTable_genome"
+
+                                               data-mobile-responsive="true" data-check-on-init="true"
+                                               data-undefined-text=""
+                                               data-id-field="protid" data-row-attributes="tablehooks.add_proteinrow_attrs">
+                                            <thead>
+                                            <tr>
+                                                <th data-field="type" data-sortable="true" data-formatter="tablehooks.format_generic_genome_link">Code/Name</th>
+                                                                        <th data-field="type" data-sortable="true">Type</th>
+
+                                                <th data-field="ncbi" data-sortable="true" data-formatter="tablehooks.format_taxonid_as_link">NCBI Taxon ID</th>
+                                                <th data-field="prots" data-sortable="true"># of Sequences/Genes</th>
+                                                <th data-field="sciname" data-sortable="true" data-formatter="tablehooks.format_sciname_genomes">Scientific Name</th>
+                                                <th data-field="common_name" data-sortable="true" data-formatter="tablehooks.format_species_common">Common Name</th>
+                                                <th data-field="uniprot_species_code" data-sortable="true" data-formatter="tablehooks.format_species_code">Code</th>
+                                                <th data-field="kingdom" data-sortable="true" data-formatter="tablehooks.format_as_kingdom_tag" title="Domain of Life"><span >Domains</span></th>
+
+                                            </tr>
+                                            </thead>
+
+                                        </table>
+                                    </div>
+
+
+
+                            {% endif %}
+
+                             </div>
+
+
+                        </div>
+                    </div>
+
+                    <br>
+                    <br>
+                    <br>
+
+                    <div class="row">
+                        <div class="col-6 offset-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title" style="font-size: large">It seems you reached the end...</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">...but no worries!</h6>
+
+                                    <p class="card-text">
+                                        A small tutorial is available <a href="{% url "uses" %}#search_manual_token" class="card-link">here </a> to help you use the search in OMA.
+                                    </p>
+
+                                    <p class="card-text">
+                                        You can also help us to improve this service by letting us know what
+                                        you searched and what you expected to find.
+
+                                    </p>
+
+                                    <div class="form-area">
+
+                                        <form method="POST" id="form_contact_suggestion" name="form_contact_suggestion" action="{% url 'search_token' %}">
+
+
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Email address</label>
+                        <input type="text" class="form-control" id="email" name="email" placeholder="Email" required>
+                    </div>
+
+              <div class="form-group">
+                    <label for="exampleInputEmail1">Query (auto filled)</label>
+                        <input type="text" class="form-control" id="subject" name="query" placeholder="Query" maxlength="70" required value="{{ search }}">
+                    </div>
+
+                                            {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Email</label>
+                    <textarea class="form-control"  required type="textarea" name="message" id="message" placeholder="Message" maxlength="300" rows="7"></textarea>
+                    </div>
+
+        <button type="submit" id="submit_contact_suggestion" name="submit_contact_suggestion" class="btn btn-m btn-secondary">Submit Form</button>
+        </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+    <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/mobile/bootstrap-table-mobile.min.js"></script>
+
+    <script type="module">
+        window.search_token_vue_search_nav.preload_token({{ search  | safe }})
+        window.search_token_vue_search_min.preload_token({{ search  | safe }})
+
+    </script>
+
+    <script >
+
+     format_result_refs = function(value, row){
+
+
+            var qterms = {{ search | safe }}.map(({ query }) => query)
+
+            var all_evids = [];
+            if (row.hasOwnProperty('xrefs')){
+                all_evids = row.xrefs.map(x => x['source'] + ": " + x['xref']);
+            }
+            var keep = all_evids.filter(function(token){
+                return qterms.some(term => token.match(term));
+            });
+            return keep.join('<br>');
+        };
+
+        function add_taxa_token(query, single_term, prefix, type){
+            var tt = {query: query, single_term: single_term, prefix: prefix, type: type}
+            window.search_token_vue.preload_token([tt])
+        }
+
+        // ENTRY RESULT TABLE
+        var data = {{ data_entry | safe }};
+        var tab = $("#matchTable_entry");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data,
+            onPostBody: function (d) {
+                //var element = $("th span:contains('Domains')")[0];
+                //element.style.writingMode = "vertical-lr"
+                document.getElementById("total_entry").innerHTML = d.length;
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+
+        // GENOME RESULT TABLE
+
+        var data_genome = {{ data_genomes | safe }};
+        var tab = $("#matchTable_genome");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data_genome ,
+            onPostBody: function(d){
+                //var element = $( "th span:contains('Domains')" )[0];
+                //element.style.writingMode = "vertical-lr"
+                document.getElementById("total_genome").innerHTML = d.length;
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+
+        // GROUP RESULT TABLES
+        var data = {{ data_group | safe }};
+        var tab = $("#matchTable_group");
+        tab.bootstrapTable({
+            reorderableColumns: true,
+            clickToSelect: false,
+            showMultiSort: true,
+            data: data ,
+            onPostBody: function(d){
+                document.getElementById("total_group").innerHTML = d.length;
+            }
+        });
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'glyphicon-download-alt', columns: 'glyphicon-list'});
+        tab.bootstrapTable('refreshOptions', {'icons': icons});
+
+    </script>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", function(e) {
+
+            var tkns = {{ search  | safe }}
+            var hilitor_query = '' // separate by @
+
+            for (var idx in tkns ) {
+                hilitor_query += tkns[idx].query + '@'
+            }
+
+
+
+            var hilitor = new Hilitor('oma-generic-container');
+            hilitor.setBreakRegExp(new RegExp('[^\\w\' -]+', "g"));
+            hilitor.setMatchType("open");
+            hilitor.apply(hilitor_query);
+
+        }, false);
+    </script>
+
+
+
+
+
+
+
+{% endblock content %}

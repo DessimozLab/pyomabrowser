@@ -1,0 +1,566 @@
+{% load staticfiles %}
+
+<script src="{% static 'js/vue.js' %}"></script>
+
+<style>
+
+    .button_search {
+        cursor:pointer;
+        align-self: center;
+        height: 100%;
+        background-color: transparent;
+        border: none;
+        margin-right: 4px;
+        margin-left: auto;
+        order: 2;
+    }
+
+    .button_search:disabled {
+    cursor:not-allowed;
+}
+
+
+    .help_icon {
+        align-self: center;
+        font-size: 1.5em;
+        margin: 4px;
+        cursor: pointer;
+    }
+
+    .prefix-dropdown {
+        border: none;
+        background-color: transparent;
+    }
+
+    .vl {
+        border-left: 2px solid grey;
+        margin-left: 4px;
+        margin-right: 4px;
+    }
+
+    #{{ unique_id }}_input_part {
+
+        display: flex;
+        border: 1px solid #eee;
+        font-size: 0.9em;
+        box-sizing: border-box;
+        padding: 0 0 0 4px;
+        border-radius: 500px;
+    }
+
+    .ml-input{}
+    .sl-input{height: 50px;}
+
+    .token-input__tag {
+        height: 30px;
+        display: inline-block;
+        margin-right: 10px;
+        background-color: #eee;
+        margin-top: 10px;
+        line-height: 30px;
+        padding: 0 5px;
+        border-radius: 5px;
+    }
+
+    .token-input__tag > span {
+        cursor: pointer;
+        opacity: 0.75;
+    }
+
+    .token-input__text {
+        border: none;
+        outline: none;
+        font-size: 0.9em;
+        line-height: 50px;
+        flex-grow: 1;
+        background: transparent;
+    }
+
+    .token-delete {
+        margin-left: 4px;
+        color: red;
+    }
+
+    #token-container_{{ unique_id }}{
+        overflow: scroll;
+        display: inline;
+    }
+
+    .ml-token-con{margin-bottom: 8px;}
+
+    .sl-token-con{white-space: nowrap;}
+
+
+</style>
+
+<script type="module">
+
+    const {createApp} = Vue
+
+    window.search_token_vue_{{ unique_id }} = createApp({
+        data() {
+            return {
+                tokens: [], //{query: 'HUMAN', single_term: true, prefix: "Species", type: "Taxon"}
+                prefixes: {
+                    'Protein': ['proteinid','xref','go','ec','description','domain','sequence'],
+                    'Taxon': ['species','taxid', 'taxon'],
+                    'HOG': ['hog','sequence'],
+                    'OMA_Group': ['og', 'fingerprint','sequence'],
+                },
+                default_prefix : 'description',
+                show_error: false,
+                error_message : " Error.",
+                post_query: '',
+                multiline: {{ multiline }},
+                wild_card: 'sequence',
+                placeholder: ' "Blue-light photoreceptor" | proteinid:P53_RAT  | species:"Drosophila melanogaster" ',  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
+                placeholder_default: 'proteinid:P53_RAT | "Blue-light photoreceptor" | species:"Drosophila melanogaster" '  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
+            }
+        },
+        compilerOptions: {
+            delimiters: ["$[", "]$"]
+        },
+        methods: {
+            get_list_prefixes(lowercase=false){
+
+                let lp = [].concat(...Object.values(this.prefixes));
+
+                if (lowercase){
+
+                    lp = lp.map(element => {return element.toLowerCase();});
+                }
+                return lp
+            },
+            get_prefix_used(){
+                return this.tokens.map(x => this.get_type_prefix(x.prefix));
+            },
+            get_type_prefix(prefix){
+                for (var key in this.prefixes) {
+                    if (this.prefixes.hasOwnProperty(key)) {
+                        if (this.prefixes[key].includes(prefix.toLowerCase())){
+                            return key
+                        }
+                    }
+                }
+                return null
+            },
+            addToken(event) {
+
+                event.preventDefault()
+                let val = event.target.value.trim();
+
+
+                if (val.length === 0 && this.tokens.length > 0){
+                    this.collect_token()
+                    // wanted to auto search if press and empty + token but post request miss post_query data
+                }
+                else {
+
+                    var sinle_term = val[0] !== '"';
+                    var multi_term_closed = (val.length > 1 && val[val.length - 1] === '"')
+                    var has_prefix = val.includes(':')
+                    var prefix_end = val[val.length - 1] === ':'
+                    var p = has_prefix ? val.split(':')[0].toLowerCase() : this.default_prefix;
+
+
+                    // If prefix but not valid
+                    if (has_prefix && !this.get_list_prefixes(true).includes(p.toLowerCase())) {
+                        this.show_error = true;
+                        this.error_message = "Error: Incorrect prefix."
+                        return;
+                    } else {
+                        this.show_error = false;
+                    }
+
+                    // If something typed
+                    if (val.length > 0) {
+
+                        // Multiple word query
+                        if (!sinle_term) {
+
+                            // STOP if multiple not closed
+                            if (!multi_term_closed) {
+
+                                if (event.code === "Space") {
+                                    event.target.value = val + ' '
+                                }
+                                return
+                            }
+                        }
+
+                        // STOP if the prefix is fine and we are at :
+                        if (prefix_end) {
+                            return
+                        }
+
+                        // has a prefix
+                        if (has_prefix) {
+
+                            var tmp = val.split(':')[1].trim()
+                            sinle_term = tmp[0] !== '"';
+                            multi_term_closed = (val.length > 1 && tmp[tmp.length - 1] === '"')
+
+
+                            // multiple term
+                            if (!sinle_term) {
+
+                                // STOP if not closed
+                                if (!multi_term_closed) {
+                                    if (event.code === "Space") {
+                                        event.target.value = val + ' '
+                                    }
+                                    return
+                                }
+
+
+                            }
+                            val = tmp
+                        }
+
+
+                        if (this.validate_token(val.replaceAll('"', ''), sinle_term, p)) {
+                            val = val.replaceAll('"', '')
+                            this.tokens.push({
+                                query: val,
+                                single_term: sinle_term,
+                                prefix: p,
+                                type: this.get_type_prefix(p)
+                            });
+                            event.target.value = '';
+                        }
+
+
+                    }
+                }
+
+            document.getElementById("token-container_search_nav").scrollLeft += 200000;
+
+
+
+
+            },
+            addToken_and_search(event){
+
+                this.addToken(event);
+
+                if (this.tokens.length > 0){
+                    this.collect_token()
+                    this.$refs.submit_button.click();
+
+                }
+
+            },
+            removeToken(index) {
+                this.tokens.splice(index, 1)
+            },
+            removeLastToken(event) {
+                if (event.target.value.length === 0) {
+                    this.removeToken(this.tokens.length - 1)
+                }
+            },
+            collect_token(){
+                this.post_query = JSON.stringify(this.tokens)
+            },
+            detokenize(index){
+                var token = this.tokens.splice(index, 1)[0];
+                var input_token_search = document.getElementById('input_token_search_{{ unique_id }}');
+                var token_str = token.prefix + ': '
+                token_str += token.single_term ? '' : '"'
+                token_str += token.query
+                token_str += token.single_term ? '' : '"'
+
+                input_token_search.value =  token_str
+
+
+            },
+            on_change_prefix(target, t){
+                var prefix = target.value
+
+
+                if (this.validate_token(t.query, t.single_term,prefix, true)){
+                    t.prefix = prefix.toLowerCase()
+                }
+                else {
+
+
+
+                    target.value = t.prefix;
+                }
+
+            },
+            validate_token(val, sinle_term, p , OnChange=false){
+
+                if (this.wild_card.includes(p)){
+                    return true
+                }
+
+                // todo Validate type val is valid for p
+
+                // validate prefix not in conflict with other prefix
+                var pu = this.get_prefix_used();
+                var current_prefix_type = this.get_type_prefix(p)
+
+                if (current_prefix_type !== 'Taxon'){
+
+                    var no_taxon = pu.filter(x => x !== 'Taxon');
+
+                    if (no_taxon.length == 0){return true}
+
+                    else if (OnChange && no_taxon.length == 1){return true}
+
+                    else if (no_taxon.length >  0 && no_taxon.includes(current_prefix_type) ){return true}
+
+                    else if (no_taxon.length > 0 && !no_taxon.includes(current_prefix_type)) {
+                        this.show_error = true;
+                            this.error_message = "Warning: You are searching for " + no_taxon[0] +
+                                " you can't add token for " + current_prefix_type
+                            return false
+                    }
+
+                }
+
+                return true
+
+            },
+            preload_token(tokens){
+                this.tokens = []
+                for (var i in tokens) {
+                    var token = tokens[i]
+                    if (this.validate_token(token.query, token.sinle_term, token.prefix )){
+                        this.tokens.push({query: token.query, single_term: token.sinle_term, prefix: token.prefix, type:token.type});
+                    }
+                }
+                this.placeholder = ''
+
+            },
+            is_empty(){return this.tokens.length === 0},
+            modal_clicked(){
+                $('#exampleModal_{{ unique_id }}').modal('show')
+            },
+            format_token_string(str){
+                if (str.length < 20){return str}
+
+                return str.slice(0, 20) + '...'
+            }
+        },
+    }).mount('#{{ unique_id }}')
+
+    var autocomplete_opts = {
+
+        paramName: 'search',
+        serviceUrl: '/api/xref/',
+        minChars: 3,
+        triggerSelectOnValidInput: false,
+        deferRequestBy: 200,
+        transformResult: function (response) {
+            var json = JSON.parse(response);
+            var xref_source_order = {{ xref_order | safe }};
+            json.sort(function (a, b){
+                const idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
+                if (idx_a === idx_b){
+                    return a.xref > b.xref ? 1 : -1;
+                }
+                return idx_a - idx_b;
+            });
+            return {
+                suggestions: $.map(json, function (dataItem) {
+                    return {value: dataItem.xref, data: dataItem};
+                })
+            };
+        },
+        groupBy: 'source',
+        formatResult: function(suggestion, currentValue) {
+            // Do not replace anything if there current value is empty
+            if (!currentValue) {
+                return suggestion.value;
+            }
+            // escape any special char
+            var pattern = '(' + currentValue.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&") + ')';
+            var highlight_and_escape = function(val){
+                return val.replace(new RegExp(pattern, 'gi'), '<strong>$1<\/strong>')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/&lt;(\/?strong)&gt;/g, '<$1>');
+            };
+            return '<span class="auto-xref">' + highlight_and_escape(suggestion.data.xref) + '</span> &nbsp;' +
+                '<span class="auto-omaid">' + suggestion.data.omaid + '</span>' +
+                '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
+        },
+        onSelect: function(item){
+            window.location.href = "/oma/vps/" + item.data.entry_nr;
+            return false;
+        },
+        response: function( event, ui ) {console.log('HOG')}
+
+    };
+    $('#input_token_search_{{ unique_id }}').autocomplete(autocomplete_opts);
+
+
+
+
+
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" data-backdrop="false" id="exampleModal_{{ unique_id }}" tabindex="-1" aria-labelledby="exampleModalLabel{{ unique_id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="exampleModalLabel{{ unique_id }}">How to use the search in OMA Browser ?</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="text-align: justify">
+
+          <strong>How does the search work?</strong>
+
+          <p>Input a query in the search field. Everytime you press Space or Enter after a word, a <b>token</b> will be created.
+              The token is composed of a <b>prefix</b>  describing how the query should be treated and the actual <b>query</b> itself.</p>
+
+          <strong>What are the different types of tokens?</strong>
+
+          <p>Each token represents either a Gene, HOG, OMA group, or Taxon. Prefixes are used to specify which category to associate with the query term.
+</p>
+
+          <table class="table table-bordered">
+  <thead>
+    <tr>
+      <th scope="col">Category</th>
+      <th scope="col">Prefixes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Genes</th>
+      <td>id, go, ec, description, domain, sequence</td>
+    </tr>
+
+  <tr>
+      <th scope="row">HOGs</th>
+      <td>hog, sequence</td>
+    </tr>
+
+    <tr>
+      <th scope="row">OMA Groups</th>
+      <td>omagroup, fingerprint, sequence</td>
+    </tr>
+
+  <tr>
+      <th scope="row">Taxon</th>
+      <td>species, taxid, taxon</td>
+    </tr>
+
+
+  </tbody>
+</table>
+
+          <small>For example, the token [go:4225] will search for genes in the OMA database annotated with the GO:0004225 gene ontology term.
+</small>
+          <br>
+
+          <strong>How to search for a multi-word query?</strong>
+
+          <p>If your query term is composed of multiple words (e.g homo sapiens), use " " to encapsulate it.
+</p>
+
+          <strong>How many tokens can I have?</strong>
+
+          <p>There is no limit on the number of tokens. It is not possible to enter multiple tokens of different categories,
+              except taxon, which can be combined with other categories. For example, you can search for 'hog:60627 species:HUMAN'
+              to return human genes found in HOG:606207.
+</p>
+
+          <strong>How to edit/delete a token?</strong>
+
+          <p>To edit a query, click on it to modify the input field. To edit a prefix, click on the dropdown icon to select another one. To remove a token, click on the x to delete it.</p>
+
+          <strong>Autosuggest</strong>
+
+          <p>Typing a query without hitting enter or space will prompt an autosuggestion for the identifier after a few seconds.</p>
+
+
+
+
+
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<form method="POST" id='form_' action="{% url 'search_token' %}" >
+            {% csrf_token %}
+
+<div id="{{ unique_id }}">
+
+    <div id="{{ unique_id }}_input_part" :class="multiline ? 'ml-input' : 'sl-input'">
+
+        <span class="material-symbols-outlined help_icon"   @click="modal_clicked">
+help
+</span>
+
+
+        <div id="token-container_{{ unique_id }}" :class="multiline ? 'ml-token-con' : 'sl-token-con'" >
+
+
+
+    <span v-for="token, index in tokens" :key="token" class="token-input__tag">
+
+
+        <select class="prefix-dropdown" @change="on_change_prefix($event.target, token)">
+
+               <template v-for="(prefixes_list, prefix_type) in prefixes">
+    <optgroup :label="prefix_type" >
+    <option v-for="prefix in prefixes_list" :key="prefix" :selected="prefix == token.prefix">
+                $[ prefix ]$
+            </option>
+         </optgroup>
+  </template>
+
+        </select>
+
+        <span class="vl"></span>
+
+        <p style="display: inline" @click='detokenize(index)'>  $[ format_token_string(token.query) ]$ </p>
+
+        <span @click='removeToken(index)' class="token-delete">X</span>
+
+        </select>
+
+    </span>
+
+    </div>
+
+    <input type="hidden" name="hidden_query" :value="post_query">
+
+    <input type='text' :placeholder='placeholder'  class='token-input__text' id="input_token_search_{{ unique_id }}"
+           @keydown.enter='addToken_and_search'
+           @keydown.space='addToken'
+           @keydown.delete='removeLastToken'
+    />
+
+    <button class=" button_search float-right" id="button_submit" ref="submit_button" :disabled="is_empty()" @click='collect_token()' type="submit">
+        <img  style='width: 24px;' src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/>
+    </button>
+
+    </div>
+
+
+    <div style="display: flex" v-show="show_error">
+        <small style="color: red; margin-right: auto;" > $[this.error_message]$  </small>
+    </div>
+
+
+
+</div>
+
+ </form>

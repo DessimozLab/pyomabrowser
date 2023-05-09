@@ -30,7 +30,7 @@
                 "sha256:fe3ce77125f434a0dd1bffe5f4643e64126d5731ce8d173d36f62fa43d6eb6f7"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==3.0.5"
+            "version": "==3.0.8"
         },
         "argh": {
             "hashes": [
@@ -285,9 +285,10 @@
         },
         "dendropy": {
             "hashes": [
-                "sha256:3e5d2522170058ebc8d1ee63a7f2d25b915e34957dc02693ebfdc15f347a0101"
+                "sha256:a8fe2fc2e243aa89b01e8f8d5c51a4724cecdbc2e8de45e3fbaf8100dcf46b6f",
+                "sha256:c4361b8348ca7d787e827f544888bf5ed034d62a4ea4473e40f0a9ad67039964"
             ],
-            "version": "==4.5.2"
+            "version": "==4.6.0"
         },
         "django": {
             "hashes": [
@@ -312,6 +313,14 @@
             ],
             "index": "pypi",
             "version": "==3.11.0"
+        },
+        "django-debug-toolbar": {
+            "hashes": [
+                "sha256:644bbd5c428d3283aa9115722471769cac1bec189edf3a0c855fd8ff870375a9",
+                "sha256:6b633b6cfee24f232d73569870f19aa86c819d750e7f3e833f2344a9eb4b4409"
+            ],
+            "index": "pypi",
+            "version": "==3.2.4"
         },
         "django-google-analytics-app": {
             "git": "https://github.com/alpae/django-google-analytics.git",
@@ -798,7 +807,7 @@
                 "sha256:f76d097d12c82a535fda9dfe5e8dd4127952b45fea9b0276cb30cca5ea313fbc"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==1.5.3"
+            "version": "==2.0.3"
         },
         "property-manager": {
             "hashes": [
@@ -1210,11 +1219,11 @@
         },
         "sqlparse": {
             "hashes": [
-                "sha256:0323c0ec29cd52bceabc1b4d9d579e311f3e4961b98d174201d5622a23b85e34",
-                "sha256:69ca804846bb114d2ec380e4360a8a340db83f0ccf3afceeb1404df028f57268"
+                "sha256:5430a4fe2ac7d0f93e66f1efc6e1338a41884b7ddf2a350cedd20ccc4d9d28f3",
+                "sha256:d446183e84b8349fa3061f0fe7f06ca94ba65b426946ffebe6e3e8295332420c"
             ],
             "markers": "python_version >= '3.5'",
-            "version": "==0.4.3"
+            "version": "==0.4.4"
         },
         "structlog": {
             "hashes": [
@@ -1222,7 +1231,7 @@
                 "sha256:e7509391f215e4afb88b1b80fa3ea074be57a5a17d794bd436a5c949da023333"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==22.3.0"
+            "version": "==23.3.0"
         },
         "tables": {
             "hashes": [

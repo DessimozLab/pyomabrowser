@@ -116,6 +116,10 @@ urlpatterns = [
 
 
     # Search Widget
+    url(r'^search-token/$', views.token_search, name='search_token'),
+    url(r'^search-token/thanks$', TemplateView.as_view(template_name="search_suggestion_thanks.html"),
+            name="search_suggestion_thanks"),
+
     url(r'^search/$', views.Searcher.as_view(), name='search'),
     url(r'^search/fulltext/(?P<query>[A-Za-z0-9 _.:()-/+"]+)/$', views.FullTextJson.as_view(), name="fulltext_json"),
 
@@ -177,8 +181,8 @@ if settings.OMA_INSTANCE_NAME != "basf":
 if settings.DEBUG:
     try:
         import debug_toolbar
-        urlpatterns.extend([
-            url(r'^__debug__/', include(debug_toolbar.urls)),
-        ])
+        #urlpatterns.extend([
+        #    url(r'^__debug__/', include(debug_toolbar.urls)),
+        #])
     except ImportError:
         pass
