@@ -56,7 +56,7 @@ services:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     image: $DOCKER_REGISTRY/oma
     restart: "no"
-    command: ["celery", "worker", "--app=pybrowser_dev.celery_app", "--concurrency=1",
+    command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
               "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=DEBUG"]
     env_file:
       - env
@@ -79,7 +79,7 @@ services:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     image: $DOCKER_REGISTRY/oma
     restart: "no"
-    command: ["celery", "worker", "--app=pybrowser_dev.celery_app", "--concurrency=1",
+    command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
               "--queues=celery,async_web,long", "--hostname=worker@%h", "--loglevel=DEBUG"]
     env_file:
       - env
