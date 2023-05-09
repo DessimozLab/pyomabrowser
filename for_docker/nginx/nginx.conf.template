@@ -21,17 +21,8 @@ server {
     proxy_intercept_errors on;
 
     #START_ERROR
-
-    error_page   500  503 504  /50x.html;
-    location = /50x.html {
-        root   /usr/share/nginx/html;
-    }
-
-    error_page   502 /502.html;
-    location = /502.html {
-        root   /usr/share/nginx/html;
-    }
-
+    error_page   500 503 504  /50x.html;
+    error_page   502          /502.html;
     #END_ERROR
 
     location ~ ^/(oma|api)/ {
