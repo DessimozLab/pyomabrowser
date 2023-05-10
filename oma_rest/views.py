@@ -680,10 +680,20 @@ class AncestralSyntenyViewSet(ViewSet):
     lookup_value_regex = r'[^/]+'
 
     def list(self, request, format=None):
-        """List of all the ancestral "scaffolds" of an ancestral genome.
+        """List of all the ancestral "contigs" of an ancestral genome.
 
-        Each scaffold will contain a graph with all the ancestral genes (HOGs)
+        Each contig will contain a graph with all the ancestral genes (HOGs)
         and their neighbors as edges (order of ancestral genes on "scaffolds")
+
+        The return value is a list of graph objects that consist of 'nodes' and
+        'links' attributes.
+
+            {"nodes": [{"id":"HOG:C0594134.1a", ...},
+                       {"id":"HOG:C0594135.3c", ...},
+                       {"id":"HOG:C0600830.1c.3b", ...}],
+             "links": [{"weight":15,"source":"HOG:C0594134.1a","target":"HOG:C0594135.3c"},
+                       {"weight":15,"source":"HOG:C0594134.1a","target":"HOG:C0600830.1c.3b"}]
+            }
 
         ---
         parameters:
@@ -703,11 +713,20 @@ class AncestralSyntenyViewSet(ViewSet):
             location: query
             example: linearized, parsimonious, any
 
+          - name: break_circular_contigs
+            description: Some ancestral contigs end up being circles. For certain applications
+                         this poses a problem. By setting this argument to "yes" (default),
+                         the function will break the circle on the weakest edge, with "no" it
+                         will return the full linearized graph. Note that this parameter
+                         has no effect if the `evidence` parameter is not equal to "linearized".
+            location: query
+
         """
         level = self.request.query_params.get('level', None)
         if level is None:
             raise ParseError("level parameter is required")
         evidence = self.request.query_params.get('evidence', "linearized")
+        break_circular_contigs = strtobool(self.request.query_params.get('break_circular_contigs', 'True'))
         try:
             graph = utils.db.get_syntenic_hogs(level=level, evidence=evidence)
         except db.DBConsistencyError:
@@ -716,8 +735,14 @@ class AncestralSyntenyViewSet(ViewSet):
             raise ValidationError(e)
 
         contigs = []
-        for contig in sorted(nx.connected_components(graph), key=len, reverse=True):
-            g = nx.node_link_data(graph.subgraph(contig))
+        for cc in sorted(nx.connected_components(graph), key=len, reverse=True):
+            contig = graph.subgraph(cc)
+            if evidence == "linearized" and break_circular_contigs and len(contig) <= len(contig.edges):
+                min_edge = sorted(contig.edges.data(), key=lambda e: e[2]['weight'])[0][:2]
+                cont = contig.copy()
+                cont.remove_edge(*min_edge)
+                contig = cont
+            g = nx.node_link_data(contig)
             for k in ('directed', 'multigraph', 'graph'):
                 g.pop(k, None)
             contigs.append(g)
