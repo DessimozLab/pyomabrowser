@@ -1,10 +1,7 @@
 # syntax=docker/dockerfile:experimental
-ARG PYOMABROWSER_CODEBASE=from_local
-ARG SPECIAL_PYTABLES=no
-ARG PYOMABROWSER_GITTAG
 
 # pull official base image
-FROM python:3.8-slim as oma_basis
+FROM python:3.10-slim as oma_basis
 
 ENV SRC_DIR="/usr/src/pyomabrowser"
 
@@ -37,7 +34,7 @@ ENV PATH="/app/bin:$PATH"
 RUN --mount=type=ssh \
     pip install -r requirements.pipenv.txt
 
-FROM python:3.8-slim as runtime
+FROM python:3.10-slim as runtime
 
 # set environment varibles
 ENV PYTHONDONTWRITEBYTECODE 1
