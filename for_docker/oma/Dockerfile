@@ -1,10 +1,7 @@
 # syntax=docker/dockerfile:experimental
-ARG PYOMABROWSER_CODEBASE=from_local
-ARG SPECIAL_PYTABLES=no
-ARG PYOMABROWSER_GITTAG
 
 # pull official base image
-FROM python:3.8-slim as oma_basis
+FROM python:3.10-slim as oma_basis
 
 ENV SRC_DIR="/usr/src/pyomabrowser"
 
@@ -23,8 +20,9 @@ RUN mkdir -m 700 /root/.ssh/ \
 RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 install --no-cache-dir 'psycopg2<2.9'
 RUN pip3 install --no-cache-dir uwsgi \
-    'numexpr==2.7.3' \
-    'numpy==1.20.2' \
+    'numexpr==2.8.4' \
+    'numpy==1.23.5' \
+    'blosc2' \
     'pipenv'
 
 WORKDIR $SRC_DIR
@@ -36,7 +34,7 @@ ENV PATH="/app/bin:$PATH"
 RUN --mount=type=ssh \
     pip install -r requirements.pipenv.txt
 
-FROM python:3.8-slim as runtime
+FROM python:3.10-slim as runtime
 
 # set environment varibles
 ENV PYTHONDONTWRITEBYTECODE 1
