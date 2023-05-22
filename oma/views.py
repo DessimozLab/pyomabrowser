@@ -1288,6 +1288,15 @@ class AncestralGenomeCentricInfo(AncestralGenomeBase, TemplateView):
         return context
 
 
+class AncestralGenomeCentricSynteny(AncestralGenomeBase, TemplateView):
+    template_name = "ancestralgenome_synteny.html"
+
+    def get_context_data(self, species_id, **kwargs):
+        context = super(AncestralGenomeCentricSynteny, self).get_context_data(species_id, **kwargs)
+
+        context.update({'tab': 'synteny'})
+        return context
+
 class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
     template_name = "ancestralgenome_genes.html"
 

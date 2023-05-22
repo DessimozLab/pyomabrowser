@@ -146,6 +146,12 @@
 {%endif%}
         </li>
 
+         <li class="{% if tab == 'synteny' %}  active selected {%endif%}">
+            <a href="{% url 'ancestralgenome_synteny' genome_name %}">
+                <span> Ancestral Synteny</span>
+            </a>
+        </li>
+
 
 
 

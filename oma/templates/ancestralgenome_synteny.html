@@ -1,0 +1,74 @@
+{% extends  "base_ancestralgenome.html" %}
+{% load static %}
+
+{% block title %}Ancestral synteny of genome {{genome_name}}{% endblock %}
+
+
+{% block css_hook %}
+    <link type="text/css" rel="stylesheet" href="{% static 'ancestral_synteny/syntenyViewer.css' %}"/>
+{% endblock css_hook %}
+{% block js_hook %}
+     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed&display=swap" rel="stylesheet">
+    <script src="{% static 'ancestral_synteny/SyntenyViewer.js' %}"></script>
+{% endblock js_hook %}
+
+
+
+
+
+{% block contentTab %}
+
+
+    <style>
+
+    #container{
+        width: 95%;
+        margin: auto;
+       min-height: 200px;
+    }
+
+</style>
+
+
+<div id="container">
+
+</div>
+
+<script>
+
+    var container_id = 'container';
+
+    var settings = {level: "{{ genome_name }}"};
+
+
+    //fetch('{% static 'ancestral_synteny/graph.json' %}')
+    //fetch('https://oma-stage.vital-it.ch/api/synteny/?level={{ genome_name }}&format=json')
+    fetch('/api/synteny/?level={{ genome_name }}&format=json')
+        .then((response) => response.json())
+        .then((json) => {
+
+            const synteny = new SyntenyViewer(container_id);
+
+            synteny.add_data(json)
+
+            synteny.configure(settings)
+
+            synteny.callback_click_hog = function(hog){
+                var newUrl="{% url 'hog_viewer' 1234567  %}".replace(/1234567/, hog.id);
+                window.open(newUrl, "_blank");
+            }
+
+            synteny.render();
+
+        })
+
+
+
+
+</script>
+
+
+
+
+{% endblock contentTab %}
