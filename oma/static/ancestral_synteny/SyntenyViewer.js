@@ -25,7 +25,15 @@ class SyntenyViewer {
             },
         }
         this.callback_click_hog = null
+
         this.color_accessor_hog = 'completeness_score';
+        this.color_remove_outlier_hog = true;
+
+        this.color_accessor_edge = 'weight';
+        this.color_remove_outlier_edge = true;
+
+        this.height_accessor_hog = 'nr_members';
+        this.height_remove_outlier_hog = true;
 
     }
 
@@ -163,7 +171,155 @@ class SyntenyViewer {
 
     }
 
+    _settings_HOGs(){
+        return `
+         
+         <p class='ui_title' > HOGs</p>
+        
+        <div class='ui_div' > 
+            <p class='ui_text' ><b>Height</b></p>
+            <span>
+            <select name=""  id="selecthhei">
+            <option value="nr_members" selected ># Members</option>
+            <option value="completeness_score">Completeness</option>
+            </select>
+            </span>
+            <span style="display: block">
+            <input id='outlier_hog_height' type="checkbox" checked> <label for="">Remove outliers</label>
+            </span>
+        </div>
+        
+       
+        <div class='ui_div'> 
+            <p class='ui_text' ><b>Coloring</b></p>
+            <span><select name="" id="selecthcol">
+            <option value="nr_members"># Members</option>
+            <option value="completeness_score" selected >Completeness</option>
+            </select></span>
+            <span style="display: block"><input id='outlier_hog_coloring' type="checkbox" checked> <label for="">Remove outliers</label></span>
+        </div>
+        `
+    }
+
+    _bind_ui_hog(){
+
+        document.getElementById("selecthhei").onchange = (e) => {
+
+            this.height_accessor_hog = e.target.value;
+            this.render()
+
+        }
+
+        document.getElementById("selecthcol").onchange = (e) => {
+
+            this.color_accessor_hog = e.target.value;
+            this.render()
+
+        }
+
+
+        document.getElementById("outlier_hog_height").addEventListener('change', (event) => {
+            this.height_remove_outlier_hog = event.currentTarget.checked ? true : false;
+            this.render()
+        })
+
+        document.getElementById("outlier_hog_coloring").addEventListener('change', (event) => {
+            this.color_remove_outlier_hog = event.currentTarget.checked ? true : false;
+            this.render()
+        })
+
+    }
+
+    _settings_Edges(){
+
+        return `
+           
+        <p class='ui_title'> Edges</p>
+        
+   
+        <div class='ui_div'> 
+            <p class='ui_text' ><b>Coloring</b></p>
+            <span><select name="" id="selectecol">
+            <option value="Weight">Weight</option>
+            </select></span>
+            <span style="display: block"><input id='outlier_edge_coloring' type="checkbox" checked> <label for="">Remove outliers</label></span>
+        </div>
+        `
+
+    }
+
+    _bind_ui_edge(){
+
+        document.getElementById("selectecol").onchange = (e) => {
+
+            this.color_accessor_edge = e.target.value;
+            this.render()
+
+        }
+
+
+
+        document.getElementById("outlier_edge_coloring").addEventListener('change', (event) => {
+            this.color_remove_outlier_edge = event.currentTarget.checked ? true : false;
+            this.render()
+        })
+
+
+    }
+
+    _build_interface(){
+
+        this.UI_container = d3.select(this.div).append("div").attr("class","corner_placeholder top right")
+            .style("flex-direction",'column')
+            .style("align-items",'end')
+
+        this.tr_buttons = this.UI_container.append("div").attr("class","tr-button").style("display",'flex')
+
+        this.tr_menus = this.UI_container.append("div").attr("class","tr-menus")
+
+        // BUTTON
+        var ex_b = this.tr_buttons.append('button')
+            .attr('id', 'button_settings')
+            .attr('data-bs-placement', 'bottom')
+            .attr('title', 'Configure viewer appearance')
+
+        var divybuty = ex_b.attr('class', ' square_button')
+        .style('margin', '2px')
+        .on("click", d => {
+            if (this.menu_export.style('display') === 'none'){
+                return this.menu_export.style("display", 'block')
+            }
+            this.menu_export.style("display", 'none')
+        })
+
+        divybuty.append("div")
+            .attr("class","label")
+            .append('i')
+            .style('color', '#888')
+            .attr('class', ' fas fa-cog ')
+
+        divybuty.append('p')
+            .text('Settings')
+            .style('font-size', 'xx-small')
+
+        this.tooltip_export = new bootstrap.Tooltip(document.getElementById('button_settings'))
+
+         // UI MENU
+        this.menu_export = this.tr_menus.append('div').attr('class', 'menu_export')
+
+        // HOG
+        this.menu_export.append("div").html(this._settings_HOGs())
+        this._bind_ui_hog();
+
+        // EDGE
+        this.menu_export.append("div").html(this._settings_Edges())
+        this._bind_ui_edge();
+
+    }
+
     render() {
+
+        d3.select("svg").remove();
 
         this.contig_width = this.settings.width - this.settings.margin.left - this.settings.margin.right;
         this.contig_left_offset = this.settings.margin.left;
@@ -180,7 +336,7 @@ class SyntenyViewer {
         this._calculate_height();
 
         // Create the main svg with zoom
-        const svg = d3.create("svg")
+        this.svg = d3.create("svg")
             .attr("viewBox", [0, 0, this.settings.width, this.settings.height])
 
         /*
@@ -192,6 +348,8 @@ class SyntenyViewer {
         svg.call(zoom);
 
         */
+
+        this._build_interface();
 
         this.Tooltip = d3.select("#" + this.div_id).append("div")
             .style("opacity", 0)
@@ -206,9 +364,9 @@ class SyntenyViewer {
             .style("font-size", '16px')
 
         this.y_offset = this.settings.margin.top;
-        this.master_g = svg.append("g").attr("id", 'master_g');
+        this.master_g = this.svg.append("g").attr("id", 'master_g');
 
-        var g_header = svg.append("g").attr('width', this.settings.width)
+        var g_header = this.svg.append("g").attr('width', this.settings.width)
 
         g_header.append("text")
             .text("Synteny reconstruction for ancestral genome at " + this.settings.level)
@@ -227,22 +385,26 @@ class SyntenyViewer {
             var contig_g = this._render_contig(contig);
 
             // todo use interpolate ?
-            this.color_hog =  d3.scaleThreshold()
-                .domain([contig.mean_completeness*0.2, contig.mean_completeness*0.4, contig.mean_completeness*0.6,contig.mean_completeness*0.8])
+
+            var color_hog = this.color_remove_outlier_hog ? contig[this.color_accessor_hog].mean_no_out : contig[this.color_accessor_hog].mean
+            this.scale_color_hog =  d3.scaleThreshold()
+                .domain([color_hog*0.2, color_hog*0.4, color_hog*0.6,color_hog*0.8])
                 .range(['#F08080', '#F8AD9D', 'lightgray', 'gray', 'dimgray']);
 
-            this.color_edge =  d3.scaleThreshold()
-                .domain([contig.mean_weight*0.2, contig.mean_weight*0.4, contig.mean_weight*0.6,contig.mean_weight*0.8])
+            var color_edge = this.color_remove_outlier_edge ? contig[this.color_accessor_edge].mean_no_out : contig[this.color_accessor_edge].mean
+            this.scale_color_edge =  d3.scaleThreshold()
+                .domain([color_edge*0.2, color_edge*0.4, color_edge*0.6, color_edge*0.8])
                 .range(['#F08080', '#F8AD9D', 'lightgray', 'gray', 'dimgray']);
 
-            this.color_edge =  d3.scaleThreshold()
-                .domain([contig.mean_weight*0.2, contig.mean_weight*0.4, contig.mean_weight*0.6,contig.mean_weight*0.8])
-                .range(['#F08080', '#F8AD9D', 'lightgray', 'gray', 'dimgray']);
+            console.log(this.height_accessor_hog, contig)
+            var min_height_hog = this.height_remove_outlier_hog ? contig[this.height_accessor_hog].min_no_out : contig[this.height_accessor_hog].min
+            var max_height_hog = this.height_remove_outlier_hog ? contig[this.height_accessor_hog].max_no_out : contig[this.height_accessor_hog].max
 
-            this.height_bar = d3.scaleLinear()
-                .domain([contig.min_size_hogs_no_outliers, contig.max_size_hogs_no_outliers])
+            this.scale_height_hog = d3.scaleLinear()
+                .domain([min_height_hog, max_height_hog])
                 .range([this.settings.row.min_bar_height, this.settings.row.bar_height])
                 .clamp(true);
+
 
             for (const rowKey in contig["rows"]) {
 
@@ -268,7 +430,7 @@ class SyntenyViewer {
 
                     var end_row = row.length -1 == hogKey;
 
-                    this._render_hog_unit(hog, g_row, hogKey, edge, contig.mean_size_hogs, contig.mean_weight);
+                    this._render_hog_unit(hog, g_row, hogKey, edge, contig[this.color_accessor_edge].mean);
 
                 }
 
@@ -283,7 +445,7 @@ class SyntenyViewer {
         }
 
 
-        this.div.append(svg.node());
+        this.div.append(this.svg.node());
 
 
     }
@@ -343,9 +505,9 @@ class SyntenyViewer {
 
     }
 
-    _render_hog_unit(hog, g_container, i, edge, mean_size, mean_weight){
+    _render_hog_unit(hog, g_container, i, edge, mean_weight){
 
-        var h_bar = this.height_bar(hog['nr_members']);
+        var h_bar = this.scale_height_hog(hog['nr_members']);
 
         var _this = this
 
@@ -355,7 +517,7 @@ class SyntenyViewer {
             .attr("y", this.settings.contig.padding_top + (this.settings.row.bar_height - h_bar)/2)
             .attr("width", this.settings.row.bar_width)
             .attr("height",h_bar )
-            .attr("fill",  this.color_hog(hog[this.color_accessor_hog]))
+            .attr("fill",  this.scale_color_hog(hog[this.color_accessor_hog]))
             .style("stroke-width", 1)
             .style("stroke", "white" )
             .on("mouseover",function () {
@@ -391,7 +553,7 @@ class SyntenyViewer {
                 .attr("y1",  this.settings.contig.padding_top + this.settings.row.bar_height / 2)
                 .attr("x2",  this.settings.row.bar_width + this.board_left_offset + this.settings.row.edge_width + i * (this.settings.row.bar_width + this.settings.row.edge_width))
                 .attr("y2", this.settings.contig.padding_top + this.settings.row.bar_height / 2)
-                .style("stroke", this.color_edge(edge.weight)  )
+                .style("stroke", this.scale_color_edge(hog[this.color_accessor_edge])  )
                 .style("stroke-width", edge.weight < 0.6 * mean_weight ? 2 : 3)
                 .on("mouseover",function () {
                     _this.Tooltip.style("opacity", 1).style("display", 'block')
@@ -508,11 +670,7 @@ class SyntenyViewer {
 
             var contig_d3 = {
                 "rows": [],
-                "min_size_hogs_no_outliers" : null,
-                "max_size_hogs_no_outliers" : null,
-                "mean_completeness" : null,
-                "mean_size_hogs" : null,
-                "mean_weight" : null,
+
             }
 
 
@@ -529,24 +687,10 @@ class SyntenyViewer {
                 weight.push(c.linear_synteny[i]["edge"]["weight"]);
             }
 
-            contig_d3.min_size_hogs = Math.min(...sizes);
-            contig_d3.max_size_hogs = Math.max(...sizes);
+            contig_d3.nr_members  = this.get_stat(sizes);
+            contig_d3.completeness_score  = this.get_stat(compl);
+            contig_d3.weight  = this.get_stat(weight);
 
-            var sizes_out = this.filterOutliers(sizes);
-
-            if (sizes_out.length > 0 ) {
-                contig_d3.min_size_hogs_no_outliers = Math.min(...sizes_out);
-                contig_d3.max_size_hogs_no_outliers = Math.max(...sizes_out);
-            }
-            else{
-                contig_d3.min_size_hogs_no_outliers = contig_d3.min_size_hogs
-                contig_d3.max_size_hogs_no_outliers = contig_d3.max_size_hogs
-            }
-
-
-            contig_d3.mean_completeness = (compl.reduce((a, b) => a + b, 0) / compl.length) || 0; // this.mode(compl) //
-            contig_d3.mean_size_hogs = this.mode(sizes) // (sizes.reduce((a, b) => a + b, 0) / sizes.length) || 0;
-            contig_d3.mean_weight =  (weight.reduce((a, b) => a + b, 0) / weight.length) || 0;
 
             datum.push(contig_d3);
 
@@ -619,6 +763,38 @@ class SyntenyViewer {
 
         // Then return
         return filteredValues;
+    }
+
+    get_stat(array){
+
+        var stat = {
+            "min": null,
+            "max": null,
+            "min_no_out": null,
+            "max_no_out": null,
+            "mean": null,
+            "mean_no_out": null,
+        }
+
+        stat.min = Math.min(...array);
+        stat.max = Math.max(...array);
+
+        var array_not_out = this.filterOutliers(array);
+
+        if (array_not_out.length > 0 ) {
+            stat.min_no_out = Math.min(...array_not_out);
+            stat.max_no_out = Math.max(...array_not_out);
+        }
+        else{
+            stat.min_no_out =  stat.min;
+            stat.max_no_out = stat.max;
+        }
+
+        stat.mean =  (array.reduce((a, b) => a + b, 0) / array.length) || 0;
+        stat.mean_no_out =  (array_not_out.reduce((a, b) => a + b, 0) / array_not_out.length) || 0;
+
+        return stat
+
     }
 
 }

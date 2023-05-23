@@ -42,8 +42,6 @@
     var settings = {level: "{{ genome_name }}"};
 
 
-    //fetch('{% static 'ancestral_synteny/graph.json' %}')
-    //fetch('https://oma-stage.vital-it.ch/api/synteny/?level={{ genome_name }}&format=json')
     fetch('/api/synteny/?level={{ genome_name }}&format=json')
         .then((response) => response.json())
         .then((json) => {
