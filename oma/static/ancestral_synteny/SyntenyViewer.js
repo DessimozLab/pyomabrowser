@@ -396,7 +396,6 @@ class SyntenyViewer {
                 .domain([color_edge*0.2, color_edge*0.4, color_edge*0.6, color_edge*0.8])
                 .range(['#F08080', '#F8AD9D', 'lightgray', 'gray', 'dimgray']);
 
-            console.log(this.height_accessor_hog, contig)
             var min_height_hog = this.height_remove_outlier_hog ? contig[this.height_accessor_hog].min_no_out : contig[this.height_accessor_hog].min
             var max_height_hog = this.height_remove_outlier_hog ? contig[this.height_accessor_hog].max_no_out : contig[this.height_accessor_hog].max
 
