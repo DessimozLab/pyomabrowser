@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class FileResult(models.Model):
     data_hash = models.CharField(max_length=32, primary_key=True)
-    result_type = models.CharField(max_length=16)
+    result_type = models.CharField(max_length=32)
     state = models.CharField(max_length=8)
     result = models.FileField(blank=True)
     create_time = models.DateTimeField(auto_now=True)
