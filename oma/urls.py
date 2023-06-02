@@ -137,6 +137,7 @@ urlpatterns = [
     url(r'^landAnnotation/$', TemplateView.as_view(template_name='explore_Annotation.html'),
         name='landAnnotation'),
     url(r'^team/$', TemplateView.as_view(template_name='about_team.html'), name='team'),
+    url(r'^sab/$', TemplateView.as_view(template_name='about_sab.html'), name='sab'),
     url(r'^funding/$', TemplateView.as_view(template_name='about_funding.html'), name='funding'),
     url(r'^license/$', TemplateView.as_view(template_name='about_license.html'), name='license'),
     url(r'^APISOAP/$', TemplateView.as_view(template_name='dlSoft_SOAP.html'), name='APISOAP'),

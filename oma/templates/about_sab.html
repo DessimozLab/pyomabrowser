@@ -1,0 +1,75 @@
+{% extends  "base_template.html" %}
+{% load static %}
+
+{% block title %}OMA Scientific Advisory Board{% endblock %}
+{% block meta_description %}OMA is a method and database for the inference of orthologs among complete genomes. Since
+    2004 it has been continuesly maintained and improved. We provide browsable orthology predictions, APIs, flat file
+    downloads and a standalone version of the inference algorithm.{% endblock %}
+
+
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+            <h1>OMA Scientific Advisory Board</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+            <p>To complement advice provided by the
+                <a href="https://www.sib.swiss/about/organization">SIB scientific advisory board</a>, which
+                reviews the progress of OMA every other year, the dedicated OMA SAB plays a vital role in
+                guiding the direction and development of the Orthologous Matrix (OMA), our comprehensive
+                database and method for orthology inference, available at
+                <a href="https://omabrowser.org">https://omabrowser.org</a>. It comprises esteemed experts
+                in comparative genomics, agricultural research/biotechnology, and big database management,
+                and provide invaluable insights to ensure that OMA remains a cutting-edge resource with
+                high usability and impact for biologists.</p>
+
+            <p>The dedicated OMA SAB meets every year, with odd years being a half-day event online and
+                even years being a full day event in-person in Lausanne, Switzerland. The first meeting will
+                be scheduled for late 2023.</p>
+
+            <h2>Current members</h2>
+
+            <div class="card card-header-oma border-0">
+                <h3>Dr Claire Yanhui Hu</h3>
+                <div class="card-body">
+                    <div class="mx-2">
+                        <img alt="Claire Yanhui Hu" src="{% static "image/sab/claire_yanhui_hu.jpg" %}" class="rounded d-block w-50" style="max-width: 256px;">
+                        <div class="small">Director of Bioinformatics, Harvard Medical School</div>
+                    </div>
+                    <p>As an accomplished leader in bioinformatics of mammalian and Drosophila systems, Dr. Hu's
+                        expertise and perspective will help shape the future direction of OMA. With a focus
+                        on creating bioinformatics tools that are not only relevant but also highly usable
+                        and impactful, Dr. Hu's contributions will significantly enhance OMA's functionality
+                        and value for our users.</p>
+                </div>
+            </div>
+
+            <h2>Expanding the OMA Scientific Advisory Board</h2>
+            <p>We are actively working to assemble a diverse and accomplished group of experts to join the
+                OMA SAB. As we continue our efforts to invite professionals in agricultural research/biotechnology
+                and big database management, we look forward to introducing more esteemed members who
+                will contribute their valuable insights to the growth and success of OMA.</p>
+
+            <h3>Stay Tuned for Updates</h3>
+            <p>There will be more information about the OMA Scientific Advisory Board coming soon. As the board takes shape and additional members join, we will provide updates on their expertise and background, highlighting the diverse perspectives that will enrich the OMA project. Keep an eye on this page for announcements, introductions, and insights from our esteemed Scientific Advisory Board members.</p>
+
+            <p style="font-weight: bold;">Together with our forthcoming members, we are committed to advancing OMA, ensuring it remains a cutting-edge resource at the forefront of orthology inference.</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+
+
