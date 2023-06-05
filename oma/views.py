@@ -1949,6 +1949,8 @@ def home(request):
                'nr_groups': utils.db.get_nr_oma_groups(),
                'nr_hogs': utils.db.get_nr_toplevel_hogs(),
                'release': utils.db.get_release_name(),
+               # TODO: get latest version automatically
+               'standalone_version': "2.5.0",
                'mailinglist_enabled': 'mailman_subscribe' in settings.INSTALLED_APPS,
                }
     return render(request, template, context)
