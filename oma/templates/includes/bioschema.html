@@ -5,7 +5,7 @@
   "name": "OMA Browser - Orthology MAtrix",
   "url": "https://omabrowser.org/",
   "description": "OMA is a method and database for the inference of orthologs among complete genomes. We provide browsable orthology predictions, APIs, flat file downloads and a standalone version of the inference algorithm.",
-  "logo": "https://omabrowser.org/{% static 'image/logo-oma.svg' %}",
+  "logo": "https://omabrowser.org{% static 'image/logo-oma.svg' %}",
   "sameAs": ["https://twitter.com/OMABrowser", "https://omabrowser.blogspot.com"],
   "parentOrganization": {
     "@type": "Organization",
@@ -259,7 +259,7 @@
       }
     ]
   },
-  "softwareVersion": "{{ standalone_version }}",
+  {% if standalone_version %}"softwareVersion": "{{ standalone_version }}",{% endif %}
   "codeRepository": "https://github.com/DessimozLab/OmaStandalone",
   "operatingSystem": ["Linux", "Mac"]
  }

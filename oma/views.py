@@ -1956,10 +1956,15 @@ def home(request):
                'nr_groups': utils.db.get_nr_oma_groups(),
                'nr_hogs': utils.db.get_nr_toplevel_hogs(),
                'release': utils.db.get_release_name(),
-               # TODO: get latest version automatically
-               'standalone_version': "2.5.0",
                'mailinglist_enabled': 'mailman_subscribe' in settings.INSTALLED_APPS,
                }
+    if hasattr(settings, "PROVIDE_SCHEMA_DOT_ORG") and settings.PROVIDE_SCHEMA_DOT_ORG:
+        context['use_schema_dot_org'] = True
+        try:
+            context['standalone_version'] = misc.get_omastandalone_versions(1)[0]
+        except IndexError:
+            pass
+
     return render(request, template, context)
 
 

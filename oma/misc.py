@@ -1,3 +1,4 @@
+import functools
 import hashlib
 import os
 import tempfile
@@ -137,3 +138,16 @@ def retrieve_last_tweets(nr_tweets=3):
         # attribute errors occur if TWITTER settings are not assigned
         tweets = ['Currently no tweets found']
     return tweets
+
+@functools.lru_cache(maxsize=4)
+def get_omastandalone_versions(latest=5):
+    from pkg_resources import parse_version
+    try:
+        root = os.path.join(os.environ['DARWIN_BROWSER_SHARE'], 'standalone')
+    except KeyError:
+        logger.warning('Cannot determine root dir for downloads.')
+        root = "standalone"
+    logger.debug('params for oma standalone version search: root={}'.format(root))
+    releases = [f[4:-4] for f in os.listdir(root) if f.startswith('OMA.') and f.endswith('.tgz')]
+    rel_v = list(map(parse_version, releases))
+    return list(map(str, sorted(rel_v, reverse=True)[:latest]))
