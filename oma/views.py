@@ -1937,14 +1937,12 @@ def domains_json(request, entry_id):
 #<editor-fold desc="Static">
 @cache_control(max_age=1800)
 def home(request):
-    tweets = misc.retrieve_last_tweets(3)
-    if settings.OMA_INSTANCE_NAME == "full":
+    if settings.OMA_INSTANCE_NAME in ("full", "test", "testing"):
         template = "home.html"
     else:
         template = "home-{}.html".format(settings.OMA_INSTANCE_NAME)
 
-    context = {'tweets': tweets,
-               'nr_genomes': len(utils.id_mapper['OMA']._genome_keys),
+    context = {'nr_genomes': len(utils.id_mapper['OMA']._genome_keys),
                'nr_proteins': utils.id_resolver.max_entry_nr,
                'nr_groups': utils.db.get_nr_oma_groups(),
                'nr_hogs': utils.db.get_nr_toplevel_hogs(),

@@ -305,13 +305,9 @@ $('#inputBrowserModal').autocomplete(autocomplete_opts);
                             <!-- Insert Twitter feed -->
                             <div class="oma-twitter">
                                 {% block forth_card_twitter_content %}
-                                <ul>
-                                    {% autoescape off %}
-                                    {%for t in tweets %}
-                                    <li>{{ t }}</li>
-                                    {% endfor %}
-				                    {% endautoescape %}
-                                </ul>
+                                <a class="twitter-timeline" href="https://twitter.com/OMAbrowser" data-tweet-limit="3" data-chrome="nofooter noborders">
+                                    Tweets by @OMAbrowser
+                                </a>
                                 {% endblock forth_card_twitter_content %}
                             </div>
                             <br>
