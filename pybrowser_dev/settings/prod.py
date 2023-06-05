@@ -81,6 +81,8 @@ MATOMO_API_TRACKING = {
     'ignore_paths': ["/oma/",],
 }
 
+PROVIDE_SCHEMA_DOT_ORG = True
+
 # beat scheduler for export app
 CELERY_BEAT_SCHEDULE = {
     'task-update-omastandalone-exports': {

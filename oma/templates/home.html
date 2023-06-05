@@ -8,9 +8,11 @@
 {% block meta_hook %} <meta name="keywords" content="orthology,evolutionary gene relations,evolution,paralogy,inference"> {% endblock %}
 
 {% block js_hook %}{{ block.super }}
+{% if use_schema_dot_org %}
 <script type="application/ld+json">
     {% include "includes/bioschema.html" %}
 </script>
+{% endif %}
 {% endblock js_hook %}
 
 
