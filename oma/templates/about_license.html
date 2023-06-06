@@ -1,8 +1,8 @@
 {% extends  "base_template.html" %}
 {% load staticfiles %}
 
-{% block title %}License of service{% endblock %}
-{% block meta_description %}OMA Browser is licenced under the Creative Commons Attribution-Share Alike 2.5 license{% endblock %}
+{% block title %}Terms of Use | OMA Browswer{% endblock %}
+{% block meta_description %}OMA is licensed under the Creative Commons Attribution License CC BY 4.0.{% endblock %}
 {% block content %}
 
 
@@ -11,7 +11,7 @@
     <div class="container">
 
         <div class="jumbotron">
-            <h1>License</h1>
+            <h1>Terms of Use</h1>
 
             <div class="oma-seperator">
                 <span class="colour1"></span>
@@ -22,14 +22,58 @@
 
             <div class="">
 
+                <p>Your access to, and use of, the OMA portal and any content or data available on it, or generated through it are subject to the following terms and conditions:</p>
+
+                <h2>License</h2>
+                <p>Unless otherwise noted, OMA data is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution License CC BY 4.0</a>.
+                    <img src="{% static "image/ccby-license.png" %}" class="img-responsive margin-auto"></p>
+                <p>The software tool <a href="https://omabrowser.org/standalone">OMA Standalone</a> for user-side orthology inference is licensed under the <a href="https://www.mozilla.org/en-US/MPL/2.0/">Mozilla Public License 2.0</a>.</p>
+
+                <p>We do not authorize the use of our name, logos and other branding of OMA. OMA must not be associated with any publicity or business promotion, without our prior written approval.</p>
+
+                <h2>Acknowledgement and Citing Rule</h2>
+                <p>If you use OMA for your scientific work, please cite our latest publication <a href="http://doi.org/10.1093/nar/gkaa1007">https://doi.org/10.1093/nar/gkaa1007</a>
+
+                <h2>Exclusions</h2>
+                <p>Some underlying sequences and annotations may be subject to third-party rights. Users of the OMA data are solely responsible for establishing the nature of and complying with any such intellectual property restrictions.</p>
 
 
+                <h2>Disclaimer</h2>
+                <p>OMA browser and OMA data are provided “AS IS” and “AS AVAILABLE”. We do not guarantee their availability, correctness, accuracy, reliability, and completeness, nor the suitability for any specific purpose. We assume no liability for any indirect or consequential loss or damages provided that such damage was not caused by willful intent or act of gross negligence.</p>
 
-                   <p class="text-justify">Our work (which include the OMA browser web site, the API and the predictions of orthology) is licensed under a Creative Commons Attribution-Share Alike 2.5 License. The OMA standalone package is under the MPL 2.0 licence.</p>
-						    <img src="{% static "image/cclicense.png" %}" class="img-responsive margin-auto">
-					<p class="text-justify">The underlying sequences and annotations may be subject to third-party constraints. Users of the data are solely responsible for establishing the nature of and complying with any such intellectual property restrictions.</p>
+                <h2>Privacy</h2>
+                <p>We are committed to providing quality information and services to the scientific community.
+                    In order to do this, we need to store some information about the usage of our websites. The
+                    information we collect is used exclusively for internal review, to improve the quality of
+                    our services and hardware infrastructure, and to also justify continued support of the
+                    OMA Browser. OMA Browser is hosted in Switzerland by the
+                    <a href="https://sib.swiss">SIB Swiss Institute of Bioinformatics</a> and <a href="https://unil.ch">University of Lausanne</a>
+                    and as such is also covered by the SIB privacy policy found <a href="https://www.sib.swiss/privacy-policy">here</a>.
+                    We strive to protect the privacy of our users and will never sell, share or exchange information
+                    about our users with any third parties. However, OMA browser is operated in an academic IT
+                    environment; access to result data via URLs is not protected. All services are provided
+                    "AS-IS" without any warranty, expressed or implied.
+                </p>
 
+                <h2>Fair use policy</h2>
+                <p>There are no restrictions on the interactive use of the OMA browser by
+                    individual users. For programmatic access to the OMA browser, please refer
+                    to the documentation on how to link and programmatically access the OMA
+                    browser. If your use case is not covered in the documentation, please contact
+                    us directly. Activities that may impact the stable operation of the service
+                    such as systematic or automated queries, downloads etc. using other mechanisms
+                    than the ones provided by the OMA browser are prohibited and may result in
+                    blocking your access.
+                </p>
 
+                <h2>Contact</h2>
+                <p>If you have any questions, you can contact the OMA Team at <a href="mailto:contact@omabrowser.org">contact@omabrowser.org</a>.</p>
+
+                <h2>Governing Law/Jurisdiction</h2>
+                <p>These terms of use and the use of OMA are governed by Swiss substantive law, without reference to
+                    its conflicts of laws provisions. The competent courts in Lausanne, Switzerland, have
+                    exclusive jurisdiction.
+                </p>
 
 
             </div>
