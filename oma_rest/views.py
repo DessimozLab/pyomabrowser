@@ -673,6 +673,46 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializers.HOGsSimilarProfileSerializer(data, context={'request': request})
         return Response(serializer.data)
 
+    @action(detail=True)
+    def gene_ontology(self, request, hog_id=None, format=None):
+        """Gene ontology annotations for an ancestral gene (i.e. HOG).
+
+        If a level is provided, the endpoint returns annotations with respect
+        to this level. Note that if the level is a more ancient taxonomic
+        level than the deepest level for the specified hog_id, the endpoint
+        returns the annotations of that more ancient level (but adjusting the
+        hog_id in the result object).
+        The special level "root" will always return the members of the root
+        HOG together with its deepest level.
+
+        ---
+        parameters:
+
+          - name: hog_id
+            description: a unique identifier for a hog_group - either
+                         its hog id starting with "HOG:" or one of its
+                         member proteins in which case the specific
+                         HOG ID of that protein is used.
+            example: HOG:0001221.1a,  P12345
+
+          - name: level
+            description: taxonomic level of reference for a HOG -
+                         default is its deepest level for a given
+                         HOG ID.
+            location: query
+            example: "Mammalia"
+        """
+        if hog_id[:4] != "HOG:":
+            hog_id = self._hog_id_from_entry(hog_id)
+        fam_nr = self._validate_hogid(hog_id)
+        level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
+
+        data = db.Database.ancestral_gene_ontology_annotations(level, hog_id)
+        #TODO: fix with better GOA model that allows for both extend and ancestral annotations
+        hack_models = [utils.GeneOntologyAnnotation(x) for x in data]
+        serializer = serializers.AncestralGeneOntologySerializer(instance=hack_models, many=True)
+        return Response(serializer.data)
+
 
 class AncestralSyntenyViewSet(ViewSet):
     schema = DocStringSchemaExtractor()

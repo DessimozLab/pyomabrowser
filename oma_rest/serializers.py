@@ -212,13 +212,15 @@ class XRefSerializer(ReadOnlySerializer):
     genome = GenomeInfoSerializer(required=False)
 
 
-class GeneOntologySerializer(ReadOnlySerializer):
-    entry_nr = serializers.IntegerField()
+
+class BaseGeneOntologySerializer(ReadOnlySerializer):
+    id = serializers.SerializerMethodField(method_name=None)
     GO_term = serializers.SerializerMethodField(method_name=None)
     name = serializers.SerializerMethodField(method_name=None)
     aspect = serializers.SerializerMethodField(method_name=None)
-    evidence = serializers.CharField()
-    reference = serializers.CharField()
+
+    def get_id(self, obj):
+        return str(obj.object_id)
 
     def get_GO_term(self, obj):
         return str(obj.term)
@@ -228,6 +230,18 @@ class GeneOntologySerializer(ReadOnlySerializer):
 
     def get_aspect(self, obj):
         return obj.aspect
+
+class GeneOntologySerializer(BaseGeneOntologySerializer):
+    entry_nr = serializers.IntegerField()
+    evidence = serializers.CharField()
+    reference = serializers.CharField()
+
+class AncestralGeneOntologySerializer(BaseGeneOntologySerializer):
+    score = serializers.IntegerField()
+    raw_score = serializers.FloatField()
+
+    def get_id(self, obj):
+        return str(obj.anno['HogID'].decode())
 
 
 class GroupListSerializer(ReadOnlySerializer):
