@@ -237,11 +237,17 @@ class GeneOntologySerializer(BaseGeneOntologySerializer):
     reference = serializers.CharField()
 
 class AncestralGeneOntologySerializer(BaseGeneOntologySerializer):
-    score = serializers.IntegerField()
-    raw_score = serializers.FloatField()
+    stars = serializers.SerializerMethodField(method_name=None)
+    score = serializers.SerializerMethodField(method_name=None)
 
     def get_id(self, obj):
         return str(obj.anno['HogID'].decode())
+
+    def get_score(self, obj):
+        return float(obj.anno['RawScore'])
+
+    def get_stars(self, obj):
+        return int(obj.anno['Score'])
 
 
 class GroupListSerializer(ReadOnlySerializer):
