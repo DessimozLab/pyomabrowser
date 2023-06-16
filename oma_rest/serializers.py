@@ -237,7 +237,7 @@ class GeneOntologySerializer(BaseGeneOntologySerializer):
     reference = serializers.CharField()
 
 class AncestralGeneOntologySerializer(BaseGeneOntologySerializer):
-    stars = serializers.SerializerMethodField(method_name=None)
+    #stars = serializers.SerializerMethodField(method_name=None)
     score = serializers.SerializerMethodField(method_name=None)
 
     def get_id(self, obj):
@@ -246,8 +246,8 @@ class AncestralGeneOntologySerializer(BaseGeneOntologySerializer):
     def get_score(self, obj):
         return float(obj.anno['RawScore'])
 
-    def get_stars(self, obj):
-        return int(obj.anno['Score'])
+    #def get_stars(self, obj):
+    #    return int(obj.anno['Score'])
 
 
 class GroupListSerializer(ReadOnlySerializer):
