@@ -717,7 +717,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         fam_nr = self._validate_hogid(hog_id)
         level, hog_id = self._get_level_and_get_roothog_if_root_as_level(hog_id)
         hog = self._get_best_matching_hog_or_raise(hog_id, level)
-        data = utils.db.get_ancestral_gene_ontology_annotations(hog['Level'], hog['hog_id'])
+        data = utils.db.get_ancestral_gene_ontology_annotations(hog['Level'], hog['ID'])
         #TODO: fix with better GOA model that allows for both extend and ancestral annotations
         hack_models = [utils.GeneOntologyAnnotation(x) for x in data]
         serializer = serializers.AncestralGeneOntologySerializer(instance=hack_models, many=True)
