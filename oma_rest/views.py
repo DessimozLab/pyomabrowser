@@ -400,7 +400,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         except ValueError as e:
             raise NotFound(e)
 
-    def _get_level_and_adjust_hogid_if_needed(self, hog_id):
+    def _get_level_and_get_roothog_if_root_as_level(self, hog_id):
         level = self.request.query_params.get('level', None)
         if level is not None:
             if level.lower() == "root":
@@ -422,6 +422,16 @@ class HOGViewSet(PaginationMixin, ViewSet):
             hog_id = hog_id[0:k + 1]
         return hog_id
 
+    def _get_best_matching_hog_or_raise(self, hog_id, level):
+        if level is None:
+            hog = utils.db.get_hog(hog_id)
+        else:
+            hogs = list(utils.db.iter_hogs_at_level(hog_id=hog_id, level=level))
+            if len(hogs) != 1:
+                raise ValueError("hog_id / level combination does not identify a unique HOG.")
+            hog = hogs[0]
+        return hog
+
     def list(self, request, format=None):
         """List of all the HOGs identified by OMA.
         ---
@@ -439,7 +449,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
                          that occured between the two points in time.
             location: query
         """
-        level, _ = self._get_level_and_adjust_hogid_if_needed(utils.db.format_hogid(1))
+        level, _ = self._get_level_and_get_roothog_if_root_as_level(utils.db.format_hogid(1))
         if level is not None:
             compare_level = self.request.query_params.get('compare_with', None)
             if compare_level is not None:
@@ -502,7 +512,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
             # hog_id == member
             hog_id = self._hog_id_from_entry(hog_id)
         fam_nr = self._validate_hogid(hog_id)
-        level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
+        level, hog_id = self._get_level_and_get_roothog_if_root_as_level(hog_id)
         if level is None:
             hog_lev_iter = utils.db.get_hdf5_handle().get_node("/HogLevel").where('(ID==hog_id)')
             lev2score = {row['Level'].decode(): row['CompletenessScore'] for row in hog_lev_iter}
@@ -575,7 +585,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         parameters:
 
           - name: hog_id
-            description: an unique identifier for a hog_group - either
+            description: a unique identifier for a hog_group - either
                          its hog id starting with "HOG:" or one of its
                          member proteins in which case the specific
                          HOG ID of that protein is used.
@@ -591,7 +601,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         if hog_id[:4] != "HOG:":
             hog_id = self._hog_id_from_entry(hog_id)
         fam_nr = self._validate_hogid(hog_id)
-        level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
+        level, hog_id = self._get_level_and_get_roothog_if_root_as_level(hog_id)
         if level is not None:
             members = [utils.ProteinEntry(entry) for entry in utils.db.hog_members_from_hog_id(hog_id, level)]
             hog_id = self._identify_lca_hog_id_from_proteins(members)
@@ -705,9 +715,9 @@ class HOGViewSet(PaginationMixin, ViewSet):
         if hog_id[:4] != "HOG:":
             hog_id = self._hog_id_from_entry(hog_id)
         fam_nr = self._validate_hogid(hog_id)
-        level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
-
-        data = utils.db.get_ancestral_gene_ontology_annotations(level, hog_id)
+        level, hog_id = self._get_level_and_get_roothog_if_root_as_level(hog_id)
+        hog = self._get_best_matching_hog_or_raise(hog_id, level)
+        data = utils.db.get_ancestral_gene_ontology_annotations(hog['Level'], hog['hog_id'])
         #TODO: fix with better GOA model that allows for both extend and ancestral annotations
         hack_models = [utils.GeneOntologyAnnotation(x) for x in data]
         serializer = serializers.AncestralGeneOntologySerializer(instance=hack_models, many=True)
