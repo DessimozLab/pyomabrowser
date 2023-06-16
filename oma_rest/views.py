@@ -407,7 +407,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
                 level = None
                 hog_id = utils.db.format_hogid(utils.db.parse_hog_id(hog_id))
             elif not self._check_level_is_valid(level):
-                raise ParseError('Invalid or unknown level parameter for this HOG')
+                raise NotFound('Invalid or unknown level parameter for this HOG')
         return level, hog_id
 
     def _check_level_is_valid(self, level):
@@ -428,7 +428,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         else:
             hogs = list(utils.db.iter_hogs_at_level(hog_id=hog_id, level=level))
             if len(hogs) != 1:
-                raise ValueError("hog_id / level combination does not identify a unique HOG.")
+                raise NotFound("hog_id / level combination does not identify a unique HOG.")
             hog = hogs[0]
         return hog
 
