@@ -1631,6 +1631,17 @@ class HOGviewer(HOGBase, TemplateView):
             context['isSingleton'] = True
         return context
 
+class HOGgo(HOGBase, TemplateView):
+    template_name = "hog_go.html"
+
+    def get_context_data(self, hog_id, **kwargs):
+        context = super(HOGgo, self).get_context_data(hog_id, **kwargs)
+        hog = context['hog']
+        context.update({'tab': 'go',
+                        'api_url': '/api/hog/{}/gene_ontology/?level={}'.format(hog.hog_id, hog.level),
+                        'lineage_link_name': 'hog_go',
+                        })
+        return context
 
 class HOGtable(HOGBase, TemplateView):
     template_name = "hog_table.html"

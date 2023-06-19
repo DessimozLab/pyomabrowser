@@ -519,14 +519,20 @@ class SyntenyViewer {
             .attr("fill",  this.scale_color_hog(hog[this.color_accessor_hog]))
             .style("stroke-width", 1)
             .style("stroke", "white" )
-            .on("mouseover",function () {
-                _this.Tooltip.style("opacity", 1).style("display", 'block')
-            })
-            .on("mousemove", function (e)  {
-                _this.Tooltip
-                    .html(`<b>ID:</b> ${hog.id} <br> <b>Completeness:</b> ${hog.completeness_score.toFixed(3)} <br>  <b># of members:</b> ${hog.nr_members} `)
-                    .style("left", e.pageX + 12 + "px")
-                    .style("top", e.pageY + 12  + "px")
+            .on("mouseover", function(e){
+                var level_api = _this.settings.level ? '?level=' + _this.settings.level : ''
+
+                $.getJSON("/api/hog/"+ hog.id +"/" + level_api, function(data){
+                    _this.Tooltip.style("opacity", 1).style("display", 'block')
+                        .html(`<b>ID:</b> ${hog.id}  <br> 
+                            <b>Description:</b>  ${data[0].description} <br> 
+                            <b>Completeness:</b> ${hog.completeness_score.toFixed(3)} <br>  
+                            <b># of members:</b> ${hog.nr_members} `)
+                        .style("left", e.pageX + 12 + "px")
+                        .style("top", e.pageY + 12  + "px")
+
+                })
+
             })
             .on("mouseleave", function () {
                 _this.Tooltip.style("opacity", 0).style("display", 'none')

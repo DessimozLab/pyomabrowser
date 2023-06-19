@@ -61,7 +61,7 @@
   <div class="ml-auto oma-details-title-buttons " style="margin-right: 20px">
 
       <span data-toggle="tooltip" data-placement="bottom" title="Ratio of species included in this HOG versus species present in HOG taxonomic range">
-          <b>Completeness score:</b> {{ hog.completeness_score}}  <i class="fas fa-info-circle" ></i> </span>
+          <b>Completeness score:</b> {{ hog.completeness_score|floatformat:2 }}  <i class="fas fa-info-circle" ></i> </span>
 
         </div>
 

@@ -52,6 +52,10 @@ urlpatterns = [
     url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
 
+
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/go/$', views.HOGgo.as_view(), name='hog_go'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/go/$', views.HOGgo.as_view(), name='hog_go'),
+
     url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/msa/$', views.HOGsMSA.as_view(), name='hog_msa'),
