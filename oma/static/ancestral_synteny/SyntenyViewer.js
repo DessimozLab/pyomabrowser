@@ -523,13 +523,36 @@ class SyntenyViewer {
                 var level_api = _this.settings.level ? '?level=' + _this.settings.level : ''
 
                 $.getJSON("/api/hog/"+ hog.id +"/" + level_api, function(data){
+
+
                     _this.Tooltip.style("opacity", 1).style("display", 'block')
                         .html(`<b>ID:</b> ${hog.id}  <br> 
                             <b>Description:</b>  ${data[0].description} <br> 
                             <b>Completeness:</b> ${hog.completeness_score.toFixed(3)} <br>  
-                            <b># of members:</b> ${hog.nr_members} `)
+                            <b># of members:</b> ${hog.nr_members} <br>
+                             <b>GO</b> loading...  `)
                         .style("left", e.pageX + 12 + "px")
                         .style("top", e.pageY + 12  + "px")
+
+
+                    $.getJSON( "/api/hog/"+ hog.id +"/gene_ontology/" + level_api, function(data_go){
+
+                        var content = `<b>ID:</b> ${hog.id}  <br> 
+                            <b>Description:</b>  ${data[0].description} <br> 
+                            <b>Completeness:</b> ${hog.completeness_score.toFixed(3)} <br>  
+                            <b># of members:</b> ${hog.nr_members} <br> <hr style="margin-top: 0.3em; margin-bottom: 0.1em"> 
+                            <b>GO annotation</b>  <hr style="margin-top: 0.1em; margin-bottom: 0.2em">   `
+
+                        for (const contentKey in data_go) {
+
+                            var go = data_go[contentKey]
+
+                            content += `<b>${go.GO_term}</b> ${go.name}  <br>  `
+                        }
+
+                        _this.Tooltip.html(content)
+
+                    })
 
                 })
 
