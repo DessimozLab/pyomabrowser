@@ -8,6 +8,10 @@ import numpy
 import pyoma.browser.exceptions
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from rest_framework import status
+
+from .tasks import go_enrichment
+
 try:
     from Bio.Alphabet import IUPAC
 except ImportError:
@@ -16,9 +20,11 @@ import collections
 
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
+from rest_framework.generics import CreateAPIView, RetrieveAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError, ValidationError
 from rest_framework.settings import api_settings
+from rest_framework import status
 from django.http import HttpResponse
 from distutils.util import strtobool
 
@@ -1386,4 +1392,125 @@ class SharedAncestrySummaryAPIView(APIView):
             genes1.add(pw['EntryNr1'])
             genes2.add(pw['EntryNr2'])
         return len(genes1), len(genes2)
+
+class CreateAsyncJobAPIView(CreateAPIView):
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED, headers=headers)
+
+    def get_success_headers(self, data):
+        try:
+            return {'Location': str(data['status_url'])}
+        except (TypeError, KeyError):
+            return {}
+
+
+class StatusAsyncJobAPIView(RetrieveAPIView):
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        header = {}
+        if instance.state == "DONE":
+            header = {"Location": serializer.data['result']}
+            stat = status.HTTP_303_SEE_OTHER
+        elif instance.state == "ERROR":
+            stat = status.HTTP_400_BAD_REQUEST
+        elif instance.state in ("PENDING", "RUNNING"):
+            stat = status.HTTP_200_OK
+            header = {"Retry-After": str(20)}
+        return Response(serializer.data, status=stat, headers=header)
+
+class CreateEnrichmentAnalysisView(CreateAsyncJobAPIView):
+    serializer_class = serializers.EnrichmentAnalysisInputSerializer
+    schema = DocStringSchemaExtractor()
+
+    """
+    Submit a Gene Ontology enrichment analysis.
+    
+    This endpoint accepts requests to perform gene ontology enrichment analysis
+    on extant and ancestral gene sets. The jobs will be executed asynchronously.
+    The reply of the server will contain a 202 reply with a Location header that 
+    points to a url where the status of the job can be checked.
+    
+    The endpoint accepts json encoded data in a POST request. The data must contain
+    a `foreground` set of extant genes (all from the same species) for an extant genome 
+    enrichment analysis, or a set of HOGs that exist in an given ancestral taxonomy 
+    level. You must indicated whether an ancestral or an extant analysis should be 
+    performed by setting the `type` parameter to either `ancestral` or `extant`. 
+    In addition, the endpoint accepts an optional `name` parameter.
+    
+    ---
+    parameters:
+       - name: type
+         description: Indicate type of analysis. either `ancestral` or `extant`.
+         
+       - name: foreground
+         description: set of foreground genes / hogs. The background will 
+                      automatically be set as the set of all existing HOGs at the
+                      given taxonomic level for the ancestral enrichment analysis,
+                      or all the main isoform protein sequences of the extant 
+                      species.
+         type: list of gene/hog IDs
+         
+       - name: taxlevel
+         description: Taxonomic level at which the ancestral enrichment analysis 
+                      should be performed. If extant analysis, this parameter 
+                      can be ignored.
+         
+       - name: name
+         description: An optional name for the analysis. 
+          
+    """
+    def perform_create(self, serializer):
+        """
+        Submit a Gene Ontology enrichment analysis.
+
+        This endpoint accepts requests to perform gene ontology enrichment analysis
+        on extant and ancestral gene sets. The jobs will be executed asynchronously.
+        The reply of the server will contain a 202 reply with a Location header that
+        points to a url where the status of the job can be checked.
+
+        The endpoint accepts json encoded data in a POST request. The data must contain
+        a `foreground` set of extant genes (all from the same species) for an extant genome
+        enrichment analysis, or a set of HOGs that exist in an given ancestral taxonomy
+        level. You must indicated whether an ancestral or an extant analysis should be
+        performed by setting the `type` parameter to either `ancestral` or `extant`.
+        In addition, the endpoint accepts an optional `name` parameter.
+
+        ---
+        parameters:
+           - name: type
+             description: Indicate type of analysis. either `ancestral` or `extant`.
+
+           - name: foreground
+             description: set of foreground genes / hogs. The background will
+                          automatically be set as the set of all existing HOGs at the
+                          given taxonomic level for the ancestral enrichment analysis,
+                          or all the main isoform protein sequences of the extant
+                          species.
+             type: list of gene/hog IDs
+
+           - name: taxlevel
+             description: Taxonomic level at which the ancestral enrichment analysis
+                          should be performed. If extant analysis, this parameter
+                          can be ignored.
+
+           - name: name
+             description: An optional name for the analysis.
+
+        """
+        obj = serializer.save(state="PENDING")
+        go_enrichment.delay(obj.id)
+        return obj
+
+
+
+class StatusEnrichmentAnalysisView(StatusAsyncJobAPIView):
+    queryset = rest_models.EnrichmentAnalysisModel.objects.all()
+    lookup_field = 'id'
+    serializer_class = serializers.EnrichmentAnalysisStatusSerializer
+
 
