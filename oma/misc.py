@@ -148,6 +148,9 @@ def get_omastandalone_versions(latest=5):
         logger.warning('Cannot determine root dir for downloads.')
         root = "standalone"
     logger.debug('params for oma standalone version search: root={}'.format(root))
-    releases = [f[4:-4] for f in os.listdir(root) if f.startswith('OMA.') and f.endswith('.tgz')]
+    try:
+        releases = [f[4:-4] for f in os.listdir(root) if f.startswith('OMA.') and f.endswith('.tgz')]
+    except IOError:
+        return []
     rel_v = list(map(parse_version, releases))
     return list(map(str, sorted(rel_v, reverse=True)[:latest]))
