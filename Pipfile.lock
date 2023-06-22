@@ -877,7 +877,7 @@
         },
         "pyoma": {
             "git": "ssh://gitolite@lab.dessimoz.org:2222/pyoma",
-            "ref": "fbb0a979c0ad09d0c93a918e806081e6e32cbfd0"
+            "ref": "427b2eeec44bcdcb99e671198c13573cc2292fdb"
         },
         "pyopa": {
             "hashes": [
