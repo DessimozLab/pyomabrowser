@@ -1721,6 +1721,7 @@ class HOGSynteny(HOGBase, TemplateView):
                 neigh.append({'hog': e[0], 'weight': str(e[2]), 'description': h.keyword})
         logger.debug("data ready to ship ")
         context.update({'tab': 'synteny',
+                        'hog_id': hog_id,
                         'lineage_link_name': 'hog_synteny',
                         'synteny': ancestral_synteny,
                         'neighbor': neigh})
