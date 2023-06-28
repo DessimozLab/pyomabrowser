@@ -16,6 +16,8 @@ class FastMappingJobs(models.Model):
     MAP_METHODS = [
         (CLOSEST_SEQ, "Closest sequence"),
         (CLOSEST_SEQ_IN_SPECIES, "Closest sequence in target species"),
+        (CLOSEST_HOG, "Closest Hierarchical Orthologous Group (HOG)"),
+        (CLOSEST_HOG_AT_LEVEL, "Closest HOG at a target taxonomic level"),
     ]
 
     # Model fields
@@ -25,7 +27,7 @@ class FastMappingJobs(models.Model):
     map_method = models.CharField(
         max_length=2,
         choices=MAP_METHODS,
-        default=CLOSEST_SEQ
+        default=CLOSEST_HOG
     )
     result = models.FileField(blank=True)
     create_time = models.DateTimeField(auto_now=True)
