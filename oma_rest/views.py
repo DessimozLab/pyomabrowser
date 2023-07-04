@@ -730,16 +730,17 @@ class HOGViewSet(PaginationMixin, ViewSet):
         return Response(serializer.data)
 
 
-class AncestralSyntenyViewSet(ViewSet):
+class SyntenyViewSet(ViewSet):
     schema = DocStringSchemaExtractor()
     lookup_field = 'hog_id'
     lookup_value_regex = r'[^/]+'
 
     def list(self, request, format=None):
-        """List of all the ancestral "contigs" of an ancestral genome.
+        """List of all the ancestral / extant "contigs" of an ancestral / extant genome.
 
-        Each contig will contain a graph with all the ancestral genes (HOGs)
-        and their neighbors as edges (order of ancestral genes on "scaffolds")
+        Each contig will contain a graph with all the ancestral genes (HOGs) or
+        the extant genes and their neighbors as edges (order of ancestral/extant genes
+        on "scaffolds/chromosomes")
 
         The return value is a list of graph objects that consist of 'nodes' and
         'links' attributes.
@@ -751,13 +752,16 @@ class AncestralSyntenyViewSet(ViewSet):
                        {"weight":15,"source":"HOG:C0594134.1a","target":"HOG:C0600830.1c.3b"}]
             }
 
+        For extant genes, the gene IDs are the OMA IDs (e.g. `HUMAN00007`)
+
         ---
         parameters:
 
           - name: level
             description: The taxonomic level at which the ancestral synteny should
                          be retrieved. The level can be specified with its numeric
-                         taxid or the scientific name.
+                         taxid or the scientific name. For extant genomes, also the
+                         UniProt mnemonic species code can be used.
             location: query
             required: True
 
@@ -784,11 +788,15 @@ class AncestralSyntenyViewSet(ViewSet):
         evidence = self.request.query_params.get('evidence', "linearized")
         break_circular_contigs = strtobool(self.request.query_params.get('break_circular_contigs', 'True'))
         try:
-            graph = utils.db.get_syntenic_hogs(level=level, evidence=evidence)
-        except db.DBConsistencyError:
-            raise NotFound(f"Ancestral Synteny for {level} does not exist")
-        except ValueError as e:
-            raise ValidationError(e)
+            extant_genome = utils.db.id_mapper['OMA'].identify_genome(level)
+            graph = utils.db.get_extant_synteny_graph(extant_genome['UniProtSpeciesCode'])
+        except db.UnknownSpecies:
+            try:
+                graph = utils.db.get_syntenic_hogs(level=level, evidence=evidence)
+            except db.DBConsistencyError:
+                raise NotFound(f"Ancestral Synteny for {level} does not exist")
+            except ValueError as e:
+                raise ValidationError(e)
 
         contigs = []
         for cc in sorted(nx.connected_components(graph), key=len, reverse=True):
@@ -811,10 +819,12 @@ class AncestralSyntenyViewSet(ViewSet):
         ---
         parameters:
 
-          - name: hog_id
+          - name: hog_id / protein_id
             description: a unique identifier for a hog_group starting
-                         with "HOG:"
-            example: HOG:0450897
+                         with "HOG:" for ancestral synteny levels, or
+                         a unique protein ID (e.g. YEAST00012) for an
+                         extant species synteny query.
+            example: HOG:0450897, HUMAN01330
 
           - name: level
             description: the taxonomic level at which the synteny graph
@@ -840,18 +850,38 @@ class AncestralSyntenyViewSet(ViewSet):
 
         """
         level = self.request.query_params.get('level', None)
-        try:
-            hog = utils.db.get_hog(hog_id=hog_id, level=level)
-        except ValueError:
-            raise NotFound(f"Invalid hog_id {hog_id}")
         evidence = self.request.query_params.get('evidence', "any")
         size = int(self.request.query_params.get('context', 2))
-        try:
-            graph = utils.db.get_syntenic_hogs(hog_id=hog['ID'], level=hog['Level'].decode(), evidence=evidence, steps=size)
-        except db.DBConsistencyError:
-            raise NotFound(f"Ancestral Synteny for {hog['Level']} around {hog_id} not found.")
-        except ValueError as e:
-            raise ValidationError(e)
+
+        graph = None
+        if not hog_id.startswith('HOG:') and level is None:
+            try:
+                enr = utils.db.id_resolver.resolve(hog_id)
+                genome = utils.db.id_mapper['OMA'].genome_of_entry_nr(enr)
+                graph = utils.db.get_extant_synteny_graph(genome['UniProtSpeciesCode'], center_entry=enr, window=size)
+            except db.InvalidId:
+                raise NotFound(f"Not a valid extant protein: {hog_id}")
+        elif level is not None:
+            try:
+                extant_genome = utils.db.id_mapper['OMA'].identify_genome(level)
+                graph = utils.db.get_extant_synteny_graph(extant_genome['UniProtSpeciesCode'], center_entry=hog_id, window=size)
+            except db.UnknownSpecies:
+                pass
+            except db.InvalidId:
+                raise NotFound(f"Not a valid extant protein {hog_id} for {level}.")
+        # if graph is assigned, we're dealing with an extant species, otherwise, lets check
+        # the ancestral levels
+        if graph is None:
+            try:
+                hog = utils.db.get_hog(hog_id=hog_id, level=level)
+            except ValueError:
+                raise NotFound(f"Invalid hog_id {hog_id}")
+            try:
+                graph = utils.db.get_syntenic_hogs(hog_id=hog['ID'], level=hog['Level'].decode(), evidence=evidence, steps=size)
+            except db.DBConsistencyError:
+                raise NotFound(f"Ancestral Synteny for {hog['Level']} around {hog_id} not found.")
+            except ValueError as e:
+                raise ValidationError(e)
         graph_as_dict = nx.node_link_data(graph)
         for k in ('directed', 'multigraph', 'graph'):
             graph_as_dict.pop(k, None)
