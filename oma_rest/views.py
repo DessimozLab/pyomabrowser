@@ -789,7 +789,7 @@ class SyntenyViewSet(ViewSet):
         break_circular_contigs = strtobool(self.request.query_params.get('break_circular_contigs', 'True'))
         try:
             extant_genome = utils.db.id_mapper['OMA'].identify_genome(level)
-            graph = utils.db.get_extant_synteny_graph(extant_genome['UniProtSpeciesCode'])
+            graph = utils.db.get_extant_synteny_graph(extant_genome['UniProtSpeciesCode'].decode())
         except db.UnknownSpecies:
             try:
                 graph = utils.db.get_syntenic_hogs(level=level, evidence=evidence)
@@ -858,13 +858,13 @@ class SyntenyViewSet(ViewSet):
             try:
                 enr = utils.db.id_resolver.resolve(hog_id)
                 genome = utils.db.id_mapper['OMA'].genome_of_entry_nr(enr)
-                graph = utils.db.get_extant_synteny_graph(genome['UniProtSpeciesCode'], center_entry=enr, window=size)
+                graph = utils.db.get_extant_synteny_graph(genome['UniProtSpeciesCode'].decode(), center_entry=enr, window=size)
             except db.InvalidId:
                 raise NotFound(f"Not a valid extant protein: {hog_id}")
         elif level is not None:
             try:
                 extant_genome = utils.db.id_mapper['OMA'].identify_genome(level)
-                graph = utils.db.get_extant_synteny_graph(extant_genome['UniProtSpeciesCode'], center_entry=hog_id, window=size)
+                graph = utils.db.get_extant_synteny_graph(extant_genome['UniProtSpeciesCode'].decode(), center_entry=hog_id, window=size)
             except db.UnknownSpecies:
                 pass
             except db.InvalidId:
