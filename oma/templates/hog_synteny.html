@@ -3,28 +3,11 @@
 
 {% block title %}Ancestral synteny for {{ fam.id }}{% endblock %}
 
-
 {% block contentTab %}
 
-
-
-
-<script src="https://d3js.org/d3.v4.min.js"></script>
-<link href="https://fonts.googleapis.com/css?family=Architects+Daughter" rel="stylesheet">
-
-<!-- bootstrap-table -->
-<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
-<script src="{% static "js/bootstrap-table.min.js" %}"></script>
-
-<link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
-<script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
-<script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
-<script src='{% static "js/tableExport.min.js" %}'></script>
-
-
-{{ synteny|json_script:"synteny-data" }}
-{{ neighbor|json_script:"neighbor-data" }}
-
+    <script src="{% static 'local_synteny_viewer/local_synteny.js' %}" charset="UTF-8"></script>
+    <script src="{% static 'local_synteny_viewer/orthoxml-parser.js' %}" charset="UTF-8"></script>
+    <script src="{% static 'js/d3_7_8.js' %}" charset="UTF-8"></script>
 
 <div class="container-fluid">
 
@@ -32,243 +15,27 @@
 
     <div class="row">
 
-        <div class="col" style=" height:calc(100vh - 285px); width:100px">
-
-            <svg id="synteny_svg" style="height:100%; width:100%" ></svg>
-
-
+        <div class="col" id="synteny_div"  style=" height:calc(100vh - 285px); width:100px">
 
         </div>
 
 
-        <div class="col" style=" height:calc(100vh - 285px); width:100px; overflow-y: scroll">
 
 
-            <table style="overflow-y: scroll" class="table table-hover" id="grpTable"
-                   data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
-               data-mobile-responsive="true" data-check-on-init="true"
-               data-undefined-text=""
-               >
-
-            <thead>
-
-
-             <tr>
-
-                 <th  data-field="hog" data-sortable="true" data-filter-control="select" data-formatter="format_hog_synteny">HOG id</th>
-
-
-                 <th  data-field="weight" data-sortable="true" data-filter-control="select"
-                    >Weight</th>
-
-                 <th  data-field="description" data-sortable="true" data-filter-control="select"
-                    >description</th>
-
-
-
- </tr>
-
-
-
-
-            </thead>
-
-
-                <script>
-                    function  format_hog_synteny(value, row) {
-
-                         var u = "{% url 'hog_synteny' 12345 67890  %}".replace(/12345/, value).replace(/67890/, "{{level}}");
-                         return '<a href="' + u + '" >' +  value + ' </a>'
-
-                    }
-
-
-                    var data = JSON.parse(document.getElementById('neighbor-data').textContent);
-
-
-                      var tab = $("#grpTable");
-        tab.bootstrapTable({
-            data: data,
-            reorderableColumns: true,
-            clickToSelect: false,
-            showMultiSort: true,
-            showLoading: true,
-
-        });
-
-
-                </script>
-
-        </table>
-
-
-
-
-
-        </div>
 
     </div>
 
 
 </div>
 
-
-
 <script>
 
-function run_synteny_graph(div_id, evidence, context){
+console.log('{{ hog.hog_id }}  {{ level }}')
 
-    var svg = d3.select("svg"),
-    width = $(div_id).width()
-    height = $(div_id).height()
-
-    svg.selectAll("*").remove();
-
-    var menu_export;
-
-    var simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id(function(d) { return d.id; }))
-    .force("charge", d3.forceManyBody().strength(-700))
-    .force("center", d3.forceCenter(width / 2, height / 2));
-
-    var url = '/api/synteny/{{ hog_id }}/?evidence='+evidence+'&context='+context+'&level={{level}}'
-
-    console.log(url);
-
-     $.getJSON( url , function(graph){
-
-
-         var max = Math.max.apply(Math, graph.links.map(function(o) { return o.weight; }))
-         var scale = d3.scaleLinear().domain([0, max]).range([0, 10]);
-
-         //add encompassing group for the zoom
-            var g = svg.append("g").attr("class", "everything");
-
-            var link = g.append("g")
-                .style("stroke", "#aaa")
-                .selectAll("line")
-                .data(graph.links)
-                .enter()
-                .append("g")
-                .attr("class", "link")
-                .append("line")
-                .text(function(d) { return d.weight })
-                .attr("stroke-width", function(d) { return scale(d.weight)})
-
-
-              var node = g.append("g")
-                        .attr("class", "nodes")
-              .selectAll("circle")
-                        .data(graph.nodes)
-              .enter().append("a")
-                .attr("xlink:href", function(d) {return  "{% url 'hog_synteny' 12345 67890  %}".replace(/12345/, d.id).replace(/67890/, "{{level}}")     })
-                  .append("circle")
-                      .attr("r", function(d){  return 6})
-                      .call(d3.drag()
-                          .on("start", dragstarted)
-                          .on("drag", dragged)
-                          .on("end", dragended));
-
-  var label = g.append("g")
-      .attr("class", "labels")
-      .selectAll("text")
-      .data(graph.nodes)
-      .enter().append("text")
-        .attr("class", "label")
-        .text(function(d){  return d.id});
-
-
-      var labelLine = g.selectAll(".link")
-        .append("text")
-        .attr("class", "link-label")
-        .attr("fill", "#000")
-        .style("font", "bold 12px Arial")
-        .attr("dy", ".35em")
-        .attr("dx", "4px")
-        .attr("text-anchor", "middle")
-          .attr("stroke-width", "0px")
-        .text(function(d) {return d.weight} );
-
-    simulation.nodes(graph.nodes).on("tick", ticked);
-
-    simulation.force("link").links(graph.links);
-
-      //add zoom capabilities
-var zoom_handler = d3.zoom()
-    .on("zoom", zoom_actions);
-
-zoom_handler(svg);
-
-//Zoom functions
-function zoom_actions(){
-    g.attr("transform", d3.event.transform)
-}
-
-function ticked() {
-      link.attr("x1", function (d) {
-              return d.source.x;
-          })
-          .attr("y1", function (d) {
-              return d.source.y;
-          })
-          .attr("x2", function (d) {
-              return d.target.x;
-          })
-          .attr("y2", function (d) {
-              return d.target.y;
-          });
-
-
-
-       labelLine.attr("x", function(d) {
-          return (d.source.x + d.target.x)/2; })
-      .attr("y", function(d) {
-          return (d.source.y + d.target.y)/2; });
-
-      node.attr("r",  function(d){  return d.id === "{{hog_id}}" ?   20 :  10})
-          .style("fill", function(d){  return d.id === "{{hog_id}}" ?   "#369" :  "#d9d9d9"})
-          .style("stroke",   "#fff" )
-          .style("stroke-width", "2px")
-          .attr("cx",  function(d){  return d.id === "{{hog_id}}" ?    d.x - 6 :   d.x - 3})
-          .attr("cy", function(d){  return d.id === "{{hog_id}}" ?    d.y -  6 :   d.y - 3}) ;
-
-      label.attr("x", function(d){  return d.id === "{{hog_id}}" ?    d.x + 20 :   d.x +10})
-          .attr("y", function (d) {
-              return d.y + 4;
-          })
-          .style("font-size", function(d){  return d.id === "{{hog_id}}" ?    "25px" :   "15px"})
-          .style("fill", "#333");
-
-
-  }
-
-function dragstarted(d) {
-  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-  d.fx = d.x;
-  d.fy = d.y;
-}
-
-function dragged(d) {
-  d.fx = d3.event.x;
-  d.fy = d3.event.y;
-}
-
-function dragended(d) {
-  if (!d3.event.active) simulation.alphaTarget(0);
-  d.fx = null;
-  d.fy = null;
-}
-
-
-     })
-
-}
-
-var div_id = '#synteny_svg';
-var evidence = 'linearized';
-var context ='2';
-
-run_synteny_graph(div_id, evidence, context)
+ $.when($.ajax({url: "/oma/hog/{{ hog.hog_id }}/orthoxml/augmented/",dataType: "text"})).then(function(orthoxml) {
+     var ls = new LocalSyntenyViewer('synteny_div', OrthoxmlParser.parse(orthoxml), '{{ hog.hog_id }}', '{{ level }}')
+         //ls.render()
+ })
 
 </script>
 

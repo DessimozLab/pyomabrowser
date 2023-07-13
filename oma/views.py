@@ -1673,6 +1673,8 @@ class HOGSynteny(HOGBase, TemplateView):
 
         context = super(HOGSynteny, self).get_context_data(hog_id, **kwargs)
 
+        '''
+
         try:
             graph = utils.db.get_syntenic_hogs(hog_id=hog_id, level=context['level'], steps=2)
         except db.DBConsistencyError as e:
@@ -1720,11 +1722,12 @@ class HOGSynteny(HOGBase, TemplateView):
                 h = models.HOG(utils.db, e[0])
                 neigh.append({'hog': e[0], 'weight': str(e[2]), 'description': h.keyword})
         logger.debug("data ready to ship ")
+        
+        '''
+
         context.update({'tab': 'synteny',
                         'hog_id': hog_id,
-                        'lineage_link_name': 'hog_synteny',
-                        'synteny': ancestral_synteny,
-                        'neighbor': neigh})
+                        'lineage_link_name': 'hog_synteny'}) #synteny': ancestral_synteny,'neighbor': neigh})
         return context
 
 
