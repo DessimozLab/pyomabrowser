@@ -16,13 +16,18 @@ class LocalSyntenyViewer {
         // CONTROLLER
         this.settings = {
             marginTop: 80,
-            marginRight: 10,
-            marginBottom: 10,
+            marginRight: 20,
+            marginBottom: 40,
             marginLeft: 40,
             width_board: document.getElementById(this.div_id).offsetWidth,
             width_tree: 300,
             width_text: 100,
-            dx: 20,
+            dx: 40,
+            circle_radius : 4,
+            circle_radius_leaf : 3,
+            height_synteny: 20,
+            ref_synteny_bottomMargin: 30,
+            length_displayed_name_leaf: 10
         }
 
         this.root = d3.hierarchy(this.data);
@@ -172,11 +177,10 @@ class LocalSyntenyViewer {
         this.svg.append('rect')
             .attr('id', 'ref_line')
           .attr('x', this.settings.width_tree + this.settings.width_text + 4  - this.settings.marginLeft )
-          .attr('y', left.x - 40 )
+          .attr('y', left.x - this.settings.height_synteny - this.settings.ref_synteny_bottomMargin )
           .attr('width', this.settings.width_board - this.settings.width_tree - this.settings.width_text - this.settings.marginRight - this.settings.marginLeft)
-          .attr('height', 20)
-          .attr('fill', 'red');
-
+          .attr('height', this.settings.height_synteny)
+          .attr('fill', 'salmon');
 
         const transition = this.svg.transition()
             .duration(duration)
@@ -205,8 +209,8 @@ class LocalSyntenyViewer {
             });
 
         nodeEnter.append("circle")
-            .attr("r", d => d.children && d.children.length === 1 ? 0: 2.5) // TODO REMOVE THIS BUG
-            .attr("fill", d => d._children ? "#555" : "#999")
+            .attr("r", d => d.children && d.children.length === 1 ? 0: d.children ? this.settings.circle_radius : this.settings.circle_radius_leaf ) // TODO REMOVE THIS BUG
+            .attr("fill", d => d._children || d.children  ? "#555" : "#999")
             .attr("stroke-width", 10);
 
 
@@ -214,8 +218,9 @@ class LocalSyntenyViewer {
             .attr("dy", "0.31em")
             .attr("x", 6)
             .attr("text-anchor", "start")
-            .text(d => { return d.data.data.id.substring(0, 10);})
+            .text(d => this.format_name(d))
             .style('font-size',  "10px")
+            .style('font-family', 'monospace')
           .clone(true).lower()
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
@@ -223,9 +228,9 @@ class LocalSyntenyViewer {
 
         nodeEnter.append('rect')
           .attr('x', this.settings.width_text + 4)
-          .attr('y', -3)
+          .attr('y', -this.settings.height_synteny/2)
           .attr('width', this.settings.width_board - this.settings.width_tree - this.settings.width_text - this.settings.marginRight - this.settings.marginLeft)
-          .attr('height', 6)
+          .attr('height', this.settings.height_synteny)
           .attr('stroke', 'black')
           .attr('fill', '#69a3b2');
 
@@ -275,5 +280,20 @@ class LocalSyntenyViewer {
             d.y0 = d.y;
         });
     }
+
+    format_name(d){
+
+        if (d.data.data.id.length <= this.settings.length_displayed_name_leaf) return d.data.data.id
+
+        return  d.data.data.id.substring(0, 7) + '...';
+
+    }
+
+    is_visible(d){
+       return (d._children || d.height == 0)
+    }
+
+
+
 
 }
