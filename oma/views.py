@@ -2533,7 +2533,10 @@ def token_search(request):
             return redirect('search_suggestion_thanks')
 
         ## Process tokens
-        raw_tokens = json.loads(request.POST.get("hidden_query", ""))
+        try:
+            raw_tokens = json.loads(request.POST.get("hidden_query", ""))
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("Cannot parse query")
         tokens = [generate_type(z['prefix'])(utils.db, z['query']) for z in raw_tokens]
         context['search'] = json.dumps(raw_tokens)  # this can be reuse by js directly
         context['search_raw'] = raw_tokens

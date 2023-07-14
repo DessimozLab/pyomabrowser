@@ -32,7 +32,7 @@ class FastMappingApp(Application):
             output_dir="res_" + out_base,
             stdout="stdout.txt",
             stderr="stderr.txt",
-            requested_memory=20 * GB,
+            requested_memory=28 * GB,
         )
 
     def __del__(self):
