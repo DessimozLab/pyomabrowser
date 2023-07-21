@@ -1,11 +1,12 @@
 class LocalSyntenyViewer {
 
-    constructor(div_id, hog_tree, focus, species) {
+    constructor(div_id, reference_element,  hog_tree, focus, species, call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny ) {
 
         var that = this // ugly handle for non-arrow function usage
 
         // MODEL
         this.hog_tree = hog_tree
+        this.reference_element = reference_element
         this.focal_hog = focus
         this.focal_species = species
         this.data = d3.hierarchy(this.find_focal_root());
@@ -32,6 +33,7 @@ class LocalSyntenyViewer {
             circle_radius: 4,
             circle_radius_leaf: 3,
             length_displayed_name_leaf: 10,
+            textMarginRight: 10,
             // UI SYNTENY
             height_synteny: 20,
             ref_synteny_bottomMargin: 30,
@@ -39,26 +41,29 @@ class LocalSyntenyViewer {
             marginLeftSynteny: 20,
             color_scheme: ['#9e0142', '#d53e4f', 'salmon', '#f46d43', '#fdae61', '#fee08b', '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2']
         }
+        this.call_back_hog_detail = call_back_hog_detail
+        this.call_back_hog_local_synteny = call_back_hog_local_synteny
+        this.callback_gene_local_synteny = callback_gene_local_synteny
 
         this.settings['width_block'] = -6 + (document.getElementById(this.div_id).offsetWidth - this.settings['width_tree'] - this.settings['marginLeftSynteny'] - this.settings['width_text']) / (1 + 2 * (this.settings['hald_window']))
 
         // LOAD THE FOCAL HOG SYNTENY
         $.ajax({
-            url: "https://oma-stage.vital-it.ch/api/synteny/" + that.focal_hog + "/?evidence=linearized&context=" + that.settings.hald_window,
+            url: "https://oma-stage.vital-it.ch/api/synteny/" + that.reference_element + "/?evidence=linearized&context=" + that.settings.hald_window,
             dataType: 'json',
             async: false,
             success: function (jsonData) {
 
-                that.load_and_process_synteny_api(that.focal_hog, jsonData, true)
+                that.load_and_process_synteny_api(that.reference_element, jsonData, true)
 
-                var ln = that.synteny_data[that.focal_hog].linear_synteny.map(hog => that.get_root_hog_id(hog))
+                var ln = that.synteny_data[that.reference_element].linear_synteny.map(hog => that.get_root_hog_id(hog))
 
-                that.color_scale = d3.scaleOrdinal().domain(ln).range(that.settings['color_scheme'].splice(that.synteny_data[that.focal_hog].linear_synteny.length - ln.length)).unknown("lightgrey");
+                that.color_scale = d3.scaleOrdinal().domain(ln).range(that.settings['color_scheme'].splice(that.synteny_data[that.reference_element].linear_synteny.length - ln.length)).unknown("lightgrey");
 
             }
         });
 
-        if (!this.synteny_data[this.focal_hog]){
+        if (!this.synteny_data[this.reference_element]){
             this.div.append("p").text('No synteny is available for this HOG or gene.')
                 .style('text-align', 'center')
                 .style('top', '200px')
@@ -66,13 +71,12 @@ class LocalSyntenyViewer {
             return
         }
 
-
         // Create the SVG container, a layer for the links and a layer for the nodes.
         this.svg = this.div.append("svg")
             .attr("width", this.settings.width)
             .attr("height", this.settings.dx)
             .attr("viewBox", [-this.settings.marginLeft, -this.settings.marginTop, this.settings.width_board, this.settings.dx])
-            .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif; user-select: none;");
+            .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif; user-select: none;")
 
         this.gLink = this.svg.append("g")
             .attr("fill", "none")
@@ -83,6 +87,19 @@ class LocalSyntenyViewer {
         this.gNode = this.svg.append("g")
             .attr("cursor", "pointer")
             .attr("pointer-events", "all");
+
+        this.Tooltip = this.div.append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "1px")
+            .style("border-radius", "4px")
+            .style("padding", "8px")
+            .style("position", "absolute")
+            .style("font-family", 'Roboto Condensed')
+            .style("font-size", '16px')
+            .style("z-index", '900')
 
         // init the d3 tree model
         this.root = d3.hierarchy(this.data);
@@ -111,6 +128,7 @@ class LocalSyntenyViewer {
         var that = this // UGLY HANDLE
 
         d3.selectAll(".g_synteny").remove();
+        this.close_tooltip()
 
         const duration = event?.altKey ? 2500 : 250; // hold the alt key to slow down the transition
         const nodes = this.root.descendants().reverse();
@@ -137,13 +155,22 @@ class LocalSyntenyViewer {
 
 
         // Render the reference synteny
-
         d3.select("#ref_line").remove();
-        var x_ref = this.settings.width_tree + this.settings.width_text - this.settings.marginLeft
+        var x_ref = this.settings.width_tree - this.settings.marginLeft
         var y_ref = left.x - this.settings.height_synteny - this.settings.ref_synteny_bottomMargin
         var ref_synteny_g = this.svg.append('g').attr('id', 'ref_line')
             .attr("transform", () => { return "translate(" + x_ref + ", " + y_ref + ")" })
-        this.render_synteny(ref_synteny_g, this.synteny_data[this.focal_hog].linear_synteny)
+        this.render_synteny(ref_synteny_g, this.synteny_data[this.reference_element].linear_synteny)
+
+        ref_synteny_g.append('text')
+            .attr("dy", "0.31em")
+            .attr("x", this.settings.width_text)
+            .attr("text-anchor", "end")
+            .text(d =>  this.reference_element )
+            .style('font-size', "14px")
+            .style("font-weight",  900 )
+            .style('font-family', 'monospace')
+
 
 
         const transition = this.svg.transition()
@@ -161,26 +188,95 @@ class LocalSyntenyViewer {
             .attr("transform", d => `translate(${source.y0},${source.x0})`)
             .attr("fill-opacity", 0)
             .attr("stroke-opacity", 0)
-            .on("click", (event, d) => {
-                // TODO TOOL TIP + MENU
-                if (d.children) {
-                    d._children = d.children;
-                    d.children = null;
-                } else {
-                    d.children = d._children;
-                    d._children = null;
-                }
-                this.update(event, d);
-            });
+
 
         nodeEnter.append("circle")
-            .attr("r", d => d.children && d.children.length === 1 ? 0 : d.children ? this.settings.circle_radius : this.settings.circle_radius_leaf) // TODO REMOVE THIS BUG
-            .attr("fill", d => d._children || d.children ? "#555" : "#999")
-            .attr("stroke-width", 10);
+            .attr("r", d =>  d.children ? this.settings.circle_radius : this.settings.circle_radius_leaf) // TODO REMOVE THIS BUG d.children && d.children.length === 1 ? 0 :
+            .attr("fill", d => d.data.data.paralog ? 'salmon' : d._children || d.children ? "#555" : "#999")
+            .attr("stroke-width", 10)
+            .on("click",  (event,node) =>   {
+
+                var menu = [];
+
+                if (node.data.data.paralog){
+
+                    var t = {
+                        title: 'Duplication',
+                        action: null,
+                    }
+
+                    var tt = {
+                        title: "Duplication node  can't be collapse",
+                        action: () =>  null
+                    }
+
+                    menu.push(t)
+                    menu.push(tt)
+
+
+                }
+
+                else {
+
+                    var t = {
+                        title: node.data.data.id.split('_')[0],
+                        action: null,
+                    }
+
+                    menu.push(t)
+
+                    if (node.children){
+                        var tt =   {
+                        title: 'Collapse' ,
+                        action: () =>  {this.toggle_node(node)}}
+
+                    menu.push(tt)
+                    }
+
+                    else if (node._children){
+
+                         var tt =   {
+                        title: 'Expand' ,
+                        action: () =>  {this.toggle_node(node)}}
+
+                        menu.push(tt)
+
+
+                    }
+
+                    if (node.children || node._children ) {
+
+                        var ttt =   {
+                        title: 'Open HOG detail' ,
+                        action: () =>  {this.call_back_hog_detail(node.data.data.id.split('_')[0])}}
+
+                    menu.push(ttt)
+
+                    var tttt =   {
+                        title: 'Use as synteny focus' ,
+                        action: () =>  {this.call_back_hog_local_synteny(node.data.data.id.split('_')[0])}}
+
+                         menu.push(tttt)
+
+
+                    }
+
+                }
+
+                var close =   {
+                        title: 'Close' ,
+                        action: () =>  {this.close_tooltip()}}
+
+                menu.push(close)
+
+                this.render_tooltip(event.offsetX + 12, event.offsetY + 12, menu)
+
+            })
+
 
         nodeEnter.append("text")
             .attr("dy", "0.31em")
-            .attr("x", 6)
+            .attr("x", this.settings.textMarginRight)
             .attr("text-anchor", "start")
             .text(d => this.format_name(d))
             .style('font-size', "10px")
@@ -269,13 +365,15 @@ class LocalSyntenyViewer {
 
     render_synteny(g_container, data) {
 
+        var that = this
+
         for (let i = 0; i < data.length; i++) {
 
             if (data[i] == null) continue
 
             var e = data[i].hog_id ? data[i].hog_id : data[i].id
 
-            var posL = this.settings['marginLeftSynteny'] + i * (this.settings['width_block'] + this.settings['blockMargin'])
+            var posL = this.settings.width_text + this.settings['marginLeftSynteny'] + i * (this.settings['width_block'] + this.settings['blockMargin'])
 
             g_container.append("line")
                 .style("stroke", "black")
@@ -284,8 +382,9 @@ class LocalSyntenyViewer {
                 .attr("y1", 0)
                 .attr("y2", 0)
 
-            g_container.append("rect")
-                .attr("x", posL)
+             var r = g_container.append("rect")
+
+                r.attr("x", posL)
                 .attr("y", -7)
                 .attr("width", this.settings['width_block'])
                 .attr("height", 15)
@@ -294,14 +393,132 @@ class LocalSyntenyViewer {
                 })
                 .style("stroke-width", 1)
                 .style("stroke", () => {
-                    return e.split('.')[0] == this.focal_hog.split('.')[0] ? "black" : "white"
+                    return e.split('.')[0] == this.reference_element.split('.')[0] ? "black" : "white"
+                })
+                .on("mouseover", function(event){
+
+                    if (data[i].hog_id){
+                        that.render_tooltip_synteny_extant(event.offsetX + 12, event.offsetY + 12, data[i].id, r)
+                    }
+
+                    else {
+                        that.render_tooltip_synteny_hog(event.offsetX + 12, event.offsetY + 12, e, r)
+                    }
+
+            })
+                .on("mouseleave", function () {
+                    that.close_tooltip()
+
+                }).style("cursor", "pointer")
+                .on("click", () => {
+                    if (data[i].hog_id){
+                        that.callback_gene_local_synteny(data[i].id)
+                    }
+                    else {
+                        that.call_back_hog_local_synteny(data[i].id)
+                    }
+
                 })
 
         }
 
     }
 
+    // TREE
+
+    render_tooltip(x, y, menu){
+
+        this.Tooltip.style("opacity", 1).style("display", 'block')
+            .style("left", x + 12 + "px")
+            .style("top", y + 12  + "px")
+
+        this.Tooltip.html('')
+
+            var gg = this.Tooltip.selectAll('menu_item')
+            .data(menu)
+            .enter().append('text')
+                .style('text-align', 'center')
+            .style('display', 'block')
+            .style('cursor', (d) =>  { return d.action ? 'pointer' : 'auto' } )
+            .style("font-weight", (d) =>  { return d.title === "Close" || !d.action ? 900 : 400 })
+            .style('font-size', d => {
+                return  '12 px';
+            })
+            .text(function(d) {
+                return d.title;
+            })
+            .on('mouseover', function(d){
+                d3.select(this).style('fill', 'steelblue');
+            })
+            .on('mouseout', function(d){
+                d3.select(this).style('fill', 'black');
+            })
+            .on('click', function(d,i){
+                i.action(d);
+            })
+
+
+
+    }
+
     // UTILS
+
+    render_tooltip_synteny_extant(x,y, id, rect){
+
+        var that = this;
+
+        $.getJSON("/api/protein/"+ id +"/", function(data){
+
+            that.Tooltip.style("opacity", 1).style("display", 'block')
+                .html(`<b>ID:</b> ${data.omaid}  <br>
+<b>canonicalid:</b> ${data.canonicalid}  <br> 
+<b>sequence length:</b> ${data.sequence_length}  <br> 
+<b>ID:</b> ${data.omaid}  <br> 
+<b>chromosome:</b> ${data.chromosome}  <br> 
+<b>description:</b> ${data.description}  <br> 
+<b>roothog_id:</b> ${data.roothog_id}  <br>`)
+                .style("left", x + 12 + "px")
+                .style("top", y + 12  + "px")
+
+        })
+
+    }
+
+    render_tooltip_synteny_hog(x,y, id, rect){
+
+        var that = this;
+
+        $.getJSON("/api/hog/"+ id +"/", function(data){
+
+            that.Tooltip.style("opacity", 1).style("display", 'block')
+                .html(`<b>ID:</b> ${id}  <br> 
+                    <b>Description:</b>  ${id} <br> `)
+                .style("left", x + 12 + "px")
+                .style("top", y + 12  + "px")
+
+        })
+
+
+    }
+
+    close_tooltip(){
+        this.Tooltip.style("opacity", 0).style("display", 'none')
+    }
+
+    toggle_node(d){
+
+           if (d.data.data.paralog) return
+
+
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            } else {
+                d.children = d._children;
+                d._children = null;
+            }
+            this.update(event, d);
+}
 
     load_and_process_synteny_api(hog_id, jsonData, is_reference) {
 
@@ -440,15 +657,13 @@ class LocalSyntenyViewer {
 
         if (!is_reference) {
 
-            console.log(this.synteny_data[this.focal_hog].linear_synteny)
-
-            var left_ref = this.synteny_data[this.focal_hog].linear_synteny.slice(0, this.settings.hald_window).map(data => {
+            var left_ref = this.synteny_data[this.reference_element].linear_synteny.slice(0, this.settings.hald_window).map(data => {
                 if (data == null) {
                     return data
                 }
                 return data.hog_id ? data.hog_id.split('.')[0] : data.id.split('.')[0]
             });
-            var right_ref = this.synteny_data[this.focal_hog].linear_synteny.slice(this.settings.hald_window + 1, this.synteny_data[this.focal_hog].linear_synteny.length).map(data => {
+            var right_ref = this.synteny_data[this.reference_element].linear_synteny.slice(this.settings.hald_window + 1, this.synteny_data[this.reference_element].linear_synteny.length).map(data => {
                 if (data == null) {
                     return data
                 }
@@ -473,8 +688,6 @@ class LocalSyntenyViewer {
 
                 }
             }
-
-            console.log(hog_id, cptR, cptL, left_ref, right_ref)
 
             if (cptR > cptL) {
                 contig.linear_synteny = contig.linear_synteny.reverse()
@@ -535,26 +748,33 @@ class LocalSyntenyViewer {
 
         var filtered = data
 
-        this._traverse(filtered, null, function (child_done, current_node) {
+        var to_remove = []
+
+         this._traverse(filtered, null, function (child_done, current_node) {
+
 
             if (child_done.children && child_done.children.length === 1) {
 
-                var solo = child_done.children[0];
-
-                current_node.children = current_node.children.filter(function (el) {
-                    return el != child_done
-                });
-                current_node.children.push(solo);
-                solo.parent = current_node;
-
-                child_done = null;
-
+                to_remove.push(child_done);
 
             }
 
         })
 
-        console.log(filtered)
+        for (const toRemoveElement of to_remove) {
+
+            var solo = toRemoveElement.children[0];
+            var parent = toRemoveElement.parent
+
+            parent.children = parent.children.filter(function (el) {
+                return el != toRemoveElement
+            });
+            parent.children.push(solo);
+            solo.parent = parent;
+
+            //child_done = null;
+
+        }
 
         return filtered
     }
@@ -572,7 +792,6 @@ class LocalSyntenyViewer {
     }
 
     get_root_hog_id(e){
-        console.log(e)
         return e  ? (e.hog_id ? e.hog_id.split('.')[0] : e.id.split('.')[0]) : null
     }
 

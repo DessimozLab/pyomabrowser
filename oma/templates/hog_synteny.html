@@ -33,7 +33,23 @@
 console.log('{{ hog.hog_id }}  {{ level }}')
 
  $.when($.ajax({url: "/oma/hog/{{ hog.hog_id }}/orthoxml/augmented/",dataType: "text"})).then(function(orthoxml) {
-     var ls = new LocalSyntenyViewer('synteny_div', OrthoxmlParser.parse(orthoxml), '{{ hog.hog_id }}', '{{ level }}')
+
+     var call_back_hog_detail = function(hog_id){
+                var newUrl="{% url 'hog_viewer' 1234567  %}".replace(/1234567/, hog_id);
+                window.open(newUrl, "_blank");
+            }
+
+    var call_back_hog_local_synteny = function(hog_id){
+        var newUrl="{% url 'hog_synteny' 1234567  %}".replace(/1234567/,hog_id);
+        window.open(newUrl, "_blank");
+    }
+
+    var callback_gene_local_synteny  = function(gene_id){
+        var newUrl="{% url 'synteny' 1234567  %}".replace(/1234567/,gene_id);
+        window.open(newUrl, "_blank");
+    }
+
+     var ls = new LocalSyntenyViewer('synteny_div', '{{ hog.hog_id }}', OrthoxmlParser.parse(orthoxml), '{{ hog.hog_id }}', '{{ level }}', call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny)
          //ls.render()
  })
 

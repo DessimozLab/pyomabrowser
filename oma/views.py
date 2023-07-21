@@ -259,6 +259,8 @@ class LocalSyntenyView(InfoBase, TemplateView):
         taxa = entry.genome.lineage
         windows = int(windows)
 
+        '''
+
         ngs_entry_nr, gene_left = utils.db.neighbour_genes(entry.entry_nr, windows)
         positions = list(range(-windows, windows + 1))  # list of intergers for gene positions
 
@@ -415,6 +417,8 @@ class LocalSyntenyView(InfoBase, TemplateView):
         o_md_geneinfos = OrderedDict(
             sorted(list(o_md_geneinfos.items()),
                    key=lambda t: t[1]['row_number']))
+        
+        
 
         context.update({
             'positions': positions,
@@ -425,6 +429,12 @@ class LocalSyntenyView(InfoBase, TemplateView):
             'stripes': stripes,
             'tab': 'synteny',
             'xrefs': xrefs
+        })
+        
+        '''
+
+        context.update({
+            'tab': 'synteny',
         })
         return context
 
