@@ -1,6 +1,6 @@
 class LocalSyntenyViewer {
 
-    constructor(div_id, reference_element,  hog_tree, focus, species, call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny ) {
+    constructor(div_id, reference_element, hog_tree, focus, species, call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny, call_back_gene_detail) {
 
         var that = this // ugly handle for non-arrow function usage
 
@@ -44,6 +44,7 @@ class LocalSyntenyViewer {
         this.call_back_hog_detail = call_back_hog_detail
         this.call_back_hog_local_synteny = call_back_hog_local_synteny
         this.callback_gene_local_synteny = callback_gene_local_synteny
+        this.call_back_gene_detail = call_back_gene_detail
 
         this.settings['width_block'] = -6 + (document.getElementById(this.div_id).offsetWidth - this.settings['width_tree'] - this.settings['marginLeftSynteny'] - this.settings['width_text']) / (1 + 2 * (this.settings['hald_window']))
 
@@ -63,7 +64,7 @@ class LocalSyntenyViewer {
             }
         });
 
-        if (!this.synteny_data[this.reference_element]){
+        if (!this.synteny_data[this.reference_element]) {
             this.div.append("p").text('No synteny is available for this HOG or gene.')
                 .style('text-align', 'center')
                 .style('top', '200px')
@@ -108,13 +109,18 @@ class LocalSyntenyViewer {
         this.settings['dy'] = (this.settings.width_tree - this.settings.marginRight - this.settings.marginLeft) / (1 + this.root.height)
         this.tree = d3.cluster()
             .nodeSize([this.settings.dx, this.settings.dy])
-            .separation(function (a, b) {return 1;})
+            .separation(function (a, b) {
+                return 1;
+            })
 
         // Build and init the tree viewer instance
         this.tree(this.root);
         this.root.x0 = this.settings.dy / 2;
         this.root.y0 = 0;
-        this.root.descendants().forEach((d, i) => {d.id = i;d._children = null;});
+        this.root.descendants().forEach((d, i) => {
+            d.id = i;
+            d._children = null;
+        });
 
         // First rendering
         this.update(null, this.root);
@@ -159,18 +165,19 @@ class LocalSyntenyViewer {
         var x_ref = this.settings.width_tree - this.settings.marginLeft
         var y_ref = left.x - this.settings.height_synteny - this.settings.ref_synteny_bottomMargin
         var ref_synteny_g = this.svg.append('g').attr('id', 'ref_line')
-            .attr("transform", () => { return "translate(" + x_ref + ", " + y_ref + ")" })
+            .attr("transform", () => {
+                return "translate(" + x_ref + ", " + y_ref + ")"
+            })
         this.render_synteny(ref_synteny_g, this.synteny_data[this.reference_element].linear_synteny)
 
         ref_synteny_g.append('text')
             .attr("dy", "0.31em")
             .attr("x", this.settings.width_text)
             .attr("text-anchor", "end")
-            .text(d =>  this.reference_element )
+            .text(d => this.reference_element)
             .style('font-size', "14px")
-            .style("font-weight",  900 )
+            .style("font-weight", 900)
             .style('font-family', 'monospace')
-
 
 
         const transition = this.svg.transition()
@@ -191,14 +198,14 @@ class LocalSyntenyViewer {
 
 
         nodeEnter.append("circle")
-            .attr("r", d =>  d.children ? this.settings.circle_radius : this.settings.circle_radius_leaf) // TODO REMOVE THIS BUG d.children && d.children.length === 1 ? 0 :
+            .attr("r", d => d.children ? this.settings.circle_radius : this.settings.circle_radius_leaf) // TODO REMOVE THIS BUG d.children && d.children.length === 1 ? 0 :
             .attr("fill", d => d.data.data.paralog ? 'salmon' : d._children || d.children ? "#555" : "#999")
             .attr("stroke-width", 10)
-            .on("click",  (event,node) =>   {
+            .on("click", (event, node) => {
 
                 var menu = [];
 
-                if (node.data.data.paralog){
+                if (node.data.data.paralog) {
 
                     var t = {
                         title: 'Duplication',
@@ -207,16 +214,14 @@ class LocalSyntenyViewer {
 
                     var tt = {
                         title: "Duplication node  can't be collapse",
-                        action: () =>  null
+                        action: () => null
                     }
 
                     menu.push(t)
                     menu.push(tt)
 
 
-                }
-
-                else {
+                } else {
 
                     var t = {
                         title: node.data.data.id.split('_')[0],
@@ -225,47 +230,79 @@ class LocalSyntenyViewer {
 
                     menu.push(t)
 
-                    if (node.children){
-                        var tt =   {
-                        title: 'Collapse' ,
-                        action: () =>  {this.toggle_node(node)}}
+                    if (node.children) {
+                        var tt = {
+                            title: 'Collapse',
+                            action: () => {
+                                this.toggle_node(node)
+                            }
+                        }
 
-                    menu.push(tt)
-                    }
+                        menu.push(tt)
+                    } else if (node._children) {
 
-                    else if (node._children){
-
-                         var tt =   {
-                        title: 'Expand' ,
-                        action: () =>  {this.toggle_node(node)}}
+                        var tt = {
+                            title: 'Expand',
+                            action: () => {
+                                this.toggle_node(node)
+                            }
+                        }
 
                         menu.push(tt)
 
 
                     }
 
-                    if (node.children || node._children ) {
+Y                    if (node.children || node._children) {
 
-                        var ttt =   {
-                        title: 'Open HOG detail' ,
-                        action: () =>  {this.call_back_hog_detail(node.data.data.id.split('_')[0])}}
+                        var ttt = {
+                            title: 'Open HOG detail',
+                            action: () => {
+                                this.call_back_hog_detail(node.data.data.id.split('_')[0])
+                            }
+                        }
 
-                    menu.push(ttt)
+                        menu.push(ttt)
 
-                    var tttt =   {
-                        title: 'Use as synteny focus' ,
-                        action: () =>  {this.call_back_hog_local_synteny(node.data.data.id.split('_')[0])}}
+                        var tttt = {
+                            title: 'Use as synteny focus',
+                            action: () => {
+                                this.call_back_hog_local_synteny(node.data.data.id.split('_')[0])
+                            }
+                        }
 
-                         menu.push(tttt)
+                        menu.push(tttt)
 
 
+                    } else {
+
+                        var ttt = {
+                            title: 'Open gene detail',
+                            action: () => {
+                                this.call_back_gene_detail(node.data.data.id)
+                            }
+                        }
+
+                        menu.push(ttt)
+
+                        var tttt = {
+                            title: 'Use as synteny focus',
+                            action: () => {
+                                this.callback_gene_local_synteny(node.data.data.id)
+                            }
+                        }
+                        menu.push(tttt)
                     }
+
 
                 }
 
-                var close =   {
-                        title: 'Close' ,
-                        action: () =>  {this.close_tooltip()}}
+                var close = {
+                    title: 'Close',
+                    action: () => {
+                        this.close_tooltip()
+                    }
+                }
 
                 menu.push(close)
 
@@ -294,7 +331,9 @@ class LocalSyntenyViewer {
             .attr("fill-opacity", 1)
             .attr("stroke-opacity", 1)
 
-        nodeUpdate.selectAll('text').style('font-size', d => { return d._children || d.height == 0 ? '14px' : '0px'})
+        nodeUpdate.selectAll('text').style('font-size', d => {
+            return d._children || d.height == 0 ? '14px' : '0px'
+        })
 
         // Transition exiting nodes to the parent's new position.
         const nodeExit = node.exit().transition(transition).remove()
@@ -333,7 +372,9 @@ class LocalSyntenyViewer {
 
         // Render synteny
 
-        this.gNode.selectAll("g").filter(function (d, i) {return d._children || d.height == 0}).each(function (d) {
+        this.gNode.selectAll("g").filter(function (d, i) {
+            return d._children || d.height == 0
+        }).each(function (d) {
 
             var g = d3.select(this).append('g').attr('class', 'g_synteny')
             var idd = d.data.data.id.split('_')[0]
@@ -359,9 +400,9 @@ class LocalSyntenyViewer {
     }
 
     _diagonal(d) {
-            return "M" + d.source.y + "," + d.source.x
-                + "V" + d.target.x + "H" + d.target.y;
-        }
+        return "M" + d.source.y + "," + d.source.x
+            + "V" + d.target.x + "H" + d.target.y;
+    }
 
     render_synteny(g_container, data) {
 
@@ -382,9 +423,9 @@ class LocalSyntenyViewer {
                 .attr("y1", 0)
                 .attr("y2", 0)
 
-             var r = g_container.append("rect")
+            var r = g_container.append("rect")
 
-                r.attr("x", posL)
+            r.attr("x", posL)
                 .attr("y", -7)
                 .attr("width", this.settings['width_block'])
                 .attr("height", 15)
@@ -395,26 +436,23 @@ class LocalSyntenyViewer {
                 .style("stroke", () => {
                     return e.split('.')[0] == this.reference_element.split('.')[0] ? "black" : "white"
                 })
-                .on("mouseover", function(event){
+                .on("mouseover", function (event) {
 
-                    if (data[i].hog_id){
+                    if (data[i].hog_id) {
                         that.render_tooltip_synteny_extant(event.offsetX + 12, event.offsetY + 12, data[i].id, r)
-                    }
-
-                    else {
+                    } else {
                         that.render_tooltip_synteny_hog(event.offsetX + 12, event.offsetY + 12, e, r)
                     }
 
-            })
+                })
                 .on("mouseleave", function () {
                     that.close_tooltip()
 
                 }).style("cursor", "pointer")
                 .on("click", () => {
-                    if (data[i].hog_id){
+                    if (data[i].hog_id) {
                         that.callback_gene_local_synteny(data[i].id)
-                    }
-                    else {
+                    } else {
                         that.call_back_hog_local_synteny(data[i].id)
                     }
 
@@ -426,48 +464,51 @@ class LocalSyntenyViewer {
 
     // TREE
 
-    render_tooltip(x, y, menu){
+    render_tooltip(x, y, menu) {
 
         this.Tooltip.style("opacity", 1).style("display", 'block')
             .style("left", x + 12 + "px")
-            .style("top", y + 12  + "px")
+            .style("top", y + 12 + "px")
 
         this.Tooltip.html('')
 
-            var gg = this.Tooltip.selectAll('menu_item')
+        var gg = this.Tooltip.selectAll('menu_item')
             .data(menu)
             .enter().append('text')
-                .style('text-align', 'center')
+            .style('text-align', 'center')
             .style('display', 'block')
-            .style('cursor', (d) =>  { return d.action ? 'pointer' : 'auto' } )
-            .style("font-weight", (d) =>  { return d.title === "Close" || !d.action ? 900 : 400 })
-            .style('font-size', d => {
-                return  '12 px';
+            .style('cursor', (d) => {
+                return d.action ? 'pointer' : 'auto'
             })
-            .text(function(d) {
+            .style("font-weight", (d) => {
+                return d.title === "Close" || !d.action ? 900 : 400
+            })
+            .style('font-size', d => {
+                return '12 px';
+            })
+            .text(function (d) {
                 return d.title;
             })
-            .on('mouseover', function(d){
+            .on('mouseover', function (d) {
                 d3.select(this).style('fill', 'steelblue');
             })
-            .on('mouseout', function(d){
+            .on('mouseout', function (d) {
                 d3.select(this).style('fill', 'black');
             })
-            .on('click', function(d,i){
+            .on('click', function (d, i) {
                 i.action(d);
             })
-
 
 
     }
 
     // UTILS
 
-    render_tooltip_synteny_extant(x,y, id, rect){
+    render_tooltip_synteny_extant(x, y, id, rect) {
 
         var that = this;
 
-        $.getJSON("/api/protein/"+ id +"/", function(data){
+        $.getJSON("/api/protein/" + id + "/", function (data) {
 
             that.Tooltip.style("opacity", 1).style("display", 'block')
                 .html(`<b>ID:</b> ${data.omaid}  <br>
@@ -478,47 +519,47 @@ class LocalSyntenyViewer {
 <b>description:</b> ${data.description}  <br> 
 <b>roothog_id:</b> ${data.roothog_id}  <br>`)
                 .style("left", x + 12 + "px")
-                .style("top", y + 12  + "px")
+                .style("top", y + 12 + "px")
 
         })
 
     }
 
-    render_tooltip_synteny_hog(x,y, id, rect){
+    render_tooltip_synteny_hog(x, y, id, rect) {
 
         var that = this;
 
-        $.getJSON("/api/hog/"+ id +"/", function(data){
+        $.getJSON("/api/hog/" + id + "/", function (data) {
 
             that.Tooltip.style("opacity", 1).style("display", 'block')
                 .html(`<b>ID:</b> ${id}  <br> 
                     <b>Description:</b>  ${id} <br> `)
                 .style("left", x + 12 + "px")
-                .style("top", y + 12  + "px")
+                .style("top", y + 12 + "px")
 
         })
 
 
     }
 
-    close_tooltip(){
+    close_tooltip() {
         this.Tooltip.style("opacity", 0).style("display", 'none')
     }
 
-    toggle_node(d){
+    toggle_node(d) {
 
-           if (d.data.data.paralog) return
+        if (d.data.data.paralog) return
 
 
-            if (d.children) {
-                d._children = d.children;
-                d.children = null;
-            } else {
-                d.children = d._children;
-                d._children = null;
-            }
-            this.update(event, d);
-}
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        } else {
+            d.children = d._children;
+            d._children = null;
+        }
+        this.update(event, d);
+    }
 
     load_and_process_synteny_api(hog_id, jsonData, is_reference) {
 
@@ -569,93 +610,84 @@ class LocalSyntenyViewer {
 
         var ends = [];
 
-        for (const hogsKey in contig.hogs) {
+        if (!( Object.keys(contig.hogs).length === 1)) {
 
-            var h = contig.hogs[hogsKey];
+            for (const hogsKey in contig.hogs) {
 
-            switch (Object.keys(h.neighbors).length) {
-                case 0:
-                    console.log("No neighbor in this hog")
-                    this.synteny_data[hog_id] = contig
-                    return
-                case 1:
-                    ends.push(h);
-                    if (ends.length > 2) {
-                        console.log("More than 2 ends in the contigs")
+                var h = contig.hogs[hogsKey];
+
+                switch (Object.keys(h.neighbors).length) {
+                    case 0:
+                        console.log("No neighbor in this hog")
+                        console.log(contig)
                         this.synteny_data[hog_id] = contig
                         return
+                    case 1:
+                        ends.push(h);
+                        if (ends.length > 2) {
+                            console.log("More than 2 ends in the contigs")
+                            this.synteny_data[hog_id] = contig
+                            return
+                        }
+                        break;
+                    case 2:
+                        break;
+                    default:
+                        console.log("More than 2 neighboring hogs")
+                        this.synteny_data[hog_id] = contig
+                        return
+                }
 
-                    }
-                    break;
-                case 2:
-                    break;
-                default:
-                    console.log("More than 2 neighboring hogs")
-                    this.synteny_data[hog_id] = contig
-                    return
+            }
+
+            if (ends.length !== 2) {
+                console.log("Contigs dont have 2 ends.")
+                this.synteny_data[hog_id] = contig
+                return
+
+            }
+
+                 // Flatten contig
+            var previous = null
+            var current = ends[0]
+            var processing = true
+            var focal_element = null
+
+            while (processing) {
+
+                contig.linear_synteny.push(current);
+
+                if (current.hog_id && current.hog_id == hog_id) {
+                    focal_element = current
+                } else if (current.id == hog_id) {
+                    focal_element = current
+                }
+
+                if (previous != null && current.neighbors.length === 1) {
+                    previous = current;
+                    current = current.neighbors[0];
+                    processing = false;
+                } else {
+                    let tmp = current
+                    current = current.neighbors[0] === previous ? current.neighbors[1] : current.neighbors[0];
+                    previous = tmp;
+                }
+
+                previous.edge = previous.edges[current];
+
+
             }
 
         }
 
-        if (ends.length !== 2) {
-            console.log("Contigs dont have 2 ends.")
-            this.synteny_data[hog_id] = contig
-            return
-
+        else {
+            var g = contig.hogs[Object.keys(contig.hogs)[0]]
+            contig.linear_synteny.push(g);
         }
 
-        // Flatten contig
-        var previous = null
-        var current = ends[0]
-        var processing = true
-        var focal_element = null
+                // INVERT LINEAR SYNTENY
 
-        while (processing) {
-
-            contig.linear_synteny.push(current);
-
-            if (current.hog_id && current.hog_id == hog_id) {
-                focal_element = current
-            } else if (current.id == hog_id) {
-                focal_element = current
-            }
-
-            if (previous != null && current.neighbors.length === 1) {
-                previous = current;
-                current = current.neighbors[0];
-                processing = false;
-            } else {
-                let tmp = current
-                current = current.neighbors[0] === previous ? current.neighbors[1] : current.neighbors[0];
-                previous = tmp;
-            }
-
-            previous.edge = previous.edges[current];
-
-
-        }
-
-        // ADD PADDING FOR MISSING ENDS
-        var padding_left = this.settings.hald_window - contig.linear_synteny.indexOf(focal_element)
-
-        if (padding_left > 0) {
-            for (let i = 0; i < padding_left; i++) {
-                contig.linear_synteny.unshift(null)
-            }
-        }
-
-        var padding_right = (this.settings.hald_window * 2 + 1) - contig.linear_synteny.length - padding_left
-
-        if (padding_right > 0) {
-            for (let i = 0; i < padding_right; i++) {
-                contig.linear_synteny.push(null)
-            }
-        }
-
-
-        // INVERT LINEAR SYNTENY
-
-        if (!is_reference) {
+        if (!is_reference && !(Object.keys(contig.hogs).length === 1) ) {
 
             var left_ref = this.synteny_data[this.reference_element].linear_synteny.slice(0, this.settings.hald_window).map(data => {
                 if (data == null) {
@@ -694,6 +726,29 @@ class LocalSyntenyViewer {
             }
 
         }
+
+
+
+        // ADD PADDING FOR MISSING ENDS
+        var padding_left = this.settings.hald_window - contig.linear_synteny.indexOf(focal_element)
+        padding_left = padding_left > this.settings.hald_window ? this.settings.hald_window : padding_left
+
+
+        if (padding_left > 0) {
+            for (let i = 0; i < padding_left; i++) {
+                contig.linear_synteny.unshift(null)
+            }
+        }
+
+        var padding_right = (this.settings.hald_window * 2 + 1) - contig.linear_synteny.length - padding_left
+
+        if (padding_right > 0) {
+            for (let i = 0; i < padding_right; i++) {
+                contig.linear_synteny.push(null)
+            }
+        }
+
+
 
         this.synteny_data[hog_id] = contig
 
@@ -750,7 +805,7 @@ class LocalSyntenyViewer {
 
         var to_remove = []
 
-         this._traverse(filtered, null, function (child_done, current_node) {
+        this._traverse(filtered, null, function (child_done, current_node) {
 
 
             if (child_done.children && child_done.children.length === 1) {
@@ -791,8 +846,8 @@ class LocalSyntenyViewer {
         return (d._children || d.height == 0)
     }
 
-    get_root_hog_id(e){
-        return e  ? (e.hog_id ? e.hog_id.split('.')[0] : e.id.split('.')[0]) : null
+    get_root_hog_id(e) {
+        return e ? (e.hog_id ? e.hog_id.split('.')[0] : e.id.split('.')[0]) : null
     }
 
 

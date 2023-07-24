@@ -49,7 +49,13 @@ console.log('{{ hog.hog_id }}  {{ level }}')
         window.open(newUrl, "_blank");
     }
 
-     var ls = new LocalSyntenyViewer('synteny_div', '{{ hog.hog_id }}', OrthoxmlParser.parse(orthoxml), '{{ hog.hog_id }}', '{{ level }}', call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny)
+    var call_back_gene_detail = function(gene_id){
+        var newUrl="{% url 'pairs' 1234567  %}".replace(/1234567/,gene_id);
+        window.open(newUrl, "_blank");
+    }
+
+
+     var ls = new LocalSyntenyViewer('synteny_div', '{{ hog.hog_id }}', OrthoxmlParser.parse(orthoxml), '{{ hog.hog_id }}', '{{ level }}', call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny, call_back_gene_detail)
          //ls.render()
  })
 
