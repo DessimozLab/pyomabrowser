@@ -23,6 +23,7 @@ RUN pip3 install --no-cache-dir uwsgi \
     'numexpr==2.8.4' \
     'numpy==1.23.5' \
     'blosc2' \
+    'cython==0.29.33' \
     'pipenv'
 
 WORKDIR $SRC_DIR
