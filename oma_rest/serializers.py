@@ -399,5 +399,5 @@ class EnrichmentAnalysisInputSerializer(serializers.ModelSerializer):
 class EnrichmentAnalysisStatusSerializer(serializers.ModelSerializer, ReadOnlySerializer):
     class Meta:
         model = EnrichmentAnalysisModel
-        fields = ['id', 'data_hash', 'type', 'foreground', 'name', 'state', 'message', 'result']
+        fields = ['id', 'data_hash', 'type', 'foreground', 'name', 'state', 'message', 'result', 'result_json']
         read_only_fields = ['id', 'data_hash', 'state']
