@@ -11,6 +11,7 @@ class LocalSyntenyViewer {
         this.focal_species = species
         this.data = d3.hierarchy(this.find_focal_root());
         this.synteny_data = {}
+        this.domain_scale = null
 
         //VIEWER
         this.div_id = div_id;
@@ -62,9 +63,9 @@ class LocalSyntenyViewer {
 
                 that.load_and_process_synteny_api(that.reference_element, jsonData, true)
 
-                var ln = that.synteny_data[that.reference_element].linear_synteny.map(hog => that.get_root_hog_id(hog))
+                that.domain_scale =  that.synteny_data[that.reference_element].linear_synteny.map(hog => that.get_hog_id(hog))
 
-                that.color_scale = d3.scaleOrdinal().domain(ln).range(that.settings['color_scheme'].splice(that.synteny_data[that.reference_element].linear_synteny.length - ln.length)).unknown("lightgrey");
+                that.color_scale = d3.scaleOrdinal().domain(that.domain_scale).range(that.settings['color_scheme'].splice(that.synteny_data[that.reference_element].linear_synteny.length - that.domain_scale.length)).unknown("lightgrey");
 
             }
         });
@@ -484,7 +485,7 @@ class LocalSyntenyViewer {
                 .attr("width", this.settings['width_block'])
                 .attr("height", 15)
                 .attr("fill", () => {
-                    return this.color_scale(e.split('.')[0])
+                    return this.color_scale(this.get_domain_scale(e))
                 })
                 .style("stroke-width", 1)
                 .style("stroke", () => {
@@ -557,6 +558,10 @@ class LocalSyntenyViewer {
     }
 
     // UTILS
+
+    get_domain_scale(query){
+        return this.domain_scale.find(hog => query.startsWith(hog))
+    }
 
     render_tooltip_synteny_extant(x, y, id, rect) {
 
@@ -902,6 +907,10 @@ class LocalSyntenyViewer {
 
     get_root_hog_id(e) {
         return e ? (e.hog_id ? e.hog_id.split('.')[0] : e.id.split('.')[0]) : null
+    }
+
+    get_hog_id(e) {
+        return e ? (e.hog_id ? e.hog_id : e.id) : null
     }
 
 
