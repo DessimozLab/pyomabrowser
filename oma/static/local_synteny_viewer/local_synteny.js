@@ -238,6 +238,11 @@ class LocalSyntenyViewer {
             .attr("fill-opacity", 0)
             .attr("stroke-opacity", 0)
 
+        nodeEnter.append("path")
+            .attr("d", d3.symbol().type(d3.symbolTriangle).size(100))
+            .attr("fill", "#555")
+            .attr("fill-opacity", 0)
+            .attr("transform", `rotate(-90)`)
 
         nodeEnter.append("circle")
             .attr("r", d => d.children ? this.settings.circle_radius : this.settings.circle_radius_leaf) // TODO REMOVE THIS BUG d.children && d.children.length === 1 ? 0 :
@@ -377,6 +382,10 @@ class LocalSyntenyViewer {
             return d._children || d.height == 0 ? '14px' : '0px'
         })
 
+        nodeUpdate.selectAll('path').attr("fill-opacity", d => {
+            return d._children ? '1' : '0'
+        })
+
         // Transition exiting nodes to the parent's new position.
         const nodeExit = node.exit().transition(transition).remove()
             .attr("transform", d => `translate(${source.y},${source.x})`)
@@ -479,7 +488,7 @@ class LocalSyntenyViewer {
                 })
                 .style("stroke-width", 1)
                 .style("stroke", () => {
-                    return e.split('.')[0] == this.reference_element.split('.')[0] ? "black" : "white"
+                    return e.split('.')[0] == this.reference_element.split('.')[0] ? "black" : "white" // todo
                 })
                 .on("mouseover", function (event) {
 
