@@ -39,7 +39,9 @@ class LocalSyntenyViewer {
             ref_synteny_bottomMargin: 30,
             blockMargin: 6,
             marginLeftSynteny: 20,
-            color_scheme: ['#9e0142', '#d53e4f', 'salmon', '#f46d43', '#fdae61', '#fee08b', '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2']
+            color_scheme: ['#9e0142', '#d53e4f', 'salmon', '#f46d43', '#fdae61', '#fee08b', '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'],
+            first_render:true,
+            max_leaves_shown_init: 30,
         }
         this.call_back_hog_detail = call_back_hog_detail
         this.call_back_hog_local_synteny = call_back_hog_local_synteny
@@ -120,9 +122,18 @@ class LocalSyntenyViewer {
         this.tree(this.root);
         this.root.x0 = this.settings.dy / 2;
         this.root.y0 = 0;
+
+        var init_depth_collapse = this.get_init_collapse()
+
         this.root.descendants().forEach((d, i) => {
             d.id = i;
-            d._children = null;
+
+            if (d.depth >= init_depth_collapse) {
+                d._children = d.children;
+                d.children = null;
+            }
+
+
         });
 
         // First rendering
@@ -131,6 +142,36 @@ class LocalSyntenyViewer {
     }
 
     // VIEWER
+
+    get_init_collapse(){
+
+        var depth;
+        for (depth = 1; depth < this.root.height; depth++) {
+
+            var X = this.get_number_visible_tree_tips_at_depth(depth)
+
+            console.log(X)
+
+            if (X > this.settings.max_leaves_shown_init) {
+                break
+            }
+        }
+
+        return depth
+    }
+
+    get_number_visible_tree_tips_at_depth(depth){
+
+        var tips = 0;
+
+        this._traverse(this.root, function(node,children){
+
+            if (node.depth <= depth) {tips += 1}
+        })
+
+        return tips
+
+    }
 
     update(event, source) {
 
@@ -387,7 +428,7 @@ class LocalSyntenyViewer {
                 return
             }
 
-            var level_query = d.data.data.hasOwnProperty('LOFT') ? '' :  '&level=' + d.data.data.taxid;
+            var level_query = d.data.data.hasOwnProperty('LOFT') ? '' :  '&level=' + d.data.data.species;
 
             $.ajax({
 
