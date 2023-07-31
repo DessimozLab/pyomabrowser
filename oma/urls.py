@@ -98,6 +98,7 @@ urlpatterns = [
     url(r'^genome/(?P<species_id>\w+)/closest/groups/$', views.GenomeCentricClosestGroups.as_view(), name='genome_closest_og'),
     url(r'^genome/(?P<species_id>\w+)/closest/hogs/$', views.GenomeCentricClosestHOGs.as_view(), name='genome_closest_hog'),
     url(r'^genome/(?P<species_id>\w+)/synteny/$', views.GenomeCentricSynteny.as_view(), name='genome_synteny'),
+    url(r'^genome/(?P<species_id>\w+)/geneorder/$', views.GenomeCentricGeneOrder.as_view(), name='genome_gene_order'),
 
     # AncestralGenome
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/info/$', views.AncestralGenomeCentricInfo.as_view(), name='ancestralgenome_info'),

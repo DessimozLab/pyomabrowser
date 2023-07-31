@@ -1221,6 +1221,15 @@ class GenomeCentricClosestHOGs(GenomeBase, TemplateView):
         return context
 
 
+class GenomeCentricGeneOrder(GenomeBase, TemplateView):
+    template_name = "genome_order.html"
+
+    def get_context_data(self, species_id, **kwargs):
+        context = super(GenomeCentricGeneOrder, self).get_context_data(species_id, **kwargs)
+        genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(species_id))
+        context.update({'tab': 'gene_order', 'genome_obj':genome_obj})
+        return context
+
 class GenomeCentricSynteny(GenomeBase, TemplateView):
     template_name = "genome_synteny.html"
 

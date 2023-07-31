@@ -81,6 +81,12 @@
 
           </li>
 
+        <li class="{% if tab == 'gene_order' %}  active selected {%endif%}">
+            <a href="{% url 'genome_gene_order' genome.uniprot_species_code %}">
+                <span> Gene Order</span>
+            </a>
+        </li>
+
 
          <li class="{% if tab == 'synteny' %} active selected {%endif%}" {% if tab != 'synteny' %}
              onclick="window.location='{% url 'genome_synteny' genome.uniprot_species_code %}'" {%endif%}>

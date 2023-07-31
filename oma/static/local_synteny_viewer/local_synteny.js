@@ -49,8 +49,11 @@ class LocalSyntenyViewer {
         this.settings['width_block'] = -6 + (document.getElementById(this.div_id).offsetWidth - this.settings['width_tree'] - this.settings['marginLeftSynteny'] - this.settings['width_text']) / (1 + 2 * (this.settings['hald_window']))
 
         // LOAD THE FOCAL HOG SYNTENY
+
+         var level_query = this.focal_hog !== this.reference_element ? '' :  '&level=' + this.focal_species;
+
         $.ajax({
-            url: "https://oma-stage.vital-it.ch/api/synteny/" + that.reference_element + "/?evidence=linearized&context=" + that.settings.hald_window,
+            url: "/api/synteny/" + that.reference_element + "/?evidence=linearized&context=" + that.settings.hald_window + level_query,
             dataType: 'json',
             async: false,
             success: function (jsonData) {
@@ -253,7 +256,7 @@ class LocalSyntenyViewer {
 
                     }
 
-Y                    if (node.children || node._children) {
+                    if (node.children || node._children) {
 
                         var ttt = {
                             title: 'Open HOG detail',
@@ -384,8 +387,11 @@ Y                    if (node.children || node._children) {
                 return
             }
 
+            var level_query = d.data.data.hasOwnProperty('LOFT') ? '' :  '&level=' + d.data.data.taxid;
+
             $.ajax({
-                url: "https://oma-stage.vital-it.ch/api/synteny/" + idd + "/?evidence=linearized&context=" + that.settings.hald_window,
+
+                url: "/api/synteny/" + idd + "/?evidence=linearized&context=" + that.settings.hald_window + level_query,
                 dataType: 'json',
                 async: true,
                 success: function (jsonData) {
@@ -414,7 +420,7 @@ Y                    if (node.children || node._children) {
 
             var e = data[i].hog_id ? data[i].hog_id : data[i].id
 
-            var posL = this.settings.width_text + this.settings['marginLeftSynteny'] + i * (this.settings['width_block'] + this.settings['blockMargin'])
+            var posL = (this.settings.width_text + this.settings['marginLeftSynteny']) + (i * (this.settings['width_block'] + this.settings['blockMargin']))
 
             g_container.append("line")
                 .style("stroke", "black")
@@ -652,14 +658,15 @@ Y                    if (node.children || node._children) {
             var current = ends[0]
             var processing = true
             var focal_element = null
+            var focal_id = is_reference ? this.reference_element : hog_id
 
             while (processing) {
 
                 contig.linear_synteny.push(current);
 
-                if (current.hog_id && current.hog_id == hog_id) {
+                if (current.hog_id && current.hog_id == focal_id) {
                     focal_element = current
-                } else if (current.id == hog_id) {
+                } else if (current.id == focal_id) {
                     focal_element = current
                 }
 
@@ -726,7 +733,6 @@ Y                    if (node.children || node._children) {
             }
 
         }
-
 
 
         // ADD PADDING FOR MISSING ENDS

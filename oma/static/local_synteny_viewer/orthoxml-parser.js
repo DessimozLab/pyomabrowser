@@ -273,7 +273,7 @@ eval("\n/**\n * Module exports.\n */\n\nmodule.exports = deprecate;\n\n/**\n * M
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   parse: () => (/* binding */ parse)\n/* harmony export */ });\nvar sax = __webpack_require__(/*! sax */ \"./node_modules/sax/lib/sax.js\");\n\nconst parse = function(orthoxml){\n\n    var build_leaf = function(gene_ref){\n\n\n        var leaf = {\n            id: _mapping[parseInt(gene_ref.attributes.id, 10)]\n        }\n\n        if (gene_ref.attributes.LOFT) {\n            leaf.LOFT = gene_ref.attributes.LOFT\n        }\n\n        return leaf\n\n    }\n\n    var build_node = function(group){\n\n        var node =  {\n            id: group.attributes.id ? group.attributes.id : 'Unknown'  ,\n            parent: _current,\n            children : [],\n            paralog: group.name == 'paralogGroup' ? true: false,\n            species: null,\n            completeness_score: null,\n            taxid: null,\n            nr_members: null,\n        }\n\n        return node\n\n    }\n\n    var openTag = function (args) {\n\n        var tagName =  args.name;\n\n        if (tagName === \"geneRef\") {\n\n            var l = build_leaf(args)\n            _current.children.push(l)\n\n        }\n\n        else if (tagName === \"gene\") {\n            _mapping[args.attributes.id] =  args.attributes.protId\n        }\n\n        else if (tagName === \"orthologGroup\" || tagName === \"paralogGroup\" ) {\n\n            var n = build_node(args);\n\n            _current.children.push(n)\n            _current = n\n\n        }\n\n        else if ( tagName === \"property\" && args.attributes.name === \"TaxRange\" ) {\n            _current.species = args.attributes.value\n        }\n\n        else if ( tagName === \"property\" && args.attributes.name === \"NrMemberGenes\" ) {\n            _current.nr_members = args.attributes.value\n        }\n\n        else if ( tagName === \"property\" && args.attributes.name === \"taxid\" ) {\n            _current.taxid = args.attributes.value\n        }\n\n        else if ( tagName === \"score\" && args.attributes.id === \"CompletenessScore\" ) {\n            _current.completeness_score = args.attributes.value\n        }\n\n\n    };\n\n    var closeTag = function (name) {\n\n\n        var tagName =  name; // xmlns\n\n    if (tagName === \"orthologGroup\" || tagName === \"paralogGroup\") {\n\n        _current = _current.parent\n\n        }\n\n    };\n\n    var parser = sax.parser(true, {});\n    var _current = {'children': []};\n    var _mapping = {};\n\n    parser.onopentag = openTag;\n    parser.onclosetag = closeTag;\n\n    parser.write(orthoxml).close();\n\n    return _current.children[0]\n}\n\n\n\n//# sourceURL=webpack://OrthoxmlParser/./src/index.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   parse: () => (/* binding */ parse)\n/* harmony export */ });\nvar sax = __webpack_require__(/*! sax */ \"./node_modules/sax/lib/sax.js\");\n\nconst parse = function(orthoxml){\n\n    var build_leaf = function(gene_ref){\n\n\n        var leaf = {\n            id: _mapping[parseInt(gene_ref.attributes.id, 10)]\n        }\n\n        if (gene_ref.attributes.LOFT) {\n            leaf.LOFT = gene_ref.attributes.LOFT\n        }\n\n        return leaf\n\n    }\n\n    var build_node = function(group){\n\n        var node =  {\n            id: group.attributes.id ? group.attributes.id : 'Unknown'  ,\n            parent: _current,\n            children : [],\n            paralog: group.name == 'paralogGroup' ? true: false,\n            species: null,\n            CompletenessScore: null,\n            taxid: null,\n            nr_members: null,\n        }\n\n        return node\n\n    }\n\n    var openTag = function (args) {\n\n        var tagName =  args.name;\n\n        if (tagName === \"geneRef\") {\n\n            var l = build_leaf(args)\n            _current.children.push(l)\n\n        }\n\n        else if (tagName === \"gene\") {\n            _mapping[args.attributes.id] =  args.attributes.protId\n        }\n\n        else if (tagName === \"orthologGroup\" || tagName === \"paralogGroup\" ) {\n\n            var n = build_node(args);\n\n            _current.children.push(n)\n            _current = n\n\n        }\n\n        else if ( tagName === \"property\" && args.attributes.name === \"TaxRange\" ) {\n            _current.species = args.attributes.value\n        }\n\n        else if ( tagName === \"property\" && args.attributes.name === \"NrMemberGenes\" ) {\n            _current.nr_members = args.attributes.value\n        }\n\n        else if ( tagName === \"property\" && args.attributes.name === \"taxid\" ) {\n            _current.taxid = args.attributes.value\n        }\n\n        else if ( tagName === \"score\" ) {\n            _current[args.attributes.id ] = args.attributes.value\n        }\n\n\n    };\n\n    var closeTag = function (name) {\n\n\n        var tagName =  name; // xmlns\n\n    if (tagName === \"orthologGroup\" || tagName === \"paralogGroup\") {\n\n        _current = _current.parent\n\n        }\n\n    };\n\n    var parser = sax.parser(true, {});\n    var _current = {'children': []};\n    var _mapping = {};\n\n    parser.onopentag = openTag;\n    parser.onclosetag = closeTag;\n\n    parser.write(orthoxml).close();\n\n    return _current.children[0]\n}\n\n\n\n//# sourceURL=webpack://OrthoxmlParser/./src/index.js?");
 
 /***/ }),
 
@@ -301,7 +301,7 @@ eval("/* (ignored) */\n\n//# sourceURL=webpack://OrthoxmlParser/util_(ignored)?"
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/ 	
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -315,14 +315,14 @@ eval("/* (ignored) */\n\n//# sourceURL=webpack://OrthoxmlParser/util_(ignored)?"
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/ 	
+/******/
 /******/ 		// Execute the module function
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/ 	
+/******/
 /************************************************************************/
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
@@ -335,7 +335,7 @@ eval("/* (ignored) */\n\n//# sourceURL=webpack://OrthoxmlParser/util_(ignored)?"
 /******/ 			}
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/global */
 /******/ 	(() => {
 /******/ 		__webpack_require__.g = (function() {
@@ -347,12 +347,12 @@ eval("/* (ignored) */\n\n//# sourceURL=webpack://OrthoxmlParser/util_(ignored)?"
 /******/ 			}
 /******/ 		})();
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	(() => {
 /******/ 		// define __esModule on exports
@@ -363,14 +363,14 @@ eval("/* (ignored) */\n\n//# sourceURL=webpack://OrthoxmlParser/util_(ignored)?"
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /************************************************************************/
-/******/ 	
+/******/
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module can't be inlined because the eval devtool is used.
 /******/ 	var __webpack_exports__ = __webpack_require__("./src/index.js");
 /******/ 	OrthoxmlParser = __webpack_exports__;
-/******/ 	
+/******/
 /******/ })()
 ;
