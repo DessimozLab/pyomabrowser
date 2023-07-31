@@ -128,7 +128,7 @@ class LocalSyntenyViewer {
         this.root.descendants().forEach((d, i) => {
             d.id = i;
 
-            if (d.depth >= init_depth_collapse) {
+            if (d.depth >= init_depth_collapse && !d.data.data.paralog) {
                 d._children = d.children;
                 d.children = null;
             }
@@ -150,8 +150,6 @@ class LocalSyntenyViewer {
 
             var X = this.get_number_visible_tree_tips_at_depth(depth)
 
-            console.log(X)
-
             if (X > this.settings.max_leaves_shown_init) {
                 break
             }
@@ -166,7 +164,7 @@ class LocalSyntenyViewer {
 
         this._traverse(this.root, function(node,children){
 
-            if (node.depth <= depth) {tips += 1}
+            if (node.depth <= depth && !node.data.data.paralog) {tips += 1}
         })
 
         return tips
