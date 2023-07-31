@@ -50,6 +50,7 @@ class EnrichmentAnalysisModel(models.Model):
     taxlevel = models.CharField(max_length=256, blank=True, verbose_name="Taxonomic level")
     state = models.CharField(max_length=8)
     result = models.FileField(blank=True)
+    result_json = models.FileField(blank=True)
     submit_time = models.DateTimeField(auto_now_add=True, auto_now=False)
     modified_time = models.DateTimeField(auto_now=True)
     compute_time = models.FloatField(null=True, blank=True)
