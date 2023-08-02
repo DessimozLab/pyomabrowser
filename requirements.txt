@@ -17,7 +17,7 @@ djangorestframework-link-header-pagination
 django-cors-headers
 pyyaml
 django-matomo-api-tracking
-
+plotly
 
 -e git+https://github.com/alpae/django-google-analytics.git@master#egg=django-google-analytics-app
 -e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@develop#egg=pyoma
