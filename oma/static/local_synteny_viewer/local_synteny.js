@@ -489,7 +489,7 @@ class LocalSyntenyViewer {
                 })
                 .style("stroke-width", 1)
                 .style("stroke", () => {
-                    return e.split('.')[0] == this.reference_element.split('.')[0] ? "black" : "white" // todo
+                    return  e.split('.')[0] == this.focal_hog.split('.')[0] ? "black" : "white" // todo
                 })
                 .on("mouseover", function (event) {
 

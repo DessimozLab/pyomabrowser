@@ -353,7 +353,6 @@ class SyntenyViewer {
             .style("border-radius", "4px")
             .style("padding", "8px")
             .style("position", "absolute")
-            .style("font-family", 'Roboto Condensed')
             .style("font-size", '16px')
 
         this.y_offset = this.settings.margin.top;
@@ -364,7 +363,6 @@ class SyntenyViewer {
         g_header.append("text")
             .text("Synteny reconstruction for ancestral genome at " + this.settings.level)
             .attr("text-anchor", 'start')
-            .attr("font-family", 'Roboto Condensed')
             .attr("font-size", '24px')
             .attr("x", this.contig_left_offset - 8)
             .attr("y", this.settings.margin.top/2)
@@ -482,6 +480,20 @@ class SyntenyViewer {
             .attr("y1", 0)
             .attr("x2", this.contig_width)
             .attr("y2", d["rows"].length * (this.settings.row.bar_height + this.settings.row.margin_bottom) + this.settings.contig.padding_bottom)
+
+
+        if (this.settings.type == 'extant'){
+
+            g.append("text")
+            .text( 'Chromosome' + d["rows"][0][0]['chromosome'] )
+            .attr("text-anchor", 'start')
+            .attr("font-size", '12px')
+            .attr("x", this.contig_left_offset)
+            .attr("y", 0)
+            .style("stroke-width", 0)
+            .attr("font-family", 'Roboto Condensed')
+
+        }
 
 
 
@@ -671,7 +683,6 @@ class SyntenyViewer {
             .attr("x", (d, i) => this.settings.row.edge_width + 4 + this.settings.row.bar_width + this.board_left_offset + (unit-1)  * (this.settings.row.bar_width + this.settings.row.edge_width))
             .attr("y", (d) => this.settings.contig.padding_top + this.settings.row.bar_height /2 + 4)
             .style("stroke-width", 0)
-            .attr("font-family", 'Roboto Condensed')
 
 
         // Add start base symbol
@@ -721,7 +732,6 @@ class SyntenyViewer {
             .attr("text-anchor", 'end')
             .attr("font-size", '12px')
             .attr("stroke-width", 0)
-            .attr("font-family", 'Roboto Condensed')
 
 
     }

@@ -20,6 +20,14 @@
 
     <div class="container-fluid">
 
+    {% if reference_entry.omaid != entry.omaid %}
+
+        <div class="alert alert-warning" role="alert">
+  This entry is not the isoform used for orthologs inferences, synteny below are inferred using the entry isoform <a href="{% url 'pairs' entry.get_main_isoform.omaid %}">{{entry.get_main_isoform.omaid}}</a>.
+        </div>
+
+     {% endif %}
+
     <div class="row">
 
         <div class="col" id="synteny_div"  style=" height:calc(100vh - 285px); width:100px">
@@ -58,14 +66,24 @@ var go_one_level_upper = function(e){
     if (!e.parent) return e
 
     if (e.parent.paralog || e.parent.children.length == 1){
-        go_one_level_upper(e.parent)
+        return go_one_level_upper(e.parent)
     }
 
     return e.parent
 
 }
 
-console.log('{{ most_specific_hog.hog_id }} {{ most_specific_hog.level }}')
+ {% if reference_entry.omaid != entry.omaid %}
+
+var FOCUS_ELEMENT = '{{ reference_entry.omaid }}'
+
+           {% else %}
+
+   var FOCUS_ELEMENT = '{{ entry.omaid }}'
+
+     {% endif %}
+
+
 
  $.when($.ajax({url: "/oma/hog/{{ most_specific_hog.hog_id }}/orthoxml/augmented/",dataType: "text"})).then(function(orthoxml) {
 
@@ -89,7 +107,7 @@ console.log('{{ most_specific_hog.hog_id }} {{ most_specific_hog.level }}')
         window.open(newUrl, "_blank");
     }
 
-     var phog = find_element(OrthoxmlParser.parse(orthoxml),  '{{ entry.omaid }}', false)
+     var phog = find_element(OrthoxmlParser.parse(orthoxml),  FOCUS_ELEMENT, false)
 
      phog = go_one_level_upper(phog)
      phog = go_one_level_upper(phog)
@@ -97,7 +115,8 @@ console.log('{{ most_specific_hog.hog_id }} {{ most_specific_hog.level }}')
      var hog_id = phog ? phog.id.split('_')[0] : '{{ most_specific_hog.hog_id }}'
      var hog_level =  phog ? phog.species:  '{{ most_specific_hog.level }}'
 
-     var ls = new LocalSyntenyViewer('synteny_div', '{{ entry.omaid }}',  OrthoxmlParser.parse(orthoxml), hog_id, hog_level , call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny, call_back_gene_detail)
+
+     var ls = new LocalSyntenyViewer('synteny_div', FOCUS_ELEMENT,  OrthoxmlParser.parse(orthoxml), hog_id, hog_level , call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny, call_back_gene_detail)
  })
 
 </script>
