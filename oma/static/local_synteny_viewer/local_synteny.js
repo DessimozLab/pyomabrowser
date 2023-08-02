@@ -104,7 +104,6 @@ class LocalSyntenyViewer {
             .style("border-radius", "4px")
             .style("padding", "8px")
             .style("position", "absolute")
-            .style("font-family", 'Roboto Condensed')
             .style("font-size", '16px')
             .style("z-index", '900')
 

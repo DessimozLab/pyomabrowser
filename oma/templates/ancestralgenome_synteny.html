@@ -52,8 +52,13 @@
 
             synteny.configure(settings)
 
-            synteny.callback_click_element = function(hog){
-                var newUrl="{% url 'hog_viewer' 1234567  %}".replace(/1234567/, hog.id);
+            synteny.callback_click_detail = function(hog_id){
+                var newUrl="{% url 'hog_viewer' 1234567  %}".replace(/1234567/, hog_id);
+                window.open(newUrl, "_blank");
+            }
+
+            synteny.callback_click_synteny = function(hog_id){
+                var newUrl="{% url 'hog_synteny' 1234567  %}".replace(/1234567/,hog_id);
                 window.open(newUrl, "_blank");
             }
 

@@ -25,7 +25,8 @@ class SyntenyViewer {
                 base_start: 0, base_end: 24, bar_width: 8, bar_height: 30, min_bar_height: 10, edge_width: 12
             },
         }
-        this.callback_click_element = null
+        this.callback_click_detail = null
+        this.callback_click_synteny = null
 
         this.color_accessor_hog = 'completeness_score';
         this.color_remove_outlier_hog = true;
@@ -529,12 +530,13 @@ class SyntenyViewer {
             .attr("x", this.board_left_offset + i * (this.settings.row.bar_width + this.settings.row.edge_width))
             .attr("y", this.settings.contig.padding_top + (this.settings.row.bar_height - h_bar)/2)
             .attr("width", this.settings.row.bar_width)
+            .style("cursor", "pointer")
             .attr("height",h_bar )
             .attr("fill",  () => {return _this.settings.type == 'ancestral' ? this.scale_color_hog(hog[this.color_accessor_hog]) : 'gray' })
             .style("stroke-width", 1)
             .style("stroke", "white" )
+            /*
             .on("mouseover", function(e){
-
                 if (_this.settings.type == 'ancestral'){
                     var level_api = _this.settings.level ? '?level=' + _this.settings.level : ''
 
@@ -613,21 +615,96 @@ class SyntenyViewer {
 
                 })
                 }
-
-
-
             })
             .on("mouseleave", function () {
                 _this.Tooltip.style("opacity", 0).style("display", 'none')
 
             })
+             */
+            .on("click", (event, node) => {
 
-            if (this.callback_click_element){
-                r.style("cursor", "pointer")
-                .on("click", () => {
-                    this.callback_click_element(hog)
+                var menu = [];
+                var data_annotation = null;
+
+                menu.push( { title: '<b>' + hog.id +'</b>', action: null } )
+
+                if (_this.settings.type == 'ancestral'){
+
+                    var level_api = _this.settings.level ? '?level=' + _this.settings.level : ''
+
+                    $.ajax({
+                        url: "/api/hog/"+ hog.id +"/" + level_api,
+                        dataType: 'json',
+                        async: false,
+                        success: function (data) {
+                            menu.push( { title: '<b>Description:</b>' +  data[0].description, action: null } )
+                            menu.push( { title: '<b>Completeness:</b>' + hog.completeness_score.toFixed(3), action: null } )
+                            menu.push( { title: '<b># of members:</b>' + hog.nr_members, action: null } )
+                        }
+
+                    })
+
+                     menu.push({ title: 'Open HOG detail', action: () => {_this.callback_click_detail(hog.id) }})
+                     menu.push({ title: 'Open local synteny', action: () => { _this.callback_click_synteny(hog.id) }})
+
+                }
+
+                else {
+
+                    $.ajax({
+                        url: "/api/protein/"+ hog.id +"/",
+                        dataType: 'json',
+                        async: false,
+                        success: function (data) {
+
+                            menu.push( { title: '<b>External Id:</b>' +  data.canonicalid, action: null } )
+                            menu.push( { title: '<b>Sequence length:</b>' + data.sequence_length, action: null } )
+                        }
+
+                    })
+
+                    menu.push({ title: 'Open Local Synteny', action: () => { _this.callback_click_synteny(hog.id) }})
+                     menu.push({ title: 'Open Gene details', action: () => {_this.callback_click_detail(hog.id) }})
+
+
+                }
+
+                menu.push({ title: 'Close', action: () => {  this.close_tooltip()}})
+
+                menu.push({ title: ' <hr style="margin-top: 0.3em; margin-bottom: 0.1em"> ', action: null })
+                menu.push({ title: ' <b>GO annotation</b>  <hr style="margin-top: 0.1em; margin-bottom: 0.2em"> ', action: null })
+
+                var url = _this.settings.type == 'ancestral' ? "/api/hog/"+ hog.id +"/gene_ontology/" + level_api : "/api/protein/"+ hog.id +"/gene_ontology/"
+
+                $.ajax({
+                    url: url,
+                    dataType: 'json',
+                    async: false,
+                    success: function (data_go) {data_annotation = data_go}
                 })
-            }
+
+                if (data_annotation){
+                    var already_process_go = new Set();
+
+                    for (const contentKey in data_annotation) {
+
+                        var go = data_annotation[contentKey]
+
+                        if (already_process_go.has(go.GO_term)) continue
+
+                        already_process_go.add(go.GO_term)
+                        menu.push( { title: '<b>' + go.GO_term + '</b>: ' + go.name , action: null } )
+                        }
+
+                }
+
+                console.log(event)
+
+
+                //this.render_tooltip(event.offsetX + 12, event.offsetY + 12, menu)
+                this.render_tooltip(event.x + 12, event.y + 12, menu)
+
+            })
 
         if (edge) {
 
@@ -655,6 +732,48 @@ class SyntenyViewer {
         }
 
 
+    }
+
+     render_tooltip(x, y, menu) {
+
+        this.Tooltip.style("opacity", 1).style("display", 'block')
+            .style("left", x + 12 + "px")
+            .style("top", y + 12 + "px")
+
+        this.Tooltip.html('')
+
+        var gg = this.Tooltip.selectAll('menu_item')
+            .data(menu)
+            .enter().append('text')
+            .style('text-align',(d) =>{ return d.action ? 'center' : 'left' } )
+            .style('display', 'block')
+            .style('cursor', (d) => {
+                return d.action ? 'pointer' : 'auto'
+            })
+            .style("font-weight", (d) => {
+                return d.title === "Close" || d.action ? 900 : 400
+            })
+            .style('font-size', d => {
+                return '12 px';
+            })
+            .html(function (d) {
+                return d.title;
+            })
+            .on('mouseover', function (d) {
+                d3.select(this).style('fill', 'steelblue');
+            })
+            .on('mouseout', function (d) {
+                d3.select(this).style('fill', 'black');
+            })
+            .on('click', function (d, i) {
+                i.action(d);
+            })
+
+
+    }
+
+     close_tooltip() {
+        this.Tooltip.style("opacity", 0).style("display", 'none')
     }
 
     _render_end_row(g_container, unit, row_i, end){

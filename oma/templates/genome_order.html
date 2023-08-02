@@ -52,9 +52,15 @@
 
             synteny.configure(settings)
 
-            synteny.callback_click_element = function(gene_id){
-                var newUrl="{% url 'pairs' 1234567  %}".replace(/1234567/,gene_id.id);
+
+             synteny.callback_click_detail = function(hog_id){
+                var newUrl="{% url 'pairs' 1234567  %}".replace(/1234567/,hog_id);
         window.open(newUrl, "_blank");
+            }
+
+            synteny.callback_click_synteny = function(hog_id){
+                var newUrl="{% url 'synteny' 1234567  %}".replace(/1234567/,hog_id);
+                window.open(newUrl, "_blank");
             }
 
             synteny.render();
