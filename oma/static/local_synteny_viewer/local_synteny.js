@@ -496,7 +496,7 @@ class LocalSyntenyViewer {
                     if (data[i].hog_id) {
                         that.render_tooltip_synteny_extant(event.offsetX + 12, event.offsetY + 12, data[i].id, r)
                     } else {
-                        that.render_tooltip_synteny_hog(event.offsetX + 12, event.offsetY + 12, e, r)
+                        that.render_tooltip_synteny_hog(event.offsetX + 12, event.offsetY + 12, data[i].id, r)
                     }
 
                 })
@@ -571,12 +571,12 @@ class LocalSyntenyViewer {
 
             that.Tooltip.style("opacity", 1).style("display", 'block')
                 .html(`<b>ID:</b> ${data.omaid}  <br>
-<b>canonicalid:</b> ${data.canonicalid}  <br> 
-<b>sequence length:</b> ${data.sequence_length}  <br> 
-<b>ID:</b> ${data.omaid}  <br> 
-<b>chromosome:</b> ${data.chromosome}  <br> 
-<b>description:</b> ${data.description}  <br> 
-<b>roothog_id:</b> ${data.roothog_id}  <br>`)
+                    <b>External ID:</b> ${data.canonicalid}  <br> 
+                    <b>OMA ID:</b> ${data.omaid}  <br> 
+                    <b>sequence length:</b> ${data.sequence_length}  <br> 
+                    <b>chromosome:</b> ${data.chromosome}  <br> 
+                    <b>description:</b> ${data.description}  <br> 
+                    <b>HOG ID:</b> ${data.oma_hog_id}  <br>`)
                 .style("left", x + 12 + "px")
                 .style("top", y + 12 + "px")
 
@@ -592,7 +592,8 @@ class LocalSyntenyViewer {
 
             that.Tooltip.style("opacity", 1).style("display", 'block')
                 .html(`<b>ID:</b> ${id}  <br> 
-                    <b>Description:</b>  ${id} <br> `)
+                    <b>Level:</b>  ${data[0].level} <br>
+                    <b>Description:</b>  ${data[0].description} <br> `)
                 .style("left", x + 12 + "px")
                 .style("top", y + 12 + "px")
 

@@ -39,7 +39,7 @@
 
     var container_id = 'container';
 
-    var settings = {level: "{{ genome_name }}"};
+    var settings = {type: 'ancestral', level: "{{ genome_name }}"};
 
 
     fetch('/api/synteny/?level={{ genome_name }}&format=json')
@@ -52,7 +52,7 @@
 
             synteny.configure(settings)
 
-            synteny.callback_click_hog = function(hog){
+            synteny.callback_click_element = function(hog){
                 var newUrl="{% url 'hog_viewer' 1234567  %}".replace(/1234567/, hog.id);
                 window.open(newUrl, "_blank");
             }
