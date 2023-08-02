@@ -1305,7 +1305,7 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
                              "profile": p,
                              "jaccard": None,
                              "description": d})
-        for sim in sortedhogs[:19]:
+        for sim in sortedhogs:
             id_hog = utils.db.format_hogid(int(sim))
             sim_hogs.append({"id": sim, "profile": results.similar[int(sim)].tolist(),
                              "jaccard": results.jaccard_distance[sim],
