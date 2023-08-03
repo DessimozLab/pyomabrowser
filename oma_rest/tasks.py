@@ -79,7 +79,7 @@ def go_enrichment(id):
     analysis_name = os.path.basename(name)
     data_json = {}
     with tempfile.TemporaryDirectory(prefix=f"{analysis_name}-") as tmpdir:
-        with gzip.open(os.path.join(tmpdir, analysis_name+".tsv.gz"), 'wt') as fout:
+        with open(os.path.join(tmpdir, analysis_name+".tsv"), 'wt') as fout:
             go_res.to_csv(fout, sep="\t")
         data_json['enrichment'] = json.loads(go_res.to_json())
         try:
