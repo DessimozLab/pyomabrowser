@@ -1444,8 +1444,7 @@ class StatusAsyncJobAPIView(RetrieveAPIView):
         serializer = self.get_serializer(instance)
         header = {}
         if instance.state == "DONE":
-            header = {"Location": serializer.data['result']}
-            stat = status.HTTP_303_SEE_OTHER
+            stat = status.HTTP_200_OK
         elif instance.state == "ERROR":
             stat = status.HTTP_400_BAD_REQUEST
         elif instance.state in ("PENDING", "RUNNING"):
