@@ -1,0 +1,48 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+{% load bootstrap4 %}
+
+
+{% block title %}Go Enrichment Analysis Result{% endblock %}
+{% block content %}
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>GO ENRICHMENT</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+            <p>
+
+                <script>
+
+                    $.getJSON("/api/enrichment/status/{{ data }}/", function( jsonData ) {
+                       console.log(jsonData)
+                    });
+
+
+                </script>
+
+
+
+            </p>
+
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock content %}

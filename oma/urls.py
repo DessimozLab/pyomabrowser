@@ -157,6 +157,9 @@ urlpatterns = [
     url(r'^functions/$', views.function_projection, name='function-projection-input'),
     url(r'^functions/(?P<data_id>\w+)/$', views.FunctionProjectionResults.as_view(), name="function-projection"),
 
+    url(r'^go_enrichment/$', views.go_enrichment , name='go_enrichment'),
+    url(r'^go_enrichment_result/(?P<data_id>[\w\d-]+)/$', views.go_enrichment_result , name='go_enrichment_result'),
+
     url(r'^release/$', views.Release.as_view(), name='release'),
     url(r'^release/json/$', views.GenomesJson.as_view(), name="genomes_json"),
 

@@ -1,0 +1,95 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+{% load bootstrap4 %}
+
+
+{% block title %}Go Enrichment Analysis{% endblock %}
+{% block content %}
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>Go enrichment analysis</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus.
+                Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.
+                Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.
+                Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit
+                amet erat.
+
+            </p>
+
+            <br>
+            <div class="card card-header-oma">
+
+                <div class="card-header">
+                    <h4>Run Go enrichment analysis</h4>
+                </div>
+
+                <div class="card-body">
+
+                    {% bootstrap_messages %}
+                        <form role="form" class="form-horizontal" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {% bootstrap_form form layout="horizontal" %}
+                            {% buttons %}
+                                <button id='submit_post_go' class="btn btn-lg btn-block btn-primary">Submit</button>
+                            {% endbuttons %}
+                        </form>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+    <script>
+
+    document.getElementById('submit_post_go').addEventListener("click", function(event){
+
+        event.preventDefault();
+
+        var input_foreground = document.getElementById('id_Foreground').value.split(/[\s,]+/)
+        var input_type = document.getElementById('id_type').value
+        var input_name = document.getElementById('id_name').value
+        var input_level = document.getElementById('id_taxon').value ? document.getElementById('id_taxon').value : ""
+
+
+        console.log(input_foreground, input_type, input_name, input_level)
+
+        fetch("/api/enrichment/", {
+          method: "POST",
+          body: JSON.stringify({
+              foreground: input_foreground,
+              type: input_type,
+              name: input_name,
+              taxlevel: input_level ,
+          }),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        })
+          .then((response) => response.json())
+          .then((json) =>  window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_self") )
+
+    })
+
+    </script>
+
+
+{% endblock content %}

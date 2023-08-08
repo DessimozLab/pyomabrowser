@@ -1946,6 +1946,12 @@ def function_projection(request):
     return render(request, "tool_function_prediction_upload.html",
                   {'form': form, 'max_upload_size': form.fields['file'].max_upload_size / (2**20)})
 
+def go_enrichment(request):
+    return render(request, "go_enrichment.html", {'form': forms.GoEnrichmentForm})
+
+def go_enrichment_result(request, data_id=None):
+    return render(request, "go_enrichment_result.html", {'data': data_id})
+
 @method_decorator(never_cache, name='dispatch')
 class AbstractFileResultDownloader(TemplateView):
     reload_frequency = 20

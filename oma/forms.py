@@ -67,6 +67,14 @@ class FunctionProjectionUploadFormBase(forms.Form):
     #                               help_text="The NCBI Taxonomic ID of the clade from which "
     #                                         "functions are propagated.")
 
+class GoEnrichmentForm(forms.Form):
+
+    CHOICES = (('extant', 'Extant genome Gene Ontology Enrichment Analysis'), ('ancestral', 'Ancestral genome Gene Ontology Enrichment Analysis' ),)
+    type = forms.ChoiceField(choices=CHOICES, required=True)
+    Foreground = forms.CharField(label='Foreground', max_length=64, required=True)
+    name = forms.CharField(label='Name of Dataset', max_length=64, required=True)
+    taxon = forms.CharField(label='Taxonomic Level', max_length=64, required=False)
+
 
 class FunctionProjectionUploadForm(FunctionProjectionUploadFormBase):
     captcha = ReCaptchaField()
