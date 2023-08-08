@@ -2366,12 +2366,10 @@ def token_search(request):
 
     if request.method == 'POST':
         t0 = time.time()
-        if request.POST.__contains__('submit_contact_suggestion'):
-
+        if 'submit_contact_suggestion' in request.POST:
             msg = EmailMessage(request.POST.get('query'), request.POST.get('message'), to=['contact@omabrowser.org'], from_email=request.POST.get('email'))
             msg.content_subtype = "html"
             msg.send()
-
             return redirect('search_suggestion_thanks')
 
         ## Process tokens
@@ -2539,16 +2537,16 @@ def token_search(request):
                     'wildcard'] and not T['Protein']):
                     return redirect('ancestralgenome_info', A.values()[0].ncbi_taxon_id)
 
-                species_augmented = S.values()
+                species_augmented = list(S.values())
                 for s_aug in species_augmented:
                     s_aug.type = "Extant"
 
                 logger.debug(" post-species w/o json: {}sec".format(time.time() - t2))
                 t2 = time.time()
                 # build json for genomes tables
-                json_species = GenomeModelJsonMixin().as_json(species_augmented)
-                json_ancestal_genomes = GenomeModelJsonMixin().as_json([augment_ancestral_genomes(ag) for ag in A.values()])
-                context['data_genomes'] = json.dumps(json_species + json_ancestal_genomes)
+                result_list = species_augmented + [augment_ancestral_genomes(ag) for ag in A.values()]
+                result_list.sort(key=lambda g: (-g.match_score, g.sciname))
+                context['data_genomes'] = json.dumps(GenomeModelJsonMixin().as_json(result_list))
                 logger.debug(" post-species json: {}sec".format(time.time() - t2))
 
             # Prepare details per term
@@ -2565,8 +2563,6 @@ def token_search(request):
             context['S_details'] = S_details
             logger.debug(f"search-post-pyoma: {time.time() - t1}sec")
         logger.debug(f"overall search: {time.time()-t0}sec")
-
-
 
     return render(request, 'search_token.html', context)
 

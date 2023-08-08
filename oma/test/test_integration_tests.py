@@ -121,103 +121,68 @@ class HogVisViewTest(TestCase):
         self.assertEqual(404, reply.status_code)
 
 
-class SyntenyViewTester(TestCase):
-    def verify_colors(self, query, window):
-        reply = self.client.get(reverse('synteny', args=[query, window]))
-        self.assertEqual(reply.status_code, 200)
-        query_genome_genes = reply.context['md']['genes']
-        ortholog_2_queryneighbors = collections.defaultdict(list)
-        for neigbor in query_genome_genes.values():
-            try:
-                for ortho in neigbor['orthologs']:
-                    ortholog_2_queryneighbors[ortho].append(neigbor)
-            except KeyError:
-                pass
-
-        query_gene = query_genome_genes[window]
-        other_genes = reply.context['o_md']
-        for query_ortholog in query_gene['orthologs']:
-            # assert that orthologs have the same type (===same color)
-            self.assertIn(query_ortholog, other_genes)
-        for ortholog in other_genes.values():
-            for o_neighbor in ortholog['o_genes'].values():
-                if not o_neighbor['o_type'] in ('blank', 'not found'):
-                    for query_gene in ortholog_2_queryneighbors[o_neighbor['entryid']]:
-                        if isinstance(o_neighbor['o_type'], list):
-                            self.assertIn(query_gene['type'], o_neighbor['o_type'])
-                        else:
-                            self.assertEqual(query_gene['type'], o_neighbor['o_type'],
-                                             'colors of {} disagrees with {}'
-                                             .format(o_neighbor['entryid'], query_gene['entryid']))
-
-    def test_colors_of_neighbors_various_windowsize(self):
-        queries = 'YEAST00055', 'YEAST00056', 'ASHGO01345'
-        windows_sizes = 4, 2, 6
-        for query in queries:
-            for window in windows_sizes:
-                self.verify_colors(query, window)
-
-    def test_many_to_many_links(self):
-        """test that there is an gene that is orthologous to genes 1 and 4 in query gene. If it is, then there
-        is a button element with class btn-5-0-
-        TODO: make this test more stable"""
-        query = 'SCHPO04241'
-        reply = self.client.get(reverse('synteny', args=[query]))
-        context = decode_replycontent(reply)
-        self.assertIn('btn-4', context)
-        self.verify_colors(query, 4)
-
-
-class SearchTester(TestCase):
-
+class TokenSearchTester(TestCase):
     def query_server(self, query, **kwargs):
-        url = reverse('search')
+        url = reverse('search_token')
         args = {'query': query}
         args.update(kwargs)
-        reply = self.client.get(url, data=args)
+        data = {'hidden_query': json.dumps([args])}
+        reply = self.client.post(url, data=data)
         return reply
 
-    def test_unique_ids_resolve_directly(self):
+    def query_multiple_tokens(self, tokens):
+        url = reverse('search_token')
+        data = {'hidden_query': json.dumps(tokens)}
+        reply = self.client.post(url, data=data)
+        return reply
+
+    def test_resolve_unique_ids(self):
         for query in ("PGTB2_SCHPO", "SPAC167.02", "O13948"):
-            res = self.query_server(query)
+            res = self.query_server(query=query, prefix='description', type='Protein')
             self.assertEqual(302, res.status_code, "ID '{}' did not resolve uniquely".format(query))
-            self.assertTrue(res.url.startswith('/oma/info/'))
+            self.assertTrue(res.url.startswith('/oma/vps/'))
+
+    def test_search_species_name(self):
+        queries = ["YEAST", "559292", "4890", "Saccharomyces cerevisiae", "Baker's yeast"]
+        expected_code = "YEAST"
+        for query in queries:
+            with self.subTest(query=query):
+                reply = self.query_server(query, prefix="species", type="Taxon")
+                self.assertEqual(200, reply.status_code)
+                self.assertIn('YEAST', [z['uniprot_species_code'] for z in json.loads(reply.context['data_genomes'])])
+
+    def test_sequence_search(self):
+        queries = ("RSYKNSSAEGVLTGKGLNWGGSLIRPEAFGLVYYTQAMIDYATNGSFEGKRVTISGSGANVAQYAALKVIEVVSLSDSKGCIISETSEQIHD",
+                   "RSYKNSSAEGVLTGKGLNWGGSLIRPEAF".lower())
+        for query in queries:
+            with self.subTest(query=query):
+                res = self.query_server(query=query, prefix="sequence", type="Protein")
+                self.assertEqual(200, res.status_code)
+                self.assertIn('DHE5_YEAST', [z['xrefid'] for z in json.loads(res.context['data_entry'])])
 
     def test_part_of_id(self):
         query = "TB2"
-        reply = self.query_server(query)
-        for target in json.loads(reply.context['data']):
+        reply = self.query_server(query, prefix="xref", type="Protein")
+        for target in json.loads(reply.context['data_entry']):
             for xref in target['xrefs']:
                 if query.lower() in xref['xref'].lower():
                     break
             else:
                 self.assertTrue(False, "Couldn't find '{}' in search result {}".format(query, target))
 
-    def test_sequence_search(self):
-        s = "RSYKNSSAEGVLTGKGLNWGGSLIRPEAFGLVYYTQAMIDYATNGSFEGKRVTISGSGANVAQYAALKVIEVVSLSDSKGCIISETSEQIHD"
-        res = self.client.post(reverse('search'), data={'query': s, 'type': 'sequence'})
-        self.assertEqual(200, res.status_code)
-        self.assertIn('DHE5_YEAST', [z['xrefid'] for z in json.loads(res.context['data'])])
-
-    def test_sequence_in_lowercase(self):
-        s = "RSYKNSSAEGVLTGKGLNWGGSLIRPEAF".lower()
-        reply = self.query_server(s, type="sequence")
-        self.assertIn('DHE5_YEAST', [z['xrefid'] for z in json.loads(reply.context['data'])])
-
     def test_numeric_group_search(self):
         gnr = 10
-        res = self.query_server(gnr, type='group')
+        res = self.query_server(gnr, type='OMA_Group', prefix="og")
         self.assertEqual(302, res.status_code)
-        self.assertEqual(reverse('omagroup', args=[gnr]), res.url)
+        self.assertEqual(reverse('omagroup_members', args=[gnr]), res.url)
 
-    def test_search_species_name(self):
-        queries = ["YEAST", "559292", "4890", "Saccharomyces cerevisiae", "Baker's yeast"]
-        expected_code = "YEAST"
-        for query in queries:
-            reply = self.query_server(query, type="species")
-            self.assertEqual(200, reply.status_code)
-            self.assertIn('YEAST', [z['uniprot_species_code'] for z in json.loads(reply.context['data'])])
-
+    def test_two_species_terms(self):
+        res = self.query_multiple_tokens([{'query': "Saccharomyces", "prefix": "species", "type": "Taxon"},
+                                          {'query': "Fungi", "prefix": "species", "type": "Taxon"},
+                                         ])
+        self.assertEqual(200, res.status_code)
+        genome_data = json.loads(res.context['data_genomes'])
+        self.assertIn('YEAST', [z['uniprot_species_code'] for z in genome_data])
 
 
 class TemplatetagTester(TestCase):
