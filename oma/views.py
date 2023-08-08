@@ -2530,12 +2530,12 @@ def token_search(request):
 
                 # redirect to genome page is only searching for genome and get one match
                 if (number_species == 1 and number_ancestral == 0 and not T['OMA_Group'] and not T['HOG'] and not T['wildcard'] and not T['Protein']):
-                    return redirect('genome_info', S.values()[0].uniprot_species_code)
+                    return redirect('genome_info', list(S.values())[0].uniprot_species_code)
 
                 # redirect to ancestral genome page is only searching for genome and get one match
                 if (number_species == 0 and number_ancestral == 1 and not T['OMA_Group'] and not T['HOG'] and not T[
                     'wildcard'] and not T['Protein']):
-                    return redirect('ancestralgenome_info', A.values()[0].ncbi_taxon_id)
+                    return redirect('ancestralgenome_info', list(A.values())[0].ncbi_taxon_id)
 
                 species_augmented = list(S.values())
                 for s_aug in species_augmented:
