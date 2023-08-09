@@ -6,43 +6,332 @@
 {% block title %}Go Enrichment Analysis Result{% endblock %}
 {% block content %}
 
+    <script src="{% static "js/bootstrap-table.min.js" %}"></script>
+    <link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
 
-<div id="oma-generic-container">
 
-    <div class="container">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 
-        <div class="jumbotron">
 
-            <h1>GO ENRICHMENT</h1>
+    <div id="oma-generic-container">
 
-            <div class="oma-seperator">
-                <span class="colour1"></span>
-                <span class="colour2"></span>
-                <span class="colour3"></span>
+        <div class="container">
+
+            <div class="jumbotron">
+
+                <h1>GO ENRICHMENT</h1>
+
+                <div class="oma-seperator">
+                    <span class="colour1"></span>
+                    <span class="colour2"></span>
+                    <span class="colour3"></span>
+                </div>
+
+                <p id="datum">
+
+                </p>
+
             </div>
-
-            <p>
-
-                <script>
-
-                    $.getJSON("/api/enrichment/status/{{ data }}/", function( jsonData ) {
-                       console.log(jsonData)
-                    });
-
-
-                </script>
-
-
-
-            </p>
-
-
 
         </div>
 
     </div>
 
-</div>
+    <script>
+
+        var transpose = function (data_structure) {
+
+            var transposed = {};
+
+            for (const [data_header, d] of Object.entries(data_structure)) {
+
+                for (const [dElement, dc] of Object.entries(d)) {
+
+                    if (!(dElement in transposed)) {
+                        transposed[dElement] = {'id': dElement}
+                    }
+
+                    transposed[dElement][data_header] = dc;
+
+                }
+
+            }
+
+            return Object.values(transposed)
+
+        }
+
+        var plot = function (div_id, data) {
+
+            var color_start = 'lightblue'
+            var color_end = 'salmon'
+
+            // Specify the chart’s dimensions.
+            const width = 928;
+            const height = 600;
+            const marginTop = 25;
+            const marginRight = 20;
+            const marginBottom = 35;
+            const marginLeft = 40;
+
+            // Create the positional scales.
+            var x = d3.scaleLinear()
+                .domain(d3.extent(data, d => d.MDS1)).nice()
+                .range([marginLeft, width - marginRight]);
+            var y = d3.scaleLinear()
+                .domain(d3.extent(data, d => d.MDS2)).nice()
+                .range([height - marginBottom, marginTop]);
+
+            var z = d3.scaleLinear()
+                .domain(d3.extent(data, d => d.ic)).nice()
+                .range([5, 20]);
+
+            var color = d3.scaleLinear()
+                .domain(d3.extent(data, d => d.p_fdr_bh)).nice()
+                .range([color_start, color_end]);
+
+            var tool = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0)
+                .style("background-color", 'lightgrey')
+                .style("padding", '12px')
+                .style("border-radius", '12px')
+                .style("opacity", 0)
+
+            // Create the SVG container.
+            var svg = d3.select('#' + div_id).append("svg")
+                .attr("viewBox", [0, 0, width, height])
+                .attr("width", width)
+                .attr("height", height)
+                .attr("style", "max-width: 100%; height: auto;");
+
+            // Append the axes.
+            svg.append("g")
+                .attr("transform", `translate(0,${height - marginBottom})`)
+                .call(d3.axisBottom(x).ticks(width / 80))
+                .call(g => g.select(".domain").remove())
+                .call(g => g.append("text")
+                    .attr("x", width)
+                    .attr("y", marginBottom - 4)
+                    .attr("fill", "currentColor")
+                    .attr("text-anchor", "end")
+                    .text("Dimension 1 →"));
+
+            svg.append("g")
+                .attr("transform", `translate(${marginLeft},0)`)
+                .call(d3.axisLeft(y))
+                .call(g => g.select(".domain").remove())
+                .call(g => g.append("text")
+                    .attr("x", -marginLeft)
+                    .attr("y", 10)
+                    .attr("fill", "currentColor")
+                    .attr("text-anchor", "start")
+                    .text("↑ Dimension 2"));
+
+            // Add a grid.
+            svg.append("g")
+                .attr("stroke", "currentColor")
+                .attr("stroke-opacity", 0.1)
+                .call(g => g.append("g")
+                    .selectAll("line")
+                    .data(x.ticks())
+                    .join("line")
+                    .attr("x1", d => 0.5 + x(d))
+                    .attr("x2", d => 0.5 + x(d))
+                    .attr("y1", marginTop)
+                    .attr("y2", height - marginBottom))
+                .call(g => g.append("g")
+                    .selectAll("line")
+                    .data(y.ticks())
+                    .join("line")
+                    .attr("y1", d => 0.5 + y(d))
+                    .attr("y2", d => 0.5 + y(d))
+                    .attr("x1", marginLeft)
+                    .attr("x2", width - marginRight));
+
+            console.log(svg.node())
+
+            // Add the scatterplot circel.
+            svg.selectAll(".circle_" + div_id)
+                .data(data)
+                .enter().append("circle")
+                .attr("class", "circle_" + div_id)
+                .attr("cx", function (d) {
+                    return x(d.MDS1);
+                })
+                .attr("cy", function (d) {
+                    return y(d.MDS2);
+                })
+                .attr("r", function (d) {
+                    return z(d.ic)
+                })
+                .style("fill", function (d) {
+                    return color(d.p_fdr_bh)
+                })
+                .style("opacity", 0.3)
+                .style("stroke", "white")
+                .on("mouseover", function (event, d) {
+
+                    tool.style("opacity", .9);
+                    tool.html(` <strong>ID:</strong> ${d.GO_ID} <br> <strong>Name:</strong> ${ d.name} <br>
+<strong>Information Content:</strong> ${d.ic} <br> <strong>p-value:</strong> ${d.p_fdr_bh} <br> `)
+
+                        .style("left", (event.pageX + 12) + "px")
+                        .style("top", (event.pageY + 12) + "px");
+                })
+                .on("mouseout", function (d) {
+                    tool.style("opacity", 0);
+                });
+
+
+            //Append a defs (for definition) element to your SVG
+            var defs = svg.append("defs");
+
+//Append a linearGradient element to the defs and give it a unique id
+            var linearGradient = defs.append("linearGradient")
+                .attr("id", "linear-gradient");
+
+            linearGradient
+                .attr("x1", "0%")
+                .attr("y1", "0%")
+                .attr("x2", "100%")
+                .attr("y2", "0%");
+
+//Set the color for the start (0%)
+            linearGradient.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", color_start); //light blue
+
+//Set the color for the end (100%)
+            linearGradient.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", color_end); //dark blue
+
+
+            //Draw the rectangle and fill with gradient
+            svg.append("rect")
+                .attr("width", 300)
+                .attr("height", 10)
+                .style("fill", "url(#linear-gradient)")
+                .attr('transform', 'translate(' + (width - 300 - marginRight) + ',0)')
+
+            svg.append("text")
+                .attr("y", 8)
+                .attr('transform', 'translate(' + (width - 300 - marginRight - 6) + ',0)')
+                .style("text-anchor", "end")
+                .style('font-weight', 600)
+                .style('font-size', '10px')
+                .attr("dx", "0")
+                .text('p-value');
+
+
+            svg.append("text")
+                .attr("y", 20)
+                .attr('transform', 'translate(' + (width - 300 - marginRight) + ',0)')
+                .style("text-anchor", "start")
+                .style('font-size', '10px')
+                .attr("dx", "0")
+                .text(color.domain()[0]);
+
+            svg.append("text")
+                .attr("y", 20)
+                .attr('transform', 'translate(' + (width - marginRight) + ',0)')
+                .style("text-anchor", "end")
+                .style('font-size', '10px')
+                .attr("dx", "0")
+                .text(color.domain()[1]);
+
+
+        }
+
+        $.getJSON("/api/enrichment/status/{{ data }}/", function (jsonData) {
+
+            if (jsonData.state !== 'DONE') {
+
+                document.getElementById('datum').innerHTML = "Computation not finished, this page will auto-refresh in <span id='timer'> 10 </span> sec or you can hit the refresh button."
+
+                const refreshTimer = document.getElementById('timer');
+
+                let timerInSeconds = 0;
+
+                setInterval(() => {
+
+                    timerInSeconds += 1;
+
+                    refreshTimer.innerHTML = `${10 - timerInSeconds}`;
+
+                    if (timerInSeconds >= 10) {
+                        window.location.reload();
+                    }
+                }, 1000);
+
+            } else if (jsonData.state === 'DONE') {
+
+                $.getJSON(jsonData.result_json, function (r) {
+
+                    var c = document.getElementById('datum');
+
+                    data_enrichment = transpose(r['enrichment'])
+
+                    c.innerHTML = `
+<br>
+
+                <h4>You can download the detailed result for this GO enrichment analysis by clicking <a href="${jsonData.result}"> here </a></h4>
+
+<br>
+
+
+                <table class="table table-hover" id="table"
+ data-mobile-responsive="true" >
+  <thead>
+    <tr>
+      <th data-field="GO_ID" data-sortable="true"> GO_ID </th>
+                <th data-field="GO_Name" data-sortable="true"> GO_Name </th>
+                <th data-field="study_count" data-sortable="true"> study_count </th>
+                <th data-field="pop_count" data-sortable="true"> pop_count </th>
+                <th data-field="Study_Entries" data-sortable="true"> Study_Entries </th>
+                <th data-field="study_n" data-sortable="true"> study_n </th>
+                <th data-field="p_uncorrected" data-sortable="true"> p_uncorrected </th>
+                <th data-field="p_bonferroni" data-sortable="true"> p_bonferroni </th>
+                <th data-field="p_fdr_bh" data-sortable="true"> p_fdr_bh </th>
+                <th data-field="GO_Aspect" data-sortable="true"> GO_Aspect </th>
+                <th data-field="Study_Proportion" data-sortable="true"> Study_Proportion </th>
+                <th data-field="Study_Ratio" data-sortable="true"> Study_Ratio </th>
+                <th data-field="Population_Proportion" data-sortable="true"> Population_Proportion </th>
+                <th data-field="Population_Ratio" data-sortable="true"> Population_Ratio </th>
+                <th data-field="Fold_Change" data-sortable="true"> Fold_Change </th>
+    </tr>
+  </thead>
+</table>
+                `
+
+                    var $table = $('#table')
+                    $table.bootstrapTable({data: data_enrichment})
+
+
+                    for (const [general_type, dati] of Object.entries(r['embedding'])) {
+
+                        var div = document.createElement("div");
+                        div.innerHTML = '<br>  <strong>' + general_type + '</strong>  <div id="d3_' + general_type + '"></div> '
+
+                        c.appendChild(div)
+
+                        plot('d3_' + general_type, transpose(dati))
+
+
+                    }
+
+                })
+
+            }
+
+
+        }).fail(function (jqxhr, textStatus, error) {
+            document.getElementById('datum').innerHTML = 'Something wrong happened: ' + error
+        })
+
+
+    </script>
 
 
 {% endblock content %}
