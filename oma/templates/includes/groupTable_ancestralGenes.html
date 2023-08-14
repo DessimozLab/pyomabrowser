@@ -152,6 +152,51 @@ apply_filter();
 
 }
 
+function run_go(){
+
+    if (apply_filter_lost && (apply_filter_retained || apply_filter_duplicated || apply_filter_gained ) ){
+
+        alert("You can't run a go enrichment analysis with lost gene (upper level HOG) and retained/gained/duplicated HOGs. Please adjust the " +
+            "settings in the left sidebar.")
+
+    }
+
+    else{
+
+        var table_data = $("#grpTable").bootstrapTable('getData')
+
+        var input_foreground = Object.keys(table_data).map(key => table_data[key].hog_id);
+        var input_type = 'ancestral'
+        var input_name = 'ancestral_'
+
+        var input_level = apply_filter_lost ? "{{ level }}" : "{{ genome_name }}"
+
+
+        fetch("/api/enrichment/", {
+          method: "POST",
+          body: JSON.stringify({
+              foreground: input_foreground,
+              type: input_type,
+              name: input_name,
+              taxlevel: input_level ,
+          }),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        })
+          .then((response) => response.json())
+          .then((json) =>  window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_self") )
+
+
+
+    }
+
+
+
+
+
+}
+
 const apply_filter = function(){
 
         var filter_parameters = [];
@@ -200,7 +245,15 @@ const apply_filter = function(){
           }
 
 
-            $('#grpTable').bootstrapTable('filterBy', {hog_id: ids_to_keep} )
+
+             if (!hide_column_event){
+                 $('#grpTable').bootstrapTable('filterBy', {hog_id: ids_to_keep, event: filter_parameters} )
+             }
+             else {
+                 $('#grpTable').bootstrapTable('filterBy', {hog_id: ids_to_keep} )
+             }
+
+
 
 
 
