@@ -239,16 +239,18 @@ data_original = jsonData
             showMultiSort: true,
             showLoading: true,
             onPostBody: function (data) {
+            },
+            onLoadSuccess: function (data) {
+
+                data_original = data
+
+                tab.bootstrapTable('hideLoading');
+
                 if (need_apply_filter){
                     need_apply_filter = false
                     apply_filter()
                 }
 
-            },
-            onLoadSuccess: function (data) {
-                data_original = data
-
-                tab.bootstrapTable('hideLoading');
         },
         refreshOptions: {'icons': icons},
 
