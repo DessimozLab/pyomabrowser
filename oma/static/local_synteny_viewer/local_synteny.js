@@ -27,13 +27,13 @@ class LocalSyntenyViewer {
             marginBottom: 40,
             marginLeft: 40,
             width_board: document.getElementById(this.div_id).offsetWidth,
-            width_tree: 300,
-            width_text: 100,
+            width_tree: 200,
+            width_text: 200,
             // UI TREE
             dx: 40,
             circle_radius: 4,
             circle_radius_leaf: 3,
-            length_displayed_name_leaf: 10,
+            length_displayed_name_leaf: 20,
             textMarginRight: 10,
             // UI SYNTENY
             height_synteny: 20,
@@ -222,6 +222,42 @@ class LocalSyntenyViewer {
             .style('font-family', 'monospace')
 
 
+        // ADD LEGEND
+        var g_legend = this.svg.append("g").attr("transform", () => {
+                return "translate(" + -8 + ", " + y_ref + ")"
+            })
+
+        g_legend.append("circle")
+            .attr("r", this.settings.circle_radius )
+            .attr("fill",  'salmon' )
+            .attr("stroke-width", 10)
+
+        g_legend.append('text')
+            .attr("dy", "0.31em")
+            .attr("x", 10)
+            .attr("text-anchor", "start")
+            .text(d => 'Duplication')
+            .style('font-size', "14px")
+            .style('font-family', 'monospace')
+
+        var g_legend_spe = this.svg.append("g").attr("transform", () => {
+                return "translate(" + -8 + ", " + (y_ref + 16) + ")"
+            })
+
+        g_legend_spe.append("circle")
+            .attr("r", this.settings.circle_radius )
+            .attr("fill",  '#555' )
+            .attr("stroke-width", 10)
+
+        g_legend_spe.append('text')
+            .attr("dy", "0.31em")
+            .attr("x", 10)
+            .attr("text-anchor", "start")
+            .text(d => 'Speciation')
+            .style('font-size', "14px")
+            .style('font-family', 'monospace')
+
+
         const transition = this.svg.transition()
             .duration(duration)
             .attr("height", height)
@@ -260,7 +296,7 @@ class LocalSyntenyViewer {
                     }
 
                     var tt = {
-                        title: "Duplication node  can't be collapse",
+                        title: "Duplication node  can't be collapsed",
                         action: () => null
                     }
 
@@ -362,7 +398,7 @@ class LocalSyntenyViewer {
             .attr("dy", "0.31em")
             .attr("x", this.settings.textMarginRight)
             .attr("text-anchor", "start")
-            .text(d => this.format_name(d))
+            .text(d => {return this.format_name(d)})
             .style('font-size', "10px")
             .style('font-family', 'monospace')
             .clone(true).lower()
@@ -897,7 +933,7 @@ class LocalSyntenyViewer {
 
         if (d.data.data.id.length <= this.settings.length_displayed_name_leaf) return d.data.data.id
 
-        return d.data.data.id.substring(0, 7) + '...';
+        return d.data.data.id.substring(0,this.settings.length_displayed_name_leaf-3 ) + '...';
 
     }
 
