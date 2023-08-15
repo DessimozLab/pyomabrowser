@@ -64,7 +64,7 @@
 
         event.preventDefault();
 
-        var input_foreground = document.getElementById('id_Foreground').value.split(/[\s,]+/)
+        var input_foreground = document.getElementById('id_Foreground').value.split(/[\s,\n\t]+/)
         var input_type = document.getElementById('id_type').value
         var input_name = document.getElementById('id_name').value
         var input_level = document.getElementById('id_taxon').value ? document.getElementById('id_taxon').value : ""
