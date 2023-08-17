@@ -365,6 +365,25 @@ class LocalSyntenyViewer {
 
                     }
 
+                       var ttcall = {
+                            title: 'Collapse All',
+                            action: () => {
+                                this.collapse_all_node(node)
+                            }
+                        }
+
+                        menu.push(ttcall)
+
+                    var tteall = {
+                            title: 'Expand All',
+                            action: () => {
+                                this.expand_all_node(node)
+                            }
+                        }
+
+                        menu.push(tteall)
+
+
                     if (node.children || node._children) {
 
                         var ttt = {
@@ -699,6 +718,61 @@ class LocalSyntenyViewer {
         }
         this.update(event, d);
     }
+
+    collapse_all_node(d) {
+
+        if (d.data.data.paralog) return
+
+        this._traverse(d, null, function (child_done, current_node) {
+
+            if (child_done.data.data.paralog){return}
+
+            if (child_done.children == null ){return}
+
+           child_done._children = child_done.children;
+            child_done.children = null;
+
+        })
+
+
+        if (d.children){
+             d._children = d.children;
+            d.children = null;
+        }
+
+
+
+        this.update(event, d);
+    }
+
+    expand_all_node(d) {
+
+        if (d.data.data.paralog) return
+
+        this._traverse(d, function (current_node, children_done) {
+
+            if (current_node.data.data.paralog){return}
+
+            if (current_node.children){return}
+
+
+            current_node.children = current_node._children;
+            current_node._children = null;
+
+
+
+
+        }, null)
+
+        if (d.children == null ){
+            d.children = d._children;
+            d._children = null;}
+
+
+
+        this.update(event, d);
+    }
+
 
     load_and_process_synteny_api(hog_id, jsonData, is_reference) {
 
