@@ -34,6 +34,7 @@ class LocalSyntenyViewer {
             circle_radius: 4,
             circle_radius_leaf: 3,
             length_displayed_name_leaf: 20,
+            length_displayed_name_leaf_sub: 40,
             textMarginRight: 10,
             // UI SYNTENY
             height_synteny: 20,
@@ -176,6 +177,7 @@ class LocalSyntenyViewer {
         var that = this // UGLY HANDLE
 
         d3.selectAll(".g_synteny").remove();
+        d3.selectAll(".g_legend").remove();
         this.close_tooltip()
 
         const duration = event?.altKey ? 2500 : 250; // hold the alt key to slow down the transition
@@ -221,9 +223,24 @@ class LocalSyntenyViewer {
             .style("font-weight", 900)
             .style('font-family', 'monospace')
 
+        // ADD ROOT LEVEL
+        this.svg.append('text')
+            .attr("x",8)
+            .attr("y",-8)
+            .attr("text-anchor", "start")
+            .text(d => this.focal_species)
+            .style('font-size', "16px")
+            .style("font-weight", 900)
+            .style('font-family', 'monospace')
+        .attr("transform", () => {
+                return "rotate(-90)"
+            })
+
 
         // ADD LEGEND
-        var g_legend = this.svg.append("g").attr("transform", () => {
+        var g_legend = this.svg.append("g")
+            .attr('class', 'g_legend')
+            .attr("transform", () => {
                 return "translate(" + -8 + ", " + y_ref + ")"
             })
 
@@ -240,7 +257,9 @@ class LocalSyntenyViewer {
             .style('font-size', "14px")
             .style('font-family', 'monospace')
 
-        var g_legend_spe = this.svg.append("g").attr("transform", () => {
+        var g_legend_spe = this.svg.append("g")
+            .attr('class', 'g_legend')
+            .attr("transform", () => {
                 return "translate(" + -8 + ", " + (y_ref + 16) + ")"
             })
 
@@ -313,7 +332,17 @@ class LocalSyntenyViewer {
 
                     menu.push(t)
 
-                    if (node.children) {
+
+                     var ts = {
+                    title: node.data.data.species,
+                    action: null}
+
+
+                    menu.push(ts)
+
+
+
+                       if (node.children) {
                         var tt = {
                             title: 'Collapse',
                             action: () => {
@@ -395,6 +424,7 @@ class LocalSyntenyViewer {
 
 
         nodeEnter.append("text")
+            .attr('class', 'leaf_label')
             .attr("dy", "0.31em")
             .attr("x", this.settings.textMarginRight)
             .attr("text-anchor", "start")
@@ -406,6 +436,16 @@ class LocalSyntenyViewer {
             .attr("stroke-width", 3)
             .attr("stroke", "white");
 
+         nodeEnter.append("text")
+            .attr('class', 'leaf_sub_label')
+            .attr("dy", "14px")
+            .attr("x", "14px" )
+            .attr("text-anchor", "start")
+            .text(d => {return this.format_sub_name(d)})
+            .style('font-size', "10px")
+            .style('font-family', 'monospace')
+
+
         // Transition nodes to their new position.
         const nodeUpdate = node.merge(nodeEnter)
 
@@ -414,8 +454,12 @@ class LocalSyntenyViewer {
             .attr("fill-opacity", 1)
             .attr("stroke-opacity", 1)
 
-        nodeUpdate.selectAll('text').style('font-size', d => {
+        nodeUpdate.selectAll('.leaf_label').style('font-size', d => {
             return d._children || d.height == 0 ? '14px' : '0px'
+        })
+
+        nodeUpdate.selectAll('.leaf_sub_label').style('font-size', d => {
+            return d._children || d.height == 0 ? '10px' : '0px'
         })
 
         nodeUpdate.selectAll('path').attr("fill-opacity", d => {
@@ -934,6 +978,14 @@ class LocalSyntenyViewer {
         if (d.data.data.id.length <= this.settings.length_displayed_name_leaf) return d.data.data.id
 
         return d.data.data.id.substring(0,this.settings.length_displayed_name_leaf-3 ) + '...';
+
+    }
+
+    format_sub_name(d) {
+
+        if (d.data.data.id.length <= this.settings.length_displayed_name_leaf_sub) return d.data.data.species
+
+        return d.data.data.id.substring(0,this.settings.length_displayed_name_leaf_sub-3 ) + '...';
 
     }
 
