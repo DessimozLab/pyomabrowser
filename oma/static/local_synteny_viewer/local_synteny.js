@@ -72,7 +72,7 @@ class LocalSyntenyViewer {
         });
 
         if (!this.synteny_data[this.reference_element]) {
-            this.div.append("p").text('No synteny is available for this HOG or gene.')
+            this.div.append("p").text('Ancestral Synteny for ' + this.reference_element +' around '+ this.focal_species +' not found.')
                 .style('text-align', 'center')
                 .style('top', '200px')
                 .style('position', 'relative')
@@ -303,7 +303,228 @@ class LocalSyntenyViewer {
             .attr("r", d => d.children ? this.settings.circle_radius : this.settings.circle_radius_leaf) // TODO REMOVE THIS BUG d.children && d.children.length === 1 ? 0 :
             .attr("fill", d => d.data.data.paralog ? 'salmon' : d._children || d.children ? "#555" : "#999")
             .attr("stroke-width", 10)
-            .on("click", (event, node) => {
+            .on("click", (event, node) => { this._click_node(event,node)})
+
+
+        nodeEnter.append("text")
+            .attr('class', 'leaf_label')
+            .attr("dy", "0.31em")
+            .attr("x", this.settings.textMarginRight)
+            .attr("text-anchor", "start")
+            .text(d => {return this.format_name(d)})
+            .style('font-size', "10px")
+            .style('font-family', 'monospace')
+            .on("click", (event, node) => { this._click_node(event,node)})
+            .clone(true).lower()
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-width", 3)
+            .attr("stroke", "white")
+
+
+
+         nodeEnter.append("text")
+            .attr('class', 'leaf_sub_label')
+            .attr("dy", "14px")
+            .attr("x", "14px" )
+            .attr("text-anchor", "start")
+            .text(d => {return this.format_sub_name(d)})
+            .style('font-size', "10px")
+            .style('font-family', 'monospace')
+        .on("click", (event, node) => { this._click_node(event,node)})
+
+
+        // Transition nodes to their new position.
+        const nodeUpdate = node.merge(nodeEnter)
+
+        nodeUpdate.transition(transition)
+            .attr("transform", d => `translate(${d.y},${d.x})`)
+            .attr("fill-opacity", 1)
+            .attr("stroke-opacity", 1)
+
+        nodeUpdate.selectAll('.leaf_label').style('font-size', d => {
+            return d._children || d.height == 0 ? '14px' : '0px'
+        })
+
+        nodeUpdate.selectAll('.leaf_sub_label').style('font-size', d => {
+            return d._children || d.height == 0 ? '10px' : '0px'
+        })
+
+        nodeUpdate.selectAll('path').attr("fill-opacity", d => {
+            return d._children ? '1' : '0'
+        })
+
+        // Transition exiting nodes to the parent's new position.
+        const nodeExit = node.exit().transition(transition).remove()
+            .attr("transform", d => `translate(${source.y},${source.x})`)
+            .attr("fill-opacity", 0)
+            .attr("stroke-opacity", 0);
+
+        // Update the links…
+        const link = this.gLink.selectAll("path")
+            .data(links, d => d.target.id);
+
+        // Enter any new links at the parent's previous position.
+        const linkEnter = link.enter().append("path")
+            .attr("d", d => {
+                const o = {x: source.x0, y: source.y0};
+                return this._diagonal({source: o, target: o});
+            });
+
+        // Transition links to their new position.
+        link.merge(linkEnter).transition(transition)
+            .attr("d", this._diagonal);
+
+        // Transition exiting nodes to the parent's new position.
+        link.exit().transition(transition).remove()
+            .attr("d", d => {
+                const o = {x: source.x, y: source.y};
+                return this._diagonal({source: o, target: o});
+            });
+
+        // Stash the old positions for transition.
+        this.root.eachBefore(d => {
+            d.x0 = d.x;
+            d.y0 = d.y;
+        });
+
+
+        // Render synteny
+
+        this.gNode.selectAll("g").filter(function (d, i) {
+            return d._children || d.height == 0
+        }).each(function (d) {
+
+            var g = d3.select(this).append('g').attr('class', 'g_synteny')
+            var idd = d.data.data.id.split('_')[0]
+
+            if (that.synteny_data.hasOwnProperty(idd)) {
+                that.render_synteny(g, that.synteny_data[idd].linear_synteny)
+                return
+            }
+
+            var level_query = d.data.data.hasOwnProperty('LOFT') ? '' :  '&level=' + d.data.data.species;
+
+            $.ajax({
+
+                url: "/api/synteny/" + idd + "/?evidence=linearized&context=" + that.settings.hald_window + level_query,
+                dataType: 'json',
+                async: true,
+                success: function (jsonData) {
+                    that.load_and_process_synteny_api(idd, jsonData);
+                    that.render_synteny(g, that.synteny_data[idd].linear_synteny)
+
+                }
+            });
+
+        });
+
+    }
+
+    _diagonal(d) {
+        return "M" + d.source.y + "," + d.source.x
+            + "V" + d.target.x + "H" + d.target.y;
+    }
+
+    render_synteny(g_container, data) {
+
+        var that = this
+
+        for (let i = 0; i < data.length; i++) {
+
+            if (data[i] == null) continue
+
+            var e = data[i].hog_id ? data[i].hog_id : data[i].id
+
+            var posL = (this.settings.width_text + this.settings['marginLeftSynteny']) + (i * (this.settings['width_block'] + this.settings['blockMargin']))
+
+            g_container.append("line")
+                .style("stroke", "black")
+                .attr("x1", posL - this.settings['blockMargin'])
+                .attr("x2", posL + this.settings['width_block'] + this.settings['blockMargin'])
+                .attr("y1", 0)
+                .attr("y2", 0)
+
+            var r = g_container.append("rect")
+
+            r.attr("x", posL)
+                .attr("y", -7)
+                .attr("width", this.settings['width_block'])
+                .attr("height", 15)
+                .attr("fill", () => {
+                    return this.color_scale(this.get_domain_scale(e))
+                })
+                .style("stroke-width", 1)
+                .style("stroke", () => {
+                    return  e.split('.')[0] == this.focal_hog.split('.')[0] ? "black" : "white" // todo
+                })
+                .on("mouseover", function (event) {
+
+
+                    if (data[i].hog_id || data[i].hog_id == '' ) {
+                        that.render_tooltip_synteny_extant(event.offsetX + 12, event.offsetY + 12, data[i].id, r)
+                    } else {
+                        that.render_tooltip_synteny_hog(event.offsetX + 12, event.offsetY + 12, data[i].id, r)
+                    }
+
+                })
+                .on("mouseleave", function () {
+                    that.close_tooltip()
+
+                }).style("cursor", "pointer")
+                .on("click", () => {
+                    if (data[i].hog_id) {
+                        that.callback_gene_local_synteny(data[i].id)
+                    } else {
+                        that.call_back_hog_local_synteny(data[i].id)
+                    }
+
+                })
+
+        }
+
+    }
+
+    // TREE
+
+    render_tooltip(x, y, menu) {
+
+        this.Tooltip.style("opacity", 1).style("display", 'block')
+            .style("left", x + 12 + "px")
+            .style("top", y + 12 + "px")
+
+        this.Tooltip.html('')
+
+        var gg = this.Tooltip.selectAll('menu_item')
+            .data(menu)
+            .enter().append('text')
+            .style('text-align', 'center')
+            .style('display', 'block')
+            .style('cursor', (d) => {
+                return d.action ? 'pointer' : 'auto'
+            })
+            .style("font-weight", (d) => {
+                return d.title === "Close" || !d.action ? 900 : 400
+            })
+            .style('font-size', d => {
+                return '12 px';
+            })
+            .text(function (d) {
+                return d.title;
+            })
+            .on('mouseover', function (d) {
+                d3.select(this).style('fill', 'steelblue');
+            })
+            .on('mouseout', function (d) {
+                d3.select(this).style('fill', 'black');
+            })
+            .on('click', function (d, i) {
+                i.action(d);
+            })
+
+
+    }
+
+    _click_node (event, node) {
 
                 var menu = [];
 
@@ -439,221 +660,7 @@ class LocalSyntenyViewer {
 
                 this.render_tooltip(event.offsetX + 12, event.offsetY + 12, menu)
 
-            })
-
-
-        nodeEnter.append("text")
-            .attr('class', 'leaf_label')
-            .attr("dy", "0.31em")
-            .attr("x", this.settings.textMarginRight)
-            .attr("text-anchor", "start")
-            .text(d => {return this.format_name(d)})
-            .style('font-size', "10px")
-            .style('font-family', 'monospace')
-            .clone(true).lower()
-            .attr("stroke-linejoin", "round")
-            .attr("stroke-width", 3)
-            .attr("stroke", "white");
-
-         nodeEnter.append("text")
-            .attr('class', 'leaf_sub_label')
-            .attr("dy", "14px")
-            .attr("x", "14px" )
-            .attr("text-anchor", "start")
-            .text(d => {return this.format_sub_name(d)})
-            .style('font-size', "10px")
-            .style('font-family', 'monospace')
-
-
-        // Transition nodes to their new position.
-        const nodeUpdate = node.merge(nodeEnter)
-
-        nodeUpdate.transition(transition)
-            .attr("transform", d => `translate(${d.y},${d.x})`)
-            .attr("fill-opacity", 1)
-            .attr("stroke-opacity", 1)
-
-        nodeUpdate.selectAll('.leaf_label').style('font-size', d => {
-            return d._children || d.height == 0 ? '14px' : '0px'
-        })
-
-        nodeUpdate.selectAll('.leaf_sub_label').style('font-size', d => {
-            return d._children || d.height == 0 ? '10px' : '0px'
-        })
-
-        nodeUpdate.selectAll('path').attr("fill-opacity", d => {
-            return d._children ? '1' : '0'
-        })
-
-        // Transition exiting nodes to the parent's new position.
-        const nodeExit = node.exit().transition(transition).remove()
-            .attr("transform", d => `translate(${source.y},${source.x})`)
-            .attr("fill-opacity", 0)
-            .attr("stroke-opacity", 0);
-
-        // Update the links…
-        const link = this.gLink.selectAll("path")
-            .data(links, d => d.target.id);
-
-        // Enter any new links at the parent's previous position.
-        const linkEnter = link.enter().append("path")
-            .attr("d", d => {
-                const o = {x: source.x0, y: source.y0};
-                return this._diagonal({source: o, target: o});
-            });
-
-        // Transition links to their new position.
-        link.merge(linkEnter).transition(transition)
-            .attr("d", this._diagonal);
-
-        // Transition exiting nodes to the parent's new position.
-        link.exit().transition(transition).remove()
-            .attr("d", d => {
-                const o = {x: source.x, y: source.y};
-                return this._diagonal({source: o, target: o});
-            });
-
-        // Stash the old positions for transition.
-        this.root.eachBefore(d => {
-            d.x0 = d.x;
-            d.y0 = d.y;
-        });
-
-
-        // Render synteny
-
-        this.gNode.selectAll("g").filter(function (d, i) {
-            return d._children || d.height == 0
-        }).each(function (d) {
-
-            var g = d3.select(this).append('g').attr('class', 'g_synteny')
-            var idd = d.data.data.id.split('_')[0]
-
-            if (that.synteny_data.hasOwnProperty(idd)) {
-                that.render_synteny(g, that.synteny_data[idd].linear_synteny)
-                return
             }
-
-            var level_query = d.data.data.hasOwnProperty('LOFT') ? '' :  '&level=' + d.data.data.species;
-
-            $.ajax({
-
-                url: "/api/synteny/" + idd + "/?evidence=linearized&context=" + that.settings.hald_window + level_query,
-                dataType: 'json',
-                async: true,
-                success: function (jsonData) {
-                    that.load_and_process_synteny_api(idd, jsonData);
-                    that.render_synteny(g, that.synteny_data[idd].linear_synteny)
-
-                }
-            });
-
-        });
-
-    }
-
-    _diagonal(d) {
-        return "M" + d.source.y + "," + d.source.x
-            + "V" + d.target.x + "H" + d.target.y;
-    }
-
-    render_synteny(g_container, data) {
-
-        var that = this
-
-        for (let i = 0; i < data.length; i++) {
-
-            if (data[i] == null) continue
-
-            var e = data[i].hog_id ? data[i].hog_id : data[i].id
-
-            var posL = (this.settings.width_text + this.settings['marginLeftSynteny']) + (i * (this.settings['width_block'] + this.settings['blockMargin']))
-
-            g_container.append("line")
-                .style("stroke", "black")
-                .attr("x1", posL - this.settings['blockMargin'])
-                .attr("x2", posL + this.settings['width_block'] + this.settings['blockMargin'])
-                .attr("y1", 0)
-                .attr("y2", 0)
-
-            var r = g_container.append("rect")
-
-            r.attr("x", posL)
-                .attr("y", -7)
-                .attr("width", this.settings['width_block'])
-                .attr("height", 15)
-                .attr("fill", () => {
-                    return this.color_scale(this.get_domain_scale(e))
-                })
-                .style("stroke-width", 1)
-                .style("stroke", () => {
-                    return  e.split('.')[0] == this.focal_hog.split('.')[0] ? "black" : "white" // todo
-                })
-                .on("mouseover", function (event) {
-
-                    if (data[i].hog_id) {
-                        that.render_tooltip_synteny_extant(event.offsetX + 12, event.offsetY + 12, data[i].id, r)
-                    } else {
-                        that.render_tooltip_synteny_hog(event.offsetX + 12, event.offsetY + 12, data[i].id, r)
-                    }
-
-                })
-                .on("mouseleave", function () {
-                    that.close_tooltip()
-
-                }).style("cursor", "pointer")
-                .on("click", () => {
-                    if (data[i].hog_id) {
-                        that.callback_gene_local_synteny(data[i].id)
-                    } else {
-                        that.call_back_hog_local_synteny(data[i].id)
-                    }
-
-                })
-
-        }
-
-    }
-
-    // TREE
-
-    render_tooltip(x, y, menu) {
-
-        this.Tooltip.style("opacity", 1).style("display", 'block')
-            .style("left", x + 12 + "px")
-            .style("top", y + 12 + "px")
-
-        this.Tooltip.html('')
-
-        var gg = this.Tooltip.selectAll('menu_item')
-            .data(menu)
-            .enter().append('text')
-            .style('text-align', 'center')
-            .style('display', 'block')
-            .style('cursor', (d) => {
-                return d.action ? 'pointer' : 'auto'
-            })
-            .style("font-weight", (d) => {
-                return d.title === "Close" || !d.action ? 900 : 400
-            })
-            .style('font-size', d => {
-                return '12 px';
-            })
-            .text(function (d) {
-                return d.title;
-            })
-            .on('mouseover', function (d) {
-                d3.select(this).style('fill', 'steelblue');
-            })
-            .on('mouseout', function (d) {
-                d3.select(this).style('fill', 'black');
-            })
-            .on('click', function (d, i) {
-                i.action(d);
-            })
-
-
-    }
 
     // UTILS
 

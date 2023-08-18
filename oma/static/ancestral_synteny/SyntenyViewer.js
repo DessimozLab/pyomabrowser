@@ -355,6 +355,7 @@ class SyntenyViewer {
             .style("padding", "8px")
             .style("position", "absolute")
             .style("font-size", '16px')
+            .style("z-index", '999')
 
         this.y_offset = this.settings.margin.top;
         this.master_g = this.svg.append("g").attr("id", 'master_g');
@@ -702,7 +703,7 @@ class SyntenyViewer {
 
 
                 //this.render_tooltip(event.offsetX + 12, event.offsetY + 12, menu)
-                this.render_tooltip(event.x + 12, event.y + 12, menu)
+                this.render_tooltip(event.pageX + 12, event.pageY + 12, menu)
 
             })
 
@@ -716,16 +717,29 @@ class SyntenyViewer {
                 .style("stroke", () => { return _this.settings.type == 'ancestral' ? this.scale_color_edge(hog[this.color_accessor_edge]) : 'lightgray' })
                 .style("stroke-width",  edge.weight < 0.6 * mean_weight ? 2 : 3)
                 .on("mouseover",function () {
-                    _this.Tooltip.style("opacity", 1).style("display", 'block')
+
+                      if (_this.settings.type == 'ancestral'){
+                          _this.Tooltip.style("opacity", 1).style("display", 'block')
+                      }
+
+
                 })
                 .on("mousemove", function (e)  {
-                    _this.Tooltip
+
+                     if (_this.settings.type == 'ancestral'){
+                          _this.Tooltip
                         .html(`<b>Weight: </b> ${edge.weight} <br> `)
                         .style("left", e.pageX + 12 + "px")
                         .style("top", e.pageY + 12  + "px")
+                      }
+
                 })
                 .on("mouseleave", function () {
-                    _this.Tooltip.style("opacity", 0).style("display", 'none')
+
+                     if (_this.settings.type == 'ancestral'){
+                          _this.Tooltip.style("opacity", 0).style("display", 'none')
+                      }
+
 
                 })
 
