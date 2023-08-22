@@ -309,6 +309,7 @@ class HOGMembersListSerializer(ReadOnlySerializer):
 
 class HOGandPatternSerializer(HOGsBaseSerializer):
     in_species = serializers.ListSerializer(child=serializers.CharField())
+    jaccard_similarity = serializers.FloatField()
 
 
 class HOGsSimilarProfileSerializer(HOGsListSerializer):

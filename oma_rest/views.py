@@ -678,9 +678,10 @@ class HOGViewSet(PaginationMixin, ViewSet):
             hog_id, max_nr_similar_fams=nr_profiles)
         nr_species = len(result.species_names)
         sim_hogs = [rest_models.HOG(hog_id=utils.db.format_hogid(fam),
-                                    in_species=[result.species_names[z] for z in range(nr_species) if result.similar[fam][z] > 0]
-                                    )
+                                    in_species=[result.species_names[z] for z in range(nr_species) if result.similar[fam][z] > 0],
+                                    jaccard_similarity=result.jaccard_distance[str(fam)])
                     for fam in result.similar.keys()]
+        sim_hogs.sort(key=lambda h: -h.jaccard_similarity)
         data = rest_models.HOG(
             hog_id=hog_id,
             similar_profile_hogs=sim_hogs,
