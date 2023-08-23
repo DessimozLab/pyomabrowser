@@ -93,6 +93,7 @@ urlpatterns = [
     url(r'^omagroup/(?P<group_id>\w+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
 
     # Genome
+    url(r"^genome/$", views.GenomeResolve.as_view(), name="genome"),
     url(r'^genome/(?P<species_id>\w+)/info/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
     url(r'^genome/(?P<species_id>\w+)/genes/$', views.GenomeCentricGenes.as_view(), name='genome_genes'),
     url(r'^genome/(?P<species_id>\w+)/closest/groups/$', views.GenomeCentricClosestGroups.as_view(), name='genome_closest_og'),

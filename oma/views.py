@@ -962,6 +962,26 @@ class HomoeologJson(HomoeologBase, JsonModelMixin, View):
 
 #<editor-fold desc="Genome Centric">
 
+class GenomeResolve(TemplateView):
+    template_name = "explore_genomes.html"
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        if not "query" in request.GET:
+            return self.render_to_response(context)
+
+        query_genome = request.GET.get("query").strip()
+        try:
+            g = utils.db.id_mapper['OMA'].identify_genome(query_genome)
+            return HttpResponseRedirect(reverse('genome_info', args=(g['UniProtSpeciesCode'].decode(),)))
+        except db.UnknownSpecies:
+            try:
+                tax = utils.db.tax.get_taxnode_from_name_or_taxid(query_genome)
+                tax = tax["Name"][0].decode()
+                return HttpResponseRedirect(reverse('ancestralgenome_info', args=(tax,)))
+            except (db.InvalidTaxonId, KeyError) as e:
+                raise Http404(e)
+
+
 class GenomeBase(ContextMixin):
     def get_context_data(self, species_id, **kwargs):
         context = super(GenomeBase, self).get_context_data(**kwargs)
