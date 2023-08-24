@@ -465,14 +465,16 @@ class HOGViewSet(PaginationMixin, ViewSet):
             if compare_level is None:
                 queryset = [rest_models.HOG(hog_id=h['ID'].decode(),
                                             level=h['Level'].decode(),
-                                            completeness_score=h['CompletenessScore'])
+                                            completeness_score=h['CompletenessScore'],
+                                            nr_genes=h['NrMemberGenes'])
                             for h in hogs]
                 serializer_cls = serializers.HOGsListSerializer
             else:
                 queryset = [rest_models.HOG(hog_id=h['ID'].decode(),
                                             level=h['Level'].decode(),
                                             completeness_score=h['CompletenessScore'],
-                                            event=h['Event'].decode())
+                                            event=h['Event'].decode(),
+                                            nr_genes=h['NrMemberGenes'])
                             for h in hogs]
                 serializer_cls = serializers.HOGsCompareListSerializer
         else:

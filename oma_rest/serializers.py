@@ -283,6 +283,7 @@ class HOGsListSerializer(HOGsBaseSerializer):
     roothog_id = serializers.IntegerField()
     completeness_score = serializers.FloatField(required=False)
     description = serializers.SerializerMethodField(method_name=None)
+    nr_genes = serializers.FloatField(required=False)
     similar_profile_hogs = serializers.HyperlinkedIdentityField(
         view_name="hog-similar-profile-hogs",
         lookup_field="roothog_id",
