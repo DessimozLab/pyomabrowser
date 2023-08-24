@@ -165,11 +165,15 @@ function run_go(){
 
         var table_data = $("#grpTable").bootstrapTable('getData')
 
-        var input_foreground = Object.keys(table_data).map(key => table_data[key].hog_id);
-        var input_type = 'ancestral'
-        var input_name = 'ancestral_'
-
-        var input_level = apply_filter_lost ? "{{ level }}" : "{{ genome_name }}"
+        var input_foreground = Object.keys(table_data).map(key => table_data[key].hog_id).filter(n=>n);
+        var input_type = 'ancestral';
+        var input_level = apply_filter_lost ? "{{ level }}" : "{{ genome_name }}";
+        var input_name = "Comparison between {{ level }} and {{ genome_name }} of [";
+        if (apply_filter_gained) input_name += "gained,";
+        if (apply_filter_duplicated) input_name += "duplicated,";
+        if (apply_filter_retained) input_name += "retained"
+        if (apply_filter_lost) input_name += "lost"
+        input_name += "]";
 
 
         fetch("/api/enrichment/", {
@@ -186,15 +190,7 @@ function run_go(){
         })
           .then((response) => response.json())
           .then((json) =>  window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_self") )
-
-
-
     }
-
-
-
-
-
 }
 
 const apply_filter = function(){
