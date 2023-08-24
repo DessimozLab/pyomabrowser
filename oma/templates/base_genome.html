@@ -12,7 +12,7 @@
     <div class="oma-details-title">
 
         <h2 class="genome_title"> {{  genome.uniprot_species_code }} - {{ genome.sciname }} </h2>
-        <p> <b>Proteome version: </b>{{ genome.release }} with <strong>{{ genome.nr_entries }} proteins.</strong> </p>
+        <p> <b>Proteome version: </b>{{ genome.release }} with <strong>{% if genome.nr_genes != genome.nr_entries %} {{ genome.nr_genes }} genes / {% endif %}{{ genome.nr_entries }} proteins.</strong> </p>
     </div>
 </div>
 
