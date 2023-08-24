@@ -3,7 +3,7 @@
 {% load bootstrap4 %}
 
 
-{% block title %}Go Enrichment Analysis{% endblock %}
+{% block title %}GO Enrichment Analysis{% endblock %}
 {% block content %}
 
 
@@ -13,7 +13,7 @@
 
         <div class="jumbotron">
 
-            <h1>Go enrichment analysis</h1>
+            <h1>GO Enrichment analysis</h1>
 
             <div class="oma-seperator">
                 <span class="colour1"></span>
@@ -64,7 +64,7 @@
 
         event.preventDefault();
 
-        var input_foreground = document.getElementById('id_Foreground').value.split(/[\s,\n\t]+/)
+        var input_foreground = document.getElementById('id_Foreground').value.split(/[\s,\n\t]+/).filter(n => n);
         var input_type = document.getElementById('id_type').value
         var input_name = document.getElementById('id_name').value
         var input_level = document.getElementById('id_taxon').value ? document.getElementById('id_taxon').value : ""
