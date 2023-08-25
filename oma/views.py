@@ -2543,7 +2543,8 @@ def token_search(request):
                 def augment_ancestral_genomes(ag): #todo better
                     ag.uniprot_species_code = ''
                     ag.species_and_strain_as_dict = ag.sciname
-                    ag.common_name = ''
+                    if not hasattr(ag, 'common_name'):
+                        ag.common_name = ''
                     ag.last_modified = ''
                     ag.nr_entries = ag.nr_genes
                     ag.type = "Ancestral"
