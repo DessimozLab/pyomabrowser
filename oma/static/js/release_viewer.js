@@ -243,7 +243,7 @@ function init_table(div_id) {
             sortable: true
         }, {
             field: 'ncbi',
-            title: 'NCBI TaxonId',
+            title: 'Taxon Id',
             sortable: true,
             formatter: tablehooks.format_taxonid_as_link
         }, {

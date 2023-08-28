@@ -9,7 +9,7 @@
 <table class="table">
 
 <tr><td>Common name:</td><td>{{ genome_name }}</td></tr>
-<tr><td>NCBI taxonomic identifier:</td><td>{{ taxid }}</td></tr>
+<tr><td>{% if taxid > 0 %}NCBI taxonomic identifier:{% else %}Taxonomic identifier:{% endif %}</td><td>{{ taxid }}</td></tr>
 <tr><td>Number of ancestral genes:</td><td>{{ nr_hogs }}</td></tr>
 <tr><td>Number of descendant extant species:</td><td>{{ nbr_species }}</td></tr>
 </table>
@@ -79,7 +79,7 @@
             sortable: true
         }, {
             field: 'ncbi',
-            title: 'NCBI TaxonId',
+            title: 'Taxon Id',
             sortable: true,
             formatter: tablehooks.format_taxonid_as_link
         }, {
