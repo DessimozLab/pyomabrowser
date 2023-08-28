@@ -363,7 +363,7 @@ class SyntenyViewer {
         var g_header = this.svg.append("g").attr('width', this.settings.width)
 
         g_header.append("text")
-            .text("Synteny reconstruction for ancestral genome at " + this.settings.level)
+            .text("Ancestral gene order reconstruction for " + this.settings.level +" genome")
             .attr("text-anchor", 'start')
             .attr("font-size", '24px')
             .attr("x", this.contig_left_offset - 8)
@@ -375,7 +375,7 @@ class SyntenyViewer {
 
             var contig = this.viewer_data[contigKey];
 
-            var contig_g = this._render_contig(contig);
+            var contig_g = this._render_contig(contig, contigKey + 1);
 
              if (this.settings.type == 'ancestral') {
 
@@ -444,7 +444,7 @@ class SyntenyViewer {
 
     }
 
-    _render_contig(d){
+    _render_contig(d, nr){
 
         var g = this.master_g.append("g")
             .attr("class", "g_contig")
@@ -484,23 +484,22 @@ class SyntenyViewer {
             .attr("y2", d["rows"].length * (this.settings.row.bar_height + this.settings.row.margin_bottom) + this.settings.contig.padding_bottom)
 
 
-        if (this.settings.type == 'extant'){
-
-            g.append("text")
-            .text( 'Chromosome' + d["rows"][0][0]['chromosome'] )
-            .attr("text-anchor", 'start')
-            .attr("font-size", '12px')
-            .attr("x", this.contig_left_offset)
-            .attr("y", 0)
-            .style("stroke-width", 0)
-            .attr("font-family", 'Roboto Condensed')
-
+        let chr_title;
+        if (this.settings.type == 'extant') {
+            chr_title = "Chromosome " + d["rows"][0][0]['chromosome'];
+        } else {
+            chr_title = "reconstructed ancestral contig " + nr;
         }
-
-
+        g.append("text")
+        .text(chr_title)
+        .attr("text-anchor", 'start')
+        .attr("font-size", '12px')
+        .attr("x", this.contig_left_offset)
+        .attr("y", 0)
+        .style("stroke-width", 0)
+        .attr("font-family", 'Roboto Condensed')
 
         return g
-
 
     }
 
