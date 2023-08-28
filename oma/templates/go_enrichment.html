@@ -85,7 +85,14 @@
           }
         })
           .then((response) => response.json())
-          .then((json) =>  window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_self") )
+          .then((json) =>  {
+              if (json.id !== undefined){
+                  window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_self")
+              } else {
+                  let msg = "\n".concat(Object.keys(json));
+                  alert("The provided data contains errors:\n" + msg);
+              }
+          });
 
     })
 
