@@ -375,7 +375,9 @@ class SyntenyViewer {
 
             var contig = this.viewer_data[contigKey];
 
-            var contig_g = this._render_contig(contig, contigKey + 1);
+            // check if contigKey is number, in which case we use this one (+1)
+            let contig_nr = (contigKey === parseInt(contigKey, 10) ? parseInt(contigKey, 10) + 1 : contigKey)
+            var contig_g = this._render_contig(contig, contig_nr);
 
              if (this.settings.type == 'ancestral') {
 
