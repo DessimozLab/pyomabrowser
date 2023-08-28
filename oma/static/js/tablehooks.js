@@ -115,12 +115,14 @@
 
 
     exports.format_taxonid_as_link = function(value, row){
-        return '<a class="external" target="_blank" href="https://uniprot.org/taxonomy/' + value +'">' + value + "</a>"
+        if (value > 0) {
+            return '<a class="external" target="_blank" href="https://uniprot.org/taxonomy/' + value + '">' + value + "</a>"
+        } else {
+            return value;
+        }
     };
 
     exports.format_entry_sequence_matches = function(value, row){
-
-
 
         if (value !== ""){
 

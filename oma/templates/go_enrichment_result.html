@@ -327,13 +327,12 @@
 
 
         }).fail(function (jqxhr, textStatus, error) {
-            let message = error
+            let message = error;
             if (jqxhr.hasOwnProperty('responseJSON')){
                 message = jqxhr.responseJSON.message;
             }
             document.getElementById('datum').innerHTML = 'Something wrong happened: ' + message;
         });
-
 
     </script>
 
