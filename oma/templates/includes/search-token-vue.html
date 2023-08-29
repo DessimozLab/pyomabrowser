@@ -110,7 +110,7 @@
                 default_prefix : 'description',
                 show_error: false,
                 error_message : " Error.",
-                post_query: '',
+                post_query_{{ unique_id }}: '',
                 multiline: {{ multiline }},
                 wild_card: 'sequence',
                 placeholder: ' "Blue-light photoreceptor" | proteinid:P53_RAT  | species:"Drosophila melanogaster" ',  //'P53_RAT | Insulin | species:HUMAN | "auxin response factor"',
@@ -259,7 +259,7 @@
                 }
             },
             collect_token(){
-                this.post_query = JSON.stringify(this.tokens)
+                this.post_query_{{ unique_id }} = JSON.stringify(this.tokens)
             },
             detokenize(index){
                 var token = this.tokens.splice(index, 1)[0];
@@ -541,10 +541,10 @@ help
 
     </div>
 
-    <input type="hidden" name="hidden_query" :value="post_query">
+    <input type="hidden" name="hidden_query" :value="post_query_{{ unique_id }}">
 
     <input type='text' :placeholder='placeholder' ref="input_handle"  class='token-input__text' id="input_token_search_{{ unique_id }}"
-           @keydown.enter='addToken_and_search'
+           @keydown.enter='$event.target.nextElementSibling.focus().click()'
            @keydown.space='addToken'
            @keydown.delete='removeLastToken'
     />
