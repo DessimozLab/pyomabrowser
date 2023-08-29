@@ -22,9 +22,40 @@
 
     <script>
 
+    function jsonToCsv(jsonData) {
+    let csv = '';
+    // Get the headers
+    let headers = Object.keys(jsonData[0]);
+    csv += headers.join(',') + '\n';
+    // Add the data
+    jsonData.forEach(function (row) {
+        let data = headers.map(header => JSON.stringify(row[header])).join(','); // Add JSON.stringify statement
+        csv += data + '\n';
+    });
+    return csv;
+}
+
 
         (function(){
         $.getJSON("{{ api_url }}", function(data){
+
+
+            // Convert JSON data to CSV
+            let csvData = jsonToCsv(data);
+
+            console.log()
+
+            // Create a CSV file and allow the user to download it
+            let blob = new Blob([csvData], { type: 'text/csv' });
+            let url = window.URL.createObjectURL(blob);
+
+            let a = document.createElement('a');
+            a.href = url;
+            a.className = 'float-right';
+            a.text = 'Download annotations (CSV)';
+            a.download = 'data.csv';
+            document.getElementById('ontology-panel').appendChild(a);
+            //a.click();
 
 
 
