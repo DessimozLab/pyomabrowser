@@ -334,50 +334,124 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 
                     <p class="text-justify">
-                        The iHam Graphical Viewer is an interactive JavaScript tool to visualize the evolutionary history of a specific gene family encoded in HOGs. The viewer is composed of two panels (Fig. 1A): a species tree which lets the user select a node to focus on a particular taxonomic range of interest, and a matrix that organizes extant genes according to their membership in species (rows) and HOGs (columns).
+
+                        The iHam Graphical Viewer is an interactive tool to visualize the evolutionary history of a specific gene family.
                     </p>
 
+                     <p class="font-weight-bold">How to read the iham viewer ?</p>
 
-                    <p class="text-justify">
+                    <p class="text-justify"> The viewer is composed of two panels: On the left is a <strong> species tree </strong> that lets the user select a node to focus on a particular taxonomic range, and on the right is a matrix that organizes extant genes according to their membership in species (rows) and HOGs (columns).
+</p>
 
-The tree-guided matrix representation of HOGs facilitates:
+                      <p class="text-justify">The entire composition of all the genes, visible from the root of the tree, is the <strong>gene family</strong> . The iham viewer is composed of the following elements:
+</p>
 
-                        <ul>
-<li> To delineate orthologous groups at given taxonomic ranges</li>
-<li> To infer duplication and loss events in the species tree</li>
-<li> To gauge the cumulative effect of duplications and losses on gene repertoires </li>
-<li> To identify potential mistakes in genome assembly, annotation or orthology inference (e.g. if losses are concentrated on terminal branches—suggestive of incomplete genomes; or if the species coverage within a HOG looks implausible—suggestive of orthology inference error).</li>
-</ul>
+                     <img src="{% static "image/iham_graphical_viewer-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
 
-                    </p>
+                     <p class="text-justify"> How does it all fit together? All the elements together provide a snapshot into the ancestral genome content of a gene family at a specific taxonomic level.</p>
+
+  <img src="{% static "image/iham_graphical_viewer-1bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
+
+                     <p class="font-weight-bold"> How can I infer evolutionary events? </p>
 
 
-                    <img src="{% static "image/iham_graphical_viewer-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                       <ul>
+<li> View an ancestral level of interest by mousing over the node in the tree. All HOGs (ancestral genes) present in that ancestral species are delineated by vertical lines.
+ </li>
+
+<li>  Mouse over subsequent internal nodes in the tree by moving closer to the leaves.
+</li>
+
+
+
+ <img src="{% static "image/iham_graphical_viewer-2bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
                              alt="export">
 
 
 
-                     <div class="text-center small">
-    <b> pyHam can be used to map gene losses, duplications or new appearances (‘gained’) onto species trees (here, using the NCBI taxonomy tree)
+                           <li> A duplication happened on the branch leading from Ecdysozoa to Nematoda because 1 vertical line appeared.
+ </li>
 
-</b>
-    </div>
+ <img src="{% static "image/iham_graphical_viewer-3bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+                           <li> A loss happened on the branch leading from Nematoda to Chromadorea because 1 vertical line disappeared.</li>
+
+ <img src="{% static "image/iham_graphical_viewer-4bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+
+
+                           <li> The gene was retained without duplications or losses from the Chromadorea to the Rhabditida common ancestor. </li>
+
+                            <img src="{% static "image/iham_graphical_viewer-4bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+
+
+                           <li> The gene was gained in Eumetazoa, the root level of the HOG.
+ </li>
+
+
+
+
+                       </ul>
+
+
+                    <p class="font-weight-bold">Tips</p>
+
+                    <ul>
+
+                        <li> Color genes according to protein length, GC-content, number of exons, or gene function similarity.</li>
+ <img src="{% static "image/iham_graphical_viewer-6bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+                           <li> If the species coverage within a HOG looks implausible, this might be due to an orthology inference error. Low-confidence HOGs can be masked based on the Completeness Score (number of species in the HOG/number of species in the clade).
+</li>
+ <img src="{% static "image/iham_graphical_viewer-7bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
+
+
+
+                           <li> Irrelevant species clades can be collapsed.
+</li>
+ <img src="{% static "image/iham_graphical_viewer-8bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
+
+                           <li> Get more information about subHOG by clicking on (?)</li>
+ <img src="{% static "image/iham_graphical_viewer-9bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
+
+                           <li> Gene more information about an extant gene by clicking on it
+</li>
+ <img src="{% static "image/iham_graphical_viewer-10bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
+
+
+                       </ul>
 
 
                      <p class="text-justify">
-
-                    Users can customize the view in different ways. They can color genes according to protein length or GC-content. Low-confidence HOGs can be masked. Irrelevant species clades can be collapsed. iHam is a reusable web widget that can be easily embedded into a website; for instance, it is used to display HOGs in OMA (<a
-                             href="http://omabrowser.org">http://omabrowser.org</a>; Altenhoff et al., 2018). Implemented as a JavaScript library using the TnT framework (Pignatelli, 2016), iHam merely requires as input HOGs in the standard OrthoXML format (Schmitt et al., 2011) and the underlying species tree in newick or PhyloXML format.
-
-
-</p>
-
-                     <small class="float-right">Please see <a href="">(Train et al. 2019)</a>  for more information.</small>
+                                             iHam is a reusable web widget that can be easily embedded into a website; it merely requires as input HOGs in the standard OrthoXML format and the underlying species tree in newick or PhyloXML format.
+                     </p>
 
 
-                    <br>
 
-                    <h3> <a href="https://phylo.io/">Phylo.io</a></h3>
+
+
+
+
+
+                     <small > Using iham ? Please cite: <br>  Clément-Marie Train and others, iHam and pyHam: visualizing and processing hierarchical orthologous groups, Bioinformatics, Volume 35, Issue 14, July 2019, Pages 2504–2506,
+                         <a href="https://doi.org/10.1093/bioinformatics/bty994">(Train et al. 2019)</a> </small>
+
+                    <br >
+
+
+
+                    <h3 style="margin-top: 12px" > <a href="https://phylo.io/">Phylo.io</a></h3>
 
                     <p class="text-justify">
 

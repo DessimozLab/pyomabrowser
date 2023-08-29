@@ -164,8 +164,8 @@ function run_go(){
 
         var input_foreground = Object.keys(table_data).map(key => table_data[key].hog_id).filter(n=>n);
         var input_type = 'ancestral';
-        var input_level = apply_filter_lost ? "{{ level }}" : "{{ genome_name }}";
-        var input_name = "Comparison between {{ level }} and {{ genome_name }} of [";
+        var input_level = apply_filter_lost ? _side_bar_genome_seleted : "{{ genome_name }}";
+        var input_name = "Comparison between " + _side_bar_genome_seleted + " and {{ genome_name }} of [";
         if (apply_filter_gained) input_name += "gained,";
         if (apply_filter_duplicated) input_name += "duplicated,";
         if (apply_filter_retained) input_name += "retained"

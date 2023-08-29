@@ -330,7 +330,8 @@
                         this.tokens.push({query: token.query, single_term: token.sinle_term, prefix: token.prefix, type:token.type});
                     }
                 }
-                this.placeholder = ''
+                this.placeholder = '';
+                this.$refs.input_handle.focus();
 
             },
             is_empty(){return this.tokens.length === 0},
@@ -542,7 +543,7 @@ help
 
     <input type="hidden" name="hidden_query" :value="post_query">
 
-    <input type='text' :placeholder='placeholder'  class='token-input__text' id="input_token_search_{{ unique_id }}"
+    <input type='text' :placeholder='placeholder' ref="input_handle"  class='token-input__text' id="input_token_search_{{ unique_id }}"
            @keydown.enter='addToken_and_search'
            @keydown.space='addToken'
            @keydown.delete='removeLastToken'

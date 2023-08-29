@@ -168,11 +168,15 @@
 
 <script>
 
+    var _side_bar_genome_seleted = null;
+
     $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 });
 
     function select_genome(genome, no_reload ){
+
+        _side_bar_genome_seleted = genome
 
          no_reload = (typeof no_reload === 'undefined') ? false : no_reload;
 
@@ -201,6 +205,8 @@
      }
 
     function reset_selection(){
+
+        _side_bar_genome_seleted = null
 
          $("#genome_selector").show()
          $("#genome_selected").hide()
