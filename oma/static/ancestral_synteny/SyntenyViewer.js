@@ -376,7 +376,7 @@ class SyntenyViewer {
             var contig = this.viewer_data[contigKey];
 
             // check if contigKey is number, in which case we use this one (+1)
-            let contig_nr = (contigKey === parseInt(contigKey, 10) ? parseInt(contigKey, 10) + 1 : contigKey)
+            let contig_nr = (contigKey == parseInt(contigKey, 10) ? parseInt(contigKey, 10) + 1 : contigKey)
             var contig_g = this._render_contig(contig, contig_nr);
 
              if (this.settings.type == 'ancestral') {
@@ -490,7 +490,7 @@ class SyntenyViewer {
         if (this.settings.type == 'extant') {
             chr_title = "Chromosome " + d["rows"][0][0]['chromosome'];
         } else {
-            chr_title = "reconstructed ancestral contig " + nr;
+            chr_title = "Ancestral contig " + nr;
         }
         g.append("text")
         .text(chr_title)
