@@ -227,7 +227,7 @@ class LocalSyntenyViewer {
         this.svg.append('text')
             .attr("x",8)
             .attr("y",-8)
-            .attr("text-anchor", "start")
+            .attr("text-anchor", "middle")
             .text(d => this.focal_species)
             .style('font-size', "16px")
             .style("font-weight", 900)
@@ -311,7 +311,7 @@ class LocalSyntenyViewer {
             .attr("dy", "0.31em")
             .attr("x", this.settings.textMarginRight)
             .attr("text-anchor", "start")
-            .text(d => {return this.format_name(d)})
+            .text(d => {return this.format_sub_name(d)})
             .style('font-size', "10px")
             .style('font-family', 'monospace')
             .on("click", (event, node) => { this._click_node(event,node)})
@@ -321,7 +321,7 @@ class LocalSyntenyViewer {
             .attr("stroke", "white")
 
 
-
+        /*
          nodeEnter.append("text")
             .attr('class', 'leaf_sub_label')
             .attr("dy", "14px")
@@ -331,6 +331,8 @@ class LocalSyntenyViewer {
             .style('font-size', "10px")
             .style('font-family', 'monospace')
         .on("click", (event, node) => { this._click_node(event,node)})
+
+         */
 
 
         // Transition nodes to their new position.
@@ -345,9 +347,12 @@ class LocalSyntenyViewer {
             return d._children || d.height == 0 ? '14px' : '0px'
         })
 
+        /*
         nodeUpdate.selectAll('.leaf_sub_label').style('font-size', d => {
             return d._children || d.height == 0 ? '10px' : '0px'
         })
+
+         */
 
         nodeUpdate.selectAll('path').attr("fill-opacity", d => {
             return d._children ? '1' : '0'
@@ -479,6 +484,18 @@ class LocalSyntenyViewer {
                     }
 
                 })
+
+            if (e.split('.')[0] == this.focal_hog.split('.')[0]){
+
+                g_container.append("text")
+            .attr('class', 'rect_upper_label')
+            .attr("dy", "18px")
+            .attr("x", posL  + this.settings['width_block']/2 )
+            .attr("text-anchor", "middle")
+            .text(d => {console.log(data[i]);return data[i].id})
+            .style('font-size', "10px")
+            .style('font-family', 'monospace')
+            }
 
         }
 
@@ -1064,9 +1081,9 @@ class LocalSyntenyViewer {
 
     format_sub_name(d) {
 
-        if (d.data.data.id.length <= this.settings.length_displayed_name_leaf_sub) return d.data.data.species
+        if (d.data.data.species.length <= this.settings.length_displayed_name_leaf_sub) return d.data.data.species
 
-        return d.data.data.id.substring(0,this.settings.length_displayed_name_leaf_sub-3 ) + '...';
+        return d.data.data.species.substring(0,this.settings.length_displayed_name_leaf_sub-3 ) + '...';
 
     }
 
