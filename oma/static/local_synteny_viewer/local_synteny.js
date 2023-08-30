@@ -34,7 +34,7 @@ class LocalSyntenyViewer {
             circle_radius: 4,
             circle_radius_leaf: 3,
             length_displayed_name_leaf: 20,
-            length_displayed_name_leaf_sub: 40,
+            length_displayed_name_leaf_sub: 20,
             textMarginRight: 10,
             // UI SYNTENY
             height_synteny: 20,
@@ -62,16 +62,16 @@ class LocalSyntenyViewer {
             async: false,
             success: function (jsonData) {
 
-                that.load_and_process_synteny_api(that.reference_element, jsonData, true)
+                that.load_and_process_synteny_api(that.reference_element, jsonData, true, level_query.replace('&level=', ''))
 
-                that.domain_scale =  that.synteny_data[that.reference_element].linear_synteny.map(hog => that.get_hog_id(hog))
+                that.domain_scale =  that.synteny_data[that.reference_element + level_query.replace('&level=', '')].linear_synteny.map(hog => that.get_hog_id(hog))
 
-                that.color_scale = d3.scaleOrdinal().domain(that.domain_scale).range(that.settings['color_scheme'].splice(that.synteny_data[that.reference_element].linear_synteny.length - that.domain_scale.length)).unknown("lightgrey");
+                that.color_scale = d3.scaleOrdinal().domain(that.domain_scale).range(that.settings['color_scheme'].splice(that.synteny_data[that.reference_element + level_query.replace('&level=', '')].linear_synteny.length - that.domain_scale.length)).unknown("lightgrey");
 
             }
         });
 
-        if (!this.synteny_data[this.reference_element]) {
+        if (!this.synteny_data[this.reference_element + level_query.replace('&level=', '')]) {
             this.div.append("p").text('Ancestral Synteny for ' + this.reference_element +' around '+ this.focal_species +' not found.')
                 .style('text-align', 'center')
                 .style('top', '200px')
@@ -212,9 +212,11 @@ class LocalSyntenyViewer {
             .attr("transform", () => {
                 return "translate(" + x_ref + ", " + y_ref + ")"
             })
-        this.render_synteny(ref_synteny_g, this.synteny_data[this.reference_element].linear_synteny)
 
-        ref_synteny_g.append('text')
+        var level_ = this.focal_hog !== this.reference_element ? '' :  this.focal_species;
+        this.render_synteny(ref_synteny_g, this.synteny_data[this.reference_element + level_].linear_synteny, level_)
+
+        /*ref_synteny_g.append('text')
             .attr("dy", "0.31em")
             .attr("x", this.settings.width_text)
             .attr("text-anchor", "end")
@@ -222,6 +224,8 @@ class LocalSyntenyViewer {
             .style('font-size', "14px")
             .style("font-weight", 900)
             .style('font-family', 'monospace')
+
+         */
 
         // ADD ROOT LEVEL
         this.svg.append('text')
@@ -303,7 +307,7 @@ class LocalSyntenyViewer {
             .attr("r", d => d.children ? this.settings.circle_radius : this.settings.circle_radius_leaf) // TODO REMOVE THIS BUG d.children && d.children.length === 1 ? 0 :
             .attr("fill", d => d.data.data.paralog ? 'salmon' : d._children || d.children ? "#555" : "#999")
             .attr("stroke-width", 10)
-            .on("click", (event, node) => { this._click_node(event,node)})
+            .on("click", (event, node) => { this._click_node(event,node, node.data.data.species)})
 
 
         nodeEnter.append("text")
@@ -314,7 +318,7 @@ class LocalSyntenyViewer {
             .text(d => {return this.format_sub_name(d)})
             .style('font-size', "10px")
             .style('font-family', 'monospace')
-            .on("click", (event, node) => { this._click_node(event,node)})
+            .on("click", (event, node) => { this._click_node(event,node, node.data.data.species)})
             .clone(true).lower()
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
@@ -402,12 +406,18 @@ class LocalSyntenyViewer {
             var g = d3.select(this).append('g').attr('class', 'g_synteny')
             var idd = d.data.data.id.split('_')[0]
 
-            if (that.synteny_data.hasOwnProperty(idd)) {
-                that.render_synteny(g, that.synteny_data[idd].linear_synteny)
+            var level_query = d.data.data.hasOwnProperty('LOFT') ? '' :  '&level=' + d.data.data.species;
+
+            if (that.synteny_data.hasOwnProperty(idd + level_query.replace('&level=', ''))) {
+
+
+                var l = level_query.replace('&level=', '')
+
+                that.render_synteny(g, that.synteny_data[idd + l].linear_synteny, l )
                 return
             }
 
-            var level_query = d.data.data.hasOwnProperty('LOFT') ? '' :  '&level=' + d.data.data.species;
+
 
             $.ajax({
 
@@ -415,8 +425,10 @@ class LocalSyntenyViewer {
                 dataType: 'json',
                 async: true,
                 success: function (jsonData) {
-                    that.load_and_process_synteny_api(idd, jsonData);
-                    that.render_synteny(g, that.synteny_data[idd].linear_synteny)
+                    that.load_and_process_synteny_api(idd, jsonData, false,  level_query.replace('&level=', ''));
+                    var l = level_query.replace('&level=', '');
+
+                    that.render_synteny(g, that.synteny_data[idd + l].linear_synteny, l)
 
                 }
             });
@@ -430,9 +442,10 @@ class LocalSyntenyViewer {
             + "V" + d.target.x + "H" + d.target.y;
     }
 
-    render_synteny(g_container, data) {
+    render_synteny(g_container, data, level) {
 
         var that = this
+
 
         for (let i = 0; i < data.length; i++) {
 
@@ -468,7 +481,7 @@ class LocalSyntenyViewer {
                     if (data[i].hog_id || data[i].hog_id == '' ) {
                         that.render_tooltip_synteny_extant(event.offsetX + 12, event.offsetY + 12, data[i].id, r)
                     } else {
-                        that.render_tooltip_synteny_hog(event.offsetX + 12, event.offsetY + 12, data[i].id, r)
+                        that.render_tooltip_synteny_hog(event.offsetX + 12, event.offsetY + 12, data[i].id, r, level)
                     }
 
                 })
@@ -480,7 +493,7 @@ class LocalSyntenyViewer {
                     if (data[i].hog_id) {
                         that.callback_gene_local_synteny(data[i].id)
                     } else {
-                        that.call_back_hog_local_synteny(data[i].id)
+                        that.call_back_hog_local_synteny(data[i].id, level)
                     }
 
                 })
@@ -492,7 +505,7 @@ class LocalSyntenyViewer {
             .attr("dy", "18px")
             .attr("x", posL  + this.settings['width_block']/2 )
             .attr("text-anchor", "middle")
-            .text(d => {console.log(data[i]);return data[i].id})
+            .text(d => {return data[i].id})
             .style('font-size', "10px")
             .style('font-family', 'monospace')
             }
@@ -541,7 +554,7 @@ class LocalSyntenyViewer {
 
     }
 
-    _click_node (event, node) {
+    _click_node (event, node, level) {
 
                 var menu = [];
 
@@ -627,7 +640,7 @@ class LocalSyntenyViewer {
                         var ttt = {
                             title: 'Open HOG detail',
                             action: () => {
-                                this.call_back_hog_detail(node.data.data.id.split('_')[0])
+                                this.call_back_hog_detail(node.data.data.id.split('_')[0], level)
                             }
                         }
 
@@ -636,7 +649,7 @@ class LocalSyntenyViewer {
                         var tttt = {
                             title: 'Use as synteny focus',
                             action: () => {
-                                this.call_back_hog_local_synteny(node.data.data.id.split('_')[0])
+                                this.call_back_hog_local_synteny(node.data.data.id.split('_')[0], level)
                             }
                         }
 
@@ -714,7 +727,6 @@ class LocalSyntenyViewer {
 
             that.Tooltip.style("opacity", 1).style("display", 'block')
                 .html(`<b>ID:</b> ${id}  <br> 
-                    <b>Level:</b>  ${data[0].level} <br>
                     <b>Description:</b>  ${data[0].description} <br> `)
                 .style("left", x + 12 + "px")
                 .style("top", y + 12 + "px")
@@ -798,7 +810,7 @@ class LocalSyntenyViewer {
     }
 
 
-    load_and_process_synteny_api(hog_id, jsonData, is_reference) {
+    load_and_process_synteny_api(hog_id, jsonData, is_reference, level) {
 
 
         // TODO ADD FALLBACK FOR EMPTY OR NOT CORRECT OR ERROR
@@ -857,13 +869,13 @@ class LocalSyntenyViewer {
                     case 0:
                         console.log("No neighbor in this hog")
                         console.log(contig)
-                        this.synteny_data[hog_id] = contig
+                        this.synteny_data[hog_id + level] = contig
                         return
                     case 1:
                         ends.push(h);
                         if (ends.length > 2) {
                             console.log("More than 2 ends in the contigs")
-                            this.synteny_data[hog_id] = contig
+                            this.synteny_data[hog_id+ level] = contig
                             return
                         }
                         break;
@@ -871,7 +883,7 @@ class LocalSyntenyViewer {
                         break;
                     default:
                         console.log("More than 2 neighboring hogs")
-                        this.synteny_data[hog_id] = contig
+                        this.synteny_data[hog_id+ level] = contig
                         return
                 }
 
@@ -879,7 +891,7 @@ class LocalSyntenyViewer {
 
             if (ends.length !== 2) {
                 console.log("Contigs dont have 2 ends.")
-                this.synteny_data[hog_id] = contig
+                this.synteny_data[hog_id+ level] = contig
                 return
 
             }
@@ -927,13 +939,15 @@ class LocalSyntenyViewer {
 
         if (!is_reference && !(Object.keys(contig.hogs).length === 1) ) {
 
-            var left_ref = this.synteny_data[this.reference_element].linear_synteny.slice(0, this.settings.hald_window).map(data => {
+            var level_ = this.focal_hog !== this.reference_element ? '' :  this.focal_species;
+
+            var left_ref = this.synteny_data[this.reference_element + level_ ].linear_synteny.slice(0, this.settings.hald_window).map(data => {
                 if (data == null) {
                     return data
                 }
                 return data.hog_id ? data.hog_id.split('.')[0] : data.id.split('.')[0]
             });
-            var right_ref = this.synteny_data[this.reference_element].linear_synteny.slice(this.settings.hald_window + 1, this.synteny_data[this.reference_element].linear_synteny.length).map(data => {
+            var right_ref = this.synteny_data[this.reference_element + level_ ].linear_synteny.slice(this.settings.hald_window + 1, this.synteny_data[this.reference_element +  level_ ].linear_synteny.length).map(data => {
                 if (data == null) {
                     return data
                 }
@@ -987,7 +1001,7 @@ class LocalSyntenyViewer {
 
 
 
-        this.synteny_data[hog_id] = contig
+        this.synteny_data[hog_id+ level] = contig
 
 
     }
@@ -1081,9 +1095,11 @@ class LocalSyntenyViewer {
 
     format_sub_name(d) {
 
-        if (d.data.data.species.length <= this.settings.length_displayed_name_leaf_sub) return d.data.data.species
+        var label_text = d.data.data.species ? d.data.data.species : d.data.data.id
 
-        return d.data.data.species.substring(0,this.settings.length_displayed_name_leaf_sub-3 ) + '...';
+        if (label_text.length <= this.settings.length_displayed_name_leaf_sub) return label_text
+
+        return label_text.substring(0,this.settings.length_displayed_name_leaf_sub-3 ) + '...';
 
     }
 

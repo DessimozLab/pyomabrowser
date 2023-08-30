@@ -87,13 +87,13 @@ var FOCUS_ELEMENT = '{{ reference_entry.omaid }}'
 
  $.when($.ajax({url: "/oma/hog/{{ most_specific_hog.hog_id }}/orthoxml/augmented/",dataType: "text"})).then(function(orthoxml) {
 
-     var call_back_hog_detail = function(hog_id){
-                var newUrl="{% url 'hog_viewer' 1234567  %}".replace(/1234567/, hog_id);
+     var call_back_hog_detail = function(hog_id, level){
+                var newUrl="{% url 'hog_viewer' 1234567 level  %}".replace(/1234567/, hog_id).replace(/7654321/, level);
                 window.open(newUrl, "_blank");
             }
 
-    var call_back_hog_local_synteny = function(hog_id){
-        var newUrl="{% url 'hog_synteny' 1234567  %}".replace(/1234567/,hog_id);
+    var call_back_hog_local_synteny = function(hog_id,level){
+        var newUrl="{% url 'hog_synteny' 1234567 7654321  %}".replace(/1234567/,hog_id).replace(/7654321/, level);
         window.open(newUrl, "_blank");
     }
 
