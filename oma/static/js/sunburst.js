@@ -87,6 +87,7 @@ var x = d3.scale.linear()
 
 var vals = {
     "avg_nr_proteins" : [],
+    "avg_nr_genes" : [],
     "nr_genomes" : [],
     "size" : []
 }
@@ -140,6 +141,7 @@ var augment_data = function(node) {
     if (!node.children) {
         node.nr_genomes = (node.nr_genomes) ? node.nr_genomes : 1;
         node.avg_nr_proteins = node.nr_proteins / node.nr_genomes;
+        node.avg_nr_genes = node.nr_genes / node.nr_genomes;
     } else {
         node.children.forEach(function(child) {
             child.lineage = node.lineage+" > "+child.name;
@@ -147,6 +149,8 @@ var augment_data = function(node) {
             node.nr_genomes = (node.nr_genomes) ? node.nr_genomes + child.nr_genomes : child.nr_genomes;
             node.nr_proteins = (node.nr_proteins) ? node.nr_proteins + child.nr_proteins : child.nr_proteins;
             node.avg_nr_proteins = node.nr_proteins / node.nr_genomes;
+            node.nr_genes = (node.nr_genes) ? node.nr_genes + child.nr_genes : child.nr_genes;
+            node.avg_nr_genes = node.nr_genes / node.nr_genomes;
         });
     }
 
@@ -161,7 +165,10 @@ var augment_data = function(node) {
     }
 
     if (node.avg_nr_proteins && vals.avg_nr_proteins < node.avg_nr_proteins){
-        vals.avg_nr_proteins = +node.avg_nr_proteins;
+        vals.avg_nr_proteins = node.avg_nr_proteins;
+    }
+    if (node.avg_nr_genes && vals.avg_nr_genes < node.avg_nr_genes){
+        vals.avg_nr_genes = node.avg_nr_genes;
     }
     return node;
 }
@@ -319,27 +326,32 @@ function click(d) {
     d3.selectAll("path").style("stroke-width", "1px").style("stroke", "#fff");
     divsearchtip.transition().duration(800).style("opacity", 0);
 
+    let hogs = "", avg_genes = "", avg_proteins = "", id = "";
+
     // dup code
-    if(d.nr_hogs){
-        var hogs = "<br>Ancestral genome size: "+d.nr_hogs.toFixed(0);
-    } else {
-        var hogs = "";
+    if (d.nr_hogs || d.nr_hogs_support){
+        hogs = "<br>Ancestral genome size:";
+        if (d.nr_hogs_support){
+            hogs += "<br>&nbsp;&nbsp;&bull;&nbsp;" + d.nr_hogs_support.toFixed(0) + " (well supported HOGs)"
+        }
+        if (d.nr_hogs) {
+            hogs += "<br>&nbsp;&nbsp;&bull;&nbsp;" + d.nr_hogs.toFixed(0) + " (all HOGs)";
+        }
+    }
+    if (d.avg_nr_genes) {
+        avg_genes = "<br>Avg genome size (number of genes): " + d.avg_nr_genes.toFixed(0);
     }
 
     if(d.avg_nr_proteins){
-        var avg_proteins = "<br>Avg genome size: "+d.avg_nr_proteins.toFixed(0);
-    } else {
-        var avg_proteins = "";
+        avg_proteins = "<br>Avg number of proteins: "+d.avg_nr_proteins.toFixed(0);
     }
 
     if(d.id){
-        var id = "Species: <a href='/oma/genome/" + d.id +"/info/'>"+d.id+"</a>";
-    } else {
-        var id = "";
+        id = "Species: <a href='/oma/genome/" + d.id +"/info/'>"+d.id+"</a>";
     }
 
-    if(d.nr_hogs){
-        var id = "Ancestral species: <a href='/oma/ancestralgenome/" + d.taxid +"/info/'>"+d.name+"</a>";
+    if (d.nr_hogs){
+        id = "Ancestral species: <a href='/oma/ancestralgenome/" + d.taxid +"/info/'>"+d.name+"</a>";
     }
 
     var lineageItems = d.lineage.split(" > ");
@@ -363,6 +375,7 @@ function click(d) {
         ")</span></h5><p>"+
         id+
         "<br>Genomes: "+d.nr_genomes+
+        avg_genes+
         avg_proteins+
         hogs+"</p>"+
         lineage)
@@ -666,16 +679,21 @@ function createVisualization(root) {
 
 // Fade all but the current sequence, and show it in the breadcrumb trail.
 function mouseover(d) {
-    if(d.nr_hogs){
-        var hogs = "<br>Ancestral genome size: "+d.nr_hogs.toFixed(0);
-    } else {
-        var hogs = "";
+    let hogs = "", avg_proteins = "", avg_genes = "";
+
+    // dup code
+    if (d.nr_hogs || d.nr_hogs_support){
+        hogs = "<br>Ancestral genome size:";
+        if (d.nr_hogs_support){
+            hogs += "<br>&nbsp;&nbsp;&bull;&nbsp;" + d.nr_hogs_support.toFixed(0) + " (well supported HOGs)"
+        }
+        if (d.nr_hogs) {
+            hogs += "<br>&nbsp;&nbsp;&bull;&nbsp;" + d.nr_hogs.toFixed(0) + " (all HOGs)";
+        }
     }
 
-    if(d.avg_nr_proteins){
-        var avg_proteins = "<br>Avg genome size: "+d.avg_nr_proteins.toFixed(0);
-    } else {
-        var avg_proteins = "";
+    if(d.avg_nr_genes){
+        avg_proteins = "<br>Avg genome size: "+d.avg_nr_genes.toFixed(0);
     }
 
     d3.select("#explanation").style("visibility", "");
