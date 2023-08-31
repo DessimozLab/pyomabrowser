@@ -61,12 +61,20 @@ function update_genome_viewer(bid) {
                     <div class="nav navbar-nav navbar-left">\
                         <div class="btn-group btn-group-sm" id="colourSel" role="group" aria-label="...">\
                             <button type="button" id="resetBtn" class="btn btn-default btn-sm" onclick="resetTo();">Reset to root</button>\
-                            <button type="button" class="btn btn-primary btn-sm radioBtn" id="heatmapRadio"\
-                             data-value="heatmap-avg_nr_proteins">Avg number of\
-                         Proteins</button>\
-                            <button type="button" class="btn btn-primary btn-sm radioBtn" id="dolRadio"\
-                             data-value="dol">Domains of\
-                             life</button>\
+                            <button class="btn btn-default btn-sm nav-link dropdown-toggle text-nowrap" id="colorSelectDropdown" \
+                                 role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Coloring <span class="caret"></span></button>\
+                            <div class="dropdown-menu" role="menu">\
+                                <button type="button" class="dropdown-item btn btn-primary btn-sm radioBtn" id="heatmapRadio"\
+                                 data-value="heatmap-avg_nr_proteins">Avg number of Proteins</button>\
+                                <button type="button" class="dropdown-item btn btn-primary btn-sm radioBtn" id="heatmapGenesRadio" \
+                                 data-value="heatmap-avg_nr_genes">Avg number of Genes</button>\
+                                <button type="button" class="dropdown-item btn btn-primary btn-sm radioBtn" id="heatmapHogsRadio" \
+                                 data-value="heatmap-nr_hogs">Number of HOGs</button>\
+                                <button type="button" class="dropdown-item btn btn-primary btn-sm radioBtn" id="heatmapHogsSupportRadio" \
+                                 data-value="heatmap-nr_hogs_support">Number of well-supported HOGs</button>\
+                                <button type="button" class="dropdown-item btn btn-primary btn-sm radioBtn" id="dolRadio"\
+                                 data-value="dol">Domains of life</button>\
+                            </div>\
                         </div>\
                     </div>\
                 </div>\

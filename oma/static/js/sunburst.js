@@ -28,7 +28,7 @@ function sb() {
 
     // dynamic function call based on the selected buttons value
 
-    $('#colourSel > .radioBtn').click(function() {
+    $('#colourSel >> .radioBtn').click(function() {
         $(this).addClass('active').siblings().removeClass('active');
         var func = $(this).data('value').split("-");
 
@@ -42,7 +42,7 @@ function sb() {
         var placeholder = "#colorscale";
 
         // init and display legend
-        if(scaleName == 'avg_nr_proteins'){
+        if(scaleName === 'avg_nr_proteins' || scaleName === "avg_nr_genes" || scaleName === "nr_hogs" || scaleName === "nr_hogs_support"){
             var colorbar = Colorbar()
                 .origin([15,0])
                 .scale(sqrt_color)
@@ -170,6 +170,12 @@ var augment_data = function(node) {
     if (node.avg_nr_genes && vals.avg_nr_genes < node.avg_nr_genes){
         vals.avg_nr_genes = node.avg_nr_genes;
     }
+    if (node.nr_hogs && vals.nr_hogs < node.nr_hogs){
+        vals.nr_hogs = node.nr_hogs;
+    }
+    if (node.nr_hogs_support && vals.nr_hogs_support < node.nr_hogs_support){
+        vals.nr_hogs_support = node.nr_hogs_support;
+    }
     return node;
 }
 
@@ -183,6 +189,9 @@ var divsearchtip = d3.select("body").append("div")
 
 var scales = {
         "avg_nr_proteins" : [],
+        "avg_nr_genes": [],
+        "nr_hogs" : [],
+        "nr_hogs_support" : [],
         "dol" : []
     };
 
@@ -503,11 +512,11 @@ var color = function(d) {
         // JavaScript sorts arrays in place,
         // we use a mapped version.
 
-        if(scaleName == "avg_nr_proteins"){
+        if (scaleName === "avg_nr_proteins" || scaleName === "avg_nr_genes" || scaleName === "nr_hogs" || scaleName === "nr_hogs_support") {
 
             //d.children.map(function (child, i) {
             d.children.map(function (child, i) {
-                return {value: child.avg_nr_proteins, idx: i};
+                return {value: child[scaleName], idx: i};
             }).forEach(function (child, i) {
                 d.children[child.idx].color = quantile_color(child.value)
             });
@@ -551,6 +560,9 @@ function init_sb() {
 
     vals = {
         "avg_nr_proteins" : [],
+        "avg_nr_genes" : [],
+        "nr_hogs" : [],
+        "nr_hogs_support" : [],
         "nr_genomes" : [],
         "size" : []
     }
@@ -693,7 +705,10 @@ function mouseover(d) {
     }
 
     if(d.avg_nr_genes){
-        avg_proteins = "<br>Avg genome size: "+d.avg_nr_genes.toFixed(0);
+        avg_genes = "<br>Avg genome size: "+d.avg_nr_genes.toFixed(0) + " (# genes)";
+    }
+    if(d.avg_nr_proteins){
+        avg_proteins = "<br>Avg number of proteins: "+d.avg_nr_proteins.toFixed(0);
     }
 
     d3.select("#explanation").style("visibility", "");
@@ -703,12 +718,13 @@ function mouseover(d) {
 
     // highlight colorbar
     if ((typeof colorbarObject !== 'undefined') && (d.avg_nr_proteins)){
-        colorbarObject.pointTo(d.avg_nr_proteins.toFixed(0));
+        let value = (scaleName === "avg_nr_proteins" ? d.avg_nr_proteins : (scaleName === "avg_nr_genes" ? d.avg_nr_genes : (scaleName === "nr_hogs" ? d.nr_hogs: d.nr_hogs_support)));
+        colorbarObject.pointTo(value.toFixed(0));
         if(!$("#colorbarNumber").length){
             $("svg.colorbar").after('<span id="colorbarNumber"></span>');
             $("#colorBarNumber").css('left', $("svg.colorbar").width() + 10);
         }
-        $('#colorbarNumber').text(d.avg_nr_proteins.toFixed(0));
+        $('#colorbarNumber').text(value.toFixed(0));
     }
 
     // Fade all the segments.
@@ -737,8 +753,9 @@ function mouseover(d) {
         "<br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: "+d.taxid+
         ")</span></h5>"+
         "<p style='text-align: left;'>Genomes: "+d.nr_genomes+
-        avg_proteins+
-        hogs+
+        avg_genes +
+        avg_proteins +
+        hogs +
         "<br>Lineage: <span style='font-size: 1em;'>"+d.lineage+"</span></p>");
 
     var ttTopMargin = 40;
