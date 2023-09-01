@@ -226,6 +226,7 @@ function init_table(div_id) {
         showColumns: true,
         search: true,
         showExport: true,
+        exportDataType: 'all',
         pageList: [10, 25, 50, 100, "All"],
         mobileResponsive: true,
         checkOnInit: true,

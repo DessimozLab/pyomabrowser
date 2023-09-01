@@ -7,6 +7,9 @@
 {% block content %}
 
 
+    <link href="http://code.jquery.com/ui/1.13.1/themes/smoothness/jquery-ui.css" rel="Stylesheet"></link>
+<script src="http://code.jquery.com/ui/1.13.1/jquery-ui.js" ></script>
+
 <div id="oma-generic-container">
 
     <div class="container">
@@ -60,6 +63,23 @@
 
     <script>
 
+
+    $('#id_type').on('change', function (e) {
+
+        var optionSelected = $("option:selected", this);
+    var valueSelected = this.value;
+
+    if (valueSelected === 'ancestral'){
+        $('#id_taxon').hide();
+        document.getElementById("id_taxon").parentNode.parentNode.style.display = 'none';
+
+    } else {
+        $('#id_taxon').show();
+        document.getElementById("id_taxon").parentNode.parentNode.style.display = 'flex';
+
+    }
+});
+
     document.getElementById('submit_post_go').addEventListener("click", function(event){
 
         event.preventDefault();
@@ -93,6 +113,55 @@
                   alert("The provided data contains errors:\n" + msg);
               }
           });
+
+    })
+
+
+    // AUTCOMPLETE TAXON
+
+     var all_names = [];
+
+        function recursiveScan(json)
+    {
+
+
+
+        if (json.taxid){
+                all_names.push({label: json.name, value: json.taxid })
+            }
+
+        if(json.children != null)
+        {
+            //here you have access to id and dataelements
+
+            if(json.children.length > 0)
+            {
+                for(let t=0; t<json.children.length; t++){
+
+                    var e = json.children[t];
+
+                    //here you have access to each child as json.children[t]
+                    //you could do the logic for the current child
+
+                    //then pass the current child to the recursive function
+                    recursiveScan(json.children[t]);
+                }
+            }
+        }
+        return true;
+    }
+
+    $.getJSON( "/All/genomes.json", function( jsonData ) {
+        recursiveScan(jsonData)
+
+        console.log(all_names)
+
+        var species_auto_options = {
+            source: all_names,
+        };
+
+        $('#id_taxon').autocomplete(species_auto_options);
+        $('#id_taxon').autocomplete("enable")
 
     })
 
