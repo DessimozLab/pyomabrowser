@@ -63,16 +63,16 @@ function update_genome_viewer(bid) {
                             <button type="button" id="resetBtn" class="btn btn-default btn-sm" onclick="resetTo();">Reset to root</button>\
                             <button class="btn btn-default btn-sm nav-link dropdown-toggle text-nowrap" id="colorSelectDropdown" \
                                  role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Coloring <span class="caret"></span></button>\
-                            <div class="dropdown-menu" role="menu">\
-                                <button type="button" class="dropdown-item btn btn-primary btn-sm radioBtn" id="heatmapRadio"\
+                            <div class="dropdown-menu" id="color_drop" role="menu">\
+                                <button type="button" class="dropdown-item btn  btn-sm radioBtn" id="heatmapRadio"\
                                  data-value="heatmap-avg_nr_proteins">Avg number of Proteins</button>\
-                                <button type="button" class="dropdown-item btn btn-primary btn-sm radioBtn" id="heatmapGenesRadio" \
+                                <button type="button" class="dropdown-item btn  btn-sm radioBtn" id="heatmapGenesRadio" \
                                  data-value="heatmap-avg_nr_genes">Avg number of Genes</button>\
-                                <button type="button" class="dropdown-item btn btn-primary btn-sm radioBtn" id="heatmapHogsRadio" \
+                                <button type="button" class="dropdown-item btn  btn-sm radioBtn" id="heatmapHogsRadio" \
                                  data-value="heatmap-nr_hogs">Number of HOGs</button>\
-                                <button type="button" class="dropdown-item btn btn-primary btn-sm radioBtn" id="heatmapHogsSupportRadio" \
+                                <button type="button" class="dropdown-item btn  btn-sm radioBtn" id="heatmapHogsSupportRadio" \
                                  data-value="heatmap-nr_hogs_support">Number of well-supported HOGs</button>\
-                                <button type="button" class="dropdown-item btn btn-primary btn-sm radioBtn" id="dolRadio"\
+                                <button type="button" class="dropdown-item btn  btn-sm radioBtn" id="dolRadio"\
                                  data-value="dol">Domains of life</button>\
                             </div>\
                         </div>\
@@ -110,6 +110,12 @@ function update_genome_viewer(bid) {
             minLength: 3,
             onSelect: function( event ) { findByName(event.value); }
         });
+
+         $('#color_drop button').on('click', function() {
+            console.log('trigger');
+            document.getElementById('colorSelectDropdown').innerHTML = $(this).text()
+            }
+        );
 
     }
 
