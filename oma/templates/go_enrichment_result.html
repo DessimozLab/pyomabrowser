@@ -7,6 +7,9 @@
 {% block content %}
 
     <script src="{% static "js/bootstrap-table.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+     <script src="{% static "js/tableExport.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
     <link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
 
 
@@ -63,8 +66,9 @@
 
         var plot = function (div_id, data) {
 
-            var color_start = 'lightblue'
-            var color_end = 'salmon'
+
+            var color_start = 'salmon'
+             var color_end = 'lightblue'
 
             // Specify the chart’s dimensions.
             const width = 928;
@@ -86,7 +90,7 @@
                 .domain(d3.extent(data, d => d.ic)).nice()
                 .range([5, 20]);
 
-            var color = d3.scaleLinear()
+            var color = d3.scaleLog()
                 .domain(d3.extent(data, d => d.p_fdr_bh)).nice()
                 .range([color_start, color_end]);
 
@@ -168,7 +172,7 @@
                 .style("fill", function (d) {
                     return color(d.p_fdr_bh)
                 })
-                .style("opacity", 0.3)
+                //.style("opacity", 0.3)
                 .style("stroke", "white")
                 .on("mouseover", function (event, d) {
 
@@ -222,7 +226,7 @@
                 .style('font-weight', 600)
                 .style('font-size', '10px')
                 .attr("dx", "0")
-                .text('p-value');
+                .text('log(p-value)');
 
 
             svg.append("text")
@@ -282,7 +286,17 @@
 
 
                 <table class="table table-hover" id="table"
- data-mobile-responsive="true" >
+
+data-toolbar="#toolbar"
+  data-search="true"
+  data-show-columns="true"
+  data-show-export="true"
+  data-pagination="true"
+  data-page-list="[10, 25, 50, 100, all]"
+ data-mobile-responsive="true"
+  data-height="680"
+
+>
   <thead>
     <tr>
       <th data-field="GO_ID" data-sortable="true"> GO_ID </th>
