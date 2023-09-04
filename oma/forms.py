@@ -70,7 +70,7 @@ class FunctionProjectionUploadFormBase(forms.Form):
 class GoEnrichmentForm(forms.Form):
 
     CHOICES = (('extant', 'Extant genome Gene Ontology Enrichment Analysis'), ('ancestral', 'Ancestral genome Gene Ontology Enrichment Analysis' ),)
-    type = forms.ChoiceField(choices=CHOICES, required=True)
+    type = forms.ChoiceField(choices=CHOICES, required=True, initial="ancestral")
     Foreground = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", 'placeholder': 'Enter your HOG or Gene Ids separeted by space, comma, new line or tabulation', 'required':True}))
     name = forms.CharField(label='Name of Dataset', max_length=64, required=True)
     taxon = forms.CharField(label='Taxonomic Level (Background)', max_length=64, required=False)
