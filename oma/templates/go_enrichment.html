@@ -69,7 +69,7 @@
         var optionSelected = $("option:selected", this);
     var valueSelected = this.value;
 
-    if (valueSelected === 'ancestral'){
+    if (valueSelected !== 'ancestral'){
         $('#id_taxon').hide();
         document.getElementById("id_taxon").parentNode.parentNode.style.display = 'none';
 
