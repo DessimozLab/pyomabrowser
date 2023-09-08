@@ -674,7 +674,7 @@ class SyntenyViewer {
                 menu.push({ title: 'Close', action: () => {  this.close_tooltip()}})
 
                 menu.push({ title: ' <hr style="margin-top: 0.3em; margin-bottom: 0.1em"> ', action: null })
-                menu.push({ title: ' <b>GO annotation</b>  <hr style="margin-top: 0.1em; margin-bottom: 0.2em"> ', action: null })
+                menu.push({ title: ' <b>GO annotations</b>  <hr style="margin-top: 0.1em; margin-bottom: 0.2em"> ', action: null })
 
                 var url = _this.settings.type == 'ancestral' ? "/api/hog/"+ hog.id +"/gene_ontology/" + level_api : "/api/protein/"+ hog.id +"/gene_ontology/"
 
@@ -685,22 +685,52 @@ class SyntenyViewer {
                     success: function (data_go) {data_annotation = data_go}
                 })
 
+                console.log(data_annotation)
+
                 if (data_annotation){
-                    var already_process_go = new Set();
+
+                    var bio = new Set(); //  Biological Process
+                    var cell = new Set(); // Cellular Component
+                    var mol = new Set(); // Molecular Function
 
                     for (const contentKey in data_annotation) {
 
                         var go = data_annotation[contentKey]
 
-                        if (already_process_go.has(go.GO_term)) continue
+                        switch (go.aspect) {
 
-                        already_process_go.add(go.GO_term)
-                        menu.push( { title: '<b>' + go.GO_term + '</b>: ' + go.name , action: null } )
+                            case "cellular_component":
+                                cell.add(go);
+                                break;
+                            case 'biological_process':
+                                bio.add(go);
+                                break;
+                            case 'molecular_function':
+                                mol.add(go);
+                                break;
+                            default:
+                                console.log(`${go.aspect} not recognise as annotation category.`);
+
                         }
+
+                        }
+
+                    var add_annotation_by_aspect = function(array_aspect, text){
+                         var sbio = Array.from(array_aspect).sort(function(a, b) {return parseFloat(b.score) - parseFloat(a.score);})
+                    menu.push( { title: '<b> ' + text + ' </b>: ' , action: null } )
+
+                        for (var sbioKey in sbio) {
+                        let go = sbio[sbioKey]
+                       menu.push( { title: '<b> - ' + go.GO_term + '</b>: ' + go.name , action: null } )
+                    }
+                    }
+
+                    add_annotation_by_aspect(bio, 'Biological Process')
+                    add_annotation_by_aspect(cell, 'Cellular Component')
+                    add_annotation_by_aspect(mol, 'Molecular Function')
 
                 }
 
-                console.log(event)
 
 
                 //this.render_tooltip(event.offsetX + 12, event.offsetY + 12, menu)
