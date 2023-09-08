@@ -148,8 +148,11 @@ class TokenSearchTester(TestCase):
         for query in queries:
             with self.subTest(query=query):
                 reply = self.query_server(query, prefix="species", type="Taxon")
-                self.assertEqual(200, reply.status_code)
-                self.assertIn('YEAST', [z['uniprot_species_code'] for z in json.loads(reply.context['data_genomes'])])
+                if reply.status_code == 302:
+                    self.assertEqual(reply.url, f"/oma/genome/{expected_code}/info/")
+                else:
+                    self.assertEqual(200, reply.status_code)
+                    self.assertIn('YEAST', [z['uniprot_species_code'] for z in json.loads(reply.context['data_genomes'])])
 
     def test_sequence_search(self):
         queries = ("RSYKNSSAEGVLTGKGLNWGGSLIRPEAFGLVYYTQAMIDYATNGSFEGKRVTISGSGANVAQYAALKVIEVVSLSDSKGCIISETSEQIHD",
