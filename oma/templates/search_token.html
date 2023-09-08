@@ -147,13 +147,13 @@
                                     <b class="float-right ">
 
 
-                                        {% if meta.entries_found <= max_proteins_shown %}
+                                        {% if meta.entries_found <= max_proteins_shown and max_entries_founded <= max_proteins_shown  %}
                                             <span id="total_entry">{{ meta.entries_found }}</span>
                                             {% if meta.entries_found == 1 or meta.entries_found == 0 %}  entry
                                             {% else %} entries {% endif %}  found
 
-                                        {% else %} Best <span id="total_entry">{{ max_proteins_shown }}</span>
-                                            entries shown out of {{ meta.entries_found }} entries
+                                        {% else %} Best <span id="total_entry"> {{ max_proteins_shown }} </span>
+                                            entries shown out of {{ max_entries_founded }} entries
 
                                         {% endif %}
 

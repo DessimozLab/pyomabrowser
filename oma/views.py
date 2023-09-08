@@ -2580,11 +2580,19 @@ def token_search(request):
             E_details = []
             G_details = []
             S_details = []
+
+            max_entries_founded = 0
+
             for to in tokens:
-                E_details.append("{} {}: {} proteins".format(to.term, function_mapper[type(to)], to.count_entries()))
+
+                count_entries = to.count_entries()
+
+                if (count_entries > max_entries_founded): max_entries_founded = count_entries
+                E_details.append("{} {}: {} proteins".format(to.term, function_mapper[type(to)], count_entries))
                 G_details.append("{} {}: {} groups".format(to.term, function_mapper[type(to)], to.count_groups()))
                 S_details.append("{} {}: {} extant species".format(to.term, function_mapper[type(to)], to.count_species()))
                 S_details.append("{} {}: {} ancestral species".format(to.term, function_mapper[type(to)], to.count_ancestral_genomes()))
+            context['max_entries_founded'] = max_entries_founded
             context['E_details'] = E_details
             context['G_details'] = G_details
             context['S_details'] = S_details
