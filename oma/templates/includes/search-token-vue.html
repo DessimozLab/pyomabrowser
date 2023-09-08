@@ -258,6 +258,12 @@
                     this.removeToken(this.tokens.length - 1)
                 }
             },
+            enter_from_input(event) {
+                if (event.target.value.trim().length > 0) {this.addToken(event)}
+                else{
+                    event.target.nextElementSibling.focus().click()
+                }
+            },
             collect_token(){
                 this.post_query_{{ unique_id }} = JSON.stringify(this.tokens)
             },
@@ -544,7 +550,7 @@ help
     <input type="hidden" name="hidden_query" :value="post_query_{{ unique_id }}">
 
     <input type='text' :placeholder='placeholder' ref="input_handle"  class='token-input__text' id="input_token_search_{{ unique_id }}"
-           @keydown.enter='$event.target.nextElementSibling.focus().click()'
+           @keydown.enter='enter_from_input'
            @keydown.space='addToken'
            @keydown.delete='removeLastToken'
     />
