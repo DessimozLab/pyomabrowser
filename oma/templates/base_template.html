@@ -181,8 +181,8 @@
                         <a class="dropdown-item" href="{% url 'land_syntenyDP' %}">Synteny dotplot</a>
                         <a class="dropdown-item" href="{% url 'genomePW' %}">Genome pair orthology</a>
                         <a class="dropdown-item" href="{% url 'go_enrichment' %}">GO enrichment analysis</a>
-                        {% if omamo_enabled %}<a class="dropdown-item" href="{% url "omamo-search" %}">OMA-MO: Finding model organism</a>{% endif %}
-                        {% if oma_instance_name == "full" %}<a class="dropdown-item" href="https://omark.omabrowser.org">OMArk: Assessing proteome quality</a>{% endif %}
+                        {% if omamo_enabled %}<a class="dropdown-item" href="{% url "omamo-search" %}">OMA-MO: Find model organism</a>{% endif %}
+                        {% if oma_instance_name == "full" %}<a class="dropdown-item" href="https://omark.omabrowser.org">OMArk: Assess proteome quality</a>{% endif %}
 
                         <div class="dropdown-divider"></div>
 
