@@ -38,7 +38,7 @@ def compute_ancestral_enrichment(obj: EnrichmentAnalysisModel):
                 logger.debug(f"cannot map {elem}: {e}")
                 hogs[elem] = None
     logger.info(f"mapping: {hogs}")
-    go_res = ancestral_species_go_enrichment(utils.db, level=level, foreground_hogs=set(hogs.values()) - {None})
+    go_res = ancestral_species_go_enrichment(utils.db, level=level, foreground_hogs=set(hogs.values()) - {None}, score_cutoff=0.2)
     return go_res, hogs
 
 def compute_extant_enrichment(obj: EnrichmentAnalysisModel):
@@ -107,14 +107,14 @@ def go_enrichment(id):
     data_json = {}
     with tempfile.TemporaryDirectory(prefix=f"{analysis_name}-") as tmpdir:
         with open(os.path.join(tmpdir, analysis_name+".tsv"), 'wt') as fout:
-            go_res.to_csv(fout, sep="\t")
+            go_res.to_csv(fout, index=False, sep="\t")
         write_parameters_file(os.path.join(tmpdir, "input_parameters.txt"), obj, mapping)
-        data_json['enrichment'] = json.loads(go_res.to_json())
+        data_json['enrichment'] = go_res.to_dict()
         try:
             plot_dfs = generate_plots(go_res, utils.db, tmpdir, pval_col="p_fdr_bh")
             emb = {}
             for aspect, df in plot_dfs.items():
-                emb[aspect] = json.loads(df.to_json())
+                emb[aspect] = df.to_dict()
             data_json['embedding'] = emb
         except Exception as e:
             logger.exception("plotting failed")

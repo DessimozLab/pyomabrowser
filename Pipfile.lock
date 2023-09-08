@@ -921,7 +921,7 @@
                 "enrichment"
             ],
             "git": "ssh://gitolite@lab.dessimoz.org:2222/pyoma",
-            "ref": "1a8b58e99afa1e1907a301af0e4ceb10ba0ca8ac"
+            "ref": "8dbc4c29922f18145b1958a8020604b5572f7641"
         },
         "pyopa": {
             "hashes": [
