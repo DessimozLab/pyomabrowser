@@ -639,9 +639,9 @@ class SyntenyViewer {
                         dataType: 'json',
                         async: false,
                         success: function (data) {
-                            menu.push( { title: '<b>Description:</b>' +  data[0].description, action: null } )
-                            menu.push( { title: '<b>Completeness:</b>' + hog.completeness_score.toFixed(3), action: null } )
-                            menu.push( { title: '<b># of members:</b>' + hog.nr_members, action: null } )
+                            menu.push( { title: '<b>Description: </b>' +  data[0].description, action: null } )
+                            menu.push( { title: '<b>Completeness: </b>' + hog.completeness_score.toFixed(3), action: null } )
+                            menu.push( { title: '<b>Nb of members: </b>' + hog.nr_members, action: null } )
                         }
 
                     })
