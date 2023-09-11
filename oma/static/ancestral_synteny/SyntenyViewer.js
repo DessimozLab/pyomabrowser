@@ -174,6 +174,11 @@ class SyntenyViewer {
     }
 
     _settings_HOGs(){
+
+        var check_hei = this.height_remove_outlier_hog ? 'checked' : ''
+        var check_col = this.color_remove_outlier_hog ? 'checked' : ''
+
+
         return `
          
          <p class='ui_title' > HOGs</p>
@@ -187,7 +192,7 @@ class SyntenyViewer {
             </select>
             </span>
             <span style="display: block">
-            <input id='outlier_hog_height' type="checkbox" checked> <label for="">Remove outliers</label>
+            <input id='outlier_hog_height' type="checkbox" ${check_hei} > <label for="">Remove outliers</label>
             </span>
         </div>
         
@@ -198,12 +203,13 @@ class SyntenyViewer {
             <option value="nr_members"># Members</option>
             <option value="completeness_score" selected >Completeness</option>
             </select></span>
-            <span style="display: block"><input id='outlier_hog_coloring' type="checkbox" checked> <label for="">Remove outliers</label></span>
+            <span style="display: block"><input id='outlier_hog_coloring' type="checkbox" ${check_col} > <label for="">Remove outliers</label></span>
         </div>
         `
     }
 
     _bind_ui_hog(){
+
 
         document.getElementById("selecthhei").onchange = (e) => {
 
@@ -270,6 +276,10 @@ class SyntenyViewer {
     }
 
     _build_interface(){
+
+
+        d3.select('.corner_placeholder').remove()
+
 
         this.UI_container = d3.select(this.div).append("div").attr("class","corner_placeholder top right")
             .style("flex-direction",'column')
