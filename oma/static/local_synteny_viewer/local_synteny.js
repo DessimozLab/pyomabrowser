@@ -214,7 +214,7 @@ class LocalSyntenyViewer {
             })
 
         var level_ = this.focal_hog !== this.reference_element ? '' :  this.focal_species;
-        this.render_synteny(ref_synteny_g, this.synteny_data[this.reference_element + level_].linear_synteny, level_)
+        this.render_synteny(ref_synteny_g, this.synteny_data[this.reference_element + level_].linear_synteny, level_, this.reference_element )
 
         /*ref_synteny_g.append('text')
             .attr("dy", "0.31em")
@@ -413,7 +413,7 @@ class LocalSyntenyViewer {
 
                 var l = level_query.replace('&level=', '')
 
-                that.render_synteny(g, that.synteny_data[idd + l].linear_synteny, l )
+                that.render_synteny(g, that.synteny_data[idd + l].linear_synteny, l, idd )
                 return
             }
 
@@ -428,7 +428,7 @@ class LocalSyntenyViewer {
                     that.load_and_process_synteny_api(idd, jsonData, false,  level_query.replace('&level=', ''));
                     var l = level_query.replace('&level=', '');
 
-                    that.render_synteny(g, that.synteny_data[idd + l].linear_synteny, l)
+                    that.render_synteny(g, that.synteny_data[idd + l].linear_synteny, l, idd)
 
                 }
             });
@@ -442,7 +442,7 @@ class LocalSyntenyViewer {
             + "V" + d.target.x + "H" + d.target.y;
     }
 
-    render_synteny(g_container, data, level) {
+    render_synteny(g_container, data, level, api_id) {
 
         var that = this
 
@@ -478,7 +478,9 @@ class LocalSyntenyViewer {
                 .style("cursor", "pointer")
                  .on("click", (event, node) => { this._click_square(event, data[i],level)})
 
-            if (e.split('.')[0] == this.focal_hog.split('.')[0]){
+
+
+            if (data[i].id == api_id){
 
                 g_container.append("text")
             .attr('class', 'rect_upper_label')
