@@ -45,55 +45,10 @@
 
                     <h5 style="font-size: smaller" class="">Phylogenetic filter:</h5>
 
-
-                    <!--Genome selector -->
-                    <div  id="genome_selector" style="padding-left:0px !important">
-
-                    <p class="text-center small" style="margin-bottom: 0px !important"> Choose a target genome</p>
-
-
-
-                    <div class="btn-group-vertical " role="group" aria-label="Vertical button group" style=" display: block;margin: 0 auto;text-align: center;   ">
-    <div class="btn-group dropup" role="group" style="padding-bottom: 0px !important;">
-      <button id="btnGroupVerticalDrop1" type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <small>Ancestor genome</small>
-      </button>
-      <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop1" x-placement="bottom-start" style="background-color:#FFFFFF !important;position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 38px, 0px);">
-
-          {% for ancestor in lineage reversed %}
-    <button class="dropdown-item" type="button" onclick="select_genome('{{ancestor}}')">{{ ancestor }}</button>
-{% endfor %}
-
-      </div>
-    </div>
-
-    <div class="btn-group " role="group" style="padding-top: 0px !important;">
-      <button id="btnGroupVerticalDrop2" style="background-color: rgba(239, 239, 239, 0.2) !important; color:rgba(100, 100, 100, 0.5) "  type="button" class="btn btn-sm dropdown-toggle"  aria-haspopup="true" aria-expanded="false"
-          data-toggle="tooltip" data-placement="bottom" title="Downward comparaison will be available soon"
-      >
-          <small>Descendant genome</small>
-      </button>
-      <div class="dropdown-menu" aria-labelledby="btnGroupVerticalDrop2">
-
-    <button class="dropdown-item" type="button" onclick="select_genome('desc')">desc</button>
-      </div>
-    </div>
-
-  </div>
-
-
-
-
-                    </div>
-
                     <!-- Genome selected -->
-                    <div id="genome_selected"  class="text-center" style="display: none">
+                    <div id="genome_selected"  class="text-center" >
 
-                        <p class="text-center small" style="margin-bottom: 8px"> Target genome set on <span style="font-weight: bold" id="selected_genome_name">Error </span></p>
-
-
-                <button type="button" class="btn btn-sm py-0" onclick="reset_selection()"> <small>Reset target genome</small> </button>
-
+                        <p class="text-center small" style="margin-bottom: 8px"> Target genome set on parent <span style="font-weight: bold" id="selected_genome_name">{{ lineage.0 }} </span></p>
 
                     </div>
 
@@ -126,7 +81,7 @@
                     </div>
 
                     <div>
-                        <input type="checkbox" class="form-check-input" id="Lost" onclick="set_filter_lost()" checked>
+                        <input type="checkbox" class="form-check-input" id="Lost" onclick="set_filter_lost()">
                         <label class="form-check-label small" for="Lost" style="color: red">
                             <b>Lost</b>  <span class="badge badge-pill badge-secondary"  data-toggle="tooltip" data-placement="top" title="All ancestral gene that have been lost in between the oldest and the most recent level, HOGs shown come from the least recent taxonomic range selected">?</span>
                         </label>
@@ -173,60 +128,6 @@
     $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 });
-
-    function select_genome(genome, no_reload ){
-
-        _side_bar_genome_seleted = genome
-
-         no_reload = (typeof no_reload === 'undefined') ? false : no_reload;
-
-         document.getElementById("selected_genome_name").innerHTML =  genome
-
-         $("#genome_selector").hide()
-         $("#genome_selected").show()
-         $("#table_filter").show()
-
-
-         if (no_reload){return}
-
-
-         var new_url = "{{ api_url|safe }}" + "&compare_with=" + genome
-
-             hide_column_event = false
-
-        need_apply_filter = true
-
-         $('#grpTable').bootstrapTable('refresh', {url: new_url  } )
-
-         $('#grpTable').bootstrapTable('showColumn', 'event');
-
-
-
-     }
-
-    function reset_selection(){
-
-        _side_bar_genome_seleted = null
-
-         $("#genome_selector").show()
-         $("#genome_selected").hide()
-         $("#table_filter").hide()
-
-
-        hide_column_event = true
-
-        need_apply_filter = true
-
-         $('#grpTable').bootstrapTable('refresh', {url:  "{{api_url|safe}}"  } )
-         $('#grpTable').bootstrapTable('hideColumn', 'event');
-
-
-
-
-
-
-     }
-
 
 </script>
 
