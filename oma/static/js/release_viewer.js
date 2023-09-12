@@ -56,48 +56,60 @@ function update_genome_viewer(bid) {
         var under = document.createElement('div');
 
         under.setAttribute('id', 'sb');
-        under.innerHTML = '<div class="row">\
-                <div class="col-sm-7 col-xs-12">\
-                    <div class="nav navbar-nav navbar-left">\
-                        <div class="btn-group btn-group-sm" id="colourSel" role="group" aria-label="...">\
-                            <button type="button" id="resetBtn" class="btn btn-default btn-sm" onclick="resetTo();">Reset to root</button>\
-                            <button class="btn btn-default btn-sm nav-link dropdown-toggle text-nowrap" id="colorSelectDropdown" \
-                                 role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Coloring <span class="caret"></span></button>\
-                            <div class="dropdown-menu" id="color_drop" role="menu">\
-                                <button type="button" class="dropdown-item btn  btn-sm radioBtn" id="heatmapRadio"\
-                                 data-value="heatmap-avg_nr_proteins">Avg number of Proteins</button>\
-                                <button type="button" class="dropdown-item btn  btn-sm radioBtn" id="heatmapGenesRadio" \
-                                 data-value="heatmap-avg_nr_genes">Avg number of Genes</button>\
-                                <button type="button" class="dropdown-item btn  btn-sm radioBtn" id="heatmapHogsRadio" \
-                                 data-value="heatmap-nr_hogs">Number of HOGs</button>\
-                                <button type="button" class="dropdown-item btn  btn-sm radioBtn" id="heatmapHogsSupportRadio" \
-                                 data-value="heatmap-nr_hogs_support">Number of well-supported HOGs</button>\
-                                <button type="button" class="dropdown-item btn  btn-sm radioBtn" id="dolRadio"\
-                                 data-value="dol">Domains of life</button>\
-                            </div>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="col-sm-5 col-xs-12">\
-                    <div class="nav navbar-nav navbar-right">\
-                        <div class="form-group input-group input-group-sm" >\
-                            <input type="text" id="search" class="form-control searchField" placeholder="Search...">\
-                            <div class="input-group-btn">\
-                                <button type="button" class="btn btn-warning"\
-                                 onclick="$(\'#search\').val(\'\');findByName();">Clear</button>\
-                                <button type="button" class="btn btn-primary" onclick="findByName();">Search</button>\
-                                <button type="button" class="btn btn-info" onclick="zoomIntoName();">Zoom into</button>\
-                            </div>\
-                        </div>\
-                    </div>\
-                </div>\
-        </div>\
-<div id="chart">\
-    <div style="position: absolute; margin: 0;" id="sequence"></div>\
-    <div style="position: absolute; margin: 20px 0 0 0;" id="colorscale">\
-        <div id="explanation" style="visibility: hidden;"></div>\
-    </div>\
-</div>'
+        under.innerHTML = `<div class="row">
+                <div class="col-sm-2 col-xs-12"> 
+                    <div class="nav navbar-nav navbar-left"> 
+                    </div> 
+                </div> 
+                <div class="col-sm-10 col-xs-12"> 
+                    <div class="nav navbar-nav navbar-right"> 
+                        <div class="form-group input-group input-group-sm" > 
+                            <input type="text" id="search" class="form-control searchField" placeholder="Search extant or ancestral taxon"> 
+                            <div class="input-group-btn"> 
+                                <button type="button" class="btn btn-warning" 
+                                 onclick="$(\'#search\').val(\'\');findByName();">Clear</button> 
+                                <button type="button" class="btn btn-primary" onclick="findByName();">Search</button> 
+                                <div class="btn-group " id="colourSel" role="group" aria-label="..."> 
+                                    <button class="btn btn-default nav-link dropdown-toggle text-nowrap" 
+                                            id="colorSelectDropdown" 
+                                            role="button" data-toggle="dropdown" aria-haspopup="true" 
+                                            aria-expanded="false">Coloring <span class="caret"></span></button> 
+                                    <div class="dropdown-menu" id="color_drop" role="menu"> 
+                                        <button type="button" class="dropdown-item btn  btn-sm radioBtn" 
+                                                id="heatmapRadio" 
+                                                data-value="heatmap-avg_nr_proteins">Avg number of Proteins 
+                                        </button> 
+                                        <button type="button" class="dropdown-item btn  btn-sm radioBtn" 
+                                                id="heatmapGenesRadio" 
+                                                data-value="heatmap-avg_nr_genes">Avg number of Genes 
+                                        </button> 
+                                        <button type="button" class="dropdown-item btn  btn-sm radioBtn" 
+                                                id="heatmapHogsRadio" 
+                                                data-value="heatmap-nr_hogs">Number of HOGs 
+                                        </button> 
+                                        <button type="button" class="dropdown-item btn  btn-sm radioBtn" 
+                                                id="heatmapHogsSupportRadio" 
+                                                data-value="heatmap-nr_hogs_support">Number of well-supported HOGs 
+                                        </button> 
+                                        <button type="button" class="dropdown-item btn  btn-sm radioBtn" 
+                                                id="dolRadio" 
+                                                data-value="dol">Domains of life 
+                                        </button> 
+                                    </div> 
+                                </div>  
+                                <button type="button" class="btn btn-info" onclick="zoomIntoName();">Zoom into</button> 
+        <button type="button" id="resetBtn" class="btn default" onClick="resetTo();">Reset to root</button> 
+                            </div> 
+                        </div> 
+                    </div> 
+                </div> 
+        </div> 
+<div id="chart"> 
+    <div style="position: absolute; margin: 0;" id="sequence"></div> 
+    <div style="position: absolute; margin: 20px 0 0 0;" id="colorscale"> 
+        <div id="explanation" style="visibility: hidden;"></div> 
+    </div> 
+</div>`
         cviewer.appendChild(under);
         // reset is disabled when root is zoomed
         $('#resetBtn').prop('disabled', true);

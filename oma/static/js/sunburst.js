@@ -339,7 +339,7 @@ function click(d) {
 
     // dup code
     if (d.nr_hogs || d.nr_hogs_support){
-        hogs = "<br>Ancestral genome size:";
+        hogs = "<br>Ancestral nb of genes";
         if (d.nr_hogs_support){
             hogs += "<br>&nbsp;&nbsp;&bull;&nbsp;" + d.nr_hogs_support.toFixed(0) + " (well supported HOGs)"
         }
@@ -348,7 +348,7 @@ function click(d) {
         }
     }
     if (d.avg_nr_genes) {
-        avg_genes = "<br>Avg genome size (number of genes): " + d.avg_nr_genes.toFixed(0);
+        avg_genes = "<br>Avg number of genes: " + d.avg_nr_genes.toFixed(0);
     }
 
     if(d.avg_nr_proteins){
@@ -383,7 +383,7 @@ function click(d) {
         "</strong><br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: "+d.taxid+
         ")</span></h5><p>"+
         id+
-        "<br>Genomes: "+d.nr_genomes+
+        "<br>Nb extant genomes: "+d.nr_genomes+
         avg_genes+
         avg_proteins+
         hogs+"</p>"+
@@ -585,7 +585,7 @@ function init_sb() {
         .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
 
     zoom = d3.behavior.zoom()
-    .scaleExtent([0.8, 5])
+    .scaleExtent([0.5, 5])
     .on("zoom", zoomed);
 
     svg = d3.select("#chart")
@@ -695,7 +695,7 @@ function mouseover(d) {
 
     // dup code
     if (d.nr_hogs || d.nr_hogs_support){
-        hogs = "<br>Ancestral genome size:";
+        hogs = "<br>Ancestral nb of genes: ";
         if (d.nr_hogs_support){
             hogs += "<br>&nbsp;&nbsp;&bull;&nbsp;" + d.nr_hogs_support.toFixed(0) + " (well supported HOGs)"
         }
@@ -705,7 +705,7 @@ function mouseover(d) {
     }
 
     if(d.avg_nr_genes){
-        avg_genes = "<br>Avg genome size: "+d.avg_nr_genes.toFixed(0) + " (# genes)";
+        avg_genes = "<br>Avg number of genes: "+d.avg_nr_genes.toFixed(0) + " (# genes)";
     }
     if(d.avg_nr_proteins){
         avg_proteins = "<br>Avg number of proteins: "+d.avg_nr_proteins.toFixed(0);
@@ -752,7 +752,7 @@ function mouseover(d) {
     div.html("<h5 style='vertical-align: middle;border-bottom: 1px solid black;padding-bottom: 3px;'>"+d.name+
         "<br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: "+d.taxid+
         ")</span></h5>"+
-        "<p style='text-align: left;'>Genomes: "+d.nr_genomes+
+        "<p style='text-align: left;'>Nb extant genomes: "+d.nr_genomes+
         avg_genes +
         avg_proteins +
         hogs +
