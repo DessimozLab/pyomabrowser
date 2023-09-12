@@ -251,7 +251,7 @@
 
 
 
-                        <div class="col-xs-12 col-lg-6">
+                        <div class="col">
 
 
                             <div id="hm" style="width: 100%;">
@@ -262,15 +262,6 @@
 
                         </div>
 
-                        <div class="col-xs-12 col-md-6">
-
-<p class="text-justify">You have two ways to select the chromosome pair of interest:
-                       use the left matrix by clicking on the square of interest
-                        or use the select widget on the left side bar to browse for each genome the chromosome to display.
-                        Once the chromosome pair is chosen, use the 'launch DotPlot' to start the visualisation.</p>
-
-
-                        </div>
 
                     </div>
 
@@ -738,7 +729,7 @@
                         }
 
                     }
-                    changeMessage("Use the matrix or select boxes to choose the pair of chromosome to visualise", false);
+                    changeMessage("Click on the matrix to choose the pair of chromosome to visualise", false);
 
                     $("#fg_first_chr").removeClass('hidden');
                     $("#fg_second_chr").removeClass('hidden');
@@ -823,6 +814,9 @@
                             clickTimeout = setTimeout(function () {
                                 $("#selectchr1").val(chromosomes1[i].id);
                                 $("#selectchr2").val(chromosomes2[d.row].id);
+
+                                document.getElementById('launch_PP').click()
+
                             }, 300)
                         })
 
