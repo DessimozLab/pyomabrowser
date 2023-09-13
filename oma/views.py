@@ -2630,7 +2630,9 @@ class GenomeModelJsonTableMixin(JsonModelMixin):
                    "species_and_strain_as_dict": 'sciname',
                    'ncbi_taxon_id': "ncbi",
                    "common_name": None,
-                   "nr_entries": "prots", "kingdom": None,
+                   "nr_entries": "prots",
+                   "nr_genes": None,
+                   "kingdom": None,
                    "last_modified": None}
 
 
