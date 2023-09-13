@@ -157,8 +157,8 @@ function update_genome_viewer(bid) {
 
         // add the sorting setting
         setting_div_col.innerHTML += '<b>Sort by:</b> ' +
-            '<form > <input type="radio" name="sort_ui" value="prots" checked> Number of genes<br>  ' +
-            '<input type="radio" name="sort_ui" value="kingdom" > Domain<br> ' +
+            '<form ><input type="radio" name="sort_ui" value="nr_genes" checked> Size (# Genes)<br>  ' +
+            '<input type="radio" name="sort_ui" value="kingdom" > Kingdom<br> ' +
             '<input type="radio" name="sort_ui" value="uniprot_species_code' +
             '" > Name<br> </form>';
 
@@ -263,6 +263,10 @@ function init_table(div_id) {
         }, {
             field: 'last_modified',
             title: 'Last Update',
+            sortable: true
+        }, {
+            field: 'nr_genes',
+            title: '# of genes',
             sortable: true
         }, {
             field: 'prots',
@@ -416,7 +420,7 @@ function init_hist(div_id) {
 
         var yAxis = d3.svg.axis()
             .scale(yScale)
-            .orient("left")
+            .orient("left");
 
         // add the tooltip area to the webpage
         var tooltip = d3.select("body").append("div")
@@ -437,7 +441,7 @@ function init_hist(div_id) {
             return d.uniprot_species_code;
         }));
         yScale.domain([0, d3.max(data, function (d) {
-            return d.prots;
+            return d.nr_genes;
         })]);
 
 
@@ -491,14 +495,14 @@ function init_hist(div_id) {
             })
             .attr("width", xScale.rangeBand())
             .attr("y", function (d) {
-                return yScale(d.prots);
+                return yScale(d.nr_genes);
             })
             .attr("fill", function (d) {
                 var color_d =  color_schema.filter(function(v){ return v["name"] === d.kingdom; })[0];
                 return color_d ? color_d.color : "rgb(255,0,0)"
             })
             .attr("height", function (d) {
-                return height - yScale(d.prots)
+                return height - yScale(d.nr_genes)
             })
             .on("mouseover", function (d) {
 
@@ -512,19 +516,14 @@ function init_hist(div_id) {
         var yAxis_g = svgContainer.append("g")
             .attr("class", "y axis")
             .call(yAxis)
-
-            yAxis_g.selectAll("text")
+            .selectAll("text")
             .attr("y", -2)
             .attr("x", 9)
             .attr("dy", "-.15em")
             .attr("transform", "rotate(-90)")
-            .style("text-anchor", "end")
+            .style("text-anchor", "end");
 
-        yAxis_g.append("text")
-            .attr("y", -2)
-            .attr("x", 0)
-            .attr("dy", "-.15em")
-            .style("text-anchor", "start").text("Nb of proteins");
+
 
         svgContainer.append("g")
             .attr("class", "grid")
@@ -541,7 +540,7 @@ function init_hist(div_id) {
                     .duration(200)
                     .style("opacity", .95);
                 tooltip.html("<b>" + d.sciname.species + "</b> "+ d.sciname.strain+"</br><b>" + d.uniprot_species_code
-                    + ", " + d.prots + "</b>")
+                    + ", " + d.prots + "(Proteins)</b>")
                     .style("left", (d3.event.pageX + 5) + "px")
                     .style("top", (d3.event.pageY - 60) + "px");
         }
