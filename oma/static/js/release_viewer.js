@@ -157,8 +157,8 @@ function update_genome_viewer(bid) {
 
         // add the sorting setting
         setting_div_col.innerHTML += '<b>Sort by:</b> ' +
-            '<form > <input type="radio" name="sort_ui" value="prots" checked> Size<br>  ' +
-            '<input type="radio" name="sort_ui" value="kingdom" > Kingdom<br> ' +
+            '<form > <input type="radio" name="sort_ui" value="prots" checked> Number of genes<br>  ' +
+            '<input type="radio" name="sort_ui" value="kingdom" > Domain<br> ' +
             '<input type="radio" name="sort_ui" value="uniprot_species_code' +
             '" > Name<br> </form>';
 
@@ -416,7 +416,7 @@ function init_hist(div_id) {
 
         var yAxis = d3.svg.axis()
             .scale(yScale)
-            .orient("left");
+            .orient("left")
 
         // add the tooltip area to the webpage
         var tooltip = d3.select("body").append("div")
@@ -512,14 +512,19 @@ function init_hist(div_id) {
         var yAxis_g = svgContainer.append("g")
             .attr("class", "y axis")
             .call(yAxis)
-            .selectAll("text")
+
+            yAxis_g.selectAll("text")
             .attr("y", -2)
             .attr("x", 9)
             .attr("dy", "-.15em")
             .attr("transform", "rotate(-90)")
-            .style("text-anchor", "end");
+            .style("text-anchor", "end")
 
-
+        yAxis_g.append("text")
+            .attr("y", -2)
+            .attr("x", 0)
+            .attr("dy", "-.15em")
+            .style("text-anchor", "start").text("Nb of proteins");
 
         svgContainer.append("g")
             .attr("class", "grid")

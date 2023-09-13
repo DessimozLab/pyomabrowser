@@ -514,9 +514,7 @@ class LocalSyntenyViewer {
             .style('cursor', (d) => {
                 return d.action ? 'pointer' : 'auto'
             })
-            .style("font-weight", (d) => {
-                return d.title === "Close" || !d.action ? 900 : 400
-            })
+            .style("font-weight", (d,i) => {return i == 0 || d.title === "Close" ? 900 : 400 })
             .style('font-size', d => {
                 return '12 px';
             })
