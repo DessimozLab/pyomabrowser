@@ -987,13 +987,13 @@ class GenomeResolve(TemplateView):
                         return HttpResponseRedirect(reverse('ancestralgenome_info', args=(candidates[0][1],)))
                     else:
                         return HttpResponseRedirect(
-                            reverse('genome_info', args=(cand_extant[0][0]['UniProtSpeciesCode'].decode()))
+                            reverse('genome_info', args=(cand_extant[0][0].uniprot_species_code))
                         )
                 elif len(candidates) > 0:
                     return HttpResponseRedirect(reverse('ancestralgenome_info', args=(candidates[0][1],)))
                 elif len(cand_extant) > 0:
                     return HttpResponseRedirect(
-                        reverse('genome_info', args=(cand_extant[0][0]['UniProtSpeciesCode'].decode()))
+                        reverse('genome_info', args=(cand_extant[0][0].uniprot_species_code))
                     )
                 else:
                     raise Http404(e)

@@ -4,6 +4,8 @@
 {% block title %}Accessing Genomes{% endblock %}
 {% block content %}
 
+<link href="https://code.jquery.com/ui/1.13.1/themes/smoothness/jquery-ui.css" rel="Stylesheet"></link>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js" ></script>
 
 <div id="oma-generic-container">
 
@@ -109,6 +111,36 @@ $('#exTax1').click( function() {
 $('#exTax2').click( function() {
     $('#textTax').val($(this).text()).focus();
 });
+
+// AUTCOMPLETE TAXON
+var all_sci_names = [];
+var all_taxids = []
+
+function recursiveScan(json){
+    if (json.taxid){
+            all_sci_names.push({label: json.name, value: json.name});
+            all_taxids.push({label: json.taxid, value: json.taxid});
+        }
+    if(json.children != null){
+        if(json.children.length > 0){
+            for(let t=0; t<json.children.length; t++){
+                let e = json.children[t];
+                recursiveScan(e);
+            }
+        }
+    }
+    return true;
+}
+
+$.getJSON( "/All/genomes.json", function( jsonData ) {
+    recursiveScan(jsonData)
+
+    $('#textSci').autocomplete({source: all_sci_names});
+    $('#textSci').autocomplete("enable");
+    $('#textTax').autocomplete({source: all_taxids});
+    $('#textTax').autocomplete("enable");
+
+})
 
 </script>
 
