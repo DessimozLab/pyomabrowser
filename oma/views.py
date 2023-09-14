@@ -979,7 +979,24 @@ class GenomeResolve(TemplateView):
                 tax = tax["Name"][0].decode()
                 return HttpResponseRedirect(reverse('ancestralgenome_info', args=(tax,)))
             except (db.InvalidTaxonId, KeyError) as e:
-                raise Http404(e)
+                # lets try with some approximate search
+                candidates = utils.db.tax.approx_search(query_genome)
+                cand_extant = utils.db.id_mapper['OMA'].approx_search_genomes(query_genome, scores=True)
+                if len(candidates) > 0 and len(cand_extant) > 0:
+                    if candidates[0][0] > cand_extant[1][0]:
+                        return HttpResponseRedirect(reverse('ancestralgenome_info', args=(candidates[0][1],)))
+                    else:
+                        return HttpResponseRedirect(
+                            reverse('genome_info', args=(cand_extant[0][0]['UniProtSpeciesCode'].decode()))
+                        )
+                elif len(candidates) > 0:
+                    return HttpResponseRedirect(reverse('ancestralgenome_info', args=(candidates[0][1],)))
+                elif len(cand_extant) > 0:
+                    return HttpResponseRedirect(
+                        reverse('genome_info', args=(cand_extant[0][0]['UniProtSpeciesCode'].decode()))
+                    )
+                else:
+                    raise Http404(e)
 
 
 class GenomeBase(ContextMixin):
