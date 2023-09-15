@@ -459,24 +459,71 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 
                      <p class="text-justify">
-                         iHam is a reusable web widget that can be easily embedded into a website; the code is available on <a href="https://github.com/dessimozlab/iham">github<a>. It merely requires as input HOGs in the standard OrthoXML format and the underlying species tree in newick or PhyloXML format.
+                         iHam is a reusable web widget that can be easily embedded into a website; the code is available on <a href="https://github.com/dessimozlab/iham">github</a>.
+                         It merely requires as input HOGs in the standard OrthoXML format and the underlying species tree in newick or PhyloXML format.
                      </p>
 
-
-
-
-
-
-
-
-                     <small > Using iham ? Please cite: <br>Clément-Marie Train et. al, iHam and pyHam: visualizing and processing hierarchical orthologous groups, Bioinformatics, Volume 35, Issue 14, July 2019, Pages 2504–2506,
+                     <small > Using iham ? Please cite: <br>Clément-Marie Train et al, iHam and pyHam: visualizing and processing hierarchical orthologous groups, Bioinformatics, Volume 35, Issue 14, July 2019, Pages 2504–2506,
                          <a href="https://doi.org/10.1093/bioinformatics/bty994">10.1093/bioinformatics/bty994</a> </small>
-
                     <br >
 
 
+                    <h3 style="margin-top: 12px" id="species_information_viewer"><a href="{% url 'release' %}">Species Information Viewer</a></h3>
+                    <p>In the species information viewer, you can browse through which species are in the OMA database and get more information about them.</p>
 
-                    <h3 style="margin-top: 12px" > <a href="https://phylo.io/">Phylo.io</a></h3>
+                    <h4 id="sunburst">Taxon Hierarchy View (sunburst)</h4>
+                    <p style="font-weight: bold;">The default view is the Taxon Hierarchy view. Each section in the Taxon Hierarchy View represents a clade or species at the tips of the viewer.</p>
+                    <img src="{% static "image/sunburst_overview.png" %}" class="rounded mx-auto d-block w-50 p-3 " alt="sunburst overview">
+                    <ul>
+                        <li>Search for taxon (ancestral or extant species name) in the search bar.</li>
+                        <li>Mouse over the sections in the Taxon Hierarchy View to get information about the genome content.</li>
+                        <ul>
+                            <li>Name of taxon</li>
+                            <li>NCBI Taxon identifier</li>
+                            <li>Number of extant genomes in this clade</li>
+                            <li>Average number of genes for the extant species in this clade (Only includes 1 representative isoform per locus)</li>
+                            <li>Average number of proteins for the extant species in this clade (may include multiple isoforms)</li>
+                            <li>Number of ancestral genes for this clade, including all HOGs and well-supported HOGs (with a Completeness Score >= 0.3)</li>
+                            <li>Taxonomic lineage</li>
+                        </ul>
+                        <li>Change color of the Taxon Hierarchy View to color clades by clicking on the drop-down menu.</li>
+                        <ul>
+                            <li>By default the sunburst is colored by Domains of life (Eukaryota, Bacteria, Archaea)</li>
+                            <li>You can also color the sunburst by the average number of proteins/genes, or number of HOGs/well-supported HOGs.</li>
+                        </ul>
+                        <li>Zoom into a taxon by clicking on it in the sunburst or searching for it and clicking the “Zoom into” button.</li>
+                    </ul>
+
+                    <h4 id="species_table">Species Table View</h4>
+                    <p style="font-weight: bold;">The default view is the Taxon Hierarchy view. Each section in the Taxon Hierarchy View represents a clade or species at the tips of the viewer.</p>
+                    <ul>
+                        <li>Columns displayed:</li>
+                        <ul>
+                            <li>Code: 5-letter UniProt species code</li>
+                            <li>Scientific Name</li>
+                            <li>Common Name</li>
+                            <li>Last Update: When the genome was last updated in OMA</li>
+                            <li># of Genes: the number of genes in this genome</li>
+                            <li># of Sequences: includes all the alternative splice variants that are included in OMA</li>
+                            <li>Taxon Id: NCBI / GTDB taxon identifier. Negative numbers indicate GTDB assembly accessions</li>
+                            <li>D.: Domain of life (Bacteria, Archaea, Eukaryota)</li>
+                        </ul>
+                        <li>Search the table for species with the search bar above the table</li>
+                        <li>Display certain columns of the table with the filter icon in the top right</li>
+                        <li>Download the data by the download icon</li>
+                    </ul>
+
+                    <h4 id="species_plot">Species Plot</h4>
+                    <p style="font-weight: bold;">View the number of genes per species plotted in a bar graph. The different Archaea, Bacteria, and Eukaryota domains are colored blue, green, and red, respectively.</p>
+                    <ul>
+                        <li>Sort bars by number of genes (size), Kingdom (domain), or Species Name (alphabetical order)</li>
+                        <li>Select which domain to show.</li>
+                        <li>View in either a compacted view or expanded view where it's possible to see every species’ name.</li>
+                    </ul>
+
+
+
+                    <h3 style="margin-top: 12px" id="phylo_io"> <a href="https://phylo.io/">Phylo.io</a></h3>
 
                     <p class="text-justify">
 
