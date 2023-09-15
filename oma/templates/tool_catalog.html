@@ -348,23 +348,22 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 
              <div class="card card-header-oma border-0">
-                    <h2> Visualization tools </h2>
+                    <h2 id="visual-tools"> Visualization tools </h2>
                 <hr>
                 <div class="card-body">
 
 
 
-                     <h3> <a href="https://github.com/dessimozlab/iham">iHam (Graphical Viewer)</a></h3>
+                     <h3 id="iHam">iHam (Graphical Viewer)</h3>
 
 
 
 
                     <p class="text-justify">
-
                         The iHam Graphical Viewer is an interactive tool to visualize the evolutionary history of a specific gene family.
                     </p>
 
-                     <p class="font-weight-bold">How to read the iham viewer ?</p>
+                    <p class="font-weight-bold">How to read the iham viewer ?</p>
 
                     <p class="text-justify"> The viewer is composed of two panels: On the left is a <strong> species tree </strong> that lets the user select a node to focus on a particular taxonomic range, and on the right is a matrix that organizes extant genes according to their membership in species (rows) and HOGs (columns).
 </p>
@@ -372,12 +371,12 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
                       <p class="text-justify">The entire composition of all the genes, visible from the root of the tree, is the <strong>gene family</strong> . The iham viewer is composed of the following elements:
 </p>
 
-                     <img src="{% static "image/iham_graphical_viewer-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                     <img src="{% static "image/iham_graphical_viewer-1bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
                              alt="export">
 
                      <p class="text-justify"> How does it all fit together? All the elements together provide a snapshot into the ancestral genome content of a gene family at a specific taxonomic level.</p>
 
-  <img src="{% static "image/iham_graphical_viewer-1bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+  <img src="{% static "image/iham_graphical_viewer-1.png" %}" class="rounded mx-auto d-block w-50 p-3 "
                              alt="export">
 
                      <p class="font-weight-bold"> How can I infer evolutionary events? </p>
@@ -412,7 +411,7 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
                            <li> The gene was retained without duplications or losses from the Chromadorea to the Rhabditida common ancestor. </li>
 
-                            <img src="{% static "image/iham_graphical_viewer-4bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                            <img src="{% static "image/iham_graphical_viewer-5bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
                              alt="export">
 
 
@@ -460,7 +459,7 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 
                      <p class="text-justify">
-                                             iHam is a reusable web widget that can be easily embedded into a website; it merely requires as input HOGs in the standard OrthoXML format and the underlying species tree in newick or PhyloXML format.
+                         iHam is a reusable web widget that can be easily embedded into a website; the code is available on <a href="https://github.com/dessimozlab/iham">github<a>. It merely requires as input HOGs in the standard OrthoXML format and the underlying species tree in newick or PhyloXML format.
                      </p>
 
 
@@ -470,8 +469,8 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 
 
-                     <small > Using iham ? Please cite: <br>  Clément-Marie Train and others, iHam and pyHam: visualizing and processing hierarchical orthologous groups, Bioinformatics, Volume 35, Issue 14, July 2019, Pages 2504–2506,
-                         <a href="https://doi.org/10.1093/bioinformatics/bty994">(Train et al. 2019)</a> </small>
+                     <small > Using iham ? Please cite: <br>Clément-Marie Train et. al, iHam and pyHam: visualizing and processing hierarchical orthologous groups, Bioinformatics, Volume 35, Issue 14, July 2019, Pages 2504–2506,
+                         <a href="https://doi.org/10.1093/bioinformatics/bty994">10.1093/bioinformatics/bty994</a> </small>
 
                     <br >
 
