@@ -210,6 +210,7 @@ class ProteinEntryViewSet(ViewSet):
         p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
         data = utils.db.get_gene_ontology_annotations(int(p_entry_nr))
         annotations = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
+        annotations = sorted(annotations, key=lambda x: [x.aspect, -x.ic])
         serializer = serializers.GeneOntologySerializer(instance=annotations, many=True)
         return Response(serializer.data)
 
@@ -729,6 +730,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         data = utils.db.get_ancestral_gene_ontology_annotations(hog['Level'], hog['ID'])
         #TODO: fix with better GOA model that allows for both extend and ancestral annotations
         hack_models = [utils.GeneOntologyAnnotation(x) for x in data]
+        hack_models = sorted(hack_models, key=lambda x: (x.aspect, -x.ic))
         serializer = serializers.AncestralGeneOntologySerializer(instance=hack_models, many=True)
         return Response(serializer.data)
 

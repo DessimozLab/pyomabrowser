@@ -221,7 +221,8 @@ class BaseGeneOntologySerializer(ReadOnlySerializer):
     id = serializers.SerializerMethodField(method_name=None)
     GO_term = serializers.SerializerMethodField(method_name=None)
     name = serializers.SerializerMethodField(method_name=None)
-    aspect = serializers.SerializerMethodField(method_name=None)
+    aspect = serializers.CharField()
+    ic = serializers.FloatField()
 
     def get_id(self, obj):
         return str(obj.object_id)
@@ -231,9 +232,6 @@ class BaseGeneOntologySerializer(ReadOnlySerializer):
 
     def get_name(self, obj):
         return obj.term.name
-
-    def get_aspect(self, obj):
-        return obj.aspect
 
 class GeneOntologySerializer(BaseGeneOntologySerializer):
     entry_nr = serializers.IntegerField()

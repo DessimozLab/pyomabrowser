@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 {% block title %}GO Annotations for {{ entry.omaid }}{% endblock %}
-{% block meta_description %}For {{ entry.omaid }} OMA stores the following information about the gene/protein.{% endblock %}
+{% block meta_description %}Gene Ontology annotations for {{ entry.omaid }}.{% endblock %}
 {% block contentTab %}
 
 {% include "includes/func_desc.html" %}
@@ -25,15 +25,46 @@
 </div>
 
     <script>
+    function jsonToCsv(jsonData) {
+        let csv = '';
+        // Get the headers
+        let headers = Object.keys(jsonData[0]);
+        csv += headers.join(',') + '\n';
+        // Add the data
+        jsonData.forEach(function (row) {
+            let data = headers.map(header => JSON.stringify(row[header])).join(','); // Add JSON.stringify statement
+            csv += data + '\n';
+        });
+        return csv;
+    }
 
-        (function(){
+    (function(){
         $.getJSON("/api/protein/{{ entry.entry_nr }}/ontology/", function(data){
+
+            if (data.length === 0){
+                $('#ontology-panel').append("<p>No gene ontology annotations found for this gene.</p>");
+                $("#loader").hide();
+                return;
+            }
+            // Convert JSON data to CSV
+            let csvData = jsonToCsv(data);
+
+            // Create a CSV file and allow the user to download it
+            let blob = new Blob([csvData], { type: 'text/csv' });
+            let url = window.URL.createObjectURL(blob);
+
+            let a = document.createElement('a');
+            a.href = url;
+            a.className = 'float-right';
+            a.text = 'Download annotations (CSV)';
+            a.download = 'GO-{{ entry.omaid }}.csv';
+            document.getElementById('ontology-panel').appendChild(a);
 
 
 
             _.forEach(_.groupBy(data, "aspect"), function(annos, aspect){
 
-                var type_name;
+               var type_name;
 
                switch (aspect) {
                   case 'molecular_function':

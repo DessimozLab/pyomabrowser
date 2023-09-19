@@ -23,27 +23,29 @@
     <script>
 
     function jsonToCsv(jsonData) {
-    let csv = '';
-    // Get the headers
-    let headers = Object.keys(jsonData[0]);
-    csv += headers.join(',') + '\n';
-    // Add the data
-    jsonData.forEach(function (row) {
-        let data = headers.map(header => JSON.stringify(row[header])).join(','); // Add JSON.stringify statement
-        csv += data + '\n';
-    });
-    return csv;
-}
+        let csv = '';
+        // Get the headers
+        let headers = Object.keys(jsonData[0]);
+        csv += headers.join(',') + '\n';
+        // Add the data
+        jsonData.forEach(function (row) {
+            let data = headers.map(header => JSON.stringify(row[header])).join(','); // Add JSON.stringify statement
+            csv += data + '\n';
+        });
+        return csv;
+    }
 
 
-        (function(){
+    (function(){
         $.getJSON("{{ api_url }}", function(data){
 
-
+            if (data.length === 0){
+                $('#ontology-panel').append("<p>No gene ontology annotations found for this HOG.</p>");
+                $("#loader").hide();
+                return;
+            }
             // Convert JSON data to CSV
             let csvData = jsonToCsv(data);
-
-            console.log()
 
             // Create a CSV file and allow the user to download it
             let blob = new Blob([csvData], { type: 'text/csv' });
@@ -53,10 +55,8 @@
             a.href = url;
             a.className = 'float-right';
             a.text = 'Download annotations (CSV)';
-            a.download = 'data.csv';
+            a.download = 'GO-{{ hog.hog_id }}.csv';
             document.getElementById('ontology-panel').appendChild(a);
-            //a.click();
-
 
 
             _.forEach(_.groupBy(data, "aspect"), function(annos, aspect){
