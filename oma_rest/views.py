@@ -41,6 +41,8 @@ from collections import Counter
 from rest_framework.decorators import action, api_view
 
 logger = logging.getLogger(__name__)
+print(logger.name)
+logger.warning("this is a test log.")
 
 
 def resolve_protein_from_id_or_raise(id):
@@ -853,10 +855,19 @@ class SyntenyViewSet(ViewSet):
                          HOG are returned.
             location: query
 
+          - name: break_circular_contigs
+            description: Some ancestral contigs end up being circles. For certain applications
+                         this poses a problem. By setting this argument to "yes" (default),
+                         the function will break the circle on the weakest edge, with "no" it
+                         will return the full linearized graph. Note that this parameter
+                         has no effect if the `evidence` parameter is not equal to "linearized".
+            location: query
+
         """
         level = self.request.query_params.get('level', None)
         evidence = self.request.query_params.get('evidence', "any")
         size = int(self.request.query_params.get('context', 2))
+        break_circular_contigs = strtobool(self.request.query_params.get('break_circular_contigs', 'True'))
 
         graph = None
         if not hog_id.startswith('HOG:') and level is None:
@@ -887,6 +898,13 @@ class SyntenyViewSet(ViewSet):
                 raise NotFound(f"Ancestral Synteny for {hog['Level']} around {hog_id} not found.")
             except ValueError as e:
                 raise ValidationError(e)
+
+        if evidence == "linearized" and break_circular_contigs and len(graph) <= len(graph.edges):
+            min_edge = sorted(graph.edges.data(), key=lambda e: e[2]['weight'])[0][:2]
+            cont = graph.copy()
+            cont.remove_edge(*min_edge)
+            graph = cont
+
         graph_as_dict = nx.node_link_data(graph)
         for k in ('directed', 'multigraph', 'graph'):
             graph_as_dict.pop(k, None)
