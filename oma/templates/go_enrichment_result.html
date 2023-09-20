@@ -252,7 +252,10 @@
 
             if (jsonData.state !== 'DONE') {
 
-                document.getElementById('datum').innerHTML = "Computation not finished, this page will auto-refresh in <span id='timer'> 10 </span> sec or you can hit the refresh button."
+                let analysis_title = jsonData['type'].split(' ').map(w => w[0].toUpperCase() + w.substring(1).toLowerCase()).join();
+                analysis_title += " GO Enrichment analysis: "+jsonData['name'];
+
+                document.getElementById('datum').innerHTML = `<h3>${analysis_title}</h3> <p>Computation not finished, this page will auto-refresh in <span id='timer'> 10 </span> sec or you can hit the refresh button.</p>`
 
                 const refreshTimer = document.getElementById('timer');
 
@@ -277,12 +280,14 @@
 
                     data_enrichment = transpose(r['enrichment'])
 
+                    let analysis_title = jsonData['type'].split(' ').map(w => w[0].toUpperCase() + w.substring(1).toLowerCase()).join();
+                    analysis_title += " GO Enrichment analysis: "+jsonData['name'];
+
                     c.innerHTML = `
 <br>
+                <h3>${analysis_title}</h3>
+                <p>You can download the detailed result for this GO enrichment analysis by clicking <a href="${jsonData.result}"> here </a></p>
 
-                <h4>You can download the detailed result for this GO enrichment analysis by clicking <a href="${jsonData.result}"> here </a></h4>
-
-<br>
 
 
                 <table class="table table-hover" id="table"
@@ -344,10 +349,14 @@ data-toolbar="#toolbar"
 
         }).fail(function (jqxhr, textStatus, error) {
             let message = error;
+            let analysis_title = "GO Enrichment analysis: failure";
             if (jqxhr.hasOwnProperty('responseJSON')){
                 message = jqxhr.responseJSON.message;
+                analysis_title = jqxhr.responseJSON.type.split(' ').map(w => w[0].toUpperCase() + w.substring(1).toLowerCase()).join();
+                analysis_title += " GO Enrichment analysis: "+jsonData['name'];
+
             }
-            document.getElementById('datum').innerHTML = 'Something wrong happened: ' + message;
+            document.getElementById('datum').innerHTML = `<h3>${analysis_title}</h3> <p>Something wrong happened: ${message}</p>`;
         });
 
     </script>

@@ -161,16 +161,18 @@ function run_go(){
     else{
 
         var table_data = $("#grpTable").bootstrapTable('getData')
+        let parent_genome = $("#selected_genome_name").text();
 
         var input_foreground = Object.keys(table_data).map(key => table_data[key].hog_id).filter(n=>n);
         var input_type = 'ancestral';
-        var input_level = apply_filter_lost ? _side_bar_genome_seleted : "{{ genome_name }}";
-        var input_name = "Comparison between " + _side_bar_genome_seleted + " and {{ genome_name }} of [";
-        if (apply_filter_gained) input_name += "gained,";
-        if (apply_filter_duplicated) input_name += "duplicated,";
-        if (apply_filter_retained) input_name += "retained"
-        if (apply_filter_lost) input_name += "lost"
-        input_name += "]";
+        var input_level = apply_filter_lost ? parent_genome : "{{ genome_name }}";
+        var input_name = "Comparison between " + parent_genome + " and {{ genome_name }} of [";
+        let events = [];
+        if (apply_filter_gained) events.push("gained")
+        if (apply_filter_duplicated) events.push("duplicated");
+        if (apply_filter_retained) events.push("retained");
+        if (apply_filter_lost) events.push("lost");
+        input_name += events.join(', ') + "]";
 
 
         fetch("/api/enrichment/", {
