@@ -676,7 +676,7 @@ class LocalSyntenyViewer {
     _click_square (event, data, level) {
 
 
-        var type  = data.hog_id ? 'extant' : 'ancestral'
+        var type  = data.hasOwnProperty('hog_id') ? 'extant' : 'ancestral'
 
         console.log(data, level)
 
