@@ -47,8 +47,11 @@
 
                     <!-- Genome selected -->
                     <div id="genome_selected"  class="text-center" >
-
-                        <p class="text-center small" style="margin-bottom: 8px"> Events w.r.t. parent genome:  <span style="font-weight: bold" id="selected_genome_name">{{ lineage.0 }} </span></p>
+                        {% if level %}
+                        <p class="text-center small" style="margin-bottom: 8px"> Events w.r.t. genome:  <span style="font-weight: bold" id="selected_genome_name">{{ level }} </span></p>
+                        {% elif parent_level %}
+                        <p class="text-center small" style="margin-bottom: 8px"> Events w.r.t. parent genome:  <span style="font-weight: bold" id="selected_genome_name">{{ parent_level }} </span></p>
+                        {% endif %}    
 
                     </div>
 

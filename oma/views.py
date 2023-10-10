@@ -1192,13 +1192,17 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
             # cut before current level
             index = full_lineage.index(context['genome_name'])
             lineage = full_lineage[index+1:]
+            for parent_level in lineage:
+                if parent_level.encode('ascii') in utils.tax.all_hog_levels:
+                    break
         else:
             lineage = []
 
         context.update({'tab': 'genes',
                         'level': level,
                         'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
-                        'lineage': lineage})
+                        'lineage': lineage,
+                        'parent_level': parent_level})
         return context
 
 
