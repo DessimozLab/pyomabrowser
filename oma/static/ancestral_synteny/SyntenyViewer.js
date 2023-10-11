@@ -676,7 +676,7 @@ class SyntenyViewer {
                     })
 
                     menu.push({ title: 'Open Local Synteny', action: () => { _this.callback_click_synteny(hog.id) }})
-                     menu.push({ title: 'Open Gene details', action: () => {_this.callback_click_detail(hog.id) }})
+                    menu.push({ title: 'Open Gene details', action: () => {_this.callback_click_detail(hog.id) }})
 
 
                 }

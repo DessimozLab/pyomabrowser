@@ -268,9 +268,31 @@ class ProteinEntryViewSet(ViewSet):
           - name: entry_id
             description: an unique identifier for a protein - either it
                          entry number, omaid or its canonical id
+
+          - name: filter
+            description: a filter name to exclude some cross-references
+                         that are not relevant. Possible values are
+                         `all`, `exact`, `maindb`.
+
+                         - `all` does not apply any filter and returns all cross-references (default).
+                         - `exact` ignores all cross-references for which the protein sequence is not
+                            exactly the same as the one in the OMA browser.
+                         - `maindb` returns only the GeneName, UniProtKB, Ensembl Genes, RefSeq and EntrezGene
+                            and the SourceID cross-references.
+
+            location: query
         """
         entry_nr = resolve_protein_from_id_or_raise(entry_id)
-        xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
+        filter_name = self.request.query_params.get('filter', 'all').lower()
+        if filter_name == 'all':
+            mapper = utils.id_mapper['XRef']
+        elif filter_name == 'maindb':
+            mapper = utils.id_mapper['GeneNameAndMainDbIdMapper']
+        elif filter_name == 'exact':
+            mapper = utils.id_mapper['XRefNoApproximateIdMapper']
+        else:
+            raise ParseError(f'invalid argument for parameter filter: {filter_name}')
+        xrefs = mapper.map_entry_nr(entry_nr)
         for ref in xrefs:
             ref['entry_nr'] = entry_nr
             ref['omaid'] = utils.id_mapper['OMA'].map_entry_nr(entry_nr)
