@@ -6,9 +6,23 @@
 
 {% block contentTab %}
 
+    <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+    {% for tax in lineage|slice:"::-1" %}
+        <li class="breadcrumb-item active" aria-current="page">
+        {% if tax in supported_ancestral_levels %}
+            <a href="{% url ancestral_link_name tax %}">{{ tax }}</a>
+        {% else %}
+            {{ tax }}
+        {% endif %}
+        </li>
+    {% endfor %}
+    </ol></nav>
+
+
 <table class="table">
 
-<tr><td>Common name:</td><td>{{ genome_name }}</td></tr>
+<tr><td class="col-sm-4">Common name:</td><td class="col-sm-8">{{ genome_name }}</td></tr>
 <tr><td>{% if taxid > 0 %}NCBI taxonomic identifier:{% else %}Taxonomic identifier:{% endif %}</td><td>{{ taxid }}</td></tr>
 <tr><td>Number of ancestral genes:</td><td>{{ nr_hogs }}</td></tr>
 <tr><td>Number of descendant extant species:</td><td>{{ nbr_species }}</td></tr>
