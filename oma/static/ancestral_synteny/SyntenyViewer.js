@@ -27,6 +27,7 @@ class SyntenyViewer {
         }
         this.callback_click_detail = null
         this.callback_click_synteny = null
+        this.callback_click_members = null
 
         this.color_accessor_hog = 'completeness_score';
         this.color_remove_outlier_hog = true;
@@ -671,6 +672,7 @@ class SyntenyViewer {
                     })
 
                      menu.push({ title: 'Open HOG detail', action: () => {_this.callback_click_detail(hog.id) }})
+                    menu.push({ title: 'Open HOG members', action: () => {_this.callback_click_members(hog.id) }})
                      menu.push({ title: 'Open local synteny', action: () => { _this.callback_click_synteny(hog.id) }})
 
                 }
@@ -777,10 +779,15 @@ class SyntenyViewer {
                     }
 
 
-
                       if (this.settings.type == 'ancestral'){
                           this.Tooltip.style("opacity", 1).style("display", 'block')
                       }
+                      else{
+                          _this.Tooltip.style("opacity", 0).style("display", 'none')
+                      }
+
+
+
 
 
                 })
@@ -848,11 +855,14 @@ class SyntenyViewer {
     }
 
      close_tooltip() {
-         this.selected_element.style("stroke-width", 1)
+        if (this.selected_element){
+            this.selected_element.style("stroke-width", 1)
          this.selected_element.style("stroke", "white")
 
          this.selected_element = null
         this.Tooltip.style("opacity", 0).style("display", 'none')
+         }
+
     }
 
     _render_end_row(g_container, unit, row_i, end){

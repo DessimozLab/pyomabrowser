@@ -62,6 +62,13 @@
                 window.open(newUrl, "_blank");
             }
 
+            synteny.callback_click_members = function(hog_id){
+                var newUrl="{% url 'hog_table' 1234567 genome_name %}".replace(/1234567/,hog_id);
+                window.open(newUrl, "_blank");
+            }
+
+
+
             synteny.render();
 
         })
