@@ -373,7 +373,8 @@ class SyntenyViewer {
         var g_header = this.svg.append("g").attr('width', this.settings.width)
 
         g_header.append("text")
-            .text("Ancestral gene order reconstruction for " + this.settings.level +" genome")
+            .text((this.settings.type === "ancestral" ? "Ancestral gene order reconstruction " : "Gene order ") +
+                " for " + this.settings.level +" genome")
             .attr("text-anchor", 'start')
             .attr("font-size", '24px')
             .attr("x", this.contig_left_offset - 8)
