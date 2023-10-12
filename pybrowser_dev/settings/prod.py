@@ -22,6 +22,7 @@ INSTALLED_APPS.extend([
     'omamo',
     'expasysearch',
     'mailman_subscribe',
+    'taxmap',
 ])
 
 MIDDLEWARE.extend([

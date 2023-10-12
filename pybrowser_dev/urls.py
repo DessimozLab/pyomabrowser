@@ -38,6 +38,11 @@ if "mailman_subscribe" in settings.INSTALLED_APPS:
         path("oma/", include('mailman_subscribe.urls'))
     )
 
+if "taxmap" in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path("oma/", include("taxmap.urls"))
+    )
+
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView
     from django.urls import re_path
