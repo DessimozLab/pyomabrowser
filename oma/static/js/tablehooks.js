@@ -116,9 +116,9 @@
 
     exports.format_taxonid_as_link = function(value, row){
         if (value > 0) {
-            return '<a class="external" target="_blank" href="https://uniprot.org/taxonomy/' + value + '">' + value + "</a>"
+            return '<a class="external" target="_blank" href="https://uniprot.org/taxonomy/' + value + '">' + value + "</a>";
         } else {
-            return value;
+            return '<a target="_blank" href="/oma/taxmap/' + value +'/">' + value + "</a>";
         }
     };
 
