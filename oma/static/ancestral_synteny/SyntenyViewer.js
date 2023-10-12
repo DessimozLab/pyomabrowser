@@ -37,6 +37,9 @@ class SyntenyViewer {
         this.height_accessor_hog = 'nr_members';
         this.height_remove_outlier_hog = true;
 
+
+        this.selected_element = null
+
     }
 
     // MODEL
@@ -635,6 +638,17 @@ class SyntenyViewer {
              */
             .on("click", (event, node) => {
 
+                if(this.selected_element){
+                         this.selected_element.style("stroke-width", 1)
+                         this.selected_element.style("stroke", "white")
+                         this.selected_element = null
+                    }
+
+                this.selected_element = d3.select(event.target)
+                this.selected_element.style("stroke-width", 2)
+                this.selected_element.style("stroke", "black")
+
+
                 var menu = [];
                 var data_annotation = null;
 
@@ -695,7 +709,6 @@ class SyntenyViewer {
                     success: function (data_go) {data_annotation = data_go}
                 })
 
-                console.log(data_annotation)
 
                 if (data_annotation){
 
@@ -741,8 +754,6 @@ class SyntenyViewer {
 
                 }
 
-
-
                 //this.render_tooltip(event.offsetX + 12, event.offsetY + 12, menu)
                 this.render_tooltip(event.pageX + 12, event.pageY + 12, menu)
 
@@ -757,10 +768,18 @@ class SyntenyViewer {
                 .attr("y2", this.settings.contig.padding_top + this.settings.row.bar_height / 2)
                 .style("stroke", () => { return _this.settings.type == 'ancestral' ? this.scale_color_edge(hog[this.color_accessor_edge]) : 'lightgray' })
                 .style("stroke-width",  edge.weight < 0.6 * mean_weight ? 2 : 3)
-                .on("mouseover",function () {
+                .on("mouseover",() =>  {
 
-                      if (_this.settings.type == 'ancestral'){
-                          _this.Tooltip.style("opacity", 1).style("display", 'block')
+                    if(this.selected_element){
+                         this.selected_element.style("stroke-width", 1)
+                         this.selected_element.style("stroke", "white")
+                         this.selected_element = null
+                    }
+
+
+
+                      if (this.settings.type == 'ancestral'){
+                          this.Tooltip.style("opacity", 1).style("display", 'block')
                       }
 
 
@@ -790,6 +809,7 @@ class SyntenyViewer {
     }
 
      render_tooltip(x, y, menu) {
+
 
         this.Tooltip.style("opacity", 1).style("display", 'block')
             .style("left", x + 12 + "px")
@@ -828,6 +848,10 @@ class SyntenyViewer {
     }
 
      close_tooltip() {
+         this.selected_element.style("stroke-width", 1)
+         this.selected_element.style("stroke", "white")
+
+         this.selected_element = null
         this.Tooltip.style("opacity", 0).style("display", 'none')
     }
 
