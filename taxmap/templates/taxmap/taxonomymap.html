@@ -1,0 +1,93 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block title %}Taxonomy mappings{% endblock %}
+{% block js_hook %}
+    <!-- bootstrap-table -->
+    <script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+    <link rel="stylesheet" href="{% static "css/bootstrap-table.min.css" %}">
+    <script src="{% static "js/bootstrap-table.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+            <h1>Taxonomy Information</h1>
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            {% if many %}<h3>Taxon "{{ query }}": {{ taxon|length }} candidates found</h3><br>{% endif %}
+
+            {% for tax in taxon %}
+            <div class="card card-header-oma">
+                <div class="card-header">
+                    <h4>{{ tax.name }} [{{ tax.taxid }}]</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row dl-horizontal">
+                        <dt class="col-sm-3">Source Taxonomy:</dt><dd class="col-sm-9">{{ tax.source }}</dd>
+                        <dt class="col-sm-3">Taxon ID:</dt><dd class="col-sm-9">{{ tax.taxid }}</dd>
+                        <dt class="col-sm-3">Taxon Name:</dt>
+                            <dd class="col-sm-9"><a class="external" target="_blank"
+                                {% if tax.source == "GTDB Taxonomy" and tax.code %}
+                                   href="https://gtdb.ecogenomic.org/genome?gid={{ tax.gtdb_acc}}"
+                                {% elif tax.source == "GTDB Taxonomy" %}
+                                   href="https://gtdb.ecogenomic.org/taxon-history?from=R207&to=R214&query={{ tax.name }}"
+                                {% elif tax.source == "NCBI Taxonomy" %}
+                                   href="https://www.uniprot.org/taxonomy/{{ tax.taxid }}"
+                                {% endif %}>{{ tax.name }}</a></dd>
+                        {% if tax.code %}
+                            <dt class="col-sm-3">Mnemonic Species Code</dt><dd class="col-sm-9"><a href="{% url 'genome_info' tax.code %}">{{ tax.code }}</a></dd>
+                            {% if tax.gtdb_acc %}<dt class="col-sm-3">GTDB Accession</dt><dd class="col-sm-9">{{ tax.gtdb_acc }}</dd>{% endif %}
+                        {% elif tax.valid or tax.oma_representative %}
+                            <dt class="col-sm-3">Ancestral Genome</dt>
+                            <dt class="col-sm-9">
+                                {% if tax.valid %}<a href="{% url 'ancestralgenome_info' tax.name %}">{{ tax.name }}</a>
+                                {% elif tax.oma_representative %}<a href="{% url 'ancestralgenome_info' tax.oma_representative %}">{{ tax.oma_representative }}</a>
+                                {% endif %}
+                            </dt>
+                        {% endif %}
+                    </dl>
+                    {% if tax.counterparts %}
+                        <h5>Canidate Taxonomy IDs in {% if tax.taxid < 0 %}NCBI Taxonomy{% else %}GTDB Taxonomy used in OMA{% endif %}</h5>
+                        <table class="table table-hover" id="counterparts-{{ tax.name }}"
+                          data-toggle="table"
+                          data-search="true"
+                          data-mobile-responsive="true"
+                          data-show-columns="true">
+                            <thread>
+                                <tr><th>Name</th><th>Taxon ID</th><th>Speciesoverlap in OMA</th></tr>
+                            </thread>
+                            <tbody>
+                            {% for row in tax.counterparts %}
+                                <tr>
+                                    <td>{{ row.name }}</td>
+                                    <td><a href="{% url 'taxmap' row.taxid %}">{{ row.taxid }}</a></td>
+                                    <td>{{ row.jaccard | floatformat:3 }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+
+
+                </div>
+            </div><br>
+            {% endfor %}
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

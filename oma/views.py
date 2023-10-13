@@ -1141,6 +1141,13 @@ class AncestralGenomeBase(ContextMixin):
                 except KeyError:
                     context['nr_hogs'] = len(utils.db.get_all_hogs_at_level(search['name']))
                 context['nbr_species'] = count_species(search)
+                lin_root_taxid = -1 if genomes_json['name'] == 'LUCA' else 0
+                context['lineage'] = [
+                    lev["Name"].decode() for lev in utils.db.tax.get_parent_taxa(context['taxid'], root=lin_root_taxid)
+                ][1:]
+                context['supported_ancestral_levels'] = set(l.decode() for l in utils.tax.all_hog_levels).intersection(
+                    context['lineage'])
+                context['ancestral_link_name'] = "ancestralgenome_info"
             else:
                 raise ValueError("Could not find ancestral genome {}".format(species_id))
         except ValueError as e:
@@ -1173,7 +1180,8 @@ class AncestralGenomeCentricSynteny(AncestralGenomeBase, TemplateView):
     def get_context_data(self, species_id, **kwargs):
         context = super(AncestralGenomeCentricSynteny, self).get_context_data(species_id, **kwargs)
 
-        context.update({'tab': 'synteny'})
+        context.update({'tab': 'synteny',
+                        'ancestral_link_name': "ancestralgenome_synteny"})
         return context
 
 class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
@@ -1182,27 +1190,19 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
     def get_context_data(self, species_id, level=None, **kwargs):
         context = super(AncestralGenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
-        ## get list lineage up
-        #  get an extant genome lineage
-        if context['taxid'] != 0:
-            taxid = utils.tax.get_subtaxonomy_rooted_at(context['taxid']).get_taxid_of_extent_genomes()[0]
-            extant = utils.Genome(utils.id_mapper['OMA'].genome_from_taxid(taxid))
-            full_lineage = extant.lineage
+        if level is not None and level not in context['supported_ancestral_levels']:
+            raise Http404(f"Reference level {f} is not valid as comparison with {species_id}")
 
-            # cut before current level
-            index = full_lineage.index(context['genome_name'])
-            lineage = full_lineage[index+1:]
-            for parent_level in lineage:
-                if parent_level.encode('ascii') in utils.tax.all_hog_levels:
-                    break
-        else:
-            lineage = []
+        parent_level = None
+        for parent_level in context['lineage']:
+            if parent_level in context['supported_ancestral_levels']:
+                break
 
         context.update({'tab': 'genes',
                         'level': level,
                         'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
-                        'lineage': lineage,
-                        'parent_level': parent_level})
+                        'parent_level': parent_level,
+                        'ancestral_link_name': "ancestralgenome_genes"})
         return context
 
 
