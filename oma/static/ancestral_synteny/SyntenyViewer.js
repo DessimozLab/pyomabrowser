@@ -648,7 +648,7 @@ class SyntenyViewer {
 
                 this.selected_element = d3.select(event.target)
                 this.selected_element.style("stroke-width", 2)
-                this.selected_element.style("stroke", "black")
+                this.selected_element.style("stroke", "red")
 
 
                 var menu = [];

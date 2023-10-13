@@ -477,8 +477,54 @@ class LocalSyntenyViewer {
                 })
                 .style("cursor", "pointer")
                  .on("click", (event, node) => { this._click_square(event, data[i],level)})
+                 .on('mouseover', (event, node) => {
 
 
+                     if (i != 5 && data[i].hog_id) {
+                         r.g_container = g_container;
+                         r.time = setTimeout(() => {
+
+
+                             var posLsub = (this.settings.width_text + this.settings['marginLeftSynteny']) + (i * (this.settings['width_block'] + this.settings['blockMargin']))
+
+                             posLsub += this.settings['width_block'] / 2;
+
+                             $.ajax({
+
+                                 url: '/api/protein/' + data[i].id + '/xref/?filter=maindb',
+                                 dataType: 'json',
+                                 async: false,
+                                 success: function (data_api) {
+
+                                     r.mouseover_text = r.g_container.append("text")
+                                         .attr('class', 'rect_upper_label')
+                                         .attr("dy", "18px")
+                                         .attr("x", posLsub)
+                                         .attr("text-anchor", () => {
+                                             return (i == 0 || i == 6) ? 'start' : (i == 4 || i == 10) ? 'end' : "middle"
+                                         })
+                                         .text(d => {
+                                             return data_api[0]['xref']
+                                         })
+                                         .style('font-size', "10px")
+                                         .style('font-family', 'monospace')
+
+                                 }
+                             });
+
+
+                         }, 300);
+                     }
+
+                })
+            .on('mouseout', (event, node) => {
+                if (i != 5 && data[i].hog_id) {
+                    clearTimeout(r.time);
+                    if (r.mouseover_text) {
+                        r.mouseover_text.remove();
+                    }
+                }
+                })
 
             if (data[i].id == api_id){
 
@@ -678,8 +724,6 @@ class LocalSyntenyViewer {
 
 
         var type  = data.hasOwnProperty('hog_id') ? 'extant' : 'ancestral'
-
-        console.log(data, level)
 
          var menu = [];
 
