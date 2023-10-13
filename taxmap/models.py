@@ -22,8 +22,8 @@ class Taxon(metaclass=abc.ABCMeta):
 
 class GTDBTaxon(Taxon):
     source = "GTDB Taxonomy"
-    def __init__(self, gtdb_taxid:int, gtdb_name:str, valid_oma_tax:bool, ncbi_counterparts:list=None, **kwargs):
-        super().__init__(gtdb_taxid, gtdb_name, ncbi_counterparts)
+    def __init__(self, gtdb_taxid:int, gtdb_name:str, valid_oma_tax:bool, ncbi_candidates:list=None, **kwargs):
+        super().__init__(gtdb_taxid, gtdb_name, ncbi_candidates)
         self.valid = valid_oma_tax
         self.oma_representative = kwargs.get("representative", None)
 
