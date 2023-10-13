@@ -509,7 +509,7 @@ class LocalSyntenyViewer {
         var gg = this.Tooltip.selectAll('menu_item')
             .data(menu)
             .enter().append('text')
-            .style('text-align', 'center')
+            .style('text-align', (d,i) => {return d.title === "Close" ? 'center' : 'start' })
             .style('display', 'block')
             .style('cursor', (d) => {
                 return d.action ? 'pointer' : 'auto'
@@ -518,7 +518,7 @@ class LocalSyntenyViewer {
             .style('font-size', d => {
                 return '12 px';
             })
-            .text(function (d) {
+            .html(function (d) {
                 return d.title;
             })
             .on('mouseover', function (d) {
@@ -554,7 +554,8 @@ class LocalSyntenyViewer {
                     menu.push(tt)
 
 
-                } else {
+                }
+                else {
 
                     var t = {
                         title: node.data.data.id.split('_')[0],
@@ -618,7 +619,7 @@ class LocalSyntenyViewer {
                     if (node.children || node._children) {
 
                         var ttt = {
-                            title: 'Open HOG detail',
+                            title: '<a href=""> Open HOG detail </a>' ,
                             action: () => {
                                 this.call_back_hog_detail(node.data.data.id.split('_')[0], level)
                             }
@@ -627,7 +628,7 @@ class LocalSyntenyViewer {
                         menu.push(ttt)
 
                         var tttt = {
-                            title: 'Use as synteny focus',
+                            title: '<a href=""> Use as synteny focus </a>',
                             action: () => {
                                 this.call_back_hog_local_synteny(node.data.data.id.split('_')[0], level)
                             }
@@ -640,7 +641,7 @@ class LocalSyntenyViewer {
                     else {
 
                         var ttt = {
-                            title: 'Open gene detail',
+                            title: '<a href=""> Open gene detail </a>' ,
                             action: () => {
                                 this.call_back_gene_detail(node.data.data.id)
                             }
@@ -649,7 +650,7 @@ class LocalSyntenyViewer {
                         menu.push(ttt)
 
                         var tttt = {
-                            title: 'Use as synteny focus',
+                            title:  '<a href=""> Use as synteny focus </a>' ,
                             action: () => {
                                 this.callback_gene_local_synteny(node.data.data.id)
                             }
@@ -688,7 +689,7 @@ class LocalSyntenyViewer {
           if (type == 'ancestral') {
 
                         var ttt = {
-                            title: 'Open HOG detail',
+                            title: '<a href=""> Open HOG detail</a>' ,
                             action: () => {
                                 this.call_back_hog_detail( data.id.split('_')[0], level)
                             }
@@ -697,7 +698,7 @@ class LocalSyntenyViewer {
                         menu.push(ttt)
 
                         var tttt = {
-                            title: 'Use as synteny focus',
+                            title:  '<a href=""> Use as synteny focus </a>' ,
                             action: () => {
                                 this.call_back_hog_local_synteny( data.id.split('_')[0], level)
                             }
@@ -710,9 +711,8 @@ class LocalSyntenyViewer {
                 dataType: 'json',
                 async: false,
                 success: function (data) {
-                    console.log(data)
-                        menu.push({title: `Description: ${data[0].description}`, action: null })
-                        menu.push({title: `Completeness Score: ${data[0].completeness_score.toFixed(2)}`, action: null })
+                        menu.push({title: ` <b>Description: </b>${data[0].description}`, action: null })
+                        menu.push({title: `<b>Completeness Score: </b>${data[0].completeness_score.toFixed(2)}`, action: null })
                 }
             });
 
@@ -723,7 +723,7 @@ class LocalSyntenyViewer {
                     else {
 
                         var ttt = {
-                            title: 'Open gene detail',
+                            title: '<a href=""> Open gene detail </a>' ,
                             action: () => {
                                 this.call_back_gene_detail( data.id)
                             }
@@ -732,12 +732,14 @@ class LocalSyntenyViewer {
                         menu.push(ttt)
 
                         var tttt = {
-                            title: 'Use as synteny focus',
+                            title: '<a href=""> Use as synteny focus </a>',
                             action: () => {
                                 this.callback_gene_local_synteny(data.id)
                             }
                         }
                         menu.push(tttt)
+
+              var genome_release = null
 
                          $.ajax({
 
@@ -745,12 +747,27 @@ class LocalSyntenyViewer {
                 dataType: 'json',
                 async: false,
                 success: function (data) {
-                    menu.push({title: `ID: ${data.omaid}`, action: null })
-                        menu.push({title: `External ID: ${data.canonicalid}`, action: null })
-                        menu.push({title: `OMA ID: ${data.omaid}`, action: null })
-                        menu.push({title: `Sequence length: ${data.sequence_length}`, action: null })
-                        menu.push({title: `Chromosome: ${data.chromosome}`, action: null })
-                        menu.push({title: `Description: ${data.description}`, action: null })
+                    genome_release = data.species.species;
+                    menu.push({title: `<b> ID:</b> ${data.omaid}`, action: null })
+                        menu.push({title: `<b>  OMA ID:</b> ${data.omaid}`, action: null })
+                        menu.push({title: `<b> Sequence length:</b> ${data.sequence_length}`, action: null })
+                        menu.push({title: `<b> Chromosome:</b> ${data.chromosome}`, action: null })
+                        menu.push({title: `<b> Description:</b> ${data.description}`, action: null })
+                }
+            });
+
+                        $.ajax({
+
+                url: '/api/protein/' + data.id + '/xref/?filter=maindb',
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+
+                    for (var dataKey in data) {
+                        var xf = data[dataKey];
+                        menu.push({title: `<b>  ${xf['source']}: </b>${xref_format.dbxref_url(xf['xref'], xf['source'], genome_release)}`, action: null })
+
+                    }
                 }
             });
 
