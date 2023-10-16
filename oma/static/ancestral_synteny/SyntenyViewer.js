@@ -672,9 +672,9 @@ class SyntenyViewer {
 
                     })
 
-                     menu.push({ title: 'Open HOG detail', action: () => {_this.callback_click_detail(hog.id) }})
-                    menu.push({ title: 'Open HOG members', action: () => {_this.callback_click_members(hog.id) }})
-                     menu.push({ title: 'Open local synteny', action: () => { _this.callback_click_synteny(hog.id) }})
+                     menu.push({ title: '<a href=""> Open HOG detail </a>', action: () => {_this.callback_click_detail(hog.id) }})
+                    menu.push({ title:  '<a href=""> Open HOG members </a>', action: () => {_this.callback_click_members(hog.id) }})
+                     menu.push({ title:  '<a href=""> Open local synteny </a>',action: () => { _this.callback_click_synteny(hog.id) }})
 
                 }
 
@@ -692,8 +692,8 @@ class SyntenyViewer {
 
                     })
 
-                    menu.push({ title: 'Open Local Synteny', action: () => { _this.callback_click_synteny(hog.id) }})
-                    menu.push({ title: 'Open Gene details', action: () => {_this.callback_click_detail(hog.id) }})
+                    menu.push({ title:  '<a href=""> Open Local Synteny </a>' , action: () => { _this.callback_click_synteny(hog.id) }})
+                    menu.push({ title:  '<a href=""> Open Gene details </a>', action: () => {_this.callback_click_detail(hog.id) }})
 
 
                 }
