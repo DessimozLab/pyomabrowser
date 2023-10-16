@@ -504,7 +504,11 @@ class LocalSyntenyViewer {
                                              return (i == 0 || i == 6) ? 'start' : (i == 4 || i == 10) ? 'end' : "middle"
                                          })
                                          .text(d => {
-                                             return data_api[0]['xref']
+                                             const order = {"Gene Name": 0, "UniProtKB/SwissProt": 1, "SourceID": 2, "UniProtKB/TrEMBL": 3, "Ensembl Gene": 4, "RefSeq": 5, "EntrezGene": 6}
+                                             let data = data_api.sort((a,b) => {
+                                                return order[a.source] - order[b.source];
+                                             });
+                                             return data[0]['xref'];
                                          })
                                          .style('font-size', "10px")
                                          .style('font-family', 'monospace')
