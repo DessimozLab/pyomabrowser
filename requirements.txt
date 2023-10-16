@@ -19,9 +19,10 @@ djangorestframework-link-header-pagination
 django-cors-headers
 pyyaml
 django-matomo-api-tracking
+pyoma<0.13
+
 
 
 -e git+https://github.com/alpae/django-google-analytics.git@master#egg=django-google-analytics-app
--e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@master#egg=pyoma
 -e git+ssh://gitolite@lab.dessimoz.org:2222/zoo@master#egg=zoo
 -e git+ssh://gitolite@lab.dessimoz.org:2222/oma-academy@master#egg=oma-academy-app
