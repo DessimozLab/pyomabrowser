@@ -18,7 +18,7 @@ coreapi = "*"
 scikit-learn = "*"
 djangorestframework-link-header-pagination = "*"
 django-cors-headers = "*"
-pyoma = {version = ">=0.13,<0.14", extras=["enrichment"]}
+pyoma = {ref = "develop", git = "ssh://gitolite@lab.dessimoz.org:2222/pyoma", extras=["enrichment"]}
 zoo = {ref = "master", git = "ssh://gitolite@lab.dessimoz.org:2222/zoo"}
 oma-academy-app = {ref = "master", git = "ssh://gitolite@lab.dessimoz.org:2222/oma-academy"}
 Django = "<3.0,>=2.2.0"

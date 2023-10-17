@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c742662f86008c7192e210ee3178ea6fea97c459ac6f63f1fa08e2d3d35958a7"
+            "sha256": "e9d5368d68ac93838b46471b5a8f27a1080653c05939c52ccb10271c133f6691"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -901,12 +901,8 @@
             "extras": [
                 "enrichment"
             ],
-            "hashes": [
-                "sha256:29674a89bd6c1d382b2a17c9b99786a37c1e2ac24972d039eda7da42efeaa34b",
-                "sha256:9cf7eca7bf60f55d1f8021ce7007c41ca481a4ae783a10fb48208da577ea6f41"
-            ],
-            "index": "pypi",
-            "version": "==0.13.0"
+            "git": "ssh://gitolite@lab.dessimoz.org:2222/pyoma",
+            "ref": "7671f3b5a301f60a13298e454afe4d8a9175471f"
         },
         "pyopa": {
             "hashes": [
