@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 numexpr = ">=2.8,<3"
 numpy = ">1.23.0"
-tables = "<4.0,>=3.7.0"
+tables = "<4.0,>=3.8.0"
 future = ">=0.12.3"
 django-bootstrap4 = "*"
 tweepy = ">=2.3.0"
