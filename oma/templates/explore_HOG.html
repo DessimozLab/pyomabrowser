@@ -86,7 +86,7 @@ $('#exMemb3').click( function(){
 
 function goHOG() {
     var query= document.getElementById("textHOG").value;
-    var newUrl="{% url 'hogs' %}"+query;
+    var newUrl="{% url 'hogs' %}"+query+"/";
     window.location = newUrl;
     return false;
 }

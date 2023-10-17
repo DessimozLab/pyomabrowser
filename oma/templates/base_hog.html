@@ -8,6 +8,10 @@
 
 {% block header_body %}
 
+    <script>$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})</script>
+
 
 <div class="w-100 d-flex align-items-center py-2"  style="padding-bottom: 0rem!important;padding-top: 0rem!important;">
 
@@ -53,6 +57,16 @@
         {% endif %}
 
     </div>
+
+  <div class="ml-auto oma-details-title-buttons " style="margin-right: 20px">
+
+      <span data-toggle="tooltip" data-placement="bottom" title="Ratio of species included in this HOG versus species present in HOG taxonomic range">
+          <b>Completeness score:</b> {{ hog.completeness_score|floatformat:2 }}  <i class="fas fa-info-circle" ></i> </span>
+
+       <button class="btn btn-default genome_back" style="width: auto !important;margin-left: 12px"><a style="color: #FFF;" href="{% url 'ancestralgenome_info' level %}">Ancestral Genome</a>
+        </button>
+
+        </div>
 
     <style>
         #lineage:hover {

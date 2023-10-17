@@ -13,16 +13,7 @@
               content="orthology,evolutionary gene relations,evolution,paralogy,inference">
     {% endblock meta_hook %}
 
-    {% if google_tracker_code %}
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_tracker_code }}"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '{{ google_tracker_code }}');
-    </script>
-
+    {% if matomo_tracker_code %}
     <!-- Matomo -->
     <script>
         var _paq = window._paq = window._paq || [];
@@ -45,11 +36,13 @@
     <link rel="shortcut icon" href="{% static "image/favicon.ico" %}" type="image/x-icon">
 
     <!-- css includes -->
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css?family=Dosis:400,800|Noto+Sans:400,700|Ropa+Sans|Material+Icons"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Dosis:400,800%7CNoto+Sans:400,700%7CRopa+Sans%7CMaterial+Icons">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css"
-          integrity="sha256-eSi1q2PG6J7g7ib17yAaWMcrr5GrtohYChqibrV7PBE=" crossorigin="anonymous"/>
-    <link rel="stylesheet" href="{% static "css/oma_styles.css" %}"/>
+          integrity="sha256-eSi1q2PG6J7g7ib17yAaWMcrr5GrtohYChqibrV7PBE=" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static "css/oma_styles.css" %}">
 
     {% block css_hook %}{% endblock %}
 
@@ -58,7 +51,9 @@
             integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"
             integrity="sha256-E/V4cWE4qvAeO5MOhjtGtqDzPndRO1LBk8lJ/PR7CA4=" crossorigin="anonymous"></script>
-    <script>var static_root = "{% static "" %}";</script>
+    <script>const static_root = "{% static "" %}";</script>
+
+
 
 
     <!-- AA: not sure which of those libs will still be needed. I suspect autocomplete.min.js for sure, rest probably not  -->
@@ -66,10 +61,16 @@
 
     <script src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
 
-    {% block js_hook %}{% endblock %}
+    {{ release_char|json_script:"release_char-data" }}
+
+    {% block js_hook %}
+
+
+    {% endblock %}
 </head>
 
-{{ release_char|json_script:"release_char-data" }}
+
+
 
 {% url 'home' as home %}
 <body class="{% if request.get_full_path == home %}landing{% endif %}">
@@ -92,21 +93,16 @@
 
 
 
-    {% if request.get_full_path != home %}
+    {% if 'home' not in request.path   %}
 
-    <div class="oma-main-search-header">
 
-        <form role="search" id="searchForm" action="{% url 'search' %}" method="GET">
-                <div class="oma-search-select">
-                    <select id="selectBrowser" class=" btn-mini" name="type" onchange="update_autocomplete_enableing('searchForm')">
-                        {% include "includes/search_select.html" %}
-                    </select>
-                </div>
-                <input style="font: small;" type="text" id="inputBrowser" class="" name="query" placeholder='{% if oma_instance_name != "basf" %}P53_RAT | Fungi | "auxin response factor"{% else %}PLDB2_ARATH | "auxin response factor" | psbC Brassicaceae{% endif %}'/>
-                <button><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
-            </form>
+        <span class="oma-main-search-header">
 
-    </div>
+        {% include "includes/search-token-vue.html" with unique_id='search_nav' multiline='false' %}
+
+        </span>
+
+
 
     {% endif %}
 
@@ -123,18 +119,15 @@
 
         <div class="navbar-nav ml-auto">
 
+        {% if 'home' not in request.path   %}
+
             <div class="search">
                 <h3>Search</h3>
-                <form class="oma-search-mobile" id="searchNavForm" role="search" action="{% url 'search' %}" method="POST">
-                    <div class="oma-search-select">
-                        <select id="selectNav" class=" btn-mini" name="type" onchange="update_autocomplete_enableing('searchNavForm')">
-                             {% include "includes/search_select.html" %}
-                        </select>
-                    </div>
-                    <input type="text" id="textNav" class="" name="query" placeholder='{% if oma_instance_name != "basf" %}P53_RAT | Fungi | "auxin response factor"{% else %}PLDB2_ARATH | "auxin response factor" | psbC Brassicaceae{% endif %}'/>
-                    <button type="submit"><img src="{% static "image/logo-oma-o.svg" %}" alt="Logo OMA icon"/></button>
-                </form>
+
+              {% include "includes/search-token-vue.html" with unique_id='search_min' multiline='false' %}
             </div>
+
+         {% endif %}
 
             <ul class="navbar-nav">
 
@@ -146,13 +139,13 @@
 
 
                     <div class="dropdown-menu" role="menu">
-                        <a class="dropdown-item" href="{% url 'release' %}">Release information</a>
+                        <a class="dropdown-item" href="{% url 'release' %}">Species/release information</a>
                         <a class="dropdown-item" href="{% url 'phylostratigraphy' %}">Phylostratigraphy</a>
 
                         <div class="dropdown-divider"></div>
 
                         <div role="presentation" class="dropdown-header">Quick access to</div>
-
+                        <a class="dropdown-item" href="{% url 'genome' %}">Extant and ancestral genomes</a>
                         <a class="dropdown-item" href="{% url 'landOMA' %}">OMA groups</a>
                         <a class="dropdown-item" href="{% url 'hogs' %}">Hierarchical orthologous groups (HOGs)</a>
                         <a class="dropdown-item" href="{% url 'landAnnotation' %}">Functional annotations</a>
@@ -178,13 +171,15 @@
                         <a class="dropdown-item" href="{% url 'function-projection-input' %}">Functional prediction</a>
                         <a class="dropdown-item" href="{% url 'land_syntenyDP' %}">Synteny dotplot</a>
                         <a class="dropdown-item" href="{% url 'genomePW' %}">Genome pair orthology</a>
-                        {% if omamo_enabled %}<a class="dropdown-item" href="{% url "omamo-search" %}">OMA-MO: Finding model organism</a>{% endif %}
-                        {% if oma_instance_name == "full" %}<a class="dropdown-item" href="https://omark.omabrowser.org">OMArk: Assessing proteome quality</a>{% endif %}
+                        <a class="dropdown-item" href="{% url 'go_enrichment' %}">GO enrichment analysis</a>
+                        {% if omamo_enabled %}<a class="dropdown-item" href="{% url "omamo-search" %}">OMA-MO: Find model organism</a>{% endif %}
+                        {% if oma_instance_name == "full" %}<a class="dropdown-item" href="https://omark.omabrowser.org">OMArk: Assess proteome quality</a>{% endif %}
 
                         <div class="dropdown-divider"></div>
 
                         <div role="presentation" class="dropdown-header">Software</div>
                         <a class="dropdown-item" href="https://omabrowser.org/standalone/">OMA StandAlone</a>
+                        <a class="dropdown-item" href="https://github.com/dessimozlab/read2tree">read2tree</a>
                         <a class="dropdown-item" href="https://github.com/dessimozlab/pyham">pyHam</a>
 
                         <div class="dropdown-divider"></div>
@@ -293,73 +288,6 @@
     </div>
 
 </nav>
-
-<script type="text/javascript">
-
-    function update_autocomplete_enableing(form_elem_id) {
-        var form_elem = document.getElementById(form_elem_id);
-        var sel = form_elem.querySelector("select[name='type']");
-        var txt = $(form_elem.querySelector("input[name='query']"));
-        if (sel.value === "id"){
-            txt.autocomplete('enable');
-        } else {
-            txt.autocomplete('disable');
-        }
-    }
-    var autocomplete_opts = {
-
-        paramName: 'search',
-        serviceUrl: '/api/xref/',
-        minChars: 3,
-        triggerSelectOnValidInput: false,
-        deferRequestBy: 200,
-        transformResult: function (response) {
-            var json = JSON.parse(response);
-            var xref_source_order = {{ xref_order | safe }};
-            json.sort(function (a, b){
-                var idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
-                if (idx_a === idx_b){
-                    return a.xref > b.xref ? 1 : -1;
-                }
-                return idx_a - idx_b;
-            });
-            return {
-                suggestions: $.map(json, function (dataItem) {
-                    return {value: dataItem.xref, data: dataItem};
-                })
-            };
-        },
-        groupBy: 'source',
-        formatResult: function(suggestion, currentValue) {
-            // Do not replace anything if there current value is empty
-            if (!currentValue) {
-                return suggestion.value;
-            }
-            // escape any special char
-            var pattern = '(' + currentValue.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&") + ')';
-            var highlight_and_escape = function(val){
-                return val.replace(new RegExp(pattern, 'gi'), '<strong>$1<\/strong>')
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/&lt;(\/?strong)&gt;/g, '<$1>');
-            };
-            var label = '<span class="auto-xref">' + highlight_and_escape(suggestion.data.xref) +'</span> &nbsp;'+
-                        '<span class="auto-omaid">' + suggestion.data.omaid + '</span>'+
-                        '<span class="auto-species">' + highlight_and_escape(suggestion.data.genome.species) + '</span>';
-            return label;
-        },
-        onSelect: function(item){
-            window.location.href = "/oma/vps/" + item.data.entry_nr;
-            return false;
-        }
-
-    };
-    $('#textNav').autocomplete(autocomplete_opts);
-    $('#inputBrowser').autocomplete(autocomplete_opts);
-    update_autocomplete_enableing('searchNavForm');
-</script>
 
 {% block content %}{% endblock %}
 

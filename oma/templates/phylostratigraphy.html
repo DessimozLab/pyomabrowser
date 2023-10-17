@@ -14,40 +14,72 @@
 }
     </style>
 
-
-
 <div id="oma-generic-container">
 
-
-
-
-        <div class="container-fluid" id="phyphy" style="height: calc(100vh - 110px)">
-
-
+        <div class="container-fluid" id="phyphy" style="height: calc(100vh - 70px)">
 
         </div>
 
 
-    </div>
+<div style="position: fixed; bottom: 0; left: 20px; width: 90%;" class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong>Filtered HOGs</strong>. We only show HOGs with a completeness score above 30%. To turn off: Settings > Bar Graph > 'Remove...'
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+
 
 
 </div>
 
-     <script src="{% static 'js/bundle.js' %}"></script>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css' rel='stylesheet' type='text/css'>
+
+    <script src="{% static 'phylostratigraphy/phylo.js' %}"></script>
 
     <script>
 
-    $.getJSON( "/All/genomes.json", function( jsonData ) {
+    var  phylo = PhyloIO.init()
 
-        var phylo = PhyloIO.init()
+    phylo.settings.phylostratigraphy = true
 
-        var c1 = phylo.create_container("phyphy")
+    var c1 = phylo.create_container("phyphy")
 
-        c1.add_tree(jsonData, {'data_type': 'json', 'use_branch_lenght': false, 'show_histogram': true})
+    var custom_settings = {
+        'name': 'phylostratigraphy',
+        'data_type' : 'json',
+        'use_branch_lenght' : false,
+        'show_histogram' : true,
+        'has_histogram_data' : true,
+        'collapse_level': 1,
+        'stack' : {
+            'type': 'genes',// or 'events',
+            'showHistogramValues' : false,
+            'showHistogramSummaryValue' : true,
+            'legendTxtSize' : 12,
+            'margin' : 8,
+            'xInitialRightMargin' : 15,
+            'stackHeight' : 200,
+            'stackWidth' : 50,
+            'maxStackHeight': 'max', // ratio -> stack height fixed | max -> largest data = stack height
 
-        phylo.start()
+        },
+    }
 
-    })
+     $.getJSON( "/All/genomes.json", function( jsonData ) {
+
+         c1.add_tree(jsonData,custom_settings)
+
+         c1.models[0].settings.show_tooltips = true;
+         c1.models[0].settings.stack.has_support = true;
+         c1.models[0].settings.stack.only_support = true;
+
+
+
+    phylo.start()
+
+     })
+
+
+
 
     </script>
 

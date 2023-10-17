@@ -115,11 +115,43 @@
 
 
     exports.format_taxonid_as_link = function(value, row){
-        return '<a class="external" target="_blank" href="https://uniprot.org/taxonomy/' + value +'">' + value + "</a>"
+        if (value > 0) {
+            return '<a class="external" target="_blank" href="https://uniprot.org/taxonomy/' + value + '">' + value + "</a>";
+        } else {
+            return '<a target="_blank" href="/oma/taxmap/' + value +'/">' + value + "</a>";
+        }
     };
 
     exports.format_entry_sequence_matches = function(value, row){
+
         if (value !== ""){
+
+            if (!value.hasOwnProperty('align')){
+                return ""
+            }
+
+            var seq = value.sequence;
+            var pos_start = seq.indexOf(value.align)
+
+            var endcut = pos_start + value.align.length  + 20
+            if (endcut < seq.length ){
+                seq = seq.slice(0,endcut);
+                seq += '...'
+            }
+
+            var startcut = pos_start - 20
+            if (startcut > 0 ){
+                seq = seq.slice(startcut);
+                seq = '...' + seq
+            }
+
+            seq = seq.replace(value.align, "<b>" + value.align + "</b>")
+
+            return seq
+
+
+
+
             var a = value.sequence;
             var b1 = "</b>";
             var b2 = "<b>";
@@ -208,7 +240,7 @@
             }
             return link_to_hog_page_with_hogid_text(row.group_nr);
         }
-        else if (row.type === "OMA group") {
+        else if (row.type === "OMA_Group") {
             return '<a href="/oma/omagroup/' + value + '/members/">' + value + '</a>';
         }
     };
@@ -218,7 +250,7 @@
         if (row.type === "HOG") {
              return " <b>Root Level: </b> " +  row.level;
         }
-        else if (row.type === "OMA group") {
+        else if (row.type === "OMA_Group") {
             return "<b>Fingerprint: </b> " +  row.fingerprint;
         }
     };
@@ -255,6 +287,7 @@
     exports.format_exons_isoforms = function(value, row){return value.length};
 
     exports.seq_search_alignment_formatter = function(value, row){
+
         var seq = row.sequence;
         var alignment = row.alignment;
         if (seq === undefined || alignment === undefined) return "n/a";

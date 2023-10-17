@@ -63,6 +63,32 @@
 
     </div>
 
+                     <br>
+
+                    <h3> <a href="{% url 'omamo-search' %}">OMA-MO: Find model organism</a></h3>
+
+                    <p class="text-justify">
+                    OMAMO is a web tool that allows the user to find the best simple model organism for a biological process of interest. The set of species consists 50 less complex organisms including bacteria, unicellular eukaryotes and fungi.
+                    </p>
+
+
+                      <br>
+
+                    <h3> <a href="https://omark.omabrowser.org">OMArk: Assess proteome quality</a></h3>
+
+                    <p class="text-justify">
+                    OMArk is a software to assess the quality of gene repertoire annotated from a genomic sequence - also called proteome. It relies on comparisons to the predicted ancestral gene repertoire of the target species and to the extant gene repertoire of close species to:
+<ul>
+                    <li>Estimate the completeness of the gene-repertoire by comparison to conserved orthologous groups.</li>
+                    <li>
+Estimate the proportion of accurate and erroneous gene models in the proteome.</li>
+                    <li>Detect possible contamination from other species in the proteome.</li>
+                </ul>
+
+
+                    </p>
+
+
 
 
 
@@ -322,62 +348,182 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 
              <div class="card card-header-oma border-0">
-                    <h2> Visualization tools </h2>
+                    <h2 id="visual-tools"> Visualization tools </h2>
                 <hr>
                 <div class="card-body">
 
 
 
-                     <h3> <a href="https://github.com/dessimozlab/iham">iHam (Graphical Viewer)</a></h3>
+                     <h3 id="iHam">iHam (Graphical Viewer)</h3>
 
 
 
 
                     <p class="text-justify">
-                        The iHam Graphical Viewer is an interactive JavaScript tool to visualize the evolutionary history of a specific gene family encoded in HOGs. The viewer is composed of two panels (Fig. 1A): a species tree which lets the user select a node to focus on a particular taxonomic range of interest, and a matrix that organizes extant genes according to their membership in species (rows) and HOGs (columns).
+                        The iHam Graphical Viewer is an interactive tool to visualize the evolutionary history of a specific gene family.
                     </p>
 
+                    <p class="font-weight-bold">How to read the iham viewer ?</p>
 
-                    <p class="text-justify">
+                    <p class="text-justify"> The viewer is composed of two panels: On the left is a <strong> species tree </strong> that lets the user select a node to focus on a particular taxonomic range, and on the right is a matrix that organizes extant genes according to their membership in species (rows) and HOGs (columns).
+</p>
 
-The tree-guided matrix representation of HOGs facilitates:
+                      <p class="text-justify">The entire composition of all the genes, visible from the root of the tree, is the <strong>gene family</strong> . The iham viewer is composed of the following elements:
+</p>
 
-                        <ul>
-<li> To delineate orthologous groups at given taxonomic ranges</li>
-<li> To infer duplication and loss events in the species tree</li>
-<li> To gauge the cumulative effect of duplications and losses on gene repertoires </li>
-<li> To identify potential mistakes in genome assembly, annotation or orthology inference (e.g. if losses are concentrated on terminal branches—suggestive of incomplete genomes; or if the species coverage within a HOG looks implausible—suggestive of orthology inference error).</li>
-</ul>
+                     <img src="{% static "image/iham_graphical_viewer-1bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
 
-                    </p>
+                     <p class="text-justify"> How does it all fit together? All the elements together provide a snapshot into the ancestral genome content of a gene family at a specific taxonomic level.</p>
+
+  <img src="{% static "image/iham_graphical_viewer-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+                     <p class="font-weight-bold"> How can I infer evolutionary events? </p>
 
 
-                    <img src="{% static "image/iham_graphical_viewer-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                       <ul>
+<li> View an ancestral level of interest by mousing over the node in the tree. All HOGs (ancestral genes) present in that ancestral species are delineated by vertical lines.
+ </li>
+
+<li>  Mouse over subsequent internal nodes in the tree by moving closer to the leaves.
+</li>
+
+
+
+ <img src="{% static "image/iham_graphical_viewer-2bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
                              alt="export">
 
 
 
-                     <div class="text-center small">
-    <b> pyHam can be used to map gene losses, duplications or new appearances (‘gained’) onto species trees (here, using the NCBI taxonomy tree)
+                           <li> A duplication happened on the branch leading from Ecdysozoa to Nematoda because 1 vertical line appeared.
+ </li>
 
-</b>
-    </div>
+ <img src="{% static "image/iham_graphical_viewer-3bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+                           <li> A loss happened on the branch leading from Nematoda to Chromadorea because 1 vertical line disappeared.</li>
+
+ <img src="{% static "image/iham_graphical_viewer-4bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+
+
+                           <li> The gene was retained without duplications or losses from the Chromadorea to the Rhabditida common ancestor. </li>
+
+                            <img src="{% static "image/iham_graphical_viewer-5bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
+
+
+
+                           <li> The gene was gained in Eumetazoa, the root level of the HOG.
+ </li>
+
+
+
+
+                       </ul>
+
+
+                    <p class="font-weight-bold">Tips</p>
+
+                    <ul>
+
+                        <li> Color genes according to protein length, GC-content, number of exons, or gene function similarity.</li>
+ <img src="{% static "image/iham_graphical_viewer-6bis.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="export">
+
+                           <li> If the species coverage within a HOG looks implausible, this might be due to an orthology inference error. Low-confidence HOGs can be masked based on the Completeness Score (number of species in the HOG/number of species in the clade).
+</li>
+ <img src="{% static "image/iham_graphical_viewer-7bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
+
+
+
+                           <li> Irrelevant species clades can be collapsed.
+</li>
+ <img src="{% static "image/iham_graphical_viewer-8bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
+
+                           <li> Get more information about subHOG by clicking on (?)</li>
+ <img src="{% static "image/iham_graphical_viewer-9bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
+
+                           <li> Gene more information about an extant gene by clicking on it
+</li>
+ <img src="{% static "image/iham_graphical_viewer-10bis.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="export">
+
+
+                       </ul>
 
 
                      <p class="text-justify">
+                         iHam is a reusable web widget that can be easily embedded into a website; the code is available on <a href="https://github.com/dessimozlab/iham">github</a>.
+                         It merely requires as input HOGs in the standard OrthoXML format and the underlying species tree in newick or PhyloXML format.
+                     </p>
 
-                    Users can customize the view in different ways. They can color genes according to protein length or GC-content. Low-confidence HOGs can be masked. Irrelevant species clades can be collapsed. iHam is a reusable web widget that can be easily embedded into a website; for instance, it is used to display HOGs in OMA (<a
-                             href="http://omabrowser.org">http://omabrowser.org</a>; Altenhoff et al., 2018). Implemented as a JavaScript library using the TnT framework (Pignatelli, 2016), iHam merely requires as input HOGs in the standard OrthoXML format (Schmitt et al., 2011) and the underlying species tree in newick or PhyloXML format.
+                     <small > Using iham ? Please cite: <br>Clément-Marie Train et al, iHam and pyHam: visualizing and processing hierarchical orthologous groups, Bioinformatics, Volume 35, Issue 14, July 2019, Pages 2504–2506,
+                         <a href="https://doi.org/10.1093/bioinformatics/bty994">10.1093/bioinformatics/bty994</a> </small>
+                    <br >
 
 
-</p>
+                    <h3 style="margin-top: 12px" id="species_information_viewer"><a href="{% url 'release' %}">Species Information Viewer</a></h3>
+                    <p>In the species information viewer, you can browse through which species are in the OMA database and get more information about them.</p>
 
-                     <small class="float-right">Please see <a href="">(Train et al. 2019)</a>  for more information.</small>
+                    <h4 id="sunburst">Taxon Hierarchy View (sunburst)</h4>
+                    <p style="font-weight: bold;">The default view is the Taxon Hierarchy view. Each section in the Taxon Hierarchy View represents a clade or species at the tips of the viewer.</p>
+                    <img src="{% static "image/sunburst_overview.png" %}" class="rounded mx-auto d-block w-100 p-3 " alt="sunburst overview">
+                    <ul>
+                        <li>Search for taxon (ancestral or extant species name) in the search bar.</li>
+                        <li>Mouse over the sections in the Taxon Hierarchy View to get information about the genome content.</li>
+                        <ul>
+                            <li>Name of taxon</li>
+                            <li>NCBI Taxon identifier</li>
+                            <li>Number of extant genomes in this clade</li>
+                            <li>Average number of genes for the extant species in this clade (Only includes 1 representative isoform per locus)</li>
+                            <li>Average number of proteins for the extant species in this clade (may include multiple isoforms)</li>
+                            <li>Number of ancestral genes for this clade, including all HOGs and well-supported HOGs (with a Completeness Score >= 0.3)</li>
+                            <li>Taxonomic lineage</li>
+                        </ul>
+                        <li>Change color of the Taxon Hierarchy View to color clades by clicking on the drop-down menu.</li>
+                        <ul>
+                            <li>By default the sunburst is colored by Domains of life (Eukaryota, Bacteria, Archaea)</li>
+                            <li>You can also color the sunburst by the average number of proteins/genes, or number of HOGs/well-supported HOGs.</li>
+                        </ul>
+                        <li>Zoom into a taxon by clicking on it in the sunburst or searching for it and clicking the “Zoom into” button.</li>
+                    </ul>
+
+                    <h4 id="species_table">Species Table View</h4>
+                    <p style="font-weight: bold;">The default view is the Taxon Hierarchy view. Each section in the Taxon Hierarchy View represents a clade or species at the tips of the viewer.</p>
+                    <ul>
+                        <li>Columns displayed:</li>
+                        <ul>
+                            <li>Code: 5-letter UniProt species code</li>
+                            <li>Scientific Name</li>
+                            <li>Common Name</li>
+                            <li>Last Update: When the genome was last updated in OMA</li>
+                            <li># of Genes: the number of genes in this genome</li>
+                            <li># of Sequences: includes all the alternative splice variants that are included in OMA</li>
+                            <li>Taxon Id: NCBI / GTDB taxon identifier. Negative numbers indicate GTDB assembly accessions</li>
+                            <li>D.: Domain of life (Bacteria, Archaea, Eukaryota)</li>
+                        </ul>
+                        <li>Search the table for species with the search bar above the table</li>
+                        <li>Display certain columns of the table with the filter icon in the top right</li>
+                        <li>Download the data by the download icon</li>
+                    </ul>
+
+                    <h4 id="species_plot">Species Plot</h4>
+                    <p style="font-weight: bold;">View the number of genes per species plotted in a bar graph. The different Archaea, Bacteria, and Eukaryota domains are colored blue, green, and red, respectively.</p>
+                    <ul>
+                        <li>Sort bars by number of genes (size), Kingdom (domain), or Species Name (alphabetical order)</li>
+                        <li>Select which domain to show.</li>
+                        <li>View in either a compacted view or expanded view where it's possible to see every species’ name.</li>
+                    </ul>
 
 
-                    <br>
 
-                    <h3> <a href="https://phylo.io/">Phylo.io</a></h3>
+                    <h3 style="margin-top: 12px" id="phylo_io"> <a href="https://phylo.io/">Phylo.io</a></h3>
 
                     <p class="text-justify">
 

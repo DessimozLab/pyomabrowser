@@ -1,16 +1,14 @@
 Django>=2.2.0,<3.0
-numexpr>=2.4-rc2
-numpy>1.16.0
-tables>=3.5.1
+numexpr>=2.7
+numpy>1.23.0
+tables>=3.8.0,<4.0
 future>=0.12.3
 django-bootstrap4
 tweepy>=2.3.0
-#django_debug_toolbar>=1.4
-#django_debug_toolbar_line_profiler>=0.6.1
-django-recaptcha==1.3.1
-celery>=4,<5
-biopython<1.78
-djangorestframework<3.10
+django-recaptcha>=3.0.0,<4.0
+celery>=5,<6
+biopython>1.80,<2.0
+djangorestframework>=3.10,<3.14
 coreapi
 pygments
 markdown<3.4  #drf checks removed version()
@@ -19,10 +17,8 @@ djangorestframework-link-header-pagination
 django-cors-headers
 pyyaml
 django-matomo-api-tracking
-pyoma<0.13
+plotly
 
-
-
--e git+https://github.com/alpae/django-google-analytics.git@master#egg=django-google-analytics-app
+-e git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@develop#egg=pyoma
 -e git+ssh://gitolite@lab.dessimoz.org:2222/zoo@master#egg=zoo
 -e git+ssh://gitolite@lab.dessimoz.org:2222/oma-academy@master#egg=oma-academy-app

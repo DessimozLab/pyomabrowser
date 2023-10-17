@@ -56,40 +56,60 @@ function update_genome_viewer(bid) {
         var under = document.createElement('div');
 
         under.setAttribute('id', 'sb');
-        under.innerHTML = '<div class="row">\
-                <div class="col-sm-7 col-xs-12">\
-                    <div class="nav navbar-nav navbar-left">\
-                        <div class="btn-group btn-group-sm" id="colourSel" role="group" aria-label="...">\
-                            <button type="button" id="resetBtn" class="btn btn-default btn-sm" onclick="resetTo();">Reset to root</button>\
-                            <button type="button" class="btn btn-primary btn-sm radioBtn" id="heatmapRadio"\
-                             data-value="heatmap-avg_nr_proteins">Avg number of\
-                         Proteins</button>\
-                            <button type="button" class="btn btn-primary btn-sm radioBtn" id="dolRadio"\
-                             data-value="dol">Domains of\
-                             life</button>\
-                        </div>\
-                    </div>\
-                </div>\
-                <div class="col-sm-5 col-xs-12">\
-                    <div class="nav navbar-nav navbar-right">\
-                        <div class="form-group input-group input-group-sm" >\
-                            <input type="text" id="search" class="form-control searchField" placeholder="Search...">\
-                            <div class="input-group-btn">\
-                                <button type="button" class="btn btn-warning"\
-                                 onclick="$(\'#search\').val(\'\');findByName();">Clear</button>\
-                                <button type="button" class="btn btn-primary" onclick="findByName();">Search</button>\
-                                <button type="button" class="btn btn-info" onclick="zoomIntoName();">Zoom into</button>\
-                            </div>\
-                        </div>\
-                    </div>\
-                </div>\
-        </div>\
-<div id="chart">\
-    <div style="position: absolute; margin: 0;" id="sequence"></div>\
-    <div style="position: absolute; margin: 20px 0 0 0;" id="colorscale">\
-        <div id="explanation" style="visibility: hidden;"></div>\
-    </div>\
-</div>'
+        under.innerHTML = `<div class="row">
+                <div class="col-sm-2 col-xs-12"> 
+                    <div class="nav navbar-nav navbar-left"> 
+                    </div> 
+                </div> 
+                <div class="col-sm-10 col-xs-12"> 
+                    <div class="nav navbar-nav navbar-right"> 
+                        <div class="form-group input-group input-group-sm" > 
+                            <input type="text" id="search" class="form-control searchField" placeholder="Search extant or ancestral taxon"> 
+                            <div class="input-group-btn"> 
+                                <button type="button" class="btn btn-warning" 
+                                 onclick="$(\'#search\').val(\'\');findByName();">Clear</button> 
+                                <button type="button" class="btn btn-primary" onclick="findByName();">Search</button> 
+                                <div class="btn-group " id="colourSel" role="group" aria-label="..."> 
+                                    <button class="btn btn-default nav-link dropdown-toggle text-nowrap" 
+                                            id="colorSelectDropdown" 
+                                            role="button" data-toggle="dropdown" aria-haspopup="true" 
+                                            aria-expanded="false">Coloring <span class="caret"></span></button> 
+                                    <div class="dropdown-menu" id="color_drop" role="menu"> 
+                                        <button type="button" class="dropdown-item btn  btn-sm radioBtn" 
+                                                id="heatmapRadio" 
+                                                data-value="heatmap-avg_nr_proteins">Avg number of Proteins 
+                                        </button> 
+                                        <button type="button" class="dropdown-item btn  btn-sm radioBtn" 
+                                                id="heatmapGenesRadio" 
+                                                data-value="heatmap-avg_nr_genes">Avg number of Genes 
+                                        </button> 
+                                        <button type="button" class="dropdown-item btn  btn-sm radioBtn" 
+                                                id="heatmapHogsRadio" 
+                                                data-value="heatmap-nr_hogs">Number of HOGs 
+                                        </button> 
+                                        <button type="button" class="dropdown-item btn  btn-sm radioBtn" 
+                                                id="heatmapHogsSupportRadio" 
+                                                data-value="heatmap-nr_hogs_support">Number of well-supported HOGs 
+                                        </button> 
+                                        <button type="button" class="dropdown-item btn  btn-sm radioBtn" 
+                                                id="dolRadio" 
+                                                data-value="dol">Domains of life 
+                                        </button> 
+                                    </div> 
+                                </div>  
+                                <button type="button" class="btn btn-info" onclick="zoomIntoName();">Zoom into</button> 
+        <button type="button" id="resetBtn" class="btn default" onClick="resetTo();">Reset to root</button> 
+                            </div> 
+                        </div> 
+                    </div> 
+                </div> 
+        </div> 
+<div id="chart"> 
+    <div style="position: absolute; margin: 0;" id="sequence"></div> 
+    <div style="position: absolute; margin: 20px 0 0 0;" id="colorscale"> 
+        <div id="explanation" style="visibility: hidden;"></div> 
+    </div> 
+</div>`
         cviewer.appendChild(under);
         // reset is disabled when root is zoomed
         $('#resetBtn').prop('disabled', true);
@@ -102,6 +122,12 @@ function update_genome_viewer(bid) {
             minLength: 3,
             onSelect: function( event ) { findByName(event.value); }
         });
+
+         $('#color_drop button').on('click', function() {
+            console.log('trigger');
+            document.getElementById('colorSelectDropdown').innerHTML = $(this).text()
+            }
+        );
 
     }
 
@@ -131,7 +157,7 @@ function update_genome_viewer(bid) {
 
         // add the sorting setting
         setting_div_col.innerHTML += '<b>Sort by:</b> ' +
-            '<form > <input type="radio" name="sort_ui" value="prots" checked> Size<br>  ' +
+            '<form ><input type="radio" name="sort_ui" value="nr_genes" checked> Size (# Genes)<br>  ' +
             '<input type="radio" name="sort_ui" value="kingdom" > Kingdom<br> ' +
             '<input type="radio" name="sort_ui" value="uniprot_species_code' +
             '" > Name<br> </form>';
@@ -212,6 +238,7 @@ function init_table(div_id) {
         showColumns: true,
         search: true,
         showExport: true,
+        exportDataType: 'all',
         pageList: [10, 25, 50, 100, "All"],
         mobileResponsive: true,
         checkOnInit: true,
@@ -238,12 +265,16 @@ function init_table(div_id) {
             title: 'Last Update',
             sortable: true
         }, {
+            field: 'nr_genes',
+            title: '# of genes',
+            sortable: true
+        }, {
             field: 'prots',
             title: '# of Sequences',
             sortable: true
         }, {
             field: 'ncbi',
-            title: 'NCBI TaxonId',
+            title: 'Taxon Id',
             sortable: true,
             formatter: tablehooks.format_taxonid_as_link
         }, {
@@ -410,7 +441,7 @@ function init_hist(div_id) {
             return d.uniprot_species_code;
         }));
         yScale.domain([0, d3.max(data, function (d) {
-            return d.prots;
+            return d.nr_genes;
         })]);
 
 
@@ -464,14 +495,14 @@ function init_hist(div_id) {
             })
             .attr("width", xScale.rangeBand())
             .attr("y", function (d) {
-                return yScale(d.prots);
+                return yScale(d.nr_genes);
             })
             .attr("fill", function (d) {
                 var color_d =  color_schema.filter(function(v){ return v["name"] === d.kingdom; })[0];
                 return color_d ? color_d.color : "rgb(255,0,0)"
             })
             .attr("height", function (d) {
-                return height - yScale(d.prots)
+                return height - yScale(d.nr_genes)
             })
             .on("mouseover", function (d) {
 
@@ -509,7 +540,7 @@ function init_hist(div_id) {
                     .duration(200)
                     .style("opacity", .95);
                 tooltip.html("<b>" + d.sciname.species + "</b> "+ d.sciname.strain+"</br><b>" + d.uniprot_species_code
-                    + ", " + d.prots + "</b>")
+                    + ", " + d.prots + "(Proteins)</b>")
                     .style("left", (d3.event.pageX + 5) + "px")
                     .style("top", (d3.event.pageY - 60) + "px");
         }

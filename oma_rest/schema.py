@@ -53,7 +53,7 @@ class DocStringSchemaExtractor(schemas.AutoSchema):
         coerce_method_names = api_settings.SCHEMA_COERCE_METHOD_NAMES
         sec_to_take = [header, coerce_method_names.get(header, None)]
         for line in lines:
-            if schemas.inspectors.header_regex.match(line):
+            if self.header_regex.match(line):
                 potential_section, seperator, lead = line.partition(':')
                 if potential_section in sec_to_take:
                     current_section = potential_section

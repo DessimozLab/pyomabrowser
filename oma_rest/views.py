@@ -3,9 +3,15 @@ import operator
 import itertools
 import os
 
+import networkx as nx
 import numpy
+import pyoma.browser.exceptions
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from rest_framework import status
+
+from .tasks import go_enrichment
+
 try:
     from Bio.Alphabet import IUPAC
 except ImportError:
@@ -14,9 +20,11 @@ import collections
 
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
+from rest_framework.generics import CreateAPIView, RetrieveAPIView, GenericAPIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.exceptions import NotFound, ParseError, ValidationError
 from rest_framework.settings import api_settings
+from rest_framework import status
 from django.http import HttpResponse
 from distutils.util import strtobool
 
@@ -33,6 +41,8 @@ from collections import Counter
 from rest_framework.decorators import action, api_view
 
 logger = logging.getLogger(__name__)
+print(logger.name)
+logger.warning("this is a test log.")
 
 
 def resolve_protein_from_id_or_raise(id):
@@ -200,8 +210,9 @@ class ProteinEntryViewSet(ViewSet):
                          entry number, omaid or its canonical id
         """
         p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
-        data = db.Database.get_gene_ontology_annotations(utils.db, int(p_entry_nr))
+        data = utils.db.get_gene_ontology_annotations(int(p_entry_nr))
         annotations = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
+        annotations = sorted(annotations, key=lambda x: [x.aspect, -x.ic])
         serializer = serializers.GeneOntologySerializer(instance=annotations, many=True)
         return Response(serializer.data)
 
@@ -257,9 +268,31 @@ class ProteinEntryViewSet(ViewSet):
           - name: entry_id
             description: an unique identifier for a protein - either it
                          entry number, omaid or its canonical id
+
+          - name: filter
+            description: a filter name to exclude some cross-references
+                         that are not relevant. Possible values are
+                         `all`, `exact`, `maindb`.
+
+                         - `all` does not apply any filter and returns all cross-references (default).
+                         - `exact` ignores all cross-references for which the protein sequence is not
+                            exactly the same as the one in the OMA browser.
+                         - `maindb` returns only the GeneName, UniProtKB, Ensembl Genes, RefSeq and EntrezGene
+                            and the SourceID cross-references.
+
+            location: query
         """
         entry_nr = resolve_protein_from_id_or_raise(entry_id)
-        xrefs = utils.id_mapper['XRef'].map_entry_nr(entry_nr)
+        filter_name = self.request.query_params.get('filter', 'all').lower()
+        if filter_name == 'all':
+            mapper = utils.id_mapper['XRef']
+        elif filter_name == 'maindb':
+            mapper = utils.id_mapper['GeneNameAndMainDbIdMapper']
+        elif filter_name == 'exact':
+            mapper = utils.id_mapper['XRefNoApproximateIdMapper']
+        else:
+            raise ParseError(f'invalid argument for parameter filter: {filter_name}')
+        xrefs = mapper.map_entry_nr(entry_nr)
         for ref in xrefs:
             ref['entry_nr'] = entry_nr
             ref['omaid'] = utils.id_mapper['OMA'].map_entry_nr(entry_nr)
@@ -290,7 +323,7 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
                          of its members
         """
         try:
-            # get members in case its a group id or fingerprint
+            # get members in case it is a group id or fingerprint
             memb = utils.db.oma_group_members(group_id)
         except db.AmbiguousID:
             raise NotFound("{} is not a unique id".format(group_id))
@@ -398,14 +431,14 @@ class HOGViewSet(PaginationMixin, ViewSet):
         except ValueError as e:
             raise NotFound(e)
 
-    def _get_level_and_adjust_hogid_if_needed(self, hog_id):
+    def _get_level_and_get_roothog_if_root_as_level(self, hog_id):
         level = self.request.query_params.get('level', None)
         if level is not None:
             if level.lower() == "root":
                 level = None
                 hog_id = utils.db.format_hogid(utils.db.parse_hog_id(hog_id))
             elif not self._check_level_is_valid(level):
-                raise ParseError('Invalid or unknown level parameter for this HOG')
+                raise NotFound('Invalid or unknown level parameter for this HOG')
         return level, hog_id
 
     def _check_level_is_valid(self, level):
@@ -419,6 +452,16 @@ class HOGViewSet(PaginationMixin, ViewSet):
                     break
             hog_id = hog_id[0:k + 1]
         return hog_id
+
+    def _get_best_matching_hog_or_raise(self, hog_id, level):
+        if level is None:
+            hog = utils.db.get_hog(hog_id)
+        else:
+            hogs = list(utils.db.iter_hogs_at_level(hog_id=hog_id, level=level))
+            if len(hogs) != 1:
+                raise NotFound("hog_id / level combination does not identify a unique HOG.")
+            hog = hogs[0]
+        return hog
 
     def list(self, request, format=None):
         """List of all the HOGs identified by OMA.
@@ -437,7 +480,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
                          that occured between the two points in time.
             location: query
         """
-        level, _ = self._get_level_and_adjust_hogid_if_needed(utils.db.format_hogid(1))
+        level, _ = self._get_level_and_get_roothog_if_root_as_level(utils.db.format_hogid(1))
         if level is not None:
             compare_level = self.request.query_params.get('compare_with', None)
             if compare_level is not None:
@@ -445,10 +488,19 @@ class HOGViewSet(PaginationMixin, ViewSet):
                     raise ValueError("Invalid level for \"compare_level\" parameter.")
             hogs = utils.db.get_all_hogs_at_level(level, compare_with=compare_level)
             if compare_level is None:
-                queryset = [rest_models.HOG(hog_id=h['ID'].decode(), level=h['Level'].decode()) for h in hogs]
+                queryset = [rest_models.HOG(hog_id=h['ID'].decode(),
+                                            level=h['Level'].decode(),
+                                            completeness_score=h['CompletenessScore'],
+                                            nr_genes=h['NrMemberGenes'])
+                            for h in hogs]
                 serializer_cls = serializers.HOGsListSerializer
             else:
-                queryset = [rest_models.HOG(hog_id=h['ID'].decode(), level=h['Level'].decode(), event=h['Event'].decode()) for h in hogs]
+                queryset = [rest_models.HOG(hog_id=h['ID'].decode(),
+                                            level=h['Level'].decode(),
+                                            completeness_score=h['CompletenessScore'],
+                                            event=h['Event'].decode(),
+                                            nr_genes=h['NrMemberGenes'])
+                            for h in hogs]
                 serializer_cls = serializers.HOGsCompareListSerializer
         else:
             # list of all the rootlevel hogs
@@ -493,26 +545,26 @@ class HOGViewSet(PaginationMixin, ViewSet):
             # hog_id == member
             hog_id = self._hog_id_from_entry(hog_id)
         fam_nr = self._validate_hogid(hog_id)
-        level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
+        level, hog_id = self._get_level_and_get_roothog_if_root_as_level(hog_id)
         if level is None:
-            levs = frozenset(
-                [row['Level'].decode() for row in utils.db.get_hdf5_handle().root.HogLevel.where('(ID==hog_id)')])
-            if 'LUCA' in levs:
+            hog_lev_iter = utils.db.get_hdf5_handle().get_node("/HogLevel").where('(ID==hog_id)')
+            lev2score = {row['Level'].decode(): row['CompletenessScore'] for row in hog_lev_iter}
+            if 'LUCA' in lev2score:
                 level = 'LUCA'
             else:
                 pe = next(utils.db.iter_members_of_hog_id(hog_id))
                 lin = pe.genome.lineage
                 for level in lin[::-1]:
-                    if level in levs:
+                    if level in lev2score:
                         break
-            result_data = [rest_models.HOG(hog_id=hog_id, level=level)]
+            result_data = [rest_models.HOG(hog_id=hog_id, level=level, completeness_score=lev2score[level])]
         else:
-            subhogs = utils.db.get_subhogids_at_level(fam_nr, level)
+            subhogs = utils.db.get_subhogs_at_level(fam_nr, level)
             result_data = []
-            for h in subhogs:
-                h = h.decode()
+            for hog in subhogs:
+                h = hog['ID'].decode()
                 if hog_id.startswith(h) or h.startswith(hog_id):
-                    result_data.append(rest_models.HOG(hog_id=h, level=level))
+                    result_data.append(rest_models.HOG(hog_id=h, level=level, completeness_score=hog['CompletenessScore']))
 
         querys = {q.hog_id: i for i, q in enumerate(result_data)}
         parents = [collections.defaultdict(set)] * len(result_data)
@@ -566,7 +618,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         parameters:
 
           - name: hog_id
-            description: an unique identifier for a hog_group - either
+            description: a unique identifier for a hog_group - either
                          its hog id starting with "HOG:" or one of its
                          member proteins in which case the specific
                          HOG ID of that protein is used.
@@ -582,7 +634,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         if hog_id[:4] != "HOG:":
             hog_id = self._hog_id_from_entry(hog_id)
         fam_nr = self._validate_hogid(hog_id)
-        level, hog_id = self._get_level_and_adjust_hogid_if_needed(hog_id)
+        level, hog_id = self._get_level_and_get_roothog_if_root_as_level(hog_id)
         if level is not None:
             members = [utils.ProteinEntry(entry) for entry in utils.db.hog_members_from_hog_id(hog_id, level)]
             hog_id = self._identify_lca_hog_id_from_proteins(members)
@@ -644,7 +696,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         fam_nr = self._validate_hogid(hog_id)
         try:
             nr_profiles = float(self.request.query_params.get('max_results', "10"))
-            if 1 < nr_profiles > 50:
+            if not (1 <= nr_profiles <= 50):
                 raise ParseError("max_results must be positive value <= 50")
         except ValueError:
             raise ParseError("max_results must be positive value <= 50")
@@ -653,9 +705,10 @@ class HOGViewSet(PaginationMixin, ViewSet):
             hog_id, max_nr_similar_fams=nr_profiles)
         nr_species = len(result.species_names)
         sim_hogs = [rest_models.HOG(hog_id=utils.db.format_hogid(fam),
-                                    in_species=[result.species_names[z] for z in range(nr_species) if result.similar[fam][z] > 0]
-                                    )
+                                    in_species=[result.species_names[z] for z in range(nr_species) if result.similar[fam][z] > 0],
+                                    jaccard_similarity=result.jaccard_distance[str(fam)])
                     for fam in result.similar.keys()]
+        sim_hogs.sort(key=lambda h: -h.jaccard_similarity)
         data = rest_models.HOG(
             hog_id=hog_id,
             similar_profile_hogs=sim_hogs,
@@ -663,6 +716,221 @@ class HOGViewSet(PaginationMixin, ViewSet):
         )
         serializer = serializers.HOGsSimilarProfileSerializer(data, context={'request': request})
         return Response(serializer.data)
+
+    @action(detail=True)
+    def gene_ontology(self, request, hog_id=None, format=None):
+        """Gene ontology annotations for an ancestral gene (i.e. HOG).
+
+        If a level is provided, the endpoint returns annotations with respect
+        to this level. Note that if the level is a more ancient taxonomic
+        level than the deepest level for the specified hog_id, the endpoint
+        returns the annotations of that more ancient level (but adjusting the
+        hog_id in the result object).
+        The special level "root" will always return the members of the root
+        HOG together with its deepest level.
+
+        ---
+        parameters:
+
+          - name: hog_id
+            description: a unique identifier for a hog_group - either
+                         its hog id starting with "HOG:" or one of its
+                         member proteins in which case the specific
+                         HOG ID of that protein is used.
+            example: HOG:0001221.1a,  P12345
+
+          - name: level
+            description: taxonomic level of reference for a HOG -
+                         default is its deepest level for a given
+                         HOG ID.
+            location: query
+            example: "Mammalia"
+        """
+        if hog_id[:4] != "HOG:":
+            hog_id = self._hog_id_from_entry(hog_id)
+        fam_nr = self._validate_hogid(hog_id)
+        level, hog_id = self._get_level_and_get_roothog_if_root_as_level(hog_id)
+        hog = self._get_best_matching_hog_or_raise(hog_id, level)
+        data = utils.db.get_ancestral_gene_ontology_annotations(hog['Level'], hog['ID'])
+        #TODO: fix with better GOA model that allows for both extend and ancestral annotations
+        hack_models = [utils.GeneOntologyAnnotation(x) for x in data]
+        hack_models = sorted(hack_models, key=lambda x: (x.aspect, -x.ic))
+        serializer = serializers.AncestralGeneOntologySerializer(instance=hack_models, many=True)
+        return Response(serializer.data)
+
+
+class SyntenyViewSet(ViewSet):
+    schema = DocStringSchemaExtractor()
+    lookup_field = 'hog_id'
+    lookup_value_regex = r'[^/]+'
+
+    def list(self, request, format=None):
+        """List of all the ancestral / extant "contigs" of an ancestral / extant genome.
+
+        Each contig will contain a graph with all the ancestral genes (HOGs) or
+        the extant genes and their neighbors as edges (order of ancestral/extant genes
+        on "scaffolds/chromosomes")
+
+        The return value is a list of graph objects that consist of 'nodes' and
+        'links' attributes.
+
+            {"nodes": [{"id":"HOG:C0594134.1a", ...},
+                       {"id":"HOG:C0594135.3c", ...},
+                       {"id":"HOG:C0600830.1c.3b", ...}],
+             "links": [{"weight":15,"source":"HOG:C0594134.1a","target":"HOG:C0594135.3c"},
+                       {"weight":15,"source":"HOG:C0594134.1a","target":"HOG:C0600830.1c.3b"}]
+            }
+
+        For extant genes, the gene IDs are the OMA IDs (e.g. `HUMAN00007`)
+
+        ---
+        parameters:
+
+          - name: level
+            description: The taxonomic level at which the ancestral synteny should
+                         be retrieved. The level can be specified with its numeric
+                         taxid or the scientific name. For extant genomes, also the
+                         UniProt mnemonic species code can be used.
+            location: query
+            required: True
+
+          - name: evidence
+            description: The evidence value for the ancestral synteny graph.
+                         This is used for filtering. The evidence values are
+                         `linearized` < `parsimonious` < `any`
+                         By default, we only show the linearized graph
+            location: query
+            example: linearized, parsimonious, any
+
+          - name: break_circular_contigs
+            description: Some ancestral contigs end up being circles. For certain applications
+                         this poses a problem. By setting this argument to "yes" (default),
+                         the function will break the circle on the weakest edge, with "no" it
+                         will return the full linearized graph. Note that this parameter
+                         has no effect if the `evidence` parameter is not equal to "linearized".
+            location: query
+
+        """
+        level = self.request.query_params.get('level', None)
+        if level is None:
+            raise ParseError("level parameter is required")
+        evidence = self.request.query_params.get('evidence', "linearized")
+        break_circular_contigs = strtobool(self.request.query_params.get('break_circular_contigs', 'True'))
+        try:
+            extant_genome = utils.db.id_mapper['OMA'].identify_genome(level)
+            graph = utils.db.get_extant_synteny_graph(extant_genome['UniProtSpeciesCode'].decode())
+        except db.UnknownSpecies:
+            try:
+                graph = utils.db.get_syntenic_hogs(level=level, evidence=evidence)
+            except db.DBConsistencyError:
+                raise NotFound(f"Ancestral Synteny for {level} does not exist")
+            except ValueError as e:
+                raise ValidationError(e)
+
+        contigs = []
+        for cc in sorted(nx.connected_components(graph), key=len, reverse=True):
+            contig = graph.subgraph(cc)
+            if evidence == "linearized" and break_circular_contigs and len(contig) <= len(contig.edges):
+                min_edge = sorted(contig.edges.data(), key=lambda e: e[2]['weight'])[0][:2]
+                cont = contig.copy()
+                cont.remove_edge(*min_edge)
+                contig = cont
+            g = nx.node_link_data(contig)
+            for k in ('directed', 'multigraph', 'graph'):
+                g.pop(k, None)
+            contigs.append(g)
+        return Response(contigs)
+
+    def retrieve(self, request, hog_id):
+        """
+        Returns the ancestral synteny graph around a reference hog at a given taxonomic level.
+
+        ---
+        parameters:
+
+          - name: hog_id / protein_id
+            description: a unique identifier for a hog_group starting
+                         with "HOG:" for ancestral synteny levels, or
+                         a unique protein ID (e.g. YEAST00012) for an
+                         extant species synteny query.
+            example: HOG:0450897, HUMAN01330
+
+          - name: level
+            description: the taxonomic level at which the synteny graph
+                         should be extracted. If not specified, the
+                         deepest level of the given HOG is used. The level
+                         can bei either a scientific name or the numeric
+                         taxonomy identifier
+            location: query
+            example: Primates, 9604
+
+          - name: evidence
+            description: The evidence value for the ancestral synteny graph.
+                         This is used for filtering. The evidence values are
+                         `linearized` < `parsimonious` < `any`
+            location: query
+            example: parsimonious
+
+          - name: context
+            description: the size of the graph around the query HOG. By default
+                         the HOGs which are at most 2 edges apart from the query
+                         HOG are returned.
+            location: query
+
+          - name: break_circular_contigs
+            description: Some ancestral contigs end up being circles. For certain applications
+                         this poses a problem. By setting this argument to "yes" (default),
+                         the function will break the circle on the weakest edge, with "no" it
+                         will return the full linearized graph. Note that this parameter
+                         has no effect if the `evidence` parameter is not equal to "linearized".
+            location: query
+
+        """
+        level = self.request.query_params.get('level', None)
+        evidence = self.request.query_params.get('evidence', "any")
+        size = int(self.request.query_params.get('context', 2))
+        break_circular_contigs = strtobool(self.request.query_params.get('break_circular_contigs', 'True'))
+
+        graph = None
+        if not hog_id.startswith('HOG:') and level is None:
+            try:
+                enr = utils.db.id_resolver.resolve(hog_id)
+                genome = utils.db.id_mapper['OMA'].genome_of_entry_nr(enr)
+                graph = utils.db.get_extant_synteny_graph(genome['UniProtSpeciesCode'].decode(), center_entry=enr, window=size)
+            except db.InvalidId:
+                raise NotFound(f"Not a valid extant protein: {hog_id}")
+        elif level is not None:
+            try:
+                extant_genome = utils.db.id_mapper['OMA'].identify_genome(level)
+                graph = utils.db.get_extant_synteny_graph(extant_genome['UniProtSpeciesCode'].decode(), center_entry=hog_id, window=size)
+            except db.UnknownSpecies:
+                pass
+            except db.InvalidId:
+                raise NotFound(f"Not a valid extant protein {hog_id} for {level}.")
+        # if graph is assigned, we're dealing with an extant species, otherwise, lets check
+        # the ancestral levels
+        if graph is None:
+            try:
+                hog = utils.db.get_hog(hog_id=hog_id, level=level)
+            except ValueError:
+                raise NotFound(f"Invalid hog_id {hog_id}")
+            try:
+                graph = utils.db.get_syntenic_hogs(hog_id=hog['ID'], level=hog['Level'].decode(), evidence=evidence, steps=size)
+            except db.DBConsistencyError:
+                raise NotFound(f"Ancestral Synteny for {hog['Level']} around {hog_id} not found.")
+            except ValueError as e:
+                raise ValidationError(e)
+
+        if evidence == "linearized" and break_circular_contigs and len(graph) <= len(graph.edges):
+            min_edge = sorted(graph.edges.data(), key=lambda e: e[2]['weight'])[0][:2]
+            cont = graph.copy()
+            cont.remove_edge(*min_edge)
+            graph = cont
+
+        graph_as_dict = nx.node_link_data(graph)
+        for k in ('directed', 'multigraph', 'graph'):
+            graph_as_dict.pop(k, None)
+        return Response(graph_as_dict)
 
 
 class APIVersion(ViewSet):
@@ -706,14 +974,17 @@ class XRefsViewSet(ViewSet):
             make_genome = functools.partial(models.Genome, utils.db)
             enr_to_genome = utils.id_mapper['OMA'].genome_of_entry_nr
             xref_mapper = utils.id_mapper['XRef']
-            for ref in xref_mapper.search_xref(pattern, match_any_substring=True):
-                res.append({'entry_nr': ref['EntryNr'],
-                            'omaid': utils.id_mapper['OMA'].map_entry_nr(ref['EntryNr']),
-                            'source': xref_mapper.source_as_string(ref['XRefSource']),
-                            'seq_match': xref_mapper.verification_as_string(ref['Verification']),
-                            'xref': ref['XRefId'].decode(),
-                            'genome': make_genome(enr_to_genome(ref['EntryNr']))})
-            res = self._remove_redundant_xrefs(res)
+            try:
+                for ref in xref_mapper.search_xref(pattern, match_any_substring=True):
+                    res.append({'entry_nr': ref['EntryNr'],
+                                'omaid': utils.id_mapper['OMA'].map_entry_nr(ref['EntryNr']),
+                                'source': xref_mapper.source_as_string(ref['XRefSource']),
+                                'seq_match': xref_mapper.verification_as_string(ref['Verification']),
+                                'xref': ref['XRefId'].decode(),
+                                'genome': make_genome(enr_to_genome(ref['EntryNr']))})
+                res = self._remove_redundant_xrefs(res)
+            except pyoma.browser.exceptions.TooUnspecificQuery as e:
+                raise ValidationError(detail="Query too unspecific. Matches >{} elements".format(e.hits))
         serializer = serializers.XRefSerializer(instance=res, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -1131,12 +1402,12 @@ class SharedAncestrySummaryAPIView(APIView):
         ---
         parameters:
           - name: genome_id1
-            description: an unique identifier for the first genome
+            description: a unique identifier for the first genome
                          - either its ncbi taxon id or the UniProt
                          species code
 
           - name: genome_id2
-            description: an unique identifier for the second genome
+            description: a unique identifier for the second genome
                          - either its ncbi taxon id or the UniProt
                          species code
 
@@ -1196,4 +1467,124 @@ class SharedAncestrySummaryAPIView(APIView):
             genes1.add(pw['EntryNr1'])
             genes2.add(pw['EntryNr2'])
         return len(genes1), len(genes2)
+
+class CreateAsyncJobAPIView(CreateAPIView):
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED, headers=headers)
+
+    def get_success_headers(self, data):
+        try:
+            return {'Location': str(data['status_url'])}
+        except (TypeError, KeyError):
+            return {}
+
+
+class StatusAsyncJobAPIView(RetrieveAPIView):
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        header = {}
+        if instance.state == "DONE":
+            stat = status.HTTP_200_OK
+        elif instance.state == "ERROR":
+            stat = status.HTTP_400_BAD_REQUEST
+        elif instance.state in ("PENDING", "RUNNING"):
+            stat = status.HTTP_200_OK
+            header = {"Retry-After": str(20)}
+        return Response(serializer.data, status=stat, headers=header)
+
+class CreateEnrichmentAnalysisView(CreateAsyncJobAPIView):
+    serializer_class = serializers.EnrichmentAnalysisInputSerializer
+    schema = DocStringSchemaExtractor()
+
+    """
+    Submit a Gene Ontology enrichment analysis.
+    
+    This endpoint accepts requests to perform gene ontology enrichment analysis
+    on extant and ancestral gene sets. The jobs will be executed asynchronously.
+    The reply of the server will contain a 202 reply with a Location header that 
+    points to a url where the status of the job can be checked.
+    
+    The endpoint accepts json encoded data in a POST request. The data must contain
+    a `foreground` set of extant genes (all from the same species) for an extant genome 
+    enrichment analysis, or a set of HOGs that exist in an given ancestral taxonomy 
+    level. You must indicated whether an ancestral or an extant analysis should be 
+    performed by setting the `type` parameter to either `ancestral` or `extant`. 
+    In addition, the endpoint accepts an optional `name` parameter.
+    
+    ---
+    parameters:
+       - name: type
+         description: Indicate type of analysis. either `ancestral` or `extant`.
+         
+       - name: foreground
+         description: set of foreground genes / hogs. The background will 
+                      automatically be set as the set of all existing HOGs at the
+                      given taxonomic level for the ancestral enrichment analysis,
+                      or all the main isoform protein sequences of the extant 
+                      species.
+         type: list of gene/hog IDs
+         
+       - name: taxlevel
+         description: Taxonomic level at which the ancestral enrichment analysis 
+                      should be performed. If extant analysis, this parameter 
+                      can be ignored.
+         
+       - name: name
+         description: An optional name for the analysis. 
+          
+    """
+    def perform_create(self, serializer):
+        """
+        Submit a Gene Ontology enrichment analysis.
+
+        This endpoint accepts requests to perform gene ontology enrichment analysis
+        on extant and ancestral gene sets. The jobs will be executed asynchronously.
+        The reply of the server will contain a 202 reply with a Location header that
+        points to a url where the status of the job can be checked.
+
+        The endpoint accepts json encoded data in a POST request. The data must contain
+        a `foreground` set of extant genes (all from the same species) for an extant genome
+        enrichment analysis, or a set of HOGs that exist in an given ancestral taxonomy
+        level. You must indicated whether an ancestral or an extant analysis should be
+        performed by setting the `type` parameter to either `ancestral` or `extant`.
+        In addition, the endpoint accepts an optional `name` parameter.
+
+        ---
+        parameters:
+           - name: type
+             description: Indicate type of analysis. either `ancestral` or `extant`.
+
+           - name: foreground
+             description: set of foreground genes / hogs. The background will
+                          automatically be set as the set of all existing HOGs at the
+                          given taxonomic level for the ancestral enrichment analysis,
+                          or all the main isoform protein sequences of the extant
+                          species.
+             type: list of gene/hog IDs
+
+           - name: taxlevel
+             description: Taxonomic level at which the ancestral enrichment analysis
+                          should be performed. If extant analysis, this parameter
+                          can be ignored.
+
+           - name: name
+             description: An optional name for the analysis.
+
+        """
+        obj = serializer.save(state="PENDING")
+        go_enrichment.delay(obj.id)
+        return obj
+
+
+
+class StatusEnrichmentAnalysisView(StatusAsyncJobAPIView):
+    queryset = rest_models.EnrichmentAnalysisModel.objects.all()
+    lookup_field = 'id'
+    serializer_class = serializers.EnrichmentAnalysisStatusSerializer
+
 

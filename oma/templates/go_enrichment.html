@@ -1,0 +1,177 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+{% load bootstrap4 %}
+
+
+{% block title %}GO Enrichment Analysis{% endblock %}
+{% block content %}
+
+
+    <link href="https://code.jquery.com/ui/1.13.1/themes/smoothness/jquery-ui.css" rel="Stylesheet"></link>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js" ></script>
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>GO Enrichment analysis</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+            <p>
+                Gene Ontology Enrichment Analysis (GOEA) uses the structured vocabulary of GO to identify
+                overrepresented GO terms within study gene sets compared to a population gene set. This
+                web-based GOEA analysis tool enables users to find functions associated with the genes of
+                interest for both extant or ancestral genes.
+            </p>
+            <p>
+                Extant gene GO enrichment is carried out as described in
+                <a href="http://dx.doi.org/10.1038/s41598-018-28948-z" target="_blank">GOATOOLS</a>,
+                where the study set is a user-defined set of extant genes, and the population is all
+                of the genes in the extant genome of interest. For ancestral gene GO enrichment, we
+                leverage the HOG GO annotations. The study set is a user-defined set of HOGs at a given
+                taxonomic level, and the population is all the HOGs defined at that taxonomic level.
+            </p>
+
+            <br>
+            <div class="card card-header-oma">
+
+                <div class="card-header">
+                    <h4>Run Go enrichment analysis</h4>
+                </div>
+
+                <div class="card-body">
+
+                    {% bootstrap_messages %}
+                        <form role="form" class="form-horizontal" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {% bootstrap_form form layout="horizontal" %}
+                            {% buttons %}
+                                <button id='submit_post_go' class="btn btn-lg btn-block btn-primary">Submit</button>
+                            {% endbuttons %}
+                        </form>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+    <script>
+
+
+    $('#id_type').on('change', function (e) {
+
+        var optionSelected = $("option:selected", this);
+    var valueSelected = this.value;
+
+    if (valueSelected !== 'ancestral'){
+        $('#id_taxon').hide();
+        document.getElementById("id_taxon").parentNode.parentNode.style.display = 'none';
+
+    } else {
+        $('#id_taxon').show();
+        document.getElementById("id_taxon").parentNode.parentNode.style.display = 'flex';
+
+    }
+});
+
+    document.getElementById('submit_post_go').addEventListener("click", function(event){
+
+        event.preventDefault();
+
+        var input_foreground = document.getElementById('id_Foreground').value.split(/[\s,\n\t]+/).filter(n => n);
+        var input_type = document.getElementById('id_type').value
+        var input_name = document.getElementById('id_name').value
+        var input_level = document.getElementById('id_taxon').value ? document.getElementById('id_taxon').value : ""
+
+
+        console.log(input_foreground, input_type, input_name, input_level)
+
+        fetch("/api/enrichment/", {
+          method: "POST",
+          body: JSON.stringify({
+              foreground: input_foreground,
+              type: input_type,
+              name: input_name,
+              taxlevel: input_level ,
+          }),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        })
+          .then((response) => response.json())
+          .then((json) =>  {
+              if (json.id !== undefined){
+                  window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_self")
+              } else {
+                  let msg = "\n".concat(Object.keys(json));
+                  alert("The provided data contains errors:\n" + msg);
+              }
+          });
+
+    })
+
+
+    // AUTCOMPLETE TAXON
+
+     var all_names = [];
+
+        function recursiveScan(json)
+    {
+
+
+
+        if (json.taxid){
+                all_names.push({label: json.name, value: json.taxid })
+            }
+
+        if(json.children != null)
+        {
+            //here you have access to id and dataelements
+
+            if(json.children.length > 0)
+            {
+                for(let t=0; t<json.children.length; t++){
+
+                    var e = json.children[t];
+
+                    //here you have access to each child as json.children[t]
+                    //you could do the logic for the current child
+
+                    //then pass the current child to the recursive function
+                    recursiveScan(json.children[t]);
+                }
+            }
+        }
+        return true;
+    }
+
+    $.getJSON( "/All/genomes.json", function( jsonData ) {
+        recursiveScan(jsonData)
+
+        console.log(all_names)
+
+        var species_auto_options = {
+            source: all_names,
+        };
+
+        $('#id_taxon').autocomplete(species_auto_options);
+        $('#id_taxon').autocomplete("enable")
+
+    })
+
+    </script>
+
+
+{% endblock content %}

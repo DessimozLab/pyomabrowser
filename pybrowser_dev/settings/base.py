@@ -27,7 +27,12 @@ DEBUG = (DEPLOYMENT != "PRODUCTION")
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
-INTERNAL_IPS = ('127.0.0.1')
+INTERNAL_IPS = ("127.0.0.1")
+if DEBUG:
+    import socket  # only if you haven't already imported this
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
+print(INTERNAL_IPS)
 
 # Application definition
 INSTALLED_APPS = [
@@ -63,8 +68,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'oma_rest.pagination.LinkHeaderPagination',
     'PAGE_SIZE': 100,
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning',
-    'DEFAULT_VERSION': '1.8',
-    'ALLOWED_VERSIONS': ('1.0', '1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8'),
+    'DEFAULT_VERSION': '1.10',
+    'ALLOWED_VERSIONS': ('1.0', '1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', '1.10'),
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
 
 
@@ -138,7 +144,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'oma.context_processors.xref_order',
                 'oma.context_processors.oma_instance',
-                'oma.context_processors.release_char',
+                'oma.context_processors.release_info',
             ],
         },
     },

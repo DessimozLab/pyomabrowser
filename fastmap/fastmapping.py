@@ -17,20 +17,22 @@ import logging
 
 
 class FastMappingApp(Application):
-    def __init__(self, fasta, out):
+    def __init__(self, fasta, out, target=None):
         self.final_out = out
         out_base = os.path.basename(out)
         fasta_base = os.path.basename(fasta)
-
+        cmd = ["fastmap-omamer", fasta_base, out_base]
+        if target is not None:
+            cmd.append(target)
         Application.__init__(
             self,
-            arguments=["fastmap-omamer", fasta_base, out_base],
+            arguments=cmd,
             inputs=[fasta],
             outputs=[out_base],
             output_dir="res_" + out_base,
             stdout="stdout.txt",
             stderr="stderr.txt",
-            requested_memory=20 * GB,
+            requested_memory=28 * GB,
         )
 
     def __del__(self):

@@ -1,7 +1,7 @@
 {% extends  "base_template.html" %}
 {% load staticfiles %}
 
-{% block title %}Release information{% endblock %}
+{% block title %}Species/release information{% endblock %}
 
 {% block content %}
 
@@ -27,13 +27,14 @@
 
 
             <table class="table">
-    <tr><td>Number of species:</td><td> {{ nr_genome }}</td></tr>
-    <tr><td>Number of proteins:</td><td>{{ nr_proteins }}</td></tr>
-    <tr><td>Number of OMA groups:</td><td>962065</td></tr>
-    <tr><td>Number of proteins in an OMA Group:</td><td>{{ nr_protein_in_oma }} ({{ percent_in_oma | floatformat }}%)</td></tr>
-    <tr><td>Number of deepest level HOGs:</td><td>{{ nr_roothogs }}</td></tr>
-    <tr><td>Number of proteins in a HOG:</td><td>{{ nr_protein_in_hog }} ({{ percent_in_hog | floatformat }}%)</td></tr>
-  </table>
+                <tr><td>Number of species:</td><td> {{ nr_genome }}</td></tr>
+                <tr><td>Number of proteins:</td><td>{{ nr_proteins }}</td></tr>
+                <!--<tr><td>Number of genes:</td><td>{{ nr_genes }}</td></tr>-->
+                <tr><td>Number of OMA groups:</td><td>{{ nr_oma_groups }}</td></tr>
+                <tr><td>Number of proteins in an OMA Group:</td><td>{{ nr_protein_in_oma }} ({{ percent_in_oma | floatformat }}%)</td></tr>
+                <tr><td>Number of deepest level HOGs:</td><td>{{ nr_roothogs }}</td></tr>
+                <tr><td>Number of proteins in a HOG:</td><td>{{ nr_protein_in_hog }} ({{ percent_in_hog | floatformat }}%)</td></tr>
+            </table>
 
 
             <br>
@@ -46,14 +47,16 @@
 
                         <div class="col ">
 
-                            <h4><strong>Species information</strong></h4>
+                            <h4><strong>Species information</strong> <br> <small>Find which species are in OMA</small></h4>
+
+
 
                         </div>
 
                         <div class="col-md-auto ">
        <div>
 
-           <span class="pull-right text_selector"><b>Select species browser widget:</b> </span>
+           <span class="pull-right text_selector"><b>Visualisation format:</b> </span>
 
 
                         <button type="button" id="btree" class="btn btn-default icon_selector" data-toggle="tooltip" data-placement="top" title="view as species tree" >

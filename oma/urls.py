@@ -33,7 +33,7 @@ urlpatterns = [
     url(r'^sequences/(?P<entry_id>\w+)/$', views.Entry_sequences.as_view(), name="entry_sequences"),
 
     # HOG
-    url(r'^hog/resolve/(?P<hog_id>HOG:[\w.:_]+)/$', views.resolve_hog_id, name="hog-resolve"),
+    url(r'^hog/resolve/(?P<hog_id>HOG:[\w.:_-]+)/$', views.resolve_hog_id, name="hog-resolve"),
 
     url(r'^hog/(?P<hog_id>[\w.:]+)/similar/domain/json/$', views.HOGDomainsJson.as_view(), name='hog_domains_json'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/similar/domain/$', views.HOGSimilarDomain.as_view(), name='hog_similar_domain'),
@@ -51,6 +51,10 @@ urlpatterns = [
 
     url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/iham/$', views.HOGviewer.as_view(), name='hog_viewer'),
+
+
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/go/$', views.HOGgo.as_view(), name='hog_go'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/go/$', views.HOGgo.as_view(), name='hog_go'),
 
     url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/fasta/$', views.HOGFasta.as_view(), name='hog_fasta'),
@@ -89,15 +93,17 @@ urlpatterns = [
     url(r'^omagroup/(?P<group_id>\w+)/json/$', views.OMAGroupJson.as_view(), name='omagroup-json'),
 
     # Genome
+    url(r"^genome/$", views.GenomeResolve.as_view(), name="genome"),
     url(r'^genome/(?P<species_id>\w+)/info/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
     url(r'^genome/(?P<species_id>\w+)/genes/$', views.GenomeCentricGenes.as_view(), name='genome_genes'),
     url(r'^genome/(?P<species_id>\w+)/closest/groups/$', views.GenomeCentricClosestGroups.as_view(), name='genome_closest_og'),
     url(r'^genome/(?P<species_id>\w+)/closest/hogs/$', views.GenomeCentricClosestHOGs.as_view(), name='genome_closest_hog'),
     url(r'^genome/(?P<species_id>\w+)/synteny/$', views.GenomeCentricSynteny.as_view(), name='genome_synteny'),
+    url(r'^genome/(?P<species_id>\w+)/geneorder/$', views.GenomeCentricGeneOrder.as_view(), name='genome_gene_order'),
 
     # AncestralGenome
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/info/$', views.AncestralGenomeCentricInfo.as_view(), name='ancestralgenome_info'),
-
+    url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/synteny/$', views.AncestralGenomeCentricSynteny.as_view(), name='ancestralgenome_synteny'),
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/genes/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.AncestralGenomeCentricGenes.as_view(), name='ancestralgenome_genes'),
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/genes/$', views.AncestralGenomeCentricGenes.as_view(), name='ancestralgenome_genes'),
 
@@ -116,6 +122,10 @@ urlpatterns = [
 
 
     # Search Widget
+    url(r'^search-token/$', views.token_search, name='search_token'),
+    url(r'^search-token/thanks$', TemplateView.as_view(template_name="search_suggestion_thanks.html"),
+            name="search_suggestion_thanks"),
+
     url(r'^search/$', views.Searcher.as_view(), name='search'),
     url(r'^search/fulltext/(?P<query>[A-Za-z0-9 _.:()-/+"]+)/$', views.FullTextJson.as_view(), name="fulltext_json"),
 
@@ -148,6 +158,9 @@ urlpatterns = [
     url(r'^functions/$', views.function_projection, name='function-projection-input'),
     url(r'^functions/(?P<data_id>\w+)/$', views.FunctionProjectionResults.as_view(), name="function-projection"),
 
+    url(r'^go_enrichment/$', views.go_enrichment , name='go_enrichment'),
+    url(r'^go_enrichment_result/(?P<data_id>[\w\d-]+)/$', views.go_enrichment_result , name='go_enrichment_result'),
+
     url(r'^release/$', views.Release.as_view(), name='release'),
     url(r'^release/json/$', views.GenomesJson.as_view(), name="genomes_json"),
 
@@ -179,8 +192,8 @@ if settings.OMA_INSTANCE_NAME != "basf":
 if settings.DEBUG:
     try:
         import debug_toolbar
-        urlpatterns.extend([
-            url(r'^__debug__/', include(debug_toolbar.urls)),
-        ])
+        #urlpatterns.extend([
+        #    url(r'^__debug__/', include(debug_toolbar.urls)),
+        #])
     except ImportError:
         pass

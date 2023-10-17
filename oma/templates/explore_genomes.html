@@ -1,0 +1,147 @@
+{% extends  "base_template.html" %}
+{% load staticfiles %}
+
+{% block title %}Accessing Genomes{% endblock %}
+{% block content %}
+
+<link href="https://code.jquery.com/ui/1.13.1/themes/smoothness/jquery-ui.css" rel="Stylesheet"></link>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js" ></script>
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>Extant and Ancestral genomes</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <div class="card card-header-oma">
+                <div class="card-body ">
+
+                    <p class="text-justify">The OMA Genome pages give an overview of all the protein coding genes of an extant species. For ancestral genomes, we provide the inferred set of HOGs (which are a proxy for the genes that existed back then in the genome).</p>
+                    <br>
+                    <br>
+
+                    <h5 > <strong> Search an ancestral or extant genome</strong></h5>
+                    <br>
+
+
+                    <form class="form-horizontal" role="search" id="searchForm" onSubmit="{% url 'genome' %}" method="GET">
+                        <div class="form-group">
+                            <div class="form-group form-row">
+                                <label for="textSci" class="col-sm-3 col-form-label control-label text-right">Scientific name:</label>
+                                <div class="col-sm-8 no-gutters">
+
+                                    <div class="input-group col mb-2">
+                                        <input id='textSci' name="query" type="text" class="form-control"/>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="submit">
+                                                <i class="fas fa-search"></i></button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-8 offset-sm-3">
+                                    <span class="font-weight-bold">Example:</span>
+                                        <a href="#" class="text-muted" id="exSci1">Homo sapiens</a> - <a href="#" class="text-muted" id='exSci2'>Mammalia</a> - <a href="#" class="text-muted" id='exSci3'>o__Pseudomonadales</a>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </form>
+
+
+                    <form class="form-horizontal" role="search" id="searchForm2" onSubmit="{% url 'genome' %}" method="GET">
+                        <div class="form-group">
+                            <div class="form-group form-row">
+                                <label for="textTax" class="col-sm-3 col-form-label control-label text-right">Taxonomy Identifier:</label>
+                                <div class="col-sm-8 no-gutters">
+
+                                    <div class="input-group col mb-2">
+                                        <input id='textTax' name="query" type="text" class="form-control"/>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="submit">
+                                                <i class="fas fa-search"></i></button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-8 offset-sm-3">
+                                    <span class="font-weight-bold">Example:</span>
+                                        <a href="#" class="text-muted" id="exTax1">4890</a> - <a href="#" class="text-muted" id='exTax2'>10090</a>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<script type="text/javascript">
+$('#exSci1').click( function() {
+    $('#textSci').val($(this).text()).focus();
+});
+$('#exSci2').click( function() {
+    $('#textSci').val($(this).text()).focus();
+});
+$('#exSci3').click( function(){
+    $('#textSci').val($(this).text()).focus();
+});
+$('#exTax1').click( function() {
+    $('#textTax').val($(this).text()).focus();
+});
+$('#exTax2').click( function() {
+    $('#textTax').val($(this).text()).focus();
+});
+
+// AUTCOMPLETE TAXON
+var all_sci_names = [];
+var all_taxids = []
+
+function recursiveScan(json){
+    if (json.taxid){
+            all_sci_names.push({label: json.name, value: json.name});
+            all_taxids.push({label: json.taxid, value: json.taxid});
+        }
+    if(json.children != null){
+        if(json.children.length > 0){
+            for(let t=0; t<json.children.length; t++){
+                let e = json.children[t];
+                recursiveScan(e);
+            }
+        }
+    }
+    return true;
+}
+
+$.getJSON( "/All/genomes.json", function( jsonData ) {
+    recursiveScan(jsonData)
+
+    $('#textSci').autocomplete({source: all_sci_names});
+    $('#textSci').autocomplete("enable");
+    $('#textTax').autocomplete({source: all_taxids});
+    $('#textTax').autocomplete("enable");
+
+})
+
+</script>
+
+{% endblock content %}

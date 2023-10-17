@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 import Bio.SeqIO
 import django.conf
-from celery import task, shared_task
+from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.db.models import Q
@@ -176,7 +176,7 @@ def submit_mapping_on_cluster(session, res_file=None, fasta=None, map_method=Non
         return JobStatus(-1)
 
 
-@task()
+@shared_task()
 def update_running_jobs():
     for job in FastMappingJobs.objects.filter(Q(state='pending') | Q(state='running')):
         if job.processing:
@@ -196,7 +196,7 @@ def update_running_jobs():
                 logger.exception("cannot send notification mail for job {}".format(job))
 
 
-@task()
+@shared_task()
 def purge_old_fastmap():
     time_threshold = datetime.now() - timedelta(days=int(settings.FASTMAP.get('store_files_in_days', 8)))
     FastMappingJobs.objects.filter(create_time__lt=time_threshold).delete()

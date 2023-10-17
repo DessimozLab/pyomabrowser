@@ -172,7 +172,7 @@
 
                     <hr>
 
-
+                    {% if "eukaryotes.cdna.fa.gz" in existing_download_files %}
                     <dl class="row">
                         <dt class="col-sm-6">cDNA Eukaryotes</dt>
                         <dd class="col-sm-6"><a href="{{ download_root }}/eukaryotes.cdna.fa.gz">
@@ -181,11 +181,10 @@
                         </a>
                         </dd>
                     </dl>
+                    <hr>
+                    {% endif %}
 
-
-                     <hr>
-
-
+                    {% if "prokaryotes.cdna.fa.gz" in existing_download_files %}
                     <dl class="row">
                         <dt class="col-sm-6">cDNA Prokaryotes</dt>
                         <dd class="col-sm-6"><a href="{{ download_root }}/prokaryotes.cdna.fa.gz">
@@ -194,11 +193,20 @@
                         </a>
                         </dd>
                     </dl>
+                    <hr>
+                    {% endif %}
 
-
-
-
-                     <hr>
+                    {% if "viruses.cdna.fa.gz" in existing_download_files %}
+                    <dl class="row">
+                        <dt class="col-sm-6">cDNA Viruses</dt>
+                        <dd class="col-sm-6"><a href="{{ download_root }}/viruses.cdna.fa.gz">
+                            <i class="fas fa-download"></i>
+                            Fasta format
+                        </a>
+                        </dd>
+                    </dl>
+                    <hr>
+                    {% endif %}
 
 
                     <dl class="row">
@@ -481,7 +489,7 @@
                         <dt class="col-sm-6">OMAmer database files</dt>
                         <dd class="col-sm-6">
                             <a href="{{ download_root }}/LUCA.h5"><i class="fas fa-download"></i> LUCA.h5</a>
-                        {% with "Metazoa.h5 Viridiplantae.h5 Primates.h5" as lineages  %}
+                        {% with "Metazoa.h5 Viridiplantae.h5 Saccharomyceta.h5 Primates.h5 Homininae.h5" as lineages  %}
                             {% for lineage in lineages.split %}
                             {% if lineage in existing_download_files %}
                                 <br><a href="{{ download_root }}/{{ lineage }}"><i class="fas fa-download"></i> {{ lineage }}</a>

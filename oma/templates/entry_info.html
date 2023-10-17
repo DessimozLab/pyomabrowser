@@ -67,9 +67,9 @@
 
                     var d = xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}");
 
-                    if (source == "Protein Name"){
+                    if (source === "Protein Name"){
 
-                        if (ref.seq_match == "unchecked" ) {
+                        if (ref.seq_match === "unchecked" ) {
                             list_item.unshift(" ")
                             list_item.unshift(d)
                         }

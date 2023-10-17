@@ -13,6 +13,7 @@ router.register(r'xref', views.XRefsViewSet, basename='xref')
 router.register(r'genome', views.GenomeViewSet, basename='genome')
 router.register(r'hog', views.HOGViewSet, basename='hog')
 router.register(r'taxonomy', views.TaxonomyViewSet, basename='taxonomy')
+router.register(r'synteny', views.SyntenyViewSet, basename="synteny")
 
 # create docu-description from template
 desc = render_to_string("oma_rest/documentation_description.html", {})
@@ -26,6 +27,8 @@ urlpatterns = [
          views.SharedAncestrySummaryAPIView.as_view(), name='shared-ancestry-summary'),
     path('sequence/', views.IdentifiySequenceAPIView.as_view(), name='sequence'),
     path('function/', views.PropagateFunctionAPIView.as_view(), name='function-propagation'),
+    path('enrichment/', views.CreateEnrichmentAnalysisView.as_view(), name='enrichment-create'),
+    path('enrichment/status/<slug:id>/', views.StatusEnrichmentAnalysisView.as_view(), name='enrichment-status'),
     path('schema/', get_schema_view(title="OMA REST API")),
     path('docs', include_docs_urls(title='REST API for the OMA Browser',
                                     description=desc)),

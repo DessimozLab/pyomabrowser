@@ -37,7 +37,7 @@
                 <div class="card-body">
 
 
-                    <h3>Search for a gene, group, or genome of interest</h3>
+                    <h3 id="search_manual_token">Search for a gene, group, or genome of interest</h3>
 
                     <p class="text-justify">From the landing page, users can search for their gene, group, or genome of interest. This can be done by clicking on the drop down menu to the left of the search bar.
 </p>
@@ -232,6 +232,120 @@
 
 
                      <br>
+
+
+                     <h3>Ancestral and Extant Genomes pages</h3>
+
+                           <p class="text-justify">
+                        The Ancestral and Extant genomes search page is an integrated page to search for information about the proteome of an extant species or ancestral one. If interested in a current species, you only need to write its scientific name or NCBI taxonomy ID in the corresponding text search boxes. If interested in an ancestral species, you can write the clade which the species is the common ancestor of in the scientific name box.
+                    </p>
+
+                       <p class="text-justify">
+Both the ancestral and extant options allow not only to inspect and explore the genes content of a genome (or HOGs in ancestral genomes), but also to visualize the gene order in an interactive way. Moreover, if looking for an extant species, you can visualize the synteny with other species or clade of choice in a dotplot representation.
+                    </p>
+
+
+
+                      <h5 >  <b>How to access it?  </b></h5>
+
+
+                       <p class="text-justify">
+You can find it by expanding the “Explore” tab on the top right menu. Once here, click on “Extant and ancestral genomes”. This will take you to the Ancestral and extant genomes search page.
+                    </p>
+
+                        <img src="{% static "image/search_genomes.png" %}" class="rounded mx-auto d-block w-75 p-3 "
+                             alt="Explore > Extant and ancestral genomes">
+
+
+
+                      <h4 id="localsynteny"> <small> <b> Gene Order Viewer</b></small></h4>
+
+                     <p class="text-justify">
+When selecting an extant genome, the Gene Order viewer is a representation of the protein-coding genes present in each chromosome/ scaffold/ contig. The grey rectangles or bars represent the genes and the links connect genes that are found next to each other (independently of the length of the sequence between them).
+                    </p>
+
+
+                      <h4 id="localsynteny"> <small> <b> Synteny</b></small></h4>
+
+                     <p class="text-justify">
+The synteny tab on the left hand menu opens a tool to visualise the gene synteny between the selected browsed extant species with another species of choice.
+                    </p>
+
+                     <p class="text-justify">
+
+When selecting a second species in the text box and pressing enter, a matrix representing an overview of the synteny between both genomes shows up. Here, you can select two chromosomes (one for each species) for closer comparison with the synteny dot plot by clicking on their intersecting square. The colour intensity of a square represents the number of 1:1 orthologs shared between chromosomes, or the number of dots in that specific dot plot. The synteny dot plot can also be opened here by selecting the chromosome of each species that you want to compare on the drop down boxes of the bottom left menu.
+
+                    </p>
+
+
+
+                    <h4 id="localsynteny"> <small> <b> Ancestral Gene Order Viewer</b></small></h4>
+
+
+                    <p class="text-justify">
+    The <strong>Ancestral Gene Order (AGO) viewer</strong>   is an interactive tool to view and explore the order of genes in a specific ancestral species.
+                    </p>
+
+                      <h5 >  <b>How to find it?  </b></h5>
+
+                    <p class="text-justify">
+Firstly, you need to open the Ancestral and Extant genomes search page. In order to view the gene order of an ancestral species, you need to select it. You can do so by writing the name of the clade whose common ancestor species you are interested in (e.g. Mammalia, Chordata, Hominidae).
+                    </p>
+                    <p class="text-justify">
+The <strong>ancestral genome page</strong> will first show, where you can access and download information like the common and scientific names of the species in the clade selected, their gene number, their OMA taxon ID or their OMA code.
+                    </p>
+                    <p class="text-justify">
+The <strong>AGO viewer</strong> can be accessed by simply clicking on the Ancestral Gene Order tab on the left hand side.
+                    </p>
+                     <p class="text-justify">
+The <strong>ancestral genes</strong> tab consists of a table of all the genes present in the ancestral genome with additional information about each of them. This is presented as the HOGs present at this level, which can be interactively accessed by clicking on them and downloaded (top right button).
+                    </p>
+
+                    <img src="{% static "image/genome_gene_order.png" %}" class="rounded mx-auto d-block w-75 p-3 "
+                             alt="table of all the genes present in the ancestral genome">
+
+                     <h5 >  <b> How to read the AGO viewer? </b></h5>
+
+                     <p class="text-justify">
+Each line or group of lines represents an ancestral contig or CAR (Contiguous Ancestral Region) and each vertical bar on them a gene (HOG present at the ancestral genome level). These contigs are ordered by decreasing length.
+                    </p>
+                     <p class="text-justify">
+By default, the height of the bars show the number of genes in the HOG (number of extant genes) while the colouring represents the completeness of the HOG (proportion of descendant species represented with at least one gene in this HOG). You can see this information and customise it on the settings option (top right button).
+                    </p>
+                     <p class="text-justify">
+The <strong>Ancestral Gene Order</strong> information shown here has been reconstructed from extant species gene order using a parsimony approach. Two HOGs (bars) are connected by a link if they have been inferred to be of closest proximity, with the weight (colour of the line) indicating the number of times these two HOGs are also of closest proximity in descendant extant genomes.
+                    </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                     <br>
+
                     <h3>Group-centric pages</h3>
 
 

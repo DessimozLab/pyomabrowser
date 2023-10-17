@@ -18,6 +18,13 @@ server {
     rewrite ^/$ /oma/home/ permanent;
     rewrite ^/index.html$ /oma/home/ permanent;
 
+    proxy_intercept_errors on;
+
+    #START_ERROR
+    error_page   500 503 504  /50x.html;
+    error_page   502          /502.html;
+    #END_ERROR
+
     location ~ ^/(oma|api)/ {
         proxy_pass http://pyoma;
         proxy_redirect off;

@@ -1,11 +1,15 @@
 import itertools
 import collections
+from hashlib import md5
+import logging
 
 from rest_framework import serializers
 from oma.utils import db
 from pyoma.browser.models import ProteinEntry
 from django.utils.http import urlencode
+from .models import EnrichmentAnalysisModel, ENRICHMENT_CHOICES
 
+logger = logging.getLogger(__name__)
 
 class QueryParamHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
     def __init__(self, query_params, nullvalues=None, **kwargs):
@@ -212,13 +216,16 @@ class XRefSerializer(ReadOnlySerializer):
     genome = GenomeInfoSerializer(required=False)
 
 
-class GeneOntologySerializer(ReadOnlySerializer):
-    entry_nr = serializers.IntegerField()
+
+class BaseGeneOntologySerializer(ReadOnlySerializer):
+    id = serializers.SerializerMethodField(method_name=None)
     GO_term = serializers.SerializerMethodField(method_name=None)
     name = serializers.SerializerMethodField(method_name=None)
-    aspect = serializers.SerializerMethodField(method_name=None)
-    evidence = serializers.CharField()
-    reference = serializers.CharField()
+    aspect = serializers.CharField()
+    ic = serializers.FloatField()
+
+    def get_id(self, obj):
+        return str(obj.object_id)
 
     def get_GO_term(self, obj):
         return str(obj.term)
@@ -226,8 +233,23 @@ class GeneOntologySerializer(ReadOnlySerializer):
     def get_name(self, obj):
         return obj.term.name
 
-    def get_aspect(self, obj):
-        return obj.aspect
+class GeneOntologySerializer(BaseGeneOntologySerializer):
+    entry_nr = serializers.IntegerField()
+    evidence = serializers.CharField()
+    reference = serializers.CharField()
+
+class AncestralGeneOntologySerializer(BaseGeneOntologySerializer):
+    #stars = serializers.SerializerMethodField(method_name=None)
+    score = serializers.SerializerMethodField(method_name=None)
+
+    def get_id(self, obj):
+        return str(obj.anno['HogID'].decode())
+
+    def get_score(self, obj):
+        return float(obj.anno['RawScore'])
+
+    #def get_stars(self, obj):
+    #    return int(obj.anno['Score'])
 
 
 class GroupListSerializer(ReadOnlySerializer):
@@ -257,7 +279,9 @@ class HOGsBaseSerializer(ReadOnlySerializer):
 
 class HOGsListSerializer(HOGsBaseSerializer):
     roothog_id = serializers.IntegerField()
+    completeness_score = serializers.FloatField(required=False)
     description = serializers.SerializerMethodField(method_name=None)
+    nr_genes = serializers.FloatField(required=False)
     similar_profile_hogs = serializers.HyperlinkedIdentityField(
         view_name="hog-similar-profile-hogs",
         lookup_field="roothog_id",
@@ -284,6 +308,7 @@ class HOGMembersListSerializer(ReadOnlySerializer):
 
 class HOGandPatternSerializer(HOGsBaseSerializer):
     in_species = serializers.ListSerializer(child=serializers.CharField())
+    jaccard_similarity = serializers.FloatField()
 
 
 class HOGsSimilarProfileSerializer(HOGsListSerializer):
@@ -320,3 +345,59 @@ class TaxonSerializer(ReadOnlySerializer):
 class TaxonomyNewickSerializer(ReadOnlySerializer):
     root_taxon = TaxonSerializer()
     newick = serializers.CharField()
+
+
+class EnrichmentAnalysisInputSerializer(serializers.ModelSerializer):
+    status_url = serializers.HyperlinkedIdentityField('enrichment-status', lookup_field='id')
+    foreground = serializers.JSONField()
+
+    class Meta:
+        model = EnrichmentAnalysisModel
+        fields = ['id', 'data_hash', 'type', 'foreground', 'taxlevel', 'name', 'status_url']
+        read_only_fields = ['id', 'data_hash', 'state']
+
+    def validate_taxlevel(self, value):
+        logger.debug(f"validate {value}, in {db.tax.all_hog_levels}")
+        if value and not value.encode('utf-8') in db.tax.all_hog_levels:
+            raise serializers.ValidationError("Invalid / unknown taxlevel value")
+        return value
+
+    def validate_type(self, value):
+        if not value in [x[0] for x in ENRICHMENT_CHOICES]:
+            raise serializers.ValidationError(f"Invalid type. Must be one of {[x[0] for x in ENRICHMENT_CHOICES]}")
+        return value
+
+    def validate_foreground(self, value):
+        if not isinstance(value, list) or len(value) < 1:
+            raise serializers.ValidationError("foreground should be a json encoded list of proteins / hogs")
+        if any((not isinstance(z, str) for z in value)):
+            raise serializers.ValidationError("foreground should be a json encoded list of proteins / hogs")
+        return value
+
+    def validate(self, data):
+        contains_ancestral = any(x.startswith('HOG:') for x in data['foreground'])
+        if contains_ancestral and data['type'] != 'ancestral':
+            raise serializers.ValidationError("HOGs can only be used for ancestral enrichment analysis")
+        if data['type'] == 'ancestral' and data['taxlevel'] is None:
+            raise serializers.ValidationError("taxlevel must be specified for ancestral enrichment analysis")
+
+        if data['type'] == 'extant':
+            data['taxlevel'] = ""
+
+        data['data_hash'] = self.get_data_hash(data)
+        return data
+
+    def get_data_hash(self, data):
+        h = md5()
+        if 'taxlevel' in data:
+            h.update(data['taxlevel'].encode('utf-8'))
+        for elem in sorted(data['foreground']):
+            h.update(elem.encode('utf-8'))
+        return h.hexdigest()
+
+
+class EnrichmentAnalysisStatusSerializer(serializers.ModelSerializer, ReadOnlySerializer):
+    class Meta:
+        model = EnrichmentAnalysisModel
+        fields = ['id', 'data_hash', 'type', 'foreground', 'name', 'state', 'message', 'result', 'result_json']
+        read_only_fields = ['id', 'data_hash', 'state']

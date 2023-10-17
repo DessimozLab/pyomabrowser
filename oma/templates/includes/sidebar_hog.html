@@ -36,6 +36,12 @@
 
         </li>
 
+     <li class="{% if tab == "go" %} active selected {% endif %}">
+            <a href="{% if level != None %} {% url 'hog_go' hog.hog_id hog.level %}{% else %}{% url 'hog_go' hog.hog_id %}{% endif %}">
+            <span>Ancestral GO</span> </a>
+        </li>
+
+
         <li class="{% if tab == "msa" %} active selected {% endif %}">
             <a href="{% if level != None %} {% url 'hog_msa' hog.hog_id hog.level %}{% else %}{% url 'hog_msa' hog.hog_id %}{% endif %}">
             <span>Alignment</span> </a>

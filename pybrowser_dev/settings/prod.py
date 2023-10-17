@@ -8,13 +8,12 @@ TWITTER_ACCESS_TOKEN = os.getenv("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
 
 # RECAPTCHA keys
-RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_PUBLIC_KEY", None)
-RECAPTCHA_PRIVATE_KEY = os.getenv("RECAPTCHA_PRIVATE_KEY", None)
+RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_PUBLIC_KEY", "not_specified")
+RECAPTCHA_PRIVATE_KEY = os.getenv("RECAPTCHA_PRIVATE_KEY", "not_specified")
 NOCAPTCHA = True  # using No Captcha reCaptcha
 
 
 INSTALLED_APPS.extend([
-    'google_analytics',
     'matomo_api_tracking',
     'captcha',
     'export',
@@ -22,12 +21,12 @@ INSTALLED_APPS.extend([
     'omamo',
     'expasysearch',
     'mailman_subscribe',
+    'taxmap',
 ])
 
 MIDDLEWARE.extend([
     'oma.middleware.LongRunningLogger',
     'matomo_api_tracking.middleware.MatomoApiTrackingMiddleware',
-    'google_analytics.middleware.GoogleAnalyticsMiddleware',
 ])
 
 LOGGING['loggers'].update({
@@ -39,11 +38,6 @@ LOGGING['loggers'].update({
     'fastmap': {
         'handlers': ['console'],
         'level': 'DEBUG' if DEBUG else 'INFO',
-        'propagate': True
-    },
-    'google_analytics': {
-        'handlers': ['console'],
-        'level': 'WARNING',
         'propagate': True
     },
     'matomo_api_tracking': {
@@ -104,8 +98,3 @@ CELERY_BEAT_SCHEDULE = {
 }
 # for backward compability reasons
 BEAT_SCHEDULE = CELERY_BEAT_SCHEDULE
-
-GOOGLE_ANALYTICS = {
-    'google_analytics_id': os.getenv('GOOGLE_TRACKING_ID', 'UA-1093824-1'),
-}
-GOOGLE_ANALYTICS_IGNORE_PATH = ['/oma/', ]

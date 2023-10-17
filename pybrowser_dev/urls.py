@@ -38,6 +38,11 @@ if "mailman_subscribe" in settings.INSTALLED_APPS:
         path("oma/", include('mailman_subscribe.urls'))
     )
 
+if "taxmap" in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path("oma/", include("taxmap.urls"))
+    )
+
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView
     from django.urls import re_path
@@ -46,7 +51,9 @@ if settings.DEPLOYMENT != "PRODUCTION":
     ]
     try:
         import debug_toolbar
-        urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
+        if "debug_toolbar" in settings.INSTALLED_APPS:
+            urlpatterns += [path('oma/__debug__/', include(debug_toolbar.urls))]
+            print("found debug_toolbar")
     except ImportError:
         pass
 

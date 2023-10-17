@@ -8,7 +8,7 @@ from .models import StandaloneExportJobs
 import shutil
 from django.utils import timezone
 from datetime import datetime, timedelta
-from celery import task
+from celery import shared_task
 import subprocess
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ def submit_export(session, res_file=None, genomes=None, release=None):
         return JobStatus(-1)
 
 
-@task()
+@shared_task()
 def update_running_jobs():
     for job in StandaloneExportJobs.objects.filter(Q(state='pending') | Q(state='running')):
         if job.processing:
@@ -81,7 +81,7 @@ def update_running_jobs():
         job.save()
 
 
-@task()
+@shared_task()
 def purge_old_exports():
     time_threshold = datetime.now() - timedelta(days=8)
     StandaloneExportJobs.objects.filter(create_time__lt=time_threshold).delete()

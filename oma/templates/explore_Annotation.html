@@ -36,19 +36,19 @@
 
 
 
-                    <form class="form-horizontal" role="search" action="/cgi-bin/gateway.pl" method="GET">
-                        <input type="hidden" name="f" value="DisplayEntry"/>
+                    <form class="form-horizontal" id="goProteinGO" onSubmit="goProteinGO(); return false;">
                         <div class="form-group form-row">
-
 
                             <label for="textAnn"  class="col-sm-3 col-form-label control-label text-right">Member gene/protein:
                             </label>
                             <div class="col-sm-8 no-gutters">
 
                                 <div class="input-group col mb-2">
-                                    <input id='textAnn' name="p1" type="text" class="form-control">
+                                    <input id='textAnn' type="text" class="form-control">
                                     <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></span></button>
+                                        <button class="btn btn-outline-secondary" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -66,16 +66,23 @@
 
 
                          <script type="text/javascript">
-                                $('#exMemb1').click( function() {
-                                    $('#textAnn').val('Q8VYZ5').focus();
-                                });
-                                $('#exMemb2').click( function() {
-                                    $('#textAnn').val('ARATH21939').focus();
-                                });
-                                $('#exMemb3').click( function() {
-                                    $('#textAnn').val('NP_172998').focus();
-                                });
-                                </script>
+                            $('#exMemb1').click( function() {
+                                $('#textAnn').val('Q8VYZ5').focus();
+                            });
+                            $('#exMemb2').click( function() {
+                                $('#textAnn').val('ARATH21939').focus();
+                            });
+                            $('#exMemb3').click( function() {
+                                $('#textAnn').val('NP_172998').focus();
+                            });
+
+                            function goProteinGO(){
+                                let query = document.getElementById("textAnn").value;
+                                let newUrl = "{% url 'entry_goa' '1234567' %}".replace('1234567', query);
+                                window.location = newUrl;
+                                return false;
+                            }
+                         </script>
 
 
                     </form>

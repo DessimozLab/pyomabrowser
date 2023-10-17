@@ -1,4 +1,4 @@
-from .prod import *
+from .profiling import *
 
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT")
