@@ -483,13 +483,13 @@
                     </dl>
                 {% endif %}
 
-                {% if "LUCA.h5" in existing_download_files %}
+                {% if "LUCA.h5" in existing_download_files or "LUCA-v2.0.0.h5" in existing_download_files %}
                     <hr>
                     <dl class="row">
                         <dt class="col-sm-6">OMAmer database files</dt>
                         <dd class="col-sm-6">
                             <a href="{{ download_root }}/LUCA.h5"><i class="fas fa-download"></i> LUCA.h5</a>
-                        {% with "Metazoa.h5 Viridiplantae.h5 Saccharomyceta.h5 Primates.h5 Homininae.h5" as lineages  %}
+                        {% with "LUCA-v2.0.0.h5 LUCA-v0.2.5.h5 Metazoa.h5 Metazoa-v2.0.0.h5 Metazoa-v0.2.5.h5 Viridiplantae.h5 Viridiplantae-v2.0.0.h5 Viridiplantae-v0.2.5.h5 Saccharomyceta.h5 Saccharomyceta-v2.0.0.h5 Saccharomyceta-v0.2.5.h5 Primates.h5 Primates-v2.0.0.h5 Primates.h5-v0.2.5.h5 Homininae.h5 Homininae-v2.0.0.h5 Homininae-v0.2.5.h5" as lineages  %}
                             {% for lineage in lineages.split %}
                             {% if lineage in existing_download_files %}
                                 <br><a href="{{ download_root }}/{{ lineage }}"><i class="fas fa-download"></i> {{ lineage }}</a>
