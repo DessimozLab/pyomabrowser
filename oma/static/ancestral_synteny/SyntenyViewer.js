@@ -124,7 +124,7 @@ class SyntenyViewer {
 
             // Flatten contig
             var previous = null
-            var current = ends[0]
+            var current = ends.sort((a, b) => a.id.toLowerCase().localeCompare(b.id.toLowerCase()))[0];
             var processing = true
 
 
