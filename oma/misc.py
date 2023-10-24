@@ -139,9 +139,16 @@ def retrieve_last_tweets(nr_tweets=3):
         tweets = ['Currently no tweets found']
     return tweets
 
+
+def parse_version_ignore_errors(version_str):
+    from pkg_resources import parse_version
+    try:
+        return parse_version(version_str)
+    except Exception:
+        return None
+
 @functools.lru_cache(maxsize=4)
 def get_omastandalone_versions(latest=5):
-    from pkg_resources import parse_version
     try:
         root = os.path.join(os.environ['DARWIN_BROWSER_SHARE'], 'standalone')
     except KeyError:
@@ -152,5 +159,5 @@ def get_omastandalone_versions(latest=5):
         releases = [f[4:-4] for f in os.listdir(root) if f.startswith('OMA.') and f.endswith('.tgz')]
     except IOError:
         return []
-    rel_v = list(map(parse_version, releases))
+    rel_v = list(filter(parse_version_ignore_errors, releases))
     return list(map(str, sorted(rel_v, reverse=True)[:latest]))

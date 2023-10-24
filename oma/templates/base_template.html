@@ -13,16 +13,7 @@
               content="orthology,evolutionary gene relations,evolution,paralogy,inference">
     {% endblock meta_hook %}
 
-    {% if google_tracker_code %}
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_tracker_code }}"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '{{ google_tracker_code }}');
-    </script>
-
+    {% if matomo_tracker_code %}
     <!-- Matomo -->
     <script>
         var _paq = window._paq = window._paq || [];

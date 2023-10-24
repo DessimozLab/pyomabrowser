@@ -14,7 +14,6 @@ NOCAPTCHA = True  # using No Captcha reCaptcha
 
 
 INSTALLED_APPS.extend([
-    'google_analytics',
     'matomo_api_tracking',
     'captcha',
     'export',
@@ -28,7 +27,6 @@ INSTALLED_APPS.extend([
 MIDDLEWARE.extend([
     'oma.middleware.LongRunningLogger',
     'matomo_api_tracking.middleware.MatomoApiTrackingMiddleware',
-    'google_analytics.middleware.GoogleAnalyticsMiddleware',
 ])
 
 LOGGING['loggers'].update({
@@ -40,11 +38,6 @@ LOGGING['loggers'].update({
     'fastmap': {
         'handlers': ['console'],
         'level': 'DEBUG' if DEBUG else 'INFO',
-        'propagate': True
-    },
-    'google_analytics': {
-        'handlers': ['console'],
-        'level': 'WARNING',
         'propagate': True
     },
     'matomo_api_tracking': {
@@ -105,8 +98,3 @@ CELERY_BEAT_SCHEDULE = {
 }
 # for backward compability reasons
 BEAT_SCHEDULE = CELERY_BEAT_SCHEDULE
-
-GOOGLE_ANALYTICS = {
-    'google_analytics_id': os.getenv('GOOGLE_TRACKING_ID', 'UA-1093824-1'),
-}
-GOOGLE_ANALYTICS_IGNORE_PATH = ['/oma/', ]

@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 numexpr = ">=2.8,<3"
 numpy = ">1.23.0"
-tables = "<4.0,>=3.7.0"
+tables = "<4.0,>=3.8.0"
 future = ">=0.12.3"
 django-bootstrap4 = "*"
 tweepy = ">=2.3.0"
@@ -18,7 +18,6 @@ coreapi = "*"
 scikit-learn = "*"
 djangorestframework-link-header-pagination = "*"
 django-cors-headers = "*"
-django-google-analytics-app = {ref = "master", git = "https://github.com/alpae/django-google-analytics.git"}
 pyoma = {ref = "develop", git = "ssh://gitolite@lab.dessimoz.org:2222/pyoma", extras=["enrichment"]}
 zoo = {ref = "master", git = "ssh://gitolite@lab.dessimoz.org:2222/zoo"}
 oma-academy-app = {ref = "master", git = "ssh://gitolite@lab.dessimoz.org:2222/oma-academy"}
