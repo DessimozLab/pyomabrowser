@@ -755,7 +755,7 @@ class LocalSyntenyViewer {
                         menu.push(tttt)
 
                $.ajax({
-                url: "/api/hog/" + data.id + "/",
+                url: "/api/hog/" + data.id + "/?level=" + level,
                 dataType: 'json',
                 async: false,
                 success: function (data) {
