@@ -1,6 +1,6 @@
 class LocalSyntenyViewer {
 
-    constructor(div_id, reference_element, hog_tree, focus, species, call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny, call_back_gene_detail) {
+    constructor(div_id, reference_element, hog_tree, focus, species, call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny, call_back_gene_detail, call_back_gene_chromosome, call_back_hog_chromosome) {
 
         var that = this // ugly handle for non-arrow function usage
 
@@ -49,6 +49,8 @@ class LocalSyntenyViewer {
         this.call_back_hog_local_synteny = call_back_hog_local_synteny
         this.callback_gene_local_synteny = callback_gene_local_synteny
         this.call_back_gene_detail = call_back_gene_detail
+        this.call_back_gene_chromosome = call_back_gene_chromosome
+        this.call_back_hog_chromosome = call_back_hog_chromosome
 
         this.settings['width_block'] = -6 + (document.getElementById(this.div_id).offsetWidth - this.settings['width_tree'] - this.settings['marginLeftSynteny'] - this.settings['width_text']) / (1 + 2 * (this.settings['hald_window']))
 
@@ -446,7 +448,6 @@ class LocalSyntenyViewer {
 
         var that = this
 
-
         for (let i = 0; i < data.length; i++) {
 
             if (data[i] == null) continue
@@ -633,6 +634,7 @@ class LocalSyntenyViewer {
                         }
 
                         menu.push(tt)
+
                     } else if (node._children) {
 
                         var tt = {
@@ -726,6 +728,8 @@ class LocalSyntenyViewer {
 
     _click_square (event, data, level) {
 
+        var that = this;
+
 
         var type  = data.hasOwnProperty('hog_id') ? 'extant' : 'ancestral'
 
@@ -754,6 +758,15 @@ class LocalSyntenyViewer {
 
                         menu.push(tttt)
 
+                        var tttttt = {
+                                    title: '<a href="#"> Locate in ancestral chromosome view </a>' ,
+                                    action: () => {
+                                        that.call_back_hog_chromosome( level, data.id.split('_')[0])
+                                    }
+                                }
+
+                                menu.push(tttttt)
+
                $.ajax({
                 url: "/api/hog/" + data.id + "/?level=" + level,
                 dataType: 'json',
@@ -771,13 +784,14 @@ class LocalSyntenyViewer {
                     else {
 
                         var ttt = {
-                            title: '<a href=""> Open gene detail </a>' ,
+                            title: '<a href="#"> Open gene detail </a>' ,
                             action: () => {
                                 this.call_back_gene_detail( data.id)
                             }
                         }
 
                         menu.push(ttt)
+
 
                         var tttt = {
                             title: '<a href=""> Use as synteny focus </a>',
@@ -796,6 +810,17 @@ class LocalSyntenyViewer {
                 async: false,
                 success: function (data) {
                     genome_release = data.species.species;
+
+                    var tttttt = {
+                                    title: '<a href="#"> Locate in chromosome view </a>' ,
+                                    action: () => {
+                                        that.call_back_gene_chromosome( data.species.code, data.omaid)
+                                    }
+                                }
+
+                                menu.push(tttttt)
+
+
                     menu.push({title: `<b> ID:</b> ${data.omaid}`, action: null })
                         menu.push({title: `<b>  OMA ID:</b> ${data.omaid}`, action: null })
                         menu.push({title: `<b> Sequence length:</b> ${data.sequence_length}`, action: null })

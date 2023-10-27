@@ -54,8 +54,18 @@ console.log('{{ hog.hog_id }}  {{ level }}')
         window.open(newUrl, "_blank");
     }
 
+    var call_back_gene_chromosome = function(level, gene_id){
+        var newUrl="{% url 'genome_gene_order' 1234567  %}".replace(/1234567/, level)
+        console.log(level, gene_id, newUrl)
+        window.open(newUrl + '?target=' + gene_id, "_blank");
+    }
 
-     var ls = new LocalSyntenyViewer('synteny_div', '{{ hog.hog_id }}', OrthoxmlParser.parse(orthoxml), '{{ hog.hog_id }}', '{{ level }}', call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny, call_back_gene_detail)
+      var call_back_hog_chromosome = function(level, gene_id){
+        var newUrl="{% url 'ancestralgenome_synteny' 1234567  %}".replace(/1234567/, level)
+        window.open(newUrl + '?target=' + gene_id, "_blank");
+    }
+
+     var ls = new LocalSyntenyViewer('synteny_div', '{{ hog.hog_id }}', OrthoxmlParser.parse(orthoxml), '{{ hog.hog_id }}', '{{ level }}', call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny, call_back_gene_detail, call_back_gene_chromosome, call_back_hog_chromosome)
          //ls.render()
  })
 

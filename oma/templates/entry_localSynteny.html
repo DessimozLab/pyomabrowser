@@ -115,8 +115,17 @@ var FOCUS_ELEMENT = '{{ reference_entry.omaid }}'
      var hog_id = phog ? phog.id.split('_')[0] : '{{ most_specific_hog.hog_id }}'
      var hog_level =  phog ? phog.species:  '{{ most_specific_hog.level }}'
 
+     var call_back_gene_chromosome = function(level, gene_id){
+        var newUrl="{% url 'genome_gene_order' 1234567   %}".replace(/1234567/, level)
+        window.open(newUrl + '?target=' + gene_id, "_blank");
+    }
 
-     var ls = new LocalSyntenyViewer('synteny_div', FOCUS_ELEMENT,  OrthoxmlParser.parse(orthoxml), hog_id, hog_level , call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny, call_back_gene_detail)
+    var call_back_hog_chromosome = function(level, gene_id){
+        var newUrl="{% url 'ancestralgenome_synteny' 1234567   %}".replace(/1234567/, level)
+        window.open(newUrl + '?target=' + gene_id, "_blank");
+    }
+
+     var ls = new LocalSyntenyViewer('synteny_div', FOCUS_ELEMENT,  OrthoxmlParser.parse(orthoxml), hog_id, hog_level , call_back_hog_detail, call_back_hog_local_synteny, callback_gene_local_synteny, call_back_gene_detail, call_back_gene_chromosome, call_back_hog_chromosome)
  })
 
 </script>
