@@ -31,7 +31,7 @@
 </style>
 
 
-<div id="container">
+    <div id="container">
 
 </div>
 
@@ -39,7 +39,7 @@
 
     var container_id = 'container';
 
-    var settings = {type: 'extant', level: "{{ genome.ncbi_taxon_id }}"};
+    var settings = {type: 'extant', level: "{{ genome.ncbi_taxon_id }}", target: '{{ target }}', error_target: '{{ message_error }}' };
 
 
     fetch('/api/synteny/?level={{ genome.ncbi_taxon_id }}&format=json')
@@ -64,6 +64,12 @@
             }
 
             synteny.render();
+
+            if (synteny.target_element){
+                synteny.target_element.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+            }
+
+
 
         })
 

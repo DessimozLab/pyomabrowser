@@ -30,7 +30,6 @@
 
 </style>
 
-
 <div id="container">
 
 </div>
@@ -39,7 +38,7 @@
 
     var container_id = 'container';
 
-    var settings = {type: 'ancestral', level: "{{ genome_name }}"};
+    var settings = {type: 'ancestral', level: "{{ genome_name }}", target: '{{ target }}', error_target: '{{ message_error }}' };
 
 
     fetch('/api/synteny/?level={{ genome_name }}&format=json')
@@ -70,6 +69,10 @@
 
 
             synteny.render();
+
+            if (synteny.target_element){
+                synteny.target_element.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+            }
 
         })
 
