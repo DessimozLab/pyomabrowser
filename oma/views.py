@@ -1087,7 +1087,29 @@ class GenomeCentricGeneOrder(GenomeBase, TemplateView):
     def get_context_data(self, species_id, **kwargs):
         context = super(GenomeCentricGeneOrder, self).get_context_data(species_id, **kwargs)
         genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(species_id))
-        context.update({'tab': 'gene_order', 'genome_obj':genome_obj})
+
+        target_param = self.request.GET.get('target', None)
+        msg = json.dumps(None)
+
+        if target_param:
+            try:
+                target_id = utils.id_resolver.resolve(target_param)
+                entry = utils.db.entry_by_entry_nr(target_id)
+                model_entry = models.ProteinEntry(utils.db, entry)
+
+                if model_entry.genome.ncbi_taxon_id == genome_obj.ncbi_taxon_id:
+                    target = model_entry.omaid
+                else:
+                    target = json.dumps(None)
+                    msg = 'Focus: Gene Id {} is a valid id but is not present this genome.'.format(target_param)
+
+            except (db.InvalidId, db.AmbiguousID):
+                target = json.dumps(None)
+                msg = 'Focus: {} is an invalid Id.'.format(target_param)
+
+        else: target = json.dumps(None)
+
+        context.update({'tab': 'gene_order', 'message_error': msg,  'target':target, 'genome_obj':genome_obj})
         return context
 
 class GenomeCentricSynteny(GenomeBase, TemplateView):
@@ -1180,7 +1202,49 @@ class AncestralGenomeCentricSynteny(AncestralGenomeBase, TemplateView):
     def get_context_data(self, species_id, **kwargs):
         context = super(AncestralGenomeCentricSynteny, self).get_context_data(species_id, **kwargs)
 
+        target_param = self.request.GET.get('target', None)
+        msg = json.dumps(None)
+        target = None
+        hog_target = None
+
+        if target_param:
+
+            # if gene id as target
+            if not target_param.startswith("HOG:"):
+
+                try:
+                    target_id = utils.id_resolver.resolve(target_param)
+                    entry = utils.db.entry_by_entry_nr(target_id)
+                    model_entry = models.ProteinEntry(utils.db, entry)
+                    hog_target = model_entry.oma_hog
+
+
+                except (db.InvalidId, db.AmbiguousID):
+                    msg = 'Focus: {} is an invalid Gene Id.'.format(target_param)
+
+            else: hog_target = target_param
+
+            print('target', hog_target)
+
+            if hog_target:
+
+                hog = utils.db.iter_hogs_at_level(hog_id=hog_target, level=species_id)
+
+                for h in hog:
+                    if h[1].decode() == hog_target and h[2].decode() == species_id:
+                        target = hog_target
+
+            print(target)
+
+            if not target:
+                msg = 'Focus: {} is an invalid Id.'.format(target_param)
+
+        if not target:
+            target = json.dumps(None)
+
         context.update({'tab': 'synteny',
+                        'message_error': msg,
+                        'target':target,
                         'ancestral_link_name': "ancestralgenome_synteny"})
         return context
 

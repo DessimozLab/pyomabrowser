@@ -15,6 +15,8 @@ class SyntenyViewer {
 
         this.settings = {
             level: null,
+            target: null,
+            error_target: null,
             type: null,
             width: this.div.offsetWidth,
             height: null,
@@ -39,7 +41,8 @@ class SyntenyViewer {
         this.height_remove_outlier_hog = true;
 
 
-        this.selected_element = null
+        this.selected_element = null;
+        this.target_element = null;
 
     }
 
@@ -124,7 +127,7 @@ class SyntenyViewer {
 
             // Flatten contig
             var previous = null
-            var current = ends[0]
+            var current = ends.sort((a, b) => a.id.toLowerCase().localeCompare(b.id.toLowerCase()))[0];
             var processing = true
 
 
@@ -285,51 +288,92 @@ class SyntenyViewer {
         d3.select('.corner_placeholder').remove()
 
 
-        this.UI_container = d3.select(this.div).append("div").attr("class","corner_placeholder top right")
+        this.UI_container_search = d3.select(this.div).append("div").attr("class","corner_placeholder top right")
+            .style("flex-direction",'row')
+            .style("align-items",'end')
+            .style('margin-right', '66px')
+        .style( 'margin-top', '10px')
+
+         // INPUT SEARCH
+        this.search = this.UI_container_search.append("div").style("display",'flex').append("input")
+            .attr("type", "text")
+            .attr("id", "search_geneorder")
+            .attr("placeholder", () => this.settings.type == 'ancestral' ? " Search for hog/gene..." :  " Search for gene...")
+            .style( 'height', '40px')
+
+        var s_b = this.UI_container_search.append('button')
+                .attr('id', 'button_search')
+                .attr('class', ' square_button')
+                .style( 'height', '40px')
+
+
+            s_b.append("div")
+                .attr("class", "label")
+                .append('i')
+                .style('color', '#888')
+                .attr('class', ' fas fa-search')
+
+
+
+        s_b.on("click", d => {
+
+            var base = window.location.href.split('?target=')[0]
+            var query = '?target=' + document.getElementById("search_geneorder").value;
+            window.location.replace(base + query);
+        })
+
+
+
+        if (this.settings.type == 'ancestral') {
+
+            this.UI_container = d3.select(this.div).append("div").attr("class","corner_placeholder top right")
             .style("flex-direction",'column')
             .style("align-items",'end')
 
-        this.tr_buttons = this.UI_container.append("div").attr("class","tr-button").style("display",'flex')
+            this.tr_buttons = this.UI_container.append("div").attr("class", "tr-button").style("display", 'flex')
 
-        this.tr_menus = this.UI_container.append("div").attr("class","tr-menus")
+            this.tr_menus = this.UI_container.append("div").attr("class", "tr-menus")
 
-        // BUTTON
-        var ex_b = this.tr_buttons.append('button')
-            .attr('id', 'button_settings')
-            .attr('data-bs-placement', 'bottom')
-            .attr('title', 'Configure viewer appearance')
+            // BUTTON
+            var ex_b = this.tr_buttons.append('button')
+                .attr('id', 'button_settings')
+                .attr('data-bs-placement', 'bottom')
+                .attr('title', 'Configure viewer appearance')
 
-        var divybuty = ex_b.attr('class', ' square_button')
-        .style('margin', '2px')
-        .on("click", d => {
-            if (this.menu_export.style('display') === 'none'){
-                return this.menu_export.style("display", 'block')
-            }
-            this.menu_export.style("display", 'none')
-        })
+            var divybuty = ex_b.attr('class', ' square_button')
+                .style('margin', '2px')
+                .on("click", d => {
+                    if (this.menu_export.style('display') === 'none') {
+                        return this.menu_export.style("display", 'block')
+                    }
+                    this.menu_export.style("display", 'none')
+                })
 
-        divybuty.append("div")
-            .attr("class","label")
-            .append('i')
-            .style('color', '#888')
-            .attr('class', ' fas fa-cog ')
+            divybuty.append("div")
+                .attr("class", "label")
+                .append('i')
+                .style('color', '#888')
+                .attr('class', ' fas fa-cog ')
 
-        divybuty.append('p')
-            .text('Settings')
-            .style('font-size', 'xx-small')
+            divybuty.append('p')
+                .text('Settings')
+                .style('font-size', 'xx-small')
 
-        this.tooltip_export = new bootstrap.Tooltip(document.getElementById('button_settings'))
+            this.tooltip_export = new bootstrap.Tooltip(document.getElementById('button_settings'))
 
-         // UI MENU
-        this.menu_export = this.tr_menus.append('div').attr('class', 'menu_export')
+            // UI MENU
+            this.menu_export = this.tr_menus.append('div').attr('class', 'menu_export')
 
-        // HOG
-        this.menu_export.append("div").html(this._settings_HOGs())
-        this._bind_ui_hog();
+            // HOG
+            this.menu_export.append("div").html(this._settings_HOGs())
+            this._bind_ui_hog();
 
-        // EDGE
-        this.menu_export.append("div").html(this._settings_Edges())
-        this._bind_ui_edge();
+            // EDGE
+            this.menu_export.append("div").html(this._settings_Edges())
+            this._bind_ui_edge();
+
+        }
+
 
     }
 
@@ -355,9 +399,8 @@ class SyntenyViewer {
         this.svg = d3.create("svg")
             .attr("viewBox", [0, 0, this.settings.width, this.settings.height])
 
-        if (this.settings.type == 'ancestral'){
-            this._build_interface();
-        }
+        this._build_interface();
+
 
         this.Tooltip = d3.select("#" + this.div_id).append("div")
             .style("opacity", 0)
@@ -382,8 +425,25 @@ class SyntenyViewer {
             .attr("text-anchor", 'start')
             .attr("font-size", '24px')
             .attr("x", this.contig_left_offset - 8)
+            .attr("y", () => this.settings.target != 'null' || this.settings.error_target != 'null' ? this.settings.margin.top/4 :  this.settings.margin.top/2)
+            .style("stroke-width", 0)
+
+        if (this.settings.target != 'null' || this.settings.error_target != 'null' ){
+
+
+            var msg = this.settings.error_target != 'null'  ? this.settings.error_target : "Focus: " + this.settings.target + ' (<a style="display:inline" fill="steelblue"  id="click_to_scroll" >click to scroll</a>)'
+
+            g_header.append("text")
+            .html(msg)
+            .attr("text-anchor", 'start')
+            .attr("font-size", '16px')
+                .attr('fill', () =>  this.settings.error_target == 'null'  ? '#888' : 'salmon' )
+            .attr("x", this.contig_left_offset - 8)
             .attr("y", this.settings.margin.top/2)
             .style("stroke-width", 0)
+
+        }
+
 
 
         for (const contigKey in this.viewer_data) {
@@ -457,6 +517,19 @@ class SyntenyViewer {
 
 
         this.div.append(this.svg.node());
+
+        var scroll_b = document.getElementById('click_to_scroll');
+
+        if (scroll_b !== null) {
+            scroll_b.addEventListener('click', () => {
+            console.log('click')
+            this.scroll_to_target();
+        })
+            }
+
+
+
+
 
 
     }
@@ -552,92 +625,6 @@ class SyntenyViewer {
             .attr("fill",  () => {return _this.settings.type == 'ancestral' ? this.scale_color_hog(hog[this.color_accessor_hog]) : 'gray' })
             .style("stroke-width", 1)
             .style("stroke", "white" )
-            /*
-            .on("mouseover", function(e){
-                if (_this.settings.type == 'ancestral'){
-                    var level_api = _this.settings.level ? '?level=' + _this.settings.level : ''
-
-                    $.getJSON("/api/hog/"+ hog.id +"/" + level_api, function(data){
-
-
-                    _this.Tooltip.style("opacity", 1).style("display", 'block')
-                        .html(`<b>ID:</b> ${hog.id}  <br> 
-                            <b>Description:</b>  ${data[0].description} <br> 
-                            <b>Completeness:</b> ${hog.completeness_score.toFixed(3)} <br>  
-                            <b># of members:</b> ${hog.nr_members} <br>
-                             <b>GO</b> loading...  `)
-                        .style("left", e.pageX + 12 + "px")
-                        .style("top", e.pageY + 12  + "px")
-
-
-                    $.getJSON( "/api/hog/"+ hog.id +"/gene_ontology/" + level_api, function(data_go){
-
-                        var content = `<b>ID:</b> ${hog.id}  <br> 
-                            <b>Description:</b>  ${data[0].description} <br> 
-                            <b>Completeness:</b> ${hog.completeness_score.toFixed(3)} <br>  
-                            <b># of members:</b> ${hog.nr_members} <br> <hr style="margin-top: 0.3em; margin-bottom: 0.1em"> 
-                            <b>GO annotation</b>  <hr style="margin-top: 0.1em; margin-bottom: 0.2em">   `
-
-                        for (const contentKey in data_go) {
-
-                            var go = data_go[contentKey]
-
-                            content += `<b>${go.GO_term}</b> ${go.name}  <br>  `
-                        }
-
-                        _this.Tooltip.html(content)
-
-                    })
-
-                })
-                }
-                else {
-
-                    $.getJSON("/api/protein/"+ hog.id +"/", function(data){
-
-                    _this.Tooltip.style("opacity", 1).style("display", 'block')
-                        .html(`<b>Id:</b> ${hog.id}  <br> 
-                            <b>External Id:</b>  ${data.canonicalid} <br> 
-                            <b>Sequence length:</b>  ${data.sequence_length} <br> 
-                            <b>Species:</b>  ${data.species.code} <br> 
-                            <b>HOG Id:</b>  ${data.oma_hog_id} <br> 
-                            <b>Oma group:</b>  ${data.oma_group} <br> 
-                             <b>GO</b> loading...  `)
-                        .style("left", e.pageX + 12 + "px")
-                        .style("top", e.pageY + 12  + "px")
-
-
-                    $.getJSON( "/api/protein/"+ hog.id +"/gene_ontology/", function(data_go){
-
-                        var content = `<b>Id:</b> ${hog.id}  <br> 
-                            <b>External Id:</b>  ${data.canonicalid} <br> 
-                            <b>Sequence length:</b>  ${data.sequence_length} <br> 
-                            <b>Species:</b>  ${data.species.code} <br> 
-                            <b>HOG Id:</b>  ${data.oma_hog_id} <br> 
-                            <b>Oma group:</b>  ${data.oma_group} <br> 
-                             
-                             <hr style="margin-top: 0.3em; margin-bottom: 0.1em"> 
-                            <b>GO annotation</b>  <hr style="margin-top: 0.1em; margin-bottom: 0.2em">   `
-
-                        for (const contentKey in data_go) {
-
-                            var go = data_go[contentKey]
-
-                            content += `<b>${go.GO_term}</b> ${go.name}  <br>  `
-                        }
-
-                        _this.Tooltip.html(content)
-
-                    })
-
-                })
-                }
-            })
-            .on("mouseleave", function () {
-                _this.Tooltip.style("opacity", 0).style("display", 'none')
-
-            })
-             */
             .on("click", (event, node) => {
 
                 if(this.selected_element){
@@ -761,6 +748,11 @@ class SyntenyViewer {
                 this.render_tooltip(event.pageX + 12, event.pageY + 12, menu)
 
             })
+
+        if (this.settings.target == hog.id){
+            this.target_element = r.node();
+            r.attr("fill", "mediumseagreen" )
+        }
 
         if (edge) {
 
@@ -1003,6 +995,13 @@ class SyntenyViewer {
             this.settings[settingsKey] = settings[settingsKey];
         }
 
+        if (this.settings.target != 'null'  || this.settings.error_target != 'null'){
+            this.settings.margin.top  = this.settings.margin.top * 1.5;
+        }
+
+        console.log(this.settings.target ,this.settings.error_target)
+
+
     }
 
     // UTILS
@@ -1089,6 +1088,16 @@ class SyntenyViewer {
         stat.mean_no_out =  (array_not_out.reduce((a, b) => a + b, 0) / array_not_out.length) || 0;
 
         return stat
+
+    }
+
+    scroll_to_target(){
+
+        if (this.target_element){
+
+            console.log(this.target_element)
+                this.target_element.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+            }
 
     }
 

@@ -324,7 +324,18 @@ data-toolbar="#toolbar"
     </tr>
   </thead>
 </table>
-                `
+         `
+
+                    for (const data_enrichmentKey in data_enrichment) {
+
+                        data_enrichment[data_enrichmentKey]['fold_change'] = data_enrichment[data_enrichmentKey]['fold_change'].toFixed(3);
+                        data_enrichment[data_enrichmentKey]['p_uncorrected'] = data_enrichment[data_enrichmentKey]['p_uncorrected'].toExponential(5);
+                        data_enrichment[data_enrichmentKey]['p_bonferroni'] = data_enrichment[data_enrichmentKey]['p_bonferroni'].toExponential(5);
+                        data_enrichment[data_enrichmentKey]['p_fdr_bh'] = data_enrichment[data_enrichmentKey]['p_fdr_bh'].toExponential(5);
+                        data_enrichment[data_enrichmentKey]['study_proportion'] = data_enrichment[data_enrichmentKey]['study_proportion'].toFixed(5);
+                        data_enrichment[data_enrichmentKey]['population_proportion'] = data_enrichment[data_enrichmentKey]['population_proportion'].toFixed(5);
+
+                    }
 
                     var $table = $('#table')
                     $table.bootstrapTable({data: data_enrichment})
