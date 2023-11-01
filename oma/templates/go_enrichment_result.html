@@ -5,7 +5,7 @@
 
 {% block title %}Go Enrichment Analysis Result{% endblock %}
 {% block content %}
-
+    <script src="{% static "js/tablehooks.js" %}"></script>
     <script src="{% static "js/bootstrap-table.min.js" %}"></script>
     <script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
      <script src="{% static "js/tableExport.min.js" %}"></script>
@@ -153,7 +153,6 @@
                     .attr("x1", marginLeft)
                     .attr("x2", width - marginRight));
 
-            console.log(svg.node())
 
             // Add the scatterplot circel.
             svg.selectAll(".circle_" + div_id)
@@ -323,7 +322,7 @@ data-toolbar="#toolbar"
         <th data-field="population_ratio" data-sortable="true"> population_ratio </th>
         <th data-field="population_proportion" data-sortable="true"> population_proportion </th>
         <th data-field="fold_change" data-sortable="true"> fold_change </th>
-        <th data-field="study_entries_with_go_term" data-sortable="true"> study_entries_with_go_term </th>
+        <th data-field="study_entries_with_go_term" data-sortable="true" data-formatter="tablehooks.HOGlist_GOE"> study_entries_with_go_term </th>
     </tr>
   </thead>
 </table>

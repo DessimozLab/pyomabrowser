@@ -70,6 +70,22 @@
         return "<b>" + value.species + "</b> " + value.strain;
     };
 
+    exports.HOGlist_GOE = function(value, row) {
+
+        var s = Math.random();
+
+        if (value.split(',').length < 5){
+            return value
+        }
+
+        var str = "<span> " + value.split(',').slice(0,4).join(',')  + "</span>" +
+            " <span id='span_more_hog" + s +"' style='display: none'> " + value.split(',').slice(5).join(',')  + " </span> " +
+            "<br> " +
+            "<b id='more_hogs" + s +"' style='cursor:pointer;' onclick='document.getElementById(\"span_more_hog" + s + "\").style.display = \"block\";document.getElementById(\"more_hogs" + s + "\").style.display = \"none\" '>(Show All...)</b>";
+
+        return str
+    };
+
     exports.format_sciname_from_genome_object = function(genome){
         return exports.format_sciname(split_sciname_into_species_and_strain(genome.species))
     };
