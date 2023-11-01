@@ -366,7 +366,7 @@ data-toolbar="#toolbar"
             if (jqxhr.hasOwnProperty('responseJSON')){
                 message = jqxhr.responseJSON.message;
                 analysis_title = jqxhr.responseJSON.type.split(' ').map(w => w[0].toUpperCase() + w.substring(1).toLowerCase()).join();
-                analysis_title += " GO Enrichment analysis: "+jsonData['name'];
+                analysis_title += " GO Enrichment analysis: "+jqxhr.responseJSON['name'];
 
             }
             document.getElementById('datum').innerHTML = `<h3>${analysis_title}</h3> <p>Something wrong happened: ${message}</p>`;
