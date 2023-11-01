@@ -176,9 +176,12 @@
                 .style("stroke", "white")
                 .on("mouseover", function (event, d) {
 
+                    d.ic = d.ic.toFixed(3);
+                    d.p_fdr_bh = d.p_fdr_bh.toExponential(5);
+
                     tool.style("opacity", .9);
                     tool.html(` <strong>ID:</strong> ${d.GO_ID} <br> <strong>Name:</strong> ${ d.name} <br>
-<strong>Information Content:</strong> ${d.ic} <br> <strong>p-value:</strong> ${d.p_fdr_bh} <br> `)
+<strong>Information Content:</strong> ${d.ic} <br> <strong>p-value:</strong> ${d.p_fdr_bh}  <br> `)
 
                         .style("left", (event.pageX + 12) + "px")
                         .style("top", (event.pageY + 12) + "px");
