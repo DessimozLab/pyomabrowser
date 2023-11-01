@@ -7,9 +7,9 @@
 <strong>OMA Browser Archive</strong>: the download files form the previous releases of OMA are still available:
 </p>
 <div class="text-center">
-	<ol class="breadcrumb ">
+	<ol class="breadcrumb">
         {%  for rel in all_releases %}
-		    <li>{% if rel.id != release.id %}<a href="{% url 'archives' rel.id %}">{% endif %}{{ rel.name }}/</a></li>
+		    <li>{% if rel.id != release.id %}<a href="{% url 'archives' rel.id %}">{% endif %}{{ rel.name }}</a> </li> {% if not forloop.last %}/{% endif %}
         {%  endfor %}
 	</ol>
 </div>
