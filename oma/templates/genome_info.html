@@ -24,7 +24,11 @@
 <table class="table">
      {% if genome.common_name %} <tr><td>Common name:</td><td>{{ genome.common_name }}</td></tr> {% endif %}
      {% if genome.uniprot_species_code %} <tr><td>UniProt identifier:</td><td>{{ genome.uniprot_species_code }}</td></tr> {% endif %}
-     {% if genome.ncbi_taxon_id %}  <tr><td>{% if genome.ncbi_taxon_id > 0 %}NCBI {% endif %}Taxonomy ID:</td><td>{{ genome.ncbi_taxon_id }}</td></tr> {% endif %}
+     {% if genome.ncbi_taxon_id %}  <tr><td>{% if genome.ncbi_taxon_id > 0 %}NCBI {% endif %}Taxonomy ID:</td>
+        {% if genome.ncbi_taxon_id > 0 %}<td><a class="external" target="_blank" href="https://uniprot.org/taxonomy/{{ genome.ncbi_taxon_id }}/">{{ genome.ncbi_taxon_id }}</a></td>
+        {% else %}<td><a href="{% url "taxmap" genome.ncbi_taxon_id %}">{{ genome.ncbi_taxon_id }}</a></td>
+        {% endif %}
+     </tr> {% endif %}
      {% if genome.release %} <tr><td>DB Release:</td><td>{{ genome.release }}</td></tr> {% endif %}
      {% if genome.url %} <tr><td>Information</td><td>{{ genome.url | urlize }}</td></tr> {% endif %}
      {% if genome.nr_genes %} <tr><td>Number of genes:</td><td>{{ genome.nr_genes }}</td></tr> {% endif %}
