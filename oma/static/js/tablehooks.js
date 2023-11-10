@@ -264,7 +264,11 @@
 
     exports.format_group_aux = function(value, row) {
         if (row.type === "HOG") {
-             return " <b>Root Level: </b> " +  row.level;
+            let aux = "<b>Root Level:</b> "+row.level;
+            if (row.query_jaccard_similarity !== undefined){
+                aux += "<br/>Similarity with outdated query HOG id: "+ row.query_jaccard_similarity.toFixed(3);
+            }
+            return aux;
         }
         else if (row.type === "OMA_Group") {
             return "<b>Fingerprint: </b> " +  row.fingerprint;
