@@ -132,8 +132,8 @@
 
 
 
-        if (json.taxid){
-                all_names.push({label: json.name, value: json.taxid })
+        if (json.name){
+                all_names.push({label: json.name, value: json.name })
             }
 
         if(json.children != null)
@@ -160,7 +160,6 @@
     $.getJSON( "/All/genomes.json", function( jsonData ) {
         recursiveScan(jsonData)
 
-        console.log(all_names)
 
         var species_auto_options = {
             source: all_names,

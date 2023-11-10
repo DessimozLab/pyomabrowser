@@ -902,11 +902,11 @@
                 "enrichment"
             ],
             "hashes": [
-                "sha256:29674a89bd6c1d382b2a17c9b99786a37c1e2ac24972d039eda7da42efeaa34b",
-                "sha256:9cf7eca7bf60f55d1f8021ce7007c41ca481a4ae783a10fb48208da577ea6f41"
+                "sha256:00578d81065e48e4e64e875ae264a66a40780674db1d79d671cb0df510cabca6",
+                "sha256:71f5cf8d7fff9b2e4aa9085f73bb575aff57d6d53c767ccea8b7f4c9eed37c3b"
             ],
             "index": "pypi",
-            "version": "==0.13.0"
+            "version": "==0.13.1"
         },
         "pyopa": {
             "hashes": [

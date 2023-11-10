@@ -79,8 +79,11 @@ class JsonModelMixin(object):
                         if isinstance(obj, (classmethod, types.MethodType)):
                             obj = obj()
                 except AttributeError as e:
-                    logger.warning('cannot access ' + accessor + ": " + str(e))
-                    raise
+                    if hasattr(self, "ignore_missing_field") and self.ignore_missing_field:
+                        continue
+                    else:
+                        logger.warning("cannot access %s: %s", accessor, e)
+                        raise
                 obj_dict[name] = obj
             yield obj_dict
 
@@ -2584,11 +2587,11 @@ def token_search(request):
                                 a = str(entry_aligned.alignment, 'utf-8')
                             e.sequence = {"sequence": entry_aligned.sequence, 'align': a}
 
-                logger.debug(" post-entry w/o json: {}sec".format(time.time()-t2))
+                logger.debug(" post-entry w/o json: %fsec", time.time()-t2)
                 t2 = time.time()
                 # Build json data for table
                 context['data_entry'] = json.dumps(EntrySearchJson().as_json(entries))
-                logger.debug(" post-entry json: {}sec".format(time.time() - t2))
+                logger.debug(" post-entry json: %fsec", time.time() - t2)
 
             # Prepare groups results
             if G:
@@ -2598,11 +2601,9 @@ def token_search(request):
 
                 for group in G.values():
                     if isinstance(group, models.HOG):
-                        group.fingerprint = None
                         group.type = 'HOG'
                         hogs.append(group)
                     elif isinstance(group, models.OmaGroup):
-                        group.level = 'God' # todo ?
                         group.type = 'OMA_Group'
                         ogs.append(group)
                     else:
@@ -2616,10 +2617,10 @@ def token_search(request):
                 if len(hogs) == 0 and len(ogs) == 1 and not T['HOG'] and not T['Protein'] and not T['wildcard']:
                     return redirect('omagroup_members', ogs[0].group_nbr)
 
-                logger.debug(" post-group w/o json: {}sec".format(time.time() - t2))
+                logger.debug(" post-group w/o json: %fsec", time.time() - t2)
                 t2 = time.time()
                 context['data_group'] = json.dumps(HOGSearchJson().as_json(hogs) + OGSearchJson().as_json(ogs))
-                logger.debug(" post-group json: {}sec".format(time.time() - t2))
+                logger.debug(" post-group json: %fsec", time.time() - t2)
 
             # Prepare genomes results
             if S or A:
@@ -2730,17 +2731,19 @@ class GenomesJson(GenomeModelJsonTableMixin, View):
 
 
 class HOGSearchJson(JsonModelMixin):
-
+    ignore_missing_field = True
     json_fields = {
         'hog_id': 'group_nr',
         'level': 'level',
         'nr_member_genes': 'size',
         'type': 'type',
-        'fingerprint': 'fingerprint'}
+        'fingerprint': 'fingerprint',
+        'query_jaccard_similarity': None,
+    }
 
 
 class OGSearchJson(JsonModelMixin):
-
+    ignore_missing_field = True
     json_fields = {
         'group_nbr': 'group_nr',
         'level': 'level',
