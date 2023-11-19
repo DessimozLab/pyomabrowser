@@ -1678,6 +1678,17 @@ class HOGSynteny(HOGBase, TemplateView):
         return context
 
 
+class Matreex(HOGBase, TemplateView):
+    template_name = "matreex.html"
+
+    def get_context_data(self, hog_id, **kwargs):
+        context = super(Matreex, self).get_context_data(hog_id, **kwargs)
+
+        context.update({'tab': 'matreex', 'hog_id': hog_id,'lineage_link_name': 'matreex' })
+
+        return context
+
+
 @method_decorator(never_cache, name='dispatch')
 class HOGsMSA(AsyncMsaMixin, HOGBase, TemplateView):
     template_name = "hog_msa.html"

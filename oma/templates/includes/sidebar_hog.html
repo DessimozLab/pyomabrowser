@@ -97,6 +97,14 @@
 
           </li>
 
+     <li class="{% if tab == 'matreex' %} active selected {%endif%}">
+                <a href="{% if level != None %}  {% url 'matreex' hog_id  level%}  {%else%}  {% url 'matreex' hog_id  %} {%endif%} " >
+                <span> Matreex © </span>
+
+            </a>
+
+        </li>
+
 
     </ul>
 
