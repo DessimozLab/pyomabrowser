@@ -37,6 +37,7 @@ import time
 import glob
 import json
 import numpy
+import pyham
 
 from . import tasks
 from . import utils
@@ -1688,6 +1689,54 @@ class Matreex(HOGBase, TemplateView):
 
         return context
 
+class MatreexJson(HOGBase, JsonModelMixin, View):
+
+    def get(self, request, hog_id,  *args, **kwargs):
+        context = self.get_context_data(hog_id, **kwargs)
+
+        try:
+
+            fam = context['hog'].fam
+            orthoxml = utils.db.get_orthoxml(fam)
+            ham = pyham.Ham(utils.tax.newick(), orthoxml, use_internal_name=True, orthoXML_as_string=True)
+
+            print(ham)
+
+
+            """
+             root_hogs = ham.get_list_top_level_hogs()
+            assert len(root_hogs) == 1, 'orthoXML is either empty or contains >1 root-HOG'
+            rh = ham.get_list_top_level_hogs()[0]
+
+            # convert the pyham HOG object into a formatted ete3.Tree
+            fam_gt = ham2gt(rh, rh.hog_id.split('_')[0])
+
+            return fam_gt
+
+
+
+
+            if fam_id not in fam_id2gt:
+                fam_id2gt[fam_id] = fam_gt
+
+
+            if len(gt.get_leaves()) <= max_gene_nr and gt.HOG not in gt_ids:
+                print(hog_id)
+                _rename_gene_tree(cl, gt, family_name)
+                _add_lost_subtrees(gt, root_st)
+                gene_trees.append(gt)
+                gt_ids.add(gt.HOG)
+                
+            """
+
+
+
+        except ValueError as e:
+            raise Http404(e.message)
+
+        data = {"test": orthoxml.decode()}
+
+        return JsonResponse(data, safe=False)
 
 @method_decorator(never_cache, name='dispatch')
 class HOGsMSA(AsyncMsaMixin, HOGBase, TemplateView):

@@ -13,21 +13,20 @@ function defaultDict() {
 
 class Hog_placement {
 
-    constructor(div_id, data_species_tree, data_gene_tree) {
+    constructor(div_id, data_species_tree) {
 
         // Settings
         this.cell_size = 30;
         this.gutter = 20;
         this.species_tree_width = 400;
         this.genes_tree_width = 400;
-        this.gene_label_width = 240;
+        this.gene_label_width = 300;
         this.species_label_width = 170;
-        this.gene_name_width = 200;
+        this.gene_name_width = 300;
         this.species_name_width = 200;
         this.start_collapse_depth= 10;
         this.max_depth = 0;
         this.show_image = true;
-
 
         // UI
         this.node_color = "#999"
@@ -35,7 +34,8 @@ class Hog_placement {
 
         // Data
         this.data_species_tree = data_species_tree
-        this.data_gene_tree = data_gene_tree
+        this.data_gene_tree_list = []
+        this.data_gene_tree = null;
 
         // Container
         this.container_id = div_id
@@ -47,12 +47,38 @@ class Hog_placement {
     start(){
 
         // Build species tree hierarchy
-        this.hierarchy_species = d3.hierarchy(this.data_species_tree );
+         this.hierarchy_species = d3.hierarchy(this.data_species_tree );
+
+        var rootlist = this.data_gene_tree_list.map(hog => hog.taxon)
+
+        var pruned_species_tree = null;
+        var depth_off_set = null
+        var found = null
+        this.hierarchy_species.each(function(d) {
+
+            if ( rootlist.includes(d.data.name) && !found ){
+                pruned_species_tree = d;
+                pruned_species_tree.parent = null
+                depth_off_set = d.depth
+                found= true
+            }
+
+        })
+
+        this.hierarchy_species = pruned_species_tree ? pruned_species_tree : this.hierarchy_species
+
         this.cols = this.hierarchy_species.leaves().reverse()
 
         this.max_depth = 0
+
         this.hierarchy_species.each(d => {
 
+            d.depth = d.depth - depth_off_set;
+
+            if (!d.data.description){d.data.description = ''}
+            if (!d.data.taxon){d.data.taxon = d.data.name}
+            if (!d.data.color){d.data.color = ''}
+            if (!d.data.matrix_color){d.data.matrix_color = ''}
 
             if (d.depth > this.max_depth){
                 this.max_depth = d.depth
@@ -102,7 +128,7 @@ class Hog_placement {
         this.render()
 
         var millis = Date.now() - start;
-        console.log(`seconds  render = ${(millis / 1000)}`);
+        //console.log(`seconds  render = ${(millis / 1000)}`);
 
 
         var start = Date.now();
@@ -110,7 +136,7 @@ class Hog_placement {
         this.start_collapse()
 
         var millis = Date.now() - start;
-        console.log(`seconds  collapse = ${(millis / 1000)}`);
+        //console.log(`seconds  collapse = ${(millis / 1000)}`);
 
 
         // Add action to button
@@ -140,7 +166,7 @@ class Hog_placement {
 
         d3.select("#show_species").on("click", () => {
             this.show_image = document.getElementById('show_species').checked;
-            console.log(this.show_image)
+            //console.log(this.show_image)
         })
 
 
@@ -178,9 +204,55 @@ class Hog_placement {
 
     }
 
+    augment_species_tree(mapping){
+
+        function traverse(o) {
+
+            if ('name' in o && o['name']  in mapping){
+
+                var e = mapping[o['name']];
+
+                for (const eKey in e) {
+                    o[eKey] = e[eKey]
+
+                }
+            }
+
+            for (var i in o) {
+
+                if (!!o[i] && typeof(o[i])=="object") {
+
+                    traverse(o[i]);
+                }
+            }
+        }
+
+        traverse(this.data_species_tree)
+
+    }
+
+    add_tree(tree){
+        this.data_gene_tree_list.push(tree)
+        this.build_data_gene_tree()
+    }
+
+    build_data_gene_tree() { // TODO
+
+        this.data_gene_tree = {
+            "HOG": "ROOT",
+            "taxon": "Vertebrata",
+            "event": "duplication",
+            "description": "Vertebrata",
+            "children": this.data_gene_tree_list
+        }
+
+    }
+
     //
 
     create_svg(){
+
+        d3.select("svg").remove();
 
         const zoom = d3.zoom()
             .on('zoom', (event) => {
@@ -192,7 +264,6 @@ class Hog_placement {
             .append("svg")
             .call(zoom)
 
-        //this.G =  this.SVG.attr("width", this.container_size.width)
         this.G =  this.SVG.attr("width", this.container_size.width)
             .attr("height", this.container_size.height)
             .append("g")
@@ -328,7 +399,7 @@ class Hog_placement {
 
 
         var millis = Date.now() - start;
-        console.log(`seconds  tree = ${(millis / 1000)}`);
+        //console.log(`seconds  tree = ${(millis / 1000)}`);
 
 
         var start = Date.now();
@@ -337,7 +408,7 @@ class Hog_placement {
         this.render_matrix()
 
         var millis = Date.now() - start;
-        console.log(`seconds  matrix = ${(millis / 1000)}`);
+        //console.log(`seconds  matrix = ${(millis / 1000)}`);
 
 
         var start = Date.now();
@@ -349,7 +420,7 @@ class Hog_placement {
         this.render_genes_names()
 
         var millis = Date.now() - start;
-        console.log(`seconds  label = ${(millis / 1000)}`);
+        //console.log(`seconds  label = ${(millis / 1000)}`);
 
 
         this.colLabels = this.G.append('g').attr('id', 'g_species_labels')
@@ -364,7 +435,7 @@ class Hog_placement {
 
 
         var millis = Date.now() - start;
-        console.log(`seconds  cal pos = ${(millis / 1000)}`);
+        //console.log(`seconds  cal pos = ${(millis / 1000)}`);
 
 
 
@@ -400,7 +471,7 @@ class Hog_placement {
             .attr("cx", d => d.y )
             .attr("cy", d => d.x )
             .attr("fill", d => d.children || d._children ? "#555" : "#999")
-            .attr("r", 6)
+            .attr("r", 8)
             /*
             .on("mouseover", (d,i) => {this.handleMouseOver(d.target)})
             .on("mouseout", (d,i) => this.handleMouseOut(d.target))
@@ -619,10 +690,11 @@ class Hog_placement {
             .selectAll("circle")
             .data(this.root_genes.descendants())
             .join("circle")
+            .filter(function(d) {return d.parent })
             .attr("cx", d => d.y )
             .attr("cy", d => d.x )
             .attr("fill", d => d.children || d._children ? "#555" : "#999")
-            .attr("r", d=>  d.parent && (d.data.event == 'hgt' || d.data.event == 'duplication' || (d.data.event == 'loss'  && d.parent.data.event != 'loss' ))  ? 1 : 6)
+            .attr("r", d=>  d.parent && (d.data.event == 'hgt' || d.data.event == 'duplication' || (d.data.event == 'loss'  && d.parent.data.event != 'loss' ))  ? 1 : 8)
             .on("click", (event, d) => {
 
                 if (d.data.event != 'loss'){
@@ -636,7 +708,7 @@ class Hog_placement {
             .data(this.root_genes.descendants())
             .join("g")
             .append("text")
-            .filter(function(d) {return d.data.event == 'duplication' })
+            .filter(function(d) {return d.data.event == 'duplication' && d.parent })
             .text(function (d) {return "\u2731"
             })
             .attr('fill', '#555')
@@ -683,16 +755,16 @@ class Hog_placement {
                     .data(this.root_genes.descendants())
                     .join("g")
                     .append("text")
-                    .filter(function(d) { return (d._children || d.children) && d.data.event != 'loss'})
+                    .filter(function(d) { return (d._children || d.children) && d.data.event != 'loss' && d.parent})
                     .text(function (d) {
                         if (d._children){ return "\u002B";}
                         else if (d.children){ return "\u2212";}
 
                     })
                     .attr('fill', 'white')
-                    .attr("x", d => d.y-5)
-                    .attr("y", d => d.x +4)
-                    .style("text-anchor", "start")
+                    .attr("x", d => d.y)
+                    .attr("y", d => d.x + 5)
+                    .style("text-anchor", "middle")
                     .on("click", (event, d) => {
                         this.collapse(d)
                     })
