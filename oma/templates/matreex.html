@@ -123,159 +123,129 @@
 </div>
 
 
-            <script>
-
-
-            var get_json_hog = function(id){
-
-                var _data;
-                $.ajax({
-                async: false,
-                url: "http://localhost/oma/hog/"+id+"/matreex/json/",
-                success: function(data){
-                    _data = data
-                }
-                });
-
-                return _data
-
+<script>
+    var get_json_hog = function(id){
+        var _data;
+        $.ajax({
+            async: false,
+            url: "/oma/hog/"+id+"/matreex/json/",
+            success: function(data){
+                _data = data
             }
+        });
+        return _data
+    }
 
-            // add list element similar hogs
+    // add list element similar hogs
 
-            var target_hog = "{{hog_id}}";
-            console.log(target_hog)
+    var target_hog = "{{hog_id}}";
+    console.log(target_hog)
 
-            $.ajax({
-                async: true,
-                url: "/api/hog/"+target_hog+"/similar_profile_hogs/?max_results=10",
-                success: function(data_sim) {
+    $.ajax({
+        async: true,
+        url: "/api/hog/"+target_hog+"/similar_profile_hogs/?max_results=10",
+        success: function(data_sim) {
 
-                    var ul = document.getElementById('ul_similar_hog')
+            var ul = document.getElementById('ul_similar_hog')
 
-                    for (const dataSimKey in data_sim['similar_profile_hogs']) {
+            for (const dataSimKey in data_sim['similar_profile_hogs']) {
+                var x = data_sim['similar_profile_hogs'][dataSimKey]
 
-                        var x = data_sim['similar_profile_hogs'][dataSimKey]
-
-                        $.ajax({
-                            async: false,
-                            url: "/api/hog/" + x.hog_id+ "/",
-                            success: function (hoggy) {
-
-
-                                var li = document.createElement('li');
-                                li.setAttribute('class', 'item');
-                                li.innerHTML = hoggy[0].hog_id + " - " + hoggy[0].description
-                                li.style.cursor = 'pointer'
-
-                                ul.appendChild(li);
-
-                                li.addEventListener('click', () => { // add a click event listener
+                $.ajax({
+                    async: false,
+                    url: "/api/hog/" + x.hog_id+ "/",
+                    success: function (hoggy) {
 
 
-                                $.ajax({
+                        var li = document.createElement('li');
+                        li.setAttribute('class', 'item');
+                        li.innerHTML = hoggy[0].hog_id + " - " + hoggy[0].description
+                        li.style.cursor = 'pointer'
+
+                        ul.appendChild(li);
+
+                        li.addEventListener('click', () => { // add a click event listener
+                            $.ajax({
                                 async: false,
-                                url: "http://localhost/oma/hog/" + hoggy[0].hog_id + "/matreex/json/",
+                                url: "/oma/hog/" + hoggy[0].hog_id + "/matreex/json/",
                                 success: function(data){
-
-
                                     viewer.add_tree(data)
                                     viewer.start();
                                 }
-                                });
-
-
-
-
-
-                                });
-
-
-                            }
-
-
-                        })
+                            });
+                        });
 
                     }
 
-                }
 
-            });
-
-            // Species tree
-
-                var full_species_tree;
-
-            $.ajax({
-                async: false,
-                url: "/All/genomes.json",
-                success: function(data){
-                    console.log(data)
-                    full_species_tree = data
-                }
-            });
-
-            // Init viewer
-            var viewer = new Hog_placement("container-viewer", full_species_tree);
-
-            // Species tree
-            var mapping = {
-                    "Tetrapoda": {
-                        "description": "Mapping 1",
-                    "color": "#467",
-                    "matrix_color": "#467"
-                    },
-                "Euteleosteomorpha": {
-                        "description": "Mapping 2",
-                    "color": "#edf",
-                    "matrix_color": "#edf"
-                    },
-                "Salmo trutta": {
-                        "description": "Mapping sp",
-                    "color": "green",
-                    "matrix_color": "green"
-                    }
+                });
             }
-            viewer.augment_species_tree(mapping)
 
-            // Add and render data
-            var _data;
-                $.ajax({
-                async: false,
-                url: "http://localhost/oma/hog/"+target_hog+"/matreex/json/", // todo
-                success: function(data){
-                    console.log(data)
-                    _data = data
-                }
-                });
+        }
+    });
 
-            viewer.add_tree(_data)
-            viewer.start();
+    // Species tree
+    var full_species_tree;
+    $.ajax({
+        async: false,
+        url: "/All/genomes.json",
+        success: function(data){
+            console.log(data)
+            full_species_tree = data
+        }
+    });
+
+    // Init viewer
+    var viewer = new Hog_placement("container-viewer", full_species_tree);
+
+    // Species tree
+    var mapping = {
+        "Tetrapoda": {
+            "description": "Mapping 1",
+            "color": "#467",
+            "matrix_color": "#467"
+        },
+        "Euteleosteomorpha": {
+            "description": "Mapping 2",
+            "color": "#edf",
+            "matrix_color": "#edf"
+        },
+        "Salmo trutta": {
+                "description": "Mapping sp",
+            "color": "green",
+            "matrix_color": "green"
+        }
+    }
+    viewer.augment_species_tree(mapping)
+
+    // Add and render data
+    var _data;
+        $.ajax({
+            async: false,
+            url: "/oma/hog/"+target_hog+"/matreex/json/", // todo
+            success: function(data){
+                console.log(data)
+                _data = data
+            }
+        });
+
+    viewer.add_tree(_data)
+    viewer.start();
 
 
-            // add addHOg button behavior
-            document.getElementById('AddHog').addEventListener('click', () => { // add a click event listener
+    // add addHOg button behavior
+    document.getElementById('AddHog').addEventListener('click', () => { // add a click event listener
+        $.ajax({
+            async: false,
+            url: "/oma/hog/" + document.getElementById('input_add_hog').value+ "/matreex/json/", // todo
+            success: function(data){
+                //viewer.add_tree(JSON.parse(gt1))
+                viewer.add_tree(data)
+                viewer.start();
+            }
+        });
+    });
 
-
-
-
-                $.ajax({
-                async: false,
-                url: "http://localhost/oma/hog/" + document.getElementById('input_add_hog').value+ "/matreex/json/", // todo
-                success: function(data){
-
-                    //viewer.add_tree(JSON.parse(gt1))
-                    viewer.add_tree(data)
-                    viewer.start();
-                }
-                });
-
-
-
-
-
-            });
-
-            </script>
+</script>
 
 {% endblock contentTab %}
