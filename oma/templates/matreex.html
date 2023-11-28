@@ -161,9 +161,7 @@
                         li.setAttribute('class', 'item');
                         li.innerHTML = hoggy[0].hog_id + " - " + hoggy[0].description
                         li.style.cursor = 'pointer'
-
                         ul.appendChild(li);
-
                         li.addEventListener('click', () => { // add a click event listener
                             $.ajax({
                                 async: false,
@@ -171,6 +169,10 @@
                                 success: function(data){
                                     viewer.add_tree(data)
                                     viewer.start();
+                                    ul.removeChild(li);
+                                },
+                                error: function(jqXHR, statusText){
+                                    alert("could not load data for HOG "+hoggy[0].hog_id);
                                 }
                             });
                         });
@@ -200,21 +202,11 @@
 
     // Species tree
     var mapping = {
-        "Tetrapoda": {
-            "description": "Mapping 1",
+        "{{ level }}": {
+            "description": "Reference level: {{ level }}",
             "color": "#467",
             "matrix_color": "#467"
         },
-        "Euteleosteomorpha": {
-            "description": "Mapping 2",
-            "color": "#edf",
-            "matrix_color": "#edf"
-        },
-        "Salmo trutta": {
-                "description": "Mapping sp",
-            "color": "green",
-            "matrix_color": "green"
-        }
     }
     viewer.augment_species_tree(mapping)
 
