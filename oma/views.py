@@ -37,6 +37,8 @@ import time
 import glob
 import json
 import numpy
+import pyham
+import ete3
 
 from . import tasks
 from . import utils
@@ -1258,7 +1260,7 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
         context = super(AncestralGenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
         if level is not None and level not in context['supported_ancestral_levels']:
-            raise Http404(f"Reference level {f} is not valid as comparison with {species_id}")
+            raise Http404(f"Reference level {level} is not valid as comparison with {species_id}")
 
         parent_level = None
         for parent_level in context['lineage']:
@@ -1680,6 +1682,145 @@ class HOGSynteny(HOGBase, TemplateView):
                         'lineage_link_name': 'hog_synteny'}) #synteny': ancestral_synteny,'neighbor': neigh})
         return context
 
+
+class Matreex(HOGBase, TemplateView):
+    template_name = "matreex.html"
+
+    def get_context_data(self, hog_id, **kwargs):
+        context = super(Matreex, self).get_context_data(hog_id, **kwargs)
+
+        context.update({'tab': 'matreex', 'hog_id': hog_id, 'lineage_link_name': 'matreex'})
+
+        return context
+
+
+class MatreexJson(HOGBase, JsonModelMixin, View):
+
+    '''
+
+    TO ADRIAN:
+
+        ham2gt and gt2json are copy paste from matreex.py code
+        I got problem with the newick tree from tax.newick() so i had to take the one from current release on browser (same problem on the original matreex code)
+        I have not integrated the  _rename_gene_tree(cl, gt, family_name) and _add_lost_subtrees(gt, root_st) because not sure if needed
+
+    '''
+
+    def get(self, request, hog_id,  *args, **kwargs):
+        context = self.get_context_data(hog_id, **kwargs)
+
+        try:
+            def ham2gt(node, hog_id):
+                """
+                Convert the pyham HOG object into a formatted ete3.Tree.
+                """
+                tree = ete3.Tree()
+
+                if isinstance(node, pyham.Gene):
+                    taxon = node.genome.name
+                    tree.add_features(
+                        event='',
+                        gene=node.prot_id,
+                        copy_nr='1'
+                    )
+                else:
+                    if isinstance(node, pyham.DuplicationNode):
+
+                        # taxon is MRCA of children
+                        taxon = node.children[0].genome.taxon.get_common_ancestor(
+                            [x.genome.taxon for x in node.children[1:]]).name
+                        tree.add_features(
+                            event='duplication'
+                        )
+                    else:
+                        taxon = node.genome.name
+                        hog_id = node.hog_id.split('_')[0] if node.hog_id else hog_id
+                        tree.add_features(
+                            event='speciation'
+                        )
+
+                #  common features between leaves, speciations and duplications
+                tree.add_features(
+                    HOG=hog_id,
+                    HOG_name=hog_id,
+                    taxon=taxon,
+                    description=taxon,
+                    color=''
+                )
+                # human friendly tree name
+                tree.name = '{}_{}'.format(hog_id, taxon)
+
+                if not isinstance(node, pyham.Gene):
+                    # differentiate when descendant duplications or not
+                    if hasattr(node, 'duplications'):
+
+                        # because speciation children include children of child duplications, we consider only the one that did not arose by duplication
+                        children = [x for x in node.children if not x.arose_by_duplication] + node.duplications
+
+                    else:
+                        children = node.children
+
+                    for c in children:
+                        tree.add_child(ham2gt(c, hog_id))
+
+                return tree
+
+            def gt2json(node):
+                """
+                Convert ete3.Tree gene tree into json.
+                """
+                event = node.event
+
+                # pick name before id
+                hog_name = node.HOG_name if node.HOG_name else node.HOG
+
+                # leaf
+                if node.is_leaf():
+                    js = {
+                        'HOG': hog_name,
+                        'taxon': node.taxon,
+                        'event': event if event == 'loss' else '',
+                        'gene': node.gene,
+                        'profile': {node.taxon: node.copy_nr},
+                        'description': node.taxon
+                    }
+
+                else:
+                    js = {
+                        'HOG': hog_name,
+                        'taxon': node.taxon,
+                        'event': event,
+                        'description': node.taxon
+                    }
+
+                if node.color:
+                    js['color'] = node.color
+
+                if not node.is_leaf():
+                    js["children"] = []
+                    for c in node.children:
+                        js["children"].append(gt2json(c))
+
+                return js
+
+            fam = context['hog'].fam
+            orthoxml = utils.db.get_orthoxml(fam)
+            newick = os.path.join(os.getenv("DARWIN_BROWSERDATA_PATH"), "speciestree.nwk")
+            ham = pyham.Ham(newick, orthoxml.decode(), tree_format="newick", use_internal_name=True, orthoXML_as_string=True, species_resolve_mode="OMA")
+
+            rh = ham.get_list_top_level_hogs()[0]
+
+            fam_gt = ham2gt(rh, rh.hog_id.split('_')[0])
+
+            j = gt2json(fam_gt)
+
+            j['HOG'] = context['hog'].keyword
+
+        except ValueError as e:
+            raise Http404(e.message)
+
+
+        return JsonResponse(j, safe=False)
 
 @method_decorator(never_cache, name='dispatch')
 class HOGsMSA(AsyncMsaMixin, HOGBase, TemplateView):

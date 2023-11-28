@@ -1,0 +1,243 @@
+{% extends  "base_hog.html" %}
+{% load staticfiles %}
+
+{% block title %}Matreex viewer for {{ fam.id }}{% endblock %}
+
+
+{% block js_hook %}
+
+<script src="{% static 'matreex/d3_6_7.js' %}" charset="UTF-8"></script>
+<script src="{% static 'matreex/matreex.js' %}" charset="UTF-8"></script>
+
+{% endblock js_hook %}
+
+
+{% block contentTab %}
+
+            <style>
+
+
+            .oma-details-content{
+                height: 100%;
+                width: 100%;
+                text-align: center;
+
+            }
+
+                #container-viewer{
+                    width: 100%;
+                    height: 100%;
+                }
+
+                .but_cont{
+
+                    top: 8px;
+                    right:8px;
+                }
+
+                .but{
+                    cursor: pointer;
+                    border-radius: 4px;
+                    border:none;
+
+
+                }
+
+                div.tooltip {
+                    position: absolute;
+                    text-align: center;
+                    width: 200px;
+                    height: 28px;
+                    padding: 2px;
+                    background-color: white;
+                    font: 12px sans-serif;
+                    pointer-events: none;}
+
+                #ul_similar_hog > li:hover {
+  text-decoration: underline;
+}
+
+            </style>
+
+    <div id="container-viewer" >
+
+                <div class="but_cont float-right">
+
+
+                    <label for="quantity">Auto collapse at depth</label>
+                    <input type="number" id="quantity" name="quantity" min="0" max="100" style="margin-right: 20px">
+
+                    <input type="checkbox" id="show_species" checked>
+                    <label for="show_species" style="margin-right: 20px">Show species thumbnail</label>
+
+                    <button class="but btn-sm" id="collapseB"> Collapse All</button>
+                    <button class="but btn-sm" id="smartB"> Smart collapse</button>
+                    <button class="but btn-sm btn-primary" data-toggle="modal" data-target="#matreex_add_hog"> AddHOG</button>
+
+
+                </div>
+
+    </div>
+
+    <!-- Modal -->
+<div class="modal fade" id="matreex_add_hog" tabindex="-1" role="dialog" aria-labelledby="matreex_add_hogLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="matreex_add_hogLabel">Add additional HOG</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+          <div class="input-group mb-3" style="width: 400px;margin: auto;">
+  <input type="text" class="form-control" id="input_add_hog" placeholder="HOG:C0606207.2b.3b.3b" aria-label="" aria-describedby="basic-addon2">
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" type="button" id="AddHog">Add</button>
+  </div>
+</div>
+
+          <br>
+
+          <div class="text-center">
+               <b> Similar HOGs</b>
+              <small style="margin-bottom: 12px; display: block">(click to add) </small>
+
+          </div>
+
+
+
+          <ul style="list-style-type: none;padding-inline-start: 0" id="ul_similar_hog">
+
+
+
+          </ul>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    var get_json_hog = function(id){
+        var _data;
+        $.ajax({
+            async: false,
+            url: "/oma/hog/"+id+"/matreex/json/",
+            success: function(data){
+                _data = data
+            }
+        });
+        return _data
+    }
+
+    // add list element similar hogs
+
+    var target_hog = "{{hog_id}}";
+    console.log(target_hog)
+
+    $.ajax({
+        async: true,
+        url: "/api/hog/"+target_hog+"/similar_profile_hogs/?max_results=10",
+        success: function(data_sim) {
+
+            var ul = document.getElementById('ul_similar_hog')
+
+            for (const dataSimKey in data_sim['similar_profile_hogs']) {
+                var x = data_sim['similar_profile_hogs'][dataSimKey]
+
+                $.ajax({
+                    async: false,
+                    url: "/api/hog/" + x.hog_id+ "/",
+                    success: function (hoggy) {
+
+
+                        var li = document.createElement('li');
+                        li.setAttribute('class', 'item');
+                        li.innerHTML = hoggy[0].hog_id + " - " + hoggy[0].description
+                        li.style.cursor = 'pointer'
+                        ul.appendChild(li);
+                        li.addEventListener('click', () => { // add a click event listener
+                            $.ajax({
+                                async: false,
+                                url: "/oma/hog/" + hoggy[0].hog_id + "/matreex/json/",
+                                success: function(data){
+                                    viewer.add_tree(data)
+                                    viewer.start();
+                                    ul.removeChild(li);
+                                },
+                                error: function(jqXHR, statusText){
+                                    alert("could not load data for HOG "+hoggy[0].hog_id);
+                                }
+                            });
+                        });
+
+                    }
+
+
+                });
+            }
+
+        }
+    });
+
+    // Species tree
+    var full_species_tree;
+    $.ajax({
+        async: false,
+        url: "/All/genomes.json",
+        success: function(data){
+            console.log(data)
+            full_species_tree = data
+        }
+    });
+
+    // Init viewer
+    var viewer = new Hog_placement("container-viewer", full_species_tree);
+
+    // Species tree
+    var mapping = {
+        "{{ level }}": {
+            "description": "Reference level: {{ level }}",
+            "color": "#467",
+            "matrix_color": "#467"
+        },
+    }
+    viewer.augment_species_tree(mapping)
+
+    // Add and render data
+    var _data;
+        $.ajax({
+            async: false,
+            url: "/oma/hog/"+target_hog+"/matreex/json/", // todo
+            success: function(data){
+                console.log(data)
+                _data = data
+            }
+        });
+
+    viewer.add_tree(_data)
+    viewer.start();
+
+
+    // add addHOg button behavior
+    document.getElementById('AddHog').addEventListener('click', () => { // add a click event listener
+        $.ajax({
+            async: false,
+            url: "/oma/hog/" + document.getElementById('input_add_hog').value+ "/matreex/json/", // todo
+            success: function(data){
+                //viewer.add_tree(JSON.parse(gt1))
+                viewer.add_tree(data)
+                viewer.start();
+            }
+        });
+    });
+
+</script>
+
+{% endblock contentTab %}

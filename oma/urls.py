@@ -69,6 +69,11 @@ urlpatterns = [
     url(r'^hog/(?P<hog_id>[\w.:]+)/orthoxml/$', views.HOGsOrthoXMLView.as_view(), name="hogs_orthoxml"),
     url(r'^hog/(?P<hog_id>[\w.:]+)/orthoxml/(?P<file_type>[\w.:]+)/$', views.HOGsOrthoXMLView.as_view(), name="hogs_orthoxml"),
 
+    url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/matreex/$', views.Matreex.as_view(), name='matreex'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/matreex/json/$', views.MatreexJson.as_view(), name='matreex-json'),
+    url(r'^hog/(?P<hog_id>[\w.:]+)/matreex/$', views.Matreex.as_view(), name='matreex'),
+
+
     url(r'^hog/(?P<hog_id>[\w.:]+)/(?P<level>[A-Za-z0-9 _.()-/:]+)/info/$', views.HOGInfo.as_view(),
         name='hog_info'),
     url(r'^hog/(?P<hog_id>[\w.:]+)/info/$', views.HOGInfo.as_view(), name='hog_info'),
