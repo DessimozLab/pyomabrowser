@@ -253,7 +253,7 @@ class SyntenyViewer {
         
    
         <div class='ui_div'> 
-            <p class='ui_text' ><b>Coloring</b></p>
+            <p class='ui_text' ><b>Thickness</b></p>
             <span><select name="" id="selectecol">
             <option value="Weight">Weight</option>
             </select></span>

@@ -18,7 +18,11 @@
              onclick="window.location='{% url 'pairs' entry.query_id %}'" {%endif%}>
             <a href="{% url 'pairs' entry.query_id %}" {% if tab == 'orthologs' %}data-toggle="collapse" aria-expanded="true" data-target="#filterOrthologs"{%endif%}>
 
-                <span>Orthologs
+                <span>
+
+
+<i class="fa fa-info-circle" style="    transform: rotate(0deg) !important;" onclick="location.href='{% url 'uses' %}#orthotable';"></i>
+                    Orthologs
 
                 {% if nr_vps %}
 
