@@ -14,9 +14,10 @@
 
     <ul class="gene-orthology">
 
-        <li class="{% if tab == 'orthologs' %} active selected {%endif%}" {% if tab != 'orthologs' %}
-             onclick="window.location='{% url 'pairs' entry.query_id %}'" {%endif%}>
-            <a href="{% url 'pairs' entry.query_id %}" {% if tab == 'orthologs' %}data-toggle="collapse" aria-expanded="true" data-target="#filterOrthologs"{%endif%}>
+        <li class="{% if tab == 'orthologs' %} active selected {%endif%}"
+                {% if tab != 'orthologs' %} onclick="window.location='{% url 'pairs' entry.query_id %}'" {%endif%}
+        >
+            <a href="{% url 'pairs' entry.query_id %}" {% if tab == 'orthologs' %}data-toggle="collapse" aria-expanded="false" data-target="#filterOrthologs"{%endif%}>
 
                 <span>
 
@@ -34,7 +35,7 @@
                 {%endif%}
             </a>
 {% if nr_vps >= 1 %}
-            <div id="filterOrthologs" class=" submenu collapse {% if tab == 'orthologs'%} show {%endif%}">
+            <div id="filterOrthologs" class=" submenu collapse "> <!-- {% if tab == 'orthologs'%} show {%endif%} -->
 
 
                 {% if tab == 'orthologs' %}
