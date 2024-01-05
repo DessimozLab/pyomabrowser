@@ -202,6 +202,22 @@ class Hog_placement {
 
         })
 
+        // initial zoom
+
+        var svg_s = this.SVG.node().getBoundingClientRect()
+        var G_s = this.G.node().getBoundingClientRect()
+
+        var ratio_zoom = (svg_s.width - 50) / G_s.width;
+        var y_offset = ((svg_s.height * ratio_zoom) -  (G_s.height * ratio_zoom)) / 2;
+        y_offset += (svg_s.height * ratio_zoom)/2;
+
+        var t = d3.zoomIdentity.translate(25,y_offset ).scale(ratio_zoom);
+
+        this.SVG.call(this.zoom.transform, t);
+
+
+
+
     }
 
     augment_species_tree(mapping){
@@ -254,7 +270,7 @@ class Hog_placement {
 
         d3.select("svg").remove();
 
-        const zoom = d3.zoom()
+        this.zoom = d3.zoom()
             .on('zoom', (event) => {
                 this.G .attr('transform', event.transform);
             })
@@ -262,7 +278,7 @@ class Hog_placement {
 
         this.SVG = this.d3_container
             .append("svg")
-            .call(zoom)
+            .call(this.zoom)
 
         this.G =  this.SVG.attr("width", this.container_size.width)
             .attr("height", this.container_size.height)
@@ -1510,4 +1526,11 @@ class Hog_placement {
         this.data_matrix = this.build_matrix2()
         this.render()
     }
+
+    update_svg_size_responsive(){
+        this.container_size = this.d3_container.node().getBoundingClientRect()
+        this.start();
+    }
+
 }
+

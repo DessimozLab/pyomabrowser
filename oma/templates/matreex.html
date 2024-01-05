@@ -139,7 +139,6 @@
     // add list element similar hogs
 
     var target_hog = "{{hog_id}}";
-    console.log(target_hog)
 
     $.ajax({
         async: true,
@@ -237,6 +236,37 @@
             }
         });
     });
+
+
+    // add responsive svg if left side panel clicked
+
+    document.getElementById('toggle-me').addEventListener('click', () => {
+
+        setTimeout(function() {
+            viewer.update_svg_size_responsive();
+        }, 100);
+
+    });
+
+    function debounce(func){
+      var timer;
+      return function(event){
+        if(timer) clearTimeout(timer);
+        timer = setTimeout(func,100,event);
+      };
+    }
+
+    window.addEventListener("resize",debounce(function(e){
+        viewer.update_svg_size_responsive();
+    }));
+
+
+
+
+
+
+
+
 
 </script>
 
