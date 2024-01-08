@@ -191,7 +191,6 @@
         async: false,
         url: "/All/genomes.json",
         success: function(data){
-            console.log(data)
             full_species_tree = data
         }
     });
@@ -215,7 +214,6 @@
             async: false,
             url: "/oma/hog/"+target_hog+"/matreex/json/", // todo
             success: function(data){
-                console.log(data)
                 _data = data
             }
         });

@@ -362,10 +362,10 @@ class Hog_placement {
         var x_gt = this.gutter
         var x_gn = x_gt + parseInt(size_gene.width) + this.gutter
         var x_m = x_gn + parseInt(size_rowname.width) + this.gutter
-        var x_gl = x_m + parseInt(size_matrix.width) + this.gutter
+        var x_gl = x_m + parseInt(size_matrix.width) + this.gutter + this.cell_size
 
         // Y anchor
-        var y_main = size_species.width + 3 * this.gutter + parseInt(size_colname.width)
+        var y_main = size_species.width + 3 * this.gutter + parseInt(size_colname.width) + this.cell_size
         var y_gt = -this.hierarchy_genes.leaves()[0].x + this.cell_size/2  + y_main
 
 
@@ -387,8 +387,8 @@ class Hog_placement {
 
         // VERTICAL
         this.g_stg.attr("transform", " rotate (90) translate ("+ x_gt  +", " + y_offset_t + ") ");
-        this.colName.attr("transform", " rotate (90)  translate ("+ x_offset_sn  +", " + (-x_gl  )+ ")  ");
-        this.colLabels.attr("transform", " rotate (90)  translate ("+ x_offset_sl   +", " + (-x_gl   ) + ")  ");
+        this.colName.attr("transform", " rotate (90)  translate ("+ x_offset_sn  +", " + (-x_gl   )+ ")  ");
+        this.colLabels.attr("transform", " rotate (90)  translate ("+ x_offset_sl   +", " + (-x_gl     ) + ")  ");
 
     }
 
@@ -516,17 +516,6 @@ class Hog_placement {
                 this.collapse_gene_by_species_name(d)
             })
 
-        /*
-            .on("mouseover", (d,i) => {
-                console.log(d)
-                this.handleMouseOver(d.target)})
-            .on("mouseout", (d,i) => this.handleMouseOut(d.target))
-
-            */
-
-
-
-
     }
 
     render_matrix(){
@@ -589,16 +578,28 @@ class Hog_placement {
                 return this.scaleText(d.value)
             })
 
-
-
-        this.overlay = this.g_mg.append('rect')
-            .attr("transform", "translate(30,30)")
-            .attr("class", 'crosshair')
-            .attr("width", this.root_species.leaves().length * this.cell_size)
-            .attr("height", this.root_genes.leaves().length * this.cell_size)
+        this.g_mg.selectAll("g")
+            .data(this.data_matrix, function (d) {
+                return d.row + ":" + d.col;
+            })
+            .join("rect")
+            .filter(d => {return d.value !== ''})
+            .attr("x",  (d) => {
+                return d.col * this.cell_size;
+            })
+            .attr("y",  (d) =>  {
+                return d.row * this.cell_size;
+            })
+            .attr("width", this.cell_size)
+            .attr("height", this.cell_size)
             .style('fill', 'white')
+             .attr('cursor', 'pointer')
             .attr('opacity', '0')
-            .on("mousemove", (event) => {
+            .on("click", (event, node) => {
+                console.log(node.hog_id.includes('HOG:') ? node.hog_id : node.HOG_name , node.taxon_name);
+            })
+            .on("mouseover", (event, d) => {
+
                 var xy = d3.pointer(event);
 
 
@@ -613,10 +614,10 @@ class Hog_placement {
 
                 this.g_mg.append("line")
                     .attr("class", "vline")
-                    .attr("x1", xy[0]+ this.cell_size )  //<<== change your code here
-                    .attr("y1", - this.species_name_width )
-                    .attr("x2", xy[0] +this.cell_size)  //<<== and here
-                    .attr("y2", this.root_genes.leaves().length * this.cell_size + this.species_label_width)
+                    .attr("x1", xy[0]   )  //<<== change your code here
+                    .attr("y1", - this.species_name_width - this.cell_size)
+                    .attr("x2", xy[0]  )  //<<== and here
+                    .attr("y2", this.root_genes.leaves().length * this.cell_size + this.species_label_width - this.cell_size)
                     .style("stroke-width", 2)
                     .style("stroke", "grey")
                     .style("fill", "none");
@@ -624,18 +625,18 @@ class Hog_placement {
                 this.g_mg.append("line")
                     .attr("class", "hline")
                     .attr("x1", -this.gene_name_width)  //<<== change your code here
-                    .attr("y1", xy[1] + this.cell_size)
+                    .attr("y1", xy[1]  )
                     .attr("x2", this.root_species.leaves().length * this.cell_size + this.gene_label_width)  //<<== and here
-                    .attr("y2", xy[1]+ this.cell_size)
+                    .attr("y2", xy[1])
                     .style("stroke-width", 2)
                     .style("stroke", "grey")
                     .style("fill", "none");
 
                 this.g_mg.append("line")
                     .attr("class", "hline2")
-                    .attr("x1", xy[0] + 2*this.cell_size)  //<<== change your code here
-                    .attr("y1", xy[1] + this.cell_size)
-                    .attr("x2", xy[0] + 2*this.cell_size)  //<<== and here
+                    .attr("x1", xy[0] + this.cell_size)  //<<== change your code here
+                    .attr("y1", xy[1] - this.cell_size)
+                    .attr("x2", xy[0] + this.cell_size)  //<<== and here
                     .attr("y2", xy[1] )
                     .style("stroke-width", 2)
                     .style("stroke", "grey")
@@ -644,17 +645,15 @@ class Hog_placement {
                 this.g_mg.append("line")
                     .attr("class", "vline2")
                     .attr("x1", xy[0] + this.cell_size)  //<<== change your code here
-                    .attr("x2", xy[0] + 2*this.cell_size)
-                    .attr("y1", xy[1] )
-                    .attr("y2", xy[1] )
+                    .attr("x2", xy[0]  )
+                    .attr("y1", xy[1] - this.cell_size)
+                    .attr("y2", xy[1] - this.cell_size)
                     .style("stroke-width", 2)
                     .style("stroke", "grey")
                     .style("fill", "none");
             })
-            .on("mouseout", (event) => {
-
-
-                d3.select('.vline').remove()
+            .on("mouseout", (event, d) => {
+                 d3.select('.vline').remove()
                 d3.select('.vline2').remove()
                 d3.select('.hline').remove()
                 d3.select('.hline2').remove()
@@ -814,6 +813,11 @@ class Hog_placement {
     render_genes_names() {
 
         var set_name = function (d) {
+
+            if (d.parent.parent == null){
+                return d.data.HOG_name;
+            }
+
             if (d.parent && (d.data.event == 'loss' || d.parent.data.event == "loss")) {
                 return d.data.taxon
             }
@@ -1049,7 +1053,8 @@ class Hog_placement {
                 if (val!=null) {
                     max = val > max ?  val : max
                     var color = this.cols[c].data.matrix_color ? this.cols[c].data.matrix_color : this.color_cell_default;
-                    data_matrix.push({row: r + 1, col: c + 1, value: val, c: color});
+                    //data_matrix.push({row: r + 1, col: c + 1, value: val, c: color});
+                    data_matrix.push({row: r + 1, col: c + 1, value: val, c: color, hog_id: this.rows[r].data.HOG, taxon_name: this.cols[c].data.taxon});
                     values.push(parseFloat(val));
 
                     val > 0 ? this.cols[c].empty = false : null

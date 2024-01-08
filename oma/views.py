@@ -1771,13 +1771,10 @@ class MatreexJson(HOGBase, JsonModelMixin, View):
                 """
                 event = node.event
 
-                # pick name before id
-                hog_name = node.HOG_name if node.HOG_name else node.HOG
-
                 # leaf
                 if node.is_leaf():
                     js = {
-                        'HOG': hog_name,
+                        'HOG': node.HOG,
                         'taxon': node.taxon,
                         'event': event if event == 'loss' else '',
                         'gene': node.gene,
@@ -1787,11 +1784,16 @@ class MatreexJson(HOGBase, JsonModelMixin, View):
 
                 else:
                     js = {
-                        'HOG': hog_name,
+                        'HOG': node.HOG,
                         'taxon': node.taxon,
                         'event': event,
                         'description': node.taxon
                     }
+
+                    if node.HOG_name:
+                        js['HOG_name'] = node.HOG_name
+                    else:
+                        js['HOG_name'] = ''
 
                 if node.color:
                     js['color'] = node.color
@@ -1804,8 +1806,9 @@ class MatreexJson(HOGBase, JsonModelMixin, View):
                 return js
 
             fam = context['hog'].fam
-            orthoxml = utils.db.get_orthoxml(fam)
+            orthoxml = utils.db.get_orthoxml(fam, augmented=True)
             newick = os.path.join(os.getenv("DARWIN_BROWSERDATA_PATH"), "speciestree.nwk")
+
             ham = pyham.Ham(newick, orthoxml.decode(), tree_format="newick", use_internal_name=True, orthoXML_as_string=True, species_resolve_mode="OMA")
 
             rh = ham.get_list_top_level_hogs()[0]
@@ -1814,7 +1817,7 @@ class MatreexJson(HOGBase, JsonModelMixin, View):
 
             j = gt2json(fam_gt)
 
-            j['HOG'] = context['hog'].keyword
+            j['HOG_name'] = context['hog'].keyword
 
         except ValueError as e:
             raise Http404(e.message)
