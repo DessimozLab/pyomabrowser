@@ -1569,7 +1569,9 @@ class HOGviewer(HOGBase, TemplateView):
         context = super(HOGviewer, self).get_context_data(hog_id, **kwargs)
         one_entry = next(utils.db.iter_members_of_hog_id(context['hog'].hog_id))
 
-        context.update({'tab': 'iham',
+        context.update({
+            'start_opened_at' : self.request.GET.get('start_opened_at', None) ,
+            'tab': 'iham',
                         'entry': one_entry,
                         'lineage_link_name': 'hog_viewer',
                         })

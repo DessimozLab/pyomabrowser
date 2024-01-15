@@ -46,6 +46,8 @@ class Hog_placement {
 
     start(){
 
+        d3.select(".tooltip").remove()
+
         // Build species tree hierarchy
          this.hierarchy_species = d3.hierarchy(this.data_species_tree );
 
@@ -91,6 +93,7 @@ class Hog_placement {
 
         // Build gene tree hierarchy
         this.hierarchy_genes = d3.hierarchy(this.data_gene_tree);
+
         this.rows = this.hierarchy_genes.leaves()
 
         // Build matrix
@@ -248,8 +251,50 @@ class Hog_placement {
     }
 
     add_tree(tree){
-        this.data_gene_tree_list.push(tree)
+
+        var tree_filtered = this.remove_single_level(tree);
+
+        this.data_gene_tree_list.push(tree_filtered)
         this.build_data_gene_tree()
+    }
+
+    remove_single_level(o) {
+
+        if(o["children"]){
+
+            var to_remove = [];
+
+            for (var c in o["children"] ) {
+
+                var child = o["children"][c]
+
+                child = this.remove_single_level(child)
+
+                if (child["children"] && child["children"].length == 1){
+
+                    to_remove.push(child);
+
+                }
+
+        }
+
+            for (const toRemoveKey in to_remove) {
+
+                var tr = to_remove[toRemoveKey];
+
+                 o["children"].push(tr["children"][0])
+
+                    var index = o["children"].indexOf(tr);
+                    if (index > -1) {
+                        o["children"].splice(index, 1);
+                    }
+
+            }
+
+            }
+
+        return o
+
     }
 
     build_data_gene_tree() { // TODO
@@ -283,6 +328,7 @@ class Hog_placement {
         this.G =  this.SVG.attr("width", this.container_size.width)
             .attr("height", this.container_size.height)
             .append("g")
+
 
     }
 
@@ -596,7 +642,11 @@ class Hog_placement {
              .attr('cursor', 'pointer')
             .attr('opacity', '0')
             .on("click", (event, node) => {
-                console.log(node.hog_id.includes('HOG:') ? node.hog_id : node.HOG_name , node.taxon_name);
+
+                var hid = node.hog_id.includes('HOG:') ? node.hog_id : node.HOG_name
+
+                this._click_square(event, hid, node.taxon_name )
+
             })
             .on("mouseover", (event, d) => {
 
@@ -911,7 +961,7 @@ class Hog_placement {
         d3.select(".tooltip").remove()
 
         var div = d3.select("body").append("div")
-            .attr("class", "tooltip")
+            .attr("class", "tooltip tooltip_img")
             .style("opacity", 0);
 
         this.colName.selectAll(".colnameg")
@@ -1535,6 +1585,94 @@ class Hog_placement {
     update_svg_size_responsive(){
         this.container_size = this.d3_container.node().getBoundingClientRect()
         this.start();
+    }
+
+     render_tooltip(x, y, menu) {
+
+         d3.select(".tooltip").remove()
+
+         this.Tooltip = this.d3_container.append("div") //this.d3_container.append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "1px")
+            .style("border-radius", "4px")
+            .style("padding", "8px")
+            .style("position", "absolute")
+            .style("font-size", '16px')
+            .style("z-index", '900')
+
+
+        this.Tooltip.style("opacity", 1).style("display", 'block')
+            .style("left", x + 12 + "px")
+            .style("top", y + 12 + "px")
+
+        this.Tooltip.html('')
+
+        var gg = this.Tooltip.selectAll('menu_item')
+            .data(menu)
+            .enter().append('text')
+            .style('text-align', 'center')
+            .style('display', 'block')
+            .style('cursor', (d) => {
+                return d.action ? 'pointer' : 'auto'
+            })
+            .style("font-weight", (d,i) => {return i == 0 || d.title === "Close" ? 900 : 400 })
+            .style('font-size', d => {
+                return '12 px';
+            })
+            .html(function (d) {
+                return d.title;
+            })
+            .on('mouseover', function (d) {
+                d3.select(this).style('fill', 'steelblue');
+            })
+            .on('mouseout', function (d) {
+                d3.select(this).style('fill', 'black');
+            })
+            .on('click', function (d, i) {
+                i.action(d);
+            })
+
+
+    }
+
+    _click_square(event, data, level) {
+
+
+         var menu = [];
+
+         var t = {title: data, action: () => {
+                                this.call_back_hog_detail( data,level)
+                            } }
+        menu.push(t)
+
+
+         var tt = {title: '( ' + level +  ' )', action: null}
+        menu.push(tt)
+
+
+
+        var close = {
+            title: 'Close',
+            action: () => {
+                this.close_tooltip()
+            }
+        }
+
+        menu.push(close)
+
+        this.render_tooltip(event.pageX + 12, event.pageY + 12, menu)
+
+            }
+
+    close_tooltip() {
+        this.Tooltip.style("opacity", 0).style("display", 'none')
+    }
+
+    call_back_hog_detail(hog,level){
+
     }
 
 }

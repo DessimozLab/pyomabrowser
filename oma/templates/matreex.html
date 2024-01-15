@@ -43,7 +43,7 @@
 
                 }
 
-                div.tooltip {
+                div.tooltip_img {
                     position: absolute;
                     text-align: center;
                     width: 200px;
@@ -218,8 +218,15 @@
             }
         });
 
+     viewer.call_back_hog_detail = function(hog_id, level){
+                var newUrl="{% url 'hog_viewer' 1234567  %}?start_opened_at=7654321".replace(/1234567/, hog_id).replace(/7654321/, level);
+                window.open(newUrl, "_blank");
+            }
+
     viewer.add_tree(_data)
     viewer.start();
+
+
 
 
     // add addHOg button behavior
