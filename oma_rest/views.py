@@ -438,11 +438,16 @@ class HOGViewSet(PaginationMixin, ViewSet):
                 level = None
                 hog_id = utils.db.format_hogid(utils.db.parse_hog_id(hog_id))
             elif not self._check_level_is_valid(level):
-                raise NotFound('Invalid or unknown level parameter for this HOG')
+                if not self._check_level_less_stringent(level):
+                    raise NotFound('Invalid or unknown level parameter for this HOG')
+                logger.warning("selected level %s is not fully intended to use for HOG queries. Certain things may break. Please report!", level)
         return level, hog_id
 
     def _check_level_is_valid(self, level):
         return level.encode('utf-8') in utils.db.tax.all_hog_levels
+
+    def _check_level_less_stringent(self, level):
+        return level.encode('utf-8') in utils.db.tax.tax_table["Name"]
 
     def _identify_lca_hog_id_from_proteins(self, proteins):
         hog_id = os.path.commonprefix([p.oma_hog for p in proteins])
