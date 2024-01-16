@@ -26,7 +26,7 @@ class LocalSyntenyViewer {
             marginRight: 20,
             marginBottom: 40,
             marginLeft: 40,
-            width_board: document.getElementById(this.div_id).offsetWidth,
+            width_board: Math.max(document.getElementById(this.div_id).offsetWidth, 800) ,
             width_tree: 200,
             width_text: 200,
             // UI TREE
