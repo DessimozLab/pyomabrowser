@@ -1141,7 +1141,8 @@ class LocalSyntenyViewer {
                 }
             }
 
-            if (cptR > cptL) {
+
+            if (cptR - (this.settings.hald_window - contig.linear_synteny.indexOf(focal_element)) > cptL) {
                 contig.linear_synteny = contig.linear_synteny.reverse()
             }
 
