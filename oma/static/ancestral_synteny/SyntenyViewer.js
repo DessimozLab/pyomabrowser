@@ -397,7 +397,7 @@ class SyntenyViewer {
 
         // Create the main svg with zoom
         this.svg = d3.create("svg")
-            .attr("viewBox", [0, 0, this.settings.width, this.settings.height])
+            .attr("viewBox", [0, -50, this.settings.width, this.settings.height])
 
         this._build_interface();
 
