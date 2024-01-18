@@ -399,8 +399,10 @@ class Hog_placement {
 
         //
         var size_gene = g_gene.node().getBBox()
-        var size_species = g_species.node().getBBox()
+        var size_species =  g_species.node().getBBox()
         var size_matrix = g_matrix.node().getBBox()
+        var width_matrix = this.cols.length * this.cell_size;
+
         var size_colname = g_species_names.node().getBBox()
         var size_rowname = g_genes_names.node().getBBox()
 
@@ -408,10 +410,10 @@ class Hog_placement {
         var x_gt = this.gutter
         var x_gn = x_gt + parseInt(size_gene.width) + this.gutter
         var x_m = x_gn + parseInt(size_rowname.width) + this.gutter
-        var x_gl = x_m + parseInt(size_matrix.width) + this.gutter + this.cell_size
+        var x_gl = x_m + parseInt(width_matrix) + this.gutter
 
         // Y anchor
-        var y_main = size_species.width + 3 * this.gutter + parseInt(size_colname.width) + this.cell_size
+        var y_main = size_species.width + 3 * this.gutter + parseInt(size_colname.width)
         var y_gt = -this.hierarchy_genes.leaves()[0].x + this.cell_size/2  + y_main
 
 
@@ -421,14 +423,11 @@ class Hog_placement {
         var x_offset_sl =  x_offset_sn + size_matrix.height + parseInt(size_colname.width) + 2*this.gutter
 
 
-
-
         // HORIZONTAL
-
         this.g_mg.attr("transform", " translate (" + (x_m - 0.5*this.cell_size) +", " + (y_main- this.cell_size) + ") ");
         this.g_gtg.attr("transform", " translate (" + x_gt+", " + y_gt + ") ");
         this.rowName.attr("transform", "translate ("+ x_gn  +", " + y_main + ") ");
-        this.rowLabels.attr("transform", " translate ("+ x_gl  +", " + y_main + ") ");
+        this.rowLabels.attr("transform", " translate ("+ x_gl   +", " + y_main + ") ");
 
 
         // VERTICAL
@@ -653,8 +652,10 @@ class Hog_placement {
                 var xy = d3.pointer(event);
 
 
-                xy[0] = Math.floor((xy[0]/this.cell_size)) * this.cell_size
-                xy[1] = Math.ceil((xy[1]/this.cell_size)) * this.cell_size
+
+                xy[0] = d.col  * this.cell_size
+                xy[1] = (d.row  + 1 ) * this.cell_size
+
 
                 d3.select('.vline').remove()
                 d3.select('.vline2').remove()
@@ -665,7 +666,7 @@ class Hog_placement {
                 this.g_mg.append("line")
                     .attr("class", "vline")
                     .attr("x1", xy[0]   )  //<<== change your code here
-                    .attr("y1", - this.species_name_width - this.cell_size)
+                    .attr("y1", - d3.select("#g_species_names").node().getBBox().width)
                     .attr("x2", xy[0]  )  //<<== and here
                     .attr("y2", this.root_genes.leaves().length * this.cell_size + this.species_label_width - this.cell_size)
                     .style("stroke-width", 2)
