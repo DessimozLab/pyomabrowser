@@ -41,9 +41,6 @@ from collections import Counter
 from rest_framework.decorators import action, api_view
 
 logger = logging.getLogger(__name__)
-print(logger.name)
-logger.warning("this is a test log.")
-
 
 def resolve_protein_from_id_or_raise(id):
     try:
@@ -1033,16 +1030,39 @@ class GenomeViewSet(PaginationMixin, ViewSet):
 
         try:
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
-            prot = []
-            range1 = g.entry_nr_offset + 1
-            range2 = range1 + g.nr_entries
-            for entry_nr in range(range1, range2):
-                prot.append(models.ProteinEntry.from_entry_nr(utils.db, entry_nr))
+            entries = utils.db.all_proteins_of_genome(g.uniprot_species_code)
+            prots = [models.ProteinEntry(utils.db, e) for e in entries]
         except db.UnknownSpecies as e:
             raise NotFound(e)
-        page = self.paginator.paginate_queryset(prot, request)
+        page = self.paginator.paginate_queryset(prots, request)
         serializer = serializers.ProteinEntrySerializer(page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
+
+
+    @action(detail=True)
+    def genes(self, request, genome_id=None):
+        """Retrieve the list of all the genes available for a genome.
+
+        This corresponds to the list of main isoform for genomes with
+        multiple isoforms, or to all the proteins for the others.
+
+        ---
+        parameters:
+          - name: genome_id
+            description: an unique identifier for a genome
+                         - either its ncbi taxon id or the
+                         UniProt species code"""
+
+        try:
+            g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
+            entries = utils.db.main_isoforms(g.uniprot_species_code)
+            prots = [models.ProteinEntry(utils.db, e) for e in entries]
+        except db.UnknownSpecies as e:
+            raise NotFound(e)
+        page = self.paginator.paginate_queryset(prots, request)
+        serializer = serializers.ProteinEntrySerializer(page, many=True, context={'request': request})
+        return self.paginator.get_paginated_response(serializer.data)
+
 
 
 class PairwiseRelationAPIView(PaginationMixin, APIView):
