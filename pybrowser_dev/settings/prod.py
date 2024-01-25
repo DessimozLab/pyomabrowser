@@ -6,13 +6,6 @@ RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_PUBLIC_KEY", "not_specified")
 RECAPTCHA_PRIVATE_KEY = os.getenv("RECAPTCHA_PRIVATE_KEY", "not_specified")
 NOCAPTCHA = True  # using No Captcha reCaptcha
 
-# EMAIL setup. If not specified, defaults to sendmail configuration on webserver
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_PORT = os.getenv("EMAIL_PORT")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.getenv("EMAIL_TLS", True)
-
 
 INSTALLED_APPS.extend([
     'matomo_api_tracking',
