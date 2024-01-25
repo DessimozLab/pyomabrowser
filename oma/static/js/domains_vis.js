@@ -84,16 +84,24 @@
 
         }
 
-
         $.each($(class_of_entries), function (each, value) {
             // Retreive the entry ID
             var entry_id = $(this).attr(attr_name),
                 container = $(this).find('.domain_vis')[0];
-            exports.load_and_visualize_domain(container, entry_id, longest_seq);
+
+            if (entry_id != null || String(entry_id) !== String('null')){
+                exports.load_and_visualize_domain(container, entry_id, longest_seq);
+            }
+
         });
     };
 
     exports.load_and_visualize_domain = function(container, entry_id, longest_seq) {
+
+        if (entry_id === 'null'){
+            return;
+        }
+
         // Grab the domain annotations
         cachedAjaxPromise("/oma/domains/" + entry_id + "/json/")
             .done(function (data)
@@ -221,6 +229,10 @@
     };
 
     exports.get_length = function(entry_id) {
+
+        if (entry_id === 'null' || entry_id == null){
+            return 0;
+        }
 
         var ls2;
         // Grab the domain annotations

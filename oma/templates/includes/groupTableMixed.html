@@ -1,0 +1,406 @@
+{% load staticfiles %}
+
+<table class="table table-hover" id="grpTable"
+               data-show-toggle="false"
+               data-taxon-filter="true" data-url-species-tree="/All/genomes.json"
+               data-show-columns="true" data-search="true" data-show-export="true"
+               data-export-data-type="all"
+               data-pagination="true" data-page-size="25" data-page-list="[10, 25, 50, 100, All]"
+               data-mobile-responsive="true" data-check-on-init="true"
+               data-undefined-text=""
+               data-checkbox-header="true"
+               data-id-field="omaid" data-row-attributes="tablehooks.add_proteinrow_attrs_omaid">
+
+            <thead>
+
+             <tr>
+                <th  data-field="omaid" data-sortable="true" data-formatter="tablehooks.format_vps_link">Protein ID</th>
+                <th  data-field="canonicalid" data-sortable="true" data-formatter="tablehooks.format_xref">Cross reference</th>
+                 <th data-field="hog_id" data-sortable="true"  data-formatter="tablehooks.format_hog_api">HOG ID</th>
+                <th data-field="event" data-sortable="true" >Evolutionary event</th>
+                <th  data-field="chromosome" data-sortable="true" >Chromosome</th>
+                <th  data-field="locus" data-sortable="true" data-formatter="tablehooks.format_locus">Locus</th>
+                <th  data-sortable="false" class="domain_vis">Domain Architectures</th>
+                 <th data-field="species" data-formatter="tablehooks.format_sciname_from_genome_object" data-sortable="false" class="taxinfo_table">Taxon</th>
+             </tr>
+
+            </thead>
+
+
+            <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display:none">
+                Genes not present in selected taxon have been filtered out as per settings.
+                <a  class="alert-link" id='reset_taxon_filter' > Click here to reset.</a>
+            </div>
+
+        </table>
+
+
+ <div id="loader">    {% include "includes/loading.html" %}
+</div>
+
+<!-- D3 and D3 Tooltip -->
+<script src="{% static "js/d3.v3.min.js" %}" type="text/javascript"></script>
+<script src="{% static "js/d3.tip.v0.6.3.js" %}" type="text/javascript"></script>
+
+<!-- Domain Visualisation -->
+<script src="{% static "js/domains_vis.js" %}" type="text/javascript"></script>
+<link href="{% static "css/domains_vis.css" %}" rel="stylesheet" type="text/css" />
+
+<!-- bootstrap-table -->
+<script src="{% static "js/tablehooks.js" %}" type="text/javascript"></script>
+<script src="{% static "js/bootstrap-table.min.js" %}"></script>
+
+<link href="{% static "css/bootstrap-table.min.css" %}" rel="stylesheet" type="text/css"/>
+<script src="{% static "js/bootstrap-table-export.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-mobile.min.js" %}"></script>
+<script src="{% static "js/tableExport.min.js" %}"></script>
+
+<!-- taxon filter import: Core -->
+<script src="{% static "js/tnt.min.js" %}"></script>
+<script src="{% static "js/bootstrap-table-filtertaxon.js" %}"></script>
+<link type="text/css" rel="stylesheet" href="{% static "css/filtertaxon.css" %}"/>
+
+<!-- taxon filter import: phyloIo -->
+<script src="{% static "js/underscore-min.js" %}"></script>
+<script src="{% static "js/treecompare.js" %}"></script>
+<link type="text/css" rel="stylesheet" href="{% static "css/phylotree.css" %}"/>
+<link type="text/css" rel="stylesheet" href="{% static "css/typeaheadjs.css" %}"/>
+<link type="text/css" rel="stylesheet" href="{% static "css/treecompare.css" %}"/>
+
+<!-- taxon filter import: Editable field -->
+<link type="text/css" rel="stylesheet" href="{% static "css/bootstrap-editable.css" %}"/>
+<script src="{% static 'js/bootstrap-editable.js'%}"></script>
+
+<script>
+
+    var data_original;
+var need_apply_filter = true
+
+var hide_column_event = true
+var apply_filter_retained = true;
+var apply_filter_duplicated = true;
+var apply_filter_lost = false;
+var apply_filter_gained = true;
+
+function set_filter_retained(){
+
+         // Get the checkbox
+      var checkBox = document.getElementById("Retained");
+
+      // If the checkbox is checked, display the output text
+      if (checkBox.checked == true){
+        apply_filter_retained = true;
+      } else {
+        apply_filter_retained = false;
+      }
+
+      apply_filter();
+
+
+     }
+function set_filter_gained(){
+
+ // Get the checkbox
+var checkBox = document.getElementById("Gained");
+
+// If the checkbox is checked, display the output text
+if (checkBox.checked == true){
+apply_filter_gained = true;
+} else {
+apply_filter_gained = false;
+}
+
+apply_filter();
+
+
+}
+function set_filter_duplicated(){
+
+ // Get the checkbox
+var checkBox = document.getElementById("Duplicated");
+
+// If the checkbox is checked, display the output text
+if (checkBox.checked == true){
+apply_filter_duplicated = true;
+} else {
+apply_filter_duplicated = false;
+}
+
+apply_filter();
+
+
+}
+function set_filter_lost(){
+
+ // Get the checkbox
+var checkBox = document.getElementById("Lost");
+
+// If the checkbox is checked, display the output text
+if (checkBox.checked == true){
+apply_filter_lost = true;
+} else {
+apply_filter_lost = false;
+}
+
+apply_filter();
+
+
+}
+
+function run_go(){
+
+    if (apply_filter_lost && (apply_filter_retained || apply_filter_duplicated || apply_filter_gained ) ){
+
+        alert("You can't run a go enrichment analysis with lost gene (upper level HOG) and retained/gained/duplicated HOGs. Please adjust the " +
+            "settings in the left sidebar.")
+
+    }
+
+    else{
+
+        var table_data = $("#grpTable").bootstrapTable('getData')
+        let parent_genome = $("#selected_genome_name").text();
+        var input_foreground = Object.keys(table_data).map(key => table_data[key].hog_id).filter(n=>n);
+        var input_name = "Comparison between " + parent_genome + " and {{ genome_name }} of [";
+
+        let events = [];
+        if (apply_filter_gained) events.push("gained");
+        if (apply_filter_duplicated) events.push("duplicated");
+        if (apply_filter_retained) events.push("retained");
+        if (apply_filter_lost) events.push("lost");
+        input_name += events.join(', ') + "]";
+
+        if (apply_filter_lost){
+
+             body = JSON.stringify({
+              foreground: Object.keys(table_data).map(key => table_data[key].hog_id).filter(n=>n),
+              type: 'ancestral',
+              name: input_name,
+              taxlevel: parent_genome ,
+          })
+
+        }
+        else{
+
+             body = JSON.stringify({
+              foreground: Object.keys(table_data).map(key => table_data[key].omaid).filter(n=>n),
+              type: 'extant',
+              name: input_name,
+              taxlevel: "" ,
+          })
+
+
+        }
+
+        console.log(body)
+
+
+
+
+        fetch("/api/enrichment/", {
+          method: "POST",
+          body: body ,
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        })
+          .then((response) => response.json())
+          .then( (json) =>
+          {
+             console.log(json)
+              window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_blank")
+          })
+
+
+    }
+
+}
+
+const apply_filter = function(){
+
+        var filter_parameters = [];
+
+        if (apply_filter_retained){
+            filter_parameters.push("retained")
+        }
+
+        if (apply_filter_duplicated){
+            filter_parameters.push("duplicated")
+        }
+
+        if (apply_filter_lost){
+            filter_parameters.push("lost")
+        }
+
+        if (apply_filter_gained){
+            filter_parameters.push("gained")
+        }
+
+
+        var ids_to_keep = [];
+
+
+
+            for (const element of data_original ) {
+
+                if (!hide_column_event){
+                    if (filter_parameters.includes(element.event)){
+                        ids_to_keep.push(element.hog_id)
+
+                    }
+                }
+
+                else {
+
+
+                  ids_to_keep.push(element.hog_id)
+
+                }
+
+
+
+          }
+
+             if (!hide_column_event){
+                 $('#grpTable').bootstrapTable('filterBy', {hog_id: ids_to_keep, event: filter_parameters} )
+             }
+             else {
+                 $('#grpTable').bootstrapTable('filterBy', {hog_id: ids_to_keep} )
+             }
+
+
+
+}
+
+hide_column_event = false
+
+
+    $.getJSON("{{api_url_protein | safe}}", function (geneData) {
+
+         $.getJSON("{{api_url_hog | safe}}", function (hogData) {
+
+             $("#loader").hide();
+            $("#table_filter").show()
+
+
+             console.log(geneData)
+             console.log(hogData)
+
+             const empty_data_item = {
+                 'canonicalid': '',
+                 'chromosome': null,
+                 'entry_nr': '',
+                 'locus': {'start':  '', 'end':  ''},
+                 'oma_hog_id': null,
+                 'omaid': null,
+                 'species': {'code':  '', 'species':  '', 'genome_url': '', 'taxon_id': ''},
+                 'event' : null,
+                 'hog_id' : null,
+             }
+
+             var lookup = {};
+
+             var dataTable = []
+
+             for (const geneKey in geneData) {
+
+                 // get data from json
+                 let e = geneData[geneKey];
+
+                 // clone empty item
+                 let empty = { ...empty_data_item };
+
+                 // feed it
+                 for (let k in empty){
+                     empty[k] = e[k]
+                 }
+                 empty['hog_id'] = e['oma_hog_id']
+
+
+                 // add it to table
+                 dataTable.push(empty)
+
+                 // add lookup to table element
+                 if (e.oma_hog_id){
+                     lookup[e.oma_hog_id] = empty
+                 }
+
+             }
+
+             for (const hogKey in hogData) {
+
+                 // get data from json
+                 let e = hogData[hogKey]
+
+                 // verify exist
+                 if (e.hog_id in lookup){
+
+                     let item = lookup[e.hog_id]
+                     item.event = e.event
+                 }
+                 else{
+
+                    let empty = { ...empty_data_item };
+                    empty.oma_hog_id = e.hog_id
+                    empty.hog_id = e.hog_id
+                     empty.event = e.event
+
+                     dataTable.push(empty)
+                 }
+
+             }
+
+        var data = dataTable
+
+
+             data_original = data
+
+        const longest_seq = data.reduce(
+                (max, prot) => (prot.sequence_length > max ? prot.sequence_length : max),
+                data[0].sequence_length
+            );
+        var tab = $("#grpTable");
+        var icons = tab.bootstrapTable('getOptions').icons;
+        $.extend(icons, {export: 'fa-download'});
+        tab.bootstrapTable({
+        data : data,
+        reorderableColumns: true,
+        clickToSelect: false,
+        showMultiSort: true,
+        showLoading: true,
+        onPostBody: function () {
+            domains.visualize_all(".protein", longest_seq);
+        },
+        onLoadSuccess: function (data, status, jqXHR) {
+            
+
+            data_original = data
+
+                tab.bootstrapTable('hideLoading');
+
+                if (need_apply_filter){
+                    need_apply_filter = false
+                    apply_filter()
+                }
+        },
+        refreshOptions: {'icons': icons}
+    });
+
+
+
+        apply_filter()
+
+
+
+
+});
+
+         });
+
+
+
+
+
+
+</script>
+

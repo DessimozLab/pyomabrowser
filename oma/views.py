@@ -1037,9 +1037,20 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
     def get_context_data(self, species_id, **kwargs):
         context = super(GenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
+
+
+        parent_level = None
+        for parent_level in context['genome'].lineage:
+            if parent_level in context['supported_ancestral_levels']:
+                break
+
         context.update({'tab': 'genes', 'api_base': 'genome',
-                        'amuse_bouche': '/api/genome/{}/proteins/?&per_page=2500000'.format(species_id),
-                        'api_url': '/api/genome/{}/proteins/?&per_page=25'.format(species_id)})
+                        'genome_name': context['genome'].sciname,
+                        'parent_level' : parent_level,
+                        'api_url_protein': '/api/genome/{}/genes/?per_page=250000'.format(species_id),
+                        'api_url_hog': '/api/hog/?level={}&compare_with={}&per_page=250000'.format(context['genome'].sciname, parent_level)
+                        })
+
         return context
 
 
