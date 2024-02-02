@@ -46,6 +46,12 @@ FASTMAP = {
     "store_files_in_days": 8,
 }
 
+EXPORT_OMA = {
+    "engine": os.getenv("EXPORT_ENGINE", "cluster"),
+    "store_files_in_days": 8,
+    "allall_root": os.getenv("DARWIN_ALLALL_PATH", None)
+}
+
 CELERY_TASK_ROUTES = {
     'oma.tasks.assign_go_function_to_user_sequences': {'queue': 'long'},
     'oma.tasks.compute_msa': {'queue': 'async_web'},
@@ -90,5 +96,9 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 6 * 3600,
     }
 }
+if EXPORT_OMA['engine'] == 'celery':
+    CELERY_TASK_ROUTES['export.tasks.run_export_celery'] = {'queue': 'long'}
+    del CELERY_BEAT_SCHEDULE['task-update-omastandalone-exports']
+
 # for backward compability reasons
 BEAT_SCHEDULE = CELERY_BEAT_SCHEDULE
