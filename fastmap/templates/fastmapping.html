@@ -51,17 +51,6 @@
 (function() {
     'use strict';
 
-    $('[name="map_method"]').change(function () {
-        var end = this.value;
-        if (end == 'st'){
-            $('[name="target"]').parent().parent().show();
-        }
-        else {
-            $('[name="target"]').val("");
-            $('[name="target"]').parent().parent().hide();
-        }
-    });
-
     window.addEventListener('load', function() {
         // Fetch all the forms we want to apply custom Bootstrap validation styles to
         var forms = document.getElementsByClassName('needs-validation');
@@ -81,17 +70,48 @@
         $('[name="target"]').parent().parent().hide();
     }
 
-    $.getJSON( "/All/flatgenomes.json", function( jsonData ) {
-        var all_names = [];
-        $.each( jsonData, function ( id, genome ) {
-            all_names.push({data: genome.id, value: genome.name + ' - '+ genome.id + " (taxid: "+genome.taxid+")"});
-        });
-        $('[name="target"]').autocomplete({
-            lookup: all_names,
-            delay: 200,
-            minLength: 3,
-            onSelect: function(sel){this.value = sel.data;}
-        });
+    var extant_names = [];
+    var ancestral_names = [];
+    $.getJSON( "/All/genomes.json", function( jsonData ) {
+        function recursiveScan(json) {
+            if (json.children != null){
+                ancestral_names.push({label: json.name, value: json.name, data: json.name});
+                for (let i=0; i<json.children.length ; i++){
+                    recursiveScan(json.children[i])
+                }
+            } else {
+                extant_names.push({data: json.id, value: json.name + ' - '+ json.id + " (taxid: "+json.taxid+")"})
+            }
+        }
+        recursiveScan(jsonData);
+    });
+
+    $('[name="map_method"]').change(function () {
+        let end = this.value;
+        let field = $('[name="target"]')
+        if (end === 'st'){
+            field.parent().parent().show();
+            field.autocomplete({
+                lookup: extant_names,
+                delay: 200,
+                minLength: 3,
+                onSelect: function(sel){this.value = sel.data;}
+            });
+        }
+        else if (end === "ht"){
+            field.parent().parent().show();
+            field.autocomplete({
+                lookup: ancestral_names,
+                delay: 200,
+                minLength: 3,
+                onSelect: function(sel){this.value = sel.data;}
+            });
+        }
+        else {
+            field.val("");
+            field.parent().parent().hide();
+            field.autocomplete("destroy");
+        }
     });
 
 })();

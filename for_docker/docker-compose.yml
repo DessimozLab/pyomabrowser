@@ -70,6 +70,10 @@ services:
         source: ${RELEASE_PATH_HOST}
         target: ${RELEASE_PATH}
         read_only: true
+      - type: bind
+        source: ${ALLALL_PATH_HOST}
+        target: ${DARWIN_ALLALL_PATH}
+        read_only: true
     depends_on:
       - broker
       - db
@@ -91,6 +95,10 @@ services:
       - type: bind
         source: ${RELEASE_PATH_HOST}
         target: ${RELEASE_PATH}
+        read_only: true
+      - type: bind
+        source: ${ALLALL_PATH_HOST}
+        target: ${DARWIN_ALLALL_PATH}
         read_only: true
     depends_on:
       - broker

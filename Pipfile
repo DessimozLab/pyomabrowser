@@ -19,6 +19,7 @@ pyham = "*"
 scikit-learn = "*"
 djangorestframework-link-header-pagination = "*"
 django-cors-headers = "*"
+omamer = ">2.0,<3.0"
 pyoma = {ref = "develop", git = "ssh://gitolite@lab.dessimoz.org:2222/pyoma", extras=["enrichment"]}
 zoo = {ref = "master", git = "ssh://gitolite@lab.dessimoz.org:2222/zoo"}
 oma-academy-app = {ref = "master", git = "ssh://gitolite@lab.dessimoz.org:2222/oma-academy"}
