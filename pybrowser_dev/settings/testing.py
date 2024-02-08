@@ -17,4 +17,7 @@ CELERY_TASK_ROUTES.update({
 })
 
 # delete beat scheduler for update-fastmap as not cluster engine used
-del CELERY_BEAT_SCHEDULE['task-update-fastmap']
+try:
+    del CELERY_BEAT_SCHEDULE['task-update-fastmap']
+except KeyError:
+    pass

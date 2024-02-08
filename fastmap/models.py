@@ -14,10 +14,10 @@ class FastMappingJobs(models.Model):
     CLOSEST_HOG = "h"
     CLOSEST_HOG_AT_LEVEL = "ht"
     MAP_METHODS = [
+        (CLOSEST_HOG, "Closest Hierarchical Orthologous Group (HOG)"),
+        # (CLOSEST_HOG_AT_LEVEL, "Closest HOG at a target taxonomic level"),
         (CLOSEST_SEQ, "Closest sequence"),
         (CLOSEST_SEQ_IN_SPECIES, "Closest sequence in target species"),
-        (CLOSEST_HOG, "Closest Hierarchical Orthologous Group (HOG)"),
-        (CLOSEST_HOG_AT_LEVEL, "Closest HOG at a target taxonomic level"),
     ]
 
     # Model fields
