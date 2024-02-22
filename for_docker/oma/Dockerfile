@@ -32,7 +32,10 @@ RUN pipenv requirements > requirements.pipenv.txt
 RUN echo "psycopg2<2.9\nuwsgi" >> requirements.pipenv.txt
 RUN python -m venv /app
 ENV PATH="/app/bin:$PATH"
+
 RUN --mount=type=ssh \
+    --mount=type=secret,id=labgit \
+    . /run/secrets/labgit && \
     pip install -r requirements.pipenv.txt
 
 FROM python:3.10-slim as runtime

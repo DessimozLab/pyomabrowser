@@ -33,9 +33,14 @@ COPY start.omabrowser /bin/start.omabrowser
 COPY entrypoint.sh /bin/entrypoint.sh
 RUN chmod 755 /bin/start.omabrowser /bin/entrypoint.sh
 
-RUN --mount=type=ssh git clone ssh://gitolite@lab.dessimoz.org:2222/browser
-RUN --mount=type=ssh git clone ssh://gitolite@lab.dessimoz.org:2222/OMA
-RUN --mount=type=ssh cd /browser && git pull \
-      && cd /OMA && git pull
+RUN --mount=type=ssh \
+    --mount=type=secret,id=labgit \
+    . /run/secrets/labgit  \
+    && git clone ${LABGIT}/browser \
+    && git clone ${LABGIT}/OMA
+
+RUN --mount=type=ssh \
+    cd /browser && git pull \
+    && cd /OMA && git pull
 
 ENTRYPOINT ["entrypoint.sh", "uwsgi", "--ini", "/etc/oma-uwsgi.conf"]
