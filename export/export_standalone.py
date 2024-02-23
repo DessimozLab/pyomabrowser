@@ -3,6 +3,7 @@ import hashlib
 import io
 import itertools
 import logging
+import shutil
 import subprocess
 import tempfile
 import textwrap
@@ -232,7 +233,15 @@ def build_export_tarball(db:Database, genomes:List[str], outfn, allall:Path, tmp
                 logger.warning("%s does not exist. skipping", src)
                 continue
             dest.parent.mkdir(parents=True, exist_ok=True)
-            os.link(src, dest)
+            try:
+                os.link(src, dest)
+            except OSError as e:
+                if e.errno == 18:
+                    shutil.copy(src, dest)
+                else:
+                    logger.error("Error linking %s to %s: %s", src, dest, e)
+                    raise
+
             vers = dest.parent / (g2 + ".sha2.gz")
             with gzip.open(vers, 'wt') as sha2:
                 sha2.write(f"AssertDatabaseVersionsInSync('{GenomeSums[g1].dbhash}','{GenomeSums[g2].dbhash}'):\n")
