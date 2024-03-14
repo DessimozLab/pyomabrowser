@@ -18,15 +18,18 @@ class Hog_placement {
         // Settings
         this.cell_size = 30;
         this.gutter = 20;
-        this.species_tree_width = 400;
-        this.genes_tree_width = 400;
-        this.gene_label_width = 300;
+        this.species_tree_width = 100;
+        this.genes_tree_width = 100;
+        this.gene_label_width = 100;
         this.species_label_width = 170;
-        this.gene_name_width = 300;
-        this.species_name_width = 200;
+        this.gene_name_width = 100;
+        this.species_name_width = 100;
         this.start_collapse_depth= 10;
         this.max_depth = 0;
         this.show_image = true;
+        this.min_width = 600;
+        this.min_heigth = 600;
+        this.grid = null
 
         // UI
         this.node_color = "#999"
@@ -88,8 +91,8 @@ class Hog_placement {
 
         })
 
-        document.getElementById('quantity').max = this.max_depth;
-        document.getElementById('quantity').value = this.start_collapse_depth;
+        //document.getElementById('quantity').max = this.max_depth;
+        //document.getElementById('quantity').value = this.start_collapse_depth;
 
         // Build gene tree hierarchy
         this.hierarchy_genes = d3.hierarchy(this.data_gene_tree);
@@ -124,7 +127,7 @@ class Hog_placement {
 
         this.create_svg()
 
-        this.add_legend()
+        //this.add_legend()
 
         var start = Date.now();
 
@@ -136,7 +139,7 @@ class Hog_placement {
 
         var start = Date.now();
 
-        this.start_collapse()
+        //this.start_collapse()
 
         var millis = Date.now() - start;
         //console.log(`seconds  collapse = ${(millis / 1000)}`);
@@ -152,7 +155,7 @@ class Hog_placement {
             this.recalibrate_position()
         })
 
-         */
+
         d3.select("#collapseB").on("click", () => {
             this.expandAll()
             this.start_collapse()
@@ -205,21 +208,21 @@ class Hog_placement {
 
         })
 
+
+         */
+
         // initial zoom
 
         var svg_s = this.SVG.node().getBoundingClientRect()
-        var G_s = this.G.node().getBoundingClientRect()
+        var G_s = this.m.node().getBoundingClientRect()
 
-        var ratio_zoom = (svg_s.width - 50) / G_s.width;
+        var ratio_zoom =  this.grid.board_width / G_s.width;
         var y_offset = ((svg_s.height * ratio_zoom) -  (G_s.height * ratio_zoom)) / 2;
         y_offset += (svg_s.height * ratio_zoom)/2;
 
-        var t = d3.zoomIdentity.translate(25,y_offset ).scale(ratio_zoom);
+        var t = d3.zoomIdentity.translate(0,0 ).scale(ratio_zoom);
 
-        this.SVG.call(this.zoom.transform, t);
-
-
-
+        this.SVG.call(this.zoom.transform, t)
 
     }
 
@@ -315,20 +318,13 @@ class Hog_placement {
 
         d3.select("svg").remove();
 
-        this.zoom = d3.zoom()
-            .on('zoom', (event) => {
-                this.G .attr('transform', event.transform);
-            })
-            .scaleExtent([0.1, 1]);
-
         this.SVG = this.d3_container
             .append("svg")
-            .call(this.zoom)
+            //.call(this.zoom)
 
-        this.G =  this.SVG.attr("width", this.container_size.width)
-            .attr("height", this.container_size.height)
+        this.G =  this.SVG.attr("width", Math.max(this.min_width,this.container_size.width))
+            .attr("height", Math.max(this.min_heigth,this.container_size.height))
             .append("g")
-
 
     }
 
@@ -439,6 +435,23 @@ class Hog_placement {
 
     //
 
+    grid_position(){
+
+        this.grid = {
+            'board_width':this.container_size.width - 4 * this.gutter -  this.gene_label_width -  this.gene_name_width - this.genes_tree_width,
+            'board_height':this.container_size.height - 3 * this.gutter -  this.species_tree_width -  this.species_name_width,
+            'startx_st':2*this.gutter + this.gene_name_width + this.genes_tree_width,
+            'starty_st':this.gutter,
+            'startx_gt':this.gutter,
+            'starty_gt': 2*this.gutter + this.species_tree_width + this.species_name_width,
+
+        }
+
+        this.grid.startx_glabel = 3*this.gutter + this.gene_name_width + this.genes_tree_width + this.grid.board_width;
+
+
+    }
+
     render() {
 
         d3.select('#g_species').remove()
@@ -449,28 +462,24 @@ class Hog_placement {
         d3.select('#g_species_labels').remove()
         d3.select('#g_species_names').remove()
 
-        var start = Date.now();
 
+        this.grid_position();
 
-        this.g_stg = this.G.append('g').attr('id', 'g_species')
+        this.render_matrix()
+
         this.render_species_tree()
-
-        this.g_gtg = this.G.append('g').attr('id', 'g_gene')
         this.render_gene_tree()
+        this.render_genes_labels()
+
+        /*
 
 
-        var millis = Date.now() - start;
-        //console.log(`seconds  tree = ${(millis / 1000)}`);
-
-
-        var start = Date.now();
 
         this.g_mg = this.G.append('g').attr('id', 'g_matrix')
         this.render_matrix()
 
         var millis = Date.now() - start;
         //console.log(`seconds  matrix = ${(millis / 1000)}`);
-
 
         var start = Date.now();
 
@@ -492,17 +501,57 @@ class Hog_placement {
 
         var start = Date.now();
 
-        this.recalibrate_position()
+        //this.recalibrate_position()
 
 
         var millis = Date.now() - start;
         //console.log(`seconds  cal pos = ${(millis / 1000)}`);
+
+         */
 
 
 
     }
 
     render_species_tree(){
+
+          // Add a clipPath: everything out of this area won't be drawn.
+      var clip2 = this.SVG.append("defs").append("SVG:clipPath")
+          .attr("id", "clip2")
+          .append("SVG:rect")
+          .attr("width", this.grid.board_width )
+          .attr("height", this.species_tree_width )
+          .attr("x", 0)
+          .attr("y", 0);
+
+
+
+        this.g_stg = this.G.append('g').attr('id', 'g_species').
+        attr("transform", `translate(${this.grid.startx_st}, ${this.grid.starty_st})`)
+        .attr("clip-path", "url(#clip2)")
+
+        this.tree_target = this.g_stg.append('rect')
+             .attr('width', this.m.node().getBoundingClientRect().width)
+                .attr('height', this.species_tree_width)
+                .attr('fill', 'blue')
+                .attr('stroke', 'black')
+                .attr('stroke-width', 1)
+                .attr('opacity', 0.5)
+
+        this.g_stn = this.G.append('g').attr('id', 'g_species_name').
+        attr("transform", `translate(${this.grid.startx_st}, ${this.grid.starty_st + this.species_tree_width})`)
+
+
+        var name = this.g_stn.append('rect')
+            .attr('width', this.grid.board_width)
+                .attr('height', this.species_name_width)
+                .attr('fill', 'white')
+                .attr('stroke', 'black')
+                .attr('stroke-width', 1)
+                .attr('opacity', 0.5)
+
+
+        /*
 
         this.root_species = d3.cluster()
             .nodeSize([this.cell_size, this.species_tree_width / (this.hierarchy_genes.height + 1)])
@@ -537,7 +586,9 @@ class Hog_placement {
             .on("mouseover", (d,i) => {this.handleMouseOver(d.target)})
             .on("mouseout", (d,i) => this.handleMouseOut(d.target))
 
-             */
+
+
+
 
 
         this.g_stg.append("g")
@@ -561,12 +612,55 @@ class Hog_placement {
                 this.collapse_gene_by_species_name(d)
             })
 
+        */
+
     }
 
     render_matrix(){
 
 
-        this.g_mg.selectAll("rect")
+        // Add a clipPath: everything out of this area won't be drawn.
+      var clip = this.SVG.append("defs").append("SVG:clipPath")
+          .attr("id", "clip")
+          .append("SVG:rect")
+          .attr("width", this.grid.board_width )
+          .attr("height", this.grid.board_height )
+          .attr("x", 0)
+          .attr("y", 0);
+
+        this.g_mg = this.G.append('g').attr('id', 'g_matrix').
+        attr("transform", `translate(${this.grid.startx_st}, ${this.grid.starty_gt })`)
+        .attr("clip-path", "url(#clip)")
+
+
+
+         this.m = this.g_mg.append('g')
+            .attr("x", 0)
+            .attr("y", 0)
+             .attr('width', this.grid.board_width)
+                .attr('height', this.grid.board_height)
+
+
+        this.zoom = d3.zoom().on('zoom', (event) => {
+
+
+                // ZOOM AND PAN
+                this.m.attr('transform', event.transform);
+
+                // PAN X
+                this.tree_target.attr('transform', 'translate(' + event.transform.x + ',0) scale(' + event.transform.k + ')' );
+
+                //PAN Y
+                this.gene_target.attr('transform', 'translate(0,' + event.transform.y + ') scale(' + event.transform.k + ')' );
+            })
+
+        this.SVG.call(this.zoom)
+
+
+        console.log(this.data_matrix)
+
+
+        this.m.selectAll("rect")
             .data(this.data_matrix, function (d) {
                 return d.row + ":" + d.col;
             })
@@ -588,7 +682,7 @@ class Hog_placement {
                 return this.color_scale[d.c](d.value)
             })
 
-
+ /*
 
         var valuesText = this.g_mg.selectAll("text")
             .data(this.data_matrix, function (d) {
@@ -711,9 +805,117 @@ class Hog_placement {
 
             })
 
+         */
+
     }
 
     render_gene_tree(){
+
+               // Add a clipPath: everything out of this area won't be drawn.
+      var clip3 = this.SVG.append("defs").append("SVG:clipPath")
+          .attr("id", "clip3")
+          .append("SVG:rect")
+          .attr("width", this.genes_tree_width )
+          .attr("height", this.grid.board_height )
+          .attr("x", 0)
+          .attr("y", 0);
+
+        this.g_gtg = this.G.append('g').attr('id', 'g_gene').
+        attr("transform", `translate(${this.grid.startx_gt}, ${this.grid.starty_gt})`)
+        .attr("clip-path", "url(#clip3)")
+
+
+
+        this.gene_target =  this.g_gtg.append('g')
+             .attr('width',  this.genes_tree_width)
+            .attr("x", 0)
+          .attr("y", 0)
+
+
+            /*
+                .attr('height', this.m.node().getBoundingClientRect().height)
+                .attr('fill', 'steelblue')
+                .attr('stroke', 'black')
+                .attr('stroke-width', 1)
+                .attr('opacity', 0.5)
+
+
+             */
+
+
+
+        this.root_genes = d3.cluster().nodeSize([this.cell_size, this.genes_tree_width/ (this.hierarchy_genes.height + 1)]).separation(() =>  { return 1})(this.hierarchy_genes);
+
+        // annotate whole tree with placement tag
+        // annotate whole tree with losses tag
+        this.root_genes.eachBefore(d => {
+            //if (d.data.placed) {
+            //    d.descendants().forEach(element => {
+            //        element.data.placed = d.data.placed
+            //    });
+            //}
+            if (d.data.event == 'loss') {
+                d.descendants().forEach(element => {
+                    element.data.loss = true
+                });
+
+            }
+
+        })
+
+
+        this.gene_target.selectAll("path")
+            .data(this.root_genes.links())
+            .join("path")
+            .attr("fill", "none")
+            .attr("stroke", (d) => {return d.target.data.color ? d.target.data.color : "#555"})
+            .attr("stroke-opacity", (d) => {return d.target.data.event === 'loss' || d.target.parent.data.event === 'loss'  ? 0.2 : 0.5})
+            .attr("stroke-width", (d) =>{
+                var w = 2 + (d.target._children ? 2*this.dft(d.target).length : 0)
+                return Math.min(this.cell_size/2, w)
+            })
+            .attr("d", d =>{
+                var s = d.target;
+                var d = d.source;
+                return   "M" + s.y + "," + s.x + "L" + d.y + "," + s.x + "L" + d.y + "," + d.x;
+            })
+
+
+        this.gene_target.append("g")
+            .selectAll("circle")
+            .data(this.root_genes.descendants())
+            .join("circle")
+            .filter(function(d) {return d.parent })
+            .attr("cx", d => d.y )
+            .attr("cy", d => d.x )
+            .attr("fill", d => d.children || d._children ? "#555" : "#999")
+            .attr("r", d=>  d.parent && (d.data.event == 'hgt' || d.data.event == 'duplication' || (d.data.event == 'loss'  && d.parent.data.event != 'loss' ))  ? 1 : 8)
+            .on("click", (event, d) => {
+
+                if (d.data.event != 'loss'){
+                    this.collapse(d)
+                }
+
+            })
+
+
+
+
+
+
+        this.g_gtn = this.G.append('g').attr('id', 'g_gene_name').
+        attr("transform", `translate(${this.grid.startx_gt + this.genes_tree_width}, ${this.grid.starty_gt})`)
+
+        this.g_gtn.append('rect')
+             .attr('width',  this.gene_name_width)
+                .attr('height', this.grid.board_height)
+                .attr('fill', 'white')
+                .attr('stroke', 'black')
+                .attr('stroke-width', 1)
+                .attr('opacity', 0.5)
+
+
+        /*
 
         this.root_genes = d3.cluster().nodeSize([this.cell_size, this.genes_tree_width/ (this.hierarchy_genes.height + 1)]).separation(() =>  { return 1})(this.hierarchy_genes);
 
@@ -835,27 +1037,23 @@ class Hog_placement {
                         this.collapse(d)
                     })
 
+         */
+
 
     }
 
     render_genes_labels(){
 
+        this.rowLabels = this.G.append('g').attr('id', 'g_genes_labels').
+        attr("transform", `translate(${this.grid.startx_glabel}, ${this.grid.starty_gt})`)
 
-        this.rowLabels.selectAll(".rowLabelg")
-            .data(this.hierarchy_genes.leaves())
-            .enter()
-            .append("text")
-            .attr("font-weight", (d) => {return d._children ? 700 : 300})
-            .text( (d) => { //d.name or aggregate leaves name
-
-                return d.data.description;
-            })
-
-            .attr("x", 0)
-            .attr("y", (d, i) => {
-                return (i + 1) * this.cell_size -14;
-            })
-            .style("text-anchor", "start")
+        this.rowLabels.append('rect')
+             .attr('width',  this.gene_label_width)
+                .attr('height', this.grid.board_height)
+                .attr('fill', 'white')
+                .attr('stroke', 'black')
+                .attr('stroke-width', 1)
+                .attr('opacity', 0.5)
 
 
 
@@ -1584,7 +1782,7 @@ class Hog_placement {
     }
 
     update_svg_size_responsive(){
-        this.container_size = this.d3_container.node().getBoundingClientRect()
+        this.container_size = this.d3_container.node().getBoundingClientRect();
         this.start();
     }
 
