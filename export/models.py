@@ -15,6 +15,7 @@ class StandaloneExportJobs(models.Model):
     create_time = models.DateTimeField(auto_now=True)
     processing = models.BooleanField(False)
     email = models.EmailField(blank=True)
+    message = models.TextField(blank=True)
     name = models.CharField(max_length=64, blank=True)
 
     def remove_erroneous_or_long_pending(self):

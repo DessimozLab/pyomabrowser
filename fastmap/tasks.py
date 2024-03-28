@@ -1,4 +1,5 @@
 import csv
+import gzip
 import logging
 import os
 import re
@@ -57,6 +58,73 @@ def submit_mapping(job: FastMappingJobs, input_file, map_method=None, target=Non
         job.save()
 
 
+def _closest_sequence_work(input_file, target, output_file):
+    mapper = ClosestSeqMapper(utils.db)
+    with auto_open(output_file, "wt") as fout:
+        csv_writer = csv.writer(fout, dialect="excel-tab")
+        csv_writer.writerow(
+            ["query", "target", "is_main_isoform", "HOG", "OMA_group", "PAM_distance", "Alignment_score"]
+        )
+
+        with auto_open(input_file, "rt") as fin:
+            seqs = Bio.SeqIO.parse(fin, "fasta")
+            it = mapper.imap_sequences(seqs, target_species=target)
+            seen_queries = set([])
+            for map_res in it:
+                if map_res.query in seen_queries:
+                    continue  # we keep just the very best mapping
+                seen_queries.add(map_res.query)
+                if map_res.target.hog_family_nr != 0:
+                    hog_id = utils.db.format_hogid(map_res.target.hog_family_nr)
+                else:
+                    hog_id = "n/a"
+                if map_res.target.oma_group != 0:
+                    oma_grp = "OmaGroup:{}".format(map_res.target.oma_group)
+                else:
+                    oma_grp = "n/a"
+                csv_writer.writerow(
+                    [
+                        map_res.query,
+                        map_res.target.omaid,
+                        map_res.target.entry_nr == map_res.closest_entry_nr,
+                        hog_id,
+                        oma_grp,
+                        map_res.distance,
+                        map_res.score,
+                    ]
+                )
+
+
+def _omamer_mapping_work(input_file, target, res_file_absolute):
+    from subprocess import run
+    res = run(["omamer", "-v"], capture_output=True)
+    if res.returncode != 0:
+        logger.error(res.stderr)
+        raise RuntimeError("OMAmer is not properly installed on the system")
+    if settings.FASTMAP['omamer_db'] is None:
+        raise RuntimeError("OMAmer is not properly configured. missing path to omamer_db")
+
+    cmd = ["omamer", "search", "--db", settings.FASTMAP['omamer_db'], "--query", input_file]
+    if target is not None:
+        n = utils.db.tax.get_taxnode_from_name_or_taxid(target)
+        if len(n) < 1:
+            raise ValueError(f"Invalid target: {target} is not a valid taxonomy level in OMA")
+        target = n[0]['Name'].decode()
+        cmd.extend(["--reference_taxon", target])
+    outfile = res_file_absolute if not res_file_absolute.endswith('.gz') else res_file_absolute[:-3]
+    cmd.extend(["--chunksize", str(4000),
+                "--log_level", "debug" if settings.DEBUG else "info",
+                '--out', outfile])
+    result = run(cmd, capture_output=True)
+    if result.returncode != 0:
+        logger.error("omamer search failed:")
+        logger.error(result.stderr)
+        last_line = result.stderr.splitlines()[-1]
+        raise RuntimeError("omamer search failed: {}".format(last_line))
+    if outfile != res_file_absolute:
+        with gzip.open(res_file_absolute, 'wb') as out, open(outfile, 'rb') as fh:
+            out.write(fh.read())
+
 @shared_task(soft_time_limit=24*3600)
 def compute_mapping_with_celery(data_id, res_file_absolute, input_file, map_method, target):
     t0 = time.time()
@@ -65,77 +133,42 @@ def compute_mapping_with_celery(data_id, res_file_absolute, input_file, map_meth
     db_entry.state = "running"
     db_entry.save()
 
+    if target in ("all", ""):
+        target = None
+    if not os.path.isdir(os.path.dirname(res_file_absolute)):
+        os.makedirs(os.path.dirname(res_file_absolute))
     try:
-        if map_method in ('s', 'st'):
-            mapper = ClosestSeqMapper(utils.db)
-        else:
-            raise ValueError("Invalid mapping method: {}".format(map_method))
-        if target in ("all", ""):
-            target = None
+        if map_method in (FastMappingJobs.CLOSEST_SEQ, FastMappingJobs.CLOSEST_SEQ_IN_SPECIES):
+            _closest_sequence_work(input_file, target, res_file_absolute)
+        elif map_method in (FastMappingJobs.CLOSEST_HOG, FastMappingJobs.CLOSEST_HOG_AT_LEVEL):
+            _omamer_mapping_work(input_file, target, res_file_absolute)
 
-        if not os.path.isdir(os.path.dirname(res_file_absolute)):
-            os.makedirs(os.path.dirname(res_file_absolute))
-        with auto_open(res_file_absolute, "wt") as fout:
-            csv_writer = csv.writer(fout, delimiter="\t")
-            csv_writer.writerow(
-                [
-                    "query",
-                    "target",
-                    "is_main_isoform",
-                    "HOG",
-                    "OMA_group",
-                    "PAM_distance",
-                    "Alignment_score",
-                ]
-            )
-
-            with auto_open(input_file, "rt") as fin:
-                seqs = Bio.SeqIO.parse(fin, "fasta")
-                it = mapper.imap_sequences(seqs, target_species=target)
-                seen_queries = set([])
-                for map_res in it:
-                    if map_res.query in seen_queries:
-                        continue  # we keep just the very best mapping
-                    seen_queries.add(map_res.query)
-                    if map_res.target.hog_family_nr != 0:
-                        hog_id = utils.db.format_hogid(map_res.target.hog_family_nr)
-                    else:
-                        hog_id = "n/a"
-                    if map_res.target.oma_group != 0:
-                        oma_grp = "OmaGroup:{}".format(map_res.target.oma_group)
-                    else:
-                        oma_grp = "n/a"
-                    csv_writer.writerow(
-                        [
-                            map_res.query,
-                            map_res.target.omaid,
-                            map_res.target.entry_nr == map_res.closest_entry_nr,
-                            hog_id,
-                            oma_grp,
-                            map_res.distance,
-                            map_res.score,
-                        ]
-                    )
-
-            # remove uploaded input file
-            os.remove(input_file)
-            db_entry.state = 'done'
-            db_entry.create_time = timezone.now()
-            tot_time = time.time() - t0
-            logger.info('finished fastmapping task {} (inputfile {}). took {:.1f}sec'.format(
-                data_id, input_file, tot_time))
-            try:
-                send_notification_email(db_entry)
-            except OSError as e:
-                logger.error("cannot send notification mail: {}".format(e))
+        # remove uploaded input file
+        os.remove(input_file)
+        db_entry.state = 'done'
+        db_entry.create_time = timezone.now()
+        tot_time = time.time() - t0
+        db_entry.runtime = tot_time
+        logger.info('finished fastmapping task {} (inputfile {}). took {:.1f}sec'.format(
+            data_id, input_file, tot_time))
+        try:
+            send_notification_email(db_entry)
+        except OSError as e:
+            logger.error("cannot send notification mail: {}".format(e))
 
     except SoftTimeLimitExceeded as e:
         logger.warning('computing fastmapping timed out for dataset: {} (inputfile {})'
                        .format(data_id, input_file))
+        db_entry.runtime = 24*3600
+        map_name = next(x[1] for x in FastMappingJobs.MAP_METHODS if x[0] == map_method)
+        db_entry.message = "computing %s timed out for your dataset" % map_name
         db_entry.state = 'timeout'
     except Exception as e:
         logger.exception("An error occured while processing {} (inputfile {})"
                          .format(data_id, input_file))
+        map_name = next(x[1] for x in FastMappingJobs.MAP_METHODS if x[0] == map_method)
+        db_entry.message = "An error occurred while computing %s: %s" % (map_name, str(e))
+        db_entry.runtime = time.time() - t0
         db_entry.state = "error"
     db_entry.save()
 

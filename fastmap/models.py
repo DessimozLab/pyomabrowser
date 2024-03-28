@@ -14,10 +14,10 @@ class FastMappingJobs(models.Model):
     CLOSEST_HOG = "h"
     CLOSEST_HOG_AT_LEVEL = "ht"
     MAP_METHODS = [
+        (CLOSEST_HOG, "Closest Hierarchical Orthologous Group (HOG)"),
+        # (CLOSEST_HOG_AT_LEVEL, "Closest HOG at a target taxonomic level"),
         (CLOSEST_SEQ, "Closest sequence"),
         (CLOSEST_SEQ_IN_SPECIES, "Closest sequence in target species"),
-        (CLOSEST_HOG, "Closest Hierarchical Orthologous Group (HOG)"),
-        (CLOSEST_HOG_AT_LEVEL, "Closest HOG at a target taxonomic level"),
     ]
 
     # Model fields
@@ -35,6 +35,8 @@ class FastMappingJobs(models.Model):
     email = models.EmailField(blank=True)
     name = models.CharField(max_length=64, blank=True)
     result_url = models.URLField(blank=True)
+    message = models.TextField(blank=True)
+    runtime = models.FloatField(default=0)
 
     def remove_erroneous_or_long_pending(self):
         PENDING_TIMEOUT = 600

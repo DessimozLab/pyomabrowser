@@ -1,6 +1,7 @@
 *.env
 *.md
 *.yml
+labgit.cnf
 .git
 README.md
 Dockerfile

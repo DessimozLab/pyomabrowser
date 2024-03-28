@@ -42,8 +42,15 @@ LOGGING['loggers'].update({
 })
 
 FASTMAP = {
-    "engine": "cluster",
+    "engine": os.getenv("FASTMAP_ENGINE", "cluster"),
     "store_files_in_days": 8,
+    "omamer_db": os.getenv('OMAMER_DB', None)
+}
+
+EXPORT_OMA = {
+    "engine": os.getenv("EXPORT_ENGINE", "cluster"),
+    "store_files_in_days": 8,
+    "allall_root": os.getenv("DARWIN_ALLALL_PATH", None)
 }
 
 CELERY_TASK_ROUTES = {
@@ -90,5 +97,12 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 6 * 3600,
     }
 }
+if EXPORT_OMA['engine'] == 'celery':
+    CELERY_TASK_ROUTES['export.tasks.run_export_celery'] = {'queue': 'long'}
+    del CELERY_BEAT_SCHEDULE['task-update-omastandalone-exports']
+if FASTMAP['engine'] == 'celery':
+    CELERY_TASK_ROUTES['fastmap.tasks.compute_mapping_with_celery'] = {'queue': 'long'}
+    del CELERY_BEAT_SCHEDULE['task-update-fastmap']
+
 # for backward compability reasons
 BEAT_SCHEDULE = CELERY_BEAT_SCHEDULE

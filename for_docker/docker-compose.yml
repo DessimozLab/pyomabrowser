@@ -14,6 +14,8 @@ services:
     build:
       context: ..
       dockerfile: for_docker/oma/Dockerfile
+      secrets:
+        - labgit
     command: /entrypoint.sh uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi --vacuum --max-requests=500
     env_file:
       - env
@@ -70,6 +72,10 @@ services:
         source: ${RELEASE_PATH_HOST}
         target: ${RELEASE_PATH}
         read_only: true
+      - type: bind
+        source: ${ALLALL_PATH_HOST}
+        target: ${DARWIN_ALLALL_PATH}
+        read_only: true
     depends_on:
       - broker
       - db
@@ -91,6 +97,10 @@ services:
       - type: bind
         source: ${RELEASE_PATH_HOST}
         target: ${RELEASE_PATH}
+        read_only: true
+      - type: bind
+        source: ${ALLALL_PATH_HOST}
+        target: ${DARWIN_ALLALL_PATH}
         read_only: true
     depends_on:
       - broker
@@ -126,6 +136,8 @@ services:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     build:
       context: ./legacy/
+      secrets:
+        - labgit
     image: $DOCKER_REGISTRY/legacy
     env_file:
       - env
@@ -142,3 +154,8 @@ services:
       stack: 
         soft: 64000000
         hard: 64000000
+
+
+secrets:
+  labgit:
+    file: "./labgit.cnf"

@@ -34,13 +34,12 @@ def export_omastandalone(request):
             if do_compute:
                 genomes_as_txt = json.dumps(genomes)
                 res_file_rel = os.path.join("AllAllExport", "AllAll-{}.tgz".format(data_id))
-                res_file_abs = os.path.join(settings.MEDIA_ROOT, res_file_rel)
                 release = db.get_release_name()
-                logger.info("Export job for {}, hash: {}, result: {}".format(release, data_id, res_file_abs))
-                res = submit_export(data_id, res_file_abs, genomes, release=release)
-                r = StandaloneExportJobs(data_hash=data_id, state=res.state, result=res_file_rel,
+                logger.info("Export job for %s, hash: %s, result: %s", release, data_id, res_file_rel)
+                # create, but not save the job. saving is done by submit_export once engine is determined
+                r = StandaloneExportJobs(data_hash=data_id, result=res_file_rel, state="pending",
                                          genomes=genomes_as_txt, processing=False)
-                r.save()
+                submit_export(r, genomes, release=release)
             return HttpResponseRedirect(reverse('export-download', args=(data_id,)))
     return render(request, "dlOMA_exportAllAll.html", context={'max_nr_genomes': 50})
 
@@ -58,4 +57,5 @@ class StandaloneExportResultDownloader(TemplateView):
         context['file_result'] = result
         context['genomes'] = json.loads(result.genomes)
         context['reload_every_x_sec'] = self.reload_frequency
+        context['days_stored_before_remove'] = settings.EXPORT_OMA.get('store_files_in_days', 7)
         return context

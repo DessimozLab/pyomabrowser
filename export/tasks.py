@@ -3,7 +3,14 @@ from __future__ import division
 import logging
 import os
 import re
+from pathlib import Path
+from typing import List
+
+import django
+from django.conf import settings
 from django.db.models import Q
+
+from oma import utils
 from .models import StandaloneExportJobs
 import shutil
 from django.utils import timezone
@@ -29,8 +36,22 @@ class JobStatus(object):
         else:
             self.state = "error"
 
+def submit_export(job:StandaloneExportJobs, genomes:List[str], release=None):
+    engine = settings.EXPORT_OMA.get('engine', 'celery').lower()
+    if engine not in ("celery", "cluster"):
+        raise django.conf.ImproperlyConfigured("invalid engine setting in EXPORT_OMA configuration")
 
-def submit_export(session, res_file=None, genomes=None, release=None):
+    logger.debug("submit process: engine: %s, abs_path for result: %s, hash: %s",
+                 engine, job.result.path, job.data_hash)
+    if engine == "celery":
+        job.save()
+        run_export_celery.delay(job.data_hash, genomes)
+    elif engine == "cluster":
+        res = submit_export_on_cluster(job.data_hash, job.result.path, genomes, release)
+        job.state = res.state
+        job.save()
+
+def submit_export_on_cluster(session, res_file=None, genomes=None, release=None):
     session_dir = '/tmp/gc3sessions'
     if not os.path.isdir(session_dir):
         os.makedirs(session_dir)
@@ -74,7 +95,7 @@ def update_running_jobs():
         job.processing = True
         job.save()
 
-        res = submit_export(job.data_hash)
+        res = submit_export_on_cluster(job.data_hash)
         job.state = res.state
         job.create_time = timezone.now()
         job.processing = False
@@ -85,3 +106,31 @@ def update_running_jobs():
 def purge_old_exports():
     time_threshold = datetime.now() - timedelta(days=8)
     StandaloneExportJobs.objects.filter(create_time__lt=time_threshold).delete()
+
+
+@shared_task(soft_time_limit=12*3600)
+def run_export_celery(data_id, genomes):
+    from . import export_standalone
+    job = StandaloneExportJobs.objects.get(data_hash=data_id)
+
+    allall_root = settings.EXPORT_OMA.get('allall_root', None)
+    if allall_root is None or not os.path.isdir(allall_root):
+        job.state = "error"
+        job.message = "Invalid server configuration. Please contact the OMA administrator"
+        job.save()
+        raise django.conf.ImproperlyConfigured("invalid allall_root setting in EXPORT_OMA configuration: {}".format(allall_root))
+    job.state = "running"
+    job.processing = True
+    job.create_time = timezone.now()
+    job.save()
+    try:
+        export_standalone.build_export_tarball(utils.db, genomes=genomes, outfn=job.result.path, allall=Path(allall_root))
+        job.state = "done"
+        job.create_time = timezone.now()
+    except Exception as e:
+        job.state = "error"
+        job.message = str(e)
+        logger.error("export job %s on %s failed: %s", data_id, genomes, e)
+    finally:
+        job.processing = False
+        job.save()

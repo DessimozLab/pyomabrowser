@@ -12,3 +12,4 @@ db.sqlite3
 docs/_build
 for_docker/env
 for_docker/.env
+for_docker/labgit.cnf
