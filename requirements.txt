@@ -51,7 +51,7 @@ numba==0.59.0; python_version >= '3.9'
 numexpr==2.9.0; python_version >= '3.9'
 numpy==1.26.4; python_version >= '3.9'
 oauthlib==3.2.2; python_version >= '3.6'
-oma-academy-app@ git+ssh://gitolite@lab.dessimoz.org:2222/oma-academy@b2091676901e51dc8818b45590fe47bec9b04e7d
+oma-academy-app@ git+${LABGIT}/oma-academy@e82953880a2b4fe3afd0f5cab2b5b30feafda089
 omamer==2.0.2; python_version >= '3.8'
 packaging==23.2; python_version >= '3.7'
 pandas==2.2.0; python_version >= '3.9'
@@ -63,7 +63,7 @@ py-cpuinfo==9.0.0
 pyfaidx==0.8.1.1; python_version >= '3.7'
 pygments==2.17.2; python_version >= '3.7'
 pyham==1.1.12
-pyoma[enrichment]@ git+ssh://gitolite@lab.dessimoz.org:2222/pyoma@d48e56685fcce4af8b1763547e3bd3b9ede4a44a
+pyoma[enrichment]@ git+${LABGIT}/pyoma@d48e56685fcce4af8b1763547e3bd3b9ede4a44a
 pyopa==0.8.4
 pyparsing==3.1.1; python_full_version >= '3.6.8'
 python-dateutil==2.8.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
@@ -94,4 +94,4 @@ vine==5.1.0; python_version >= '3.6'
 wcwidth==0.2.13
 xmltodict==0.13.0; python_version >= '3.4'
 zipp==3.17.0; python_version >= '3.8'
-zoo@ git+ssh://gitolite@lab.dessimoz.org:2222/zoo@940480866139f23fe1c905b1f1ef03585026b38b
+zoo@ git+${LABGIT}/zoo@940480866139f23fe1c905b1f1ef03585026b38b
