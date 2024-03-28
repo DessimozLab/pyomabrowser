@@ -878,7 +878,7 @@
         },
         "oma-academy-app": {
             "git": "${LABGIT}/oma-academy",
-            "ref": "b2091676901e51dc8818b45590fe47bec9b04e7d"
+            "ref": "e82953880a2b4fe3afd0f5cab2b5b30feafda089"
         },
         "omamer": {
             "hashes": [
