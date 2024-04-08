@@ -18,7 +18,11 @@ def load_compose(compose_file=None):
 
 
 def build(conf):
-    services = load_compose(conf.compose_file)['services']
+    compose_file = load_compose(conf.compose_file)
+    secrets = compose_file['secrets']
+    print(secrets)
+    
+    services = compose_file['services']
     for service, configs in services.items():
         if len(conf.service) > 0 and service not in conf.service:
             continue
@@ -28,6 +32,9 @@ def build(conf):
         build_conf = configs['build']
         context = build_conf['context'] if "context" in build_conf else "./"
         cmd = ["docker", "build", "--ssh", "default"]
+        if secrets is not None:
+            for k, v in secrets.items():
+                cmd.extend(['--secret', 'id='+k+',src='+v['file']])
         if conf.no_cache:
             cmd.append("--no-cache")
         try:
