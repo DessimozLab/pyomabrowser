@@ -5,9 +5,11 @@
 {% block meta_description %}Download the list of predicted orthologs between a pair of genomes.{% endblock %}
 {% block css_hook %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/typeaheadjs.css' %}"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
 {% endblock css_hook %}
 {% block js_hook %}
     <script src="{% static 'js/typeahead.bundle.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
 {% endblock js_hook %}
 
 {% block content %}
@@ -31,14 +33,14 @@
              <div>
 
             <p class="text-justify">Use the following form to download the list of all predicted orthologs
-                        between a pair of genomes of interest. Since orthologs are sometimes 1:many
-                        or many:many relations, this download will return more orthologs than what
-                        is covered by the OMA groups. The result is returned as a tab-separated
-                        text file, each line corresponding to one orthologous relation. The columns
-                        are the two IDs, the type of orthology (1:1, 1:n, m:1 or m:n) and (if available)
+                        between a pair of genomes of interest. The result is returned either as a tab- or 
+                        comma separated text file, where each line corresponding to one orthologous relation. 
+                        The columns will contain the OMA IDs and all the selected cross-references for both 
+                        genomes, the type of orthology (1:1, 1:n, m:1 or m:n) and (if available)
                         the OMA group containing both sequences.
+                        The json format will contain additional information for the genes of each 
+                        orthologous relation.
                     </p>
-
                  <br>
 
 
@@ -49,44 +51,47 @@
                     <h4>Download orthologs between two species</h4>
                 </div>
                 <div class="card-body">
-                     <form class="form " role="form" id="genomePW" action="/cgi-bin/gateway.pl" method="get" >
-                    <INPUT TYPE="HIDDEN" NAME="f" VALUE="PairwiseOrthologs">
-
+                    <form class="form " role="form" id="genomePW" method="get" >
                         <div class="form-group row">
                             <label for="textG1" class="col-md-2 offset-md-1 control-label">Species 1:</label>
-                            <div class="col-sm-7">
-                                <input  id="textG1" type="text"  class="form-control typeahead" name="p1">
+                            <div class="col-xs-8    col-sm-7">
+                                <input  id="textG1" type="text"  class="form-control typeahead">
                             </div>
                             <br>
                         </div>
                         <div class="form-group row">
                             <label for="textG2" class="col-md-2 offset-md-1 control-label">Species 2:
                             </label>
-                            <div class="col-sm-7">
-                                <input  id="textG2" type="text"  class="form-control typeahead" name="p2">
+                            <div class="col-xs-8 col-sm-7">
+                                <input  id="textG2" type="text"  class="form-control typeahead">
                             </div>
                             <br>
                         </div>
                         <div class="form-group row">
-                            <label for="textG2" class="col-md-2 offset-md-1  control-label">Preferred ID:
+                            <label for="selectBrowser" class="col-md-2 offset-md-1  control-label">Preferred ID:
                             </label>
-                            <div class=" col-xs-6 col-sm-2 ">
-                                <select id='selectBrowser' class="form-control " for="inputSuccess3" name="p3">
+                            <div class=" col-xs-6 col-sm-7 ">
+                                <select id='selectBrowser' multiple class="form-control selectpicker">
                                 <OPTION value="OMA">OMA IDs</OPTION>
-                                <OPTION value="Source">Source Data IDs</OPTION>
+                                <OPTION value="SourceID">Source Data IDs</OPTION>
                                 <OPTION value="SourceAC">Source Data ACs</OPTION>
-                                <OPTION value="SwissProt">UniProt/SwissProt IDs</OPTION>
-                                <OPTION value="SwissProt_AC">UniProt/SwissProt ACs</OPTION>
-                                <OPTION value="UniProt">UniProt ACs</OPTION>
-                                <OPTION value="Refseq_AC">RefSeq ACs</OPTION>
+                                <OPTION value="UniProtKB/SwissProt">UniProtKB/SwissProt</OPTION>
+                                <OPTION value="UniProtKB/TrEMBL">UniProtKB/TrEMBL</OPTION>
+                                <OPTION value="RefSeq">RefSeq</OPTION>
                                 <OPTION value="EntrezGene">Entrez Gene IDs</OPTION>
-                                <OPTION value="EnsemblGene">Ensembl Gene IDs</OPTION>
+                                <OPTION value="Ensembl Gene">Ensembl Gene IDs</OPTION>
                                 </select>
-
-                                </div>
-
-
-
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="selectFormat" class="col-md-2 offset-md-1 control-label">Format:</label>
+                            <div class="col-xs-6 col-sm-5 ">
+                                <select id='selectFormat' class="form-control">
+                                    <OPTION value="tsv">TSV - TAB seperated format</OPTION>
+                                    <OPTION value="csv">CSV - Comma seperated format</OPTION>
+                                    <OPTION value="json">JSON</OPTION>
+                                </select>
+                            </div>
                         </div>
 
                          <button type="submit" class="btn btn-lg btn-block btn-primary ">Get pairs</button>
@@ -162,6 +167,7 @@ $(document).ready(function() {
         $(this).val('');
       }
   });
+
   $('#textG2').typeahead({
     hint: true
   },
@@ -176,18 +182,34 @@ $(document).ready(function() {
   });
 
   $('#genomePW').submit(function(){
-       $('#textG1').val(genomeIDs[$('#textG1').val()]);
-       $('#textG2').val(genomeIDs[$('#textG2').val()]);
-       if ($('#textG1').val() == '' || $('#textG2').val() == '') {
-       alert('Please define the two genomes.');
-       return false;
-  }
+    let sp1 = $('#textG1').val(), sp2 = $('#textG2').val();
+    if (! Object.values(genomeIDs).includes(sp1)){
+        sp1 = genomeIDs[sp1];
+    }
+    if (! Object.values(genomeIDs).includes(sp2)){
+        sp2 = genomeIDs[sp2];
+    }
+    if (sp1 === '' || sp2 === '' || sp1 === undefined || sp2 === undefined) {
+      alert('Please define the two genomes.');
+      return false;
+    }
+    let newUrl = "{% url "pairs" "sp111" "sp222"%}".replace("sp111", sp1).replace("sp222", sp2);
+    let xrefs = Array.from($("#selectBrowser > option:checked"), e=>e.value).join(',');
+    const params = new URLSearchParams(
+             {"format": $('#selectFormat').val(),
+              "xrefs": xrefs,
+              "per_page": 200000,
+             });
+    console.log(newUrl, params);
+    window.location = newUrl + "?" + params.toString();
+    return false;
   });
-    $(window).keydown(function(event){
-      if(event.keyCode == 13) {
-        event.preventDefault();
-        return false;
-      }
+
+  $(window).keydown(function(event){
+    if(event.keyCode === 13) {
+      event.preventDefault();
+      return false;
+    }
   });
 });
 

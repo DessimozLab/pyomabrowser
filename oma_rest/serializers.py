@@ -119,6 +119,15 @@ class ProteinEntrySerializer(ReadOnlySerializer):
         return collections.OrderedDict([('start', obj.locus_start), ('end', obj.locus_end), ('strand', obj.strand)])
 
 
+class ProteinEntryWithXRefSerializer(ProteinEntrySerializer):
+    xrefs = serializers.SerializerMethodField(method_name=None, required=False)
+    def get_xrefs(self, obj):
+        if obj.xrefs is not None:
+            res = collections.defaultdict(str)
+            res.update({key: value['id'].decode() for key, value in obj.xrefs.items()})
+            return res
+        return None
+
 class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     roothog_id = serializers.IntegerField(source='hog_family_nr')
     hog_levels = serializers.SerializerMethodField(method_name=None)
@@ -330,11 +339,17 @@ class ProteinDomainsSerializer(ReadOnlySerializer):
 
 
 class PairwiseRelationSerializer(ReadOnlySerializer):
-    entry_1 = ProteinEntrySerializer()
-    entry_2 = ProteinEntrySerializer()
+    entry_1 = ProteinEntryWithXRefSerializer()
+    entry_2 = ProteinEntryWithXRefSerializer()
     rel_type = serializers.CharField()
     distance = serializers.FloatField()
     score = serializers.FloatField()
+    oma_group = serializers.SerializerMethodField(method_name=None)
+
+    def get_oma_group(self, obj):
+        if obj.entry_1.oma_group == obj.entry_2.oma_group and obj.entry_1.oma_group != 0:
+            return obj.entry_1.oma_group
+        return ""
 
 
 class TaxonSerializer(ReadOnlySerializer):

@@ -321,6 +321,13 @@ class PairwiseRelationsTest(APITestCase):
         self.assertEqual(200, response_filt.status_code)
         self.assertLess(len(response_filt.data), len(response.data))
 
+    def test_pairs_with_crossrefs_and_tsv_format(self):
+        client = APIClient()
+        response = client.get('/api/pairs/YEAST/PLAF7/?format=tsv&xrefs=EntrezGene,UniProtKB%2FSwissProt')
+        self.assertEqual(200, response.status_code)
+        self.assertIn("EntrezGene_1", response.content.decode('utf-8'))
+        self.assertIn("UniProtKB/SwissProt_2", response.content.decode('utf-8'))
+
     def test_empty_result_if_inexisting_rel_type(self):
         response = APIClient().get('/api/pairs/YEAST/PLAF7/?rel_type=2:6')
         self.assertEqual(200, response.status_code)

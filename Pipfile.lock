@@ -377,6 +377,14 @@
             "markers": "python_version >= '3.6'",
             "version": "==3.13.1"
         },
+        "djangorestframework-csv": {
+            "hashes": [
+                "sha256:b269b692feda1971e1342f395a21d339c6a16d2961ff64357a9a6188f27af10f",
+                "sha256:d1bcfbaaeaa5145af6bb0985a36a5bbf2f853d9961c722f69c7b0c9c3bcc269a"
+            ],
+            "index": "pypi",
+            "version": "==3.0.2"
+        },
         "djangorestframework-link-header-pagination": {
             "hashes": [
                 "sha256:bcfc220d0ed20b7b7db54d7a1719b53a33560d796d1944a5069f4b75243e55f5",

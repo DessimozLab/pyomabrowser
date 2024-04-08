@@ -2,7 +2,7 @@ import functools
 import operator
 import itertools
 import os
-
+from  datetime import datetime
 import networkx as nx
 import numpy
 import pyoma.browser.exceptions
@@ -25,6 +25,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError, ValidationError
 from rest_framework.settings import api_settings
 from rest_framework import status
+from rest_framework_csv.renderers import CSVRenderer
 from django.http import HttpResponse
 from distutils.util import strtobool
 
@@ -32,9 +33,11 @@ from . import models as rest_models
 from . import serializers
 from .schema import DocStringSchemaExtractor
 from .pagination import PaginationMixin, LazyPagedPytablesQuery
+from .renderers import TSVRenderer
 
 from oma import utils, misc
 from pyoma.browser import models, db
+from pyoma.browser.idmapper import NoSearchXrefIdMapper
 import logging
 
 from collections import Counter
@@ -1067,6 +1070,7 @@ class GenomeViewSet(PaginationMixin, ViewSet):
 
 class PairwiseRelationAPIView(PaginationMixin, APIView):
     schema = DocStringSchemaExtractor()
+    renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (CSVRenderer, TSVRenderer)
 
     def _get_entry_range(self, genome, chr):
         if chr is None:
@@ -1080,7 +1084,47 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
                 # this means the chr does not exist
                 return 0, 0
 
-    def get(self, request, genome_id1, genome_id2, chr1=None, chr2=None):
+    def finalize_response(self, request, response, *args, **kwargs):
+        super().finalize_response(request, response, *args, **kwargs)
+        file_renderers = ('csv', 'tsv')
+        """renderers that return files and should be an attachment with a filename"""
+
+        # this renderer should download a file
+        if response.accepted_renderer.format in file_renderers:
+            filename = 'OMA-Pairs'
+            filename += "_" + kwargs['genome_id1'] + "-" + kwargs['genome_id2']
+            # add a timestamp
+            filename += '_' + datetime.now().strftime('%Y-%m-%d_%H%M%S')
+            # file extension
+            filename += '.' + response.accepted_renderer.format
+            # add the header
+            response['content-disposition'] = 'attachment; filename=' + filename
+
+        return response
+
+    def get_renderer_context(self):
+        context = super().get_renderer_context()
+        xrefs, _ = self._get_requested_xrefs_and_mapper()
+        context['header'] = (('entry_1.omaid',) + tuple(f"entry_1.xrefs.{x}" for x in xrefs) +
+                             ('entry_2.omaid',) + tuple(f"entry_2.xrefs.{x}" for x in xrefs) +
+                             ('rel_type', 'oma_group'))
+        labels = (('OMAid_1',) + tuple(f"{x}_1" for x in xrefs) +
+                  ('OMAid_2', ) + tuple(f"{x}_2" for x in xrefs) +
+                  ("RelType", "OmaGroup"))
+        context['labels'] = {h: l for h, l in zip(context['header'], labels)}
+        return context
+
+    def _get_requested_xrefs_and_mapper(self):
+        xref_mapper = None
+        crossref = self.request.query_params.getlist('xrefs')
+        if len(crossref) == 1:
+            crossref = list(map(str.strip, crossref[0].split(',')))
+        if len(crossref) > 0:
+            xref_mapper = NoSearchXrefIdMapper(utils.db, sources=crossref)
+            crossref = [xref_mapper.xrefEnum(z) for z in xref_mapper.idtype]
+        return crossref, xref_mapper
+
+    def get(self, request, genome_id1, genome_id2, format=None):
         """List the pairwise relations among two genomes
 
         The relations are orthologs in case the genomes are
@@ -1111,6 +1155,20 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
                          second genome
             location: query
 
+          - name: type
+            description: type of orthologs to use, can be either
+                         'vps' or 'hogs' (default)
+            location: query
+
+          - name: xrefs
+            description: list of cross-references sources.
+                         Possible values are any subset of
+                         'UniProtKB/SwissProt', UniProtKB/TrEMBL',
+                         'EntrezGene', 'SourceID', 'SourceAC',
+                         'Ensembl Gene' and 'RefSeq'.
+                         Default is no cross-references, but only OMA IDs.
+            location: query
+
           - name: rel_type
             description: limit relations to a certain type of
                         relations, e.g. '1:1'.
@@ -1123,23 +1181,42 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
         except db.UnknownSpecies as e:
             raise NotFound(e)
 
-        tab_name = 'VPairs' if genome1.uniprot_species_code != genome2.uniprot_species_code else 'within'
-        rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/{}'.format(
-            genome1.uniprot_species_code, tab_name))
-
         chr1 = request.query_params.get('chr1', None)
         chr2 = request.query_params.get('chr2', None)
         range1 = self._get_entry_range(genome1, chr1)
         range2 = self._get_entry_range(genome2, chr2)
         logger.debug("EntryRanges: ({0[0]},{0[1]}), ({1[0]},{1[1]})".format(range1, range2))
 
+        crossref, xref_mapper = self._get_requested_xrefs_and_mapper()
+        if len(crossref) > 0:
+            xrefs1 = xref_mapper.xreftab_to_dict(xref_mapper.map_entry_nr_range(range1[0], range1[1] + 1))
+            xrefs2 = xref_mapper.xreftab_to_dict(xref_mapper.map_entry_nr_range(range2[0], range2[1] + 1))
+        else:
+            xrefs1, xrefs2 = {}, {}
+
+        def build_ext_ProteinEntries_dict(entries, allxrefs):
+            res = {}
+            for entry in entries:
+                p = models.ProteinEntry(utils.db, entry)
+                setattr(p, 'xrefs', allxrefs.get(p.entry_nr))
+                res[p.entry_nr] = p
+            return res
+        entries1 = build_ext_ProteinEntries_dict(utils.db.main_isoforms(genome1.uniprot_species_code), xrefs1)
+        entries2 = build_ext_ProteinEntries_dict(utils.db.main_isoforms(genome2.uniprot_species_code), xrefs2)
+
+        tab_name = 'VPairs' if genome1.uniprot_species_code != genome2.uniprot_species_code else 'within'
+        rel_tab = utils.db.get_hdf5_handle().get_node('/PairwiseRelation/{}/{}'.format(
+            genome1.uniprot_species_code, tab_name))
+
         def obj_factory(data):
-            rel = models.PairwiseRelation(utils.db, data)
+            rel = models.PairwiseRelation(utils.db, data, entry1=entries1.get(data['EntryNr1']), entry2=entries2.get(data['EntryNr2']))
             if ((chr1 is None or chr1 == rel.entry_1.chromosome) and
                     (chr2 is None or chr2 == rel.entry_2.chromosome)):
                 if rel_type is None or rel_type == rel.rel_type:
                     return rel
             return None
+
+        logger.info("negociated format: %s", request.accepted_renderer.format)
 
         query = '(EntryNr1 >= {0[0]}) & (EntryNr1 <= {0[1]}) ' \
                 '& (EntryNr2 >= {1[0]}) & (EntryNr2 <= {1[1]})'.format(range1, range2)

@@ -29,6 +29,7 @@ Markdown = "*"
 PyYAML = "*"
 django-matomo-api-tracking = "*"
 django-debug-toolbar = "*"
+djangorestframework-csv = "*"
 
 [dev-packages]
 
