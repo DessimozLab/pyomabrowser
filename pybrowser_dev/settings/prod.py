@@ -1,5 +1,10 @@
+import logging
 from .base import *
-import os
+try:
+    import sentry_sdk
+except ImportError:
+    sentry_sdk = None
+logger = logging.getLogger(__name__)
 
 # RECAPTCHA keys
 RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_PUBLIC_KEY", "not_specified")
@@ -106,3 +111,18 @@ if FASTMAP['engine'] == 'celery':
 
 # for backward compability reasons
 BEAT_SCHEDULE = CELERY_BEAT_SCHEDULE
+
+if os.getenv("SENTRY_DNS") is not None:
+    if sentry_sdk is None:
+        logger.error("Sentry sdk package not installed")
+    else:
+        sentry_sdk.init(
+            dns = os.getenv("SENTRY_DNS"),
+            # Set traces_sample_rate to 1.0 to capture 100%
+            # of transactions for performance monitoring.
+            traces_sample_rate = 1.0,
+            # Set profiles_sample_rate to 1.0 to profile 100%
+            # of sampled transactions.
+            # We recommend adjusting this value in production.
+            profiles_sample_rate = 1.0 if DEBUG else 0.1,
+        )
