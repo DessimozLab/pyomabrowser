@@ -54,9 +54,9 @@ class Hog_placement {
         this.leaf_font_size = 10
         this.zoom_transform = null;
         this.sub_sampling_ratio = 1;
-        this.gene_name_padding_y = (this.cell_size - this.leaf_font_size) /2;
         this.crosshair_width = 2;
         this.gene_tree_x_translate = 0;
+        this.species_tree_x_translate = 0;
         this.old_transform = d3.zoomIdentity;
 
 
@@ -313,10 +313,22 @@ class Hog_placement {
 
 
                 if (event.sourceEvent){
+
+                    console.log(event.sourceEvent.offsetY, this.grid.starty_gt)
+
                     if (event.sourceEvent.offsetX < this.grid.startx_st){
                         this.gene_tree_x_translate +=  -event.sourceEvent.movementX
                         this.gene_tree_x_translate = this._clamp( this.gene_tree_x_translate, -this.grid.genes_tree_width_raw*this.zoom_transform.k + 10*this.zoom_transform.k + this.genes_tree_width , 0)
                         this.zoom_transform.x = this.old_transform.x;
+
+                    }
+
+                    else if (event.sourceEvent.offsetY < this.grid.starty_gt){
+
+                        console.log(event.sourceEvent.movementY);
+                        this.species_tree_x_translate +=  -event.sourceEvent.movementY
+                        this.species_tree_x_translate = this._clamp( this.species_tree_x_translate, -this.grid.species_tree_width_raw*this.zoom_transform.k + 10*this.zoom_transform.k + this.species_tree_width , 0)
+                        this.zoom_transform.y = this.old_transform.y;
 
                     }
                 }
@@ -369,7 +381,7 @@ class Hog_placement {
     _zoom_update_species_tree(){
 
         var sp_tree_offset_y = ( -this.cell_size*1.5  + this.grid.y_offset_st)*this.zoom_transform.k - this.zoom_transform.x
-        var x_offset_sp =  this.grid.species_tree_width_raw*this.zoom_transform.k - (this.species_tree_width)
+        var x_offset_sp =  this.grid.species_tree_width_raw*this.zoom_transform.k - (this.species_tree_width) + this.species_tree_x_translate
 
         this.tree_target.attr('transform', 'rotate(90) translate(' + -x_offset_sp + ','+sp_tree_offset_y+ ') scale(' + this.zoom_transform.k + ')' );
 
