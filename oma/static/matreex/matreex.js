@@ -5,9 +5,12 @@ var millis = Date.now() - start;
 
 DEV MAP
 
+
+
 ZOOM:
     - add g under each panel (like clipath) and add specific zoom to each element
 e.g. zoom on matrix do all but paning on tree move the tree, etc..
+    - Clamp translation and scale for each element
 
 GENE TREE:
      - zoom at max the name are y offset need to account for middle anchor
@@ -244,12 +247,12 @@ class Hog_placement {
      _grid_position(){
 
         this.grid = {
-            'board_width':this.container_size.width - 4 * this.gutter -  this.gene_label_width -  this.gene_name_width - this.genes_tree_width,
-            'board_height':this.container_size.height - 3 * this.gutter -  this.species_tree_width -  this.species_name_width,
-            'startx_st':1*this.gutter + this.gene_name_width + this.genes_tree_width,
-            'starty_st':this.gutter,
+            'board_width':this.container_size.width - 2*this.gutter -  this.gene_label_width -  this.gene_name_width - this.genes_tree_width,
+            'board_height':this.container_size.height -  2*this.gutter -  this.species_tree_width -  this.species_name_width,
+            'startx_st': this.gutter + this.gene_name_width + this.genes_tree_width,
+            'starty_st': this.gutter,
             'startx_gt':this.gutter,
-            'starty_gt': 2*this.gutter + this.species_tree_width + this.species_name_width,
+            'starty_gt': this.gutter + this.species_tree_width + this.species_name_width,
         }
 
         this.grid.startx_glabel = this.gutter + this.gene_name_width + this.genes_tree_width + this.grid.board_width;
@@ -312,7 +315,7 @@ class Hog_placement {
                 if (event.sourceEvent){
                     if (event.sourceEvent.offsetX < this.grid.startx_st){
                         this.gene_tree_x_translate +=  -event.sourceEvent.movementX
-                        this.gene_tree_x_translate = this._clamp( this.gene_tree_x_translate, -this.grid.genes_tree_width_raw*this.zoom_transform.k+10, 0)
+                        this.gene_tree_x_translate = this._clamp( this.gene_tree_x_translate, -this.grid.genes_tree_width_raw*this.zoom_transform.k + 10*this.zoom_transform.k + this.genes_tree_width , 0)
                         this.zoom_transform.x = this.old_transform.x;
 
                     }
@@ -326,15 +329,11 @@ class Hog_placement {
                 this.m.attr('transform', mat_tr);
 
                 // SPECIES TREE
-                var sp_tree_offset_y = this.grid.y_offset_st*this.zoom_transform.k - this.zoom_transform.x + (this.cell_size/2)*this.zoom_transform.k
-                var x_offset_sp =  this.grid.species_tree_width_raw*this.zoom_transform.k - (this.species_tree_width)
-                this.tree_target.attr('transform', 'rotate(90) translate(' + -x_offset_sp + ','+sp_tree_offset_y+ ') scale(' + this.zoom_transform.k + ')' );
+                this._zoom_update_species_tree()
+
 
                 // SPECIES TREE NAME
-                var offset_x = this.grid.species_tree_height_raw*this.zoom_transform.k + this.zoom_transform.x
-                var offset_y =  this.grid.y_offset_st*this.zoom_transform.k + this.zoom_transform.x
-                this.colName.attr('transform', `rotate(90) translate(${0}, ${-offset_x}) scale(${this.zoom_transform.k})` );
-                this.colName.selectAll("text").attr('font-size', 10/this.zoom_transform.k + 'px')
+                this._zoom_update_species_name()
 
                 //GENE TREE
                 this._zoom_update_gene_tree();
@@ -355,6 +354,27 @@ class Hog_placement {
 
     }
 
+    _zoom_update_species_name() {
+
+        var offset_x = (this.grid.species_tree_height_raw+this.cell_size*1.5)*this.zoom_transform.k + this.zoom_transform.x
+
+        this.colName.attr('transform', `rotate(90) translate(${0}, ${-offset_x}) scale(${this.zoom_transform.k})` );
+        this.colName.selectAll("text")
+                .attr('font-size', (d,i) => { return i % this.sub_sampling_ratio === 0? this.leaf_font_size/this.zoom_transform.k + 'px' : 0  }  )
+                .attr('x', this.gene_name_padding_left/this.zoom_transform.k + 'px')
+                .attr("y", (d, i) => { return (i + 0.5) * this.cell_size + (0.5*this.leaf_font_size/this.zoom_transform.k)   })
+
+    }
+
+    _zoom_update_species_tree(){
+
+        var sp_tree_offset_y = ( -this.cell_size*1.5  + this.grid.y_offset_st)*this.zoom_transform.k - this.zoom_transform.x
+        var x_offset_sp =  this.grid.species_tree_width_raw*this.zoom_transform.k - (this.species_tree_width)
+
+        this.tree_target.attr('transform', 'rotate(90) translate(' + -x_offset_sp + ','+sp_tree_offset_y+ ') scale(' + this.zoom_transform.k + ')' );
+
+    }
+
     _zoom_update_gene_tree(){
 
         var x_offset_gt = this.grid.genes_tree_width_raw*this.zoom_transform.k - (this.genes_tree_width) + this.gene_tree_x_translate
@@ -365,7 +385,7 @@ class Hog_placement {
 
     }
 
-    _zoom_update_gene_name(scroll_mode){
+    _zoom_update_gene_name(){
 
 
             this.rowName.attr('transform', 'translate(0,' + this.zoom_transform.y + ') scale(' + this.zoom_transform.k + ')' );
@@ -373,10 +393,9 @@ class Hog_placement {
             this.rowName.selectAll("text")
                 .attr('font-size', (d,i) => { return i % this.sub_sampling_ratio === 0? this.leaf_font_size/this.zoom_transform.k + 'px' : 0  }  )
                 .attr('x', this.gene_name_padding_left/this.zoom_transform.k + 'px')
-                //.attr("y", (d, i) => { return (i + 1) * this.cell_size   })
+                .attr("y", (d, i) => { return (i + 0.5) * this.cell_size + (0.5*this.leaf_font_size/this.zoom_transform.k)   })
 
     }
-
 
     _zoom_update_gene_label(){
 
@@ -385,6 +404,7 @@ class Hog_placement {
         this.rowLabels.selectAll("text")
                 .attr('font-size', (d,i) => { return i % this.sub_sampling_ratio === 0? this.leaf_font_size/this.zoom_transform.k + 'px' : 0  }  )
                 .attr('x', this.gene_name_padding_left/this.zoom_transform.k + 'px')
+                .attr("y", (d, i) => { return (i + 0.5) * this.cell_size + (0.5*this.leaf_font_size/this.zoom_transform.k)   })
 
     }
 
@@ -566,7 +586,6 @@ class Hog_placement {
           .attr("y", 0)
 
         this.root_species = d3.cluster()
-
             .nodeSize([this.cell_size, (this.species_tree_width/this.ratio_zoom) / (this.hierarchy_genes.height + 1)])
             .separation(() =>  { return 1})
             (this.hierarchy_species);
@@ -753,12 +772,24 @@ class Hog_placement {
                 this.clean_crosshair()
 
 
+                // VERTICAL LINE
+
                 this.g_mg.append("line")
                     .attr("class", "vline")
-                    .attr("x1", pos_x  )  //<<== change your code here
+                    .attr("x1", pos_x  )
                     .attr("y1", -10000)
-                    .attr("x2", pos_x  )  //<<== and here
+                    .attr("x2", pos_x  )
                     .attr("y2", 10000)
+                    .style("stroke-width", this.crosshair_width * tr.k)
+                    .style("stroke", "grey")
+                    .style("fill", "none");
+
+                this.g_stn.append("line")
+                    .attr("class", "vline_stl")
+                    .attr("x1", pos_x)  //<<== change your code here
+                    .attr("y1", -1000  )
+                    .attr("x2", pos_x)  //<<== and here
+                    .attr("y2", 1000)
                     .style("stroke-width", this.crosshair_width * tr.k)
                     .style("stroke", "grey")
                     .style("fill", "none");
@@ -829,7 +860,7 @@ class Hog_placement {
 
 
 
-        this.ratio_zoom = this.grid.board_width / this.m.node().getBoundingClientRect().width;
+        this.ratio_zoom = (this.grid.board_width -20) / this.m.node().getBoundingClientRect().width;
 
 
     }
@@ -854,7 +885,6 @@ class Hog_placement {
              .attr('width',  this.genes_tree_width)
             .attr("x", 0)
           .attr("y", 0)
-
 
         this.root_genes = d3.cluster()
             .nodeSize([this.cell_size, (this.genes_tree_width/this.ratio_zoom) / (this.hierarchy_genes.height + 1)])
@@ -1022,9 +1052,7 @@ class Hog_placement {
             })
 
             .attr("x", 0)
-            .attr("y", (d, i) => {
-                return (i + 1) * this.cell_size -14;
-            })
+            .attr("y", (d, i) => { return (i + 0.5) * this.cell_size +  0.5*this.leaf_font_size})
             .style("text-anchor", "start")
 
 
@@ -1086,7 +1114,6 @@ class Hog_placement {
                     return d.parent.data.event == "loss" || d.data.event == "loss"  ? 'lightgrey'  : 'black';
                 }
                 else {
-
                     return 'black';
                 }
             })
@@ -1094,8 +1121,7 @@ class Hog_placement {
                 return set_name(d)
             })
             .attr("x", this.gene_name_padding_left)
-            .attr("y", (d, i) => { return (i + 1) * this.cell_size - this.gene_name_padding_y;
-            })
+            .attr("y", (d, i) => { return (i + 0.5) * this.cell_size +  0.5*this.leaf_font_size})
             .style("text-anchor", "start")
 
             .each((d, i, nodes) => {
@@ -1136,22 +1162,14 @@ class Hog_placement {
             .enter()
             .append("text")
             .style("fill", (d) => {
-                if(d.data.matrix_color){
-                  return d.data.matrix_color
-                }
-                else {
-
-                    return 'black';
-                }
+                if(d.data.matrix_color){return d.data.matrix_color} else {return 'black';}
             })
             .attr("font-weight", (d) => {return d._children ? 700 : 300})
             .text(function (d) {
                 return d.data.taxon;
             })
             .attr("x", 0)
-            .attr("y",  (d, i) => {
-                return (i + 1) * this.cell_size;
-            })
+            .attr("y", (d, i) => { return (i + 0.5) * this.cell_size +  0.5*this.leaf_font_size})
             .style("text-anchor", "start")
             .each((d,i,nodes) => this.wrap(nodes[i],this.species_name_width))
             /*
@@ -1213,22 +1231,12 @@ class Hog_placement {
 
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
     clean_crosshair(){
 
            d3.select('.vline').remove()
             d3.select('.vline2').remove()
+            d3.select('.vline_stl').remove()
+
 
 
             d3.select('.hline').remove()
@@ -1562,6 +1570,11 @@ class Hog_placement {
     }
 
     //
+
+    between(x, min, max) {
+      return x >= min && x <= max;
+    }
+
     dft(root){
         var leaves = []
         var stack=[];
