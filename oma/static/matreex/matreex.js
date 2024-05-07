@@ -7,15 +7,17 @@ DEV MAP
 
 
 
-ZOOM:
-    - add g under each panel (like clipath) and add specific zoom to each element
-e.g. zoom on matrix do all but paning on tree move the tree, etc..
-    - Clamp translation and scale for each element
+BUG:
+    - long label cant overflow due to clip path maybe remove clip path for this since ellipsis
+    - when collapsing trees, zoom and tree layout got messed up (zoom_ratio ?)
+    - add hog button go crazy
+    . async load of modal
 
-GENE TREE:
-     - zoom at max the name are y offset need to account for middle anchor
-     - no gutter so crosshair is conitnous line neeed to remove one or 2 character for inner padding
-     - Recalibrate ellipsis for gene name
+Nice to have:
+    - double click on cell to open
+
+LEGEND:
+    RMOVE LOSS AND HGT ADD SPECITATION as oma option
 
 
  */
@@ -32,14 +34,15 @@ function defaultDict() {
 
 class Hog_placement {
 
-    constructor(div_id, data_species_tree) {
+    constructor(div_id, data_species_tree, oma=false) {
+
 
         // Settings
         this.cell_size = 30;
         this.gutter = 20;
         this.species_tree_width = 100;
-        this.genes_tree_width = 200;
-        this.gene_label_width = 100;
+        this.genes_tree_width = 100;
+        this.gene_label_width = 150;
         this.species_label_width = 170;
         this.gene_name_width = 100;
         this.species_name_width = 100;
@@ -58,13 +61,16 @@ class Hog_placement {
         this.gene_tree_x_translate = 0;
         this.species_tree_x_translate = 0;
         this.old_transform = d3.zoomIdentity;
+        this.ratio_zoom = null;
+        this.oma = oma;
+        this.highlight = [];
 
 
         // UTILS METRICS
         this.grid = null;
 
         // Data
-        this.data_species_tree = data_species_tree;
+        this.data_species_tree = data_species_tree == 'oma' ? this._get_oma_species_tree() : data_species_tree;
         this.data_gene_tree_list = [];
         this.cols = null;
 
@@ -76,6 +82,334 @@ class Hog_placement {
         this.d3_container = d3.select("#" + this.container_id)
         this.container_size = this.d3_container.node().getBoundingClientRect()
 
+        this._add_menu_button()
+
+    }
+
+    _search_autocomplete(){
+
+        var lookup = []
+        lookup = lookup.concat(this.get_gene_tree_list_name(this.data_gene_tree, []))
+        lookup = lookup.concat(this.get_species_tree_list_name(this.data_species_tree, []))
+        lookup = [...new Set(lookup)];
+
+    $('#input_search').autocomplete({
+        lookup: lookup,
+        onSelect:  (suggestion) =>  {
+            this._add_to_highlight_list(suggestion.value);
+        }
+    });
+
+    }
+
+
+    _add_to_highlight_list(d){
+        this.highlight.push(d)
+        this.highlight =  [...new Set(this.highlight)];
+
+        this._render()
+        this._zoom_ping()
+
+
+
+    }
+
+    _add_menu_button() {
+
+        var div = this.d3_container.append("div").attr("class", "corner_placeholder")
+            .style("position", 'absolute')
+            .style("margin", '48px')
+            .style("margin-top", '28px')
+            .style("z-index", '9999')
+            .style("right", '0px')
+
+           var search = div.append('div').attr('id','dfg')
+
+            document.getElementById('dfg').innerHTML = '<div class="input-group mb-3">\n' +
+            '  <input type="text" class="form-control" id="input_search" placeholder="Search for HOG, gene or taxa" aria-label="Search for HOG, gene or taxa" aria-describedby="basic-addon2">\n' +
+            '  <div class="input-group-append">\n' +
+            '    <button class="btn btn-outline-danger" type="button" id="reset_search_button">Reset</button>\n' +
+            '    <button class="btn btn-outline-secondary" type="button" id="search_button">Highlight</button>\n' +
+            '  </div>\n' +
+            '</div>'
+
+
+        document.getElementById('search_button').addEventListener('click', () => {
+            let search_ = document.querySelector('#input_search').value;
+            this._add_to_highlight_list(search_);
+
+        })
+
+        document.getElementById('reset_search_button').addEventListener('click', () => {
+            this.highlight = [];
+            this._render()
+            this._zoom_ping()
+        })
+
+
+        this.tr_buttons = div.append("div").attr("class", "tr-button")
+            .style("right", 0)
+            .style("position", 'absolute')
+
+
+        this.tr_menus = div.append("div").attr("class", "tr-menus")
+            .style('position', 'absolute')
+            .style('top', '126px')
+            .style('right', '0')
+
+
+        // add the button
+        var ex_b = this.tr_buttons.append('button')
+            .attr('id', 'button_export')
+
+        var divybuty = ex_b.attr('class', ' square_button')
+            .style('border-radius', '8px')
+            .style('border', 'none')
+            .style('padding', '8px')
+            .style('cursor', 'pointer')
+            .style('background-color', '')
+            .style('color', '#555')
+            .style('width', '56px')
+            .style('height', '56px')
+            .on("click", d => {
+
+                if (this.menu_export.style('display') === 'none') {
+                    ex_b.style('background-color', '#CCC');
+                    return this.menu_export.style("display", 'block')
+                }
+                ex_b.style('background-color', 'rgba(239, 239, 239, 0.95)');
+                return this.menu_export.style("display", 'none')
+            })
+            .on("mouseover", d => {
+                ex_b.style('background-color', '#ddd');
+            })
+            .on("mouseout", d => {
+                ex_b.style('background-color', 'rgba(239, 239, 239, 0.95)');
+
+            })
+
+        divybuty.append("div")
+            .attr("class", "label")
+            .append('i')
+            .style('color', '#888')
+            .attr('class', ' fas fa-cog')
+
+        divybuty.append('p')
+            .text('Settings')
+            .style('font-size', 'xx-small')
+
+
+        this.tooltip_export = new bootstrap.Tooltip(document.getElementById('button_export'))
+
+
+        // add the sub menu container
+        this.menu_export = this.tr_menus.append('div')
+            .style("background-color", 'rgba(239, 239, 239, 0.98)')
+            .attr('class', 'menu_export')
+            .style('display', 'none')
+            .style('padding', '8px')
+            .style('width', '300px')
+
+
+        var d = this.menu_export.append('div').style('margin', '10px')
+
+        d.append("input").attr('type', 'checkbox').attr('id', 'show_species').attr('checked', 'checked').style('display', 'inline-block')
+        d.append("label").text('Show species thumbnail').attr('for', 'show_species').style('margin-left', '10px').style('display', 'inline-block')
+
+
+        d3.select("#show_species").on("click", () => {
+            this.show_image = document.getElementById('show_species').checked;
+
+        })
+
+        var e = this.menu_export.append('div').style('margin', '10px')
+
+        e.append("input").attr('type', 'number').attr('id', 'quantity').attr('name', 'quantity').attr('value', '10').attr('min', '0').attr('max', '100').style('margin-right', '20px')
+        e.append("label").text('Auto collapse at depth').attr('for', 'quantity')
+
+
+        d3.select("#quantity").on("change", () => {
+
+            this.start_collapse_depth = document.getElementById('quantity').value;
+
+            this.hierarchy_species.eachBefore(d => {
+                if (d._children) {
+                    d.children = d._children
+                    d._children = null;
+                }
+            })
+
+            this.hierarchy_species.eachAfter(d => {
+
+                if (this.start_collapse_depth <= d.depth) {
+
+                    if (d.children) {
+                        d._children = d.children;
+                        d.children = null;
+                    }
+
+                }
+
+
+            })
+
+            this.data_matrix = this._build_matrix()
+            this._render()
+            this._zoom_ping()
+
+
+        })
+
+
+        this.menu_export.append('button').attr('class', 'btn btn-sm btn-outline-dark').style('margin', '10px').append("div").text('Collapse all').on("click", d => {
+            this.expandAll()
+            this.start_collapse()
+
+        })
+
+
+        this.menu_export.append('button').attr('class', 'btn btn-sm btn-outline-dark').style('margin', '10px').append("div").text('Smart collapse').on("click", d => {
+            this.expandAll()
+            this.smart_collapse()
+        })
+
+
+        if (this.oma == true) {
+
+            var viewer = this;
+
+            var mod = document.createElement('div');
+            mod.innerHTML = `<div class="modal fade" id="matreex_add_hog" tabindex="-1" role="dialog" aria-labelledby="matreex_add_hogLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="matreex_add_hogLabel">Add additional HOG</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+          <div class="input-group mb-3" style="width: 400px;margin: auto;">
+  <input type="text" class="form-control" id="input_add_hog" placeholder="HOG:C0606207.2b.3b.3b" aria-label="" aria-describedby="basic-addon2">
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" type="button" id="AddHog">Add</button>
+  </div>
+</div>
+
+          <br>
+
+          <div class="text-center">
+               <b> Similar HOGs</b>
+              <small style="margin-bottom: 12px; display: block">(click to add) </small>
+
+          </div>
+
+
+
+          <ul style="list-style-type: none;padding-inline-start: 0" id="ul_similar_hog">
+
+
+
+          </ul>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>`
+            document.body.appendChild(mod);
+
+                $.ajax({
+        async: true,
+        url: "/api/hog/"+target_hog+"/similar_profile_hogs/?max_results=10",
+        success: function(data_sim) {
+
+            var ul = document.getElementById('ul_similar_hog')
+
+            for (const dataSimKey in data_sim['similar_profile_hogs']) {
+                var x = data_sim['similar_profile_hogs'][dataSimKey]
+
+                $.ajax({
+                    async: true,
+                    url: "/api/hog/" + x.hog_id+ "/",
+                    success: function (hoggy) {
+
+
+                        var li = document.createElement('li');
+                        li.setAttribute('class', 'item');
+                        li.innerHTML = hoggy[0].hog_id + " - " + hoggy[0].description
+                        li.style.cursor = 'pointer'
+                        ul.appendChild(li);
+                        li.addEventListener('click', () => { // add a click event listener
+                            $.ajax({
+                                async: false,
+                                url: "/oma/hog/" + hoggy[0].hog_id + "/matreex/json/",
+                                success: function(data){
+                                    viewer.add_tree(data)
+                                    viewer.start();
+                                    ul.removeChild(li);
+                                },
+                                error: function(jqXHR, statusText){
+                                    alert("could not load data for HOG "+hoggy[0].hog_id);
+                                }
+                            });
+                        });
+
+                    }
+
+
+                });
+            }
+
+        }
+    });
+
+            // add addHOg button behavior
+            document.getElementById('AddHog').addEventListener('click', () => { // add a click event listener
+                $.ajax({
+                    async: false,
+                    url: "/oma/hog/" + document.getElementById('input_add_hog').value+ "/matreex/json/", // todo
+                    success: function(data){
+                        //viewer.add_tree(JSON.parse(gt1))
+                        viewer.add_tree(data)
+                        viewer.start();
+                    }
+                });
+            });
+
+            $('#matreex_add_hog').modal({ show: false})
+
+        this.d3_container.append('button').attr('class', 'btn btn-sm btn-outline-dark')
+            .style('position', 'relative')
+            .style('top', '200px')
+            .style('left', (55 -this.d3_container.node().getBoundingClientRect().width/2) + 'px')
+            .html("<i class='bi-plus-lg'></i> Add hog").on("click", d => {
+            $('#matreex_add_hog').modal('show');
+              })
+
+
+
+        }
+
+        return div
+    }
+
+    _get_oma_species_tree() {
+
+        // Species tree
+        var full_species_tree;
+        $.ajax({
+            async: false,
+            url: "/All/genomes.json",
+            success: function (data) {
+                full_species_tree = data
+            }
+    });
+
+    return full_species_tree;
     }
 
     start(){
@@ -97,78 +431,15 @@ class Hog_placement {
         // initial zooming
         this._zoom_start()
 
-        //document.getElementById('quantity').max = this.max_depth;
-        //document.getElementById('quantity').value = this.start_collapse_depth;
+        this.add_legend()
 
-        //this.add_legend()
-
-        //this.start_collapse()
-
-         // Add action to button
-        /*
-        d3.select("#expandB").on("click", () => {
-            this.expandAll()
-
-            this.data_matrix = this.build_matrix2()
-            this.render()
-            this.recalibrate_position()
-        })
+        document.getElementById('quantity').max = this.max_depth;
+        document.getElementById('quantity').value = this.start_collapse_depth;
 
 
-        d3.select("#collapseB").on("click", () => {
-            this.expandAll()
-            this.start_collapse()
-            //this.data_matrix = this.build_matrix2()
-            //this.render()
-            //this.recalibrate_position()
-        })
+        this.start_collapse()
 
-        d3.select("#smartB").on("click", () => {
-            this.expandAll()
-            this.smart_collapse()
-        })
-
-
-        d3.select("#show_species").on("click", () => {
-            this.show_image = document.getElementById('show_species').checked;
-            //console.log(this.show_image)
-        })
-
-
-        d3.select("#quantity").on("change", () =>  {
-
-            this.start_collapse_depth = document.getElementById('quantity').value;
-
-            this.hierarchy_species.eachBefore(d => {
-                if (d._children) {
-                    d.children = d._children
-                    d._children = null;
-                }
-            })
-
-            this.hierarchy_species.eachAfter(d => {
-
-                if (this.start_collapse_depth <= d.depth){
-
-                    if (d.children) {
-                        d._children = d.children;
-                        d.children = null;
-                    }
-
-                }
-
-
-            })
-
-            this.data_matrix = this.build_matrix2()
-            this.render()
-            this.recalibrate_position()
-
-
-        })
-
-
-         */
+        this._search_autocomplete();
 
 
     }
@@ -273,7 +544,7 @@ class Hog_placement {
         d3.select('#g_genes_names').remove()
         d3.select('#g_matrix').remove()
         d3.select('#g_species_labels').remove()
-        d3.select('#g_species_names').remove()
+        d3.select('#g_species_name').remove()
 
         this._grid_position();
 
@@ -283,9 +554,9 @@ class Hog_placement {
 
         this._render_species_tree()
 
-        this._render_species_names()
-
         this._render_gene_tree()
+
+        this._render_species_names()
 
         this._render_genes_labels()
 
@@ -293,7 +564,141 @@ class Hog_placement {
 
         this._build_zoom()
 
+        this._render_highlight()
 
+
+    }
+
+    _render_highlight(){
+
+        function visitPostOrder(node) {
+
+             if( node._children || (node.parent && node.parent.invisible)) {
+                for (var i = 0; i < node._children.length; i++) {
+                    node._children[i].invisible = true;
+                }
+
+            if (node.children) {
+                node.children.forEach(visitPostOrder);
+            }
+            if (node._children) {
+                node._children.forEach(visitPostOrder);
+            }
+
+        }
+}
+        function visitPreOrder(node) {
+
+            if (node.children) {
+                node.children.forEach(visitPreOrder);
+            }
+            if (node._children) {
+                node._children.forEach(visitPreOrder);
+            }
+
+            if (node.data.hasOwnProperty('gene')) {
+                    if (that.highlight.includes(node.data.gene)) {
+                        node.is_selected = true
+                    }
+                }
+            else if (node.data.hasOwnProperty('HOG')) {
+                    if (that.highlight.includes(node.data.HOG)) {
+                        node.is_selected = true
+                    }
+            }
+
+            else if (node.data.hasOwnProperty('name')){
+                if (that.highlight.includes(node.data.name)) {
+               node.is_selected = true
+           }
+            }
+
+          if (( node.is_selected ||  node.hasSelectedDescendant) && node.parent) {
+            node.parent.hasSelectedDescendant = true;
+                }
+
+        }
+
+        var that = this
+
+
+        // ROW
+
+        this.root_genes.each((row, index) => {
+             row.row_number = index;
+             row.is_selected = false;
+             row.hasSelectedDescendant = false;
+             row.invisible = false;
+         })
+
+        visitPostOrder(this.root_genes);
+
+        visitPreOrder(this.root_genes);
+
+        this.m_highlight_row.selectAll(".rowhighlight")
+            .data(this.root_genes.descendants())
+            .join("g")
+            .append("rect")
+            .filter(d => {
+
+                if (d.invisible) {return}
+
+                if (d.is_selected || (d.hasSelectedDescendant && d._children)) {
+                        return d
+                    }
+
+            })
+            .attr("x",  (d) => {
+                return - 200
+            })
+            .attr("y",  (d) =>  {
+                return d.x  + this.grid.y_offset_gt + this.cell_size
+            })
+            .attr("width", 10000)
+            .attr("height", this.cell_size)
+            .style("fill",  (d) => {
+                return d.is_selected ? 'rgba(0, 100, 200, 0.1)' : 'rgba(0, 100, 200, 0.05)'
+            })
+
+
+        // COLUMN
+
+        this.root_species.each((row, index) => {
+             row.row_number = index;
+             row.is_selected = false;
+             row.hasSelectedDescendant = false;
+             row.invisible = false;
+         })
+
+        visitPostOrder(this.root_species);
+
+        visitPreOrder(this.root_species);
+
+        this.m_highlight_col.selectAll(".colhighlight")
+            .data(this.root_species.descendants())
+            .join("g")
+            .append("rect")
+            .filter(d => {
+
+                if (d.invisible) {return}
+
+                if (d.is_selected || (d.hasSelectedDescendant && d._children)) {
+                        return d
+                    }
+
+            })
+            .attr("x",  (d) => {
+                return  this.grid.species_tree_height_raw + this.minX_root_species - d.x + 0.5*this.cell_size
+            })
+            .attr("y",  (d) =>  {
+                return 0
+            })
+            .attr("width", this.cell_size)
+            .attr("height", this.g_mg.node().getBoundingClientRect().height + this.cell_size)
+            .style("fill",  (d) => {
+                return d.is_selected ? 'rgba(0, 100, 200, 0.1)' : 'rgba(0, 100, 200, 0.05)'
+
+            })
 
     }
 
@@ -303,33 +708,28 @@ class Hog_placement {
             .on('zoom', (event) => {
 
                 // Set extant of scale and translate
-                //event.transform.x = this._clamp(event.transform.x, (-this.grid.board_width+20) / event.transform.k, (this.grid.board_width-20) / event.transform.k)
-                //event.transform.y = this._clamp(event.transform.y, -this.grid.board_height+20, this.grid.board_height-20)
+                event.transform.y = this._clamp(event.transform.y,this.grid.board_height - this.grid.genes_tree_height_raw*event.transform.k -40*event.transform.k,0)
+                event.transform.x = this._clamp(event.transform.x,this.grid.board_width - this.grid.species_tree_height_raw*event.transform.k -40*event.transform.k,0)
                 event.transform.k  = this._clamp(event.transform.k, this.ratio_zoom, 5)
                 this.zoom_transform = event.transform;
 
                 // Compute label subsampling ratio
                 this.sub_sampling_ratio = Math.ceil(this.leaf_font_size / (this.cell_size * this.zoom_transform.k));
 
-
                 if (event.sourceEvent){
 
-                    console.log(event.sourceEvent.offsetY, this.grid.starty_gt)
-
-                    if (event.sourceEvent.offsetX < this.grid.startx_st){
+                    // GENE TREE
+                    if (event.sourceEvent.offsetX < this.grid.startx_st && event.sourceEvent.offsetY > this.grid.starty_gt){
                         this.gene_tree_x_translate +=  -event.sourceEvent.movementX
                         this.gene_tree_x_translate = this._clamp( this.gene_tree_x_translate, -this.grid.genes_tree_width_raw*this.zoom_transform.k + 10*this.zoom_transform.k + this.genes_tree_width , 0)
                         this.zoom_transform.x = this.old_transform.x;
-
                     }
 
-                    else if (event.sourceEvent.offsetY < this.grid.starty_gt){
-
-                        console.log(event.sourceEvent.movementY);
+                    // SPECIES TREE
+                    else if (event.sourceEvent.offsetY < this.grid.starty_gt && event.sourceEvent.offsetX > this.grid.startx_st){
                         this.species_tree_x_translate +=  -event.sourceEvent.movementY
                         this.species_tree_x_translate = this._clamp( this.species_tree_x_translate, -this.grid.species_tree_width_raw*this.zoom_transform.k + 10*this.zoom_transform.k + this.species_tree_width , 0)
                         this.zoom_transform.y = this.old_transform.y;
-
                     }
                 }
 
@@ -340,9 +740,13 @@ class Hog_placement {
                 mat_tr.y = this.zoom_transform.y - this.cell_size* this.zoom_transform.k;
                 this.m.attr('transform', mat_tr);
 
+
+                this.m_highlight_row.attr('transform', mat_tr);
+                this.m_highlight_col.attr('transform', mat_tr);
+
+
                 // SPECIES TREE
                 this._zoom_update_species_tree()
-
 
                 // SPECIES TREE NAME
                 this._zoom_update_species_name()
@@ -597,8 +1001,16 @@ class Hog_placement {
             .attr("x", 0)
           .attr("y", 0)
 
+          var real_depth =  0;
+
+        this.hierarchy_species.each((node) => {
+
+            real_depth = !this.isNodeHidden(node) && node.depth > real_depth ? node.depth : real_depth;
+
+        });
+
         this.root_species = d3.cluster()
-            .nodeSize([this.cell_size, (this.species_tree_width/this.ratio_zoom) / (this.hierarchy_genes.height + 1)])
+            .nodeSize([this.cell_size, (this.species_tree_width/this.ratio_zoom) / (real_depth + 1)])
             .separation(() =>  { return 1})
             (this.hierarchy_species);
 
@@ -626,13 +1038,10 @@ class Hog_placement {
             .attr("cy", d => d.x )
             .attr("fill", d => d.children || d._children ? "#555" : "#999")
             .attr("r", 8)
-            /*
-            .on("mouseover", (d,i) => {this.handleMouseOver(d.target)})
-            .on("mouseout", (d,i) => this.handleMouseOut(d.target))
-
-             */
-
-
+        .on("click", (event, d) => {
+                this.collapse(d)
+                this.collapse_gene_by_species_name(d)
+            })
 
         this.tree_target.append("g")
             .selectAll(".colLabelg")
@@ -659,6 +1068,18 @@ class Hog_placement {
         this.grid.species_tree_width_raw = this.tree_target.node().getBoundingClientRect().width
         this.grid.species_tree_height_raw = this.tree_target.node().getBoundingClientRect().height
 
+        this.minX_root_species = Infinity;
+        this.maxX_root_species = -Infinity;
+
+        this.root_species.each(node => {
+            if (node.x < this.minX_root_species) {
+                this.minX_root_species = node.x;
+            }
+            if (node.x > this.maxX_root_species) {
+                this.maxX_root_species = node.x;
+            }
+        });
+
     }
 
     _render_matrix(){
@@ -674,19 +1095,29 @@ class Hog_placement {
           .attr("y", 0);
 
 
-
         this.g_mg = this.G.append('g').attr('id', 'g_matrix').
         attr("transform", `translate(${this.grid.startx_st}, ${this.grid.starty_gt })`)
         .attr("clip-path", "url(#clip)")
 
+         this.m_highlight_row = this.g_mg.append('g')
+             .attr('class', 'highlight_row')
+            .attr("x", 0)
+            .attr("y", 0)
+             .attr('width', this.grid.board_width)
+                .attr('height', this.grid.board_height)
 
+        this.m_highlight_col = this.g_mg.append('g')
+             .attr('class', 'highlight_col')
+            .attr("x", 0)
+            .attr("y", 0)
+             .attr('width', this.grid.board_width)
+                .attr('height', this.grid.board_height)
 
          this.m = this.g_mg.append('g')
             .attr("x", 0)
             .attr("y", 0)
              .attr('width', this.grid.board_width)
                 .attr('height', this.grid.board_height)
-
 
         this.m.selectAll("rect")
             .data(this.data_matrix, function (d) {
@@ -709,7 +1140,6 @@ class Hog_placement {
                 if (d.value === "0.0") {return this.color_scale[d.c](0.0000001)}
                 return this.color_scale[d.c](d.value)
             })
-
 
 
         var valuesText = this.m.selectAll("text")
@@ -746,7 +1176,6 @@ class Hog_placement {
             })
 
 
-
         this.m.selectAll("g")
             .data(this.data_matrix, function (d) {
                 return d.row + ":" + d.col;
@@ -768,9 +1197,7 @@ class Hog_placement {
 
                 var hid = node.hog_id.includes('HOG:') ? node.hog_id : node.HOG_name
 
-                console.log(hid, node.taxon_name)
-
-                //this._click_square(event, hid, node.taxon_name )
+                this._click_square(event, hid, node.taxon_name )
 
             })
             .on("mouseover", (event, d) => {
@@ -869,10 +1296,10 @@ class Hog_placement {
 
             })
 
-
-
-
         this.ratio_zoom = (this.grid.board_width -20) / this.m.node().getBoundingClientRect().width;
+
+
+
 
 
     }
@@ -898,8 +1325,16 @@ class Hog_placement {
             .attr("x", 0)
           .attr("y", 0)
 
+        var real_depth =  0;
+
+        this.hierarchy_genes.each((node) => {
+
+            real_depth = !this.isNodeHidden(node) && node.depth > real_depth ? node.depth : real_depth;
+
+        });
+
         this.root_genes = d3.cluster()
-            .nodeSize([this.cell_size, (this.genes_tree_width/this.ratio_zoom) / (this.hierarchy_genes.height + 1)])
+            .nodeSize([this.cell_size, (this.genes_tree_width/this.ratio_zoom) / (real_depth + 1)])
             .separation(() =>  { return 1})(this.hierarchy_genes);
 
         // annotate whole tree with placement tag
@@ -1028,6 +1463,7 @@ class Hog_placement {
 
 
         // need to update grid ofsset depending on the tree size
+        this.grid.genes_tree_height_raw = this.gene_target.node().getBoundingClientRect().height
         this.grid.genes_tree_width_raw = this.gene_target.node().getBoundingClientRect().width
         this.grid.y_offset_gt = -this.rows[0].x
 
@@ -1118,6 +1554,7 @@ class Hog_placement {
             .data(this.hierarchy_genes.leaves())
             .enter()
             .append("text")
+            .style("font-family", "monospace")
             .attr("font-weight", (d) => {
                 return d._children  ? 700 : 300
             })
@@ -1151,6 +1588,12 @@ class Hog_placement {
 
     _render_species_names(){
 
+        d3.select(".tooltip").remove()
+
+        var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
          this.SVG.append("defs").append("SVG:clipPath")
           .attr("id", "clip6")
           .append("SVG:rect")
@@ -1173,6 +1616,7 @@ class Hog_placement {
             .data(this.hierarchy_species.leaves())
             .enter()
             .append("text")
+            .style("font-family", "monospace")
             .style("fill", (d) => {
                 if(d.data.matrix_color){return d.data.matrix_color} else {return 'black';}
             })
@@ -1184,7 +1628,6 @@ class Hog_placement {
             .attr("y", (d, i) => { return (i + 0.5) * this.cell_size +  0.5*this.leaf_font_size})
             .style("text-anchor", "start")
             .each((d,i,nodes) => this.wrap(nodes[i],this.species_name_width))
-            /*
             .on("mouseover", (event, d) => {
                 if (this.show_image){ (async() => {
 
@@ -1210,6 +1653,7 @@ class Hog_placement {
 
         div.transition()
             .duration(200)
+             .style("display", 'block')
             .style("opacity", 1);
 
         div.html("<b>" + d.data.taxon + "</b>" )
@@ -1226,7 +1670,6 @@ class Hog_placement {
 
 
 
-
     })();
                 event.target.innerHTML = d.data.taxon}
             })
@@ -1234,10 +1677,10 @@ class Hog_placement {
                 this.wrap(event.target, this.gene_name_width)
                 div.transition()
                     .duration(250)
-                    .style("opacity", 0);
+                    .style("opacity", 0)
+                    .style("display", 'none');
             })
 
-             */
 
 
 
@@ -1292,6 +1735,25 @@ class Hog_placement {
         this.build_data_gene_tree()
     }
 
+    add_tree_oma_api(id){
+
+        var tree;
+
+        $.ajax({
+            async: false,
+            url: "/oma/hog/"+id+"/matreex/json/",
+            success: function(data){
+                tree = data
+            }
+        });
+
+
+        var tree_filtered = this.remove_single_level(tree);
+
+        this.data_gene_tree_list.push(tree_filtered)
+        this.build_data_gene_tree()
+    }
+
     remove_single_level(o) {
 
         if(o["children"]){
@@ -1331,6 +1793,58 @@ class Hog_placement {
 
     }
 
+    get_gene_tree_list_name(o, array) {
+
+        var array = array
+
+        if (o["children"]) {
+
+            for (var c in o["children"]) {
+
+                var child = o["children"][c]
+
+                array = this.get_gene_tree_list_name(child, array)
+
+                if (child.hasOwnProperty('gene')){
+                    array.push(child.gene)
+                }
+
+                else if (child.hasOwnProperty('HOG')){
+                    array.push(child.HOG)
+                }
+
+            }
+
+        }
+
+        return array
+
+    }
+
+    get_species_tree_list_name(o, array) {
+
+        var array = array
+
+        if (o["children"]) {
+
+            for (var c in o["children"]) {
+
+                var child = o["children"][c]
+
+                array = this.get_species_tree_list_name(child, array)
+
+                array.push(child.name)
+
+            }
+
+        }
+
+        return array
+
+    }
+
+
+
     build_data_gene_tree() { // TODO
 
         this.data_gene_tree = {
@@ -1343,14 +1857,7 @@ class Hog_placement {
 
     }
 
-    //
-
-
-
     add_legend(){
-
-
-
 
         this.SVG.append("text")
             .text(function (d) {return "\u2731"
@@ -1358,15 +1865,13 @@ class Hog_placement {
             .attr('fill', '#555')
             .style("font-size", "25px")
             .attr('x', this.gutter)
-            .attr('y', this.gutter + 20)
+            .attr('y', this.gutter + 40)
             .style("text-anchor", "start")
-
-
 
 
         this.SVG.append('text')
             .attr('x',  this.gutter + 20 + 8)
-            .attr('y', this.gutter + 20 - 4 )
+            .attr('y', this.gutter + 40 - 4 )
             .text('Duplication')
 
 
@@ -1377,12 +1882,12 @@ class Hog_placement {
             .attr('fill', '#555')
             .style("font-size", "18px")
             .attr('x', this.gutter)
-            .attr('y', 2*this.gutter + 38)
+            .attr('y', 2*this.gutter + 58)
             .style("text-anchor", "start")
 
         this.SVG.append('text')
             .attr('x',  this.gutter + 20 + 8)
-            .attr('y', 2*this.gutter + 40 - 4 )
+            .attr('y', 2*this.gutter + 60 - 4 )
             .text('Loss')
 
 
@@ -1392,16 +1897,17 @@ class Hog_placement {
             .attr('fill', '#555')
             .style("font-size", "32px")
             .attr('x', this.gutter)
-            .attr('y', 3*this.gutter + 60)
+            .attr('y', 3*this.gutter + 80)
             .style("text-anchor", "start")
 
         this.SVG.append('text')
             .attr('x',  this.gutter + 20 + 8)
-            .attr('y', 3 * this.gutter + 60 - 4 )
+            .attr('y', 3 * this.gutter + 80 - 4 )
             .text('HGT')
 
 
     }
+
 
 
     //
@@ -1511,9 +2017,13 @@ class Hog_placement {
 
         })
 
-        if(render_loop){this.data_matrix = this._build_matrix()
+        if(render_loop){
+
+            this.data_matrix = this._build_matrix()
 
             this._render()
+
+            this._zoom_ping()
 
             //this.recalibrate_position()
              }
@@ -1549,10 +2059,9 @@ class Hog_placement {
 
     wrap(node, size) {
 
-
         var self = d3.select(node),text = self.text();
 
-        var l = Math.floor(this.gene_name_width/10)
+        var l = Math.floor(size/8);
 
         if (text.length > l){
             text = text.slice(0,l)
@@ -1573,15 +2082,8 @@ class Hog_placement {
          */
     }
 
-    handleMouseOver(d){
-        d3.select(d).attr('fill', "green")
-    }
 
-    handleMouseOut(d){
-        d3.select(d).attr('fill', this.node_color)
-    }
-
-    //
+    // UTILS
 
     between(x, min, max) {
       return x >= min && x <= max;
@@ -1752,6 +2254,7 @@ class Hog_placement {
 
         this.data_matrix = this._build_matrix()
         this._render()
+        this._zoom_ping()
         //this.recalibrate_position()
 
 
@@ -1845,6 +2348,7 @@ class Hog_placement {
 
         this.data_matrix = this._build_matrix()
         this._render()
+        this._zoom_ping()
     }
 
     update_svg_size_responsive(){
@@ -1852,7 +2356,7 @@ class Hog_placement {
         this.start();
     }
 
-     render_tooltip(x, y, menu) {
+    render_tooltip(x, y, menu) {
 
          d3.select(".tooltip").remove()
 
@@ -1861,11 +2365,12 @@ class Hog_placement {
             .attr("class", "tooltip")
             .style("background-color", "white")
             .style("border", "solid")
+             .style("border-color", "#666")
             .style("border-width", "1px")
-            .style("border-radius", "4px")
+            .style("border-radius", "2px")
             .style("padding", "8px")
             .style("position", "absolute")
-            .style("font-size", '16px')
+            .style("font-size", '12px')
             .style("z-index", '900')
 
 
@@ -1939,6 +2444,24 @@ class Hog_placement {
     call_back_hog_detail(hog,level){
 
     }
+
+    isNodeHidden(node) {
+    // Start with the node itself
+    var currentNode = node;
+
+    // Traverse up the tree
+    while(currentNode.parent) {
+        currentNode = currentNode.parent;
+
+        // If the parent node is collapsed, then this node is hidden
+        if(currentNode._children) {
+            return true;
+        }
+    }
+
+    // If we traversed up the tree and didn't find a collapsed parent, the node is not hidden
+    return false;
+}
 
 }
 
