@@ -1,5 +1,6 @@
-var start = Date.now();
-var millis = Date.now() - start;
+
+
+
 
 function defaultDict() {
     this.get = function (key) {
@@ -13,43 +14,420 @@ function defaultDict() {
 
 class Hog_placement {
 
-    constructor(div_id, data_species_tree) {
+    constructor(div_id, data_species_tree, oma=false) {
+
 
         // Settings
         this.cell_size = 30;
         this.gutter = 20;
-        this.species_tree_width = 400;
-        this.genes_tree_width = 400;
-        this.gene_label_width = 300;
+        this.species_tree_width = 100;
+        this.genes_tree_width = 100;
+        this.gene_label_width = 150;
         this.species_label_width = 170;
-        this.gene_name_width = 300;
-        this.species_name_width = 200;
+        this.gene_name_width = 100;
+        this.species_name_width = 100;
         this.start_collapse_depth= 10;
         this.max_depth = 0;
         this.show_image = true;
-
-        // UI
+        this.min_width = 600;
+        this.min_heigth = 600;
         this.node_color = "#999"
         this.color_cell_zero = "#f8f8f8"
+        this.gene_name_padding_left = 5;
+        this.leaf_font_size = 10
+        this.zoom_transform = null;
+        this.sub_sampling_ratio = 1;
+        this.crosshair_width = 2;
+        this.gene_tree_x_translate = 0;
+        this.species_tree_x_translate = 0;
+        this.old_transform = d3.zoomIdentity;
+        this.ratio_zoom = null;
+        this.oma = oma;
+        this.highlight = [];
+
+
+        // UTILS METRICS
+        this.grid = null;
 
         // Data
-        this.data_species_tree = data_species_tree
-        this.data_gene_tree_list = []
+        this.data_species_tree = data_species_tree == 'oma' ? this._get_oma_species_tree() : data_species_tree;
+        this.data_gene_tree_list = [];
+        this.cols = null;
+
         this.data_gene_tree = null;
+        this.rows = null;
 
         // Container
         this.container_id = div_id
         this.d3_container = d3.select("#" + this.container_id)
         this.container_size = this.d3_container.node().getBoundingClientRect()
 
+        this._add_menu_button()
+
+    }
+
+    _search_autocomplete(){
+
+        var lookup = []
+        lookup = lookup.concat(this.get_gene_tree_list_name(this.data_gene_tree, []))
+        lookup = lookup.concat(this.get_species_tree_list_name(this.data_species_tree, []))
+        lookup = [...new Set(lookup)];
+
+    $('#input_search').autocomplete({
+        lookup: lookup,
+        onSelect:  (suggestion) =>  {
+            this._add_to_highlight_list(suggestion.value);
+        }
+    });
+
+    }
+
+
+    _add_to_highlight_list(d){
+        this.highlight.push(d)
+        this.highlight =  [...new Set(this.highlight)];
+
+        this._render()
+        this._zoom_ping()
+
+
+
+    }
+
+    _add_menu_button() {
+
+        var div = this.d3_container.append("div").attr("class", "corner_placeholder")
+            .style("position", 'absolute')
+            .style("margin", '48px')
+            .style("margin-top", '28px')
+            .style("z-index", '9999')
+            .style("right", '0px')
+
+           var search = div.append('div').attr('id','dfg')
+
+            document.getElementById('dfg').innerHTML = '<div class="input-group mb-3">\n' +
+            '  <input type="text" class="form-control" id="input_search" placeholder="Search for HOG, gene or taxa" aria-label="Search for HOG, gene or taxa" aria-describedby="basic-addon2">\n' +
+            '  <div class="input-group-append">\n' +
+            '    <button class="btn btn-outline-danger" type="button" id="reset_search_button">Reset</button>\n' +
+            '    <button class="btn btn-outline-secondary" type="button" id="search_button">Highlight</button>\n' +
+            '  </div>\n' +
+            '</div>'
+
+
+        document.getElementById('search_button').addEventListener('click', () => {
+            let search_ = document.querySelector('#input_search').value;
+            this._add_to_highlight_list(search_);
+
+        })
+
+        document.getElementById('reset_search_button').addEventListener('click', () => {
+            this.highlight = [];
+            this._render()
+            this._zoom_ping()
+        })
+
+
+        this.tr_buttons = div.append("div").attr("class", "tr-button")
+            .style("right", 0)
+            .style("position", 'absolute')
+
+
+        this.tr_menus = div.append("div").attr("class", "tr-menus")
+            .style('position', 'absolute')
+            .style('top', '126px')
+            .style('right', '0')
+
+
+        // add the button
+        var ex_b = this.tr_buttons.append('button')
+            .attr('id', 'button_export')
+
+        var divybuty = ex_b.attr('class', ' square_button')
+            .style('border-radius', '8px')
+            .style('border', 'none')
+            .style('padding', '8px')
+            .style('cursor', 'pointer')
+            .style('background-color', '')
+            .style('color', '#555')
+            .style('width', '56px')
+            .style('height', '56px')
+            .on("click", d => {
+
+                if (this.menu_export.style('display') === 'none') {
+                    ex_b.style('background-color', '#CCC');
+                    return this.menu_export.style("display", 'block')
+                }
+                ex_b.style('background-color', 'rgba(239, 239, 239, 0.95)');
+                return this.menu_export.style("display", 'none')
+            })
+            .on("mouseover", d => {
+                ex_b.style('background-color', '#ddd');
+            })
+            .on("mouseout", d => {
+                ex_b.style('background-color', 'rgba(239, 239, 239, 0.95)');
+
+            })
+
+        divybuty.append("div")
+            .attr("class", "label")
+            .append('i')
+            .style('color', '#888')
+            .attr('class', ' fas fa-cog')
+
+        divybuty.append('p')
+            .text('Settings')
+            .style('font-size', 'xx-small')
+
+
+        this.tooltip_export = new bootstrap.Tooltip(document.getElementById('button_export'))
+
+
+        // add the sub menu container
+        this.menu_export = this.tr_menus.append('div')
+            .style("background-color", 'rgba(239, 239, 239, 0.98)')
+            .attr('class', 'menu_export')
+            .style('display', 'none')
+            .style('padding', '8px')
+            .style('width', '300px')
+
+
+        var d = this.menu_export.append('div').style('margin', '10px')
+
+        d.append("input").attr('type', 'checkbox').attr('id', 'show_species').attr('checked', 'checked').style('display', 'inline-block')
+        d.append("label").text('Show species thumbnail').attr('for', 'show_species').style('margin-left', '10px').style('display', 'inline-block')
+
+
+        d3.select("#show_species").on("click", () => {
+            this.show_image = document.getElementById('show_species').checked;
+
+        })
+
+        var e = this.menu_export.append('div').style('margin', '10px')
+
+        e.append("input").attr('type', 'number').attr('id', 'quantity').attr('name', 'quantity').attr('value', '10').attr('min', '0').attr('max', '100').style('margin-right', '20px')
+        e.append("label").text('Auto collapse at depth').attr('for', 'quantity')
+
+
+        d3.select("#quantity").on("change", () => {
+
+            this.start_collapse_depth = document.getElementById('quantity').value;
+
+            this.hierarchy_species.eachBefore(d => {
+                if (d._children) {
+                    d.children = d._children
+                    d._children = null;
+                }
+            })
+
+            this.hierarchy_species.eachAfter(d => {
+
+                if (this.start_collapse_depth <= d.depth) {
+
+                    if (d.children) {
+                        d._children = d.children;
+                        d.children = null;
+                    }
+
+                }
+
+
+            })
+
+            this.data_matrix = this._build_matrix()
+            this._render()
+            this._zoom_ping()
+
+
+        })
+
+
+        this.menu_export.append('button').attr('class', 'btn btn-sm btn-outline-dark').style('margin', '10px').append("div").text('Collapse all').on("click", d => {
+            this.expandAll()
+            this.start_collapse()
+
+        })
+
+
+        this.menu_export.append('button').attr('class', 'btn btn-sm btn-outline-dark').style('margin', '10px').append("div").text('Smart collapse').on("click", d => {
+            this.expandAll()
+            this.smart_collapse()
+        })
+
+
+        if (this.oma == true) {
+
+            var viewer = this;
+
+            var mod = document.createElement('div');
+            mod.innerHTML = `<div class="modal fade" id="matreex_add_hog" tabindex="-1" role="dialog" aria-labelledby="matreex_add_hogLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="matreex_add_hogLabel">Add additional HOG</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+          <div class="input-group mb-3" style="width: 400px;margin: auto;">
+  <input type="text" class="form-control" id="input_add_hog" placeholder="HOG:C0606207.2b.3b.3b" aria-label="" aria-describedby="basic-addon2">
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" type="button" id="AddHog">Add</button>
+  </div>
+</div>
+
+          <br>
+
+          <div class="text-center">
+               <b> Similar HOGs</b>
+              <small style="margin-bottom: 12px; display: block">(click to add) </small>
+
+          </div>
+
+
+
+          <ul style="list-style-type: none;padding-inline-start: 0" id="ul_similar_hog">
+
+
+
+          </ul>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>`
+            document.body.appendChild(mod);
+
+            $.ajax({
+                async: true,
+                url: "/api/hog/" + target_hog + "/similar_profile_hogs/?max_results=10",
+                success: function (data_sim) {
+
+                    var ul = document.getElementById('ul_similar_hog')
+
+                    for (const dataSimKey in data_sim['similar_profile_hogs']) {
+                        var x = data_sim['similar_profile_hogs'][dataSimKey]
+
+                        $.ajax({
+                            async: true,
+                            url: "/api/hog/" + x.hog_id + "/",
+                            success: function (hoggy) {
+
+
+                                var li = document.createElement('li');
+                                li.setAttribute('class', 'item');
+                                li.innerHTML = hoggy[0].hog_id + " - " + hoggy[0].description
+                                li.style.cursor = 'pointer'
+                                ul.appendChild(li);
+                                li.addEventListener('click', () => { // add a click event listener
+                                    $.ajax({
+                                        async: false,
+                                        url: "/oma/hog/" + hoggy[0].hog_id + "/matreex/json/",
+                                        success: function (data) {
+                                            viewer.add_tree(data)
+                                            viewer.start();
+                                            ul.removeChild(li);
+                                        },
+                                        error: function (jqXHR, statusText) {
+                                            alert("could not load data for HOG " + hoggy[0].hog_id);
+                                        }
+                                    });
+                                });
+
+                            }
+
+
+                        });
+                    }
+
+                }
+            });
+
+            // add addHOg button behavior
+            document.getElementById('AddHog').addEventListener('click', () => { // add a click event listener
+                $.ajax({
+                    async: false,
+                    url: "/oma/hog/" + document.getElementById('input_add_hog').value + "/matreex/json/", // todo
+                    success: function (data) {
+                        //viewer.add_tree(JSON.parse(gt1))
+                        viewer.add_tree(data)
+                        viewer.start();
+                    }
+                });
+            });
+
+            $('#matreex_add_hog').modal({show: false})
+
+            this.d3_container.append('button').attr('class', 'btn btn-sm btn-outline-dark')
+                .style('position', 'relative')
+                .style('float', 'left')
+                .style('top',  (this.species_tree_width + this.species_name_width) + 'px')
+                .style('left', this.genes_tree_width + 'px')
+                .html("<i class='fas fa-plus' style = \"color: rgb(136, 136, 136);\"></i> Add hog").on("click", d => {
+                $('#matreex_add_hog').modal('show');
+            })
+
+
+        }
+
+        return div
+    }
+
+    _get_oma_species_tree() {
+
+        // Species tree
+        var full_species_tree;
+        $.ajax({
+            async: false,
+            url: "/All/genomes.json",
+            success: function (data) {
+                full_species_tree = data
+            }
+    });
+
+    return full_species_tree;
     }
 
     start(){
 
         d3.select(".tooltip").remove()
 
+        // build species tree hierarchy
+        this._create_hierarchy_species();
+
+        // Build gene tree hierarchy
+        this._create_hierarchy_genes();
+
+        // Create maste r SVG
+        this._create_svg()
+
+        // Render the viewers
+        this._render()
+
+        // initial zooming
+        this._zoom_start()
+
+        this.add_legend()
+
+        document.getElementById('quantity').max = this.max_depth;
+        document.getElementById('quantity').value = this.start_collapse_depth;
+
+
+        this.start_collapse()
+
+        this._search_autocomplete();
+
+
+    }
+
+    _create_hierarchy_species() {
+
         // Build species tree hierarchy
-         this.hierarchy_species = d3.hierarchy(this.data_species_tree );
+        this.hierarchy_species = d3.hierarchy(this.data_species_tree);
 
         var rootlist = this.data_gene_tree_list.map(hog => hog.taxon)
 
@@ -69,8 +447,6 @@ class Hog_placement {
 
         this.hierarchy_species = pruned_species_tree ? pruned_species_tree : this.hierarchy_species
 
-        this.cols = this.hierarchy_species.leaves().reverse()
-
         this.max_depth = 0
 
         this.hierarchy_species.each(d => {
@@ -88,964 +464,387 @@ class Hog_placement {
 
         })
 
-        document.getElementById('quantity').max = this.max_depth;
-        document.getElementById('quantity').value = this.start_collapse_depth;
-
-        // Build gene tree hierarchy
-        this.hierarchy_genes = d3.hierarchy(this.data_gene_tree);
-
-        this.rows = this.hierarchy_genes.leaves()
-
-        // Build matrix
-        this.data_matrix = this.build_matrix2()
-
-        // PANEL LAYOUT
-        this.gt_h = this.m_h = this.lgt_h =  this.cell_size * this.rows.length;
-        this.m_w = this.lst_h =  this.st_h = this.cell_size * this.cols.length;
-        this.gt_w = this.genes_tree_width;
-        this.st_w = this.species_tree_width;
-        this.lgt_w = this.gene_label_width;
-        this.lst_w = this.species_label_width;
-        this.ngt_w = this.gene_name_width;
-        this.nst_w = this.species_name_width;
-
-        // CREATE LABELS COLOR SCALE
+         // CREATE LABELS COLOR SCALE
         var list_label = []
         this.hierarchy_species.each(d => {d.data.description ? list_label.push(d.data.description): null})
         var dsc = [new Set(list_label)];
         this.speciesColor = d3.scaleOrdinal().domain(dsc).range(d3.schemePaired);
 
+    }
+
+    _create_hierarchy_genes() {
+
+        this.hierarchy_genes = d3.hierarchy(this.data_gene_tree);
 
         var list_label = []
         this.hierarchy_genes.each(d => {d.data.description ? list_label.push(d.data.description): null})
         var dgc = [new Set(list_label)];
         this.genesColor = d3.scaleOrdinal().domain(dgc).range(d3.schemePaired);
-
-
-        this.create_svg()
-
-        this.add_legend()
-
-        var start = Date.now();
-
-        this.render()
-
-        var millis = Date.now() - start;
-        //console.log(`seconds  render = ${(millis / 1000)}`);
-
-
-        var start = Date.now();
-
-        this.start_collapse()
-
-        var millis = Date.now() - start;
-        //console.log(`seconds  collapse = ${(millis / 1000)}`);
-
-
-        // Add action to button
-        /*
-        d3.select("#expandB").on("click", () => {
-            this.expandAll()
-
-            this.data_matrix = this.build_matrix2()
-            this.render()
-            this.recalibrate_position()
-        })
-
-         */
-        d3.select("#collapseB").on("click", () => {
-            this.expandAll()
-            this.start_collapse()
-            //this.data_matrix = this.build_matrix2()
-            //this.render()
-            //this.recalibrate_position()
-        })
-
-        d3.select("#smartB").on("click", () => {
-            this.expandAll()
-            this.smart_collapse()
-        })
-
-
-        d3.select("#show_species").on("click", () => {
-            this.show_image = document.getElementById('show_species').checked;
-            //console.log(this.show_image)
-        })
-
-
-        d3.select("#quantity").on("change", () =>  {
-
-            this.start_collapse_depth = document.getElementById('quantity').value;
-
-            this.hierarchy_species.eachBefore(d => {
-                if (d._children) {
-                    d.children = d._children
-                    d._children = null;
-                }
-            })
-
-            this.hierarchy_species.eachAfter(d => {
-
-                if (this.start_collapse_depth <= d.depth){
-
-                    if (d.children) {
-                        d._children = d.children;
-                        d.children = null;
-                    }
-
-                }
-
-
-            })
-
-            this.data_matrix = this.build_matrix2()
-            this.render()
-            this.recalibrate_position()
-
-
-        })
-
-        // initial zoom
-
-        var svg_s = this.SVG.node().getBoundingClientRect()
-        var G_s = this.G.node().getBoundingClientRect()
-
-        var ratio_zoom = (svg_s.width - 50) / G_s.width;
-        var y_offset = ((svg_s.height * ratio_zoom) -  (G_s.height * ratio_zoom)) / 2;
-        y_offset += (svg_s.height * ratio_zoom)/2;
-
-        var t = d3.zoomIdentity.translate(25,y_offset ).scale(ratio_zoom);
-
-        this.SVG.call(this.zoom.transform, t);
-
-
-
-
     }
 
-    augment_species_tree(mapping){
-
-        function traverse(o) {
-
-            if ('name' in o && o['name']  in mapping){
-
-                var e = mapping[o['name']];
-
-                for (const eKey in e) {
-                    o[eKey] = e[eKey]
-
-                }
-            }
-
-            for (var i in o) {
-
-                if (!!o[i] && typeof(o[i])=="object") {
-
-                    traverse(o[i]);
-                }
-            }
-        }
-
-        traverse(this.data_species_tree)
-
-    }
-
-    add_tree(tree){
-
-        var tree_filtered = this.remove_single_level(tree);
-
-        this.data_gene_tree_list.push(tree_filtered)
-        this.build_data_gene_tree()
-    }
-
-    remove_single_level(o) {
-
-        if(o["children"]){
-
-            var to_remove = [];
-
-            for (var c in o["children"] ) {
-
-                var child = o["children"][c]
-
-                child = this.remove_single_level(child)
-
-                if (child["children"] && child["children"].length == 1){
-
-                    to_remove.push(child);
-
-                }
-
-        }
-
-            for (const toRemoveKey in to_remove) {
-
-                var tr = to_remove[toRemoveKey];
-
-                 o["children"].push(tr["children"][0])
-
-                    var index = o["children"].indexOf(tr);
-                    if (index > -1) {
-                        o["children"].splice(index, 1);
-                    }
-
-            }
-
-            }
-
-        return o
-
-    }
-
-    build_data_gene_tree() { // TODO
-
-        this.data_gene_tree = {
-            "HOG": "ROOT",
-            "taxon": "Vertebrata",
-            "event": "duplication",
-            "description": "Vertebrata",
-            "children": this.data_gene_tree_list
-        }
-
-    }
-
-    //
-
-    create_svg(){
+    _create_svg(){
 
         d3.select("svg").remove();
 
-        this.zoom = d3.zoom()
-            .on('zoom', (event) => {
-                this.G .attr('transform', event.transform);
-            })
-            .scaleExtent([0.1, 1]);
-
         this.SVG = this.d3_container
             .append("svg")
-            .call(this.zoom)
 
-        this.G =  this.SVG.attr("width", this.container_size.width)
-            .attr("height", this.container_size.height)
+        this.G =  this.SVG.attr("width", Math.max(this.min_width,this.container_size.width))
+            .attr("height", Math.max(this.min_heigth,this.container_size.height))
             .append("g")
 
-
     }
 
-    add_legend(){
+     _grid_position(){
 
+        this.grid = {
+            'board_width':this.container_size.width - 2*this.gutter -  this.gene_label_width -  this.gene_name_width - this.genes_tree_width,
+            'board_height':this.container_size.height -  2*this.gutter -  this.species_tree_width -  this.species_name_width,
+            'startx_st': this.gutter + this.gene_name_width + this.genes_tree_width,
+            'starty_st': this.gutter,
+            'startx_gt':this.gutter,
+            'starty_gt': this.gutter + this.species_tree_width + this.species_name_width,
+        }
 
-
-
-        this.SVG.append("text")
-            .text(function (d) {return "\u2731"
-            })
-            .attr('fill', '#555')
-            .style("font-size", "25px")
-            .attr('x', this.gutter)
-            .attr('y', this.gutter + 20)
-            .style("text-anchor", "start")
-
-
-
-
-        this.SVG.append('text')
-            .attr('x',  this.gutter + 20 + 8)
-            .attr('y', this.gutter + 20 - 4 )
-            .text('Duplication')
-
-
-
-        this.SVG.append("text")
-            .text(function (d) {return "\u274C"
-            })
-            .attr('fill', '#555')
-            .style("font-size", "18px")
-            .attr('x', this.gutter)
-            .attr('y', 2*this.gutter + 38)
-            .style("text-anchor", "start")
-
-        this.SVG.append('text')
-            .attr('x',  this.gutter + 20 + 8)
-            .attr('y', 2*this.gutter + 40 - 4 )
-            .text('Loss')
-
-
-        this.SVG.append("text")
-            .text(function (d) {return "\u21DD"
-            })
-            .attr('fill', '#555')
-            .style("font-size", "32px")
-            .attr('x', this.gutter)
-            .attr('y', 3*this.gutter + 60)
-            .style("text-anchor", "start")
-
-        this.SVG.append('text')
-            .attr('x',  this.gutter + 20 + 8)
-            .attr('y', 3 * this.gutter + 60 - 4 )
-            .text('HGT')
+        this.grid.startx_glabel = this.gutter + this.gene_name_width + this.genes_tree_width + this.grid.board_width;
 
 
     }
 
-    recalibrate_position(){
-
-        //
-        var g_gene = d3.select("#g_gene")
-        var g_genes_names = d3.select("#g_genes_names")
-        var g_species_names = d3.select("#g_species_names")
-        var g_matrix = d3.select("#g_matrix")
-        var g_species = d3.select("#g_species")
-
-        //
-        var size_gene = g_gene.node().getBBox()
-        var size_species =  g_species.node().getBBox()
-        var size_matrix = g_matrix.node().getBBox()
-        var width_matrix = this.cols.length * this.cell_size;
-
-        var size_colname = g_species_names.node().getBBox()
-        var size_rowname = g_genes_names.node().getBBox()
-
-        // X anchor
-        var x_gt = this.gutter
-        var x_gn = x_gt + parseInt(size_gene.width) + this.gutter
-        var x_m = x_gn + parseInt(size_rowname.width) + this.gutter
-        var x_gl = x_m + parseInt(width_matrix) + this.gutter
-
-        // Y anchor
-        var y_main = size_species.width + 3 * this.gutter + parseInt(size_colname.width)
-        var y_gt = -this.hierarchy_genes.leaves()[0].x + this.cell_size/2  + y_main
-
-
-        // if rotate(90) X and Y are inverted
-        var y_offset_t =   -size_species.height + -this.hierarchy_species.leaves()[0].x - x_m - + this.cell_size/4
-        var x_offset_sn =  size_species.width  + 2*this.gutter  //  size_gene.height
-        var x_offset_sl =  x_offset_sn + size_matrix.height + parseInt(size_colname.width) + 2*this.gutter
-
-
-        // HORIZONTAL
-        this.g_mg.attr("transform", " translate (" + (x_m - 0.5*this.cell_size) +", " + (y_main- this.cell_size) + ") ");
-        this.g_gtg.attr("transform", " translate (" + x_gt+", " + y_gt + ") ");
-        this.rowName.attr("transform", "translate ("+ x_gn  +", " + y_main + ") ");
-        this.rowLabels.attr("transform", " translate ("+ x_gl   +", " + y_main + ") ");
-
-
-        // VERTICAL
-        this.g_stg.attr("transform", " rotate (90) translate ("+ x_gt  +", " + y_offset_t + ") ");
-        this.colName.attr("transform", " rotate (90)  translate ("+ x_offset_sn  +", " + (-x_gl   )+ ")  ");
-        this.colLabels.attr("transform", " rotate (90)  translate ("+ x_offset_sl   +", " + (-x_gl     ) + ")  ");
-
+    _clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
     }
 
-    //
-
-    render() {
+    _render() {
 
         d3.select('#g_species').remove()
         d3.select('#g_gene').remove()
+        d3.select('#g_gene_g').remove()
         d3.select('#g_genes_labels').remove()
         d3.select('#g_genes_names').remove()
         d3.select('#g_matrix').remove()
         d3.select('#g_species_labels').remove()
-        d3.select('#g_species_names').remove()
+        d3.select('#g_species_name').remove()
 
-        var start = Date.now();
+        this._grid_position();
 
+        this._build_matrix()
 
-        this.g_stg = this.G.append('g').attr('id', 'g_species')
-        this.render_species_tree()
+        this._render_matrix()
 
-        this.g_gtg = this.G.append('g').attr('id', 'g_gene')
-        this.render_gene_tree()
+        this._render_species_tree()
 
+        this._render_gene_tree()
 
-        var millis = Date.now() - start;
-        //console.log(`seconds  tree = ${(millis / 1000)}`);
+        this._render_species_names()
 
+        this._render_genes_labels()
 
-        var start = Date.now();
+        this._render_genes_names()
 
-        this.g_mg = this.G.append('g').attr('id', 'g_matrix')
-        this.render_matrix()
+        this._build_zoom()
 
-        var millis = Date.now() - start;
-        //console.log(`seconds  matrix = ${(millis / 1000)}`);
-
-
-        var start = Date.now();
-
-        this.rowLabels = this.G.append('g').attr('id', 'g_genes_labels')
-        this.render_genes_labels()
-
-        this.rowName = this.G.append('g').attr('id', 'g_genes_names')
-        this.render_genes_names()
-
-        var millis = Date.now() - start;
-        //console.log(`seconds  label = ${(millis / 1000)}`);
-
-
-        this.colLabels = this.G.append('g').attr('id', 'g_species_labels')
-        this.render_species_labels()
-
-        this.colName = this.G.append('g').attr('id', 'g_species_names')
-        this.render_species_names()
-
-        var start = Date.now();
-
-        this.recalibrate_position()
-
-
-        var millis = Date.now() - start;
-        //console.log(`seconds  cal pos = ${(millis / 1000)}`);
-
+        this._render_highlight()
 
 
     }
 
-    render_species_tree(){
-
-        this.root_species = d3.cluster()
-            .nodeSize([this.cell_size, this.species_tree_width / (this.hierarchy_genes.height + 1)])
-            .separation(() =>  { return 1})
-            (this.hierarchy_species);
+    _render_highlight(){
 
 
-        this.g_stg.selectAll("path")
-            .data(this.root_species.links())
-            .join("path")
-            .attr("fill", "none")
-            .attr("stroke", (d) => {return d.target.data.color ? d.target.data.color : "#555"})
-            .attr("stroke-opacity", 0.5)
-            .attr("stroke-width", (d) => {
-                var w = 2 + (d.target._children ? 2*this.dft(d.target).length : 0)
-                return Math.min(this.cell_size/2, w)
+
+        function visitPreOrder(node) {
+
+             if( node._children || (node.parent && node.parent.invisible)) {
+                for (var i = 0; i < node._children.length; i++) {
+                    node._children[i].invisible = true;
+                }
+
+            if (node.children) {
+                node.children.forEach(visitPreOrder);
+            }
+            if (node._children) {
+                node._children.forEach(visitPreOrder);
+            }
+
+        }
+}
+        function visitPostOrder(node) {
+
+            if (node.children) {
+                node.children.forEach(visitPostOrder);
+            }
+            if (node._children) {
+                node._children.forEach(visitPostOrder);
+            }
+
+            if (node.data.hasOwnProperty('gene')) {
+                    if (that.highlight.includes(node.data.gene)) {
+                        node.is_selected = true
+                    }
+                }
+            else if (node.data.hasOwnProperty('HOG')) {
+                    if (that.highlight.includes(node.data.HOG)) {
+                        node.is_selected = true
+                    }
+            }
+
+            else if (node.data.hasOwnProperty('name')){
+                if (that.highlight.includes(node.data.name)) {
+               node.is_selected = true
+           }
+            }
+
+
+            if (( node.is_selected && (node.children || node._children) )) {
+                visit_select_all(node);
+            }
+
+          if (( node.is_selected ||  node.hasSelectedDescendant) && node.parent) {
+            node.parent.hasSelectedDescendant = true;
+                }
+
+        }
+
+        function visit_clean(node) {
+
+            node.is_selected = false;
+            node.hasSelectedDescendant = false;
+            node.invisible = false;
+
+            if (node.children) {
+                node.children.forEach(visit_clean);
+            }
+            if (node._children) {
+                node._children.forEach(visit_clean);
+            }
+
+        }
+
+        function visit_select_all(node) {
+
+            node.is_selected = true;
+
+            if (node.children) {
+                node.children.forEach(visit_select_all);
+            }
+            if (node._children) {
+                node._children.forEach(visit_select_all);
+            }
+
+        }
+
+        this.m_highlight_col.selectAll(".colhighlight").remove()
+        this.m_highlight_row.selectAll(".rowhighlight").remove()
+        var that = this
+
+        visit_clean(this.root_genes)
+        visit_clean(this.root_species)
+
+
+        // ROW
+
+        visitPostOrder(this.root_genes);
+        visitPreOrder(this.root_genes);
+
+
+        this.m_highlight_row.selectAll(".rowhighlight")
+            .data(this.root_genes.descendants())
+            .join("g")
+            .append("rect")
+            .attr("class", "rowhighlight")
+            .filter(d => {
+
+                 if (d.invisible) {return}
+
+                if (!d._children && !d.children && d.is_selected) {
+                    return d
+                }
+
+                else if ((d.hasSelectedDescendant || d.is_selected ) && d._children)  {
+                    return d
+                }
+
             })
-            .attr("d", d =>{
-                var s = d.target;
-                var d = d.source;
-                return   "M" + s.y + "," + s.x + "L" + d.y + "," + s.x + "L" + d.y + "," + d.x;})
-
-
-        this.g_stg.selectAll("circle")
-            .data(this.root_species.descendants())
-            .join("circle")
-            .attr("cx", d => d.y )
-            .attr("cy", d => d.x )
-            .attr("fill", d => d.children || d._children ? "#555" : "#999")
-            .attr("r", 8)
-            /*
-            .on("mouseover", (d,i) => {this.handleMouseOver(d.target)})
-            .on("mouseout", (d,i) => this.handleMouseOut(d.target))
-
-             */
-
-
-        this.g_stg.append("g")
-            .selectAll(".colLabelg")
-            .data(this.root_species.descendants())
-            .enter()
-            .append("text")
-            .filter(function(d) { return d._children || d.children })
-            .text(function (d) {
-                if (d._children){ return "\u002B";}
-                else if (d.children){ return "\u2212";}
-
-            })
-            .attr('fill', 'white')
-            .attr('cursor', 'pointer')
-            .attr("x", d => d.y-5)
-            .attr("y", d => d.x +5)
-            .style("text-anchor", "start")
-            .on("click", (event, d) => {
-                this.collapse(d)
-                this.collapse_gene_by_species_name(d)
-            })
-
-    }
-
-    render_matrix(){
-
-
-        this.g_mg.selectAll("rect")
-            .data(this.data_matrix, function (d) {
-                return d.row + ":" + d.col;
-            })
-            .join("rect")
-            .filter(d => {return d.value !== ''})
             .attr("x",  (d) => {
-                return d.col * this.cell_size;
+                return - 200
             })
             .attr("y",  (d) =>  {
-                return d.row * this.cell_size;
+                return d.x  + this.grid.y_offset_gt + this.cell_size
             })
-            .attr("class", function (d) {
-                return "cell cell-border cr" + (d.row - 1) + " cc" + (d.col - 1);
-            })
-            .attr("width", this.cell_size)
+            .attr("width", 10000)
             .attr("height", this.cell_size)
             .style("fill",  (d) => {
-                if (d.value === "0.0") {return this.color_scale[d.c](0.0000001)}
-                return this.color_scale[d.c](d.value)
+                return d.is_selected ? 'rgba(0, 100, 200, 0.1)' : 'rgba(0, 100, 200, 0.05)'
             })
 
 
+        // COLUMN
+        visitPostOrder(this.root_species);
+        visitPreOrder(this.root_species);
 
-        var valuesText = this.g_mg.selectAll("text")
-            .data(this.data_matrix, function (d) {
-                return d.row + ":" + d.col;
-            })
-            .join('text')
-            .filter(d => {return d.value !== ''})
-            .text(function (d) {
-                if (d.value === "0.0") {return '>0'}
-                else if (d.value >=  10){
-                    return parseFloat(d.value).toFixed(0)
+
+        this.m_highlight_col.selectAll(".colhighlight")
+            .data(this.root_species.descendants())
+            .join("g")
+            .append("rect")
+            .attr("class", "colhighlight")
+            .filter(d => {
+
+                if (d.invisible) {return}
+
+                if (!d._children && !d.children && d.is_selected) {
+                    return d
                 }
-                return d.value;
+
+                else if ((d.hasSelectedDescendant || d.is_selected ) && d._children)  {
+                    return d
+                }
+
             })
             .attr("x",  (d) => {
-                if (d.value.toString().includes(".")) {
-                    return d.col * this.cell_size + this.cell_size/2 -10 ;
-                }
-                if(d.value >= 10){
-                    return d.col * this.cell_size + this.cell_size/2 -9 ;
-                }
-                return d.col * this.cell_size + this.cell_size/2 -4 ;
-            })
-            .attr("y",  (d) => {
-                return d.row * this.cell_size + this.cell_size/2 +4;
-            })
-            .style("fill",  (d) => {
-                if (d.value == 0 && d.c != 'red'){
-                    return d.c
-                }
-                if (d.value === "0.0") {return this.scaleText(0.0000001)}
-                return this.scaleText(d.value)
-            })
-
-        this.g_mg.selectAll("g")
-            .data(this.data_matrix, function (d) {
-                return d.row + ":" + d.col;
-            })
-            .join("rect")
-            .filter(d => {return d.value !== ''})
-            .attr("x",  (d) => {
-                return d.col * this.cell_size;
+                return  this.grid.species_tree_height_raw + this.minX_root_species - d.x + 0.5*this.cell_size
             })
             .attr("y",  (d) =>  {
-                return d.row * this.cell_size;
+                return 0
             })
             .attr("width", this.cell_size)
-            .attr("height", this.cell_size)
-            .style('fill', 'white')
-             .attr('cursor', 'pointer')
-            .attr('opacity', '0')
-            .on("click", (event, node) => {
-
-                var hid = node.hog_id.includes('HOG:') ? node.hog_id : node.HOG_name
-
-                this._click_square(event, hid, node.taxon_name )
-
-            })
-            .on("mouseover", (event, d) => {
-
-                var xy = d3.pointer(event);
-
-
-
-                xy[0] = d.col  * this.cell_size
-                xy[1] = (d.row  + 1 ) * this.cell_size
-
-
-                d3.select('.vline').remove()
-                d3.select('.vline2').remove()
-                d3.select('.hline').remove()
-                d3.select('.hline2').remove()
-
-
-                this.g_mg.append("line")
-                    .attr("class", "vline")
-                    .attr("x1", xy[0]   )  //<<== change your code here
-                    .attr("y1", - d3.select("#g_species_names").node().getBBox().width)
-                    .attr("x2", xy[0]  )  //<<== and here
-                    .attr("y2", this.root_genes.leaves().length * this.cell_size + this.species_label_width - this.cell_size)
-                    .style("stroke-width", 2)
-                    .style("stroke", "grey")
-                    .style("fill", "none");
-
-                this.g_mg.append("line")
-                    .attr("class", "hline")
-                    .attr("x1", -this.gene_name_width)  //<<== change your code here
-                    .attr("y1", xy[1]  )
-                    .attr("x2", this.root_species.leaves().length * this.cell_size + this.gene_label_width)  //<<== and here
-                    .attr("y2", xy[1])
-                    .style("stroke-width", 2)
-                    .style("stroke", "grey")
-                    .style("fill", "none");
-
-                this.g_mg.append("line")
-                    .attr("class", "hline2")
-                    .attr("x1", xy[0] + this.cell_size)  //<<== change your code here
-                    .attr("y1", xy[1] - this.cell_size)
-                    .attr("x2", xy[0] + this.cell_size)  //<<== and here
-                    .attr("y2", xy[1] )
-                    .style("stroke-width", 2)
-                    .style("stroke", "grey")
-                    .style("fill", "none");
-
-                this.g_mg.append("line")
-                    .attr("class", "vline2")
-                    .attr("x1", xy[0] + this.cell_size)  //<<== change your code here
-                    .attr("x2", xy[0]  )
-                    .attr("y1", xy[1] - this.cell_size)
-                    .attr("y2", xy[1] - this.cell_size)
-                    .style("stroke-width", 2)
-                    .style("stroke", "grey")
-                    .style("fill", "none");
-            })
-            .on("mouseout", (event, d) => {
-                 d3.select('.vline').remove()
-                d3.select('.vline2').remove()
-                d3.select('.hline').remove()
-                d3.select('.hline2').remove()
+            .attr("height", this.g_mg.node().getBoundingClientRect().height + this.cell_size)
+            .style("fill",  (d) => {
+                return d.is_selected ? 'rgba(0, 100, 200, 0.1)' : 'rgba(0, 100, 200, 0.05)'
 
             })
 
     }
 
-    render_gene_tree(){
+    _build_zoom(){
 
-        this.root_genes = d3.cluster().nodeSize([this.cell_size, this.genes_tree_width/ (this.hierarchy_genes.height + 1)]).separation(() =>  { return 1})(this.hierarchy_genes);
+        this.zoom = d3.zoom()
+            .on('zoom', (event) => {
 
-        // annotate whole tree with placement tag
-        // annotate whole tree with losses tag
-        this.root_genes.eachBefore(d => {
-            //if (d.data.placed) {
-            //    d.descendants().forEach(element => {
-            //        element.data.placed = d.data.placed
-            //    });
-            //}
-            if (d.data.event == 'loss') {
-                d.descendants().forEach(element => {
-                    element.data.loss = true
-                });
+                // Set extant of scale and translate
+                event.transform.y = this._clamp(event.transform.y,this.grid.board_height - this.grid.genes_tree_height_raw*event.transform.k -40*event.transform.k,0)
+                event.transform.x = this._clamp(event.transform.x,this.grid.board_width - this.grid.species_tree_height_raw*event.transform.k -40*event.transform.k,0)
+                event.transform.k  = this._clamp(event.transform.k, this.ratio_zoom, 5)
+                this.zoom_transform = event.transform;
 
-            }
+                // Compute label subsampling ratio
+                this.sub_sampling_ratio = Math.ceil(this.leaf_font_size / (this.cell_size * this.zoom_transform.k));
 
-        })
+                if (event.sourceEvent){
 
+                    // GENE TREE
+                    if (event.sourceEvent.offsetX < this.grid.startx_st && event.sourceEvent.offsetY > this.grid.starty_gt){
+                        this.gene_tree_x_translate +=  -event.sourceEvent.movementX
+                        this.gene_tree_x_translate = this._clamp( this.gene_tree_x_translate, -this.grid.genes_tree_width_raw*this.zoom_transform.k + 10*this.zoom_transform.k + this.genes_tree_width , 0)
+                        this.zoom_transform.x = this.old_transform.x;
+                    }
 
-        this.g_gtg.selectAll("path")
-            .data(this.root_genes.links())
-            .join("path")
-            .attr("fill", "none")
-            .attr("stroke", (d) => {return d.target.data.color ? d.target.data.color : "#555"})
-            .attr("stroke-opacity", (d) => {return d.target.data.event === 'loss' || d.target.parent.data.event === 'loss'  ? 0.2 : 0.5})
-            .attr("stroke-width", (d) =>{
-                var w = 2 + (d.target._children ? 2*this.dft(d.target).length : 0)
-                return Math.min(this.cell_size/2, w)
-            })
-            .attr("d", d =>{
-                var s = d.target;
-                var d = d.source;
-                return   "M" + s.y + "," + s.x + "L" + d.y + "," + s.x + "L" + d.y + "," + d.x;
-            })
-
-
-        this.g_gtg.append("g")
-            .selectAll("circle")
-            .data(this.root_genes.descendants())
-            .join("circle")
-            .filter(function(d) {return d.parent })
-            .attr("cx", d => d.y )
-            .attr("cy", d => d.x )
-            .attr("fill", d => d.children || d._children ? "#555" : "#999")
-            .attr("r", d=>  d.parent && (d.data.event == 'hgt' || d.data.event == 'duplication' || (d.data.event == 'loss'  && d.parent.data.event != 'loss' ))  ? 1 : 8)
-            .on("click", (event, d) => {
-
-                if (d.data.event != 'loss'){
-                    this.collapse(d)
+                    // SPECIES TREE
+                    else if (event.sourceEvent.offsetY < this.grid.starty_gt && event.sourceEvent.offsetX > this.grid.startx_st){
+                        this.species_tree_x_translate +=  -event.sourceEvent.movementY
+                        this.species_tree_x_translate = this._clamp( this.species_tree_x_translate, -this.grid.species_tree_width_raw*this.zoom_transform.k + 10*this.zoom_transform.k + this.species_tree_width , 0)
+                        this.zoom_transform.y = this.old_transform.y;
+                    }
                 }
 
+                // MATRIX
+                var mat_tr = d3.zoomIdentity;
+                mat_tr.x = this.zoom_transform.x;
+                mat_tr.k = this.zoom_transform.k;
+                mat_tr.y = this.zoom_transform.y - this.cell_size* this.zoom_transform.k;
+                this.m.attr('transform', mat_tr);
+
+
+                this.m_highlight_row.attr('transform', mat_tr);
+                this.m_highlight_col.attr('transform', mat_tr);
+
+
+                // SPECIES TREE
+                this._zoom_update_species_tree()
+
+                // SPECIES TREE NAME
+                this._zoom_update_species_name()
+
+                //GENE TREE
+                this._zoom_update_gene_tree();
+
+                // GENE TREE NAME
+                this._zoom_update_gene_name();
+
+                // GENE TREE LABEL
+                this._zoom_update_gene_label()
+
+                this.old_transform = this.zoom_transform;
+
+
+
             })
 
-        this.g_gtg.append("g")
-            .selectAll(".rowLabelg")
-            .data(this.root_genes.descendants())
-            .join("g")
-            .append("text")
-            .filter(function(d) {return d.data.event == 'duplication' && d.parent })
-            .text(function (d) {return "\u2731"
-            })
-            .attr('fill', '#555')
-            .style("font-size", "40px")
-            .attr("x", d => d.y )
-            .attr("y", d => d.x + 15)
-            .style("text-anchor", "middle")
-
-        this.g_gtg.append("g")
-            .selectAll(".rowLabelg")
-            .data(this.root_genes.descendants())
-            .join("g")
-            .append("text")
-            .filter(function(d) {return d.data.event == 'loss'  && d.parent.data.event != 'loss' })
-            .text(function (d) {return "\u274C"
-            })
-            .attr('fill', 'black')
-            .style("font-size", "20px")
-            .attr("x", d => d.y )
-            .attr("y", d => d.x + 8)
-            .style("text-anchor", "middle")
-            .on("click", (event, d) => {
-                //this.collapse( d)
-            })
-
-
-        this.g_gtg.append("g")
-            .selectAll(".rowLabelg")
-            .data(this.root_genes.descendants())
-            .join("g")
-            .append("text")
-            .filter(function(d) {return d.data.event == 'hgt' })
-            .text(function (d) {return "\u21DD"
-            })
-            .attr('fill', '#555')
-            .style("font-size", "3em")
-            .attr("x", d => d.y )
-            .attr("y", d => d.x + 13)
-            .style("text-anchor", "middle")
-
-
-        this.g_gtg.append("g")
-                    .selectAll(".rowLabelg")
-                    .data(this.root_genes.descendants())
-                    .join("g")
-                    .append("text")
-                    .filter(function(d) { return (d._children || d.children) && d.data.event != 'loss' && d.parent})
-                    .text(function (d) {
-                        if (d._children){ return "\u002B";}
-                        else if (d.children){ return "\u2212";}
-
-                    })
-                    .attr('fill', 'white')
-                    .attr("x", d => d.y)
-                    .attr("y", d => d.x + 5)
-                    .style("text-anchor", "middle")
-                    .on("click", (event, d) => {
-                        this.collapse(d)
-                    })
-
+        this.SVG.call(this.zoom)
 
     }
 
-    render_genes_labels(){
+    _zoom_update_species_name() {
 
+        var offset_x = (this.grid.species_tree_height_raw+this.cell_size*1.5)*this.zoom_transform.k + this.zoom_transform.x
 
-        this.rowLabels.selectAll(".rowLabelg")
-            .data(this.hierarchy_genes.leaves())
-            .enter()
-            .append("text")
-            .attr("font-weight", (d) => {return d._children ? 700 : 300})
-            .text( (d) => { //d.name or aggregate leaves name
-
-                return d.data.description;
-            })
-
-            .attr("x", 0)
-            .attr("y", (d, i) => {
-                return (i + 1) * this.cell_size -14;
-            })
-            .style("text-anchor", "start")
-
-
+        this.colName.attr('transform', `rotate(90) translate(${0}, ${-offset_x}) scale(${this.zoom_transform.k})` );
+        this.colName.selectAll("text")
+                .attr('font-size', (d,i) => { return i % this.sub_sampling_ratio === 0? this.leaf_font_size/this.zoom_transform.k + 'px' : 0  }  )
+                .attr('x', this.gene_name_padding_left/this.zoom_transform.k + 'px')
+                .attr("y", (d, i) => { return (i + 0.5) * this.cell_size + (0.5*this.leaf_font_size/this.zoom_transform.k)   })
 
     }
 
-    render_genes_names() {
+    _zoom_update_species_tree(){
 
-        var set_name = function (d) {
+        var sp_tree_offset_y = ( -this.cell_size*1.5  + this.grid.y_offset_st)*this.zoom_transform.k - this.zoom_transform.x
+        var x_offset_sp =  this.grid.species_tree_width_raw*this.zoom_transform.k - (this.species_tree_width) + this.species_tree_x_translate
 
-            if (d.parent.parent == null){
-                return d.data.HOG_name;
-            }
-
-            if (d.parent && (d.data.event == 'loss' || d.parent.data.event == "loss")) {
-                return d.data.taxon
-            }
-            if (d._children && d.data.event !== 'loss') {
-                if (d.data.HOG) {
-                    return d.data.HOG
-                }
-                var name = ""
-                this.dft(d).forEach(function (d) {
-                    name += d.data.gene
-                })
-                return name
-
-            }
-            return d.data.gene;
-        }
-
-        this.rowName.selectAll(".rownameg")
-            .data(this.hierarchy_genes.leaves())
-            .enter()
-            .append("text")
-            .attr("font-weight", (d) => {
-                return d._children  ? 700 : 300
-            })
-            .style("fill", (d) => {
-                if(d.parent){
-                    return d.parent.data.event == "loss" || d.data.event == "loss"  ? 'lightgrey'  : 'black';
-                }
-                else {
-
-                    return 'black';
-                }
-            })
-            .text((d) => {
-                return set_name(d)
-            })
-            .attr("x", 0)
-            .attr("y", (d, i) => {
-                return (i + 1) * this.cell_size - 14;
-            })
-            .style("text-anchor", "start")
-
-            .each((d, i, nodes) => {
-                this.wrap(nodes[i], this.gene_name_width)
-            })
-        .on("mouseover", (event, d) => {
-            event.target.innerHTML = set_name(d)
-        })
-        .on("mouseout", (event) => {
-            this.wrap(event.target, this.gene_name_width)
-        })
-
+        this.tree_target.attr('transform', 'rotate(90) translate(' + -x_offset_sp + ','+sp_tree_offset_y+ ') scale(' + this.zoom_transform.k + ')' );
 
     }
 
-    render_species_labels(){
+    _zoom_update_gene_tree(){
 
-        function hasUnicode (str) {
-            for (var i = 0; i < str.length; i++) {
-                if (str.charCodeAt(i) > 127) return true;
-            }
-            return false;
-        }
+        var x_offset_gt = this.grid.genes_tree_width_raw*this.zoom_transform.k - (this.genes_tree_width) + this.gene_tree_x_translate
+        var y_offset_gt = (this.cell_size/2 + this.grid.y_offset_gt)*this.zoom_transform.k + this.zoom_transform.y
+        this.gene_target.attr('transform', 'translate(' + -x_offset_gt + ',' +  y_offset_gt + ') scale(' + this.zoom_transform.k + ')' );
 
-
-        this.colLabels.selectAll(".colLabelg")
-            .data(this.hierarchy_species.leaves())
-            .enter()
-            .append("text")
-            .attr("font-weight", (d) => {return d._children ? 700 : 300})
-            .text((d)  => {
-                return d.data.description;
-            })
-            .style("fill", (d) => {return this.speciesColor(d.data.description)})
-            .attr("x", 0)
-            .attr("y",  (d, i) => {
-                return (i + 1) * this.cell_size;
-            })
-            .style("text-anchor", "start")
-            .attr("transform", (d, i) => {
-                if (hasUnicode(d.data.description) ) {
-                    return "translate(" + ((i +0.5) * -this.cell_size) +"," + ((i + 1) * this.cell_size) +") rotate(-90)";
-                }
-                return "rotate(0)";
-            } )
+        //this.gene_target.selectAll("circle").attr('r', d => d.children || d._children ? 4/this.zoom_transform.k : 8)
 
     }
 
-    render_species_names(){
-
-        d3.select(".tooltip").remove()
-
-        var div = d3.select("body").append("div")
-            .attr("class", "tooltip tooltip_img")
-            .style("opacity", 0);
-
-        this.colName.selectAll(".colnameg")
-            .data(this.hierarchy_species.leaves())
-            .enter()
-            .append("text")
-            .style("fill", (d) => {
-                if(d.data.matrix_color){
-                  return d.data.matrix_color
-                }
-                else {
-
-                    return 'black';
-                }
-            })
-            .attr("font-weight", (d) => {return d._children ? 700 : 300})
-            .text(function (d) {
-                return d.data.taxon;
-            })
-            .attr("x", 0)
-            .attr("y",  (d, i) => {
-                return (i + 1) * this.cell_size;
-            })
-            .style("text-anchor", "start")
-            .each((d,i,nodes) => this.wrap(nodes[i],this.species_name_width))
-            .on("mouseover", (event, d) => {
-                if (this.show_image){ (async() => {
-
-        const endpoint = encodeURI('http://en.wikipedia.org/w/api.php?action=query&titles=' + d.data.taxon +'&prop=pageimages&origin=*&format=json&pithumbsize=200');
-        const img = await d3.json(endpoint, {crossOrigin: "anonymous"});
-
-        var idimg,j= null;
-        j = JSON.parse(JSON.stringify(img.query.pages))
-        for (var k in j ) { idimg = k; break;}
+    _zoom_update_gene_name(){
 
 
-        try {
-            j[idimg].thumbnail.source
-        }
-        catch (e) {
-            return
-        }
+            this.rowName.attr('transform', 'translate(0,' + this.zoom_transform.y + ') scale(' + this.zoom_transform.k + ')' );
 
+            this.rowName.selectAll("text")
+                .attr('font-size', (d,i) => { return i % this.sub_sampling_ratio === 0? this.leaf_font_size/this.zoom_transform.k + 'px' : 0  }  )
+                .attr('x', this.gene_name_padding_left/this.zoom_transform.k + 'px')
+                .attr("y", (d, i) => { return (i + 0.5) * this.cell_size + (0.5*this.leaf_font_size/this.zoom_transform.k)   })
 
-        div.html('')
-
-
-
-        div.transition()
-            .duration(200)
-            .style("opacity", 1);
-
-        div.html("<b>" + d.data.taxon + "</b>" )
-            .style("left", (event.pageX) + "px")
-            .style("top", (event.pageY - 28) + "px");
-
-
-
-        div.html("<b>" + d.data.taxon + "</b>" + '<img src="' + j[idimg].thumbnail.source + '">')
-            .style("left", (event.pageX) + "px")
-            .style("top", (event.pageY - 28) + "px");
-
-
-
-
-
-
-    })();
-                event.target.innerHTML = d.data.taxon}
-            })
-            .on("mouseout", (event) => {
-                this.wrap(event.target, this.gene_name_width)
-                div.transition()
-                    .duration(250)
-                    .style("opacity", 0);
-            })
     }
 
-    build_matrix2(){
+    _zoom_update_gene_label(){
+
+        this.rowLabels.attr('transform', 'translate(0,' + this.zoom_transform.y + ') scale(' + this.zoom_transform.k + ')' );
+
+        this.rowLabels.selectAll("text")
+                .attr('font-size', (d,i) => { return i % this.sub_sampling_ratio === 0? this.leaf_font_size/this.zoom_transform.k + 'px' : 0  }  )
+                .attr('x', this.gene_name_padding_left/this.zoom_transform.k + 'px')
+                .attr("y", (d, i) => { return (i + 0.5) * this.cell_size + (0.5*this.leaf_font_size/this.zoom_transform.k)   })
+
+    }
+
+    _build_matrix(){
 
         this.cols = this.hierarchy_species.leaves().reverse()
         this.rows = this.hierarchy_genes.leaves()
-        this.color_scale = {}
+
+        this.color_scale = {};
 
         for (var h = 0; h < this.cols.length; h++) {
             this.cols[h].empty= true
@@ -1056,9 +855,11 @@ class Hog_placement {
         }
 
 
-        var values = []
+        var values = [];
         var data_matrix = [];
         var max = 1
+
+
 
         for (var r = 0; r < this.rows.length; r++) {
 
@@ -1104,14 +905,13 @@ class Hog_placement {
                 if (val!=null) {
                     max = val > max ?  val : max
                     var color = this.cols[c].data.matrix_color ? this.cols[c].data.matrix_color : this.color_cell_default;
-                    //data_matrix.push({row: r + 1, col: c + 1, value: val, c: color});
                     data_matrix.push({row: r + 1, col: c + 1, value: val, c: color, hog_id: this.rows[r].data.HOG, taxon_name: this.cols[c].data.taxon});
+                    //data_matrix.push({row: r + 1, col: c + 1, value: val, c: color, hog_id: this.rows[r].data.HOG, taxon_name: this.cols[c].data.taxon});
                     values.push(parseFloat(val));
 
                     val > 0 ? this.cols[c].empty = false : null
                 }
             }
-
 
 
 
@@ -1175,7 +975,1007 @@ class Hog_placement {
                 }
         })
 
-        return data_matrix
+        this.data_matrix = data_matrix;
+
+    }
+
+    _zoom_start() { // initial zoom
+
+        var t = d3.zoomIdentity.translate(0, 0).scale(this.ratio_zoom);
+
+        this.SVG.call(this.zoom.transform, t)
+
+    }
+
+    _zoom_ping() { // initial zoom
+
+        var t = d3.zoomTransform(this.SVG.node());
+
+        this.SVG.call(this.zoom.transform, t)
+
+    }
+
+    _render_species_tree(){
+
+
+          // Add a clipPath: everything out of this area won't be drawn.
+      var clip2 = this.SVG.append("defs").append("SVG:clipPath")
+          .attr("id", "clip2")
+          .append("SVG:rect")
+          .attr("width", this.grid.board_width )
+          .attr("height", this.species_tree_width )
+          .attr("x", 0)
+          .attr("y", 0);
+
+        this.g_stg = this.G.append('g').attr('id', 'g_species').
+                attr("transform", `translate(${this.grid.startx_st}, ${this.grid.starty_st})`)
+        .attr("clip-path", "url(#clip2)")
+
+        this.tree_target =  this.g_stg.append('g')
+             .attr('width',  this.species_tree_width)
+            .attr("x", 0)
+          .attr("y", 0)
+
+          var real_depth =  0;
+
+        this.hierarchy_species.each((node) => {
+
+            real_depth = !this.isNodeHidden(node) && node.depth > real_depth ? node.depth : real_depth;
+
+        });
+
+        this.root_species = d3.cluster()
+            .nodeSize([this.cell_size, ((this.species_tree_width-30)/this.ratio_zoom) / (real_depth + 1)])
+            .separation(() =>  { return 1})
+            (this.hierarchy_species);
+
+
+        this.tree_target.selectAll("path")
+            .data(this.root_species.links())
+            .join("path")
+            .attr("fill", "none")
+            .attr("stroke", (d) => {return d.target.data.color ? d.target.data.color : "#555"})
+            .attr("stroke-opacity", 0.5)
+            .attr("stroke-width", (d) => {
+                var w = 2 + (d.target._children ? 2*this.dft(d.target).length : 0)
+                return Math.min(this.cell_size/2, w)
+            })
+            .attr("d", d =>{
+                var s = d.target;
+                var d = d.source;
+                return   "M" + s.y + "," + s.x + "L" + d.y + "," + s.x + "L" + d.y + "," + d.x;})
+
+
+        this.tree_target.selectAll("circle")
+            .data(this.root_species.descendants())
+            .join("circle")
+            .attr("cx", d => d.y )
+            .attr("cy", d => d.x )
+            .attr("fill", d => d.children || d._children ? "#555" : "#999")
+            .attr("r", 8)
+        .on("click", (event, d) => {
+                this.collapse(d)
+                this.collapse_gene_by_species_name(d)
+            })
+
+        this.tree_target.append("g")
+            .selectAll(".colLabelg")
+            .data(this.root_species.descendants())
+            .enter()
+            .append("text")
+            .filter(function(d) { return d._children || d.children })
+            .text(function (d) {
+                if (d._children){ return "\u002B";}
+                else if (d.children){ return "\u2212";}
+
+            })
+            .attr('fill', 'white')
+            .attr('cursor', 'pointer')
+            .attr("x", d => d.y-5)
+            .attr("y", d => d.x +5)
+            .style("text-anchor", "start")
+            .on("click", (event, d) => {
+                this.collapse(d)
+                this.collapse_gene_by_species_name(d)
+            })
+
+        this.grid.y_offset_st = -this.cols[0].x
+        this.grid.species_tree_width_raw = this.tree_target.node().getBoundingClientRect().width
+        this.grid.species_tree_height_raw = this.tree_target.node().getBoundingClientRect().height
+
+        this.minX_root_species = Infinity;
+        this.maxX_root_species = -Infinity;
+
+        this.root_species.each(node => {
+            if (node.x < this.minX_root_species) {
+                this.minX_root_species = node.x;
+            }
+            if (node.x > this.maxX_root_species) {
+                this.maxX_root_species = node.x;
+            }
+        });
+
+    }
+
+    _render_matrix(){
+
+
+        // Add a clipPath: everything out of this area won't be drawn.
+      var clip = this.SVG.append("defs").append("SVG:clipPath")
+          .attr("id", "clip")
+          .append("SVG:rect")
+          .attr("width", this.grid.board_width )
+          .attr("height", this.grid.board_height )
+          .attr("x", 0)
+          .attr("y", 0);
+
+
+        this.g_mg = this.G.append('g').attr('id', 'g_matrix').
+        attr("transform", `translate(${this.grid.startx_st}, ${this.grid.starty_gt })`)
+        .attr("clip-path", "url(#clip)")
+
+         this.m_highlight_row = this.g_mg.append('g')
+             .attr('class', 'highlight_row')
+            .attr("x", 0)
+            .attr("y", 0)
+             .attr('width', this.grid.board_width)
+                .attr('height', this.grid.board_height)
+
+        this.m_highlight_col = this.g_mg.append('g')
+             .attr('class', 'highlight_col')
+            .attr("x", 0)
+            .attr("y", 0)
+             .attr('width', this.grid.board_width)
+                .attr('height', this.grid.board_height)
+
+         this.m = this.g_mg.append('g')
+            .attr("x", 0)
+            .attr("y", 0)
+             .attr('width', this.grid.board_width)
+                .attr('height', this.grid.board_height)
+
+        this.m.selectAll("rect")
+            .data(this.data_matrix, function (d) {
+                return d.row + ":" + d.col;
+            })
+            .join("rect")
+            .filter(d => {return d.value !== ''})
+            .attr("x",  (d) => {
+                return d.col * this.cell_size;
+            })
+            .attr("y",  (d) =>  {
+                return d.row * this.cell_size;
+            })
+            .attr("class", function (d) {
+                return "cell cell-border cr" + (d.row - 1) + " cc" + (d.col - 1);
+            })
+            .attr("width", this.cell_size)
+            .attr("height", this.cell_size)
+            .style("fill",  (d) => {
+                if (d.value === "0.0") {return this.color_scale[d.c](0.0000001)}
+                return this.color_scale[d.c](d.value)
+            })
+
+
+        var valuesText = this.m.selectAll("text")
+            .data(this.data_matrix, function (d) {
+                return d.row + ":" + d.col;
+            })
+            .join('text')
+            .filter(d => {return d.value !== ''})
+            .text(function (d) {
+                if (d.value === "0.0") {return '>0'}
+                else if (d.value >=  10){
+                    return parseFloat(d.value).toFixed(0)
+                }
+                return d.value;
+            })
+            .attr("x",  (d) => {
+                if (d.value.toString().includes(".")) {
+                    return d.col * this.cell_size + this.cell_size/2 -10 ;
+                }
+                if(d.value >= 10){
+                    return d.col * this.cell_size + this.cell_size/2 -9 ;
+                }
+                return d.col * this.cell_size + this.cell_size/2 -4 ;
+            })
+            .attr("y",  (d) => {
+                return d.row * this.cell_size + this.cell_size/2 +4;
+            })
+            .style("fill",  (d) => {
+                if (d.value == 0 && d.c != 'red'){
+                    return d.c
+                }
+                if (d.value === "0.0") {return this.scaleText(0.0000001)}
+                return this.scaleText(d.value)
+            })
+
+
+        this.m.selectAll("g")
+            .data(this.data_matrix, function (d) {
+                return d.row + ":" + d.col;
+            })
+            .join("rect")
+            .filter(d => {return d.value !== ''})
+            .attr("x",  (d) => {
+                return d.col * this.cell_size;
+            })
+            .attr("y",  (d) =>  {
+                return d.row * this.cell_size;
+            })
+            .attr("width", this.cell_size)
+            .attr("height", this.cell_size)
+            .style('fill', 'white')
+             .attr('cursor', 'pointer')
+            .attr('opacity', '0')
+            .on("click", (event, node) => {
+
+                var hid = node.hog_id.includes('HOG:') ? node.hog_id : node.HOG_name
+
+                this._click_square(event, hid, node.taxon_name )
+
+            })
+            .on("mouseover", (event, d) => {
+
+                var tr = this.zoom_transform ? this.zoom_transform : d3.zoomTransform(this.SVG.node());
+
+                var pos_x = d.col  * this.cell_size * tr.k + tr.x
+                var pos_y = d.row  * this.cell_size * tr.k + tr.y
+
+
+                this.clean_crosshair()
+
+
+                // VERTICAL LINE
+
+                this.g_mg.append("line")
+                    .attr("class", "vline")
+                    .attr("x1", pos_x  )
+                    .attr("y1", -10000)
+                    .attr("x2", pos_x  )
+                    .attr("y2", 10000)
+                    .style("stroke-width", this.crosshair_width * tr.k)
+                    .style("stroke", "grey")
+                    .style("fill", "none");
+
+                this.g_stn.append("line")
+                    .attr("class", "vline_stl")
+                    .attr("x1", pos_x)  //<<== change your code here
+                    .attr("y1", -1000  )
+                    .attr("x2", pos_x)  //<<== and here
+                    .attr("y2", 1000)
+                    .style("stroke-width", this.crosshair_width * tr.k)
+                    .style("stroke", "grey")
+                    .style("fill", "none");
+
+
+                // HORYZONTAL LINE
+
+                this.g_mg.append("line")
+                    .attr("class", "hline")
+                    .attr("x1", -1000)  //<<== change your code here
+                    .attr("y1", pos_y  )
+                    .attr("x2", 1000)  //<<== and here
+                    .attr("y2", pos_y)
+                    .style("stroke-width", this.crosshair_width * tr.k)
+                    .style("stroke", "grey")
+                    .style("fill", "none");
+
+                this.g_gtn.append("line")
+                    .attr("class", "hline_gtn")
+                    .attr("x1", 0)  //<<== change your code here
+                    .attr("y1", pos_y  )
+                    .attr("x2", this.gene_name_width)  //<<== and here
+                    .attr("y2", pos_y)
+                    .style("stroke-width", this.crosshair_width * tr.k)
+                    .style("stroke", "grey")
+                    .style("fill", "none");
+
+                this.g_gtl.append("line")
+                    .attr("class", "hline_gtl")
+                    .attr("x1", 0)  //<<== change your code here
+                    .attr("y1", pos_y  )
+                    .attr("x2", this.gene_label_width)  //<<== and here
+                    .attr("y2", pos_y)
+                    .style("stroke-width", this.crosshair_width * tr.k)
+                    .style("stroke", "grey")
+                    .style("fill", "none");
+
+
+
+                /*
+                this.g_mg.append("line")
+                    .attr("class", "hline2")
+                    .attr("x1", xy[0] + this.cell_size* this.ratio_zoom)  //<<== change your code here
+                    .attr("y1", xy[1] - this.cell_size* this.ratio_zoom)
+                    .attr("x2", xy[0] + this.cell_size* this.ratio_zoom)  //<<== and here
+                    .attr("y2", xy[1] )
+                    .style("stroke-width", 2)
+                    .style("stroke", "grey")
+                    .style("fill", "none");
+
+                this.g_mg.append("line")
+                    .attr("class", "vline2")
+                    .attr("x1", xy[0] + this.cell_size* this.ratio_zoom)  //<<== change your code here
+                    .attr("x2", xy[0]  )
+                    .attr("y1", xy[1] - this.cell_size* this.ratio_zoom)
+                    .attr("y2", xy[1] - this.cell_size* this.ratio_zoom)
+                    .style("stroke-width", 2)
+                    .style("stroke", "grey")
+                    .style("fill", "none");
+
+                 */
+            })
+            .on("mouseout", (event, d) => {
+                 this.clean_crosshair()
+
+            })
+
+        this.ratio_zoom = (this.grid.board_width -20) / this.m.node().getBoundingClientRect().width;
+
+
+
+
+
+    }
+
+    _render_gene_tree() {
+
+               // Add a clipPath: everything out of this area won't be drawn.
+      var clip3 = this.SVG.append("defs").append("SVG:clipPath")
+          .attr("id", "clip3")
+          .append("SVG:rect")
+          .attr("width", this.genes_tree_width )
+          .attr("height", this.grid.board_height )
+          .attr("x", 0)
+          .attr("y", 0);
+
+        this.g_gtg = this.G.append('g').attr('id', 'g_gene').
+        attr("transform", `translate(${this.grid.startx_gt}, ${this.grid.starty_gt})`)
+        .attr("clip-path", "url(#clip3)")
+
+        this.gene_target =  this.g_gtg.append('g')
+            .attr('id', 'g_gene_g')
+             .attr('width',  this.genes_tree_width)
+            .attr("x", 0)
+          .attr("y", 0)
+
+        var real_depth =  0;
+
+        this.hierarchy_genes.each((node) => {
+
+            real_depth = !this.isNodeHidden(node) && node.depth > real_depth ? node.depth : real_depth;
+
+        });
+
+        this.root_genes = d3.cluster()
+            .nodeSize([this.cell_size, (this.genes_tree_width/this.ratio_zoom) / (real_depth + 1)])
+            .separation(() =>  { return 1})(this.hierarchy_genes);
+
+        // annotate whole tree with placement tag
+        // annotate whole tree with losses tag
+        this.root_genes.eachBefore(d => {
+            //if (d.data.placed) {
+            //    d.descendants().forEach(element => {
+            //        element.data.placed = d.data.placed
+            //    });
+            //}
+            if (d.data.event === 'loss') {
+                d.descendants().forEach(element => {
+                    element.data.loss = true
+                });
+
+            }
+
+        })
+
+
+        this.gene_target.selectAll("path")
+            .data(this.root_genes.links())
+            .join("path")
+            .attr("fill", "none")
+            .attr("stroke", (d) => {return d.target.data.color ? d.target.data.color : "#555"})
+            .attr("stroke-opacity", (d) => {return d.target.data.event === 'loss' || d.target.parent.data.event === 'loss'  ? 0.2 : 0.5})
+            .attr("stroke-width", (d) =>{
+                var w = 2 + (d.target._children ? 2*this.dft(d.target).length : 0)
+                return Math.min(this.cell_size/2, w)
+            })
+            .attr("d", d =>{
+                var s = d.target;
+                var d = d.source;
+                return   "M" + s.y + "," + s.x + "L" + d.y + "," + s.x + "L" + d.y + "," + d.x;
+            })
+
+
+        this.gene_target.selectAll("circle")
+            .data(this.root_genes.descendants())
+            .join("circle")
+            .filter(function(d) {return d.parent })
+            .attr("cx", d => d.y )
+            .attr("cy", d => d.x )
+            .style("cursor", "pointer")
+            .attr("fill", d => d.children || d._children ? "#555" : "#999")
+            .attr("r", d=>  d.parent && (d.data.event == 'hgt' || d.data.event == 'duplication' || (d.data.event == 'loss'  && d.parent.data.event != 'loss' ))  ? 1 : 8)
+            .on("click", (event, d) => {
+
+                if (d.data.event != 'loss'){
+                    this.collapse(d)
+                }
+
+            })
+
+
+        this.gene_target
+            .selectAll(".rowLabelg")
+            .data(this.root_genes.descendants())
+            .join("g")
+            .append("text")
+            .filter(function(d) {return d.data.event == 'duplication' && d.parent })
+            .text(function (d) {return "\u2731"
+            })
+            .attr('fill', '#555')
+            .style("font-size", "40px")
+            .style("cursor", "pointer")
+            .attr("x", d => d.y )
+            .attr("y", d => d.x + 15)
+            .style("text-anchor", "middle")
+
+
+        this.gene_target
+            .selectAll(".rowLabelg")
+            .data(this.root_genes.descendants())
+            .join("g")
+            .append("text")
+            .filter(function(d) {return d.data.event == 'loss'  && d.parent.data.event != 'loss' })
+            .text(function (d) {return "\u274C"
+            })
+            .attr('fill', 'black')
+            .style("font-size", "20px")
+            .style("cursor", "pointer")
+            .attr("x", d => d.y )
+            .attr("y", d => d.x + 8)
+            .style("text-anchor", "middle")
+            .on("click", (event, d) => {
+                this.collapse( d)
+            })
+
+
+        this.gene_target
+            .selectAll(".rowLabelg")
+            .data(this.root_genes.descendants())
+            .join("g")
+            .append("text")
+            .filter(function(d) {return d.data.event == 'hgt' })
+            .text(function (d) {return "\u21DD"
+            })
+            .attr('fill', '#555')
+            .style("font-size", "3em")
+            .style("cursor", "pointer")
+            .attr("x", d => d.y )
+            .attr("y", d => d.x + 13)
+            .style("text-anchor", "middle")
+
+
+        this.gene_target.selectAll(".rowLabelg")
+            .data(this.root_genes.descendants())
+            .join("g")
+            .append("text")
+            .filter(function(d) { return (d._children || d.children) && d.data.event != 'loss' && d.parent})
+            .text(function (d) {
+                if (d._children){ return "\u002B";}
+                else if (d.children){ return "\u2212";}
+
+            })
+            .attr('fill', 'white')
+    .style("cursor", "pointer")
+            .attr("x", d => d.y)
+            .attr("y", d => d.x + 5)
+            .style("text-anchor", "middle")
+            .on("click", (event, d) => {
+                this.collapse(d)
+            })
+
+
+
+        // need to update grid ofsset depending on the tree size
+        this.grid.genes_tree_height_raw = this.gene_target.node().getBoundingClientRect().height
+        this.grid.genes_tree_width_raw = this.gene_target.node().getBoundingClientRect().width
+        this.grid.y_offset_gt = -this.rows[0].x
+
+
+    }
+
+    _render_genes_labels(){
+
+        var clip5 = this.SVG.append("defs").append("SVG:clipPath")
+          .attr("id", "clip5")
+          .append("SVG:rect")
+          .attr("width", this.gene_label_width )
+          .attr("height", this.grid.board_height )
+          .attr("x", 0)
+          .attr("y", 0);
+
+        this.g_gtl = this.G.append('g').attr('id', 'g_genes_labels').
+        attr("transform", `translate(${this.grid.startx_glabel}, ${this.grid.starty_gt})`)
+        .attr("clip-path", "url(#clip5)")
+
+        this.rowLabels =  this.g_gtl.append('g')
+             .attr('width',  this.genes_tree_width)
+            .attr("x", 0)
+          .attr("y", 0)
+
+         this.rowLabels.selectAll(".rowLabelg")
+            .data(this.hierarchy_genes.leaves())
+            .enter()
+            .append("text")
+            .attr("font-weight", (d) => {return d._children ? 700 : 300})
+            .text( (d) => { //d.name or aggregate leaves name
+
+                return d.data.description;
+            })
+
+            .attr("x", 0)
+            .attr("y", (d, i) => { return (i + 0.5) * this.cell_size +  0.5*this.leaf_font_size})
+            .style("text-anchor", "start")
+
+
+
+    }
+
+    _render_genes_names() {
+
+        var set_name = function (d) {
+
+            if (d.parent.parent == null){
+                return d.data.HOG_name;
+            }
+
+            if (d.parent && (d.data.event == 'loss' || d.parent.data.event == "loss")) {
+                return d.data.taxon
+            }
+            if (d._children && d.data.event !== 'loss') {
+                if (d.data.HOG) {
+                    return d.data.HOG
+                }
+                var name = ""
+                this.dft(d).forEach(function (d) {
+                    name += d.data.gene
+                })
+                return name
+
+            }
+            return d.data.gene;
+        }
+
+
+        var clip4 = this.SVG.append("defs").append("SVG:clipPath")
+          .attr("id", "clip4")
+          .append("SVG:rect")
+          .attr("width", 2*this.gene_name_width )
+          .attr("height", this.grid.board_height )
+          .attr("x", 0)
+          .attr("y", 0);
+
+        this.g_gtn = this.G.append('g').attr('id', 'g_genes_names').
+        attr("transform", `translate(${this.grid.startx_gt + this.genes_tree_width}, ${this.grid.starty_gt})`)
+        .attr("clip-path", "url(#clip4)")
+
+        this.rowName =  this.g_gtn.append('g')
+             .attr('width',  this.genes_tree_width)
+            .attr("x", 0)
+          .attr("y", 0)
+
+        this.rowName.selectAll(".rownameg")
+            .data(this.hierarchy_genes.leaves())
+            .enter()
+            .append("text")
+            .style("font-family", "monospace")
+            .attr("font-weight", (d) => {
+                return d._children  ? 700 : 300
+            })
+            .style("fill", (d) => {
+                if(d.parent){
+                    return d.parent.data.event == "loss" || d.data.event == "loss"  ? 'lightgrey'  : 'black';
+                }
+                else {
+                    return 'black';
+                }
+            })
+            .text((d) => {
+                return set_name(d)
+            })
+            .attr("x", this.gene_name_padding_left)
+            .attr("y", (d, i) => { return (i + 0.5) * this.cell_size +  0.5*this.leaf_font_size})
+            .style("text-anchor", "start")
+
+            .each((d, i, nodes) => {
+                this.wrap(nodes[i], this.gene_name_width)
+            })
+        .on("mouseover", (event, d) => {
+            event.target.innerHTML = set_name(d)
+        })
+        .on("mouseout", (event) => {
+            this.wrap(event.target, this.gene_name_width)
+        })
+
+
+    }
+
+    _render_species_names(){
+
+        d3.select(".tooltip").remove()
+
+        var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+         this.SVG.append("defs").append("SVG:clipPath")
+          .attr("id", "clip6")
+          .append("SVG:rect")
+          .attr("width", this.grid.board_width )
+          .attr("height", this.species_name_width * 2 )
+          .attr("x", 0)
+          .attr("y", 0);
+
+        this.g_stn = this.G.append('g').attr('id', 'g_species_name').
+       attr("transform", `translate(${this.grid.startx_st}, ${this.grid.starty_st + this.species_tree_width})`)
+        .attr("clip-path", "url(#clip6)")
+
+        this.colName =  this.g_stn.append('g')
+             .attr('width',  this.genes_tree_width)
+             .attr('height', this.species_name_width)
+            .attr("x", 0)
+          .attr("y", 0)
+
+        this.colName.selectAll(".colnameg")
+            .data(this.hierarchy_species.leaves())
+            .enter()
+            .append("text")
+            .style("font-family", "monospace")
+            .style("fill", (d) => {
+                if(d.data.matrix_color){return d.data.matrix_color} else {return 'black';}
+            })
+            .attr("font-weight", (d) => {return d._children ? 700 : 300})
+            .text(function (d) {
+                return d.data.taxon;
+            })
+            .attr("x", 0)
+            .attr("y", (d, i) => { return (i + 0.5) * this.cell_size +  0.5*this.leaf_font_size})
+            .style("text-anchor", "start")
+            .each((d,i,nodes) => this.wrap(nodes[i],this.species_name_width))
+            .on("mouseover", (event, d) => {
+                if (this.show_image){ (async() => {
+
+        const endpoint = encodeURI('http://en.wikipedia.org/w/api.php?action=query&titles=' + d.data.taxon +'&prop=pageimages&origin=*&format=json&pithumbsize=200');
+        const img = await d3.json(endpoint, {crossOrigin: "anonymous"});
+
+        var idimg,j= null;
+        j = JSON.parse(JSON.stringify(img.query.pages))
+        for (var k in j ) { idimg = k; break;}
+
+
+        try {
+            j[idimg].thumbnail.source
+        }
+        catch (e) {
+            return
+        }
+
+
+        div.html('')
+
+
+
+        div.transition()
+            .duration(200)
+             .style("display", 'block')
+            .style("opacity", 1);
+
+        div.html("<b>" + d.data.taxon + "</b>" )
+            .style("left", (event.pageX) + "px")
+            .style("top", (event.pageY - 28) + "px");
+
+
+
+        div.html("<b>" + d.data.taxon + "</b>" + '<img src="' + j[idimg].thumbnail.source + '">')
+            .style("left", (event.pageX) + "px")
+            .style("top", (event.pageY - 28) + "px");
+
+
+
+
+
+    })();
+                event.target.innerHTML = d.data.taxon}
+            })
+            .on("mouseout", (event) => {
+                this.wrap(event.target, this.gene_name_width)
+                div.transition()
+                    .duration(250)
+                    .style("opacity", 0)
+                    .style("display", 'none');
+            })
+
+
+
+
+    }
+
+    clean_crosshair(){
+
+           d3.select('.vline').remove()
+            d3.select('.vline2').remove()
+            d3.select('.vline_stl').remove()
+
+
+
+            d3.select('.hline').remove()
+            d3.select('.hline2').remove()
+            d3.select('.hline_gtn').remove()
+            d3.select('.hline_gtl').remove()
+    }
+
+    augment_species_tree(mapping){
+
+        function traverse(o) {
+
+            if ('name' in o && o['name']  in mapping){
+
+                var e = mapping[o['name']];
+
+                for (const eKey in e) {
+                    o[eKey] = e[eKey]
+
+                }
+            }
+
+            for (var i in o) {
+
+                if (!!o[i] && typeof(o[i])=="object") {
+
+                    traverse(o[i]);
+                }
+            }
+        }
+
+        traverse(this.data_species_tree)
+
+    }
+
+    add_tree(tree){
+
+        var tree_filtered = this.remove_single_level(tree);
+
+        this.data_gene_tree_list.push(tree_filtered)
+        this.build_data_gene_tree()
+    }
+
+    add_tree_oma_api(id){
+
+        var tree;
+
+        $.ajax({
+            async: false,
+            url: "/oma/hog/"+id+"/matreex/json/",
+            success: function(data){
+                tree = data
+            }
+        });
+
+
+        var tree_filtered = this.remove_single_level(tree);
+
+        this.data_gene_tree_list.push(tree_filtered)
+        this.build_data_gene_tree()
+    }
+
+    remove_single_level(o) {
+
+        if(o["children"]){
+
+            var to_remove = [];
+
+            for (var c in o["children"] ) {
+
+                var child = o["children"][c]
+
+                child = this.remove_single_level(child)
+
+                if (child["children"] && child["children"].length == 1){
+
+                    to_remove.push(child);
+
+                }
+
+        }
+
+            for (const toRemoveKey in to_remove) {
+
+                var tr = to_remove[toRemoveKey];
+
+                 o["children"].push(tr["children"][0])
+
+                    var index = o["children"].indexOf(tr);
+                    if (index > -1) {
+                        o["children"].splice(index, 1);
+                    }
+
+            }
+
+            }
+
+        return o
+
+    }
+
+    get_gene_tree_list_name(o, array) {
+
+        var array = array
+
+        if (o["children"]) {
+
+            for (var c in o["children"]) {
+
+                var child = o["children"][c]
+
+                array = this.get_gene_tree_list_name(child, array)
+
+                if (child.hasOwnProperty('gene')){
+                    array.push(child.gene)
+                }
+
+                else if (child.hasOwnProperty('HOG')){
+                    array.push(child.HOG)
+                }
+
+            }
+
+        }
+
+        return array
+
+    }
+
+    get_species_tree_list_name(o, array) {
+
+        var array = array
+
+        if (o["children"]) {
+
+            for (var c in o["children"]) {
+
+                var child = o["children"][c]
+
+                array = this.get_species_tree_list_name(child, array)
+
+                array.push(child.name)
+
+            }
+
+        }
+
+        return array
+
+    }
+
+
+
+    build_data_gene_tree() { // TODO
+
+        this.data_gene_tree = {
+            "HOG": "ROOT",
+            "taxon": "Vertebrata",
+            "event": "duplication",
+            "description": "Vertebrata",
+            "children": this.data_gene_tree_list
+        }
+
+    }
+
+    add_legend(){
+
+        this.SVG.append("text")
+            .text(function (d) {return "\u2731"
+            })
+            .attr('fill', '#555')
+            .style("font-size", "25px")
+            .attr('x', this.gutter)
+            .attr('y', this.gutter + 40)
+            .style("text-anchor", "start")
+
+        this.SVG.append('text')
+            .attr('x',  this.gutter + 20 + 8)
+            .attr('y', this.gutter + 40 - 4 )
+            .text('Duplication')
+
+         this.SVG.append("circle")
+            .attr('fill', '#555')
+            .style("font-size", "25px")
+            .attr('cx', this.gutter + 10)
+            .attr('cy', this.gutter + 60)
+            .attr('r', 8)
+
+
+        this.SVG.append('text')
+            .attr('x',  this.gutter + 20 + 8)
+            .attr('y', this.gutter + 70 - 4 )
+            .text('Speciation')
+
+
+
+
+
+        if (!this.oma){
+
+             this.SVG.append("text")
+            .text(function (d) {return "\u274C"
+            })
+            .attr('fill', '#555')
+            .style("font-size", "18px")
+            .attr('x', this.gutter)
+            .attr('y', 2*this.gutter + 78)
+            .style("text-anchor", "start")
+
+        this.SVG.append('text')
+            .attr('x',  this.gutter + 20 + 8)
+            .attr('y', 2*this.gutter + 80 - 4 )
+            .text('Loss')
+
+
+        this.SVG.append("text")
+            .text(function (d) {return "\u21DD"
+            })
+            .attr('fill', '#555')
+            .style("font-size", "32px")
+            .attr('x', this.gutter)
+            .attr('y', 3*this.gutter + 90)
+            .style("text-anchor", "start")
+
+        this.SVG.append('text')
+            .attr('x',  this.gutter + 20 + 8)
+            .attr('y', 3 * this.gutter + 90 - 4 )
+            .text('HGT')
+        }
+
+
+
+
+    }
+
+
+
+    //
+
+    render_species_labels(){
+
+        function hasUnicode (str) {
+            for (var i = 0; i < str.length; i++) {
+                if (str.charCodeAt(i) > 127) return true;
+            }
+            return false;
+        }
+
+
+        this.colLabels.selectAll(".colLabelg")
+            .data(this.hierarchy_species.leaves())
+            .enter()
+            .append("text")
+            .attr("font-weight", (d) => {return d._children ? 700 : 300})
+            .text((d)  => {
+                return d.data.description;
+            })
+            .style("fill", (d) => {return this.speciesColor(d.data.description)})
+            .attr("x", 0)
+            .attr("y",  (d, i) => {
+                return (i + 1) * this.cell_size;
+            })
+            .style("text-anchor", "start")
+            .attr("transform", (d, i) => {
+                if (hasUnicode(d.data.description) ) {
+                    return "translate(" + ((i +0.5) * -this.cell_size) +"," + ((i + 1) * this.cell_size) +") rotate(-90)";
+                }
+                return "rotate(0)";
+            } )
 
     }
 
@@ -1192,13 +1992,11 @@ class Hog_placement {
         }
 
         if (d.data.HOG){this.update_profile_to_collapse_node(d)}
-        this.data_matrix = this.build_matrix2()
+        this.data_matrix = this._build_matrix()
 
-
-
-        this.render()
-
-        this.recalibrate_position()
+        this._render()
+        this._zoom_ping()
+        //this.recalibrate_position()
 
 
     }
@@ -1253,11 +2051,16 @@ class Hog_placement {
 
         })
 
-        if(render_loop){this.data_matrix = this.build_matrix2()
+        if(render_loop){
 
-            this.render()
+            this.data_matrix = this._build_matrix()
 
-            this.recalibrate_position()}
+            this._render()
+
+            this._zoom_ping()
+
+            //this.recalibrate_position()
+             }
 
 
 
@@ -1290,10 +2093,9 @@ class Hog_placement {
 
     wrap(node, size) {
 
-
         var self = d3.select(node),text = self.text();
 
-        var l = Math.floor(this.gene_name_width/10)
+        var l = Math.floor(size/8);
 
         if (text.length > l){
             text = text.slice(0,l)
@@ -1314,15 +2116,13 @@ class Hog_placement {
          */
     }
 
-    handleMouseOver(d){
-        d3.select(d).attr('fill', "green")
+
+    // UTILS
+
+    between(x, min, max) {
+      return x >= min && x <= max;
     }
 
-    handleMouseOut(d){
-        d3.select(d).attr('fill', this.node_color)
-    }
-
-    //
     dft(root){
         var leaves = []
         var stack=[];
@@ -1486,9 +2286,10 @@ class Hog_placement {
 
         })
 
-        this.data_matrix = this.build_matrix2()
-        this.render()
-        this.recalibrate_position()
+        this.data_matrix = this._build_matrix()
+        this._render()
+        this._zoom_ping()
+        //this.recalibrate_position()
 
 
     }
@@ -1579,16 +2380,17 @@ class Hog_placement {
 
             })
 
-        this.data_matrix = this.build_matrix2()
-        this.render()
+        this.data_matrix = this._build_matrix()
+        this._render()
+        this._zoom_ping()
     }
 
     update_svg_size_responsive(){
-        this.container_size = this.d3_container.node().getBoundingClientRect()
+        this.container_size = this.d3_container.node().getBoundingClientRect();
         this.start();
     }
 
-     render_tooltip(x, y, menu) {
+    render_tooltip(x, y, menu) {
 
          d3.select(".tooltip").remove()
 
@@ -1597,11 +2399,12 @@ class Hog_placement {
             .attr("class", "tooltip")
             .style("background-color", "white")
             .style("border", "solid")
+             .style("border-color", "#666")
             .style("border-width", "1px")
-            .style("border-radius", "4px")
+            .style("border-radius", "2px")
             .style("padding", "8px")
             .style("position", "absolute")
-            .style("font-size", '16px')
+            .style("font-size", '12px')
             .style("z-index", '900')
 
 
@@ -1675,6 +2478,24 @@ class Hog_placement {
     call_back_hog_detail(hog,level){
 
     }
+
+    isNodeHidden(node) {
+    // Start with the node itself
+    var currentNode = node;
+
+    // Traverse up the tree
+    while(currentNode.parent) {
+        currentNode = currentNode.parent;
+
+        // If the parent node is collapsed, then this node is hidden
+        if(currentNode._children) {
+            return true;
+        }
+    }
+
+    // If we traversed up the tree and didn't find a collapsed parent, the node is not hidden
+    return false;
+}
 
 }
 
