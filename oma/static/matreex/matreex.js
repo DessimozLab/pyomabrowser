@@ -1,26 +1,6 @@
-var start = Date.now();
-var millis = Date.now() - start;
-
-/*
-
-DEV MAP
 
 
 
-BUG:
-    - long label cant overflow due to clip path maybe remove clip path for this since ellipsis
-    - when collapsing trees, zoom and tree layout got messed up (zoom_ratio ?)
-    - add hog button go crazy
-    . async load of modal
-
-Nice to have:
-    - double click on cell to open
-
-LEGEND:
-    RMOVE LOSS AND HGT ADD SPECITATION as oma option
-
-
- */
 
 function defaultDict() {
     this.get = function (key) {
@@ -322,57 +302,57 @@ class Hog_placement {
 </div>`
             document.body.appendChild(mod);
 
-                $.ajax({
-        async: true,
-        url: "/api/hog/"+target_hog+"/similar_profile_hogs/?max_results=10",
-        success: function(data_sim) {
+            $.ajax({
+                async: true,
+                url: "/api/hog/" + target_hog + "/similar_profile_hogs/?max_results=10",
+                success: function (data_sim) {
 
-            var ul = document.getElementById('ul_similar_hog')
+                    var ul = document.getElementById('ul_similar_hog')
 
-            for (const dataSimKey in data_sim['similar_profile_hogs']) {
-                var x = data_sim['similar_profile_hogs'][dataSimKey]
+                    for (const dataSimKey in data_sim['similar_profile_hogs']) {
+                        var x = data_sim['similar_profile_hogs'][dataSimKey]
 
-                $.ajax({
-                    async: true,
-                    url: "/api/hog/" + x.hog_id+ "/",
-                    success: function (hoggy) {
+                        $.ajax({
+                            async: true,
+                            url: "/api/hog/" + x.hog_id + "/",
+                            success: function (hoggy) {
 
 
-                        var li = document.createElement('li');
-                        li.setAttribute('class', 'item');
-                        li.innerHTML = hoggy[0].hog_id + " - " + hoggy[0].description
-                        li.style.cursor = 'pointer'
-                        ul.appendChild(li);
-                        li.addEventListener('click', () => { // add a click event listener
-                            $.ajax({
-                                async: false,
-                                url: "/oma/hog/" + hoggy[0].hog_id + "/matreex/json/",
-                                success: function(data){
-                                    viewer.add_tree(data)
-                                    viewer.start();
-                                    ul.removeChild(li);
-                                },
-                                error: function(jqXHR, statusText){
-                                    alert("could not load data for HOG "+hoggy[0].hog_id);
-                                }
-                            });
+                                var li = document.createElement('li');
+                                li.setAttribute('class', 'item');
+                                li.innerHTML = hoggy[0].hog_id + " - " + hoggy[0].description
+                                li.style.cursor = 'pointer'
+                                ul.appendChild(li);
+                                li.addEventListener('click', () => { // add a click event listener
+                                    $.ajax({
+                                        async: false,
+                                        url: "/oma/hog/" + hoggy[0].hog_id + "/matreex/json/",
+                                        success: function (data) {
+                                            viewer.add_tree(data)
+                                            viewer.start();
+                                            ul.removeChild(li);
+                                        },
+                                        error: function (jqXHR, statusText) {
+                                            alert("could not load data for HOG " + hoggy[0].hog_id);
+                                        }
+                                    });
+                                });
+
+                            }
+
+
                         });
-
                     }
 
-
-                });
-            }
-
-        }
-    });
+                }
+            });
 
             // add addHOg button behavior
             document.getElementById('AddHog').addEventListener('click', () => { // add a click event listener
                 $.ajax({
                     async: false,
-                    url: "/oma/hog/" + document.getElementById('input_add_hog').value+ "/matreex/json/", // todo
-                    success: function(data){
+                    url: "/oma/hog/" + document.getElementById('input_add_hog').value + "/matreex/json/", // todo
+                    success: function (data) {
                         //viewer.add_tree(JSON.parse(gt1))
                         viewer.add_tree(data)
                         viewer.start();
@@ -380,16 +360,16 @@ class Hog_placement {
                 });
             });
 
-            $('#matreex_add_hog').modal({ show: false})
+            $('#matreex_add_hog').modal({show: false})
 
-        this.d3_container.append('button').attr('class', 'btn btn-sm btn-outline-dark')
-            .style('position', 'relative')
-            .style('top', '200px')
-            .style('left', (55 -this.d3_container.node().getBoundingClientRect().width/2) + 'px')
-            .html("<i class='bi-plus-lg'></i> Add hog").on("click", d => {
-            $('#matreex_add_hog').modal('show');
-              })
-
+            this.d3_container.append('button').attr('class', 'btn btn-sm btn-outline-dark')
+                .style('position', 'relative')
+                .style('float', 'left')
+                .style('top',  (this.species_tree_width + this.species_name_width) + 'px')
+                .style('left', this.genes_tree_width + 'px')
+                .html("<i class='fas fa-plus' style = \"color: rgb(136, 136, 136);\"></i> Add hog").on("click", d => {
+                $('#matreex_add_hog').modal('show');
+            })
 
 
         }
@@ -571,7 +551,9 @@ class Hog_placement {
 
     _render_highlight(){
 
-        function visitPostOrder(node) {
+
+
+        function visitPreOrder(node) {
 
              if( node._children || (node.parent && node.parent.invisible)) {
                 for (var i = 0; i < node._children.length; i++) {
@@ -579,21 +561,21 @@ class Hog_placement {
                 }
 
             if (node.children) {
-                node.children.forEach(visitPostOrder);
-            }
-            if (node._children) {
-                node._children.forEach(visitPostOrder);
-            }
-
-        }
-}
-        function visitPreOrder(node) {
-
-            if (node.children) {
                 node.children.forEach(visitPreOrder);
             }
             if (node._children) {
                 node._children.forEach(visitPreOrder);
+            }
+
+        }
+}
+        function visitPostOrder(node) {
+
+            if (node.children) {
+                node.children.forEach(visitPostOrder);
+            }
+            if (node._children) {
+                node._children.forEach(visitPostOrder);
             }
 
             if (node.data.hasOwnProperty('gene')) {
@@ -613,39 +595,75 @@ class Hog_placement {
            }
             }
 
+
+            if (( node.is_selected && (node.children || node._children) )) {
+                visit_select_all(node);
+            }
+
           if (( node.is_selected ||  node.hasSelectedDescendant) && node.parent) {
             node.parent.hasSelectedDescendant = true;
                 }
 
         }
 
+        function visit_clean(node) {
+
+            node.is_selected = false;
+            node.hasSelectedDescendant = false;
+            node.invisible = false;
+
+            if (node.children) {
+                node.children.forEach(visit_clean);
+            }
+            if (node._children) {
+                node._children.forEach(visit_clean);
+            }
+
+        }
+
+        function visit_select_all(node) {
+
+            node.is_selected = true;
+
+            if (node.children) {
+                node.children.forEach(visit_select_all);
+            }
+            if (node._children) {
+                node._children.forEach(visit_select_all);
+            }
+
+        }
+
+        this.m_highlight_col.selectAll(".colhighlight").remove()
+        this.m_highlight_row.selectAll(".rowhighlight").remove()
         var that = this
+
+        visit_clean(this.root_genes)
+        visit_clean(this.root_species)
 
 
         // ROW
 
-        this.root_genes.each((row, index) => {
-             row.row_number = index;
-             row.is_selected = false;
-             row.hasSelectedDescendant = false;
-             row.invisible = false;
-         })
-
         visitPostOrder(this.root_genes);
-
         visitPreOrder(this.root_genes);
+
 
         this.m_highlight_row.selectAll(".rowhighlight")
             .data(this.root_genes.descendants())
             .join("g")
             .append("rect")
+            .attr("class", "rowhighlight")
             .filter(d => {
 
-                if (d.invisible) {return}
+                 if (d.invisible) {return}
 
-                if (d.is_selected || (d.hasSelectedDescendant && d._children)) {
-                        return d
-                    }
+                if (!d._children && !d.children && d.is_selected) {
+                    return d
+                }
+
+                else if ((d.hasSelectedDescendant || d.is_selected ) && d._children)  {
+                    return d
+                }
 
             })
             .attr("x",  (d) => {
@@ -662,29 +680,26 @@ class Hog_placement {
 
 
         // COLUMN
-
-        this.root_species.each((row, index) => {
-             row.row_number = index;
-             row.is_selected = false;
-             row.hasSelectedDescendant = false;
-             row.invisible = false;
-         })
-
         visitPostOrder(this.root_species);
-
         visitPreOrder(this.root_species);
+
 
         this.m_highlight_col.selectAll(".colhighlight")
             .data(this.root_species.descendants())
             .join("g")
             .append("rect")
+            .attr("class", "colhighlight")
             .filter(d => {
 
                 if (d.invisible) {return}
 
-                if (d.is_selected || (d.hasSelectedDescendant && d._children)) {
-                        return d
-                    }
+                if (!d._children && !d.children && d.is_selected) {
+                    return d
+                }
+
+                else if ((d.hasSelectedDescendant || d.is_selected ) && d._children)  {
+                    return d
+                }
 
             })
             .attr("x",  (d) => {
@@ -1010,7 +1025,7 @@ class Hog_placement {
         });
 
         this.root_species = d3.cluster()
-            .nodeSize([this.cell_size, (this.species_tree_width/this.ratio_zoom) / (real_depth + 1)])
+            .nodeSize([this.cell_size, ((this.species_tree_width-30)/this.ratio_zoom) / (real_depth + 1)])
             .separation(() =>  { return 1})
             (this.hierarchy_species);
 
@@ -1536,7 +1551,7 @@ class Hog_placement {
         var clip4 = this.SVG.append("defs").append("SVG:clipPath")
           .attr("id", "clip4")
           .append("SVG:rect")
-          .attr("width", this.gene_name_width )
+          .attr("width", 2*this.gene_name_width )
           .attr("height", this.grid.board_height )
           .attr("x", 0)
           .attr("y", 0);
@@ -1598,7 +1613,7 @@ class Hog_placement {
           .attr("id", "clip6")
           .append("SVG:rect")
           .attr("width", this.grid.board_width )
-          .attr("height", this.species_name_width )
+          .attr("height", this.species_name_width * 2 )
           .attr("x", 0)
           .attr("y", 0);
 
@@ -1868,26 +1883,42 @@ class Hog_placement {
             .attr('y', this.gutter + 40)
             .style("text-anchor", "start")
 
-
         this.SVG.append('text')
             .attr('x',  this.gutter + 20 + 8)
             .attr('y', this.gutter + 40 - 4 )
             .text('Duplication')
 
+         this.SVG.append("circle")
+            .attr('fill', '#555')
+            .style("font-size", "25px")
+            .attr('cx', this.gutter + 10)
+            .attr('cy', this.gutter + 60)
+            .attr('r', 8)
 
 
-        this.SVG.append("text")
+        this.SVG.append('text')
+            .attr('x',  this.gutter + 20 + 8)
+            .attr('y', this.gutter + 70 - 4 )
+            .text('Speciation')
+
+
+
+
+
+        if (!this.oma){
+
+             this.SVG.append("text")
             .text(function (d) {return "\u274C"
             })
             .attr('fill', '#555')
             .style("font-size", "18px")
             .attr('x', this.gutter)
-            .attr('y', 2*this.gutter + 58)
+            .attr('y', 2*this.gutter + 78)
             .style("text-anchor", "start")
 
         this.SVG.append('text')
             .attr('x',  this.gutter + 20 + 8)
-            .attr('y', 2*this.gutter + 60 - 4 )
+            .attr('y', 2*this.gutter + 80 - 4 )
             .text('Loss')
 
 
@@ -1897,13 +1928,16 @@ class Hog_placement {
             .attr('fill', '#555')
             .style("font-size", "32px")
             .attr('x', this.gutter)
-            .attr('y', 3*this.gutter + 80)
+            .attr('y', 3*this.gutter + 90)
             .style("text-anchor", "start")
 
         this.SVG.append('text')
             .attr('x',  this.gutter + 20 + 8)
-            .attr('y', 3 * this.gutter + 80 - 4 )
+            .attr('y', 3 * this.gutter + 90 - 4 )
             .text('HGT')
+        }
+
+
 
 
     }
