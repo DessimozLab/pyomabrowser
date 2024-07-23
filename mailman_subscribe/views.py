@@ -1,6 +1,7 @@
 from django.http import JsonResponse, HttpResponseRedirect
 from django import forms
 from django.urls import reverse
+from captcha.fields import ReCaptchaField
 from . import tasks
 
 import logging
@@ -8,14 +9,16 @@ logger = logging.getLogger(__name__)
 
 
 
-class EmailForm(forms.Form):
+class MailmanForm(forms.Form):
     email = forms.EmailField(label="Email", required=True)
+    captcha = ReCaptchaField()
 
 
 # Create your views here.
 def subscribe(request):
     if request.method == "POST":
-        form = EmailForm(request.POST)
+        logger.warning(request.POST)
+        form = MailmanForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             logger.error("sending email...")

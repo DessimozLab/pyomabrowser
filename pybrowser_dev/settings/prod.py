@@ -43,6 +43,11 @@ LOGGING['loggers'].update({
         'handlers': ['console'],
         'level': 'WARNING',
         'propagate': True
+    },
+    'mailman_subscribe': {
+        'handlers': ['console'],
+        'level': 'DEBUG' if DEBUG else 'INFO',
+        'propagate': True
     }
 })
 

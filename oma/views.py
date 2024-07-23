@@ -2086,7 +2086,9 @@ def home(request):
             context['standalone_version'] = misc.get_omastandalone_versions(1)[0]
         except IndexError:
             pass
-
+    if context['mailinglist_enabled']:
+        from mailman_subscribe.views import MailmanForm
+        context['form'] = MailmanForm()
     return render(request, template, context)
 
 

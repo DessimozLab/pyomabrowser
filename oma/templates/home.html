@@ -1,6 +1,7 @@
 {% extends  "base_template.html" %}
 {% load static %}
 {% load humanize %}
+{% load bootstrap4 %}
 
 
 {% block title %}OMA Orthology database{% endblock %}
@@ -282,8 +283,11 @@
                             <span id="frame_mailman" style="display: none;">
                             {% if mailinglist_enabled %}
                                 <form action="{% url "mailman-subscribe" %}" method="POST">{% csrf_token %}
-                                    Email: <input name="email" size="13"/>
-                                    <input type="submit" value="Sign up" /><br/>(max 1-2 emails/month, no spam!)
+                                    {% bootstrap_form form layout="inline" %}
+                                    {% buttons %}
+                                        <button type="submit" class="btn btn-primary float-right">Sign up</button>
+                                    {% endbuttons %}
+                                    <br/>(max 1-2 emails/month, no spam!)
                                 </form>
                             {% endif %}
                             </span>
