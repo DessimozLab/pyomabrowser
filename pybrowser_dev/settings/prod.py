@@ -81,7 +81,7 @@ MAILMAN_SUBSCRIBE = {
 }
 
 MATOMO_API_TRACKING = {
-    'url': 'https://matomo.sib.swiss/matomo.php',
+    'url': 'https://matomo-app.vital-it.ch/matomo.php',
     'site_id': 6,
     'ignore_paths': ["/oma/",],
 }
