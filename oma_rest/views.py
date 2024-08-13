@@ -1338,7 +1338,7 @@ class TaxonomyViewSet(ViewSet):
         if type == 'newick':
             leaf = request.query_params.get('newick_leaf_label', "sciname").lower()
             internal = request.query_params.get('newick_internal_label', "sciname").lower()
-            if internal == "None":
+            if internal == "none":
                 internal = None
             quoted_internal = strtobool(request.query_params.get('newick_quote_labels', "no"))
             try:
