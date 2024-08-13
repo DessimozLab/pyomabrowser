@@ -1343,7 +1343,7 @@ class TaxonomyViewSet(ViewSet):
             quoted_internal = strtobool(request.query_params.get('newick_quote_labels', "no"))
             try:
                 data = {'root_taxon': root_data,
-                        'newick': tx.newick(quoted_internal=quoted_internal, leaf=leaf, internal=internal),
+                        'newick': tx.newick(quoted=quoted_internal, leaf=leaf, internal=internal),
                        }
             except ValueError as e:
                 raise ParseError(str(e))
