@@ -1279,6 +1279,26 @@ class TaxonomyViewSet(ViewSet):
                 child should be collapsed or not. Defaults to yes.
             location: query
             type: boolean
+
+          - name: newick_leaf_label
+            description: type of data to store in the leaf nodes of the
+               newick tree. Must be one of ("sciname", "species_code")
+               Defaults to "sciname" if not specified.
+            location: query
+
+          - name: newick_internal_label
+            description: type of data to store in the internal nodes of
+               the newick tree. Must be one of ("sciname", "taxid" or
+               "None").
+               Defaults to "sciname" if not specified.
+            location: query
+
+          - name: newick_quote_labels
+            description: Whether or not to quote the labels in the newick
+               tree. If not, spaces are replaced by '_' characters.
+               Defaults to no.
+            location: query
+            type: boolean
         """
 
         # e.g. members = YEAST,ASHGO
@@ -1316,7 +1336,17 @@ class TaxonomyViewSet(ViewSet):
         root = tx._get_root_taxon()
         root_data = {'name': root['Name'].decode(), 'taxon_id': int(root['NCBITaxonId'])}
         if type == 'newick':
-            data = {'root_taxon': root_data, 'newick': tx.newick()}
+            leaf = request.query_params.get('newick_leaf_label', "sciname").lower()
+            internal = request.query_params.get('newick_internal_label', "sciname").lower()
+            if internal == "None":
+                internal = None
+            quoted_internal = strtobool(request.query_params.get('newick_quote_labels', "no"))
+            try:
+                data = {'root_taxon': root_data,
+                        'newick': tx.newick(quoted_internal=quoted_internal, leaf=leaf, internal=internal),
+                       }
+            except ValueError as e:
+                raise ParseError(str(e))
             serializer = serializers.TaxonomyNewickSerializer(instance=data)
             return Response(serializer.data)
         elif type == "phyloxml":
