@@ -944,7 +944,7 @@
         },
         "oma-academy-app": {
             "git": "${LABGIT}/oma-academy",
-            "ref": "59e50da0bec82897d3b93d26e794a702bb1588bf"
+            "ref": "924ebc593e2a393ce08064d214d1533f328ffd6c"
         },
         "omamer": {
             "hashes": [

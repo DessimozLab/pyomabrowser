@@ -52,7 +52,7 @@ numba==0.60.0; python_version >= '3.9'
 numexpr==2.10.1; python_version >= '3.9'
 numpy==1.26.4; python_version >= '3.9'
 oauthlib==3.2.2; python_version >= '3.6'
-oma-academy-app@ git+${LABGIT}/oma-academy@59e50da0bec82897d3b93d26e794a702bb1588bf
+oma-academy-app@ git+${LABGIT}/oma-academy@924ebc593e2a393ce08064d214d1533f328ffd6c
 omamer==2.0.4; python_version >= '3.8'
 packaging==24.1; python_version >= '3.8'
 pandas==2.2.2; python_version >= '3.9'
