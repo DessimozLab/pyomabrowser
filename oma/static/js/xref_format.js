@@ -183,7 +183,7 @@
             img: '<img src="'+static_root+'/image/ncbi.gif" alt="NCBI" />'
         },
         'HGNC': {
-            url: function(id){return "https://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id="+id;},
+            url: function(id){return "https://https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/"+id;},
             img: '<img src="'+static_root+'/image/hgnc.gif" alt="HGNC"/>',
             label: function(id, elem){
                 $.getJSON("https://rest.genenames.org/fetch/hgnc_id/"+id, function(data){
