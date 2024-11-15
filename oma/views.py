@@ -9,6 +9,8 @@ from builtins import str
 from builtins import range
 import hashlib
 import collections
+
+import networkx as nx
 import pandas as pd
 import sklearn
 from django.shortcuts import render, redirect
@@ -1176,8 +1178,20 @@ class AncestralGenomeBase(ContextMixin):
                 context['genome_name'] = search['name']
                 try:
                     context['nr_hogs'] = search['nr_hogs']
+                    context['nr_well_supported_hogs'] = search["nr_hogs_support"]
                 except KeyError:
-                    context['nr_hogs'] = len(utils.db.get_all_hogs_at_level(search['name']))
+                    hogs = utils.db.get_all_hogs_at_level(search["name"])
+                    context['nr_hogs'] = len(hogs)
+                    context['nr_well_supported_hogs'] = len(numpy.where(hogs['Completeness'] > 0.2))
+                try:
+                    context["nr_hogs_on_contigs"] = search["hogs_by_completeness"]["0.0"]["hogs_on_contigs"]
+                except KeyError:
+                    try:
+                        synteny_graph = utils.db.get_syntenic_hogs(level=search["name"], evidence="linearized")
+                        on_contigs = sum(len(cc) for cc in nx.connected_components(synteny_graph) if len(cc) > 1)
+                    except KeyError:
+                        on_contigs = "n/a"
+                    context["nr_hogs_on_contigs"] = on_contigs
                 context['nbr_species'] = count_species(search)
                 lin_root_taxid = -1 if genomes_json['name'] == 'LUCA' else 0
                 context['lineage'] = [
