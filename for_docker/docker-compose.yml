@@ -5,7 +5,7 @@ volumes:
   static_volume:
   media_volume:
   # if release data is used with bind mount, comment release_volume line
-  #release_volume:
+  release_volume:
 
 services:
   web:
@@ -25,7 +25,7 @@ services:
       - ..:/usr/src/pyomabrowser
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      #- release_volume:${RELEASE_PATH}
+      - release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
       - type: bind
         source: ${RELEASE_PATH_HOST}
@@ -66,7 +66,7 @@ services:
       # into your docker image. convenient for development, but not encouraged in production
       - ..:/usr/src/pyomabrowser
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      #- release_volume:${RELEASE_PATH}
+      - release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
       - type: bind
         source: ${RELEASE_PATH_HOST}
@@ -92,7 +92,7 @@ services:
       # into your docker image. convenient for development, but not encouraged in production
       - ..:/usr/src/pyomabrowser
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      #- release_volume:${RELEASE_PATH}
+      - release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
       - type: bind
         source: ${RELEASE_PATH_HOST}
@@ -116,7 +116,7 @@ services:
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      #- release_volume:${RELEASE_PATH}
+      - release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
       - type: bind
         source: "${RELEASE_PATH_HOST}/downloads"
@@ -145,7 +145,7 @@ services:
       - 8000
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
-      #- release_volume:${RELEASE_PATH}
+      - release_volume:${RELEASE_PATH}
       - type: bind
         source: "${RELEASE_PATH_HOST}/data"
         target: ${DARWIN_BROWSERDATA_PATH}
