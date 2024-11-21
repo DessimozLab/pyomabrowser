@@ -6,10 +6,10 @@
 {% block js_hook %}
 
 <!-- Load css from static -->
-<link rel="stylesheet" href="https://unpkg.com/chromosome-viewer@1.0.9/dist/GenomeViewer.css">
+<link rel="stylesheet" href="https://unpkg.com/chromosome-viewer@1.1.4/dist/GenomeViewer.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
 
-    <script type="module" src="https://unpkg.com/chromosome-viewer@1.0.9/dist/GenomeViewer.umd.js"></script>
+    <script type="module" src="https://unpkg.com/chromosome-viewer@1.1.4/dist/GenomeViewer.umd.js"></script>
 
 {% endblock js_hook %}
 
@@ -33,6 +33,21 @@ a {
     const settings = {
       'type_chromosome': 'ancestral',
       'sorting_chromosome': 'size',
+        'level': '{{genome_name}}',
+    'oma': true,
+'callback_click_synteny': function (data) {
+                        var newUrl="{% url 'hog_synteny' 1234567 genome_name %}".replace(/1234567/,data);
+
+        window.open(newUrl, "_blank");
+    },
+    'callback_click_detail': function (data) {
+       var newUrl="{% url 'hog_viewer' 1234567 genome_name %}".replace(/1234567/, data);
+                window.open(newUrl, "_blank");
+    },
+        'callback_click_members': function (data) {
+       var newUrl="{% url 'hog_table' 1234567 genome_name %}".replace(/1234567/, data);
+                window.open(newUrl, "_blank");
+    },
     };
 
     fetch("/api/synteny/?format=json&level={{genome_name}}")
