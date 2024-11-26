@@ -1394,7 +1394,8 @@ class HOGSimilarProfile(HOGBase, TemplateView):
 
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
-        results = utils.db.get_families_with_similar_hog_profile(context['hog'].fam)
+        results = utils.db.get_families_with_similar_hog_profile(
+                context['hog'].fam, max_nr_similar_fams=51)
         if len(results.similar.keys()) > 1:
             run_prof = True
         else:
