@@ -6,10 +6,10 @@
 {% block js_hook %}
 
 <!-- Load css from static -->
-<link rel="stylesheet" href="https://unpkg.com/chromosome-viewer@1.1.5/dist/GenomeViewer.css">
+<link rel="stylesheet" href="https://unpkg.com/chromosome-viewer@1.1.8/dist/GenomeViewer.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
 
-    <script type="module" src="https://unpkg.com/chromosome-viewer@1.1.5/dist/GenomeViewer.umd.js"></script>
+    <script type="module" src="https://unpkg.com/chromosome-viewer@1.1.8/dist/GenomeViewer.umd.js"></script>
 
 {% endblock js_hook %}
 
@@ -33,6 +33,8 @@ a {
     const settings = {
       'type_chromosome': 'ancestral',
       'sorting_chromosome': 'size',
+        'force_extent_numerical': {'age': {'min': 0, 'max': 200}},
+
         'level': '{{genome_name}}',
     'oma': true,
 'callback_click_synteny': function (data) {
