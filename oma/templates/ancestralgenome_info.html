@@ -24,7 +24,8 @@
 
 <tr><td class="col-sm-4">Common name:</td><td class="col-sm-8">{{ genome_name }}</td></tr>
 <tr><td>{% if taxid > 0 %}NCBI taxonomic identifier:{% else %}Taxonomic identifier:{% endif %}</td><td>{{ taxid }}</td></tr>
-<tr><td>Number of ancestral genes:</td><td>{{ nr_hogs }}</td></tr>
+<tr><td>Number of ancestral genes:</td><td>{{ nr_hogs }} (all HOGs)<br>{{ nr_well_supported_hogs }} (well supported HOGs <span class="badge badge-pill badge-dark"  data-toggle="tooltip" data-placement="top" title="Hogs with a completeness score > 0.2">?</span>)</td></tr>
+<tr><td>Number of ancestral genes included in ancestral contigs:</td><td>{{ nr_hogs_on_contigs }}</td></tr>
 <tr><td>Number of descendant extant species:</td><td>{{ nbr_species }}</td></tr>
 </table>
 
