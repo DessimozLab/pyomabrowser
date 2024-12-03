@@ -27,7 +27,6 @@ from django.template.loader import render_to_string, get_template
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.shortcuts import redirect, resolve_url
 
-
 from collections import OrderedDict, defaultdict
 
 import tweepy
@@ -52,7 +51,8 @@ from pyoma.browser.decorators import timethis
 
 logger = logging.getLogger(__name__)
 
-#<editor-fold desc="General">
+
+# <editor-fold desc="General">
 
 # --- General -------
 class JsonModelMixin(object):
@@ -97,6 +97,7 @@ class JsonModelMixin(object):
 
 class FastaResponseMixin(object):
     """A mixin to generate Fasta response."""
+
     def get_fastaheader(self, member):
         return " | ".join([member.omaid, member.canonicalid, '[{}]'.format(member.genome.sciname)])
 
@@ -148,9 +149,10 @@ class AsyncMsaMixin(object):
             tasks.compute_msa.delay(msa_id, group_type, *args)
         return {'msa_file_obj': r}
 
+
 # //</editor-fold>
 
-#//<editor-fold desc="Entry Centric">
+# //<editor-fold desc="Entry Centric">
 
 
 #  --- Entry Centric -------
@@ -214,25 +216,24 @@ class InfoBase(ContextMixin, EntryCentricMixin):
         entry = self.get_entry(entry_id)
 
         if entry.is_main_isoform:
-            reference_entry= entry
+            reference_entry = entry
         else:
-            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            # In order to populate pairswise table, badge, link with main isofrma information we replace here
             reference_entry = entry.get_main_isoform()
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
         nr_homoeologs_relations = utils.db.count_homoeologs(reference_entry.entry_nr)
 
-
         # get parent genome/hog level
         most_specific_hog = self.get_most_specific_hog(reference_entry)
 
         context.update({'entry': entry,
-                        'reference_entry':reference_entry,
+                        'reference_entry': reference_entry,
                         'most_specific_hog': most_specific_hog,
                         'tab': 'geneinformation',
                         'nr_homo': nr_homoeologs_relations,
                         'nr_vps': nr_ortholog_relations['NrAnyOrthologs'],
-                        'nr_pps':  nr_ortholog_relations['NrHogInducedPWParalogs']})
+                        'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs']})
         return context
 
 
@@ -281,15 +282,14 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         entry = self.get_entry(entry_id)
 
         if entry.is_main_isoform:
-            reference_entry= entry
+            reference_entry = entry
         else:
-            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            # In order to populate pairswise table, badge, link with main isofrma information we replace here
             reference_entry = entry.get_main_isoform()
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
 
-
-        if nr_ortholog_relations['NrAnyOrthologs']  < self._max_entry_to_load:
+        if nr_ortholog_relations['NrAnyOrthologs'] < self._max_entry_to_load:
             load_full_data = 0
             url = reverse('pairs_support_json', args=(reference_entry.omaid,))
         else:
@@ -303,7 +303,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
 
         context.update(
             {'entry': entry,
-             'reference_entry':reference_entry,
+             'reference_entry': reference_entry,
              'most_specific_hog': most_specific_hog,
              'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_homo': nr_homeologs_relations,
@@ -331,7 +331,8 @@ class PairsJson(PairsBase, JsonModelMixin, View):
 class PairsJson_Support(PairsBase, JsonModelMixin, View):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'RelType': 'RelType', 'type_p': 'type_p','type_h':'type_h','type_g':'type_g'}
+                   'canonicalid': 'xrefid', 'RelType': 'RelType', 'type_p': 'type_p', 'type_h': 'type_h',
+                   'type_g': 'type_g'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -424,7 +425,6 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
         if len(vps) > 0:
             longest_seq = max(e.sequence_length for e in vps)
 
-
         start = time.time()
         data = list(self.to_json_dict(vps))
         end = time.time()
@@ -435,66 +435,63 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
 
 
 class PairsJson_SupportSample(PairsBase, JsonModelMixin, View):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'RelType': 'RelType', 'type_p': 'type_p', 'type_h': 'type_h',
+                   'type_g': 'type_g'}
 
-        json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
-                       'genome.species_and_strain_as_dict': 'taxon',
-                       'canonicalid': 'xrefid', 'RelType': 'RelType', 'type_p': 'type_p', 'type_h': 'type_h',
-                       'type_g': 'type_g'}
+    def get(self, request, *args, **kwargs):
 
-        def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
 
-            context = self.get_context_data(**kwargs)
+        entry = context['entry']
+        entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
 
-            entry = context['entry']
-            entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
+        orthologs_dict = {}
+        vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
+        for rel in itertools.chain(vps_raw):
+            pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
+            pw_relation.type_p = 1
+            orthologs_dict[rel['EntryNr2']] = pw_relation
 
-            orthologs_dict = {}
-            vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-            for rel in itertools.chain(vps_raw):
-                pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
-                pw_relation.type_p = 1
-                orthologs_dict[rel['EntryNr2']] = pw_relation
+        vps = orthologs_dict.values()
+        if len(vps) > PairsBase._max_entry_to_load:
+            vps = list(vps)
+            vps = vps[0:PairsBase._max_entry_to_load]
 
-            vps = orthologs_dict.values()
-            if len(vps) > PairsBase._max_entry_to_load:
-                vps = list(vps)
-                vps = vps[0:PairsBase._max_entry_to_load]
+        # populate with inference evidence missing attribute
+        for rel in vps:
 
-            # populate with inference evidence missing attribute
-            for rel in vps:
+            rel_db = utils.db.entry_by_entry_nr(rel.entry_nr)
 
-                rel_db = utils.db.entry_by_entry_nr(rel.entry_nr)
+            if not hasattr(rel, 'RelType'):
+                rel.RelType = None
 
-                if not hasattr(rel, 'RelType'):
-                    rel.RelType = None
+            if not hasattr(rel, 'type_p'):
+                rel.type_p = 0
 
-                if not hasattr(rel, 'type_p'):
-                    rel.type_p = 0
+            if not hasattr(rel, 'type_h'):
 
-                if not hasattr(rel, 'type_h'):
+                rel.type_h = 1
 
-                    rel.type_h = 1
+                prefix = os.path.commonprefix((entry_db["OmaHOG"], rel_db["OmaHOG"])).decode()
+                if "." in prefix and prefix[-1].isdigit():
+                    rel.type_h = 0
 
-                    prefix = os.path.commonprefix((entry_db["OmaHOG"], rel_db["OmaHOG"])).decode()
-                    if "." in prefix and prefix[-1].isdigit():
-                        rel.type_h = 0
-
-
-                if not hasattr(rel, 'type_g'):
-                    if entry.oma_group != 0:
-                        if entry.oma_group == rel.oma_group:
-                            rel.type_g = 1
-                        else:
-                            rel.type_g = 0
+            if not hasattr(rel, 'type_g'):
+                if entry.oma_group != 0:
+                    if entry.oma_group == rel.oma_group:
+                        rel.type_g = 1
                     else:
                         rel.type_g = 0
+                else:
+                    rel.type_g = 0
 
+        entry.RelType = 'self'
 
-            entry.RelType = 'self'
+        data = list(self.to_json_dict(vps))
 
-            data = list(self.to_json_dict(vps))
-
-            return JsonResponse(data, safe=False)
+        return JsonResponse(data, safe=False)
 
 
 class PairsView(TemplateView, PairsBase):
@@ -503,10 +500,11 @@ class PairsView(TemplateView, PairsBase):
 
 class PairsViewFasta(FastaView, PairsBase):
     """returns a fasta represenation of all the pairwise orthologs"""
+
     def get_fastaheader(self, memb):
         return ' | '.join(
-                [memb.omaid, memb.canonicalid, memb.reltype,
-                 '[{}]'.format(memb.genome.sciname)])
+            [memb.omaid, memb.canonicalid, memb.reltype,
+             '[{}]'.format(memb.genome.sciname)])
 
     def render_to_response(self, context, **kwargs):
         return self.render_to_fasta_response(itertools.chain([context['entry']], context['vps']))
@@ -524,9 +522,9 @@ class ParalogsBase(ContextMixin, EntryCentricMixin):
         entry = self.get_entry(entry_id)
 
         if entry.is_main_isoform:
-            reference_entry= entry
+            reference_entry = entry
         else:
-            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            # In order to populate pairswise table, badge, link with main isofrma information we replace here
             reference_entry = entry.get_main_isoform()
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
@@ -563,14 +561,12 @@ class ParalogsView(TemplateView, ParalogsBase):
 
 
 class ParalogsJson(ParalogsBase, JsonModelMixin, View):
-
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.uniprot_species_code': 'code',
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'DivergenceLevel': 'DivergenceLevel'}
 
     def get(self, request, *args, **kwargs):
-
         context = self.get_context_data(**kwargs)
 
         entry = context['entry']
@@ -627,12 +623,12 @@ class HomeologsBase(ContextMixin, EntryCentricMixin):
         entry = self.get_entry(entry_id)
 
         if entry.is_main_isoform:
-            reference_entry= entry
+            reference_entry = entry
         else:
-            #In order to populate pairswise table, badge, link with main isofrma information we replace here
+            # In order to populate pairswise table, badge, link with main isofrma information we replace here
             reference_entry = entry.get_main_isoform()
 
-        nr_homeologs_relations  = utils.db.count_homoeologs(reference_entry.entry_nr)
+        nr_homeologs_relations = utils.db.count_homoeologs(reference_entry.entry_nr)
 
         if nr_homeologs_relations < self._max_entry_to_load:
             load_full_data = 0
@@ -648,7 +644,7 @@ class HomeologsBase(ContextMixin, EntryCentricMixin):
 
         context.update(
             {'entry': entry,
-             'reference_entry':reference_entry,
+             'reference_entry': reference_entry,
              'most_specific_hog': most_specific_hog,
              'nr_pps': nr_ortholog_relations['NrHogInducedPWParalogs'],
              'nr_homo': nr_homeologs_relations,
@@ -665,11 +661,11 @@ class HomeologsBase(ContextMixin, EntryCentricMixin):
 class HomeologsView(TemplateView, HomeologsBase):
     template_name = "entry_homeologs.html"
 
-class HomeologsJson(HomeologsBase, JsonModelMixin, View):
 
+class HomeologsJson(HomeologsBase, JsonModelMixin, View):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'SyntenyConservationLocal':'conservation', 'Confidence':'confidence'}
+                   'canonicalid': 'xrefid', 'SyntenyConservationLocal': 'conservation', 'Confidence': 'confidence'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -690,27 +686,27 @@ class HomeologsJson(HomeologsBase, JsonModelMixin, View):
 
 
 class HomeologsSampleJson(HomeologsBase, JsonModelMixin, View):
-        json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
-                       'genome.species_and_strain_as_dict': 'taxon',
-                       'canonicalid': 'xrefid', 'SyntenyConservationLocal':'conservation', 'Confidence':'confidence'}
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
+                   'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'SyntenyConservationLocal': 'conservation', 'Confidence': 'confidence'}
 
-        def get(self, request, *args, **kwargs):
-            context = self.get_context_data(**kwargs)
-            entry = context['entry']
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        entry = context['entry']
 
-            pps = []
-            for p in utils.db.get_homoeologs(entry.entry_nr):
-                pm = models.ProteinEntry.from_entry_nr(utils.db, p[1])
-                pm.SyntenyConservationLocal = p["SyntenyConservationLocal"].item()
-                pm.Confidence = p["Confidence"].item()
-                pps.append(pm)
+        pps = []
+        for p in utils.db.get_homoeologs(entry.entry_nr):
+            pm = models.ProteinEntry.from_entry_nr(utils.db, p[1])
+            pm.SyntenyConservationLocal = p["SyntenyConservationLocal"].item()
+            pm.Confidence = p["Confidence"].item()
+            pps.append(pm)
 
-            if len(pps) > HomeologsBase._max_entry_to_load:
-                pps = list(pps)
-                pps = pps[0:HomeologsBase._max_entry_to_load]
+        if len(pps) > HomeologsBase._max_entry_to_load:
+            pps = list(pps)
+            pps = pps[0:HomeologsBase._max_entry_to_load]
 
-            data = list(self.to_json_dict(pps))
-            return JsonResponse(data, safe=False)
+        data = list(self.to_json_dict(pps))
+        return JsonResponse(data, safe=False)
 
 
 # Isoforms (old before merging with sequences tab)
@@ -724,13 +720,11 @@ class Entry_Isoform(TemplateView, InfoBase):
         isoforms = entry.alternative_isoforms
         isoforms.append(entry)
 
-
         main_isoform = None
 
         for iso in isoforms:
             if iso.is_main_isoform:
                 main_isoform = iso
-
 
         context.update(
             {'entry': entry,
@@ -739,7 +733,6 @@ class Entry_Isoform(TemplateView, InfoBase):
              'main_isoform': main_isoform,
              'table_data_url': reverse('isoforms_json', args=(entry.omaid,))})
         return context
-
 
 
 # GOA
@@ -752,13 +745,12 @@ class Entry_GOA(TemplateView, InfoBase):
 
         context.update(
             {'entry': entry,
-              'tab': 'goa'})
+             'tab': 'goa'})
         return context
 
 
 # Sequences & Isoforms
 class Entry_sequences(TemplateView, InfoBase):
-
     template_name = "entry_sequences.html"
 
     def get_context_data(self, entry_id, **kwargs):
@@ -767,7 +759,7 @@ class Entry_sequences(TemplateView, InfoBase):
         # get the query entry
         entry = self.get_entry(entry_id)
 
-        #Get all isoforms including itself
+        # Get all isoforms including itself
         isoforms = entry.alternative_isoforms
         isoforms.append(entry)
 
@@ -776,7 +768,6 @@ class Entry_sequences(TemplateView, InfoBase):
         for iso in isoforms:
             if iso.is_main_isoform:
                 main_isoform = iso
-
 
         context.update(
             {'entry': entry,
@@ -798,7 +789,6 @@ class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
                    'locus_start': 'locus_start',
                    'locus_end': 'locus_end',
                    'exons.as_list_of_dict': 'exons'}
-
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -836,7 +826,6 @@ class FamGeneDataJsonFromEntry(FamBaseFromEntry, JsonModelMixin, View):
     json_fields = {'entry_nr': 'id', 'omaid': 'protid', 'sequence_length': None,
                    'genome.species_and_strain_as_dict': 'taxon',
                    'canonicalid': 'xrefid', 'gc_content': None, 'nr_exons': None}
-
 
     def get(self, request, entry_id, *args, **kwargs):
         offset = int(request.GET.get('offset', 0))
@@ -933,13 +922,14 @@ class HomoeologView(HomoeologBase, TemplateView):
 
 class HomoeologFasta(HomoeologBase, FastaView):
     """returns a fasta represenation of all the homoeologs"""
+
     def get_fastaheader(self, memb):
         reltype = memb.reltype if hasattr(memb, 'reltype') else 'self'
         conf = memb.confidence if hasattr(memb, 'confidence') else 100
         return ' | '.join(
-                [memb.omaid, memb.canonicalid, reltype,
-                 'Confidence:{:.2f}'.format(conf),
-                 '[{}]'.format(memb.genome.sciname)])
+            [memb.omaid, memb.canonicalid, reltype,
+             'Confidence:{:.2f}'.format(conf),
+             '[{}]'.format(memb.genome.sciname)])
 
     def render_to_response(self, context, **kwargs):
         extended_entries = []
@@ -965,12 +955,14 @@ class HomoeologJson(HomoeologBase, JsonModelMixin, View):
         data = list(self.to_json_dict(context['hps']))
         return JsonResponse(data, safe=False)
 
+
 # //</editor-fold>
 
-#<editor-fold desc="Genome Centric">
+# <editor-fold desc="Genome Centric">
 
 class GenomeResolve(TemplateView):
     template_name = "explore_genomes.html"
+
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         if not "query" in request.GET:
@@ -1014,7 +1006,8 @@ class GenomeBase(ContextMixin):
             meta = utils.db.per_species_metadata_retriever(species_id)
             context['genome'] = genome_obj
             context['genome_meta'] = meta
-            context['supported_ancestral_levels'] = set(l.decode() for l in utils.tax.all_hog_levels).intersection(genome_obj.lineage)
+            context['supported_ancestral_levels'] = set(l.decode() for l in utils.tax.all_hog_levels).intersection(
+                genome_obj.lineage)
         except db.UnknownSpecies as e:
             raise Http404(e)
         return context
@@ -1039,8 +1032,6 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
     def get_context_data(self, species_id, **kwargs):
         context = super(GenomeCentricGenes, self).get_context_data(species_id, **kwargs)
 
-
-
         parent_level = None
         for parent_level in context['genome'].lineage:
             if parent_level in context['supported_ancestral_levels']:
@@ -1048,9 +1039,10 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
 
         context.update({'tab': 'genes', 'api_base': 'genome',
                         'genome_name': context['genome'].sciname,
-                        'parent_level' : parent_level,
+                        'parent_level': parent_level,
                         'api_url_protein': '/api/genome/{}/genes/?per_page=250000'.format(species_id),
-                        'api_url_hog': '/api/hog/?level={}&compare_with={}&per_page=250000'.format(context['genome'].sciname, parent_level)
+                        'api_url_hog': '/api/hog/?level={}&compare_with={}&per_page=250000'.format(
+                            context['genome'].sciname, parent_level)
                         })
 
         return context
@@ -1088,14 +1080,17 @@ class GenomeCentricClosestHOGs(GenomeBase, TemplateView):
 
         hog_closest = []
         for g in hog_closest_raw:
-            hog_closest.append({'genome': models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr': g[1]})
+            hog_closest.append(
+                {'genome': models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])),
+                 'nbr': g[1]})
 
         hog_least = []
         for g in hog_least_raw:
-            hog_least.append({'genome': models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])), 'nbr': g[1]})
+            hog_least.append(
+                {'genome': models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(g[0])),
+                 'nbr': g[1]})
 
-
-        context.update({'tab': 'closest', 'subtab':'hogs', 'closest':hog_closest, 'least':hog_least })
+        context.update({'tab': 'closest', 'subtab': 'hogs', 'closest': hog_closest, 'least': hog_least})
         return context
 
 
@@ -1125,10 +1120,12 @@ class GenomeCentricGeneOrder(GenomeBase, TemplateView):
                 target = json.dumps(None)
                 msg = 'Focus: {} is an invalid Id.'.format(target_param)
 
-        else: target = json.dumps(None)
+        else:
+            target = json.dumps(None)
 
-        context.update({'tab': 'gene_order', 'message_error': msg,  'target':target, 'genome_obj':genome_obj})
+        context.update({'tab': 'gene_order', 'message_error': msg, 'target': target, 'genome_obj': genome_obj})
         return context
+
 
 class GenomeCentricSynteny(GenomeBase, TemplateView):
     template_name = "genome_synteny.html"
@@ -1136,12 +1133,13 @@ class GenomeCentricSynteny(GenomeBase, TemplateView):
     def get_context_data(self, species_id, **kwargs):
         context = super(GenomeCentricSynteny, self).get_context_data(species_id, **kwargs)
         genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(species_id))
-        context.update({'tab': 'synteny', 'genome_obj':genome_obj})
+        context.update({'tab': 'synteny', 'genome_obj': genome_obj})
         return context
 
-#</editor-fold >
 
-#<editor-fold desc="Ancestral Genome Centric">
+# </editor-fold >
+
+# <editor-fold desc="Ancestral Genome Centric">
 
 class AncestralGenomeBase(ContextMixin):
 
@@ -1195,8 +1193,9 @@ class AncestralGenomeBase(ContextMixin):
                 context['nbr_species'] = count_species(search)
                 lin_root_taxid = -1 if genomes_json['name'] == 'LUCA' else 0
                 context['lineage'] = [
-                    lev["Name"].decode() for lev in utils.db.tax.get_parent_taxa(context['taxid'], root=lin_root_taxid)
-                ][1:]
+                                         lev["Name"].decode() for lev in
+                                         utils.db.tax.get_parent_taxa(context['taxid'], root=lin_root_taxid)
+                                     ][1:]
                 context['supported_ancestral_levels'] = set(l.decode() for l in utils.tax.all_hog_levels).intersection(
                     context['lineage'])
                 context['ancestral_link_name'] = "ancestralgenome_info"
@@ -1252,7 +1251,8 @@ class AncestralGenomeCentricSynteny(AncestralGenomeBase, TemplateView):
                 except (db.InvalidId, db.AmbiguousID):
                     msg = 'Focus: {} is an invalid Gene Id.'.format(target_param)
 
-            else: hog_target = target_param
+            else:
+                hog_target = target_param
 
             print('target', hog_target)
 
@@ -1274,9 +1274,10 @@ class AncestralGenomeCentricSynteny(AncestralGenomeBase, TemplateView):
 
         context.update({'tab': 'synteny',
                         'message_error': msg,
-                        'target':target,
+                        'target': target,
                         'ancestral_link_name': "ancestralgenome_synteny"})
         return context
+
 
 class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
     template_name = "ancestralgenome_genes.html"
@@ -1299,11 +1300,9 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
                         'ancestral_link_name': "ancestralgenome_genes"})
         return context
 
+# </editor-fold >
 
-
-#</editor-fold >
-
-#<editor-fold desc="HOGs Centric">
+# <editor-fold desc="HOGs Centric">
 
 
 def resolve_hog_id(request, hog_id):
@@ -1327,7 +1326,7 @@ def resolve_hog_id(request, hog_id):
                 raise Http404("taxonid {} is unknown in OMA database".format(taxid))
         args = (match.group('id'), level)
     else:
-        args = (match.group('id'), )
+        args = (match.group('id'),)
     return HttpResponseRedirect(reverse('hog_table', args=args))
 
 
@@ -1385,7 +1384,7 @@ class HOGInfo(HOGBase, TemplateView):
 
         hog = context['hog']
         sub_hogs = list(utils.db.get_subhogs(hog.fam, include_subids=True))
-        context.update({'tab': 'info', 'sub_hogs': sub_hogs, 'lineage_link_name': 'hog_viewer',})
+        context.update({'tab': 'info', 'sub_hogs': sub_hogs, 'lineage_link_name': 'hog_viewer', })
         return context
 
 
@@ -1395,7 +1394,7 @@ class HOGSimilarProfile(HOGBase, TemplateView):
     def get_context_data(self, hog_id, idtype='OMA', **kwargs):
         context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
         results = utils.db.get_families_with_similar_hog_profile(
-                context['hog'].fam, max_nr_similar_fams=51)
+            context['hog'].fam, max_nr_similar_fams=51)
         if len(results.similar.keys()) > 1:
             run_prof = True
         else:
@@ -1409,14 +1408,14 @@ class HOGSimilarProfile(HOGBase, TemplateView):
                         'lineage_link_name': 'hog_similar_profile',
                         })
 
-
         return context
 
 
 class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
 
-    def get(self, request, hog_id,  *args, **kwargs):
+    def get(self, request, hog_id, *args, **kwargs):
         context = self.get_context_data(hog_id, **kwargs)
+
         class NumpyEncoder(json.JSONEncoder):
             def default(self, obj):
                 if isinstance(obj, numpy.ndarray):
@@ -1424,7 +1423,7 @@ class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
                 return json.JSONEncoder.default(self, obj)
 
         fam = context['hog'].fam
-        #Get profile from args and sort hogid  according to jaccard
+        # Get profile from args and sort hogid  according to jaccard
         results = utils.db.get_families_with_similar_hog_profile(fam)
         sortedhogs = [(k, v) for k, v in results.jaccard_distance.items()]
         sortedhogs = sorted(sortedhogs, key=lambda x: x[1])
@@ -1469,7 +1468,7 @@ class HOGSimilarDomain(HOGBase, TemplateView):
         if sim_fams is not None:
             longest_seq = max(longest_seq, max(sim_fams['ReprEntryLength']))
 
-            # Map entry numbers
+            #  Map entry numbers
             sim_fams['ReprEntryNr'] = sim_fams['ReprEntryNr'].apply(
                 utils.db.id_mapper['Oma'].map_entry_nr)
 
@@ -1478,7 +1477,7 @@ class HOGSimilarDomain(HOGBase, TemplateView):
                         'longest_seq': longest_seq,
                         'tab': 'similar',
                         'subtab': 'domain',
-                        'lineage_link_name': 'hog_similar_domain',})
+                        'lineage_link_name': 'hog_similar_domain', })
         return context
 
 
@@ -1507,7 +1506,6 @@ class HOGSimilarPairwise(HOGBase, TemplateView):
         # sorted the groups by number of orthologous relations
         sorted_HOGs = sorted([(value, key) for (key, value) in count_HOGs.items()], reverse=True)
 
-
         if len(sorted_HOGs) == 0:
             data = ''
         else:
@@ -1527,7 +1525,6 @@ class HOGSimilarPairwise(HOGBase, TemplateView):
 
                 data.append(hdata)
 
-
         context.update({
             'tab': 'similar',
             'subtab': 'pairwise',
@@ -1538,8 +1535,8 @@ class HOGSimilarPairwise(HOGBase, TemplateView):
 
         return context
 
-class HOGSimilarPairwiseJSON(HOGSimilarPairwise, View):
 
+class HOGSimilarPairwiseJSON(HOGSimilarPairwise, View):
 
     def get(self, request, hog_id, *args, **kwargs):
         context = self.get_context_data(hog_id, **kwargs)
@@ -1551,24 +1548,22 @@ class HOGSimilarPairwiseJSON(HOGSimilarPairwise, View):
             data = []
             cpt = 0
             for h in hogs:
-                cpt+=1
+                cpt += 1
                 hog = models.HOG(utils.db, h[1])
 
                 hdata = {"rank": cpt,
-                        "HOG ID": hog.hog_id,
-                        "nbr_orthologs": h[0],
-                        "nbr_members": hog.nr_member_genes,
-                        "Description": hog.keyword,
-                        }
+                         "HOG ID": hog.hog_id,
+                         "nbr_orthologs": h[0],
+                         "nbr_members": hog.nr_member_genes,
+                         "Description": hog.keyword,
+                         }
 
                 data.append(hdata)
 
-        return JsonResponse(data,safe=False)
-
+        return JsonResponse(data, safe=False)
 
 
 class HOGDomainsJson(HOGSimilarDomain, JsonModelMixin, View):
-
     json_fields = {'Fam': 'Fam', 'ReprEntryNr': 'ReprEntryNr',
                    'PrevCount': 'PrevCount', 'FamSize': 'FamSize',
                    'sim': 'Similarity', 'TopLevel': 'TopLevel',
@@ -1578,7 +1573,7 @@ class HOGDomainsJson(HOGSimilarDomain, JsonModelMixin, View):
         context = self.get_context_data(hog_id, **kwargs)
         df = context['sim_hogs']
         df = df[df.Fam != context['hog_row']['fam']]
-        if len(df) == 0:  #len(context['sim_hogs']) == 0:
+        if len(df) == 0:  # len(context['sim_hogs']) == 0:
             data = ''
         else:
             data = df[list(self.json_fields.keys())] \
@@ -1596,11 +1591,11 @@ class HOGviewer(HOGBase, TemplateView):
         one_entry = next(utils.db.iter_members_of_hog_id(context['hog'].hog_id))
 
         context.update({
-            'start_opened_at' : self.request.GET.get('start_opened_at', None) ,
+            'start_opened_at': self.request.GET.get('start_opened_at', None),
             'tab': 'iham',
-                        'entry': one_entry,
-                        'lineage_link_name': 'hog_viewer',
-                        })
+            'entry': one_entry,
+            'lineage_link_name': 'hog_viewer',
+        })
         try:
             context.update({'fam': {'id': 'HOG:{:07d}'.format(context['hog'].fam)},
                             'show_internal_labels': self.show_internal_labels,
@@ -1610,6 +1605,7 @@ class HOGviewer(HOGBase, TemplateView):
         except db.Singleton:
             context['isSingleton'] = True
         return context
+
 
 class HOGgo(HOGBase, TemplateView):
     template_name = "hog_go.html"
@@ -1622,6 +1618,7 @@ class HOGgo(HOGBase, TemplateView):
                         'lineage_link_name': 'hog_go',
                         })
         return context
+
 
 class HOGtable(HOGBase, TemplateView):
     template_name = "hog_table.html"
@@ -1650,7 +1647,6 @@ class HOGSynteny(HOGBase, TemplateView):
     template_name = "hog_synteny.html"
 
     def get_context_data(self, hog_id, **kwargs):
-
         context = super(HOGSynteny, self).get_context_data(hog_id, **kwargs)
 
         '''
@@ -1707,7 +1703,7 @@ class HOGSynteny(HOGBase, TemplateView):
 
         context.update({'tab': 'synteny',
                         'hog_id': hog_id,
-                        'lineage_link_name': 'hog_synteny'}) #synteny': ancestral_synteny,'neighbor': neigh})
+                        'lineage_link_name': 'hog_synteny'})  # synteny': ancestral_synteny,'neighbor': neigh})
         return context
 
 
@@ -1723,7 +1719,6 @@ class Matreex(HOGBase, TemplateView):
 
 
 class MatreexJson(HOGBase, JsonModelMixin, View):
-
     '''
 
     TO ADRIAN:
@@ -1734,7 +1729,7 @@ class MatreexJson(HOGBase, JsonModelMixin, View):
 
     '''
 
-    def get(self, request, hog_id,  *args, **kwargs):
+    def get(self, request, hog_id, *args, **kwargs):
         context = self.get_context_data(hog_id, **kwargs)
 
         try:
@@ -1837,7 +1832,8 @@ class MatreexJson(HOGBase, JsonModelMixin, View):
             orthoxml = utils.db.get_orthoxml(fam, augmented=True)
             newick = os.path.join(os.getenv("DARWIN_BROWSERDATA_PATH"), "speciestree.nwk")
 
-            ham = pyham.Ham(newick, orthoxml.decode(), tree_format="newick", use_internal_name=True, orthoXML_as_string=True, species_resolve_mode="OMA")
+            ham = pyham.Ham(newick, orthoxml.decode(), tree_format="newick", use_internal_name=True,
+                            orthoXML_as_string=True, species_resolve_mode="OMA")
 
             rh = ham.get_list_top_level_hogs()[0]
 
@@ -1850,8 +1846,8 @@ class MatreexJson(HOGBase, JsonModelMixin, View):
         except ValueError as e:
             raise Http404(e.message)
 
-
         return JsonResponse(j, safe=False)
+
 
 @method_decorator(never_cache, name='dispatch')
 class HOGsMSA(AsyncMsaMixin, HOGBase, TemplateView):
@@ -1877,11 +1873,10 @@ class HOGsOrthoXMLView(HOGBase, View):
             orthoxml = utils.db.get_orthoxml(fam, augmented=augmented)
         except ValueError as e:
             raise Http404(e.message)
-        response = HttpResponse(content_type='text/plain')  #'application/xml')
+        response = HttpResponse(content_type='text/plain')  # 'application/xml')
         response.write(orthoxml)
         response['Access-Control-Allow-Origin'] = '*'
         return response
-
 
 
 class HOGtableFromEntry(EntryCentricMixin, View):
@@ -1918,7 +1913,7 @@ class OrthoXMLFromEntry(EntryCentricMixin, View):
             raise Http404("{} doesn't belong to any HOG".format(entry_id))
         orthoxml = utils.db.get_orthoxml(entry.hog_family_nr)
 
-        response = HttpResponse(content_type='text/plain')  #'application/xml')
+        response = HttpResponse(content_type='text/plain')  # 'application/xml')
         response.write(orthoxml)
         response['Access-Control-Allow-Origin'] = '*'
         return response
@@ -1990,7 +1985,6 @@ class HOGsFastaView(FastaView, HOGsBase):
         return self.render_to_fasta_response(context['hog_members'])
 
 
-
 class HOGiHam(EntryCentricMixin, TemplateView):
     template_name = "hog_vis.html"
     show_internal_labels = True
@@ -2033,7 +2027,7 @@ class HOGDomainsBase(ContextMixin, EntryCentricMixin):
         if sim_fams is not None:
             longest_seq = max(longest_seq, max(sim_fams['ReprEntryLength']))
 
-            # Map entry numbers
+            #  Map entry numbers
             sim_fams['ReprEntryNr'] = sim_fams['ReprEntryNr'].apply(
                 utils.db.id_mapper['Oma'].map_entry_nr)
 
@@ -2061,7 +2055,7 @@ class HOGDomainsJson_old(HOGDomainsBase, View):
         context = self.get_context_data(**kwargs)
         df = context['sim_hogs']
         df = df[df.Fam != context['hog_row']['fam']]
-        if len(df) == 0:  #len(context['sim_hogs']) == 0:
+        if len(df) == 0:  # len(context['sim_hogs']) == 0:
             data = ''
         else:
             data = df[list(self.json_fields.keys())] \
@@ -2078,9 +2072,10 @@ def domains_json(request, entry_id):
     response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
     return JsonResponse(response)
 
+
 # //</editor-fold>
 
-#<editor-fold desc="Static">
+# <editor-fold desc="Static">
 @cache_control(max_age=1800)
 def home(request):
     if settings.OMA_INSTANCE_NAME in ("full", "test", "testing"):
@@ -2140,7 +2135,8 @@ def genome_suggestion(request):
             message = get_template('email_genome_suggestion.html').render(form.cleaned_data)
             for recepient in (data['suggested_from_email'], "contact@omabrowser.org",
                               "alpae+gqwmhtm2ep3kmeqmmrlp@boards.trello.com"):
-                sender = data['suggested_from_email'] if recepient != data['suggested_from_email'] else "contact@omabrowser.org"
+                sender = data['suggested_from_email'] if recepient != data[
+                    'suggested_from_email'] else "contact@omabrowser.org"
                 msg = EmailMessage(subj, message, to=[recepient], from_email=sender)
                 msg.content_subtype = "html"
                 msg.send()
@@ -2165,11 +2161,8 @@ class Release(TemplateView):
             hist = utils.db.group_size_histogram(grp)
             proteins = (hist['Count'] * hist['Size']).sum()
             ctx['nr_protein_in_{}'.format(grp)] = proteins
-            ctx['percent_in_{}'.format(grp)] = 100*proteins / ctx['nr_proteins']
+            ctx['percent_in_{}'.format(grp)] = 100 * proteins / ctx['nr_proteins']
         return ctx
-
-
-
 
 
 def export_marker_genes(request):
@@ -2181,8 +2174,8 @@ def export_marker_genes(request):
             top_N_genomes = None
         if len(genomes) >= 2 and 0 < min_species_coverage <= 1:
             data_id = hashlib.md5(
-                    (str(genomes) + str(min_species_coverage) + str(top_N_genomes)).encode('utf-8')
-                ).hexdigest()
+                (str(genomes) + str(min_species_coverage) + str(top_N_genomes)).encode('utf-8')
+            ).hexdigest()
             try:
                 r = FileResult.objects.get(data_hash=data_id)
                 do_compute = r.remove_erroneous_or_long_pending()
@@ -2226,13 +2219,16 @@ def function_projection(request):
     else:
         form = form_cls()
     return render(request, "tool_function_prediction_upload.html",
-                  {'form': form, 'max_upload_size': form.fields['file'].max_upload_size / (2**20)})
+                  {'form': form, 'max_upload_size': form.fields['file'].max_upload_size / (2 ** 20)})
+
 
 def go_enrichment(request):
     return render(request, "go_enrichment.html", {'form': forms.GoEnrichmentForm})
 
+
 def go_enrichment_result(request, data_id=None):
     return render(request, "go_enrichment_result.html", {'data': data_id})
+
 
 @method_decorator(never_cache, name='dispatch')
 class AbstractFileResultDownloader(TemplateView):
@@ -2288,7 +2284,7 @@ class CurrentView(TemplateView):
         try:
             for i, rel in enumerate(all):
                 if rel['id'] == cur['id']:
-                    return all[i+1:i+cnt+1]
+                    return all[i + 1:i + cnt + 1]
         except KeyError:
             pass
 
@@ -2345,28 +2341,28 @@ class ArchiveView(CurrentView):
     def download_root(self, context):
         return "/" + context['release'].get('id', '')
 
+
 # //</editor-fold>
 
 # <editor-fold desc="Dot plot">
 
 # synteny viewer DotPlot
 def DotplotViewer(request, g1, g2, chr1, chr2):
-
     len1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(g1)).approx_chromosome_length(chr1)
     len2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(g2)).approx_chromosome_length(chr2)
 
-    return render(request, 'dotplot_viewer.html', {'len_genome1':len1,'len_genome2':len2,   'genome1': g1, 'genome2': g2, 'chromosome1': chr1, 'chromosome2': chr2})
+    return render(request, 'dotplot_viewer.html',
+                  {'len_genome1': len1, 'len_genome2': len2, 'genome1': g1, 'genome2': g2, 'chromosome1': chr1,
+                   'chromosome2': chr2})
 
 
 class ChromosomeJson(JsonModelMixin, View):
-
     '''
     This json aim to get from a genome the list of chromosome associated to him with their genes
     '''
     json_fields = {'sciname': None}
 
     def get(self, request, genome, *args, **kwargs):
-
         genome_obj = models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_UniProtCode(genome))
         genomerange = utils.db.id_mapper['OMA'].genome_range(genome)
 
@@ -2406,8 +2402,8 @@ class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
 
         logger.debug("EntryRanges: ({},{}), ({},{})".format(e1, e2, t1, t2))
         for e in rel_tab.where(
-                    '(EntryNr1 >= {:d}) & (EntryNr1 <= {:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'
-                    .format(e1, e2, t1, t2)):
+                '(EntryNr1 >= {:d}) & (EntryNr1 <= {:d}) & (EntryNr2 >= {:d}) & (EntryNr2 <= {:d})'
+                        .format(e1, e2, t1, t2)):
             rel = models.PairwiseRelation(utils.db, e.fetch_all_fields())
 
             if rel.entry_1.chromosome == chr1 and rel.entry_2.chromosome == chr2:
@@ -2418,9 +2414,10 @@ class HomologsBetweenChromosomePairJson(JsonModelMixin, View):
 
         return JsonResponse(data, safe=False)
 
+
 # //</editor-fold>
 
-#<editor-fold desc="Group Centric">
+# <editor-fold desc="Group Centric">
 
 
 class OgCentricMixin(object):
@@ -2498,8 +2495,8 @@ class OMAGroup_similar_pairwise(TemplateView, GroupBase):
 
         for m in context['members']:
             vps_raw = sorted(utils.db.get_vpairs(m.entry_nr), key=lambda x: x['RelType'])
-            gene_outside += [models.ProteinEntry.from_entry_nr(utils.db, rel[1]) for rel in vps_raw if rel[1] not in gene_ids ]
-
+            gene_outside += [models.ProteinEntry.from_entry_nr(utils.db, rel[1]) for rel in vps_raw if
+                             rel[1] not in gene_ids]
 
         # count for each group orthologs the numbers of relations
         count_groups = defaultdict(int)
@@ -2507,7 +2504,6 @@ class OMAGroup_similar_pairwise(TemplateView, GroupBase):
         for gene in gene_outside:
             if gene.oma_group > 0:
                 count_groups[gene.oma_group] += 1
-
 
         # sorted the groups by number of orthologous relations
         sorted_groups = sorted([(value, key) for (key, value) in count_groups.items()], reverse=True)
@@ -2593,7 +2589,7 @@ class OMAGroupBase(ContextMixin):
         context = super(OMAGroupBase, self).get_context_data(**kwargs)
         try:
             context['members'] = [utils.ProteinEntry(e) for e in utils.db.oma_group_members(group_id)]
-            #context.update(utils.db.oma_group_metadata(context['members'][0].oma_group))
+            # context.update(utils.db.oma_group_metadata(context['members'][0].oma_group))
 
         except db.InvalidId as e:
             raise Http404(e)
@@ -2613,10 +2609,10 @@ class EntryCentricOMAGroup(OMAGroup, EntryCentricMixin):
                         'nr_vps': utils.db.count_vpairs(entry.entry_nr)})
         return context
 
+
 # //</editor-fold>
 
 def token_search(request):
-
     function_mapper = {
         search.XRefSearch: ["description", "proteinid", "xref"],
         search.TaxSearch: ["taxon", "species", "taxid"],
@@ -2642,9 +2638,9 @@ def token_search(request):
         'data_entry': [],
         'data_group': [],
         'data_genomes': [],
-        'max_proteins_shown':  35,
-        'max_groups_shown':  1000,
-        'max_genomes_shown':  False,
+        'max_proteins_shown': 35,
+        'max_groups_shown': 1000,
+        'max_genomes_shown': False,
         'meta': {
             'taxon_found': 0,
             'entries_found': 0,
@@ -2655,7 +2651,8 @@ def token_search(request):
     if request.method == 'POST':
         t0 = time.time()
         if 'submit_contact_suggestion' in request.POST:
-            msg = EmailMessage(request.POST.get('query'), request.POST.get('message'), to=['contact@omabrowser.org'], from_email=request.POST.get('email'))
+            msg = EmailMessage(request.POST.get('query'), request.POST.get('message'), to=['contact@omabrowser.org'],
+                               from_email=request.POST.get('email'))
             msg.content_subtype = "html"
             msg.send()
             return redirect('search_suggestion_thanks')
@@ -2683,7 +2680,7 @@ def token_search(request):
         for t in raw_tokens:
             if t['prefix'] in wild_card:
                 context['search_organised']['wildcard'].append(t)
-                context['search_organised']['wildcard_count'] +=1
+                context['search_organised']['wildcard_count'] += 1
             else:
                 context['search_organised'][t['type']].append(t)
 
@@ -2761,7 +2758,7 @@ def token_search(request):
                                 a = str(entry_aligned.alignment, 'utf-8')
                             e.sequence = {"sequence": entry_aligned.sequence, 'align': a}
 
-                logger.debug(" post-entry w/o json: %fsec", time.time()-t2)
+                logger.debug(" post-entry w/o json: %fsec", time.time() - t2)
                 t2 = time.time()
                 # Build json data for table
                 context['data_entry'] = json.dumps(EntrySearchJson().as_json(entries))
@@ -2785,7 +2782,7 @@ def token_search(request):
 
                 # redirect to hog page is only searching for hog and get one match
                 if len(hogs) == 1 and len(ogs) == 0 and not T['OMA_Group'] and not T['Protein'] and not T['wildcard']:
-                    return redirect('hog_viewer',  hogs[0].hog_id)
+                    return redirect('hog_viewer', hogs[0].hog_id)
 
                 # redirect to omagroup page if only searching for og and get one match
                 if len(hogs) == 0 and len(ogs) == 1 and not T['HOG'] and not T['Protein'] and not T['wildcard']:
@@ -2800,7 +2797,7 @@ def token_search(request):
             if S or A:
                 t2 = time.time()
 
-                def augment_ancestral_genomes(ag): #todo better
+                def augment_ancestral_genomes(ag):  # todo better
                     ag.uniprot_species_code = ''
                     ag.species_and_strain_as_dict = ag.sciname
                     if not hasattr(ag, 'common_name'):
@@ -2810,13 +2807,13 @@ def token_search(request):
                     ag.type = "Ancestral"
                     return ag
 
-
                 # easy peasy
                 number_species = len(S) if S else 0
                 number_ancestral = len(A) if A else 0
 
                 # redirect to genome page is only searching for genome and get one match
-                if (number_species == 1 and number_ancestral == 0 and not T['OMA_Group'] and not T['HOG'] and not T['wildcard'] and not T['Protein']):
+                if (number_species == 1 and number_ancestral == 0 and not T['OMA_Group'] and not T['HOG'] and not T[
+                    'wildcard'] and not T['Protein']):
                     return redirect('genome_info', list(S.values())[0].uniprot_species_code)
 
                 # redirect to ancestral genome page is only searching for genome and get one match
@@ -2850,19 +2847,21 @@ def token_search(request):
                 if (count_entries > max_entries_founded): max_entries_founded = count_entries
                 E_details.append("{} {}: {} proteins".format(to.term, function_mapper[type(to)], count_entries))
                 G_details.append("{} {}: {} groups".format(to.term, function_mapper[type(to)], to.count_groups()))
-                S_details.append("{} {}: {} extant species".format(to.term, function_mapper[type(to)], to.count_species()))
-                S_details.append("{} {}: {} ancestral species".format(to.term, function_mapper[type(to)], to.count_ancestral_genomes()))
+                S_details.append(
+                    "{} {}: {} extant species".format(to.term, function_mapper[type(to)], to.count_species()))
+                S_details.append("{} {}: {} ancestral species".format(to.term, function_mapper[type(to)],
+                                                                      to.count_ancestral_genomes()))
             context['max_entries_founded'] = max_entries_founded
             context['E_details'] = E_details
             context['G_details'] = G_details
             context['S_details'] = S_details
             logger.debug(f"search-post-pyoma: {time.time() - t1}sec")
-        logger.debug(f"overall search: {time.time()-t0}sec")
+        logger.debug(f"overall search: {time.time() - t0}sec")
 
     return render(request, 'search_token.html', context)
 
-#<editor-fold desc="Search Widget">
 
+# <editor-fold desc="Search Widget">
 
 
 class EntrySearchJson(JsonModelMixin):
@@ -2871,8 +2870,7 @@ class EntrySearchJson(JsonModelMixin):
                    'canonicalid': 'xrefid', 'oma_group': None,
                    'hog_family_nr': 'roothog', 'xrefs': None,
                    'description': None,
-                   "sequence" : "sequence"}
-
+                   "sequence": "sequence"}
 
 
 class GenomeModelJsonMixin(JsonModelMixin):
@@ -2884,6 +2882,7 @@ class GenomeModelJsonMixin(JsonModelMixin):
                    "kingdom": None,
                    "last_modified": None,
                    "type": "type"}
+
 
 class GenomeModelJsonTableMixin(JsonModelMixin):
     json_fields = {'uniprot_species_code': None,
@@ -2899,7 +2898,9 @@ class GenomeModelJsonTableMixin(JsonModelMixin):
 class GenomesJson(GenomeModelJsonTableMixin, View):
     def get(self, request, *args, **kwargs):
         genome_key = utils.id_mapper['OMA']._genome_keys
-        lg = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_table[utils.db.id_mapper['OMA']._entry_off_keys[e - 1]]) for e in genome_key]
+        lg = [models.Genome(utils.db,
+                            utils.db.id_mapper['OMA'].genome_table[utils.db.id_mapper['OMA']._entry_off_keys[e - 1]])
+              for e in genome_key]
         data = list(self.to_json_dict(lg))
         return JsonResponse(data, safe=False)
 
@@ -2934,14 +2935,12 @@ class FullTextJson(JsonModelMixin, View):
                    'description': None}
 
     def get(self, request, query, *args, **kwargs):
-
-        #data = search_fulltext(query)
-        data = list(self.to_json_dict( search_fulltext(query)))
+        # data = search_fulltext(query)
+        data = list(self.to_json_dict(search_fulltext(query)))
         return JsonResponse(data, safe=False)
 
 
 def search_fulltext(query):
-
     terms = shlex.split(query)
     logger.info(terms)
     entry_cands = collections.Counter()
@@ -2958,55 +2957,53 @@ def search_fulltext(query):
     else:
         _, top_cnt = entry_cands.most_common(1)[0]
         candidates = (models.ProteinEntry(utils.db, enr) for enr, cnts in entry_cands.most_common()
-                      if cnts >= top_cnt-2)
+                      if cnts >= top_cnt - 2)
         candidates = list(itertools.islice(candidates, 0, 1000))
         return candidates
 
     return []
 
 
-def check_term_for_entry_nr(term): # todo apply this to general term logic
-        try:
-            prefix, id_ = term.split(':', maxsplit=1)
-            if prefix == "GO":
-                return utils.db.entrynrs_with_go_annotation(id_)
-            elif prefix == "EC":
-                return utils.db.entrynrs_with_ec_annotation(id_)
-            elif prefix.lower() in ('cathdb', 'cath', 'gene3d', 'pfam', 'cath/gene3d'):
-                return utils.db.entrynrs_with_domain_id(id_)
-            elif prefix == "HOG":
-                return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
-            elif prefix.lower() in ('oma', 'omagrp', 'omagroup'):
-                return {e['EntryNr'] for e in utils.db.oma_group_members(id_)}
-            elif prefix.lower() in ("tax", "ncbitax", "taxid", "species"):
-                try:
-                    return set([]) ############self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(id_))
-                except ValueError:
-                    return set([])
-        except ValueError:
-            entry_nrs = set()
+def check_term_for_entry_nr(term):  # todo apply this to general term logic
+    try:
+        prefix, id_ = term.split(':', maxsplit=1)
+        if prefix == "GO":
+            return utils.db.entrynrs_with_go_annotation(id_)
+        elif prefix == "EC":
+            return utils.db.entrynrs_with_ec_annotation(id_)
+        elif prefix.lower() in ('cathdb', 'cath', 'gene3d', 'pfam', 'cath/gene3d'):
+            return utils.db.entrynrs_with_domain_id(id_)
+        elif prefix == "HOG":
+            return {e['EntryNr'] for e in utils.db.member_of_hog_id(term)}
+        elif prefix.lower() in ('oma', 'omagrp', 'omagroup'):
+            return {e['EntryNr'] for e in utils.db.oma_group_members(id_)}
+        elif prefix.lower() in ("tax", "ncbitax", "taxid", "species"):
             try:
-                entry_nrs.add(utils.id_resolver.resolve(term))
-            except db.AmbiguousID as e:
-                entry_nrs.update(e.candidates)
-            except db.InvalidId:
-                pass
+                return set(
+                    [])  ############self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(id_))
+            except ValueError:
+                return set([])
+    except ValueError:
+        entry_nrs = set()
+        try:
+            entry_nrs.add(utils.id_resolver.resolve(term))
+        except db.AmbiguousID as e:
+            entry_nrs.update(e.candidates)
+        except db.InvalidId:
+            pass
 
-            if len(term) >= 7 and utils.db.seq_search.contains_only_valid_chars(term):
-                # check if valid AA sequence
-                entry_nrs.update(utils.db.seq_search.exact_search(term))
-            return entry_nrs
+        if len(term) >= 7 and utils.db.seq_search.contains_only_valid_chars(term):
+            # check if valid AA sequence
+            entry_nrs.update(utils.db.seq_search.exact_search(term))
+        return entry_nrs
 
 
 class Searcher(View):
-
-
     _entry_selector = ["id", "sequence", "crossref"]
     _omagroup_selector = ["groupid", "fingerprint"]
     _hog_selector = ["groupid"]
     _genome_selector = ["name", "taxid"]
     _max_results = 50
-
 
     def analyse_search(self, request, type, query):
         if query == "":
@@ -3053,13 +3050,13 @@ class Searcher(View):
                     if result:
                         genome_term.append(term)
                         if geno["ncbi"]:
-                            genome_term_link.append([term,geno["uniprot_species_code"], geno["sciname"]])
+                            genome_term_link.append([term, geno["uniprot_species_code"], geno["sciname"]])
                         try:
-                            protein_scope += self._genome_entries_from_taxonomy(utils.db.tax.get_subtaxonomy_rooted_at(geno["ncbi"]))
+                            protein_scope += self._genome_entries_from_taxonomy(
+                                utils.db.tax.get_subtaxonomy_rooted_at(geno["ncbi"]))
 
                         except ValueError:
                             pass
-
 
         context["genome_term"] = list(set(genome_term))
         context["genome_term_link"] = genome_term_link
@@ -3067,14 +3064,14 @@ class Searcher(View):
 
         pruned_term = [term for term in terms if term not in genome_term]
 
-        self.logic_entry(request, context, pruned_term, scope = protein_scope, redirect_valid=redir )
+        self.logic_entry(request, context, pruned_term, scope=protein_scope, redirect_valid=redir)
         self.logic_group(request, context, pruned_term)
 
         context['url_fulltest_entries'] = reverse('fulltext_json', args=(query,))
 
         return render(request, 'search_test.html', context=context)
 
-    def logic_entry(self,request, context, terms, scope=None, redirect_valid=False):
+    def logic_entry(self, request, context, terms, scope=None, redirect_valid=False):
         logger.info("Start entry search")
         if scope:
             scope = set(scope)
@@ -3089,7 +3086,6 @@ class Searcher(View):
         search_entry_meta = {}
         total_search = 0
         union_entry = None
-
 
         @timethis(logging.INFO)
         def search_crossref_and_desc(terms):
@@ -3140,7 +3136,6 @@ class Searcher(View):
         # search terms in ids and crossrefs,
         # updates entry_search and search_entry_meta
         id_hits_by_entry = search_crossref_and_desc(terms)
-
 
         # search by Sequence
         start = time.time()
@@ -3246,7 +3241,7 @@ class Searcher(View):
         logger.info("Entry json took {} sec for {} entry.".format(time.time() - start, len(data_entry)))
         return
 
-    def logic_group(self,request, context, terms):
+    def logic_group(self, request, context, terms):
 
         logger.info("Start group search")
 
@@ -3304,7 +3299,7 @@ class Searcher(View):
             for term in terms:
                 try:
                     r = self.search_hog(request, term, selector=[selector])
-                except db.OutdatedHogId as exception :
+                except db.OutdatedHogId as exception:
 
                     try:
                         candidates = utils.hogid_forward_mapper.map_hogid(exception.outdated_hog_id)
@@ -3349,7 +3344,6 @@ class Searcher(View):
                 total_search_hog += 0
                 search_hog_meta[selector] = 0
 
-
         search_hog_meta['total'] = total_search_hog
         search_group_meta['total'] = total_search_hog + total_search_og
 
@@ -3363,7 +3357,6 @@ class Searcher(View):
         for k in sorted(hog_search, key=lambda k: len(hog_search[k])):
             for r in hog_search[k]:
                 sorted_results_hog.append([r, k])
-
 
         filtered_og = []
         filtered_hog = []
@@ -3431,7 +3424,6 @@ class Searcher(View):
             total_search += len(genomes)
             search_meta[selector] = len(genomes)
 
-
         logger.info("Start genome search")
 
         # store general search info
@@ -3444,21 +3436,19 @@ class Searcher(View):
             search_term_meta[term]['taxon'] = 0
 
         # for each method to search an extant genome store info
-        ext_search = {select:[] for select in self._genome_selector}
-        search_ext_meta = {select:0 for select in self._genome_selector}
+        ext_search = {select: [] for select in self._genome_selector}
+        search_ext_meta = {select: 0 for select in self._genome_selector}
         total_search_ext = 0
 
         for selector in self._genome_selector:
 
             # for each terms we get the raw results
             for term in terms:
-
                 r = self.search_genome(request, term, selector=[selector])
 
                 search_term_meta[term][selector] += len(r)
 
                 _add_genomes(r, ext_search, total_search_ext, search_ext_meta)
-
 
         # for each method to search a taxon
         taxon_search = {select: [] for select in self._genome_selector}
@@ -3485,7 +3475,7 @@ class Searcher(View):
                         it.type = 'Extant'
 
                     _add_genomes(induced_genome, ext_search, total_search_ext, search_ext_meta)
-                    #search_term_meta[term][selector] += len(induced_genome)
+                    # search_term_meta[term][selector] += len(induced_genome)
                     search_term_meta[term]["taxon"] += len(induced_genome)
 
         search_taxon_meta['total'] = total_search_taxon
@@ -3530,7 +3520,7 @@ class Searcher(View):
         if len(json_genome) < len(cleaned_taxon):
             context['data_genome'] = json.dumps(json_genome + cleaned_taxon)
         else:
-            context['data_genome'] = json.dumps( cleaned_taxon + json_genome)
+            context['data_genome'] = json.dumps(cleaned_taxon + json_genome)
 
         context['meta_genome'] = search_genome_meta
         context['meta_extant'] = search_ext_meta
@@ -3542,7 +3532,7 @@ class Searcher(View):
         logger.info(
             "Genome json took {} sec for {} genomes.".format(start - end, len(cleaned_taxon) + len(cleaned_genome)))
 
-    def search_entry(self, request,  query, selector=_entry_selector, redirect_valid=False):
+    def search_entry(self, request, query, selector=_entry_selector, redirect_valid=False):
 
         """
         data = entry found with different selector
@@ -3562,19 +3552,19 @@ class Searcher(View):
             try:
                 entry_nr = utils.id_resolver.search_protein(query)
 
-                if redirect_valid and len(list(entry_nr.keys()))==1:
+                if redirect_valid and len(list(entry_nr.keys())) == 1:
 
                     # check if query is in found match (e.g if search "DHE5_YEAST" we prefer keep this in url than "12")
                     entry_nr, matches = list(entry_nr.items())[0]
                     original_query = False
 
-                    if len(list(matches.keys()) ) == 1:
-                        t,m = list(matches.items())[0]
+                    if len(list(matches.keys())) == 1:
+                        t, m = list(matches.items())[0]
                         if len(m) == 1:
                             if m[0] == query:
                                 original_query = m[0]
 
-                    if original_query is False :
+                    if original_query is False:
                         return redirect('pairs', list(entry_nr.keys())[0])
                     else:
                         return redirect('pairs', original_query)
@@ -3588,18 +3578,16 @@ class Searcher(View):
 
                 for entry in ambiguous.candidates:
                     pass
-                    #data.append(entry)
+                    # data.append(entry)
 
             except db.InvalidId as e:
                 data += []
         end = time.time()
         logger.info("[{}] Entry id search {}".format(query, start - end))
 
-
-
         start = time.time()
         align_data = None
-        match=None
+        match = None
         if "sequence" in selector:
 
             seq_searcher = utils.db.seq_search
@@ -3608,12 +3596,11 @@ class Searcher(View):
 
                 targets = []
 
-                exact_matches = seq_searcher.exact_search(seq,only_full_length=False,is_sanitised=True)
+                exact_matches = seq_searcher.exact_search(seq, only_full_length=False, is_sanitised=True)
 
                 if len(exact_matches) == 1:
                     if redirect_valid:
                         redirect('pairs', exact_matches[0])
-
 
                 for enr in exact_matches:
                     data.append(enr)
@@ -3638,7 +3625,6 @@ class Searcher(View):
 
     def search_group(self, request, query, selector=_omagroup_selector, redirect_valid=False):
 
-
         def _check_group_number(gn):
             if isinstance(gn, int) and 0 < gn <= utils.db.get_nr_oma_groups():
                 return gn
@@ -3647,7 +3633,6 @@ class Searcher(View):
             elif isinstance(gn, (bytes, str)) and gn.isdigit():
                 return int(gn)
             return None
-
 
         """
         
@@ -3754,10 +3739,9 @@ class Searcher(View):
 
             hog_nbr = _check_hog_number(query)
 
-
             if hog_nbr:
                 if redirect_valid:
-                    return redirect('hog_viewer',  models.HOG(utils.db, hog_nbr).hog_id)
+                    return redirect('hog_viewer', models.HOG(utils.db, hog_nbr).hog_id)
                 logger.info("QUERY HOG: {}".format(query))
                 logger.info("QUERY CHECKED: {}".format(hog_nbr))
                 potential_group_nbr.append(hog_nbr)
@@ -3773,8 +3757,7 @@ class Searcher(View):
 
         return data
 
-    def search_genome(self, request, query, selector=_genome_selector,redirect_valid=False):
-
+    def search_genome(self, request, query, selector=_genome_selector, redirect_valid=False):
 
         data = []
 
@@ -3801,7 +3784,7 @@ class Searcher(View):
 
             except db.UnknownSpecies:
 
-                amb_genome =  utils.id_mapper['OMA'].approx_search_genomes(query)
+                amb_genome = utils.id_mapper['OMA'].approx_search_genomes(query)
 
                 for genome in amb_genome:
                     genome.found_by = 'name'
@@ -3908,31 +3891,6 @@ class Searcher(View):
         query = request.POST.get('query', '')
         return self.analyse_search(request, type, query)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def search_id(self, request, query):
         context = {'query': query, 'search_method': 'id'}
         try:
@@ -4020,7 +3978,7 @@ class Searcher(View):
     def _genome_entries_from_taxonomy(self, tax):
         genomes = self._genomes_from_taxonomy(tax)
         return set(enr for enr in itertools.chain.from_iterable(
-            range(g.entry_nr_offset+1, g.entry_nr_offset+g.nr_entries+1) for g in genomes))
+            range(g.entry_nr_offset + 1, g.entry_nr_offset + g.nr_entries + 1) for g in genomes))
 
     def _genomes_from_taxonomy(self, tax):
         taxids = tax.get_taxid_of_extent_genomes()
@@ -4029,8 +3987,6 @@ class Searcher(View):
         else:
             genomes = [models.Genome(utils.db, utils.db.id_mapper['OMA'].genome_from_taxid(taxid)) for taxid in taxids]
         return genomes
-
-
 
     def search_fulltext2(self, request, query):
         terms = shlex.split(query)
@@ -4051,7 +4007,7 @@ class Searcher(View):
         else:
             _, top_cnt = entry_cands.most_common(1)[0]
             candidates = (models.ProteinEntry(utils.db, enr) for enr, cnts in entry_cands.most_common()
-                          if cnts >= top_cnt-2)
+                          if cnts >= top_cnt - 2)
             candidates = list(itertools.islice(candidates, 0, 1000))
             context['data'] = json.dumps(EntrySearchJson().as_json(candidates))
             context['total_shown'] = len(candidates)
