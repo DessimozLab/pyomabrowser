@@ -1,12 +1,3 @@
-version: '3.7'
-
-volumes:
-  postgres_data:
-  static_volume:
-  media_volume:
-  # if release data is used with bind mount, comment release_volume line
-  release_volume:
-
 services:
   web:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
@@ -22,15 +13,23 @@ services:
     volumes:
       # uncomment the following line if you want to use transparently the current checkout mounted
       # into your docker image. convenient for development, but not encouraged in production
-      - ..:/usr/src/pyomabrowser
-      - static_volume:${DARWIN_BROWSERSTATIC_PATH}
-      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      - release_volume:${RELEASE_PATH}
-      # use a bind mount if you have the browser data on the host filesystem
+      # - ..:/usr/src/pyomabrowser
+      - type: volume
+        source: static_volume
+        target: ${DARWIN_BROWSERSTATIC_PATH}
+      - type: volume
+        source: media_volume
+        target: ${DARWIN_BROWSERMEDIA_PATH}
+
+      # bind mount of release data
       - type: bind
-        source: ${RELEASE_PATH_HOST}
-        target: ${RELEASE_PATH}
+        source: $RELEASE_PATH_HOST
+        target: $RELEASE_PATH
         read_only: true
+
+      # alternative if you want to have a docker volume for the release data, comment above and uncomment below
+      #- release_volume:${RELEASE_PATH}
+
     ports:
       - 8000
     depends_on:
@@ -61,21 +60,8 @@ services:
               "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=DEBUG"]
     env_file:
       - env
-    volumes:
-      # uncomment the following line if you want to use transparently the current checkout mounted
-      # into your docker image. convenient for development, but not encouraged in production
-      - ..:/usr/src/pyomabrowser
-      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      - release_volume:${RELEASE_PATH}
-      # use a bind mount if you have the browser data on the host filesystem
-      - type: bind
-        source: ${RELEASE_PATH_HOST}
-        target: ${RELEASE_PATH}
-        read_only: true
-      - type: bind
-        source: ${ALLALL_PATH_HOST}
-        target: ${DARWIN_ALLALL_PATH}
-        read_only: true
+    volumes_from:
+      - web
     depends_on:
       - broker
       - db
@@ -87,21 +73,14 @@ services:
               "--queues=celery,async_web,long", "--hostname=worker@%h", "--loglevel=DEBUG"]
     env_file:
       - env
+    volumes_from:
+      - web
     volumes:
-      # uncomment the following line if you want to use transparently the current checkout mounted
-      # into your docker image. convenient for development, but not encouraged in production
-      - ..:/usr/src/pyomabrowser
-      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      - release_volume:${RELEASE_PATH}
-      # use a bind mount if you have the browser data on the host filesystem
-      - type: bind
-        source: ${RELEASE_PATH_HOST}
-        target: ${RELEASE_PATH}
-        read_only: true
       - type: bind
         source: ${ALLALL_PATH_HOST}
         target: ${DARWIN_ALLALL_PATH}
         read_only: true
+
     depends_on:
       - broker
       - db
@@ -129,31 +108,13 @@ services:
       - DARWIN_BROWSERDOWNLOAD_PATH=${DARWIN_BROWSERDOWNLOAD_PATH}
     depends_on:
       - web
-      - legacy
 
-
-  legacy:
-    restart: ${RESTART_CONTAINERS:-unless-stopped}
-    build:
-      context: ./legacy/
-      secrets:
-        - labgit
-    image: $DOCKER_REGISTRY/legacy
-    env_file:
-      - env
-    ports:
-      - 8000
-    volumes:
-      - static_volume:${DARWIN_BROWSERSTATIC_PATH}
-      - release_volume:${RELEASE_PATH}
-      - type: bind
-        source: "${RELEASE_PATH_HOST}/data"
-        target: ${DARWIN_BROWSERDATA_PATH}
-        read_only: true
-    ulimits:
-      stack: 
-        soft: 64000000
-        hard: 64000000
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  # if release data is used with bind mount, comment release_volume line
+  #release_volume:
 
 
 secrets:
