@@ -64,7 +64,7 @@ py-cpuinfo==9.0.0
 pyfaidx==0.8.1.3; python_version >= '3.7'
 pygments==2.18.0; python_version >= '3.8'
 pyham==1.2.0
-pyoma[enrichment]@ git+${LABGIT}/pyoma@8de1aa82a55783cbb196f7c43632b1e7c140ad8b
+pyoma[enrichment]@ git+${LABGIT}/pyoma@8007fce4485b50b943931d0c7598a47216f3c1bb
 pyopa==0.8.4
 pyparsing==3.2.0; python_version >= '3.9'
 python-dateutil==2.9.0.post0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'
