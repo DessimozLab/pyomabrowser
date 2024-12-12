@@ -2,10 +2,6 @@ upstream pyoma {
     server web:8000;
 }
 
-upstream legacy {
-    server legacy:8000;
-}
-
 server {
     listen 80;
     proxy_set_header Host $host;
@@ -28,14 +24,6 @@ server {
     location ~ ^/(oma|api)/ {
         proxy_pass http://pyoma;
         proxy_redirect off;
-    }
-
-    location /cgi-bin {
-        proxy_pass http://legacy;
-        proxy_redirect off;
-        include uwsgi_params;
-        uwsgi_modifier1 9;
-        uwsgi_read_timeout 100;
     }
 
     location /All/ {
