@@ -60,7 +60,8 @@ FASTMAP = {
 EXPORT_OMA = {
     "engine": os.getenv("EXPORT_ENGINE", "cluster"),
     "store_files_in_days": 8,
-    "allall_root": os.getenv("DARWIN_ALLALL_PATH", None)
+    "allall_root": os.getenv("DARWIN_ALLALL_PATH", None),
+    "build_folder": os.getenv("EXPORT_BUILD_PATH", None),
 }
 
 CELERY_TASK_ROUTES = {

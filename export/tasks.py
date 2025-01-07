@@ -114,6 +114,7 @@ def run_export_celery(data_id, genomes):
     job = StandaloneExportJobs.objects.get(data_hash=data_id)
 
     allall_root = settings.EXPORT_OMA.get('allall_root', None)
+    build_folder = settings.EXPORT_OMA.get('build_folder', None)
     if allall_root is None or not os.path.isdir(allall_root):
         job.state = "error"
         job.message = "Invalid server configuration. Please contact the OMA administrator"
@@ -124,7 +125,9 @@ def run_export_celery(data_id, genomes):
     job.create_time = timezone.now()
     job.save()
     try:
-        export_standalone.build_export_tarball(utils.db, genomes=genomes, outfn=job.result.path, allall=Path(allall_root))
+        export_standalone.build_export_tarball(
+            utils.db, genomes=genomes, outfn=job.result.path, allall=Path(allall_root), tmpfolder=build_folder
+        )
         job.state = "done"
         job.create_time = timezone.now()
     except Exception as e:
