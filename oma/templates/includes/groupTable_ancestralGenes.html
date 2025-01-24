@@ -189,7 +189,7 @@ function run_go(){
         })
           .then((response) => response.json())
           .then((json) =>
-              window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_blank") )
+              window.open("{% url 'go_enrichment_result' '00000000-0000-0000-0000-000000000000'  %}".replace(/00000000-0000-0000-0000-000000000000/, json.id), "_blank") )
     }
 }
 
