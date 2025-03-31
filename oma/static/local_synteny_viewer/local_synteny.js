@@ -59,7 +59,7 @@ class LocalSyntenyViewer {
          var level_query = this.focal_hog !== this.reference_element ? '' :  '&level=' + this.focal_species;
 
         $.ajax({
-            url: "/api/synteny/" + that.reference_element + "/?evidence=linearized&context=" + that.settings.hald_window + level_query,
+            url: "/api/synteny/" + that.reference_element + "/?evidence=linearized&format=json&context=" + that.settings.hald_window + level_query,
             dataType: 'json',
             async: false,
             success: function (jsonData) {
@@ -423,7 +423,7 @@ class LocalSyntenyViewer {
 
             $.ajax({
 
-                url: "/api/synteny/" + idd + "/?evidence=linearized&context=" + that.settings.hald_window + level_query,
+                url: "/api/synteny/" + idd + "/?evidence=linearized&format=json&context=" + that.settings.hald_window + level_query,
                 dataType: 'json',
                 async: true,
                 success: function (jsonData) {
@@ -492,7 +492,7 @@ class LocalSyntenyViewer {
 
                              $.ajax({
 
-                                 url: '/api/protein/' + data[i].id + '/xref/?filter=maindb',
+                                 url: '/api/protein/' + data[i].id + '/xref/?filter=maindb&format=json',
                                  dataType: 'json',
                                  async: false,
                                  success: function (data_api) {
@@ -768,11 +768,11 @@ class LocalSyntenyViewer {
                                 menu.push(tttttt)
 
                $.ajax({
-                url: "/api/hog/" + data.id + "/?level=" + level,
+                url: "/api/hog/" + data.id + "/?format=json&level=" + level,
                 dataType: 'json',
                 async: false,
                 success: function (data) {
-                        menu.push({title: ` <b>Description: </b>${data[0].description}`, action: null })
+                        menu.push({title: `<b>Description: </b>${data[0].description}`, action: null })
                         menu.push({title: `<b>Completeness Score: </b>${data[0].completeness_score.toFixed(2)}`, action: null })
                 }
             });
@@ -805,7 +805,7 @@ class LocalSyntenyViewer {
 
                          $.ajax({
 
-                url: "/api/protein/" + data.id + "/",
+                url: "/api/protein/" + data.id + "/?format=json",
                 dataType: 'json',
                 async: false,
                 success: function (data) {
@@ -831,7 +831,7 @@ class LocalSyntenyViewer {
 
                         $.ajax({
 
-                url: '/api/protein/' + data.id + '/xref/?filter=maindb',
+                url: '/api/protein/' + data.id + '/xref/?filter=maindb&format=json',
                 dataType: 'json',
                 async: false,
                 success: function (data) {
@@ -870,7 +870,7 @@ class LocalSyntenyViewer {
 
         var that = this;
 
-        $.getJSON("/api/protein/" + id + "/", function (data) {
+        $.getJSON("/api/protein/" + id + "/?format=json", function (data) {
 
             that.Tooltip.style("opacity", 1).style("display", 'block')
                 .html(`<b>ID:</b> ${data.omaid}  <br>
@@ -891,7 +891,7 @@ class LocalSyntenyViewer {
 
         var that = this;
 
-        $.getJSON("/api/hog/" + id + "/", function (data) {
+        $.getJSON("/api/hog/" + id + "/?format=json", function (data) {
 
             that.Tooltip.style("opacity", 1).style("display", 'block')
                 .html(`<b>ID:</b> ${id}  <br> 
