@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 {% block css_hook %}
-    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
 {% endblock %}
 
 {% block js_hook %}
@@ -583,8 +583,8 @@
 
     </div>
 
-    <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
-        <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/mobile/bootstrap-table-mobile.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.16.0/dist/extensions/mobile/bootstrap-table-mobile.min.js"></script>
 
     <script type="module">
         window.search_token_vue_search_nav.preload_token({{ search  | safe }})
