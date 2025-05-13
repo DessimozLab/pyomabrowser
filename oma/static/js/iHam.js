@@ -33530,6 +33530,8 @@ module.exports = {
           obj.rows.push({ value: "<a href=\"/oma/hog/" + hogid + "/" + level + "/table/\" target=\"_blank\"> Show " + header + " members</a>" });
 
           obj.rows.push({ value: "<a href=\"/oma/hog/" + hogid + "/" + level + "/iham/\" target=\"_blank\"> Set focal to " + header + " </a>" });
+
+          obj.rows.push({ value: "<a href=\"/oma/ancestralgenome/" + level + "/chromosome/?query=" + hogid + "\" target=\"_blank\"> Locate in chromosome viewer </a>" });
         }
 
         _hog_header_tooltip = tooltip.list().width(180).id('hog_header_tooltip').container(div).call(this, obj);
