@@ -56,7 +56,7 @@ a {
       .then(response => response.json())
       .then(data => {
 
-        const app = createApp(GenomeViewer, { jsonData: data, user_settings : settings})
+        const app = Vue.createApp(GenomeViewer, { jsonData: data, user_settings : settings})
           const vm = app.mount('#app');
 
         // Access the root component instance and call methods or update state
