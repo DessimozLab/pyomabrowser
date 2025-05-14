@@ -55,7 +55,17 @@ a {
     fetch("/api/synteny/?format=json&level={{genome_name}}")
       .then(response => response.json())
       .then(data => {
-        Vue.createApp(GenomeViewer, { jsonData: data, user_settings: settings }).mount('#app');
+
+        const app = createApp(GenomeViewer, { jsonData: data, user_settings : settings})
+          const vm = app.mount('#app');
+
+        // Access the root component instance and call methods or update state
+                vm.$refs.chromosomeViewer.forEach(chromosome => {
+                    if (chromosome && typeof chromosome.render_excerpt === 'function') {
+                        chromosome.render_excerpt();
+                    }
+        });
+
       });
   </script>
 
