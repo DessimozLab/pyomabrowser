@@ -30,10 +30,11 @@ a {
     <script >
 
     const settings = {
+        'colorAccessor_excerpt' : 'completeness_score',
+        'heightAccessor_excerpt' : 'nr_members',
       'type_chromosome': 'ancestral',
       'sorting_chromosome': 'size',
-        'remove_outliers_legend': ['age'],
-
+        'force_extent_numerical': {'nr_members': {'min': 0, 'max': 2*{{nbr_species}} }},
         'level': '{{genome_name}}',
     'oma': true,
 'callback_click_synteny': function (data) {
