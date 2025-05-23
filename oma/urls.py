@@ -100,6 +100,7 @@ urlpatterns = [
     # Genome
     url(r"^genome/$", views.GenomeResolve.as_view(), name="genome"),
     url(r'^genome/(?P<species_id>\w+)/info/$', views.GenomeCentricInfo.as_view(), name='genome_info'),
+    url(r'^genome/(?P<species_id>\w+)/chromosome/$', views.GenomeCentricChromosome.as_view(), name='genome_chromosome'),
     url(r'^genome/(?P<species_id>\w+)/genes/$', views.GenomeCentricGenes.as_view(), name='genome_genes'),
     url(r'^genome/(?P<species_id>\w+)/closest/groups/$', views.GenomeCentricClosestGroups.as_view(), name='genome_closest_og'),
     url(r'^genome/(?P<species_id>\w+)/closest/hogs/$', views.GenomeCentricClosestHOGs.as_view(), name='genome_closest_hog'),
@@ -111,6 +112,7 @@ urlpatterns = [
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/synteny/$', views.AncestralGenomeCentricSynteny.as_view(), name='ancestralgenome_synteny'),
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/genes/(?P<level>[A-Za-z0-9 _.()-/]+)/$', views.AncestralGenomeCentricGenes.as_view(), name='ancestralgenome_genes'),
     url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/genes/$', views.AncestralGenomeCentricGenes.as_view(), name='ancestralgenome_genes'),
+    url(r'^ancestralgenome/(?P<species_id>[A-Za-z0-9 _.:,()/-]+)/chromosome/$', views.AncestralGenomeCentricChromosome.as_view(), name='ancestralgenome_chromosome'),
 
     # HOG via Entry (from external resources)
     url(r'^hogs/(?P<entry_id>\w+)/$', views.HOGtableFromEntry.as_view(), name='hog_table_from_entry'),

@@ -18,7 +18,8 @@
         {% if entry.chromosome|length > 5 %}Scaffold
         {% else %}Chromosome
         {% endif %}
-        {{entry.chromosome}} ]: {{entry.locus_start}} ... {{entry.locus_end}} </td></tr>
+        {{entry.chromosome}} ]: {{entry.locus_start}} ... {{entry.locus_end}}  <a href="{% url 'genome_chromosome' entry.genome.uniprot_species_code %}?query={{ entry.omaid }}">  <span> Jump to chromosome viewer</span> </a> </td></tr>
+
     <tr><td>Number of exons</td><td>{{ entry.exons | length }}</td></tr>
     <tr><td>Exons</td><td>{{ entry.exons }}</td></tr>
      {% if "PMP" in xrefs %}

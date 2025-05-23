@@ -1026,6 +1026,16 @@ class GenomeCentricInfo(GenomeBase, TemplateView):
         return context
 
 
+
+class GenomeCentricChromosome(GenomeBase, TemplateView):
+    template_name = "genome_chromosome.html"
+
+    def get_context_data(self, species_id, **kwargs):
+        context = super(GenomeCentricChromosome, self).get_context_data(species_id, **kwargs)
+
+        context.update({'tab': 'chromosome'})
+        return context
+
 class GenomeCentricGenes(GenomeBase, TemplateView):
     template_name = "genome_genes.html"
 
@@ -1298,6 +1308,15 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
                         'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
                         'parent_level': parent_level,
                         'ancestral_link_name': "ancestralgenome_genes"})
+        return context
+
+class AncestralGenomeCentricChromosome(AncestralGenomeBase, TemplateView):
+    template_name = "ancestralgenome_chromosome.html"
+
+    def get_context_data(self, species_id, level=None, **kwargs):
+        context = super(AncestralGenomeCentricChromosome, self).get_context_data(species_id, **kwargs)
+
+        context.update({'tab': 'chromosome'})
         return context
 
 # </editor-fold >

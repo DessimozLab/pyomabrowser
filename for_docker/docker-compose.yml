@@ -95,7 +95,7 @@ services:
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      #- release_volume:${RELEASE_PATH}
+      - release_volume:${RELEASE_PATH}
       # use a bind mount if you have the browser data on the host filesystem
       - type: bind
         source: "${RELEASE_PATH_HOST}/downloads"
@@ -115,7 +115,6 @@ volumes:
   media_volume:
   # if release data is used with bind mount, comment release_volume line
   #release_volume:
-
 
 
 secrets:
