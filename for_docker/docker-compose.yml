@@ -31,14 +31,14 @@ services:
       #- release_volume:${RELEASE_PATH}
 
     ports:
-      - 8000:8000
+      - 8000
     depends_on:
       - broker
       - db
 
   db:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
-    image: postgres:15
+    image: postgres:alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
