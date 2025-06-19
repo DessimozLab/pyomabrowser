@@ -45,6 +45,16 @@ def convert_go_to_drwformat(go, fh):
                 fh.write("]:\n")
     fh.write("Ontology_name := _n: Ontology_id := _id: Ontology_def := _def: Ontology_is_a := _is: Ontology_part_of := _p: Ontology_can_be := _cb: Ontology_has_parts := _hp:\n")
 
+
+class GenomeData:
+    def __init__(self, code, seqs, xrefs, splice_map, go_anno):
+        self.code = code
+        self.seqs = seqs
+        self.xrefs = xrefs
+        self.splice_map = splice_map
+        self.go_anno = go_anno
+
+
 class DarwinExporter:
     def __init__(self, db: Database):
         self.db = db
@@ -114,23 +124,29 @@ class DarwinExporter:
                 buf.write(xrefs[tag])
         return buf.getvalue()
 
-    def process_genome(self, genome:str, folder:Path):
-        genome_data = self.data_for_genome(genome)
-        fasta = folder / "DB" / (genome + ".fa")
-        darwin_db = folder / "Cache" / "DB" / (genome + ".db")
-        with open(fasta, 'wt') as fh:
+    def _write_fasta_sequences(self, fname: Path, genome_data:GenomeData):
+        with open(fname, 'wt') as fh:
             for enr, xrefs in genome_data.xrefs.items():
                 fh.write(f">{self._produce_fasta_header(xrefs)}\n")
                 seq = genome_data.seqs[enr]['SEQ']
                 for k in range(0, len(seq), 80):
                     fh.write(f"{seq[k:k+80]}\n")
 
+    def _write_splice_file(self, fname: Path, genome_data:GenomeData):
+        with open(fname, "wt") as fh:
+            for gene in genome_data.splice_map:
+                splice_vars = ";".join(map(lambda nr: f"{genome_data.Genome}{nr:06d}", gene))
+                fh.write(splice_vars)
+                fh.write("\n")
+
+    def process_genome(self, genome:str, folder:Path):
+        genome_data = self.data_for_genome(genome)
+        fasta = folder / "DB" / (genome + ".fa")
+        darwin_db = folder / "Cache" / "DB" / (genome + ".db")
+        self._write_fasta_sequences(fasta, genome_data)
+
         if len(genome_data.splice_map) > 0:
-            with open(folder / "DB" / (genome + ".splice"), "wt") as fh:
-                for gene in genome_data.splice_map:
-                    splice_vars = ";".join(map(lambda nr: f"{genome}{nr:06d}", gene))
-                    fh.write(splice_vars)
-                    fh.write("\n")
+            self._write_splice_file(folder / "DB" / (genome + ".splice"), genome_data)
 
         #with open(folder / "data" / "GOdata.drw.gz") as fh:
         fasta_hash = darwin_hash_of_file(fasta)
@@ -162,15 +178,6 @@ class DarwinExporter:
         gs.dbhash = darwin_hash_of_file(darwin_db)
         gs.fastahash = fasta_hash
         return gs
-
-
-class GenomeData:
-    def __init__(self, code, seqs, xrefs, splice_map, go_anno):
-        self.code = code
-        self.seqs = seqs
-        self.xrefs = xrefs
-        self.splice_map = splice_map
-        self.go_anno = go_anno
 
 
 def darwin_hash_of_file(fn):
