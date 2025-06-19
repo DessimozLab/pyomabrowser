@@ -79,11 +79,11 @@
                             Depending on the size of your requested dataset as well as the server load, this
                             may still take some time. Once the file is ready, we will store it
                             for {{ days_stored_before_remove }} days. You can come back to this page using this link:
-                            <a href="">{{ request.get_host }}{% url 'export-download' file_result.data_hash %}</a>
+                            <a href="">{{ request.get_host }}{% url 'fastoma-export-download' file_result.data_hash %}</a>
                         </p>
 
                         <p>This page gets automatically reloaded every {{ reload_every_x_sec }} secs or after pressing the refresh button</p>
-                        <form action="{% url 'fastoma-download' file_result.data_hash %}">
+                        <form action="{% url 'fastoma-export-download' file_result.data_hash %}">
                             <input type="submit" value="Refresh" />
                         </form>
                     {% endif %}
