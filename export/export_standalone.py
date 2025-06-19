@@ -125,6 +125,7 @@ class DarwinExporter:
         return buf.getvalue()
 
     def _write_fasta_sequences(self, fname: Path, genome_data:GenomeData):
+        fname.parent.mkdir(parents=True, exist_ok=True)
         with open(fname, 'wt') as fh:
             for enr, xrefs in genome_data.xrefs.items():
                 fh.write(f">{self._produce_fasta_header(xrefs)}\n")
@@ -133,9 +134,10 @@ class DarwinExporter:
                     fh.write(f"{seq[k:k+80]}\n")
 
     def _write_splice_file(self, fname: Path, genome_data:GenomeData):
+        fname.parent.mkdir(parents=True, exist_ok=True)
         with open(fname, "wt") as fh:
             for gene in genome_data.splice_map:
-                splice_vars = ";".join(map(lambda nr: f"{genome_data.Genome}{nr:06d}", gene))
+                splice_vars = ";".join(map(lambda nr: f"{genome_data.code}{nr:06d}", gene))
                 fh.write(splice_vars)
                 fh.write("\n")
 

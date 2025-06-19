@@ -92,6 +92,6 @@ def export_fastoma(request):
                 r = StandaloneExportJobs(data_hash=data_id, result=res_file_rel, state="pending",
                                          genomes=genomes_as_txt, processing=False)
                 r.save()
-                run_fastoma_export.delay(r, genomes, release=release)
+                run_fastoma_export.delay(r.data_hash, genomes)
             return HttpResponseRedirect(reverse('fastoma-export-download', args=(data_id,)))
     return render(request, "dlOMA_exportFastOMA.html", context={'max_nr_genomes': 250})
