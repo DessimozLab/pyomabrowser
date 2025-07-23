@@ -889,7 +889,7 @@ class Hog_placement {
 
                    if (val!=null){
 
-                    val = val/cpt
+                    val = val/collapse_cols.length
 
                     val = val % 1 === 0 ? val : val.toFixed(1)
 
@@ -906,7 +906,6 @@ class Hog_placement {
                     max = val > max ?  val : max
                     var color = this.cols[c].data.matrix_color ? this.cols[c].data.matrix_color : this.color_cell_default;
                     data_matrix.push({row: r + 1, col: c + 1, value: val, c: color, hog_id: this.rows[r].data.HOG, taxon_name: this.cols[c].data.taxon});
-                    //data_matrix.push({row: r + 1, col: c + 1, value: val, c: color, hog_id: this.rows[r].data.HOG, taxon_name: this.cols[c].data.taxon});
                     values.push(parseFloat(val));
 
                     val > 0 ? this.cols[c].empty = false : null
