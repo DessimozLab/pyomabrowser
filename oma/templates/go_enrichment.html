@@ -114,7 +114,7 @@
           .then((response) => response.json())
           .then((json) =>  {
               if (json.id !== undefined){
-                  window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_self")
+                  window.open("{% url 'go_enrichment_result' '00000000-0000-0000-0000-000000000000'  %}".replace(/00000000-0000-0000-0000-000000000000/, json.id), "_self")
               } else {
                   let msg = "\n".concat(Object.keys(json));
                   alert("The provided data contains errors:\n" + msg);
