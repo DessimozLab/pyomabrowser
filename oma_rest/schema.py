@@ -11,7 +11,7 @@ import yaml
 from rest_framework import schemas
 from rest_framework.compat import coreapi, coreschema, uritemplate
 from rest_framework.settings import api_settings
-from django.utils.six.moves.urllib import parse as urlparse
+from urllib.parse import urljoin
 import logging
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class DocStringSchemaExtractor(schemas.AutoSchema):
             path = path[1:]
 
         return coreapi.Link(
-            url=urlparse.urljoin(base_url, path),
+            url=urljoin(base_url, path),
             action=method.lower(),
             encoding=encoding,
             fields=fields,
