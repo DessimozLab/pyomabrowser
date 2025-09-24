@@ -285,6 +285,7 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         else:
             # In order to populate pairswise table, badge, link with main isofrma information we replace here
             reference_entry = entry.get_main_isoform()
+            reference_entry.oma_hog_root = reference_entry.oma_hog.split('.')[0]
 
         nr_ortholog_relations = utils.db.nr_ortholog_relations(reference_entry.entry_nr)
 
@@ -346,88 +347,54 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
 
         ## Get VPS
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-        pps = utils.db.get_hog_induced_pairwise_paralogs(entry.entry_nr)
         for rel in itertools.chain(vps_raw):
             pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
-            # pw_relation.RelType = rel['RelType']
-            # if len(rel['RelType']) == 3:
-            #    pw_relation.RelType += " ortholog"
-
             pw_relation.type_p = 1
-
             orthologs_dict[rel['EntryNr2']] = pw_relation
 
         ## Get HOG orthologs
         hog_pair = utils.db.get_hog_induced_pairwise_orthologs(entry_db)
         for en in hog_pair:
-
-            if en[0] in orthologs_dict.keys():
-                pw_relation = orthologs_dict[en[0]]
+            if en['EntryNr'] in orthologs_dict:
+                pw_relation = orthologs_dict[en['EntryNr']]
             else:
-                pw_relation = models.ProteinEntry.from_entry_nr(utils.db, en[0])
-
-            if not hasattr(pw_relation, 'RelType'):
-                pw_relation.RelType = en[-1].decode()
-
+                # en is already the full entry of the protein
+                pw_relation = models.ProteinEntry(utils.db, en)
+            pw_relation.RelType = en['RelType'].decode()
             pw_relation.type_h = 1
-
-            orthologs_dict[en[0]] = pw_relation
+            orthologs_dict[en['EntryNr']] = pw_relation
 
         ## Get OG orthologs
-
         if entry.oma_group != 0:
-
-            OG_pair = list(utils.db.oma_group_members(entry.oma_group))
-            OG_pair.remove(entry_db)
-
-            for ent in OG_pair:
-
-                if ent[0] in orthologs_dict.keys():
-                    pw_relation = orthologs_dict[ent[0]]
+            for ent in utils.db.oma_group_members(entry.oma_group):
+                if ent['EntryNr'] == entry.entry_nr:
+                    continue
+                if ent['EntryNr'] in orthologs_dict:
+                    pw_relation = orthologs_dict[ent['EntryNr']]
                 else:
-                    pw_relation = models.ProteinEntry.from_entry_nr(utils.db, ent[0])
-
-                # if not hasattr(pw_relation, 'RelType'):
-                #    pw_relation.RelType = None
-
+                    pw_relation = models.ProteinEntry(utils.db, ent)
                 pw_relation.type_g = 1
-
-                orthologs_dict[ent[0]] = pw_relation
+                orthologs_dict[ent['EntryNr']] = pw_relation
 
         vps = orthologs_dict.values()
 
         # populate with inference evidence missing attribute
         for rel in vps:
-
             if not hasattr(rel, 'RelType'):
                 rel.RelType = None
-
             if not hasattr(rel, 'type_p'):
                 rel.type_p = 0
-
             if not hasattr(rel, 'type_h'):
                 rel.type_h = 0
-
             if not hasattr(rel, 'type_g'):
                 rel.type_g = 0
 
         end = time.time()
-        logger.info("[{}] Pairs modeled {}".format(context['entry'].omaid, start - end))
-
-        entry.RelType = 'self'
-        if entry._entry['AltSpliceVariant'] in (0, entry.entry_nr):
-            entry.alt_splicing_variant = entry.omaid
-        else:
-            entry.alt_splicing_variant = utils.id_mapper['OMA'].map_entry_nr(entry._entry['AltSpliceVariant'])
-
-        longest_seq = 0
-        if len(vps) > 0:
-            longest_seq = max(e.sequence_length for e in vps)
+        logger.info("[{}] Pairs modeled {}".format(context['entry'].omaid, end - start))
 
         start = time.time()
         data = list(self.to_json_dict(vps))
         end = time.time()
-
         logger.info("[{}] Json formatting {}".format(context['entry'].omaid, start - end))
 
         return JsonResponse(data, safe=False)
@@ -440,56 +407,28 @@ class PairsJson_SupportSample(PairsBase, JsonModelMixin, View):
                    'type_g': 'type_g'}
 
     def get(self, request, *args, **kwargs):
-
         context = self.get_context_data(**kwargs)
+        entry: models.ProteinEntry = context['entry']
 
-        entry = context['entry']
-        entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
-
-        orthologs_dict = {}
+        vps = []
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
-        for rel in itertools.chain(vps_raw):
+        for rel in itertools.islice(vps_raw, self._max_entry_to_load):
             pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
             pw_relation.type_p = 1
-            orthologs_dict[rel['EntryNr2']] = pw_relation
-
-        vps = orthologs_dict.values()
-        if len(vps) > PairsBase._max_entry_to_load:
-            vps = list(vps)
-            vps = vps[0:PairsBase._max_entry_to_load]
+            vps.append(pw_relation)
 
         # populate with inference evidence missing attribute
         for rel in vps:
-
-            rel_db = utils.db.entry_by_entry_nr(rel.entry_nr)
-
             if not hasattr(rel, 'RelType'):
                 rel.RelType = None
-
             if not hasattr(rel, 'type_p'):
-                rel.type_p = 0
-
+                rel.type_p = 0  # must actually not happen!
             if not hasattr(rel, 'type_h'):
-
-                rel.type_h = 1
-
-                prefix = os.path.commonprefix((entry_db["OmaHOG"], rel_db["OmaHOG"])).decode()
-                if "." in prefix and prefix[-1].isdigit():
-                    rel.type_h = 0
-
+                rel.type_h = 1 if entry.is_orthologous_to(rel) else 0
             if not hasattr(rel, 'type_g'):
-                if entry.oma_group != 0:
-                    if entry.oma_group == rel.oma_group:
-                        rel.type_g = 1
-                    else:
-                        rel.type_g = 0
-                else:
-                    rel.type_g = 0
-
-        entry.RelType = 'self'
+                rel.type_g = 1 if entry.oma_group != 0 and rel.oma_group == entry.oma_group else 0
 
         data = list(self.to_json_dict(vps))
-
         return JsonResponse(data, safe=False)
 
 
