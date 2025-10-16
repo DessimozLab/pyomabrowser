@@ -2,6 +2,7 @@ import gzip
 import json
 import tarfile
 import tempfile
+import textwrap
 import time
 import os
 from oma import utils
@@ -32,6 +33,10 @@ def compute_ancestral_enrichment(obj: EnrichmentAnalysisModel):
         else:
             try:
                 entry = ProteinEntry(utils.db, utils.id_resolver.resolve(elem))
+                if entry.oma_hog == "":
+                    logger.debug(f"{elem} -> {entry.omaid}, but no hog")
+                    hogs[elem] = None
+                    continue
                 hog = utils.db.iter_hogs_at_level(entry.oma_hog, level)
                 hogs[elem] = next(hog)['ID'].decode()
             except (AmbiguousID, InvalidId, StopIteration) as e:
@@ -94,6 +99,17 @@ def go_enrichment(id):
             go_res, mapping = compute_ancestral_enrichment(obj)
         else:
             go_res, mapping = compute_extant_enrichment(obj)
+        if go_res is None:
+            msg = textwrap.dedent(
+                f"""
+                 no results from enrichment analysis.
+                 - Please check your input IDs of the foreground set.
+                   -> {len(set(mapping.values()) - {None})} out of {len(mapping)} foreground IDs could be mapped:
+                 """)
+            msg += "    "
+            msg += "\n    ".join([f"{k:10s} -> {v}" for k, v in mapping.items()])
+            msg += f"\n- Do at least some of the elements have {obj.type} GO annotations?"
+            raise Exception(msg)
     except Exception as e:
         logger.exception('error while computing go_enrichment_analysis for dataset: {}'
                          .format(obj.id))

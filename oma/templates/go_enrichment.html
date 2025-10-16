@@ -48,8 +48,7 @@
                 </div>
 
                 <div class="card-body">
-
-                    {% bootstrap_messages %}
+                        <div id="client-error-message"></div>
                         <form role="form" class="form-horizontal" enctype="multipart/form-data">
                             {% csrf_token %}
                             {% bootstrap_form form layout="horizontal" %}
@@ -69,32 +68,68 @@
 
 
     <script>
-
-
     $('#id_type').on('change', function (e) {
-
         var optionSelected = $("option:selected", this);
-    var valueSelected = this.value;
+        var valueSelected = this.value;
 
-    if (valueSelected !== 'ancestral'){
-        $('#id_taxon').hide();
-        document.getElementById("id_taxon").parentNode.parentNode.style.display = 'none';
+        if (valueSelected !== 'ancestral'){
+            $('#id_taxon').hide();
+            document.getElementById("id_taxon").parentNode.parentNode.style.display = 'none';
+        } else {
+            $('#id_taxon').show();
+            document.getElementById("id_taxon").parentNode.parentNode.style.display = 'flex';
+        }
+    });
 
-    } else {
-        $('#id_taxon').show();
-        document.getElementById("id_taxon").parentNode.parentNode.style.display = 'flex';
-
-    }
-});
 
     document.getElementById('submit_post_go').addEventListener("click", function(event){
 
         event.preventDefault();
 
-        var input_foreground = document.getElementById('id_Foreground').value.split(/[\s,\n\t]+/).filter(n => n);
-        var input_type = document.getElementById('id_type').value
-        var input_name = document.getElementById('id_name').value
-        var input_level = document.getElementById('id_taxon').value ? document.getElementById('id_taxon').value : ""
+        // Remove is-invalid from all inputs before validating
+        document.querySelectorAll('.is-invalid').forEach(function(el) {
+            el.classList.remove('is-invalid');
+        });
+        document.getElementById('client-error-message').innerHTML = '';
+
+        var input_foreground_raw = document.getElementById('id_Foreground').value;
+        let input_foreground;
+        try {
+            // Try to parse as JSON array
+            let parsed = JSON.parse(input_foreground_raw);
+            if (Array.isArray(parsed)) {
+                input_foreground = parsed.filter(n => n);
+            } else {
+                throw "Not an array";
+            }
+        } catch (e) {
+            // Fallback: split by whitespace/comma
+            input_foreground = input_foreground_raw.split(/[\s,\n\t]+/).filter(n => n);
+        }
+        let input_type = document.getElementById('id_type').value
+        let input_name = document.getElementById('id_name').value
+        let taxon_input = document.getElementById('id_taxon');
+        let input_level = taxon_input.value ? taxon_input.value : ""
+        // remove input level if not ancestral
+        if (input_type === "extent" && input_level) {
+            input_level = ""
+        }
+
+        if (input_type === "ancestral" && !input_level) {
+            let errorDiv = document.getElementById('client-error-message');
+            errorDiv.innerHTML = '<div class="alert alert-danger" role="alert">Please select a taxonomic level for ancestral analysis.</div>';
+            taxon_input.classList.add("is-invalid");
+
+            // Remove error on input
+            taxon_input.addEventListener("input", function handler() {
+                if (taxon_input.value) {
+                    errorDiv.innerHTML = '';
+                    taxon_input.classList.remove("is-invalid");
+                    taxon_input.removeEventListener("input", handler);
+                }
+            });
+            return;
+        }
 
 
         console.log(input_foreground, input_type, input_name, input_level)
@@ -111,14 +146,34 @@
             "Content-type": "application/json; charset=UTF-8"
           }
         })
-          .then((response) => response.json())
-          .then((json) =>  {
-              if (json.id !== undefined){
-                  window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_self")
-              } else {
-                  let msg = "\n".concat(Object.keys(json));
-                  alert("The provided data contains errors:\n" + msg);
-              }
+            .then((response) => response.json())
+            .then((json) =>  {
+                if (json.id !== undefined){
+                    window.open("{% url 'go_enrichment_result' 1234567  %}".replace(/1234567/, json.id), "_self")
+                } else {
+                    let errorDiv = document.getElementById('client-error-message');
+                    let errors = [];
+                    if (json.hasOwnProperty('taxlevel')) {
+                        errors.push("Taxonomic level not found: " + json.taxlevel[0]);
+                        taxon_input.classList.add("is-invalid");
+                    }
+                    if (json.hasOwnProperty('foreground')) {
+                        errors.push("Foreground malformed. Please specify a list of extent genes or ancestral HOG-IDs.");
+                        document.getElementById('id_Foreground').classList.add("is-invalid");
+                    }
+                    if (json.hasOwnProperty('non_field_errors')) {
+                        errors.push(json.non_field_errors[0]);
+                        document.getElementById('id_Foreground').classList.add("is-invalid");
+                    }
+                    errorDiv.innerHTML = '<div class="alert alert-danger" role="alert">' + errors.join("<br/>") + '</div>';
+
+                    document.querySelectorAll('.is-invalid').forEach(function (el) {
+                        el.addEventListener('input', function () {
+                                el.classList.remove('is-invalid');
+                            }, {once: true}
+                        );
+                    });
+                }
           });
 
     })

@@ -369,7 +369,7 @@ data-toolbar="#toolbar"
                 analysis_title += " GO Enrichment analysis: "+jqxhr.responseJSON['name'];
 
             }
-            document.getElementById('datum').innerHTML = `<h3>${analysis_title}</h3> <p>Something wrong happened: ${message}</p>`;
+            document.getElementById('datum').innerHTML = `<h3>${analysis_title}</h3> <p>Something unexpected happened during the computation: </p><pre><code>${message}</code></pre>`;
         });
 
     </script>
