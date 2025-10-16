@@ -152,8 +152,6 @@ urlpatterns = [
     path('funding/', TemplateView.as_view(template_name='about_funding.html'), name='funding'),
     path('license/', RedirectView.as_view(pattern_name="license"), name='red-license'),
     path('terms_of_use/', TemplateView.as_view(template_name='about_license.html'), name='license'),
-    path('APISOAP/', TemplateView.as_view(template_name='dlSoft_SOAP.html'), name='APISOAP'),
-    path('APIDAS/', TemplateView.as_view(template_name='APIDAS.html'), name='APIDAS'),
     path('type/', TemplateView.as_view(template_name='help_typesOrthologs.html'), name='type'),
     path('uses/', TemplateView.as_view(template_name='help_typicalUses.html'), name='uses'),
     path('FAQ/', TemplateView.as_view(template_name='help_FAQ.html'), name='FAQ'),
