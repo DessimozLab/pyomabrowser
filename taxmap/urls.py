@@ -1,6 +1,6 @@
-from django.conf.urls import url
+from django.urls import re_path
 from . import views
 
 urlpatterns = [
-    url(r'^taxmap/(?P<taxon>[\w _.()-/:-]+)/$', views.TaxonomyMapView.as_view(), name="taxmap"),
+    re_path(r'^taxmap/(?P<taxon>[\w _.()-/:-]+)/$', views.TaxonomyMapView.as_view(), name="taxmap"),
 ]

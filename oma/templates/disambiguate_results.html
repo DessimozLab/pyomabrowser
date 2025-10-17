@@ -1,5 +1,5 @@
 {% extends  "base_template.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load oma_extras %}
 
 {% block title %}{% block titleTab %}Results for "{% if tokens %}{{ tokens | join:' AND ' }} {% else %}{{ query  }} {% endif %}"  {% endblock titleTab %}{% endblock %}
