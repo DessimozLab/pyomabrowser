@@ -6,69 +6,60 @@
 {% block js_hook %}
 
 <!-- Load css from static -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.1.20/dist/GenomeViewer.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.1.22/dist/GenomeViewer.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
-<script type="module" src="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.1.20/dist/GenomeViewer.umd.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.1.22/dist/GenomeViewer.umd.js"></script>
 
 {% endblock js_hook %}
 
 
 {% block contentTab %}
 
-
     <style>
-
-a {
-    text-decoration: none !important;
-}
+    a {
+        text-decoration: none !important;
+    }
     </style>
 
-
-
-     <div id="app" style="width: 100%;"></div>
+    <div id="app" style="width: 100%;"></div>
 
     <script >
-
     const settings = {
         'colorAccessor_excerpt' : 'completeness_score',
         'heightAccessor_excerpt' : 'nr_members',
-      'type_chromosome': 'ancestral',
-      'sorting_chromosome': 'size',
+        'type_chromosome': 'ancestral',
+        'sorting_chromosome': 'size',
+        'min_genes': 10,
         'force_extent_numerical': {'nr_members': {'min': 0, 'max': 2*{{nbr_species}} }},
         'level': '{{genome_name}}',
-    'oma': true,
-'callback_click_synteny': function (data) {
-                        var newUrl="{% url 'hog_synteny' 1234567 genome_name %}".replace(/1234567/,data);
-
-        window.open(newUrl, "_blank");
-    },
-    'callback_click_detail': function (data) {
-       var newUrl="{% url 'hog_viewer' 1234567 genome_name %}".replace(/1234567/, data);
-                window.open(newUrl, "_blank");
-    },
+        'oma': true,
+        'callback_click_synteny': function (data) {
+            let newUrl="{% url 'hog_synteny' 1234567 genome_name %}".replace(/1234567/,data);
+            window.open(newUrl, "_blank");
+        },
+        'callback_click_detail': function (data) {
+            let newUrl="{% url 'hog_viewer' 1234567 genome_name %}".replace(/1234567/, data);
+            window.open(newUrl, "_blank");
+        },
         'callback_click_members': function (data) {
-       var newUrl="{% url 'hog_table' 1234567 genome_name %}".replace(/1234567/, data);
-                window.open(newUrl, "_blank");
-    },
+            let newUrl="{% url 'hog_table' 1234567 genome_name %}".replace(/1234567/, data);
+            window.open(newUrl, "_blank");
+        },
     };
 
     fetch("/api/synteny/?format=json&level={{genome_name}}")
       .then(response => response.json())
       .then(data => {
-
-        const app = Vue.createApp(GenomeViewer, { jsonData: data, user_settings : settings})
-          const vm = app.mount('#app');
+        const app = Vue.createApp(GenomeViewer, {jsonData: data, user_settings: settings});
+        const vm = app.mount('#app');
 
         // Access the root component instance and call methods or update state
-                vm.$refs.chromosomeViewer.forEach(chromosome => {
-                    if (chromosome && typeof chromosome.render_excerpt === 'function') {
-                        chromosome.render_excerpt();
-                    }
+        vm.$refs.chromosomeViewer.forEach(chromosome => {
+            if (chromosome && typeof chromosome.render_excerpt === 'function') {
+                chromosome.render_excerpt();
+            }
         });
-
       });
   </script>
-
-
 
 {% endblock contentTab %}

@@ -970,7 +970,6 @@ class GenomeCentricChromosome(GenomeBase, TemplateView):
 
     def get_context_data(self, species_id, **kwargs):
         context = super(GenomeCentricChromosome, self).get_context_data(species_id, **kwargs)
-
         context.update({'tab': 'chromosome'})
         return context
 
