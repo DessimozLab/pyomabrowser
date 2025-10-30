@@ -7,10 +7,9 @@
 {% block js_hook %}
 
 <!-- Load css from static -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.1.22/dist/GenomeViewer.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.1.23/dist/GenomeViewer.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
-
-    <script type="module" src="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.1.22/dist/GenomeViewer.umd.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.1.23/dist/GenomeViewer.umd.js"></script>
 
 {% endblock js_hook %}
 
@@ -24,6 +23,7 @@
     </style>
 
     <div id="app" style="width: 100%;"></div>
+    <div id="message-container"></div>
 
     <script >
     const settings = {
@@ -46,15 +46,34 @@
     fetch("/api/synteny/?format=json&level={{genome.uniprot_species_code}}")
       .then(response => response.json())
       .then(data => {
-        const app = Vue.createApp(GenomeViewer, {jsonData: data, user_settings: settings});
-        const vm = app.mount('#app');
+          const app = Vue.createApp(GenomeViewer, {jsonData: data, user_settings: settings});
+          const vm = app.mount('#app');
 
-        // Access the root component instance and call methods or update state
-        vm.$refs.chromosomeViewer.forEach(chromosome => {
-            if (chromosome && typeof chromosome.render_excerpt === 'function') {
-                chromosome.render_excerpt();
-            }
-        });
+          // Wait a tick for refs to populate (optional safety)
+          Vue.nextTick(() => {
+              if (vm.$refs.chromosomeViewer && vm.$refs.chromosomeViewer.length) {
+                  vm.$refs.chromosomeViewer.forEach(chromosome => {
+                      if (chromosome && typeof chromosome.render_excerpt === 'function') {
+                          chromosome.render_excerpt();
+                      }
+                  });
+              } else {
+                  // Show Bootstrap alert if no chromosomeViewer refs are found
+                  document.getElementById('message-container').innerHTML = `
+                    <div class="alert alert-info mt-3" role="alert">
+                      No chromosome data to display.
+                    </div>
+                  `;
+              }
+          });
+      })
+      .catch(error => {
+          console.error('Fetch error:', error);
+          document.getElementById('message-container').innerHTML = `
+            <div class="alert alert-danger mt-3" role="alert">
+              Failed to load data. Please try again later.
+            </div>
+            `;
       });
   </script>
 
