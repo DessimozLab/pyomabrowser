@@ -124,6 +124,7 @@ if os.getenv("SENTRY_DNS") is not None:
     else:
         sentry_sdk.init(
             dns = os.getenv("SENTRY_DNS"),
+            environment = os.getenv("SENTRY_ENVIRONMENT", "production"),
             # Set traces_sample_rate to 1.0 to capture 100%
             # of transactions for performance monitoring.
             traces_sample_rate = 1.0,
