@@ -30,7 +30,7 @@ PyYAML = "*"
 django-matomo-api-tracking = "*"
 django-debug-toolbar = "*"
 djangorestframework-csv = "*"
-#sentry-sdk = "*"
+sentry-sdk = {version = "*", extras=["django"]}
 
 [dev-packages]
 

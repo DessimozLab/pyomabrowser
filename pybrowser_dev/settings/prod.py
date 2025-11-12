@@ -118,12 +118,12 @@ if FASTMAP['engine'] == 'celery':
 # for backward compability reasons
 BEAT_SCHEDULE = CELERY_BEAT_SCHEDULE
 
-if os.getenv("SENTRY_DNS") is not None:
+if os.getenv("SENTRY_DSN") is not None:
     if sentry_sdk is None:
         logger.error("Sentry sdk package not installed")
     else:
         sentry_sdk.init(
-            dns = os.getenv("SENTRY_DNS"),
+            dsn = os.getenv("SENTRY_DSN"),
             environment = os.getenv("SENTRY_ENVIRONMENT", "production"),
             # Set traces_sample_rate to 1.0 to capture 100%
             # of transactions for performance monitoring.
