@@ -2147,7 +2147,7 @@ def export_marker_genes(request):
 
 
 def function_projection(request):
-    form_cls = forms.FunctionProjectionUploadForm if 'captcha' in settings.INSTALLED_APPS else forms.FunctionProjectionUploadFormBase
+    form_cls = forms.FunctionProjectionUploadForm if 'django_recaptcha' in settings.INSTALLED_APPS else forms.FunctionProjectionUploadFormBase
     if request.method == 'POST':
         form = form_cls(request.POST, request.FILES)
         if form.is_valid():
