@@ -1,7 +1,7 @@
-# syntax=docker/dockerfile:experimental
+# syntax=docker/dockerfile:1
 
 # pull official base image
-FROM python:3.10-slim as oma_basis
+FROM python:3.12-slim AS oma_basis
 
 ENV SRC_DIR="/usr/src/pyomabrowser"
 
@@ -16,29 +16,42 @@ RUN mkdir -m 700 /root/.ssh/ \
     && ssh-keyscan -p 2222 lab.dessimoz.org >> /root/.ssh/known_hosts \
     && chmod 600 /root/.ssh/known_hosts
 
-# install dependencies
-RUN pip3 install --no-cache-dir --upgrade pip
-RUN pip3 install --no-cache-dir 'psycopg2<2.9'
-RUN pip3 install --no-cache-dir uwsgi \
-    'numexpr==2.8.4' \
-    'numpy==1.23.5' \
-    'blosc2' \
-    'cython==0.29.33' \
-    'pipenv'
+# --- Install uv ---
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR $SRC_DIR
-COPY Pipfile Pipfile.lock $SRC_DIR
-RUN pipenv requirements > requirements.pipenv.txt
-RUN echo "psycopg2<2.9\nuwsgi" >> requirements.pipenv.txt
-RUN python -m venv /app
-ENV PATH="/app/bin:$PATH"
+COPY pyproject.toml uv.lock ./
 
+# --- Install dependencies securely ---
+# If LABGIT_TOKEN is passed as a secret, switch URLs from SSH → HTTPS dynamically.
 RUN --mount=type=ssh \
     --mount=type=secret,id=labgit \
-    . /run/secrets/labgit && \
-    pip install -r requirements.pipenv.txt
+    bash -c '\
+      if [ -f /run/secrets/labgit ]; then \
+        DEFAULT_SSH="ssh://lab.dessimoz.org:2222/"; \
+        LABGIT=$(cat /run/secrets/labgit); \
+        echo "LABGIT secret: ${LABGIT}"; \
+        if [ "${LABGIT}" != "${DEFAULT_SSH}" ]; then \
+          echo "Replacing Git URLs for non-default host: $LABGIT"; \
+          sed -i "s|${DEFAULT_SSH}|${LABGIT}|g" pyproject.toml; \
+          cat pyproject.toml; \
+          uv lock; \
+          cat uv.lock; \
+        else \
+          echo "Using default SSH Git URLs"; \
+        fi; \
+      fi && \
+      uv sync --all-groups \
+    '
 
-FROM python:3.10-slim as runtime
+# Install dependencies into a venv directly at /app
+RUN --mount=type=ssh \
+    uv venv /app \
+    && VIRTUAL_ENV=/app uv sync --frozen --all-groups --active \
+    && python -OO -m compileall /app
+
+
+FROM python:3.12-slim AS runtime
 
 # set environment varibles
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -60,5 +73,5 @@ ENV PATH="/app/bin:$PATH"
 # set work directory
 RUN mkdir $SRC_DIR
 WORKDIR $SRC_DIR
-COPY . $SRC_DIR
+#COPY . $SRC_DIR
 COPY for_docker/oma/entrypoint.sh /

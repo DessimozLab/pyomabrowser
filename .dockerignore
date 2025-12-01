@@ -11,3 +11,4 @@ celerybeat-schedule.db
 *.phyloxml
 *.h5
 *.h5.idx
+ansible

@@ -1,4 +1,4 @@
 # setting the base URL to the LAB's git server (either as ssh or https)
-export LABGIT="ssh://gitolite@lab.dessimoz.org:2222"
+ssh://gitolite@lab.dessimoz.org:2222
 # if ssh doesn't work, use https with your credentials
-#export LABGIT="https://USER:PASSWORD@git.lab.dessimoz.org/git"
+#https://USER:PASSWORD@git.lab.dessimoz.org/git
