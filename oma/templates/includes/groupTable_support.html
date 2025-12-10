@@ -62,14 +62,14 @@
  </tr>
 
             <tr>
-        <th  class="micro-header" data-field="type_p"  data-align="center" data-halign="center"  data-sortable="true" data-formatter="stateFormatterPO" >Pair</th>
+        <th  class="micro-header" data-field="support"  data-align="center" data-halign="center"  data-sortable="true" data-formatter="stateFormatterPO" >Pair</th>
 
 
-                <th class="micro-header" data-field="type_h"   data-align="center" data-halign="center" data-sortable="true"  data-formatter="stateFormatterH" >
+                <th class="micro-header" data-field="support"   data-align="center" data-halign="center" data-sortable="true"  data-formatter="stateFormatterH" >
                  HOG</th>
 
 
-                <th class="micro-header" data-field="type_g"   data-align="center" data-halign="center"  data-sortable="true" data-formatter="stateFormatterOG" >
+                <th class="micro-header" data-field="support"   data-align="center" data-halign="center"  data-sortable="true" data-formatter="stateFormatterOG" >
                     OMA
                    </th>
 
@@ -91,11 +91,7 @@
     // Add header
 
   function stateFormatterPO(value, row, index) {
-
-
-
-
-    if (row['type_p'] === 1) {
+    if (row.support.includes("Pairs")) {
       return '<i class="fas fa-check " style="color:green"></i>';
     }
     else {
@@ -106,7 +102,7 @@
   function stateFormatterH(value, row, index) {
 
 
-    if (row['type_h'] === 1) {
+    if (row.support.includes("HOG")) {
       return '<a href="{% url 'hog_viewer' entry.oma_hog_root %}"><i class="fas fa-check " style="color:green"></i></a>';
     }
     else {
@@ -117,7 +113,7 @@
   function stateFormatterOG(value, row, index) {
 
 
-    if (row['type_g'] === 1) {
+    if (row.support.includes("OMAGroup")) {
       return '<a href="{% url 'omagroup_members' entry.oma_group %}"><i class="fas fa-check " style="color:green"></i></a>';
     }
     else {
@@ -207,13 +203,8 @@
                     let ids = []
                     for (var protein in table) {
                         const protid = table[protein].protid
-                        let support = [];
                         ids.push(protid)
-                        // Store support info for each protein
-                        if (table[protein].type_p === 1) support.push("Pair");
-                        if (table[protein].type_h === 1) support.push("HOG");
-                        if (table[protein].type_g === 1) support.push("OMA");
-                        supportTypes[protid] = support;
+                        supportTypes[protid] = table[protein].support;
                     }
 
                     function check_call_ready(call_pending){
@@ -241,7 +232,7 @@
                                 const dat = JSON.parse(this.responseText)
                                 for (i in dat){
                                     const prot = dat[i]["target"];
-                                    const supportStr = supportTypes[prot.omaid].length ? " | Support:" + supportTypes[prot.omaid].join(",") : "";
+                                    const supportStr = supportTypes[prot.omaid].length ? "Support:" + supportTypes[prot.omaid].join(",") : "";
                                     const header = [`>${prot.omaid}`, prot.canonicalid, supportStr,`[${prot.species.species}]`]
                                         .filter(Boolean).join(' | ');
                                     const sequence = prot.sequence.replace(/(.{60})/g, "$1\n");
