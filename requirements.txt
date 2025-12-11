@@ -96,4 +96,5 @@ verboselogs==1.7
 vine==5.1.0; python_version >= '3.6'
 wcwidth==0.2.13
 xmltodict==1.0.2; python_version >= '3.9'
+django-vite==3.0.4; python_version >= '3.9'
 zoo @ git+${LABGIT}/zoo@bae7b33732548e10cff1d1bf6748805771340cc1

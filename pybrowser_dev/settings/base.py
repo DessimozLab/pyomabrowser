@@ -49,8 +49,15 @@ INSTALLED_APPS = [
     'oma_rest',
     'bootstrap4',
     'django.contrib.humanize',
-    'academy'
+    'academy',
 ]
+
+# django_vite is optional - only needed for web server, not workers
+try:
+    import django_vite
+    INSTALLED_APPS.append('django_vite')
+except ImportError:
+    pass
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -214,6 +221,19 @@ else:
         "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, '../../media'))
+
+
+# Django-Vite configuration for Vue components
+# Note: BASE_DIR is pybrowser_dev/settings, so we need to go up two levels
+PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
+DJANGO_VITE = {
+    "default": {
+        "manifest_path": os.path.join(PROJECT_ROOT, "oma/static/dist/manifest.json"),
+        "dev_mode": DEBUG,
+        "dev_server_host": "localhost",
+        "dev_server_port": 5173,
+    }
+}
 
 
 # some jenkins specific modifications

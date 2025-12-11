@@ -1,0 +1,27 @@
+# docker-compose.override.yml
+# This file adds Vite dev server for frontend development
+# It's automatically used by docker-compose when present
+
+services:
+  # Vite dev server for Vue hot-reload
+  vite:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules  # Anonymous volume to avoid overwriting node_modules
+    environment:
+      - NODE_ENV=development
+
+  # Override web to mount source code for live reload
+  web:
+    volumes:
+      - ..:/usr/src/pyomabrowser  # Mount source code for development
+    # Use Django dev server for hot reload (instead of uWSGI)
+    command: >
+      sh -c "pip install django-vite gunicorn &&
+         gunicorn pybrowser_dev.wsgi:application --bind 0.0.0.0:8000 --reload --workers 1 --timeout 300"
+

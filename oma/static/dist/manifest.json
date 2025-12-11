@@ -1,0 +1,11 @@
+{
+  "src/entries/search-token.js": {
+    "file": "js/searchToken-3PCLlKYy.js",
+    "name": "searchToken",
+    "src": "src/entries/search-token.js",
+    "isEntry": true,
+    "css": [
+      "assets/searchToken-DYMY2Yye.css"
+    ]
+  }
+}
