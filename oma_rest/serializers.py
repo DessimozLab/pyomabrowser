@@ -182,8 +182,11 @@ class IsoformProteinSerializer(ProteinEntrySerializer):
         return len(obj.exons)
 
 
-class OrthologsListSerializer(ProteinEntrySerializer):
+class OrthologsListRelTypeSerializer(ProteinEntrySerializer):
     rel_type = serializers.CharField()
+
+
+class OrthologsListSerializer(OrthologsListRelTypeSerializer):
     distance = serializers.FloatField()
     score = serializers.FloatField()
 

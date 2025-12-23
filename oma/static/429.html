@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Too Many Requests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --primary: #2563eb;
+      --warning: #dc2626;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: linear-gradient(180deg, #f8fafc, #eef2f7);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .card {
+      background: var(--card);
+      max-width: 520px;
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: 1.75rem;
+    }
+
+    p {
+      margin: 0.5rem 0 1.5rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .hint {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+
+    .hint h2 {
+      font-size: 1rem;
+      margin: 0 0 0.5rem;
+    }
+
+    .hint ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      color: var(--muted);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.6rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      font-weight: 500;
+      color: var(--text);
+      background: #fff;
+      transition: transform 0.05s ease, box-shadow 0.05s ease;
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+    }
+
+    .footer {
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 0.2rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="icon">⚠️</div>
+    <h1>Too Many Requests</h1>
+    <p>
+      You’ve sent too many requests in a short period of time.
+      Please slow down and try again shortly.
+    </p>
+
+    <div class="hint">
+      <h2>What you can do</h2>
+      <ul>
+        <li>Wait a moment before retrying</li>
+        <li>Reduce how often you refresh or call the API</li>
+      </ul>
+    </div>
+
+    <div class="actions">
+      <a href="javascript:location.reload()" class="btn primary">Retry</a>
+      <a href="mailto:contact@omabrowser.org" class="btn">Contact support</a>
+    </div>
+
+    <div class="footer">
+      Error code: <span class="code">HTTP 429</span>
+    </div>
+  </div>
+</body>
+</html>

@@ -172,8 +172,12 @@ class ProteinEntryViewSet(ViewSet):
         """
         p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
         data = utils.db.get_hog_induced_pairwise_orthologs(p_entry_nr)
-        content = [models.ProteinEntry(utils.db, e) for e in data]
-        serializer = serializers.ProteinEntrySerializer(instance=content, many=True, context={'request': request})
+        content = []
+        for e in data:
+            ortholog = models.ProteinEntry(utils.db, e)
+            ortholog.rel_type = e['RelType'].decode()
+            content.append(ortholog)
+        serializer = serializers.OrthologsListRelTypeSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 
     @action(detail=True)
