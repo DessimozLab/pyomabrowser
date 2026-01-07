@@ -29,17 +29,22 @@ until postgres_ready; do
 done
 >&2 echo "Database up and running"
 
-# Make sure the database is set up
->&2 echo "Assure database is set up with tables"
-python3 manage.py makemigrations
-python3 manage.py migrate
+if [ "$CONTAINER_ROLE" = "web" ]; then
+    # Fix permissions for mounted volumes
+    >&2 echo "Fixing permissions for mounted volumes"
+    chown -R oma:oma "$DARWIN_BROWSERSTATIC_PATH" "$DARWIN_BROWSERMEDIA_PATH"
 
-# Install static files
-python3 manage.py collectstatic --noinput
+    # Make sure the database is set up
+    >&2 echo "Assure database is set up with tables"
+    python3 manage.py makemigrations
+    python3 manage.py migrate
 
-# create root account for Django admin page
->&2 echo "Create superuser for the database"
-python3 manage.py shell << END
+    # Install static files
+    python3 manage.py collectstatic --noinput
+
+    # create root account for Django admin page
+    >&2 echo "Create superuser for the database"
+    python3 manage.py shell << END
 import os
 from django.contrib.auth.models import User
 try:
@@ -54,5 +59,6 @@ except Exception as dexc:
 except:
     raise
 END
+fi
 
-exec "$@"
+exec gosu oma "$@"

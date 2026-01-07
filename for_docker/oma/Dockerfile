@@ -28,7 +28,7 @@ RUN --mount=type=ssh \
     --mount=type=secret,id=labgit \
     bash -c '\
       if [ -f /run/secrets/labgit ]; then \
-        DEFAULT_SSH="ssh://lab.dessimoz.org:2222/"; \
+        DEFAULT_SSH="ssh://gitolite@lab.dessimoz.org:2222/"; \
         LABGIT=$(cat /run/secrets/labgit); \
         echo "LABGIT secret: ${LABGIT}"; \
         if [ "${LABGIT}" != "${DEFAULT_SSH}" ]; then \
@@ -40,7 +40,9 @@ RUN --mount=type=ssh \
         else \
           echo "Using default SSH Git URLs"; \
         fi; \
-      fi && \
+      fi; \
+      git config --global url."ssh://gitolite@lab.dessimoz.org:2222/".insteadOf \
+                        "ssh://lab.dessimoz.org:2222/"; \
       uv sync --all-groups \
     '
 
@@ -59,12 +61,23 @@ ENV PYTHONUNBUFFERED 1
 ENV SRC_DIR="/usr/src/pyomabrowser"
 RUN useradd --system --no-create-home oma
 
-RUN apt-get -qq update \
+ARG TARGETPLATFORM
+RUN set -eux; \
+    apt-get -qq update \
     && apt-get install -y --no-install-recommends \
-       libpq-dev \
+       ca-certificates \
+       libpq5 \
        mafft \
-       wget \
-    && rm -rf /var/lib/apt/lists/*
+       wget; \
+    case "$TARGETPLATFORM" in \
+      "linux/amd64") ARCH="amd64" ;;\
+      "linux/arm64") ARCH="arm64" ;; \
+      *) echo "Unsupported platform: $TARGETPLATFORM" >&2; exit 1 ;; \
+    esac; \
+    wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/1.19/gosu-$ARCH"; \
+    chmod +x /usr/local/bin/gosu; \
+    gosu nobody true; \
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip
 
@@ -75,3 +88,5 @@ RUN mkdir $SRC_DIR
 WORKDIR $SRC_DIR
 #COPY . $SRC_DIR
 COPY for_docker/oma/entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

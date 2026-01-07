@@ -40,6 +40,6 @@ twitter = [
 ]
 
 [tool.uv.sources]
-pyoma = { git = "ssh://lab.dessimoz.org:2222/pyoma", branch = "develop" }
-zoo = { git = "ssh://lab.dessimoz.org:2222/zoo" }
-oma-academy-app = { git = "ssh://lab.dessimoz.org:2222/oma-academy" }
+pyoma = { git = "ssh://gitolite@lab.dessimoz.org:2222/pyoma", branch = "develop" }
+zoo = { git = "ssh://gitolite@lab.dessimoz.org:2222/zoo" }
+oma-academy-app = { git = "ssh://gitolite@lab.dessimoz.org:2222/oma-academy" }

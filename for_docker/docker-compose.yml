@@ -7,7 +7,9 @@ services:
       dockerfile: for_docker/oma/Dockerfile
       secrets:
         - labgit
-    command: /entrypoint.sh uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi --vacuum --max-requests=500
+    command: uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi --vacuum --max-requests=500
+    environment:
+      - CONTAINER_ROLE=web
     env_file:
       - env
     volumes:
@@ -58,6 +60,8 @@ services:
     image: $DOCKER_REGISTRY/oma
     command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
               "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=DEBUG"]
+    environment:
+      - CONTAINER_ROLE=worker
     env_file:
       - env
     volumes_from:
@@ -71,6 +75,8 @@ services:
     image: $DOCKER_REGISTRY/oma
     command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
               "--queues=celery,async_web,long", "--hostname=worker@%h", "--loglevel=DEBUG"]
+    environment:
+      - CONTAINER_ROLE=worker
     env_file:
       - env
     volumes_from:
