@@ -844,7 +844,7 @@ class SyntenyViewSet(ViewSet):
                 cont = contig.copy()
                 cont.remove_edge(*min_edge)
                 contig = cont
-            g = nx.node_link_data(contig)
+            g = nx.node_link_data(contig, edges="links")
             for k in ('directed', 'multigraph', 'graph'):
                 g.pop(k, None)
             contigs.append(g)
@@ -936,7 +936,7 @@ class SyntenyViewSet(ViewSet):
             cont.remove_edge(*min_edge)
             graph = cont
 
-        graph_as_dict = nx.node_link_data(graph)
+        graph_as_dict = nx.node_link_data(graph, edges="links")
         for k in ('directed', 'multigraph', 'graph'):
             graph_as_dict.pop(k, None)
         return Response(graph_as_dict)
