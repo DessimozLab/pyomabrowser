@@ -6,12 +6,11 @@ labgit.cnf
 README.md
 Dockerfile
 db.sqlite3
-celerybeat-schedule.db
 *.nwk
 *.phyloxml
 *.h5
 *.h5.idx
+*.db
 ansible
 media
 .venv
-for_docker
