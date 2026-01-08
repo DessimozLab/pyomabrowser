@@ -1,0 +1,13 @@
+
+services:
+  web:
+    volumes:
+      - ..:/usr/src/pyomabrowser   # mount your local checkout for live code reload
+
+  worker:
+    command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
+              "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=DEBUG"]
+
+  worker_long:
+    command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
+              "--queues=celery,async_web,long", "--hostname=worker@%h", "--loglevel=DEBUG"]
