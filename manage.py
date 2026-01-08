@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import os
 import sys
+import warnings
+warnings.filterwarnings("ignore", category=SyntaxWarning, module=r"ete3\..*")
 
 if __name__ == "__main__":
     if "OMA_INSTANCE" in os.environ:

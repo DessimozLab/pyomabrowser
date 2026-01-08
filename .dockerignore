@@ -12,3 +12,6 @@ celerybeat-schedule.db
 *.h5
 *.h5.idx
 ansible
+media
+.venv
+for_docker

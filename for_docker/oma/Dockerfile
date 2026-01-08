@@ -56,11 +56,16 @@ RUN --mount=type=ssh \
 FROM python:3.12-slim AS runtime
 
 # set environment varibles
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+# hide warnings about invalid escape sequences in Python files (e.g. in ete3)
+ENV PYTHONWARNINGS="ignore:invalid escape sequence:SyntaxWarning"
 ENV SRC_DIR="/usr/src/pyomabrowser"
+
+# create oma user
 RUN useradd --system --no-create-home oma
 
+# add gosu for easy step-down from root
 ARG TARGETPLATFORM
 RUN set -eux; \
     apt-get -qq update \
@@ -79,14 +84,13 @@ RUN set -eux; \
     gosu nobody true; \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip
-
 COPY --from=oma_basis --chown=oma /app /app
 ENV PATH="/app/bin:$PATH"
+
 # set work directory
-RUN mkdir $SRC_DIR
+COPY . $SRC_DIR
 WORKDIR $SRC_DIR
-#COPY . $SRC_DIR
+
 COPY for_docker/oma/entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
