@@ -7,17 +7,20 @@
 - adjust settings in `env` (OMA_INSTANCE, keys, ...)
 - adjust settings in `docker-compose.yml`:
   
-  - bind mount release data?
-  - bind mount current checkout?
+  - not a bind mount for release data? (see section on copying data into volume)
 
 - copy `labgit.cnf.template' to `labgit.cnf`
   - if not using git+ssh to clone repos, set your USER and PASSWORD data for git+https in `labgit.cnf`
-
+  
 - `docker compose build --ssh default` to build containers for OMA browser (`--ssh default` only needed if git+ssh is used)
 - `docker compose up -d` to start containers
 - `docker compose logs -f` shows log of containers
 - access oma instance on http://localhost/oma/home
 
+__WARNING__: there is a docker-compose.override.yml file in the repo, which enables 
+mounting the current repo checkout into the containers. This is useful for development purposes
+but is not ideal in production. You can start the containers without loading the override file with 
+`docker compose -f docker-compose.yml up -d`. 
 
 ### Background
 
@@ -68,14 +71,22 @@ you can also change things to use [docker volume](https://docs.docker.com/storag
 on [copying data into a docker volume](#copying-data-into-the-release_volume)
 for how this needs to be done.
 
-Last but not least, by uncommenting the line 
+#### Addtional notes about docker-compose.override.yml
+We provide a docker-compose.override.yml file in the repo, which overrides 
+some aspects of the docker-compose setup, relevant for development purposes.
+In particular, the override file mounts the current repo checkout into the 
+containers so that changes to the code are immediately reflected in the 
+containers. This is useful for development purposes but is not ideal in 
+production. Note, however, that if static files change, you have to restart 
+the docker-compose instances.
 
-`..:/usr/src/pyomabrowser`
+You can start the containers without loading the override file by explicitly 
+using the `-f` flag with the base docker-compose.yml file only, e.g. 
+`docker compose -f docker-compose.yml up -d`.
 
-in the web and celery service:volume section, you can mount the current 
-repo checkout from your host to the docker containers which allows
-to transparently refresh on code changes. Note however that if 
-static files change, you have to restart the docker-compose instances.
+To see which configs are loaded exactly, you can use the `docker compose config` command:
+`docker compose -f docker-compose.yml config` returns the config of the base docker-compose.yml file, where as
+`docker compose config` returns the merged config including the override file.
 
 
 # Settings in `labgit.cnf`
@@ -83,7 +94,7 @@ Building the containers requires cloning GIT repositories from the lab.dessimoz.
 host. Access to this host can be gained either via git+ssh or git+https. 
 Please copy the `labgit.cnf.template` file to `labgit.cnf` and either leave
 the definition of LABGIT variable unchanged (i.e. `ssh://gitolite@lab.dessimoz.org:2222`)
-or uncomment the second variant `export LABGIT="https://USER:PASSWORD@git.lab.dessimoz.org/git"` 
+or uncomment the second variant `https://USER:PASSWORD@git.lab.dessimoz.org/git` 
 and specify your USER and PASSWORD in the url.
 
 
@@ -91,7 +102,7 @@ and specify your USER and PASSWORD in the url.
 
 To build the images you should only need to run 
 `docker compose build` from the for_docker/ directory on your host. If you use 
-git+ssh you need to add `--ssh default` to the command.  
+git+ssh you need to add `--ssh default` to the command.
 
 
 

@@ -7,7 +7,10 @@ services:
       dockerfile: for_docker/oma/Dockerfile
       secrets:
         - labgit
-    command: /entrypoint.sh uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi --vacuum --max-requests=500
+    command: uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi --vacuum --max-requests=500
+    environment:
+      - CONTAINER_ROLE=web
+      - AUTO_INIT=true
     env_file:
       - env
     volumes:
@@ -33,17 +36,26 @@ services:
     ports:
       - 8000
     depends_on:
-      - broker
-      - db
+      broker:
+        condition: service_healthy
+      db:
+        condition: service_healthy
 
   db:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     image: postgres:alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - env
+    environment:
+      POSTGRES_USER: ${SQL_USER}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD}
+      POSTGRES_DB: ${SQL_DATABASE}
     shm_size: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SQL_USER} -d ${SQL_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   broker:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
@@ -52,12 +64,19 @@ services:
       - env
     ports:
       - 5672:5672
+    healthcheck:
+        test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
 
   worker:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     image: $DOCKER_REGISTRY/oma
     command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
-              "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=DEBUG"]
+              "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=INFO"]
+    environment:
+      - CONTAINER_ROLE=worker
     env_file:
       - env
     volumes_from:
@@ -70,7 +89,9 @@ services:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     image: $DOCKER_REGISTRY/oma
     command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
-              "--queues=celery,async_web,long", "--hostname=worker@%h", "--loglevel=DEBUG"]
+              "--queues=celery,async_web,long", "--hostname=worker@%h", "--loglevel=INFO"]
+    environment:
+      - CONTAINER_ROLE=worker
     env_file:
       - env
     volumes_from:

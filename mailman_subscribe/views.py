@@ -1,7 +1,7 @@
 from django.http import JsonResponse, HttpResponseRedirect
 from django import forms
 from django.urls import reverse
-from captcha.fields import ReCaptchaField
+from django_recaptcha.fields import ReCaptchaField
 from . import tasks
 
 import logging
