@@ -30,13 +30,13 @@ RUN --mount=type=ssh \
       if [ -f /run/secrets/labgit ]; then \
         DEFAULT_SSH="ssh://gitolite@lab.dessimoz.org:2222/"; \
         LABGIT=$(cat /run/secrets/labgit); \
-        echo "LABGIT secret: ${LABGIT}"; \
+        if [ -n "${LABGIT}" ] && [ "${LABGIT%/}" = "${LABGIT}" ]; then \
+          LABGIT="${LABGIT}/"; \
+        fi; \
         if [ "${LABGIT}" != "${DEFAULT_SSH}" ]; then \
           echo "Replacing Git URLs for non-default host: $LABGIT"; \
-          sed -i "s|${DEFAULT_SSH}|${LABGIT}|g" pyproject.toml; \
-          cat pyproject.toml; \
-          uv lock; \
-          cat uv.lock; \
+          ESCAPED_LABGIT=$(printf "%s\n" "$LABGIT" | sed "s/[&/]/\\\\&/g"); \
+          sed -i "s|$DEFAULT_SSH|$ESCAPED_LABGIT|g" pyproject.toml; \
         else \
           echo "Using default SSH Git URLs"; \
         fi; \
