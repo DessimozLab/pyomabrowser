@@ -205,6 +205,12 @@ class EntryCentricMixin(object):
                                      .format(entry.omaid, entry.oma_hog))
                         break
             most_specific_hog = utils.HOG(most_specific_hog)
+            # ensure HOG wrapper contains underlying data; pyoma can return
+            # an object with _hog == None which will raise when properties
+            # like hog_id are accessed in templates. Treat such cases as
+            # "no HOG" to avoid template errors.
+            if getattr(most_specific_hog, '_hog', None) is None:
+                most_specific_hog = None
         return most_specific_hog
 
 
@@ -1848,8 +1854,16 @@ class HOGtableFromEntry(EntryCentricMixin, View):
                         return redirect(self.redirect_to, hog.hog_id, hog.level)
             else:
                 hog = self.get_most_specific_hog(entry)
-                if hog is not None:
-                    return redirect(self.redirect_to, hog.hog_id, hog.level)
+                # Defensive check: sometimes the underlying _hog data can be None
+                # (pyoma might return an incomplete object). Accessing the property
+                # `hog.hog_id` can raise when `_hog` is None, so guard against it
+                # and fall back to redirecting to the protein info page.
+                try:
+                    if hog is not None and getattr(hog, '_hog', None) is not None and hog._hog.get('ID') is not None:
+                        return redirect(self.redirect_to, hog.hog_id, hog.level)
+                except Exception:
+                    logger.exception("Error accessing hog id for entry '%s' (%s); redirecting to protein info",
+                                     entry_id, entry.omaid)
         except db.InvalidId:
             pass
         logger.info("hog for requested entry '{}' ({}) has no hog. redirect to protein info"
