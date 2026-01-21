@@ -1,7 +1,7 @@
 services:
   web:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
-    image: $DOCKER_REGISTRY/oma
+    image: $DOCKER_REGISTRY/oma:${IMAGE_TAG:-latest}
     build:
       context: ..
       dockerfile: for_docker/oma/Dockerfile
@@ -108,7 +108,7 @@ services:
 
   nginx:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
-    image: $DOCKER_REGISTRY/nginx
+    image: $DOCKER_REGISTRY/nginx:${IMAGE_TAG:-latest}
     build:
       context: ./nginx
     ports:
