@@ -26,6 +26,9 @@ docker-build:
     DARWIN_BROWSERMEDIA_PATH: /data/media
     DARWIN_BROWSERDATA_PATH: /data/release/data
     DARWIN_BROWSERDOWNLOAD_PATH: /data/release/downloads
+    DARWIN_ALLALL_PATH: /data/release/AllAll
+    ALLALL_PATH_HOST: $CI_PROJECT_DIR/
+    RELEASE_PATH_HOST: $CI_PROJECT_DIR/
     DEPLOYMENT_TYPE: production
     # DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   before_script:
@@ -35,6 +38,8 @@ docker-build:
   # All branches are tagged with $DOCKER_IMAGE_NAME (defaults to commit ref slug)
   # Default branch is also tagged with `latest`
   script:
+    - env
+    - docker compose -f for_docker/docker-compose.yml config
     - docker compose -f for_docker/docker-compose.yml build
     - docker compose -f for_docker/docker-compose.yml push
     - |
