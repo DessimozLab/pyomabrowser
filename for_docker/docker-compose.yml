@@ -7,8 +7,6 @@ services:
       dockerfile: for_docker/oma/Dockerfile
       secrets:
         - labgit
-      ssh:
-        - default
     command: uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi --vacuum --max-requests=500
     environment:
       - CONTAINER_ROLE=web
