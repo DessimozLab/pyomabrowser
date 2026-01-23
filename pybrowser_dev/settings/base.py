@@ -200,6 +200,10 @@ USE_TZ = True
 
 CONTACT_EMAIL = "contact@omabrowser.org"
 
+# HOG Viewer configuration
+HOG_VIEWER = {
+    "member_threshold": 2000,  # Max members to show in iHam viewer without warning
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
