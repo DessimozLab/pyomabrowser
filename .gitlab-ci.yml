@@ -40,6 +40,8 @@ docker-build:
     - echo "" > for_docker/env
     - |
       if [ -n "$DOCKER_AUTH_CONFIG" ]; then
+        mkdir -p /root/.docker
+        [ -f /root/.docker/config.json ] || echo '{}' > /root/.docker/config.json
         echo "$DOCKER_AUTH_CONFIG" | jq -s '.[0] * .[1]' /root/.docker/config.json - > /root/.docker/config.json.tmp
         mv /root/.docker/config.json.tmp /root/.docker/config.json
       fi
