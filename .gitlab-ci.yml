@@ -38,6 +38,11 @@ docker-build:
   before_script:
     - echo $LABGIT_URL > for_docker/labgit.cnf
     - echo "" > for_docker/env
+    - |
+      if [ -n "$DOCKER_AUTH_CONFIG" ]; then
+        echo "$DOCKER_AUTH_CONFIG" | jq -s '.[0] * .[1]' /root/.docker/config.json - > /root/.docker/config.json.tmp
+        mv /root/.docker/config.json.tmp /root/.docker/config.json
+      fi
     # CI_JOB_TOKEN created automatcally by job itself: https://docs.gitlab.com/ci/jobs/ci_job_token/
     - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
   # All branches are tagged with $DOCKER_IMAGE_NAME (defaults to commit ref slug)
