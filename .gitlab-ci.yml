@@ -38,7 +38,8 @@ docker-build:
   before_script:
     - echo $LABGIT_URL > for_docker/labgit.cnf
     - echo "" > for_docker/env
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    # CI_JOB_TOKEN created automatcally by job itself: https://docs.gitlab.com/ci/jobs/ci_job_token/
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
   # All branches are tagged with $DOCKER_IMAGE_NAME (defaults to commit ref slug)
   # Default branch is also tagged with `latest`
   script:
@@ -60,6 +61,8 @@ docker-build:
 
 deploy_stage:
   stage: deploy
+  tags:
+    - gitinrun # <-- this forces Runner #120 (tagged gitinrun) as for the moment the kubernetes's runners cannot reach our stage server
   image: docker:latest
   environment:
     name: stage
