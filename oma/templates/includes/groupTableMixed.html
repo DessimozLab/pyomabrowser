@@ -275,11 +275,14 @@ const apply_filter = function(){
 hide_column_event = false
 
 
-    $.getJSON("{{api_url_protein | safe}}", function (geneData) {
+    $.when(
+        $.getJSON("{{api_url_protein | safe}}"),
+        $.getJSON("{{api_url_hog | safe}}")
+    ).done(function (geneResponse, hogResponse) {
+        var geneData = geneResponse[0];
+        var hogData = hogResponse[0];
 
-         $.getJSON("{{api_url_hog | safe}}", function (hogData) {
-
-             $("#loader").hide();
+        $("#loader").hide();
             $("#table_filter").show()
 
 
@@ -372,7 +375,7 @@ hide_column_event = false
             domains.visualize_all(".protein", longest_seq);
         },
         onLoadSuccess: function (data, status, jqXHR) {
-            
+
 
             data_original = data
 
@@ -395,12 +398,9 @@ hide_column_event = false
 
 });
 
-         });
-
 
 
 
 
 
 </script>
-
