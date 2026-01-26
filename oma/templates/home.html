@@ -29,9 +29,12 @@
         {% endif %}
 
         <div class="oma-search ">
-            {% include "includes/search-token-vue-vite.html" with unique_id='search_nav' multiline='true' %}
-        </div>
-
+            {% if request.GET.vite == '1' %}
+                {% include "includes/search-token-vue-vite.html" with unique_id='search_nav' multiline='true' %}
+            {% else %}
+                {% include "includes/search-token-vue.html" with unique_id='search_nav' multiline='true' %}
+            {% endif %}
+        </div
 
         <div class="oma-quick-start">
             <!-- <img src="{% static "image/icon-bulb-add.png" %}" alt="Quick start Examples"/> -->
