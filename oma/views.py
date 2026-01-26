@@ -275,6 +275,30 @@ class LocalSyntenyView(InfoBase, TemplateView):
         return context
 
 
+class OrthologSupport:
+    def __init__(self, pairs=False, hogs=False, omagroup=False):
+        self.pairs = pairs
+        self.hogs = hogs
+        self.omagroup = omagroup
+
+    def as_list(self):
+        sup = []
+        if self.pairs:
+            sup.append("Pairs")
+        if self.hogs:
+            sup.append("HOG")
+        if self.omagroup:
+            sup.append("OMAGroup")
+        return sup
+
+    def __str__(self):
+        return f"Support: {','.join(self.as_list())}"
+
+    def as_fasta_header(self):
+        return str(self)
+
+
+
 # Orthologs
 class PairsBase(ContextMixin, EntryCentricMixin):
     """Base class to collect data for pairwise orthologs."""
@@ -323,25 +347,10 @@ class PairsBase(ContextMixin, EntryCentricMixin):
         return context
 
 
-class PairsJson(PairsBase, JsonModelMixin, View):
-    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
-                   'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'RelType': 'RelType'}
+class PairsSupport(PairsBase):
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        data = list(self.to_json_dict(context['vps']))
-        return JsonResponse(data, safe=False)
-
-
-class PairsJson_Support(PairsBase, JsonModelMixin, View):
-    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
-                   'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'RelType': 'RelType', 'type_p': 'type_p', 'type_h': 'type_h',
-                   'type_g': 'type_g'}
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
+    def get_context_data(self, entry_id, **kwargs):
+        context = super(PairsSupport, self).get_context_data(entry_id, **kwargs)
         entry = context['entry']
 
         # Get orthologs
@@ -349,13 +358,13 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
         orthologs_dict = {}
         entry_db = utils.db.entry_by_entry_nr(entry.entry_nr)
 
-        start = time.time()
+        start = time.perf_counter()
 
         ## Get VPS
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
         for rel in itertools.chain(vps_raw):
             pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
-            pw_relation.type_p = 1
+            pw_relation.support = OrthologSupport(pairs=True)
             orthologs_dict[rel['EntryNr2']] = pw_relation
 
         ## Get HOG orthologs
@@ -363,11 +372,12 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
         for en in hog_pair:
             if en['EntryNr'] in orthologs_dict:
                 pw_relation = orthologs_dict[en['EntryNr']]
+                pw_relation.support.hogs = True
             else:
                 # en is already the full entry of the protein
                 pw_relation = models.ProteinEntry(utils.db, en)
+                pw_relation.support = OrthologSupport(hogs=True)
             pw_relation.RelType = en['RelType'].decode()
-            pw_relation.type_h = 1
             orthologs_dict[en['EntryNr']] = pw_relation
 
         ## Get OG orthologs
@@ -377,40 +387,38 @@ class PairsJson_Support(PairsBase, JsonModelMixin, View):
                     continue
                 if ent['EntryNr'] in orthologs_dict:
                     pw_relation = orthologs_dict[ent['EntryNr']]
+                    pw_relation.support.omagroup = True
                 else:
                     pw_relation = models.ProteinEntry(utils.db, ent)
-                pw_relation.type_g = 1
+                    pw_relation.support = OrthologSupport(omagroup=True)
                 orthologs_dict[ent['EntryNr']] = pw_relation
 
-        vps = orthologs_dict.values()
+        orthologs = list(orthologs_dict.values())
 
         # populate with inference evidence missing attribute
-        for rel in vps:
+        for rel in orthologs:
             if not hasattr(rel, 'RelType'):
                 rel.RelType = None
-            if not hasattr(rel, 'type_p'):
-                rel.type_p = 0
-            if not hasattr(rel, 'type_h'):
-                rel.type_h = 0
-            if not hasattr(rel, 'type_g'):
-                rel.type_g = 0
 
-        end = time.time()
+        end = time.perf_counter()
+        context['orthologs'] = orthologs
         logger.info("[{}] Pairs modeled {}".format(context['entry'].omaid, end - start))
+        return context
 
-        start = time.time()
-        data = list(self.to_json_dict(vps))
-        end = time.time()
-        logger.info("[{}] Json formatting {}".format(context['entry'].omaid, start - end))
 
+class PairsJson_Support(PairsSupport, JsonModelMixin, View):
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom', 'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'RelType': 'RelType', 'support.as_list': 'support' }
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = list(self.to_json_dict(context['orthologs']))
         return JsonResponse(data, safe=False)
 
 
 class PairsJson_SupportSample(PairsBase, JsonModelMixin, View):
-    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
-                   'genome.species_and_strain_as_dict': 'taxon',
-                   'canonicalid': 'xrefid', 'RelType': 'RelType', 'type_p': 'type_p', 'type_h': 'type_h',
-                   'type_g': 'type_g'}
+    json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom', 'genome.species_and_strain_as_dict': 'taxon',
+                   'canonicalid': 'xrefid', 'RelType': 'RelType', 'support.as_list': 'support'}
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -420,19 +428,14 @@ class PairsJson_SupportSample(PairsBase, JsonModelMixin, View):
         vps_raw = sorted(utils.db.get_vpairs(entry.entry_nr), key=lambda x: x['RelType'])
         for rel in itertools.islice(vps_raw, self._max_entry_to_load):
             pw_relation = models.ProteinEntry.from_entry_nr(utils.db, rel['EntryNr2'])
-            pw_relation.type_p = 1
+            pw_relation.support = OrthologSupport(
+                pairs=True,
+                hogs=bool(entry.is_orthologous_to(pw_relation)),
+                omagroup=bool(entry.oma_group != 0 and entry.oma_group == pw_relation.oma_group)
+            )
+            if not hasattr(pw_relation, 'RelType'):
+                pw_relation.RelType = None
             vps.append(pw_relation)
-
-        # populate with inference evidence missing attribute
-        for rel in vps:
-            if not hasattr(rel, 'RelType'):
-                rel.RelType = None
-            if not hasattr(rel, 'type_p'):
-                rel.type_p = 0  # must actually not happen!
-            if not hasattr(rel, 'type_h'):
-                rel.type_h = 1 if entry.is_orthologous_to(rel) else 0
-            if not hasattr(rel, 'type_g'):
-                rel.type_g = 1 if entry.oma_group != 0 and rel.oma_group == entry.oma_group else 0
 
         data = list(self.to_json_dict(vps))
         return JsonResponse(data, safe=False)
@@ -442,16 +445,22 @@ class PairsView(TemplateView, PairsBase):
     template_name = "entry_orthology.html"
 
 
-class PairsViewFasta(FastaView, PairsBase):
+class PairsViewFasta(FastaView, PairsSupport):
     """returns a fasta represenation of all the pairwise orthologs"""
 
     def get_fastaheader(self, memb):
-        return ' | '.join(
-            [memb.omaid, memb.canonicalid, memb.reltype,
-             '[{}]'.format(memb.genome.sciname)])
+        header = [memb.omaid, memb.canonicalid]
+        if getattr(memb, 'RelType', None):
+            header.append(memb.RelType)
+        if getattr(memb, 'support', None):
+            header.append(str(memb.support))
+        header.append('[{}]'.format(memb.genome.sciname))
+        return ' | '.join(header)
 
     def render_to_response(self, context, **kwargs):
-        return self.render_to_fasta_response(itertools.chain([context['entry']], context['vps']))
+        query = context['entry']
+        query.RelType = "query"
+        return self.render_to_fasta_response(itertools.chain([query], context['orthologs']))
 
 
 # Paralogs
@@ -2161,7 +2170,7 @@ def export_marker_genes(request):
 
 
 def function_projection(request):
-    form_cls = forms.FunctionProjectionUploadForm if 'captcha' in settings.INSTALLED_APPS else forms.FunctionProjectionUploadFormBase
+    form_cls = forms.FunctionProjectionUploadForm if 'django_recaptcha' in settings.INSTALLED_APPS else forms.FunctionProjectionUploadFormBase
     if request.method == 'POST':
         form = form_cls(request.POST, request.FILES)
         if form.is_valid():

@@ -1,18 +1,14 @@
-{# 
+{#
   Django template include for SearchToken Vue component
-  
-  Usage in templates:
-  include "includes/search-token-vue-vite.html" with unique_id='search_nav' multiline='true'
 #}
 {% load static %}
 {% load django_vite %}
 
-{# Load Vite assets using django_vite tags #}
-{% vite_hmr_client %}
+{# Load Vite assets #}
 {% vite_asset 'src/entries/search-token.js' %}
 
 {# Mount point with data attributes for Vue #}
-<div 
+<div
   id="{{ unique_id }}"
   data-search-token
   data-multiline="{{ multiline|default:'false' }}"
@@ -21,14 +17,8 @@
   data-api-url="/api/xref/"
   data-csrf-token="{{ csrf_token }}"
 >
-  {# Loading state - Vue will replace this #}
   <div class="d-flex align-items-center justify-content-center" style="height: 50px;">
     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
     Loading search...
   </div>
 </div>
-
-{# 
-  For pages that need to call preloadToken or other methods,
-  access via: window.search_token_vue_{{ unique_id }}.preloadToken([...])
-#}

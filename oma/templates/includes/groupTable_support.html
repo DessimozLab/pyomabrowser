@@ -62,14 +62,14 @@
  </tr>
 
             <tr>
-        <th  class="micro-header" data-field="type_p"  data-align="center" data-halign="center"  data-sortable="true" data-formatter="stateFormatterPO" >Pair</th>
+        <th  class="micro-header" data-field="support"  data-align="center" data-halign="center"  data-sortable="true" data-formatter="stateFormatterPO" >Pair</th>
 
 
-                <th class="micro-header" data-field="type_h"   data-align="center" data-halign="center" data-sortable="true"  data-formatter="stateFormatterH" >
+                <th class="micro-header" data-field="support"   data-align="center" data-halign="center" data-sortable="true"  data-formatter="stateFormatterH" >
                  HOG</th>
 
 
-                <th class="micro-header" data-field="type_g"   data-align="center" data-halign="center"  data-sortable="true" data-formatter="stateFormatterOG" >
+                <th class="micro-header" data-field="support"   data-align="center" data-halign="center"  data-sortable="true" data-formatter="stateFormatterOG" >
                     OMA
                    </th>
 
@@ -91,11 +91,7 @@
     // Add header
 
   function stateFormatterPO(value, row, index) {
-
-
-
-
-    if (row['type_p'] === 1) {
+    if (row.support.includes("Pairs")) {
       return '<i class="fas fa-check " style="color:green"></i>';
     }
     else {
@@ -106,7 +102,7 @@
   function stateFormatterH(value, row, index) {
 
 
-    if (row['type_h'] === 1) {
+    if (row.support.includes("HOG")) {
       return '<a href="{% url 'hog_viewer' entry.oma_hog_root %}"><i class="fas fa-check " style="color:green"></i></a>';
     }
     else {
@@ -117,7 +113,7 @@
   function stateFormatterOG(value, row, index) {
 
 
-    if (row['type_g'] === 1) {
+    if (row.support.includes("OMAGroup")) {
       return '<a href="{% url 'omagroup_members' entry.oma_group %}"><i class="fas fa-check " style="color:green"></i></a>';
     }
     else {
@@ -200,71 +196,58 @@
                 fasta.onclick = function() {
 
                     // Get the table data (filtered out protein will not be here)
-                    var table = tab.bootstrapTable('getData')
+                    const table = tab.bootstrapTable('getData')
+                    let supportTypes = {};
 
                     // extract the list of protein id
-                    var ids = []
-                    for (var protein in table){
-                        ids.push(table[protein].protid)}
+                    let ids = []
+                    for (var protein in table) {
+                        const protid = table[protein].protid
+                        ids.push(protid)
+                        supportTypes[protid] = table[protein].support;
+                    }
+
+                    function check_call_ready(call_pending){
+                        if (call_pending === 0){
+                            let filename =  "{{ entry.omaid }}_{{tab}}.fa";
+                            let blob = new Blob([sequences], {type: "text/plain;charset=utf-8"});
+                            saveAs(blob, filename);
+                            fasta.innerHTML = 'Fasta <i class="fa fa fa-file-download"></i>'
+                        }
+                    }
 
                     // init the sequences container and the request handler
-
-                    var call_pending = 0
-                    var sequences = ""
-
-                    function check_call_ready(){
-
-                        if (call_pending ==0){
-
-                            var filename =  "{{ entry.omaid }}_{{tab}}.txt";
-                                  var blob = new Blob([sequences], {
-                                      type: "text/plain;charset=utf-8"
-                                });
-
-                                saveAs(blob, filename);
-                                fasta.innerHTML = 'Fasta <i class="fa fa fa-file-download"></i>'
-                        }
-
-                    }
-
-                    fasta.innerHTML = 'Loading fasta</i>'
+                    let call_pending = 0
+                    let sequences = ""
+                    fasta.innerHTML = 'Loading fasta'
 
                     // Split the ids on array of 1000 elements max (limit of the api call for bulk_retreive)
-                    var i,j,chunk = 999;
-                    for (i=0,j=ids.length; i<j; i+=chunk) {
-
-                        var xhr = new XMLHttpRequest();
-                    xhr.open("POST", '/api/protein/bulk_retrieve/', true);
-
-                    xhr.setRequestHeader("Content-Type", "application/json");
-
-                    xhr.onreadystatechange = function() {
-
-                        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-
-                            var dat = JSON.parse(this.responseText)
-
-                            for (i in dat){
-
-                                sequences += ">{0} | {1} [{2}]  \n{3}\n".replace('{0}', dat[i]["target"].omaid)
-                                    .replace('{1}', dat[i]["target"].canonicalid)
-                                    .replace('{2}', dat[i]["target"].species.species)
-                                    .replace('{3}', dat[i]["target"].sequence.replace(/(.{60})/g,"$1\n"))
+                    let chunk = 999;
+                    for (let i=0; i < ids.length; i += chunk) {
+                        let xhr = new XMLHttpRequest();
+                        xhr.open("POST", '/api/protein/bulk_retrieve/', true);
+                        xhr.setRequestHeader("Content-Type", "application/json");
+                        xhr.onreadystatechange = function() {
+                            if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                                const dat = JSON.parse(this.responseText)
+                                for (i in dat){
+                                    const prot = dat[i]["target"];
+                                    const supportStr = supportTypes[prot.omaid].length ? "Support:" + supportTypes[prot.omaid].join(",") : "";
+                                    const header = [`>${prot.omaid}`, prot.canonicalid, supportStr,`[${prot.species.species}]`]
+                                        .filter(Boolean).join(' | ');
+                                    const sequence = prot.sequence.replace(/(.{60})/g, "$1\n");
+                                    sequences += `${header}\n${sequence}\n`;
+                                }
+                                call_pending -= 1;
+                                console.log(call_pending);
+                                check_call_ready(call_pending);
                             }
-                            call_pending -= 1
-                            console.log(call_pending)
-                            check_call_ready(call_pending)
+                        };
 
-                        }
-
+                        call_pending += 1;
+                        let id = JSON.stringify({ids: ids.slice(i,i+chunk)});
+                        xhr.send(id);
                     }
-
-                    call_pending += 1
-                        var id = JSON.stringify(({ids: ids.slice(i,i+chunk)}))
-                    xhr.send(id)
-
-                    }
-
                 }
 
                 div.appendChild(fasta)

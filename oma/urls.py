@@ -13,7 +13,6 @@ urlpatterns = [
     # Entry
     path('vps/<entry_id>/', views.PairsView.as_view(), name="pairs"),
     path('vps/<entry_id>/fasta/', views.PairsViewFasta.as_view(), name="pairs_fasta"),
-    path('vps/<entry_id>/json/', views.PairsJson.as_view(), name="pairs_json"),
     path('vps/<entry_id>/json_support/', views.PairsJson_Support.as_view(), name="pairs_support_json"),
     path('vps/<entry_id>/json_support_sample/', views.PairsJson_SupportSample.as_view(), name="pairs_support_sample_json"),
     path('pps/<entry_id>/json/', views.ParalogsJson.as_view(), name="paralogs_json"),

@@ -1,7 +1,7 @@
 services:
   web:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
-    image: $DOCKER_REGISTRY/oma
+    image: $DOCKER_REGISTRY/oma:${IMAGE_TAG:-latest}
     build:
       context: ..
       dockerfile: for_docker/oma/Dockerfile
@@ -17,36 +17,32 @@ services:
       # uncomment the following line if you want to use transparently the current checkout mounted
       # into your docker image. convenient for development, but not encouraged in production
       # - ..:/usr/src/pyomabrowser
-      - type: volume
-        source: static_volume
-        target: ${DARWIN_BROWSERSTATIC_PATH}
-      - type: volume
-        source: media_volume
-        target: ${DARWIN_BROWSERMEDIA_PATH}
-
-      # bind mount of release data
-      - type: bind
-        source: $RELEASE_PATH_HOST
-        target: $RELEASE_PATH
-        read_only: true
-
-      # alternative if you want to have a docker volume for the release data, comment above and uncomment below
-      #- release_volume:${RELEASE_PATH}
-
+      - static_volume:${DARWIN_BROWSERSTATIC_PATH}
+      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
+      - ${RELEASE_PATH_HOST}:${RELEASE_PATH}:ro
     ports:
       - 8000
     depends_on:
-      - broker
-      - db
+      broker:
+        condition: service_healthy
+      db:
+        condition: service_healthy
 
   db:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     image: postgres:alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - env
+    environment:
+      POSTGRES_USER: ${SQL_USER}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD}
+      POSTGRES_DB: ${SQL_DATABASE}
     shm_size: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SQL_USER} -d ${SQL_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   broker:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
@@ -55,16 +51,25 @@ services:
       - env
     ports:
       - 5672:5672
+    healthcheck:
+        test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
 
   worker:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     image: $DOCKER_REGISTRY/oma
     command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
-              "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=DEBUG"]
+              "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=INFO"]
+    environment:
+      - CONTAINER_ROLE=worker
     env_file:
       - env
-    volumes_from:
-      - web
+    volumes:
+      - static_volume:${DARWIN_BROWSERSTATIC_PATH}
+      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
+      - ${RELEASE_PATH_HOST}:${RELEASE_PATH}:ro
     depends_on:
       - broker
       - db
@@ -73,37 +78,31 @@ services:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     image: $DOCKER_REGISTRY/oma
     command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
-              "--queues=celery,async_web,long", "--hostname=worker@%h", "--loglevel=DEBUG"]
+              "--queues=celery,async_web,long", "--hostname=worker@%h", "--loglevel=INFO"]
+    environment:
+      - CONTAINER_ROLE=worker
     env_file:
       - env
-    volumes_from:
-      - web
     volumes:
-      - type: bind
-        source: ${ALLALL_PATH_HOST}
-        target: ${DARWIN_ALLALL_PATH}
-        read_only: true
-
+      - static_volume:${DARWIN_BROWSERSTATIC_PATH}
+      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
+      - ${RELEASE_PATH_HOST}:${RELEASE_PATH}:ro
+      - ${ALLALL_PATH_HOST}:${DARWIN_ALLALL_PATH}:ro
     depends_on:
       - broker
       - db
 
   nginx:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
-    image: $DOCKER_REGISTRY/nginx
+    image: $DOCKER_REGISTRY/nginx:${IMAGE_TAG:-latest}
     build:
       context: ./nginx
     ports:
-      - 80:80
+      - ${WEBSERVER_PORT:-80}:80
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
-      # - release_volume:${RELEASE_PATH}
-      # use a bind mount if you have the browser data on the host filesystem
-      - type: bind
-        source: "${RELEASE_PATH_HOST}/downloads"
-        target: ${DARWIN_BROWSERDOWNLOAD_PATH}
-        read_only: true
+      - ${RELEASE_PATH_HOST}/downloads:${DARWIN_BROWSERDOWNLOAD_PATH}:ro
     environment:
       - DEPLOYMENT_TYPE=${DEPLOYMENT_TYPE}
       - DARWIN_BROWSERSTATIC_PATH=${DARWIN_BROWSERSTATIC_PATH}
@@ -116,7 +115,8 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
-  # if release data is used with bind mount, comment release_volume line
+  # if release data is used with a docker volume, uncomment release_volume line and
+  # set RELEASE_PATH_HOST="release_volume" in env file
   #release_volume:
 
 

@@ -172,8 +172,12 @@ class ProteinEntryViewSet(ViewSet):
         """
         p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
         data = utils.db.get_hog_induced_pairwise_orthologs(p_entry_nr)
-        content = [models.ProteinEntry(utils.db, e) for e in data]
-        serializer = serializers.ProteinEntrySerializer(instance=content, many=True, context={'request': request})
+        content = []
+        for e in data:
+            ortholog = models.ProteinEntry(utils.db, e)
+            ortholog.rel_type = e['RelType'].decode()
+            content.append(ortholog)
+        serializer = serializers.OrthologsListRelTypeSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 
     @action(detail=True)
@@ -840,7 +844,7 @@ class SyntenyViewSet(ViewSet):
                 cont = contig.copy()
                 cont.remove_edge(*min_edge)
                 contig = cont
-            g = nx.node_link_data(contig)
+            g = nx.node_link_data(contig, edges="links")
             for k in ('directed', 'multigraph', 'graph'):
                 g.pop(k, None)
             contigs.append(g)
@@ -932,7 +936,7 @@ class SyntenyViewSet(ViewSet):
             cont.remove_edge(*min_edge)
             graph = cont
 
-        graph_as_dict = nx.node_link_data(graph)
+        graph_as_dict = nx.node_link_data(graph, edges="links")
         for k in ('directed', 'multigraph', 'graph'):
             graph_as_dict.pop(k, None)
         return Response(graph_as_dict)
