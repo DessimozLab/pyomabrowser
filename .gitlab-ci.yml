@@ -69,8 +69,6 @@ docker-build:
 
 deploy_stage:
   stage: deploy
-  tags:
-    - gitinrun # <-- this forces Runner #120 (tagged gitinrun) as for the moment the kubernetes's runners cannot reach our stage server
   image: docker:latest
   environment:
     name: stage
@@ -94,7 +92,7 @@ deploy_stage:
         cd pyomabrowser/for_docker
         git fetch --all
         git reset --hard origin/master
-        podman login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+        echo "$CI_JOB_TOKEN" | podman login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
         podman compose pull
         systemctl --user restart podman-compose@pyoma.service
       EOF
