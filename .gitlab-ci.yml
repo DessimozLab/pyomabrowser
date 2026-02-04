@@ -24,7 +24,7 @@ docker-build:
     DOCKER_BUILDKIT: 1
     IMAGE_TAG: $CI_COMMIT_REF_SLUG
     DOCKER_REGISTRY: $CI_REGISTRY_IMAGE
-    
+
     RELEASE_PATH: /data/release
     DARWIN_BROWSERSTATIC_PATH: /data/static
     DARWIN_BROWSERMEDIA_PATH: /data/media
@@ -36,9 +36,18 @@ docker-build:
     DEPLOYMENT_TYPE: production
     # DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   before_script:
+    - apk add --no-cache jq
     - echo $LABGIT_URL > for_docker/labgit.cnf
     - echo "" > for_docker/env
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - |
+      if [ -n "$DOCKER_AUTH_CONFIG" ]; then
+        mkdir -p /root/.docker
+        [ -f /root/.docker/config.json ] || echo '{}' > /root/.docker/config.json
+        echo "$DOCKER_AUTH_CONFIG" | jq -s '.[0] * .[1]' /root/.docker/config.json - > /root/.docker/config.json.tmp
+        mv /root/.docker/config.json.tmp /root/.docker/config.json
+      fi
+    # CI_JOB_TOKEN created automatcally by job itself: https://docs.gitlab.com/ci/jobs/ci_job_token/
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
   # All branches are tagged with $DOCKER_IMAGE_NAME (defaults to commit ref slug)
   # Default branch is also tagged with `latest`
   script:
@@ -58,13 +67,12 @@ docker-build:
       exists:
         - for_docker/oma/Dockerfile
 
-
 deploy_stage:
   stage: deploy
   image: docker:latest
   environment:
     name: stage
-    url:  https://oma-stage.vital-it.ch
+    url: https://oma-stage.vital-it.ch
   only:
     - master
   variables:
@@ -72,20 +80,19 @@ deploy_stage:
     USER: oma
   before_script:
     - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - chmod 400 "$SSH_PRIVATE_KEY"
+    - ssh-add "$SSH_PRIVATE_KEY"
     - mkdir -p ~/.ssh
-    - cp "${SSH_PRIVATE_KEY}" ~/.ssh/id_ed25519
-    - chmod 600 ~/.ssh/id_ed25519
-    - ssh-keyscan -H "$STAGE_HOST" >> ~/.ssh/known_hosts
-    - cat ~/.ssh/known_hosts
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H ${STAGE_HOST} >> ~/.ssh/known_hosts
   script:
     - |
       ssh ${USER}@${STAGE_HOST} << 'EOF'
         cd pyomabrowser/for_docker
         git fetch --all
         git reset --hard origin/master
-        podman login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+        echo "$CI_JOB_TOKEN" | podman login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
         podman compose pull
         systemctl --user restart podman-compose@pyoma.service
       EOF
-
-
