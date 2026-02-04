@@ -6,11 +6,11 @@
     const release_char = JSON.parse(document.getElementById('release_char-data').textContent);
 
     const cases = {
-        Bacteria: {cls: 'label-success', display_text: "Bacteria", tag: "B"},
-        Archaea: {cls: 'label-primary', display_text: "Archaea", tag: "A"},
-        Eukaryota: {cls: 'label-danger', display_text: "Eukaryota", tag: "E"},
-        Viruses: {cls: 'label-warning', display_text: "Viruses", tag: "V"},
-        _default: {cls: 'label-default', display_text: "unknown", tag: "?"}
+        Bacteria: {cls: 'badge-success', display_text: "Bacteria", tag: "B"},
+        Archaea: {cls: 'badge-primary', display_text: "Archaea", tag: "A"},
+        Eukaryota: {cls: 'badge-danger', display_text: "Eukaryota", tag: "E"},
+        Viruses: {cls: 'badge-warning', display_text: "Viruses", tag: "V"},
+        _default: {cls: 'badge-secondary', display_text: "unknown", tag: "?"}
     };
 
     const zeroPad = function(num, size) {
@@ -61,9 +61,16 @@
     }
 
     exports.format_as_kingdom_tag = function (kingdom) {
-        var cur_case = cases[kingdom] ? cases[kingdom] : cases['_default']
-        return '<span class="label ' + cur_case.cls + '"><abbr class="abbrNoUnder" ' +
-            'title="' + cur_case.display_text + '">' + cur_case.tag + '</abbr></span>';
+        let cur_case = cases[kingdom];
+        if (cur_case) {
+            return '<span class="badge ' + cur_case.cls + '"><abbr class="abbrNoUnder" ' +
+                'title="' + cur_case.display_text + '">' + cur_case.tag + '</abbr></span>';
+        } else {
+            let tag = kingdom && kingdom.length > 0 ? kingdom.charAt(0).toUpperCase() : "?";
+            return '<span class="badge badge-secondary"><abbr class="abbrNoUnder" ' +
+               'title="' + kingdom.charAt(0).toUpperCase() + kingdom.slice(1) + '">' + tag + '</abbr></span>';
+        }
+
     };
 
     exports.format_sciname = function(value, row) {
