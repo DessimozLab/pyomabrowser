@@ -22,6 +22,7 @@ from django.views.generic import TemplateView, View
 from django.views.generic.base import ContextMixin
 from django.urls import reverse
 from django.core.mail import EmailMessage
+from django.db import connections
 from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.shortcuts import redirect, resolve_url
@@ -2193,6 +2194,15 @@ def go_enrichment(request):
 
 def go_enrichment_result(request, data_id=None):
     return render(request, "go_enrichment_result.html", {'data': data_id})
+
+
+def health_check(request):
+    try:
+        connections["default"].cursor()
+        utils.db.get_release_name()
+        return JsonResponse({'status': 'ready'})
+    except Exception as e:
+        return JsonResponse({"status": "not_ready", "error_message": str(e)}, status=503)
 
 
 @method_decorator(never_cache, name='dispatch')

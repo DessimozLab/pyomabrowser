@@ -179,6 +179,7 @@ urlpatterns = [
     re_path(r'dotplot/(?P<org1>[A-Z0-9]+)/(?P<org2>[A-Z0-9]+)/(?P<chr1>[A-Za-z0-9 _.()-]+)/(?P<chr2>[A-Za-z0-9 _.()-]+)/json/$',
         views.HomologsBetweenChromosomePairJson.as_view(), name='synteny_chr_pair_json'),
     path('tools/', TemplateView.as_view(template_name='tool_catalog.html'), name='tool_catalog'),
+    path("health/", views.health_check, name="health_check"),
 ]
 
 if settings.OMA_INSTANCE_NAME != "basf":
