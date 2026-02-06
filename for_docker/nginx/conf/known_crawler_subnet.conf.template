@@ -1,0 +1,4 @@
+# list of subnets that are known to crawl aggressively and should be throttled
+# format is <subnet> <label>; (don't forget the semicolon at the end of each line)
+77.222.96.0/21   RU-INTERSV;   # INTERSV-NET-3
+43.152.141.0/24  ACE-SG;       # Ace Data Centre

@@ -1,14 +1,101 @@
+{{ $BEHIND_PROXY := getenv "REVERSE_PROXY_IP" | ne "" }}
+{{ $log_rate_limit_file := getenv "LOG_RATE_LIMIT_FILE" }}
+{{ $user_agent_bot_file := getenv "USER_AGENT_BOT_FILE" }}
+{{ $subnet_bot_file := getenv "SUBNET_BOT_FILE" }}
+{{ $nginx_snippet_path := getenv "NGINX_SNIPPET_PATH" "/etc/nginx/snippets" }}
+{{ $THROTTLED := or ($log_rate_limit_file | ne "") (or ($user_agent_bot_file | ne "") ($subnet_bot_file | ne "")) }}
+{{ $is_dev := eq ((getenv "DEPLOYMENT_TYPE") | strings.ToUpper | string.Trunc 3) "DEV" }}
+{{ $log_to_file := getenv "NGINX_LOG_TO_FILE" | default "false" | conv.ToBool }}
+
 upstream pyoma {
     server web:8000;
 }
 
+{{ if $BEHIND_PROXY }}
+# pass incoming X-Forwarded-Proto or set to $scheme
+map $http_x_forwarded_proto $proxyproto {
+    default     $http_x_forwarded_proto;
+    ""          $scheme;
+}
+{{ end }}
+
+{{- if $THROTTLED }}
+# Configure limit zones
+limit_req_zone $bot_throttle_key zone=bot_limit:5m rate=6r/m;
+limit_req_zone $subnet_key zone=subnet_limit:5m rate=6r/m;
+
+map $http_user_agent $bot_throttle_key {
+    default            "";         # Not a bot → no limit
+    {{ $ua_file := printf "%s/%s"  $nginx_snippet_path  $user_agent_bot_file }}
+    {{- if (file.Exists $ua_file) }}
+    include    {{ $ua_file }};
+    {{- end }}
+}
+
+geo $subnet_key {
+    default         "";
+    {{ $sb_file := printf "%s/%s"  $nginx_snippet_path $subnet_bot_file }}
+    {{- if (file.Exists $sb_file) }}
+    include    {{ $sb_file }};
+    {{- end }}
+    {{- if $log_rate_limit_file }}
+    {{ $al_file := printf "%s/%s"  $nginx_snippet_path $log_rate_limit_file }}
+    {{- if (file.Exists $al_file) }}
+    include   {{ $al_file }};
+    {{- end }}
+    {{- end }}
+}
+
+
+map $request_uri $is_exempt_path {
+    default                     0;
+    ~^/oma/domains/[^/]+/json/  1;    # exclude domain json requests from throttling
+}
+
+map $bot_throttle_key $is_known_bot {
+    ""      0;
+    default 1;
+}
+
+map $subnet_key $is_throttle_subnet {
+    ""      0;
+    default 1;
+}
+
+
+map "$is_known_bot|$is_exempt_path|$is_throttle_subnet" $should_throttle {
+    default   0;
+    "1|0|0"   1;  # Bot AND not exempted → throttle
+    "1|0|1"   1;  # Bot AND not exempted AND BadSubnet → throttle
+    "0|0|1"   1;  # BadSubnet → throttle
+    "0|1|1"   1;  # exempted AND BadSubnet → throttle
+    "1|1|1"   1;  # Bot AND exempted AND BadSubnet → throttle
+}
+{{- end }}
+
+
 server {
     listen 80;
+    server_tokens off;
+
+    {{ if $BEHIND_PROXY -}}
+    # set proxy headers if run behind external proxy
+    set_real_ip_from {{ getenv "REVERSE_PROXY_IP" }};
+    real_ip_header X-Forwarded-For;
+    real_ip_recursive on;
+    {{- end }}
+
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    {{- if $BEHIND_PROXY }}
+    proxy_set_header X-Forwarded-Proto $proxyproto;
+    {{- else }}
     proxy_set_header X-Forwarded-Proto $scheme;
-    server_tokens off;
+    {{- end }}
+
+    # allow to upload files up to 55MB
+    client_max_body_size 55M;
 
     # redirect / to home page
     rewrite ^/$ /oma/home/ permanent;
@@ -16,31 +103,59 @@ server {
 
     proxy_intercept_errors on;
 
-    #START_ERROR
+    {{- if not $is_dev }}
     error_page   500 503 504  /50x.html;
     error_page   502          /502.html;
-    #END_ERROR
+    error_page   429          /429.html;
+    {{- end }}
+
+    {{- if $log_to_file }}
+    access_log /var/log/nginx/access.log;
+    error_log  /var/log/nginx/error.log warn;
+    {{- end }}
+    access_log /dev/stdout;
+    error_log  /dev/stderr {{ if $is_dev -}} info {{- else -}} warn {{- end }};
 
     location ~ ^/(oma|api)/ {
+        {{- if $THROTTLED }}
+        if ($should_throttle)  {
+            return 418;    # Return 418 I'm a teapot for throttled requests => triggers redirect to throttled endpoint
+        }
+        {{- end }}
         proxy_pass http://pyoma;
         proxy_redirect off;
+        uwsgi_read_timeout 100;
     }
 
+    {{ if $THROTTLED }}
+    error_page 418 = @throttle;
+
+    location @throttle {
+        internal;  # disallow direct access to this location from outside
+        limit_req zone=bot_limit    burst=6 nodelay;
+        limit_req zone=subnet_limit burst=8 nodelay;
+        limit_req_status 429;    # Return 429 Too Many Requests when the limit is exceeded
+        include uwsgi_params;
+        proxy_pass http://pyoma;
+        uwsgi_read_timeout 100;
+    }
+    {{- end }}
+
     location /All/ {
-        alias ${DARWIN_BROWSERDOWNLOAD_PATH}/;
+        alias {{ getenv "DARWIN_BROWSERDOWNLOAD_PATH" }}/;
         add_header Access-Control-Allow-Origin *;
     }
 
     location /static/ {
-        alias ${DARWIN_BROWSERSTATIC_PATH}/;
+        alias {{ getenv "DARWIN_BROWSERSTATIC_PATH" }}/;
     }
 
     location /media/ {
-        alias ${DARWIN_BROWSERMEDIA_PATH}/;
+        alias {{ getenv "DARWIN_BROWSERMEDIA_PATH" }}/;
     }
 
     location / {
-        alias ${DARWIN_BROWSERSTATIC_PATH}/;
+        alias {{ getenv "DARWIN_BROWSERSTATIC_PATH" }}/;
     }
 
 }
