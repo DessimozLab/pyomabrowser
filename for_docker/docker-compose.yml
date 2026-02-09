@@ -110,7 +110,7 @@ services:
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
       - ${RELEASE_PATH_HOST}/downloads:${DARWIN_BROWSERDOWNLOAD_PATH}:ro
       - ${NGINX_SNIPPET_PATH_HOST:-/dev/null}:${NGINX_SNIPPET_PATH:-/etc/nginx/snippets}
-      - ${NGINX_LOG_PATH_HOST:-/dev/null}./logs:/var/log/nginx
+      - ${NGINX_LOG_PATH_HOST:-/dev/null}:/var/log/nginx
     environment:
       - DEPLOYMENT_TYPE=${DEPLOYMENT_TYPE}
       - DARWIN_BROWSERSTATIC_PATH=${DARWIN_BROWSERSTATIC_PATH}
