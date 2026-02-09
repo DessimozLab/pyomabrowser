@@ -121,10 +121,9 @@ services:
       - REVERSE_PROXY_IP=${REVERSE_PROXY_IP:-}
       # USER_AGENT_BOT_FILE and SUBNET_BOT_FILE are relative to NGINX_SNIPPET_PATH_HOST
       # they can be used to block known crawlers/crawlers coming from known subnets
-      # uncomment and set to appropriate files if you want to use this feature
       # an example of both files is provided in ./nginx/snippets/*.conf.template
-      #- USER_AGENT_BOT_FILE=user_agent_to_bot.conf
-      #- SUBNET_BOT_FILE=known_crawler_subnet.conf
+      - USER_AGENT_BOT_FILE=${USER_AGENT_BOT_FILE:-}
+      - SUBNET_BOT_FILE=${SUBNET_BOT_FILE:-}
     depends_on:
       - web
 
