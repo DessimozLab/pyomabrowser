@@ -205,12 +205,6 @@ class EntryCentricMixin(object):
                                      .format(entry.omaid, entry.oma_hog))
                         break
             most_specific_hog = utils.HOG(most_specific_hog)
-            # ensure HOG wrapper contains underlying data; pyoma can return
-            # an object with _hog == None which will raise when properties
-            # like hog_id are accessed in templates. Treat such cases as
-            # "no HOG" to avoid template errors.
-            if getattr(most_specific_hog, '_hog', None) is None:
-                most_specific_hog = None
         return most_specific_hog
 
 
@@ -1669,7 +1663,7 @@ class HOGSynteny(HOGBase, TemplateView):
                 h = models.HOG(utils.db, e[0])
                 neigh.append({'hog': e[0], 'weight': str(e[2]), 'description': h.keyword})
         logger.debug("data ready to ship ")
-        
+
         '''
 
         context.update({'tab': 'synteny',
@@ -3614,13 +3608,13 @@ class Searcher(View):
             return None
 
         """
-        
-        :param request: 
-        :param query: 
+
+        :param request:
+        :param query:
         :param selector: array of restricted search to perform
         :param redirect_valid: if a perfect matched if found we directly goes to the related page
-        :param loaded_entries: array of entries already searched for this query, shortcut all entries search module 
-        :return: 
+        :param loaded_entries: array of entries already searched for this query, shortcut all entries search module
+        :return:
         """
 
         data = []
