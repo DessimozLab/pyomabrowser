@@ -1,11 +1,11 @@
-{{ $BEHIND_PROXY := getenv "REVERSE_PROXY_IP" | ne "" }}
-{{ $log_rate_limit_file := getenv "LOG_RATE_LIMIT_FILE" }}
-{{ $user_agent_bot_file := getenv "USER_AGENT_BOT_FILE" }}
-{{ $subnet_bot_file := getenv "SUBNET_BOT_FILE" }}
-{{ $nginx_snippet_path := getenv "NGINX_SNIPPET_PATH" "/etc/nginx/snippets" }}
-{{ $THROTTLED := or ($log_rate_limit_file | ne "") (or ($user_agent_bot_file | ne "") ($subnet_bot_file | ne "")) }}
-{{ $is_dev := eq ((getenv "DEPLOYMENT_TYPE") | strings.ToUpper | strings.Trunc 3) "DEV" }}
-{{ $log_to_file := getenv "NGINX_LOG_TO_FILE" | default "false" | conv.ToBool }}
+{{- $BEHIND_PROXY := getenv "REVERSE_PROXY_IP" | ne "" }}
+{{- $log_rate_limit_file := getenv "LOG_RATE_LIMIT_FILE" }}
+{{- $user_agent_bot_file := getenv "USER_AGENT_BOT_FILE" }}
+{{- $subnet_bot_file := getenv "SUBNET_BOT_FILE" }}
+{{- $nginx_snippet_path := getenv "NGINX_SNIPPET_PATH" "/etc/nginx/snippets" }}
+{{- $THROTTLED := or ($log_rate_limit_file | ne "") (or ($user_agent_bot_file | ne "") ($subnet_bot_file | ne "")) }}
+{{- $is_dev := eq ((getenv "DEPLOYMENT_TYPE") | strings.ToUpper | strings.Trunc 3) "DEV" }}
+{{- $log_to_file := getenv "NGINX_LOG_TO_FILE" | default "false" | conv.ToBool }}
 
 upstream pyoma {
     server web:8000;
