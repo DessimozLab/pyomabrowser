@@ -1561,6 +1561,7 @@ class HOGviewer(HOGBase, TemplateView):
             'tab': 'iham',
             'entry': one_entry,
             'lineage_link_name': 'hog_viewer',
+            'hog_viewer_threshold': settings.HOG_VIEWER.get('member_threshold', 2000),
         })
         try:
             context.update({'fam': {'id': 'HOG:{:07d}'.format(context['hog'].fam)},
@@ -1664,7 +1665,7 @@ class HOGSynteny(HOGBase, TemplateView):
                 h = models.HOG(utils.db, e[0])
                 neigh.append({'hog': e[0], 'weight': str(e[2]), 'description': h.keyword})
         logger.debug("data ready to ship ")
-        
+
         '''
 
         context.update({'tab': 'synteny',
@@ -3610,13 +3611,13 @@ class Searcher(View):
             return None
 
         """
-        
-        :param request: 
-        :param query: 
+
+        :param request:
+        :param query:
         :param selector: array of restricted search to perform
         :param redirect_valid: if a perfect matched if found we directly goes to the related page
-        :param loaded_entries: array of entries already searched for this query, shortcut all entries search module 
-        :return: 
+        :param loaded_entries: array of entries already searched for this query, shortcut all entries search module
+        :return:
         """
 
         data = []
