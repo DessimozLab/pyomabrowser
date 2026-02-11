@@ -224,14 +224,13 @@ MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, '../..
 
 
 # Django-Vite configuration for Vue components
-# Note: BASE_DIR is pybrowser_dev/settings, so we need to go up two levels
-PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
+# After collectstatic, Vite assets are in STATIC_ROOT/vite/
 DJANGO_VITE = {
     "default": {
-        "manifest_path": os.path.join(PROJECT_ROOT, "oma/static/dist/manifest.json"),
-        "dev_mode": DEBUG,
-        "dev_server_host": "localhost",
-        "dev_server_port": 5173,
+        "manifest_path": os.path.join(STATIC_ROOT, "vite/manifest.json"),
+        "dev_mode":  os.environ.get('DJANGO_VITE_DEV_MODE', 'false').lower() == 'true',
+        "dev_server_host": os.environ.get('DJANGO_VITE_DEV_SERVER_HOST', 'localhost'),
+        "dev_server_port": int(os.environ.get('DJANGO_VITE_DEV_SERVER_PORT', '5173')),
     }
 }
 

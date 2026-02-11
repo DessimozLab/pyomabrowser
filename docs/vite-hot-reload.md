@@ -1,6 +1,4 @@
-# Frontend Development with Vite
-
-Vue.js frontend for the OMA Browser, built with Vite.
+# Vite Hot-Reload Development Setup
 
 ## Quick Start
 
@@ -31,21 +29,6 @@ docker compose exec web python manage.py collectstatic --noinput
 - Excludes override file with `-f docker-compose.yml`
 - Assets built and served from `STATIC_ROOT/vite/`
 
-## Project Structure
-
-```
-frontend/
-├── src/
-│   ├── components/          # Vue Single File Components
-│   │   └── SearchToken.vue
-│   └── entries/             # Entry points (loaded by Django templates)
-│       └── search-token.js
-├── package.json
-└── vite.config.js
-```
-
-Build output: `../oma/static/vite/{manifest.json,js/,assets/}`
-
 ## How It Works
 
 ### Development Mode
@@ -68,95 +51,6 @@ Django-Vite generates URLs pointing to `http://localhost:5173/static/src/...` fo
 - Uses manifest.json at `STATIC_ROOT/vite/manifest.json`
 
 **Important**: Vite config uses `base: '/static/'` in both modes for consistency.
-
-## Using Components in Django
-
-### In Templates
-
-```django
-{% include "includes/search-token-vue-vite.html" with unique_id='search_nav' multiline='true' %}
-```
-
-### Interact from JavaScript
-
-```javascript
-// Access component instance
-window.search_token_vue_search_nav.preloadToken([
-  {query: 'P53_RAT', single_term: true, prefix: 'proteinid', type: 'Protein'}
-]);
-```
-
-## Adding New Components
-
-1. Create `.vue` file in `src/components/`
-2. Create entry point in `src/entries/`
-3. Add to `vite.config.js` → `rollupOptions.input`
-4. Create Django template include
-
-Example: `vite.config.js`
-```javascript
-rollupOptions: {
-  input: {
-    searchToken: resolve(__dirname, 'src/entries/search-token.js'),
-    newComponent: resolve(__dirname, 'src/entries/new-component.js')  // Add here
-  }
-}
-```
-
-## Configuration Reference
-
-### Django Settings (`pybrowser_dev/settings/base.py`)
-
-```python
-DJANGO_VITE = {
-    "default": {
-        "manifest_path": os.path.join(STATIC_ROOT, "vite/manifest.json"),
-        "dev_mode": os.environ.get('DJANGO_VITE_DEV_MODE', 'false').lower() == 'true',
-        "dev_server_host": os.environ.get('DJANGO_VITE_DEV_SERVER_HOST', 'localhost'),
-        "dev_server_port": int(os.environ.get('DJANGO_VITE_DEV_SERVER_PORT', '5173')),
-    }
-}
-```
-
-### Vite Config (`vite.config.js`)
-
-```javascript
-export default defineConfig({
-  base: '/static/',  // Always /static/ for both dev and prod
-  build: {
-    outDir: '../oma/static',
-    manifest: 'vite/manifest.json',
-    rollupOptions: {
-      output: {
-        entryFileNames: 'vite/js/[name].js',
-        assetFileNames: 'vite/assets/[name].[ext]'
-      }
-    }
-  }
-})
-```
-
-### Output Structure
-
-**After `npm run build`**:
-```
-oma/static/vite/
-├── manifest.json
-├── js/searchToken.js
-└── assets/searchToken.css
-```
-
-**After `collectstatic` in container**:
-```
-/data/static/vite/  # STATIC_ROOT
-├── manifest.json
-├── js/searchToken.js
-└── assets/searchToken.css
-```
-
-**URLs**:
-- Dev: `http://localhost:5173/static/src/entries/search-token.js`
-- Prod: `/static/vite/js/searchToken.js`
 
 ## Troubleshooting
 
@@ -203,9 +97,64 @@ docker compose restart web
 - **Use production mode** (`-f docker-compose.yml`) when testing production builds or not working on frontend
 - `docker-compose.override.yml` is tracked in git for development convenience
 
+## Configuration Reference
+
+### Django Settings (`pybrowser_dev/settings/base.py`)
+
+```python
+DJANGO_VITE = {
+    "default": {
+        "manifest_path": os.path.join(STATIC_ROOT, "vite/manifest.json"),
+        "dev_mode": os.environ.get('DJANGO_VITE_DEV_MODE', 'false').lower() == 'true',
+        "dev_server_host": os.environ.get('DJANGO_VITE_DEV_SERVER_HOST', 'localhost'),
+        "dev_server_port": int(os.environ.get('DJANGO_VITE_DEV_SERVER_PORT', '5173')),
+    }
+}
+```
+
+### Vite Config (`frontend/vite.config.js`)
+
+```javascript
+export default defineConfig({
+  base: '/static/',  // Always /static/ for both dev and prod
+  build: {
+    outDir: '../oma/static',
+    manifest: 'vite/manifest.json',
+    rollupOptions: {
+      output: {
+        entryFileNames: 'vite/js/[name].js',
+        assetFileNames: 'vite/assets/[name].[ext]'
+      }
+    }
+  }
+})
+```
+
+### Output Structure
+
+**After `npm run build`**:
+```
+oma/static/vite/
+├── manifest.json
+├── js/searchToken.js
+└── assets/searchToken.css
+```
+
+**After `collectstatic` in container**:
+```
+/data/static/vite/  # STATIC_ROOT
+├── manifest.json
+├── js/searchToken.js
+└── assets/searchToken.css
+```
+
+**URLs**:
+- Dev: `http://localhost:5173/static/src/entries/search-token.js`
+- Prod: `/static/vite/js/searchToken.js`
+
 ## Additional Resources
 
 - [Vite Documentation](https://vitejs.dev/)
 - [Vue 3 Documentation](https://vuejs.org/)
-
+- [frontend/README.md](../frontend/README.md) - Frontend-specific details
 

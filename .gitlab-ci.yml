@@ -11,13 +11,32 @@
 # for the default branch and all other (MR) branches.
 
 stages:
+  - frontend
   - build
   - deploy
+
+frontend-build:
+  stage: frontend
+  image: node:24-alpine
+  script:
+    - cd frontend
+    - npm ci --silent
+    - npm run build
+  artifacts:
+    paths:
+      - oma/static/vite/
+    expire_in: 1 hour
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - frontend/package.json
 
 docker-build:
   # Use the official docker image.
   image: docker:cli
   stage: build
+  needs:
+    - frontend-build
   services:
     - docker:dind
   variables:

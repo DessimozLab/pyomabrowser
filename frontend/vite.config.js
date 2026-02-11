@@ -5,18 +5,20 @@ import { resolve } from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  
-  // Base path for production (Django static files)
+
+  // Base path: always use /static/ to match django-vite's behavior
+  // In dev mode, Vite dev server will serve from http://localhost:5173/static/
+  // In production, files are in STATIC_ROOT and served at /static/vite/
   base: '/static/',
-  
+
   build: {
-    // Output to Django static directory
-    outDir: resolve(__dirname, '../oma/static/dist'),
-    emptyOutDir: true,
-    
-    // Generate manifest for django-vite
-    manifest: 'manifest.json',
-    
+    // Output directly to Django static directory (not dist/ subdirectory)
+    outDir: resolve(__dirname, '../oma/static'),
+    emptyOutDir: false,  // Don't delete other static files
+
+    // Generate manifest for django-vite in vite/ subdirectory
+    manifest: 'vite/manifest.json',
+
     rollupOptions: {
       input: {
         // Entry points for different pages
@@ -24,13 +26,13 @@ export default defineConfig({
       },
       output: {
         // Predictable naming for Django static files
-        entryFileNames: 'js/[name].js',
-        chunkFileNames: 'js/[name]-[hash].js',
-        assetFileNames: 'assets/[name].[ext]'
+        entryFileNames: 'vite/js/[name].js',
+        chunkFileNames: 'vite/js/[name]-[hash].js',
+        assetFileNames: 'vite/assets/[name].[ext]'
       }
     }
   },
-  
+
   // Dev server configuration
   server: {
     port: 5173,
@@ -45,7 +47,7 @@ export default defineConfig({
       port: 5173,
     }
   },
-  
+
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
