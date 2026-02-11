@@ -20,7 +20,7 @@ frontend-build:
   image: node:24-alpine
   script:
     - cd frontend
-    - npm ci --silent
+    - npm ci --verbose
     - npm run build
   artifacts:
     paths:
