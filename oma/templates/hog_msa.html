@@ -4,13 +4,8 @@
 {% block title %}OMA: MSA of {{ hog.hog_id }} at {{ hog.level }}{% endblock %}
 {% block meta_description %}Multiple sequence alignment of the member proteins of the hierarchical orthologous group (HOG) for {{ hog.hog_id }} at {{ hog.level }}.{% endblock %}
 
-{% block meta_hook %}
-{% if msa_file_obj.state == "pending" or msa_file_obj.state == "running" %}
-    <meta http-equiv="refresh" content="5" />
-{% endif %}
-{% endblock %}
-
 {% block js_hook %}
+<script src="///cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 <script src="{% static "js/msa.js"%}"></script>
 {% endblock %}
 
@@ -18,8 +13,6 @@
 {% if isSingleton %}
     This entry is not part of any hierarchical orthologous group.
 {% else %}
-
         {% include "includes/msa.html" %}
-
 {% endif %}
 {% endblock contentTab %}

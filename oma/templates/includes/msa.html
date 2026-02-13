@@ -1,25 +1,57 @@
+{% load static %}
+
 <div class="panel-body">
-    {% if msa_file_obj.state == "pending" or msa_file_obj.state == "running" %}
-        <p>The MSA you requested is currently being computed in the background.
-        Depending on the length and the number of sequences, the computation
-        will take from a few seconds up to several minutes.</p>
+    <div id="msa_message"><p>Preparing alignment job...</p></div>
+    <div id="msa_container"></div>
+</div>
 
-        <input type="button" value="Refresh Page" onClick="window.location.reload()">
-    {% elif msa_file_obj.state == "error" %}
-        <p>An server error occurred. The functionality to compute MSAs is
-            currently not available. Please come back later.</p>
-    {% elif msa_file_obj.state == "timeout" %}
-        <p>This msa cannot be computed online as it is taking too much time. If you really need to have it, either compute it
-        yourself on your local computer, or contact us on contact@omabrowser.org.</p>
-    {% else %}
-        <div id="msa_div">Loading...</div>
-        <script>
+<script>
 (function(){
-    var url = "{{ msa_file_obj.result.url }}";
-    msa.io.fasta.read(url, function(err, seqs) {
+    const jobHash = "{{  msa_file_obj.data_hash }}";
+    const statusUrl = "{% url 'msa-status' job_hash='JOB_HASH_PLACEHOLDER' %}".replace("JOB_HASH_PLACEHOLDER", jobHash);
+    const msaDiv = document.getElementById("msa_container");
 
-        var opts = {};
-        opts.el = document.getElementById("msa_div");
+    function renderStatus(state, metadata){
+
+        const el = document.getElementById("msa_message");
+
+        if(state === "pending" || state === "running"){
+            el.innerHTML = `
+                <p>The MSA is currently being computed in the background. Depending on the length and the number of sequences, the computation will take from a few seconds up to several minutes.</p>
+                <div id="loader">{%  include "includes/loading.html" %}</div>
+            `;
+            return;
+        }
+
+        if(state === "error"){
+            el.innerHTML = `
+                <p>A server error occurred. The functionality to compute MSAs is
+            currently not available. Please try again later.</p>
+            `;
+            return;
+        }
+
+        if(state === "timeout"){
+            el.innerHTML = `
+                <p>This msa cannot be computed online as it is taking too much time. If you really need to have it, either compute it
+        yourself on your local computer or contact us on contact@omabrowser.org.</p>
+            `;
+            return;
+        }
+
+        if(state === "loading"){
+            let warn_message = "";
+            if (metadata && metadata.subsampled) {
+                warn_message = `<div class="alert alert-warning" role="alert">The MSA of this group has been subsampled from ${metadata.n_sequences} to ${metadata.n_sequences_aligned} sequences. If you need the full MSA, please <a href="{{ unaligned_url }}">download the unaligned sequences</a> and align them locally.</div> `;
+            }
+            el.innerHTML = `${warn_message}<div id="loading-info"><p>Loading alignment…</p></div>`;
+            return;
+        }
+    }
+
+    function renderMSA(seqs){
+        const opts = {};
+        opts.el = msaDiv;
         opts.vis = {
             conserv: false,
             overviewbox: true,
@@ -47,15 +79,66 @@
         opts.visorder = {'overviewBox': -30};
 
         // init msa
-        var m = new msa.msa(opts);
+        const m = new msa.msa(opts);
         m.seqs.reset(seqs);
         // set max height of alignment
-        var h = Math.max(window.innerHeight - opts.zoomer.overviewboxHeight - 160,
-                         10 * m.g.zoomer.get('rowHeight'));
+        const h = Math.max(window.innerHeight - opts.zoomer.overviewboxHeight - 160,
+            10 * m.g.zoomer.get('rowHeight'));
         m.g.zoomer.autoHeight(h);
         m.render();
-    });
+        let status_message = document.getElementById("loading-info");
+        if (status_message !== null && status_message !== undefined){
+            status_message.innerHTML = "";
+        }
+    }
+
+    function loadMSA(url){
+        fetch(url)
+            .then(r => r.arrayBuffer())
+            .then(buffer => {
+                let fastaText;
+                try{
+                    fastaText = pako.ungzip(
+                        new Uint8Array(buffer),
+                        {to:'string'}
+                    );
+                }catch(e){
+                    fastaText = new TextDecoder("utf-8").decode(buffer);
+                }
+
+                const seqs = msa.io.fasta.parse(fastaText);
+                renderMSA(seqs);
+            })
+            .catch(err=>{
+                msaDiv.innerText = "Failed to load MSA.";
+                console.error(err);
+            });
+    }
+
+
+    function poll(){
+        fetch(statusUrl)
+            .then(r => r.json())
+            .then(data => {
+                if(data.state === "done"){
+                    renderStatus("loading", data.metadata)
+                    loadMSA(data.result_url);
+                    return;
+                }
+
+                renderStatus(data.state);
+
+                if (data.state === "pending" || data.state === "running"){
+                    setTimeout(poll, 5000);
+                }
+            })
+            .catch(err=>{
+                console.error("Failed to check MSA status:", err);
+                renderStatus("error");
+            });
+    }
+
+    poll();
+
 })();
-        </script>
-    {% endif %}
-</div>
+</script>

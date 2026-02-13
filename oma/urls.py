@@ -133,6 +133,9 @@ urlpatterns = [
     path('search/', views.Searcher.as_view(), name='search'),
     # path('search/fulltext/<query>[A-Za-z0-9 _.:()-/+"]+)/', views.FullTextJson.as_view(), name="fulltext_json"),
 
+    # Async job status
+    path('jobs/msa/<job_hash>/', views.MSAStatus.as_view(), name='msa-status'),
+
     path('export_markers/', views.export_marker_genes, name='export_markers'),
     path('markers/<data_id>/', views.MarkerGenesResults.as_view(), name='marker_genes'),
 

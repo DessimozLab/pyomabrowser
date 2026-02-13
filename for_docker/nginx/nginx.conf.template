@@ -152,6 +152,10 @@ server {
 
     location /media/ {
         alias {{ getenv "DARWIN_BROWSERMEDIA_PATH" }}/;
+        gzip on;
+        gzip_static always;
+        gzip_proxied any;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript chemical/x-fasta;
     }
 
     location / {

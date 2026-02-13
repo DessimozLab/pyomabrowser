@@ -4,6 +4,7 @@ from __future__ import division
 import collections
 import logging
 import os
+import random
 import tarfile
 import io
 import time
@@ -11,6 +12,10 @@ import gzip
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+
+from .decorators import async_job_task
+from .misc import result_upload_path
+
 try:
     from Bio.Alphabet import IUPAC
 except ImportError:
@@ -28,32 +33,24 @@ from pyoma.browser.db import FastMapper
 from . import utils, misc
 from .models import FileResult
 
-
 logger = logging.getLogger(__name__)
 
 
-@shared_task
-def export_marker_genes(genomes, data_id, min_species_coverage=0.5, top_N_grps=None):
-    logger.debug('starting task export_marker_genes for {}'.format(data_id))
-    db_entry = FileResult.objects.get(data_hash=data_id)
-    db_entry.state = 'running'
-    db_entry.save()
-    try:
-        grps = collect_groups(genomes, min_species_coverage=min_species_coverage)
-        if top_N_grps is not None:
-            size_ordered_grpids = sorted(grps.keys(), key=lambda x: -len(grps[x]))
-            grps = {k: grps[k] for k in size_ordered_grpids[0:top_N_grps]}
-        with FastaTarballResultBuilder('marker_genes', 'OMAGroup_', data_id) as exporter:
-            exporter.add_groups(grps)
+@async_job_task(model=FileResult)
+def export_marker_genes(job: FileResult, genomes, min_species_coverage=0.5, top_N_grps=None):
+    logger.info('starting task export_marker_genes for %s', job.data_hash)
 
-        db_entry.result = exporter.fname
-        db_entry.state = 'done'
-
-    except Exception:
-        logger.exception('failed to create marker genes:')
-        db_entry.state = 'error'
-    finally:
-        db_entry.save()
+    grps = collect_groups(genomes, min_species_coverage=min_species_coverage)
+    if top_N_grps is not None:
+        size_ordered_grpids = sorted(grps.keys(), key=lambda x: -len(grps[x]))
+        grps = {k: grps[k] for k in size_ordered_grpids[0:top_N_grps]}
+    with FastaTarballResultBuilder('marker_genes', 'OMAGroup_', job.data_hash) as exporter:
+        exporter.add_groups(grps)
+    task_meta = {
+        'n_groups': len(grps),
+        'avg_group_size': sum(len(g) for g in grps.values()) / len(grps) if len(grps) > 0 else 0,
+    }
+    return exporter.fname, task_meta
 
 
 def collect_groups(genomes, min_species_coverage):
@@ -75,7 +72,7 @@ class FastaTarballResultBuilder(object):
     def __init__(self, prefix, grouptype, data_id):
         self.prefix = prefix
         self.grouptype = grouptype
-        self.fname = os.path.join("markers","{}_{}.tgz".format(prefix, data_id))
+        self.fname = misc.result_upload_path(f"markers", prefix, data_id, "tgz" )
         self.fpath = os.path.join(settings.MEDIA_ROOT, self.fname)
 
     def __enter__(self):
@@ -123,55 +120,59 @@ class FastaTarballResultBuilder(object):
         return misc.as_fasta(headers=headers, seqs=seqs), misc.as_fasta(headers=headers, seqs=cds)
 
 
-@shared_task(soft_time_limit=800)
-def compute_msa(data_id, group_type, hog_id_or_grp_nr, *args):
-    t0 = time.time()
-    logger.info('starting computing MSA')
-    db_entry = FileResult.objects.get(data_hash=data_id)
-    db_entry.state = "running"
-    db_entry.save()
-
+@async_job_task(FileResult, soft_time_limit=800, logical_inputs=dict(group_type="group_type", group_id="hog_id_or_grp_nr", level="level", max_seqs="max_nr_seqs"))
+def compute_msa(job: FileResult, group_type, hog_id_or_grp_nr, **kwargs):
+    logger.info(f'starting computing MSA for {group_type} {hog_id_or_grp_nr} with data_id {job.data_hash}')
+    t0  = time.perf_counter()
     if group_type == 'hog':
-        level = args[0]
+        level = kwargs.get('level', None)
         memb = utils.db.member_of_hog_id(hog_id_or_grp_nr, level)
     elif group_type == 'og':
         memb = utils.db.oma_group_members(hog_id_or_grp_nr)
-    members = [pyoma.browser.models.ProteinEntry(utils.db, e) for e in memb]
     seqs = []
-    for prot in members:
+    for e in memb:
+        prot = pyoma.browser.models.ProteinEntry(utils.db, e)
         if IUPAC is not None:
             seq = Seq(prot.sequence, IUPAC.protein)
         else:
             seq = Seq(prot.sequence)
         seqs.append(SeqRecord(seq, id=prot.omaid, annotations={"molecule_type": "protein"}))
-    logger.info(u"msa for {:d} sequences (avg length: {:.1f})"
-                .format(len(seqs),
-                        sum([len(str(s.seq)) for s in seqs])/len(seqs)))
+    avg_len = sum([len(s) for s in seqs])/len(seqs) if len(seqs) > 0 else 0
+    n_seqs = len(seqs)
+    logger.info("msa for %d sequences (avg length: %.1f)",len(seqs), avg_len)
+
+    if kwargs.get('max_nr_seqs') and n_seqs > kwargs['max_nr_seqs']:
+        logger.warning("too many sequences for msa (%d), subsampling!", n_seqs)
+        seqs = random.sample(seqs, kwargs['max_nr_seqs'])
+
     try:
         mafft = Mafft(seqs, datatype=DataType.PROTEIN)
         msa = mafft()
-        name = os.path.join('msa', data_id[-2:], data_id[-4:-2], data_id)
+        name = result_upload_path('msa', "MSA", job.data_hash, "fasta.gz")
         path = os.path.join(settings.MEDIA_ROOT, name)
-        if not os.path.isdir(os.path.dirname(path)):
-            os.makedirs(os.path.dirname(path))
-        with open(path, 'w') as fh:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with gzip.open(path, 'wt') as fh:
             SeqIO.write(msa, fh, 'fasta')
-        db_entry.result = name
-        db_entry.state = 'done'
-        tot_time = time.time() - t0
-        logger.info('finished compute_msa task. took {:.3f}sec, {:.3%} for mafft'.format(tot_time, mafft.elapsed_time/tot_time))
     except (IOError, WrapperError) as e:
-        arglist = [group_type, str(hog_id_or_grp_nr)]
-        arglist.extend(args)
+        arglist = [group_type, str(hog_id_or_grp_nr), *kwargs.items()]
         logger.exception('error while computing msa for dataset: {}'.format(
             ', '.join(arglist)))
-        db_entry.state = 'error'
-    except SoftTimeLimitExceeded as e:
-        arglist = [group_type, str(hog_id_or_grp_nr)]
-        arglist.extend(args)
-        logger.warning('computing msa timed out for dataset: {}'.format(', '.join(arglist)))
-        db_entry.state = 'timeout'
-    db_entry.save()
+        raise
+
+    tot_time = time.perf_counter() - t0
+    logger.info(
+        'finished compute_msa task. took %.3f sec, %.3f%% for mafft',
+        tot_time,
+        100 * mafft.elapsed_time / tot_time
+    )
+    task_meta = {
+        'n_sequences': n_seqs,
+        'n_sequences_aligned': len(msa),
+        'avg_length': avg_len,
+        'subsampled': kwargs.get('max_nr_seqs') is not None and n_seqs > kwargs['max_nr_seqs'],
+        'compression': 'gzip',
+    }
+    return name, task_meta
 
 
 class FunctionProjectorMock(object):
@@ -189,15 +190,12 @@ class FunctionProjectorMock(object):
                            'Assigned_by': 'OMA Fun Proj', 'Aspect': 'M'})
                 yield rec
 
-@shared_task
-def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit=None, result_url=None):
+@async_job_task(FileResult)
+def assign_go_function_to_user_sequences(job: FileResult, sequence_file, tax_limit=None, result_url=None):
     t0 = time.time()
-    logger.info('starting projecting GO functions')
-    db_entry = FileResult.objects.get(data_hash=data_id)
-    db_entry.state = "running"
-    db_entry.save()
+    logger.info('starting projecting GO functions for %s with data_id %s', sequence_file, job.data_hash)
 
-    name = os.path.join('function_projection', data_id[-2:], data_id[-4:-2], data_id+".txt.gz")
+    name = result_upload_path('function_projection', "OMA-GO", job.data_hash, "gaf.gz")
     path = os.path.join(settings.MEDIA_ROOT, name)
     try:
         with auto_open(sequence_file, 'rt') as seq_in:
@@ -209,26 +207,24 @@ def assign_go_function_to_user_sequences(data_id, sequence_file, tax_limit=None,
             with gzip.open(path, 'wt') as fout:
                 projector.write_annotations(fout, sequences)
 
-        if db_entry.email != '':
-            logger.info('sending ready mail to {}'.format(db_entry.email))
-            context = {'e': db_entry, 'result_url': result_url}
+        if job.email != '':
+            logger.info('sending ready mail to {}'.format(job.email))
+            context = {'e': job, 'result_url': result_url}
             message = get_template('email_function_projection_ready.html').render(context)
             sender = "noreply@omabrowser.org"
-            msg = EmailMessage("GO Function Predictions ready", message, to=[db_entry.email], from_email=sender)
+            msg = EmailMessage("GO Function Predictions ready", message, to=[job.email], from_email=sender)
             msg.content_subtype = "html"
             try:
                 msg.send()
             except OSError as e:
                 logger.error('cannot send confirmation mail: {}'.format(e))
 
-        db_entry.result = name
-        db_entry.state = 'done'
         tot_time = time.time() - t0
         logger.info('finished assign_go_function_to_user_sequences task. took {:.3f}sec'.format(tot_time))
     except:
         logger.exception('error while computing assign_go_function_to_user_sequences for dataset: {}'
-            .format(data_id))
-        db_entry.state = 'error'
+            .format(job.data_hash))
+        raise
     finally:
         os.remove(sequence_file)
-    db_entry.save()
+    return name, {}
