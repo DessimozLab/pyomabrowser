@@ -15,7 +15,7 @@
 .dns_fix: &dns_fix
   - |
     # temporary workaround for DNS issues
-    sed 's/nameserver 10\.96\.0\.10/nameserver 10.0.91.1/' /etc/resolv.conf > /tmp/resolv.conf.new
+    sed 's/ndots:5/ndots:1/' /etc/resolv.conf > /tmp/resolv.conf.new
     cat /tmp/resolv.conf.new > /etc/resolv.conf
     cat /etc/resolv.conf
 
@@ -87,6 +87,7 @@ docker-build:
       ls -la oma/static/vite/ || echo "Warning: vite artifacts not found"
       mkdir -p for_docker/oma/static/vite
       cp -r oma/static/vite/* for_docker/oma/static/vite/ || echo "No vite files to copy"
+      ls -la for_docker/oma/static/vite/
     - docker compose -f for_docker/docker-compose.yml build
     - docker compose -f for_docker/docker-compose.yml push
     - |
