@@ -59,15 +59,6 @@ function run_init_if_needed() {
     >&2 echo " -> Fixing permissions for mounted volumes"
     chown -R oma:oma "$DARWIN_BROWSERSTATIC_PATH" "$DARWIN_BROWSERMEDIA_PATH"
 
-    # Make sure the database is set up
-    >&2 echo " -> Assure database is set up with tables"
-    python3 manage.py makemigrations
-    python3 manage.py migrate
-
-    # Install static files
-    >&2 echo " -> Collect static files"
-    python3 manage.py collectstatic --noinput
-
     # create root account for Django admin page
     >&2 echo " -> Create superuser for the database"
     python3 manage.py shell << EOF
@@ -95,6 +86,15 @@ function run_web() {
   if [ "${AUTO_INIT:-true}" = "true" ]; then
     run_init_if_needed
   fi
+
+  # Make sure the database is set up
+  >&2 echo " -> Assure database is set up with tables"
+  python3 manage.py migrate --noinput
+
+  # Install static files
+  >&2 echo " -> Collect static files"
+  python3 manage.py collectstatic --noinput --clear
+
   drop_privileges "$@"
 }
 
