@@ -205,7 +205,7 @@ class AsyncJobMixin:
 #  --- Entry Centric -------
 class EntryCentricMixin(object):
 
-    def get_entry(self, entry_id):
+    def get_entry(self, entry_id, main_isoform=False):
         """resolve any ID and return an entry or a 404 if it is unknown"""
         try:
             entry_nr, is_modif = utils.id_resolver.resolve(entry_id, check_if_modified=True)
@@ -215,6 +215,11 @@ class EntryCentricMixin(object):
 
         # this need to be added to have root level hog id
         model_entry = models.ProteinEntry(utils.db, entry)
+        if main_isoform and not model_entry.is_main_isoform:
+            model_entry = model_entry.get_main_isoform()
+            model_entry.different_isoform = True
+        else:
+            model_entry.different_isoform = False
 
         if model_entry.oma_hog:
             model_entry.oma_hog_root = model_entry.oma_hog.split(".")[0]
@@ -228,7 +233,7 @@ class EntryCentricMixin(object):
 
     def get_most_specific_hog(self, entry):
         if not isinstance(entry, models.ProteinEntry):
-            entry = self.get_entry(entry)
+            entry = self.get_entry(entry, main_isoform=True)
         most_specific_hog = None
         if entry.oma_hog != "":
             # we want the hog at the first interesting level above the species itself
@@ -1915,21 +1920,27 @@ class HOGtableFromEntry(EntryCentricMixin, View):
     redirect_to = "hog_table"
 
     def get(self, request, entry_id, level=None, **kwargs):
-        entry = self.get_entry(entry_id)
+        entry = self.get_entry(entry_id, main_isoform=True)
+        if entry.oma_hog == "":
+            logger.info("requested entry '%s' (%s) has no hog. redirect to protein info", entry_id, entry.omaid)
+            return redirect("pairs", entry_id)
+
         try:
             if level is not None:
-                subhogs = [utils.HOG(h) for h in utils.db.get_subhogs_at_level(entry.hog_family_nr, level)]
-                for hog in subhogs:
-                    if entry.oma_hog.startswith(hog.hog_id):
-                        return redirect(self.redirect_to, hog.hog_id, hog.level)
-            else:
-                hog = self.get_most_specific_hog(entry)
-                if hog is not None:
-                    return redirect(self.redirect_to, hog.hog_id, hog.level)
+                if level in entry.genome.lineage:
+                    try:
+                        h = utils.HOG(next(utils.db.iter_hogs_at_level(entry.oma_hog, level)))
+                        return redirect(self.redirect_to, h.hog_id, h.level)
+                    except StopIteration:
+                        pass
+            hog = self.get_most_specific_hog(entry)
+            if hog is not None:
+                return redirect(self.redirect_to, hog.hog_id, hog.level)
         except db.InvalidId:
             pass
-        logger.info("hog for requested entry '{}' ({}) has no hog. redirect to protein info"
-                    .format(entry_id, entry.omaid))
+        logger.warning("cannot find hog for requested entry '%s' (%s) with oma_hog: %s -> "
+                       "cannot resolve hog. redirect to protein info",
+                    entry_id, entry.omaid, entry.oma_hog)
         return redirect("pairs", entry_id)
 
 
@@ -1940,7 +1951,7 @@ class HOGiHamFromEntry(HOGtableFromEntry):
 # might be needed for external resources (orthoxml by protein entry)
 class OrthoXMLFromEntry(EntryCentricMixin, View):
     def get(self, request, entry_id, **kwargs):
-        entry = self.get_entry(entry_id)
+        entry = self.get_entry(entry_id, main_isoform=True)
         if entry.hog_family_nr == 0:
             raise Http404("{} doesn't belong to any HOG".format(entry_id))
         orthoxml = utils.db.get_orthoxml(entry.hog_family_nr)
@@ -2023,7 +2034,7 @@ class HOGiHam(EntryCentricMixin, TemplateView):
 
     def get_context_data(self, entry_id, idtype='OMA', **kwargs):
         context = super(HOGiHam, self).get_context_data(**kwargs)
-        entry = self.get_entry(entry_id)
+        entry = self.get_entry(entry_id, main_isoform=True)
         context.update({'tab': 'hogs',
                         'entry': entry,
                         })
@@ -2047,7 +2058,7 @@ class HOGDomainsBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, idtype='OMA', **kwargs):
         # TODO: move some of this to misc / a model.
         context = super(HOGDomainsBase, self).get_context_data(**kwargs)
-        entry = self.get_entry(entry_id)
+        entry = self.get_entry(entry_id, main_isoform=True)
         fam = entry.hog_family_nr
 
         (fam_row, sim_fams) = utils.db.get_prevalent_domains(fam)
