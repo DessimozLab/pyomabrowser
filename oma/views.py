@@ -2635,7 +2635,7 @@ class OMAGroup_align(AsyncJobMixin, GroupBase, TemplateView):
         context.update({
             "msa_file_obj": job,
             "tab": "align",
-            "unaligned_url": reverse("omagroup-fasta", args=context['omagroup'].group_nbr),
+            "unaligned_url": reverse("omagroup-fasta", args=(context['omagroup'].group_nbr,)),
         })
         return context
 
