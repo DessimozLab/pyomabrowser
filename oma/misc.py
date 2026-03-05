@@ -114,12 +114,17 @@ def handle_uploaded_file(fh, dir=None):
     return res
 
 
+def result_upload_path(folder, prefix, data_id, ext):
+    return os.path.join(folder, data_id[-2:], data_id[-4:-2], f"{prefix}_{data_id}.{ext}")
+
+
 def parse_version_ignore_errors(version_str):
     from pkg_resources import parse_version
     try:
         return parse_version(version_str)
     except Exception:
         return None
+
 
 @functools.lru_cache(maxsize=4)
 def get_omastandalone_versions(latest=5):

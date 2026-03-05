@@ -60,143 +60,289 @@
 
 {% block contentTab %}
 
-<div  style="background-color: white; padding:10px;padding-top: 36px;">
+<div style="background-color: white; padding:10px; padding-top: 36px;">
 
-    {% if isSingleton %}This entry is not part of any hierarchical orthologous group.
+    {% if isSingleton %}
+        This entry is not part of any hierarchical orthologous group.
 
     {% else %}
 
-    <div id="hogvis">
+        {% if hog.nr_member_genes < hog_viewer_threshold %}
+            <!-- Auto-load viewer for small HOGs -->
+            <div id="hogvis">
 
-        <div id="header">
+                <div id="header">
 
-            <div id="gap_conpenser"> </div>
+                    <div id="gap_conpenser"> </div>
 
-            <div id="hogvisheader">
+                    <div id="hogvisheader">
 
-                <div>
+                        <div>
 
-                    <button id='btn_display_settings' class="btn btn-default" style="float: right; margin: 0 0 10px 10px;" aria-label="Left Align"  data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings" type="button"  >
-                        OPTIONS
-                        <i id="icon_settings" class="fas fa-caret-down"></i>
+                            <button id='btn_display_settings' class="btn btn-default" style="float: right; margin: 0 0 10px 10px;" aria-label="Left Align"  data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings" type="button">
+                                OPTIONS
+                                <i id="icon_settings" class="fas fa-caret-down"></i>
 
-                    </button>
+                            </button>
 
-                    <h3 >Hierarchical group {{ fam.id }} <span id="open_txt">open at level of </span><span id="current_level_text" style="font-weight:bold;">Root</span></h3>
+                            <h3>Hierarchical group {{ fam.id }} <span id="open_txt">open at level of </span><span id="current_level_text" style="font-weight:bold;">Root</span></h3>
 
-                </div>
+                        </div>
 
-                <div id="hogvis_settings">
+                        <div id="hogvis_settings">
 
 
-                    <div class="collapse" id="collapseSettings">
+                            <div class="collapse" id="collapseSettings">
 
-                        <div id="menu-bar">
-                            <div id="color-schema-dropdown" class="dropdown">
-                                <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
-                                    Set color scheme
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item active" href="#">Query Gene</a>
-                                    <a class="dropdown-item" href="#">Protein Length</a>
-                                    <a class="dropdown-item" href="#">GC Content</a>
-                                    <a class="dropdown-item" href="#">Number of Exons</a>
-                                    <a class="dropdown-item" href="#">Gene Function Similarity</a>
+                                <div id="menu-bar">
+                                    <div id="color-schema-dropdown" class="dropdown">
+                                        <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton"
+                                                data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            Set color scheme
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item active" href="#">Query Gene</a>
+                                            <a class="dropdown-item" href="#">Protein Length</a>
+                                            <a class="dropdown-item" href="#">GC Content</a>
+                                            <a class="dropdown-item" href="#">Number of Exons</a>
+                                            <a class="dropdown-item" href="#">Gene Function Similarity</a>
+                                        </div>
+                                    </div>
+
+                                    <div id="gene-tooltips-dropdown" class="dropdown">
+                                        <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            Show gene tooltips on
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item active" href="#">Click</a>
+                                            <a class="dropdown-item" href="#">Mouseover</a>
+                                        </div>
+                                    </div>
+
+                                    <div id="percentage-coverage-selector">
+                                        <button class="btn btn-sm btn-outline-dark" type="button"
+                                                aria-haspopup="true" aria-expanded="false">Remove columns under <input id="set_min_coverage"
+                                                                                                                       type="number" step="10" value="0"
+                                                                                                                       min="0" max="100">% of species coverage
+                                        </button>
+                                    </div>
+
+
+
+
                                 </div>
-                            </div>
 
-                            <div id="gene-tooltips-dropdown" class="dropdown">
-                                <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" data-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
-                                    Show gene tooltips on
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item active" href="#">Click</a>
-                                    <a class="dropdown-item" href="#">Mouseover</a>
-                                </div>
-                            </div>
+                                <div id="color-legend" style=""></div>
 
-                            <div id="percentage-coverage-selector">
-                                <button class="btn btn-sm btn-outline-dark" type="button"
-                                        aria-haspopup="true" aria-expanded="false">Remove columns under <input id="set_min_coverage"
-                                                                                                               type="number" step="10" value="0"
-                                                                                                               min="0" max="100">% of species coverage
-                                </button>
-                            </div>
 
+                            </div>
 
 
 
                         </div>
-
-                        <div id="color-legend" style=""></div>
-
-
                     </div>
 
-
+                    <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display: none">Lowly supported hogs have been removed as per settings. <a  class="alert-link" id='reset_column_filter' > Click here to reset.</a></div>
 
                 </div>
+
+                <script>
+
+                    (function(){
+                        document.getElementById("btn_display_settings").addEventListener("click", function(){
+                            var ico = document.getElementById("icon_settings");
+                            if (ico.getAttribute("class") === "fas fa-caret-up") {ico.setAttribute("class","fas fa-caret-down")}
+                            else ico.setAttribute("class","fas fa-caret-up");
+                        });
+                    }) ();
+                </script>
+
             </div>
 
-            <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display: none">Lowly supported hogs have been removed as per settings. <a  class="alert-link" id='reset_column_filter' > Click here to reset.</a></div>
+            <div id="loader">
+
+                                    {% include "includes/loading.html" %}
+
+
+                <style>
+
+                    #search-status {
+          width: calc(100% - 280px);
+          height: calc(100% - 180px);
+          position: fixed;
+          top: 180px;
+          left: 280px;
+          background: rgba(255, 255, 255, 0.95);
+          z-index: 10;
+        }
+
+                </style>
+
+            </div>
 
         </div>
 
-        <script>
+    {% else %}
+        <!-- Show warning for large HOGs -->
+        <div style="background-color: white; padding: 10px;">
+            <div id="large_hog_warning"  class="alert alert-warning alert-dismissible fade show" role="alert">
+                <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Large HOG - Performance Warning</h4>
+                <p>
+                    This hierarchical orthologous group contains <strong>{{ hog.nr_member_genes }} members</strong>.
+                    Loading the interactive viewer requires significant data transfer and computing power to render properly.
+                </p>
+                <hr>
+                <p class="mb-0">
+                    <button class="btn btn-primary" id="load_iham_button" onclick="loadIHamViewer()">
+                        <i class="fas fa-play"></i> Load Viewer
+                    </button>
+                </p>
+            </div>
 
-            (function(){
-                document.getElementById("btn_display_settings").addEventListener("click", function(){
-                    var ico = document.getElementById("icon_settings");
-                    if (ico.getAttribute("class") === "fas fa-caret-up") {ico.setAttribute("class","fas fa-caret-down")}
-                    else ico.setAttribute("class","fas fa-caret-up");
-                });
-            }) ();
-        </script>
+            <div id="hogvis" style="display: none;">
 
-    </div>
+                <div id="header">
 
-    <div id="loader">
+                    <div id="gap_conpenser"> </div>
 
-                                {% include "includes/loading.html" %}
+                    <div id="hogvisheader">
+
+                        <div>
+
+                            <button id='btn_display_settings' class="btn btn-default" style="float: right; margin: 0 0 10px 10px;" aria-label="Left Align"  data-toggle="collapse" data-target="#collapseSettings" aria-expanded="false" aria-controls="collapseSettings" type="button"  >
+                                OPTIONS
+                                <i id="icon_settings" class="fas fa-caret-down"></i>
+
+                            </button>
+
+                            <h3 >Hierarchical group {{ fam.id }} <span id="open_txt">open at level of </span><span id="current_level_text" style="font-weight:bold;">Root</span></h3>
+
+                        </div>
+
+                        <div id="hogvis_settings">
 
 
-        <style>
+                            <div class="collapse" id="collapseSettings">
 
-            #search-status {
-  width: calc(100% - 280px);
-  height: calc(100% - 180px);
-  position: fixed;
-  top: 180px;
-  left: 280px;
-  background: rgba(255, 255, 255, 0.95);
-  z-index: 10;
-}
+                                <div id="menu-bar">
+                                    <div id="color-schema-dropdown" class="dropdown">
+                                        <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton"
+                                                data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            Set color scheme
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item active" href="#">Query Gene</a>
+                                            <a class="dropdown-item" href="#">Protein Length</a>
+                                            <a class="dropdown-item" href="#">GC Content</a>
+                                            <a class="dropdown-item" href="#">Number of Exons</a>
+                                            <a class="dropdown-item" href="#">Gene Function Similarity</a>
+                                        </div>
+                                    </div>
 
-        </style>
+                                    <div id="gene-tooltips-dropdown" class="dropdown">
+                                        <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            Show gene tooltips on
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item active" href="#">Click</a>
+                                            <a class="dropdown-item" href="#">Mouseover</a>
+                                        </div>
+                                    </div>
 
-    </div>
+                                    <div id="percentage-coverage-selector">
+                                        <button class="btn btn-sm btn-outline-dark" type="button"
+                                                aria-haspopup="true" aria-expanded="false">Remove columns under <input id="set_min_coverage"
+                                                                                                                       type="number" step="10" value="0"
+                                                                                                                       min="0" max="100">% of species coverage
+                                        </button>
+                                    </div>
+
+
+
+
+                                </div>
+
+                                <div id="color-legend" style=""></div>
+
+
+                            </div>
+
+
+
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info text-center alert_remove" role="alert" style="margin-bottom:0; padding: 4px; display: none">Lowly supported hogs have been removed as per settings. <a  class="alert-link" id='reset_column_filter' > Click here to reset.</a></div>
+
+                </div>
+
+                <script>
+
+                    (function(){
+                        document.getElementById("btn_display_settings").addEventListener("click", function(){
+                            var ico = document.getElementById("icon_settings");
+                            if (ico.getAttribute("class") === "fas fa-caret-up") {ico.setAttribute("class","fas fa-caret-down")}
+                            else ico.setAttribute("class","fas fa-caret-up");
+                        });
+                    }) ();
+                </script>
+
+            </div>
+
+            <div id="loader" style="display: none;">
+
+                                    {% include "includes/loading.html" %}
+
+
+                <style>
+
+                    #search-status {
+          width: calc(100% - 280px);
+          height: calc(100% - 180px);
+          position: fixed;
+          top: 180px;
+          left: 280px;
+          background: rgba(255, 255, 255, 0.95);
+          z-index: 10;
+        }
+
+                </style>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+    {% endif %}
 
 </div>
 
 <script>
+    function loadIHamViewer() {
+        // Hide the large-HOG warning once loading starts
+        var warning = document.getElementById("large_hog_warning");
+        if (warning) {
+            warning.style.display = "none";
+        }
 
+        // Show the viewer container and loader
+        var hogvisElement = document.getElementById("hogvis");
+        var loaderElement = document.getElementById("loader");
+        if (hogvisElement) {
+            hogvisElement.style.display = "block";
+        }
+        if (loaderElement) {
+            loaderElement.style.display = "block";
+        }
 
-
-
-
-
-
-
-    (function () {
-
-
-
+        // Load the data
         $.when(
             $.ajax({url: "/oma/hog/{{ hog.hog_id }}/orthoxml/augmented/",
-            //$.ajax({url: "/oma/hog/{{ hog.hog_id }}/orthoxml/",
                 dataType: "text"}),
             $.ajax({url: "/All/speciestree.nwk"}),
             $.ajax({url: "/oma/hogdata/{{ entry.omaid }}/json",dataType: "text"})
@@ -399,11 +545,12 @@
 
 
         });
-    }) ();
+    }
+
+    // Auto-load viewer when under threshold
+    {% if hog.nr_member_genes < hog_viewer_threshold %}
+    loadIHamViewer();
+    {% endif %}
 </script>
-
-{% endif %}
-
-</div>
 
 {% endblock %}

@@ -7,5 +7,5 @@
 {% elif kingdom == "Viruses" %}
 <span class="badge badge-warning"><abbr class='abbrNoUnder' title="Viruses">V</abbr></span>
 {% else %}
-<span class="badge badge-default"><abbr class='abbrNoUnder' title="unknown">?</abbr></span>
+<span class="badge badge-secondary"><abbr class='abbrNoUnder' title="{{ kingdom }}">{{ kingdom | first }}</abbr></span>
 {% endif %}

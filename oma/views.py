@@ -7,6 +7,7 @@ import types
 from builtins import map
 from builtins import str
 from builtins import range
+from typing import Type, Callable
 import hashlib
 import collections
 
@@ -22,6 +23,7 @@ from django.views.generic import TemplateView, View
 from django.views.generic.base import ContextMixin
 from django.urls import reverse
 from django.core.mail import EmailMessage
+from django.db import connections
 from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.shortcuts import redirect, resolve_url
@@ -44,7 +46,7 @@ from . import tasks
 from . import utils
 from . import misc
 from . import forms
-from .models import FileResult
+from .models import FileResult, AsyncJobBase
 from pyoma.browser import db, models, search
 from pyoma.browser.decorators import timethis
 
@@ -127,27 +129,73 @@ class FastaView(FastaResponseMixin, ContextMixin, View):
         return self.render_to_fasta_response(context)
 
 
-class AsyncMsaMixin(object):
-    def get_msa_results(self, group_type, *args):
-        msa_id = hashlib.md5(group_type.encode('utf-8'))
-        for arg in args:
-            msa_id.update(str(arg).encode('utf-8'))
-        msa_id = msa_id.hexdigest()
+class AsyncJobMixin:
+    job_model: Type[AsyncJobBase]  = None
+    task: Callable = None
+
+    def compute_job_hash(self, **kwargs):
+        logical_mapping = getattr(self.task, 'logical_inputs', None)
+        if logical_mapping is None:
+            raise NotImplementedError("Subclasses of AsyncJobViewMixin must implement compute_job_hash() if not logical_mapping is defined.")
+        md5 = hashlib.md5()
+        for logical_name, arg_name in logical_mapping.items():
+            value = kwargs.get(arg_name)
+            if value is not None:
+                md5.update(str(value).encode('utf-8'))
+        return md5.hexdigest()
+
+    def get_job_status(self, job_hash):
+        """For status polling: return job info"""
         try:
-            logger.debug('fetching FileResult for {}'.format(msa_id))
-            r = FileResult.objects.get(data_hash=msa_id)
-            do_compute = r.remove_erroneous_or_long_pending()
-        except FileResult.DoesNotExist:
+            job = self.job_model.objects.get(data_hash=job_hash)
+        except self.job_model.DoesNotExist:
+            raise Http404("No job found for the given parameters.")
+        return {
+            "state": job.state,
+            "metadata": {k: v for k, v in job.metadata.items() if k not in ('parameters', 'task_id', )},
+            "result_url": job.result.url if job.result else None,
+            "message": job.message,
+            "runtime": job.runtime_seconds
+        }
+
+    def get_or_create_job(self, extra_fields=None, **task_kwargs) -> AsyncJobBase:
+        """For job submission: compute hash and trigger task if needed."""
+        extra_fields = extra_fields or {}
+        job_hash = self.compute_job_hash(**task_kwargs)
+        return self._get_or_create_by_hash(job_hash, extra_fields, **task_kwargs)
+
+    def _get_or_create_by_hash(self, job_hash, extra_fields, **task_kwargs):
+        """Internal helper for creating or resetting a job by hash."""
+        do_compute = False
+        try:
+            job = self.job_model.objects.get(data_hash=job_hash)
+            # if error or pending too long, mark for recompute
+            if job.is_error_or_long_pending():
+                do_compute = True
+        except self.job_model.DoesNotExist:
             do_compute = True
+            job = None
 
         if do_compute:
-            logger.info('require computing msa for {} {}'.format(group_type, args))
-            r = FileResult(data_hash=msa_id, result_type='msa_{}'.format(group_type),
-                           state="pending")
-            r.save()
-            tasks.compute_msa.delay(msa_id, group_type, *args)
-        return {'msa_file_obj': r}
+            if job is not None:
+                job.state = self.job_model.STATE_PENDING
+                job.metadata = {}
+                job.runtime_seconds = None
+                if hasattr(job.result, 'name'):
+                    job.result.name = ""
+            else:
+                job = self.job_model.objects.create(data_hash=job_hash, state=self.job_model.STATE_PENDING)
 
+            # Dynamically set extra fields if they exist in the model
+            model_fields = {f.name for f in job._meta.get_fields()}
+            for k, v in extra_fields.items():
+                if k in model_fields:
+                    setattr(job, k, v)
+                else:
+                    logger.warning("Extra field '%s' not in job model, skipping.", k)
+            job.save()
+            self.task.delay(job_hash, **task_kwargs)
+        return job
 
 # //</editor-fold>
 
@@ -157,7 +205,7 @@ class AsyncMsaMixin(object):
 #  --- Entry Centric -------
 class EntryCentricMixin(object):
 
-    def get_entry(self, entry_id):
+    def get_entry(self, entry_id, main_isoform=False):
         """resolve any ID and return an entry or a 404 if it is unknown"""
         try:
             entry_nr, is_modif = utils.id_resolver.resolve(entry_id, check_if_modified=True)
@@ -167,6 +215,11 @@ class EntryCentricMixin(object):
 
         # this need to be added to have root level hog id
         model_entry = models.ProteinEntry(utils.db, entry)
+        if main_isoform and not model_entry.is_main_isoform:
+            model_entry = model_entry.get_main_isoform()
+            model_entry.different_isoform = True
+        else:
+            model_entry.different_isoform = False
 
         if model_entry.oma_hog:
             model_entry.oma_hog_root = model_entry.oma_hog.split(".")[0]
@@ -180,7 +233,7 @@ class EntryCentricMixin(object):
 
     def get_most_specific_hog(self, entry):
         if not isinstance(entry, models.ProteinEntry):
-            entry = self.get_entry(entry)
+            entry = self.get_entry(entry, main_isoform=True)
         most_specific_hog = None
         if entry.oma_hog != "":
             # we want the hog at the first interesting level above the species itself
@@ -1560,6 +1613,7 @@ class HOGviewer(HOGBase, TemplateView):
             'tab': 'iham',
             'entry': one_entry,
             'lineage_link_name': 'hog_viewer',
+            'hog_viewer_threshold': settings.HOG_VIEWER.get('member_threshold', 2000),
         })
         try:
             context.update({'fam': {'id': 'HOG:{:07d}'.format(context['hog'].fam)},
@@ -1815,16 +1869,34 @@ class MatreexJson(HOGBase, JsonModelMixin, View):
 
 
 @method_decorator(never_cache, name='dispatch')
-class HOGsMSA(AsyncMsaMixin, HOGBase, TemplateView):
+class HOGsMSA(AsyncJobMixin, HOGBase, TemplateView):
     template_name = "hog_msa.html"
+    job_model = FileResult
+    task = tasks.compute_msa
 
     def get_context_data(self, **kwargs):
         context = super(HOGsMSA, self).get_context_data(**kwargs)
         hog = context['hog']
-        context.update(self.get_msa_results('hog', hog.hog_id, hog.level))
-        context.update({'lineage_link_name': "hog_msa",
-                        "tab": "msa"})
+        try:
+            max_nr_seqs = int(self.request.GET.get('max_nr_seqs', 2000))
+        except ValueError:
+            max_nr_seqs = 2000
+        job = self.get_or_create_job(extra_fields={"result_type": "msa_hog"},
+                                     group_type="hog", hog_id_or_grp_nr=hog.hog_id, level=hog.level,
+                                     max_nr_seqs=max_nr_seqs)
+        context.update({
+            "msa_file_obj": job,
+            "lineage_link_name": "hog_msa",
+            "tab": "msa",
+            "unaligned_url": reverse("hog_fasta", args=(hog.hog_id, hog.level)),
+        })
         return context
+
+class MSAStatus(AsyncJobMixin, View):
+    job_model = FileResult
+
+    def get(self, request, job_hash, **kwargs):
+        return JsonResponse(self.get_job_status(job_hash))
 
 
 class HOGsOrthoXMLView(HOGBase, View):
@@ -1848,29 +1920,27 @@ class HOGtableFromEntry(EntryCentricMixin, View):
     redirect_to = "hog_table"
 
     def get(self, request, entry_id, level=None, **kwargs):
-        entry = self.get_entry(entry_id)
+        entry = self.get_entry(entry_id, main_isoform=True)
+        if entry.oma_hog == "":
+            logger.info("requested entry '%s' (%s) has no hog. redirect to protein info", entry_id, entry.omaid)
+            return redirect("pairs", entry_id)
+
         try:
             if level is not None:
-                subhogs = [utils.HOG(h) for h in utils.db.get_subhogs_at_level(entry.hog_family_nr, level)]
-                for hog in subhogs:
-                    if entry.oma_hog.startswith(hog.hog_id):
-                        return redirect(self.redirect_to, hog.hog_id, hog.level)
-            else:
-                hog = self.get_most_specific_hog(entry)
-                # Defensive check: sometimes the underlying _hog data can be None
-                # (pyoma might return an incomplete object). Accessing the property
-                # `hog.hog_id` can raise when `_hog` is None, so guard against it
-                # and fall back to redirecting to the protein info page.
-                try:
-                    if hog is not None and getattr(hog, '_hog', None) is not None and hog._hog.get('ID') is not None:
-                        return redirect(self.redirect_to, hog.hog_id, hog.level)
-                except Exception:
-                    logger.exception("Error accessing hog id for entry '%s' (%s); redirecting to protein info",
-                                     entry_id, entry.omaid)
+                if level in entry.genome.lineage:
+                    try:
+                        h = utils.HOG(next(utils.db.iter_hogs_at_level(entry.oma_hog, level)))
+                        return redirect(self.redirect_to, h.hog_id, h.level)
+                    except StopIteration:
+                        pass
+            hog = self.get_most_specific_hog(entry)
+            if hog is not None:
+                return redirect(self.redirect_to, hog.hog_id, hog.level)
         except db.InvalidId:
             pass
-        logger.info("hog for requested entry '{}' ({}) has no hog. redirect to protein info"
-                    .format(entry_id, entry.omaid))
+        logger.warning("cannot find hog for requested entry '%s' (%s) with oma_hog: %s -> "
+                       "cannot resolve hog. redirect to protein info",
+                    entry_id, entry.omaid, entry.oma_hog)
         return redirect("pairs", entry_id)
 
 
@@ -1881,7 +1951,7 @@ class HOGiHamFromEntry(HOGtableFromEntry):
 # might be needed for external resources (orthoxml by protein entry)
 class OrthoXMLFromEntry(EntryCentricMixin, View):
     def get(self, request, entry_id, **kwargs):
-        entry = self.get_entry(entry_id)
+        entry = self.get_entry(entry_id, main_isoform=True)
         if entry.hog_family_nr == 0:
             raise Http404("{} doesn't belong to any HOG".format(entry_id))
         orthoxml = utils.db.get_orthoxml(entry.hog_family_nr)
@@ -1964,7 +2034,7 @@ class HOGiHam(EntryCentricMixin, TemplateView):
 
     def get_context_data(self, entry_id, idtype='OMA', **kwargs):
         context = super(HOGiHam, self).get_context_data(**kwargs)
-        entry = self.get_entry(entry_id)
+        entry = self.get_entry(entry_id, main_isoform=True)
         context.update({'tab': 'hogs',
                         'entry': entry,
                         })
@@ -1988,7 +2058,7 @@ class HOGDomainsBase(ContextMixin, EntryCentricMixin):
     def get_context_data(self, entry_id, idtype='OMA', **kwargs):
         # TODO: move some of this to misc / a model.
         context = super(HOGDomainsBase, self).get_context_data(**kwargs)
-        entry = self.get_entry(entry_id)
+        entry = self.get_entry(entry_id, main_isoform=True)
         fam = entry.hog_family_nr
 
         (fam_row, sim_fams) = utils.db.get_prevalent_domains(fam)
@@ -2151,14 +2221,14 @@ def export_marker_genes(request):
             ).hexdigest()
             try:
                 r = FileResult.objects.get(data_hash=data_id)
-                do_compute = r.remove_erroneous_or_long_pending()
+                do_compute = r.is_error_or_long_pending()
             except FileResult.DoesNotExist:
                 do_compute = True
 
             if do_compute:
                 r = FileResult(data_hash=data_id, result_type='markers', state="pending")
                 r.save()
-                tasks.export_marker_genes.delay(genomes, data_id, min_species_coverage, top_N_genomes)
+                tasks.export_marker_genes.delay(data_id, genomes, min_species_coverage, top_N_genomes)
             return HttpResponseRedirect(reverse('marker_genes', args=(data_id,)))
     return render(request, "dlOMA_exportMarker.html", context={'max_nr_genomes': 200})
 
@@ -2173,7 +2243,7 @@ def function_projection(request):
             data_id = hashlib.md5(user_file_info['md5'].encode('utf-8')).hexdigest()
             try:
                 r = FileResult.objects.get(data_hash=data_id)
-                do_compute = r.remove_erroneous_or_long_pending()
+                do_compute = r.is_error_or_long_pending()
             except FileResult.DoesNotExist:
                 do_compute = True
 
@@ -2201,6 +2271,15 @@ def go_enrichment(request):
 
 def go_enrichment_result(request, data_id=None):
     return render(request, "go_enrichment_result.html", {'data': data_id})
+
+
+def health_check(request):
+    try:
+        connections["default"].cursor()
+        utils.db.get_release_name()
+        return JsonResponse({'status': 'ready'})
+    except Exception as e:
+        return JsonResponse({"status": "not_ready", "error_message": str(e)}, status=503)
 
 
 @method_decorator(never_cache, name='dispatch')
@@ -2544,14 +2623,20 @@ class OMAGroup(GroupBase, TemplateView):
 
 
 @method_decorator(never_cache, name='dispatch')
-class OMAGroup_align(AsyncMsaMixin, OMAGroup):
+class OMAGroup_align(AsyncJobMixin, GroupBase, TemplateView):
     template_name = "omagroup_align.html"
+    job_model = FileResult
+    task = tasks.compute_msa
 
     def get_context_data(self, group_id, **kwargs):
         context = super(OMAGroup_align, self).get_context_data(group_id)
-        context.update(self.get_msa_results('og', group_id))
-        context.update(
-            {'tab': 'align'})
+        job = self.get_or_create_job(extra_fields={"result_type": "msa_og"},
+                                     group_type="og", hog_id_or_grp_nr=context['omagroup'].group_nbr)
+        context.update({
+            "msa_file_obj": job,
+            "tab": "align",
+            "unaligned_url": reverse("omagroup-fasta", args=(context['omagroup'].group_nbr,)),
+        })
         return context
 
 

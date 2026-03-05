@@ -1,0 +1,12 @@
+# Map user agents to bot names for rate limiting
+# the user agents can be regexp and are matched against the
+# User-Agent header of incoming requests.
+# Format: <match_pattern>   <bot_name>;  (don't forget the semicolon at the end)
+~*baiduspider              baidu;
+~*mj12bot                  mj12;
+~*(bytespider|bytedance)   bytespider;
+~*amazonbot                amazon;
+~*meta-external            facebook;
+~*petalbot                 petal;
+~*(gptbot|openai)          openai;
+~*(bot|crawl|spider)       genericbot;       # Bot → apply limit

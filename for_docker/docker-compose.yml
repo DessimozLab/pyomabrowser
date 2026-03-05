@@ -28,6 +28,12 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8000/oma/health/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
 
   db:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
@@ -60,7 +66,7 @@ services:
 
   worker:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
-    image: $DOCKER_REGISTRY/oma
+    image: $DOCKER_REGISTRY/oma:${IMAGE_TAG:-latest}
     command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
               "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=INFO"]
     environment:
@@ -77,7 +83,7 @@ services:
 
   worker_long:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
-    image: $DOCKER_REGISTRY/oma
+    image: $DOCKER_REGISTRY/oma:${IMAGE_TAG:-latest}
     command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
               "--queues=celery,async_web,long", "--hostname=worker@%h", "--loglevel=INFO"]
     environment:
@@ -104,11 +110,21 @@ services:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
       - ${RELEASE_PATH_HOST}/downloads:${DARWIN_BROWSERDOWNLOAD_PATH}:ro
+      - ${NGINX_SNIPPET_PATH_HOST:-./nginx/snippets}:${NGINX_SNIPPET_PATH:-/etc/nginx/snippets}
+      - ${NGINX_LOG_PATH_HOST:-./nginx/logs}:/var/log/nginx
     environment:
       - DEPLOYMENT_TYPE=${DEPLOYMENT_TYPE}
       - DARWIN_BROWSERSTATIC_PATH=${DARWIN_BROWSERSTATIC_PATH}
       - DARWIN_BROWSERMEDIA_PATH=${DARWIN_BROWSERMEDIA_PATH}
       - DARWIN_BROWSERDOWNLOAD_PATH=${DARWIN_BROWSERDOWNLOAD_PATH}
+      - NGINX_SNIPPET_PATH=${NGINX_SNIPPET_PATH:-/etc/nginx/snippets}
+      - NGINX_LOG_TO_FILE=${NGINX_LOG_TO_FILE:-false}
+      - REVERSE_PROXY_IP=${REVERSE_PROXY_IP:-}
+      # USER_AGENT_BOT_FILE and SUBNET_BOT_FILE are relative to NGINX_SNIPPET_PATH_HOST
+      # they can be used to block known crawlers/crawlers coming from known subnets
+      # an example of both files is provided in ./nginx/snippets/*.conf.template
+      - USER_AGENT_BOT_FILE=${USER_AGENT_BOT_FILE:-}
+      - SUBNET_BOT_FILE=${SUBNET_BOT_FILE:-}
     depends_on:
       - web
 
