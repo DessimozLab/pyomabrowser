@@ -13,7 +13,7 @@ export default defineConfig({
 
   build: {
     // Output directly to Django static directory (not dist/ subdirectory)
-    outDir: resolve(__dirname, '../oma/static'),
+    outDir: resolve(__dirname, 'static'),
     emptyOutDir: false,  // Don't delete other static files
 
     // Generate manifest for django-vite in vite/ subdirectory

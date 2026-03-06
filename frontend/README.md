@@ -19,17 +19,25 @@ docker compose up
 
 ### Production Mode
 
-To test production build:
+To test production build, rebuild the containers and start 
+them without the override file:
 
 ```bash
-cd frontend/ && npm run build
-cd ../for_docker/
+docker compose -f docker-compose.yml build 
 docker compose -f docker-compose.yml up -d
-docker compose exec web python manage.py collectstatic --noinput
 ```
 
 - Excludes override file with `-f docker-compose.yml`
 - Assets built and served from `STATIC_ROOT/vite/`
+- No hot-reload, changes require rebuild and restart
+
+To debug the production build, check the vite build output 
+in the docker logs of the frontend_builder target:
+```bash
+docker build --target frontend_builder -f oma/Dockerfile -t frontend_builder ..
+docker run --rm -it frontend_builder bash
+```
+
 
 ## Project Structure
 

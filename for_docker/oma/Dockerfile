@@ -53,6 +53,14 @@ RUN --mount=type=ssh \
     && python -OO -m compileall /app
 
 
+FROM node:24-alpine as frontend_builder
+WORKDIR /app
+COPY frontend/package*json ./
+RUN npm install
+COPY frontend .
+RUN npm run build
+
+
 FROM python:3.12-slim AS runtime
 
 # set environment varibles
@@ -85,6 +93,7 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=oma_basis --chown=oma /app /app
+COPY --from=frontend_builder --chown=oma /app/static/ /app/oma/static/
 ENV PATH="/app/bin:$PATH"
 
 # set work directory

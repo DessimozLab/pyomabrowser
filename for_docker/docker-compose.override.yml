@@ -21,10 +21,16 @@ services:
       - DJANGO_VITE_DEV_SERVER_HOST=localhost
       - DJANGO_VITE_DEV_SERVER_PORT=5173
     # Skip production entrypoint, run Django dev server directly
-    entrypoint: []
-    command: >
-      sh -c "python manage.py migrate --noinput &&
-             python manage.py runserver 0.0.0.0:8000"
+    #  django dev server often gets killed, so we do not encourage using it
+    #  unless you want to test something that needs the dev server (e.g. live reload of templates)
+    #  uncomment the following lines to use it, but be aware that it may cause issues with the container getting killed
+    #  and you will need to access the dev server on http://localhost:8000 instead of http://localhost
+    #entrypoint: []
+    #command: >
+    # sh -c "python manage.py migrate --noinput &&
+    #        python manage.py runserver 0.0.0.0:8000"
+    #ports:
+    # - "8000:8000"
     depends_on:
       - vite
 
