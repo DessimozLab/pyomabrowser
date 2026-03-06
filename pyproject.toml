@@ -29,6 +29,8 @@ dependencies = [
     "sentry-sdk[django]>=2.44.0",
     "tables>=3.10.2",
     "zoo",
+    "tables<3.11",    # 3.11.1 crashes after migrations
+    "setuptools<81",  # coreapi uses pkg_resources which got dropped in 82
 ]
 
 [dependency-groups]
