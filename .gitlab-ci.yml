@@ -20,35 +20,13 @@
     cat /etc/resolv.conf
 
 stages:
-  - frontend
   - build
   - deploy
-
-frontend-build:
-  stage: frontend
-  image: node:24-alpine
-  before_script:
-    - *dns_fix
-  script:
-    - cd frontend
-    - npm ci --verbose
-    - npm run build
-  artifacts:
-    paths:
-      - oma/static/vite/
-    expire_in: 1 hour
-  # Run this job only if there are changes in the frontend directory
-  # rules:
-  #   - if: $CI_COMMIT_BRANCH
-  #     changes:
-  #       - frontend/**/*
 
 docker-build:
   # Use the official docker image.
   image: docker:cli
   stage: build
-  needs:
-    - frontend-build
   services:
     - docker:dind
   variables:
@@ -83,11 +61,6 @@ docker-build:
   # All branches are tagged with $DOCKER_IMAGE_NAME (defaults to commit ref slug)
   # Default branch is also tagged with `latest`
   script:
-    - |
-      ls -la oma/static/vite/ || echo "Warning: vite artifacts not found"
-      mkdir -p for_docker/oma/static/vite
-      cp -r oma/static/vite/* for_docker/oma/static/vite/ || echo "No vite files to copy"
-      ls -la for_docker/oma/static/vite/
     - docker compose -f for_docker/docker-compose.yml build
     - docker compose -f for_docker/docker-compose.yml push
     - |
