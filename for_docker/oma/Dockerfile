@@ -93,11 +93,11 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=oma_basis --chown=oma /app /app
-COPY --from=frontend_builder --chown=oma /app/static/ /app/oma/static/
 ENV PATH="/app/bin:$PATH"
 
 # set work directory
 COPY . $SRC_DIR
+COPY --from=frontend_builder --chown=oma /app/static/ $SRC_DIR/oma/static/
 WORKDIR $SRC_DIR
 
 COPY for_docker/oma/entrypoint.sh /
