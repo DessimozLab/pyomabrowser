@@ -77,7 +77,7 @@
 
 
 {% url 'home' as home %}
-<body class="{% if request.get_full_path == home %}landing{% endif %}">
+<body class="{% if request.path == home %}landing{% endif %}">
 {% block topelement %}
    {% if oma_instance_name != "full" and oma_instance_name != "basf" %}
       <div class="ribbon">Go to the regular (non-viral) <a href="https://omabrowser.org">OMA database</a></div>

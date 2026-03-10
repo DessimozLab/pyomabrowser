@@ -1,0 +1,21 @@
+{% load static %}
+{% load django_vite %}
+
+{# Load Vite assets #}
+{% vite_asset 'src/entries/search-token.js' %}
+
+{# Mount point with data attributes for Vue #}
+<div
+  id="{{ unique_id }}"
+  data-search-token
+  data-multiline="{{ multiline|default:'false' }}"
+  data-xref-order="[]"
+  data-search-url="/oma/search-token/"
+  data-api-url="/api/xref/"
+  data-csrf-token="{{ csrf_token }}"
+>
+  <div class="d-flex align-items-center justify-content-center" style="height: 50px;">
+    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+    Loading search...
+  </div>
+</div>

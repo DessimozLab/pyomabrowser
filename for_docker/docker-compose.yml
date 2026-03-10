@@ -11,6 +11,7 @@ services:
     environment:
       - CONTAINER_ROLE=web
       - AUTO_INIT=true
+      - DJANGO_VITE_DEV_MODE=false
     env_file:
       - env
     volumes:

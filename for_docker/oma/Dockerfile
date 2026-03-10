@@ -53,6 +53,14 @@ RUN --mount=type=ssh \
     && python -OO -m compileall /app
 
 
+FROM node:24-alpine as frontend_builder
+WORKDIR /app
+COPY frontend/package*json ./
+RUN npm install
+COPY frontend .
+RUN npm run build
+
+
 FROM python:3.12-slim AS runtime
 
 # set environment varibles
@@ -89,6 +97,7 @@ ENV PATH="/app/bin:$PATH"
 
 # set work directory
 COPY . $SRC_DIR
+COPY --from=frontend_builder --chown=oma /app/static/ $SRC_DIR/oma/static/
 WORKDIR $SRC_DIR
 
 COPY for_docker/oma/entrypoint.sh /

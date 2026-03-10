@@ -13,3 +13,7 @@ docs/_build
 for_docker/env
 for_docker/.env
 for_docker/labgit.cnf
+frontend/node_modules
+
+# Generated frontend assets
+oma/static/vite/

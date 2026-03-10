@@ -49,8 +49,15 @@ INSTALLED_APPS = [
     'oma_rest',
     'bootstrap4',
     'django.contrib.humanize',
-    'academy'
+    'academy',
 ]
+
+# django_vite is optional - only needed for web server, not workers
+try:
+    import django_vite
+    INSTALLED_APPS.append('django_vite')
+except ImportError:
+    pass
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -218,6 +225,18 @@ else:
         "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv('DARWIN_BROWSERMEDIA_PATH', os.path.join(BASE_DIR, '../../media'))
+
+
+# Django-Vite configuration for Vue components
+# After collectstatic, Vite assets are in STATIC_ROOT/vite/
+DJANGO_VITE = {
+    "default": {
+        "manifest_path": os.path.join(STATIC_ROOT, "vite/manifest.json"),
+        "dev_mode":  os.environ.get('DJANGO_VITE_DEV_MODE', 'false').lower() == 'true',
+        "dev_server_host": os.environ.get('DJANGO_VITE_DEV_SERVER_HOST', 'localhost'),
+        "dev_server_port": int(os.environ.get('DJANGO_VITE_DEV_SERVER_PORT', '5173')),
+    }
+}
 
 
 # some jenkins specific modifications
