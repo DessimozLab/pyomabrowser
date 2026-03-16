@@ -100,7 +100,7 @@ class Hog_placement {
             .style("position", 'absolute')
             .style("margin", '48px')
             .style("margin-top", '28px')
-            .style("z-index", '9999')
+            .style("z-index", '998')
             .style("right", '0px')
 
            var search = div.append('div').attr('id','dfg')
@@ -2497,4 +2497,3 @@ class Hog_placement {
 }
 
 }
-
