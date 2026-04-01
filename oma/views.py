@@ -2350,7 +2350,8 @@ class CurrentView(TemplateView):
         except KeyError:
             # expected to happen if no archive release has been selected yet.
             return []
-
+        if not os.path.isdir(download_dir):
+            download_dir = os.getenv('DARWIN_BROWSERDOWNLOAD_PATH', download_dir)
         if not os.path.isdir(download_dir):
             logger.warning("Download folder for release {} does not exists ({})".format(release, download_dir))
             return []
@@ -2375,6 +2376,8 @@ class CurrentView(TemplateView):
         context['release_with_backlinks'] = self._get_previous_releases(context['release'], context['all_releases'])
         context['download_root'] = self.download_root(context)
         context['existing_download_files'] = self.existing_download_files(context['release'])
+        context['omamer_database_files'] = sorted(f for f in context['existing_download_files']
+                                                  if f.endswith('.h5') and not f.startswith('OmaServer'))
         logger.debug("context data: {}".format(context))
         return context
 
