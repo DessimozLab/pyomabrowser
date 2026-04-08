@@ -23,37 +23,59 @@ WORKDIR $SRC_DIR
 COPY pyproject.toml uv.lock ./
 
 # --- Install dependencies securely ---
-# If LABGIT_TOKEN is passed as a secret, switch URLs from SSH → HTTPS dynamically.
+# Supports:
+# 1. SSH (default) - uses --mount=type=ssh
+# 2. labgit secret with optional TOKEN replacement, allows also to switch URLs from SSH -> HTTPS
+#    - labgit contains URL template with ${TOKEN} placeholder
+#    - TOKEN secret provides the actual token value
+#    - If ${TOKEN} not in URL, TOKEN secret is ignored
 RUN --mount=type=ssh \
     --mount=type=secret,id=labgit \
+    --mount=type=secret,id=TOKEN \
     bash -c '\
+      DEFAULT_SSH="ssh://gitolite@lab.dessimoz.org:2222/"; \
+      REPLACEMENT_URL=""; \
+      \
+      # Check for labgit secret file \
       if [ -f /run/secrets/labgit ]; then \
-        DEFAULT_SSH="ssh://gitolite@lab.dessimoz.org:2222/"; \
         LABGIT=$(cat /run/secrets/labgit); \
+        \
+        # If TOKEN secret exists and URL contains ${TOKEN}, replace it \
+        if [ -f /run/secrets/TOKEN ]; then \
+          TOKEN_VALUE=$(cat /run/secrets/TOKEN); \
+          if [[ "$LABGIT" == *"\${TOKEN}"* ]] || [[ "$LABGIT" == *"\$TOKEN"* ]]; then \
+            echo "Replacing \${TOKEN} placeholder in labgit URL"; \
+            LABGIT="${LABGIT//\$\{TOKEN\}/$TOKEN_VALUE}"; \
+            LABGIT="${LABGIT//\$TOKEN/$TOKEN_VALUE}"; \
+          fi; \
+        fi; \
+        \
+        # Ensure trailing slash \
         if [ -n "${LABGIT}" ] && [ "${LABGIT%/}" = "${LABGIT}" ]; then \
           LABGIT="${LABGIT}/"; \
         fi; \
         if [ "${LABGIT}" != "${DEFAULT_SSH}" ]; then \
-          echo "Replacing Git URLs for non-default host: $LABGIT"; \
-          ESCAPED_LABGIT=$(printf "%s\n" "$LABGIT" | sed "s/[&/]/\\\\&/g"); \
-          sed -i "s|$DEFAULT_SSH|$ESCAPED_LABGIT|g" pyproject.toml; \
-        else \
-          echo "Using default SSH Git URLs"; \
+          echo "Using Git URL from secret file"; \
+          REPLACEMENT_URL="${LABGIT}"; \
         fi; \
       fi; \
-      git config --global url."ssh://gitolite@lab.dessimoz.org:2222/".insteadOf \
-                        "ssh://lab.dessimoz.org:2222/"; \
-      uv sync --all-groups \
+      \
+      # Replace URL if needed \
+      if [ -n "$REPLACEMENT_URL" ]; then \
+        echo "Replacing $DEFAULT_SSH with configured URL"; \
+        git config --global url."$REPLACEMENT_URL".insteadOf "ssh://lab.dessimoz.org:2222/" \
+      else \
+        echo "Using default SSH Git URLs"; \
+        git config --global url."$DEFAULT_SSH".insteadOf "ssh://lab.dessimoz.org:2222/"; \
+      fi; \
+      uv venv /app  \
+      && VIRTUAL_ENV=/app uv sync --all-groups --frozen --active \
+      && python -OO -m compileall /app \
     '
 
-# Install dependencies into a venv directly at /app
-RUN --mount=type=ssh \
-    uv venv /app \
-    && VIRTUAL_ENV=/app uv sync --frozen --all-groups --active \
-    && python -OO -m compileall /app
 
 
-FROM node:24-alpine as frontend_builder
+FROM node:24-alpine AS frontend_builder
 WORKDIR /app
 COPY frontend/package*json ./
 RUN npm install
