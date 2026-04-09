@@ -6,13 +6,12 @@
 - make a softlink from `.env` to `env`, i.e. `ln -s env .env`
 - adjust settings in `env` (OMA_INSTANCE, keys, ...)
 - adjust settings in `docker-compose.yml`:
-  
   - not a bind mount for release data? (see section on copying data into volume)
-
-- copy `labgit.cnf.template' to `labgit.cnf`
-  - if not using git+ssh to clone repos, set your USER and PASSWORD data for git+https in `labgit.cnf`
-  
-- `docker compose build --ssh default` to build containers for OMA browser (`--ssh default` only needed if git+ssh is used)
+- copy `labgit.cnf.template` to `labgit.cnf` and set the git access URL (see below)
+- copy `token.template` to `token` (leave empty unless using token-based HTTPS auth)
+- build:
+  - SSH access: `docker compose build --ssh default` (key must be in SSH agent, see below)
+  - HTTPS access: `docker compose build`
 - `docker compose up -d` to start containers
 - `docker compose logs -f` shows log of containers
 - access oma instance on http://localhost/oma/home
@@ -71,7 +70,7 @@ you can also change things to use [docker volume](https://docs.docker.com/storag
 on [copying data into a docker volume](#copying-data-into-the-release_volume)
 for how this needs to be done.
 
-#### Addtional notes about docker-compose.override.yml
+#### Additional notes about docker-compose.override.yml
 We provide a docker-compose.override.yml file in the repo, which overrides 
 some aspects of the docker-compose setup, relevant for development purposes.
 In particular, the override file mounts the current repo checkout into the 
@@ -89,21 +88,67 @@ To see which configs are loaded exactly, you can use the `docker compose config`
 `docker compose config` returns the merged config including the override file.
 
 
-# Settings in `labgit.cnf`
-Building the containers requires cloning GIT repositories from the lab.dessimoz.org 
-host. Access to this host can be gained either via git+ssh or git+https. 
-Please copy the `labgit.cnf.template` file to `labgit.cnf` and either leave
-the definition of LABGIT variable unchanged (i.e. `ssh://gitolite@lab.dessimoz.org:2222`)
-or uncomment the second variant `https://USER:PASSWORD@git.lab.dessimoz.org/git` 
-and specify your USER and PASSWORD in the url.
+# Settings in `labgit.cnf` and `token`
+
+Building the containers requires cloning private git repositories from `lab.dessimoz.org`.
+Access can be configured either via SSH or HTTPS.
+
+Copy `labgit.cnf.template` to `labgit.cnf`. The file contains a single line: the base URL
+to the git server. Three variants are supported:
+
+**1. SSH (default)**
+```
+ssh://gitolite@lab.dessimoz.org:2222/
+```
+Use `docker compose build --ssh default` to forward your SSH agent into the build.
+The key must be loaded in your SSH agent beforehand:
+```bash
+ssh-add ~/.ssh/your_lab_key
+```
+You can verify the key is available with `ssh-add -l`. Docker's `--ssh default` flag
+only forwards keys that are already in the agent — it does not read `~/.ssh/config`
+`IdentityFile` entries directly.
+
+**2. HTTPS with username and password**
+```
+https://USER:PASSWORD@git.lab.dessimoz.org/git
+```
+No `--ssh default` flag needed. Credentials are passed securely as a build secret.
+
+**3. HTTPS with a CI token (e.g. GitLab CI)**
+```
+https://gitlab-ci-token:${TOKEN}@gitlab.myorg.com/
+```
+The `${TOKEN}` placeholder is substituted at build time from the `token` secret file.
+Copy `token.template` to `token` and put the token value in that file:
+```bash
+echo "glpat-xxxxxxxxxxxxxxxxxxxx" > token
+```
+Then build normally (no `--ssh default` needed):
+```bash
+docker compose build
+```
+
+If `labgit.cnf` does not contain `${TOKEN}`, the `token` file is ignored. You still need
+the file to exist (an empty file is fine):
+```bash
+cp token.template token
+```
 
 
 ### Building the images
 
-To build the images you should only need to run 
-`docker compose build` from the for_docker/ directory on your host. If you use 
-git+ssh you need to add `--ssh default` to the command.
+To build the images, run `docker compose build` from the `for_docker/` directory.
 
+| Access method | Build command |
+|---|---|
+| SSH | `docker compose build --ssh default` |
+| HTTPS (password or token) | `docker compose build` |
+
+To build only a specific service:
+```bash
+docker compose build oma --ssh default
+```
 
 
 ### Starting services
@@ -142,3 +187,5 @@ docker-compose down --volume
 ### Changes
 - discontinued the build_container script - please use now directly `docker compose build`.
 - We recently dropped the legacy container from the setup, as all functionality has been ported to the Django webserver.
+- `labgit.cnf` is now a plain URL file (not a shell script). Supports SSH, HTTPS with credentials, or HTTPS with a `${TOKEN}` placeholder substituted from the `token` secret file.
+- SSH builds now configure the container's SSH client to use `gitolite` as the login user for `lab.dessimoz.org`, ensuring compatibility with both the lock file URLs and Docker's SSH agent forwarding.
