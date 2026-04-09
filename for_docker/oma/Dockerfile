@@ -63,11 +63,16 @@ RUN --mount=type=ssh \
       # Replace URL if needed \
       if [ -n "$REPLACEMENT_URL" ]; then \
         echo "Replacing $DEFAULT_SSH with configured URL"; \
-        git config --global url."$REPLACEMENT_URL".insteadOf "ssh://lab.dessimoz.org:2222/" \
+        git config --global --add url."$REPLACEMENT_URL".insteadOf "ssh://lab.dessimoz.org:2222/"; \
+        git config --global --add url."$REPLACEMENT_URL".insteadOf "ssh://gitolite@lab.dessimoz.org:2222/"; \
+        git config --global --add url."$REPLACEMENT_URL".insteadOf "git+ssh://lab.dessimoz.org:2222/"; \
+        git config --global --add url."$REPLACEMENT_URL".insteadOf "git+ssh://gitolite@lab.dessimoz.org:2222/"; \
       else \
         echo "Using default SSH Git URLs"; \
-        git config --global url."$DEFAULT_SSH".insteadOf "ssh://lab.dessimoz.org:2222/"; \
+        git config --global --add url."$DEFAULT_SSH".insteadOf "ssh://lab.dessimoz.org:2222/"; \
+        git config --global --add url."$DEFAULT_SSH".insteadOf "git+ssh://lab.dessimoz.org:2222/"; \
       fi; \
+      \
       uv venv /app  \
       && VIRTUAL_ENV=/app uv sync --all-groups --frozen --active \
       && python -OO -m compileall /app \
