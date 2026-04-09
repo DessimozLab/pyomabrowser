@@ -14,7 +14,9 @@ RUN apt-get -qq update \
 RUN mkdir -m 700 /root/.ssh/ \
     && touch /root/.ssh/known_hosts \
     && ssh-keyscan -p 2222 lab.dessimoz.org >> /root/.ssh/known_hosts \
-    && chmod 600 /root/.ssh/known_hosts
+    && chmod 600 /root/.ssh/known_hosts \
+    && printf 'Host lab.dessimoz.org\n    Port 2222\n    User gitolite\n    StrictHostKeyChecking yes\n' > /root/.ssh/config \
+    && chmod 600 /root/.ssh/config
 
 # --- Install uv ---
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
