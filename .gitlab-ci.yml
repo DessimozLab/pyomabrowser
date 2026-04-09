@@ -48,6 +48,7 @@ docker-build:
     - *dns_fix
     - apk add --no-cache jq
     - echo $LABGIT_URL > for_docker/labgit.cnf
+    - echo "" > for_docker/token
     - echo "" > for_docker/env
     - |
       if [ -n "$DOCKER_AUTH_CONFIG" ]; then

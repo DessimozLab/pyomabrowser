@@ -2,3 +2,4 @@
 ssh://gitolite@lab.dessimoz.org:2222
 # if ssh doesn't work, use https with your credentials
 #https://USER:PASSWORD@git.lab.dessimoz.org/git
+#https://gitlab-ci-token:${TOKEN}@gitlab.myorg.com

@@ -13,6 +13,7 @@ docs/_build
 for_docker/env
 for_docker/.env
 for_docker/labgit.cnf
+for_docker/token
 frontend/node_modules
 
 # Generated frontend assets
