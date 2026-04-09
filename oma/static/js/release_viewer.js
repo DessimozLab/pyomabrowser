@@ -263,6 +263,7 @@ function init_table(div_id) {
             field: 'sciname',
             title: 'Scientific Name',
             sortable: true,
+            sorter: tablehooks.sorter_sciname,
             formatter: tablehooks.format_sciname
         }, {
             field: 'common_name',

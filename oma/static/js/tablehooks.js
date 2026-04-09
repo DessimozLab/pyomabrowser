@@ -72,6 +72,13 @@
         }
 
     };
+    exports.sorter_sciname = function(a, b){
+        function getName(obj){
+            if (!obj) return '';
+            return obj.species + " " + obj.strain;
+        }
+        return getName(a).localeCompare(getName(b));
+    }
 
     exports.format_sciname = function(value, row) {
         return "<b>" + value.species + "</b> " + value.strain;
