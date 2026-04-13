@@ -31,7 +31,8 @@ from distutils.util import strtobool
 
 from . import models as rest_models
 from . import serializers
-from .schema import DocStringSchemaExtractor
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from .pagination import PaginationMixin, LazyPagedPytablesQuery
 from .renderers import TSVRenderer
 
@@ -54,33 +55,111 @@ def resolve_protein_from_id_or_raise(id):
         raise NotFound("requested id '{}' is not unique".format(id))
 
 
+_ENTRY_ID_PARAM = OpenApiParameter(
+    'entry_id',
+    location=OpenApiParameter.PATH,
+    type={"oneOf": [{"type": "string"},{"type": "integer"}]},
+    description='A unique protein identifier: entry number (integer), OMA ID (e.g. HUMAN00001), or canonical ID (e.g. P12345).',
+)
+
+_HOG_ID_PARAM = OpenApiParameter(
+    'hog_id',
+    location=OpenApiParameter.PATH,
+    type={"oneOf": [{"type": "string"},{"type": "integer"}]},
+    description='A unique HOG identifier starting with "HOG:" (e.g. HOG:0001221.1a), or a protein identifier. If a protein identifier is specified, the most specific HOG to which the protein belongs is then used.',
+    pattern=r'^(HOG:[A-Z]*[0-9]+(\..+)?|[A-Z0-9]+[0-9]+)$',
+)
+
+_OMA_GROUP_PARAM = OpenApiParameter(
+    'group_id',
+    location=OpenApiParameter.PATH,
+    type=str,
+    description='A unique OMA group identifier: group number, fingerprint, or a member protein ID.',
+)
+
+_GENOME_ID_PARAM = OpenApiParameter(
+    'genome_id',
+    location=OpenApiParameter.PATH,
+    type={"oneOf": [{"type": "string"},{"type": "integer"}]},
+    description='A unique genome identifier: NCBI taxon ID or UniProt species code (e.g. HUMAN).',
+)
+
+_LEVEL_PARAM = OpenApiParameter(
+    'level',
+    location=OpenApiParameter.QUERY,
+    type=str,
+    required=False,
+    description='Taxonomic level to restrict the query. The special value "root" uses the deepest level of the HOG.',
+)
+
+_SYNTENY_LEVEL_PARAM = OpenApiParameter(
+    'level',
+    location=OpenApiParameter.QUERY,
+    type=str,
+    required=True,
+    description=(
+        'Taxonomic level at which to retrieve ancestral synteny. '
+        'Can be a numeric taxid, scientific name, or UniProt mnemonic species code '
+        'for extant genomes.'
+    ),
+)
+
+_SYNTENY_EVIDENCE_PARAM = OpenApiParameter(
+    'evidence',
+    location=OpenApiParameter.QUERY,
+    type=str,
+    enum=['linearized', 'parsimonious', 'any'],
+    required=False,
+    description=(
+        'Evidence filter for the ancestral synteny graph. '
+        'Values: "linearized" (default) < "parsimonious" < "any".'
+    ),
+)
+
+_SYNTENY_BREAK_CIRCULAR_CONTIGS_PARAM = OpenApiParameter(
+    'break_circular_contigs',
+    location=OpenApiParameter.QUERY,
+    type=bool,
+    required=False,
+    default=True,
+    description=(
+        'Break circular contigs at their weakest edge. '
+        'Default: yes. Has no effect if evidence is not "linearized".'
+    ),
+)
+
+
 # Create your views here.
 class ProteinEntryViewSet(ViewSet):
     serializer_class = serializers.ProteinEntryDetailSerializer
     lookup_field = 'entry_id'
-    schema = DocStringSchemaExtractor()
 
+    @extend_schema(
+        request={'application/json': {
+            'type': 'object',
+            'required': ['ids'],
+            'properties': {
+                'ids': {
+                    'type': 'array',
+                    'items': {'oneOf': [{'type': 'string'}, {'type': 'integer'}]},
+                    'maxItems': 1000,
+                    'description': 'List of protein identifiers (entry numbers, OMA IDs, or canonical IDs)',
+                    'example': [1, 'HUMAN5231', 523, 122, 'P12345'],
+                }
+            }
+        }},
+        responses=serializers.XRef2ProteinDetailSerializer(many=True),
+    )
     @action(detail=False, methods=['post'])
     def bulk_retrieve(self, request, format=None):
         """Retrieve the information available for multiple protein IDs at once.
 
-        The POST request must contain a json-encoded list of IDs of
-        up to 1000 IDs for which the information is returned.
+        The POST request must contain a json-encoded list of up to 1000 protein IDs.
+        In case the ID is not unique or unknown, an empty element is returned for
+        that query element.
 
-        In case the ID is not unique or unknown, an empty element is
-        returned for this query element.
-
-        changed in verison 1.7: the endpoint returns now a list with tuples (query_id, target)
-        instead of a simple list of proteins in the order of the query ids.
-
-        ---
-        parameters:
-
-          - name: ids
-            description: A list of ids of proteins to retrieve
-            location: body
-            required: True
-
+        Changed in version 1.7: the endpoint now returns a list of (query_id, target)
+        tuples instead of a plain list of proteins.
         """
         MAX_SIZE = 1000
         if 'ids' not in request.data:
@@ -106,41 +185,37 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializer_cls(instance=proteins, many=True, context={'request': request})
         return Response(serializer.data)
 
-    def retrieve(self, request, entry_id=None, format=None):
-        """
-        Retrieve the information available for a protein entry.
-        ---
-        parameters:
-
-          - name: entry_id
-            description: an unique identifier for a protein - either it
-                         entry number, omaid or its canonical id
-        """
-
-        # Load the entry and its domains, before forming the JSON to draw client-side.
+    @extend_schema(
+        parameters=[_ENTRY_ID_PARAM],
+    )
+    def retrieve(self, request, entry_id: str|int, format=None):
+        """Retrieve the information available for a protein entry."""
         entry_nr = resolve_protein_from_id_or_raise(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, entry_nr)
         serializer = serializers.ProteinEntryDetailSerializer(
             instance=protein, context={'request': request})
         return Response(serializer.data)
 
+    @extend_schema(
+        parameters=[
+            _ENTRY_ID_PARAM,
+            OpenApiParameter(
+                'rel_type',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                enum=['1:1', '1:n', 'm:1', 'm:n'],
+                description='Filter for orthologs of a specific relationship type only (e.g. "1:1"). If not specified, all orthologs are returned.',
+            ),
+        ],
+        responses=serializers.OrthologsListSerializer(many=True),
+    )
     @action(detail=True)
-    def orthologs(self, request, entry_id=None, format=None):
-        """List of all the identified pairwise orthologues for a protein. Filtering
-        specific subtypes of orthology is possible by specifying a rel_type
-        query parameter.
-        ---
-        parameters:
+    def orthologs(self, request, entry_id: str|int, format=None):
+        """List of all the identified pairwise orthologues for a protein.
 
-          - name: entry_id
-            description: an unique identifier for a protein - either it
-                         entry number, omaid or its canonical id
-
-          - name: rel_type
-            description: filter for orthologs of a specific relationship type only
-            location: query
-            type: string
-            example: "1:1"
+        Filtering specific subtypes of orthology is possible by specifying the
+        rel_type query parameter.
         """
         rel_type = request.query_params.get('rel_type', None)
         p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
@@ -159,17 +234,13 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.OrthologsListSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 
+    @extend_schema(
+        parameters=[_ENTRY_ID_PARAM],
+        #responses=serializers.OrthologsListRelTypeSerializer(many=True),
+    )
     @action(detail=True)
-    def hog_derived_orthologs(self, request, entry_id, format=None):
-        """List of the orthologs derived from the hog for a given protein.
-
-        ---
-        parameters:
-
-          - name: entry_id
-            description: an unique identifier for a protein - either it
-                         entry number, omaid or its canonical id
-        """
+    def hog_derived_orthologs(self, request, entry_id: str|int, format=None):
+        """List of the orthologs derived from the HOG for a given protein."""
         p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
         data = utils.db.get_hog_induced_pairwise_orthologs(p_entry_nr)
         content = []
@@ -180,16 +251,15 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.OrthologsListRelTypeSerializer(instance=content, many=True, context={'request': request})
         return Response(serializer.data)
 
+    @extend_schema(
+        parameters=[_ENTRY_ID_PARAM],
+    )
     @action(detail=True)
-    def homoeologs(self, request, entry_id=None, format=None):
+    def homoeologs(self, request, entry_id: str|int, format=None):
         """List of all the homoeologs for a given protein.
 
-        ---
-        parameters:
-
-          - name: entry_id
-            description: an unique identifier for a protein - either its
-                         entry number, omaid or canonical id."""
+        Only applicable to proteins from polyploid genomes.
+        """
         entry_nr = resolve_protein_from_id_or_raise(entry_id)
         protein = models.ProteinEntry.from_entry_nr(utils.db, int(entry_nr))
         if not protein.genome.is_polyploid:
@@ -203,16 +273,12 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.ProteinEntrySerializer(instance=homoeologs, many=True, context={'request': request})
         return Response(serializer.data)
 
+    @extend_schema(
+        parameters=[_ENTRY_ID_PARAM],
+    )
     @action(detail=True)
-    def gene_ontology(self, request, entry_id=None, format=None):
-        """Gene ontology information available for a protein.
-        ---
-        parameters:
-
-          - name: entry_id
-            description: an unique identifier for a protein - either its
-                         entry number, omaid or its canonical id
-        """
+    def gene_ontology(self, request, entry_id: str|int, format=None):
+        """Gene ontology information available for a protein."""
         p_entry_nr = resolve_protein_from_id_or_raise(entry_id)
         data = utils.db.get_gene_ontology_annotations(int(p_entry_nr))
         annotations = [models.GeneOntologyAnnotation(utils.db, m) for m in data]
@@ -220,40 +286,36 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.GeneOntologySerializer(instance=annotations, many=True)
         return Response(serializer.data)
 
+    @extend_schema(deprecated=True, responses=serializers.GeneOntologySerializer(many=True))
     @action(detail=True)
-    def ontology(self, request, entry_id=None, format=None):
-        """Deprecated: use gene_ontology endpoint instead"""
+    def ontology(self, request, entry_id: str|int, format=None):
+        """Deprecated: use gene_ontology endpoint instead."""
         return self.gene_ontology(request, entry_id, format=format)
 
+    @extend_schema(
+        parameters=[_ENTRY_ID_PARAM],
+        responses={200: OpenApiTypes.OBJECT},
+    )
     @action(detail=True)
     def domains(self, request, entry_id=None, format=None):
-        """List of the domains present in a protein.
-        ---
-        parameters:
-          - name: entry_id
-            description: an unique identifier for a protein -
-                         either it entry number, omaid or its canonical id
-        """
+        """List of the domains present in a protein."""
         entry_nr = resolve_protein_from_id_or_raise(entry_id)
         entry = utils.db.entry_by_entry_nr(entry_nr)
         domains = utils.db.get_domains(entry['EntryNr'])
         response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
         return Response(response)
 
+    @extend_schema(
+        parameters=[_ENTRY_ID_PARAM],
+        responses=serializers.IsoformProteinSerializer(many=True),
+    )
     @action(detail=True)
     def isoforms(self, request, entry_id=None, format=None):
         """List of isoforms for a protein.
 
-        The result contains a list of proteins with information on
-        their locus and and exon structure for all the isoforms
-        recored in OMA belonging to the gene of the query protein.
-
-        ---
-        parameters:
-
-          - name: entry_id
-            description: an unique identifier for a protein - either it
-                         entry number, omaid or its canonical id
+        The result contains a list of proteins with information on their locus
+        and exon structure for all isoforms recorded in OMA belonging to the
+        gene of the query protein.
         """
         entry_nr = resolve_protein_from_id_or_raise(entry_id)
         proteins = [models.ProteinEntry(utils.db, e)
@@ -262,30 +324,29 @@ class ProteinEntryViewSet(ViewSet):
             instance=proteins, many=True, context={'request': request})
         return Response(serializer.data)
 
-
+    @extend_schema(
+        parameters=[
+            _ENTRY_ID_PARAM,
+            OpenApiParameter(
+                'filter',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                enum=['all', 'exact', 'maindb'],
+                default='all',
+                description=(
+                    'Filter cross-references by type. Possible values: '
+                    '"all" (default, no filter), '
+                    '"exact" (only entries with identical sequence), '
+                    '"maindb" (GeneName, UniProtKB, Ensembl, RefSeq, EntrezGene, SourceID only).'
+                ),
+            ),
+        ],
+        responses=serializers.XRefSerializer(many=True),
+    )
     @action(detail=True)
     def xref(self, request, entry_id=None, format=None):
-        """List of cross-references for a protein.
-        ---
-        parameters:
-
-          - name: entry_id
-            description: an unique identifier for a protein - either it
-                         entry number, omaid or its canonical id
-
-          - name: filter
-            description: a filter name to exclude some cross-references
-                         that are not relevant. Possible values are
-                         `all`, `exact`, `maindb`.
-
-                         - `all` does not apply any filter and returns all cross-references (default).
-                         - `exact` ignores all cross-references for which the protein sequence is not
-                            exactly the same as the one in the OMA browser.
-                         - `maindb` returns only the GeneName, UniProtKB, Ensembl Genes, RefSeq and EntrezGene
-                            and the SourceID cross-references.
-
-            location: query
-        """
+        """List of cross-references for a protein."""
         entry_nr = resolve_protein_from_id_or_raise(entry_id)
         filter_name = self.request.query_params.get('filter', 'all').lower()
         if filter_name == 'all':
@@ -304,9 +365,9 @@ class ProteinEntryViewSet(ViewSet):
         return Response(serializer.data)
 
 
+
 class OmaGroupViewSet(PaginationMixin, ViewSet):
     lookup_field = 'group_id'
-    schema = DocStringSchemaExtractor()
 
     def list(self, request, format=None):
         """List of all the OMA Groups in the current release."""
@@ -316,16 +377,9 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
         serializer = serializers.GroupListSerializer(page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
 
+    @extend_schema(parameters=_OMA_GROUP_PARAM)
     def retrieve(self, request, group_id=None, format=None):
-        """Retrieve the information available for a given OMA group.
-        ---
-        parameters:
-
-          - name: group_id
-            description: an unique identifier for an OMA group - either its
-                         group number, its fingerprint or an entry id of one
-                         of its members
-        """
+        """Retrieve the information available for a given OMA group."""
         try:
             # get members in case it is a group id or fingerprint
             memb = utils.db.oma_group_members(group_id)
@@ -356,18 +410,10 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
             instance=group, context={'request': request})
         return Response(serializer.data)
 
+    @extend_schema(parameters=_OMA_GROUP_PARAM)
     @action(detail=True)
     def close_groups(self, request, group_id=None, format=None):
-        """Retrieve the sorted list of closely related groups for a given OMA group.
-        ---
-        parameters:
-
-          - name: group_id
-            description: an unique identifier for an OMA group - either its
-                         group number, its fingerprint or an entry id of one
-                         of its members
-        """
-
+        """Retrieve the sorted list of closely related groups for a given OMA group."""
         try:
             # get members in case its a group id or fingerprint
             group_member = utils.db.oma_group_members(group_id)
@@ -408,11 +454,35 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
         return self.paginator.get_paginated_response(serializer.data)
 
 
+# @extend_schema_view(
+#     list=extend_schema(
+#         parameters=[
+#             _LEVEL_PARAM,
+#             OpenApiParameter(
+#                 'compare_with',
+#                 location=OpenApiParameter.QUERY,
+#                 type=str,
+#                 required=False,
+#                 description=(
+#                     'Compare the HOGs at the given level with those at this parent level, '
+#                     'annotating all HOGs with the evolutionary events that occurred between the two points.'
+#                 ),
+#             ),
+#         ],
+#         responses=serializers.HOGsListSerializer(many=True),
+#     ),
+#     retrieve=extend_schema(
+#         parameters=[
+#             _HOG_ID_PARAM,
+#             _LEVEL_PARAM,
+#         ],
+#         responses=serializers.HOGsLevelDetailSerializer(many=True),
+#     ),
+#)
 class HOGViewSet(PaginationMixin, ViewSet):
     lookup_field = 'hog_id'
     lookup_value_regex = r'[^/]+'
     serializer_class = serializers.ProteinEntrySerializer
-    schema = DocStringSchemaExtractor()
 
     def _hog_id_from_entry(self, entry_id):
         entry_nr = resolve_protein_from_id_or_raise(entry_id)
@@ -472,22 +542,26 @@ class HOGViewSet(PaginationMixin, ViewSet):
             hog = hogs[0]
         return hog
 
+    @extend_schema(
+        parameters=[
+            _LEVEL_PARAM,
+            OpenApiParameter(
+                'compare_with',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description=(
+                    'Compare the HOGs at the given level with those at this parent level, '
+                    'annotating all HOGs with the evolutionary events that occurred between the two points.'
+                ),
+            )
+        ])
     def list(self, request, format=None):
         """List of all the HOGs identified by OMA.
-        ---
-        parameters:
 
-          - name: level
-            description: filter the list of HOGs by a specific
-                         taxonomic level.
-            location: query
-
-          - name: compare_with
-            description: compares the hog at `level` with those passed
-                         with this argument (must be a parent level) and
-                         annotates all hogs with the evolutionary events
-                         that occured between the two points in time.
-            location: query
+        Optionally filter by a specific taxonomic level using the `level` query parameter.
+        Use `compare_with` (a parent level) to annotate HOGs with evolutionary events
+        that occurred between the two levels.
         """
         level, _ = self._get_level_and_get_roothog_if_root_as_level(utils.db.format_hogid(1))
         if level is not None:
@@ -520,35 +594,16 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializer_cls(page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
 
-    def retrieve(self, request, hog_id):
-        """Retrieve the detail available for a given HOG, along with its deepest level
-        (i.e. root level) as well as the list of all the taxonomic levels that the HOG
-        spans through.
+    @extend_schema(parameters=[_HOG_ID_PARAM,_LEVEL_PARAM])
+    def retrieve(self, request, hog_id: str|int):
+        """Retrieve the detail available for a given HOG.
 
-        For a given hog_id, the endpoint searches the deepest taxonomic level that
-        has this ID, unless a more recent level has been chosen with the `level` query
-        parameter in which case the following information is returned for all induced
-        hogs.
+        Returns the deepest level (root level) as well as the list of all the taxonomic
+        levels the HOG spans. Optionally restrict to a specific level with the `level`
+        query parameter. The special level "root" returns the root HOG level.
 
-        The endpoint returns an object per hog with the level, urls to the members and
-        a list of parent and children hogs. The parent and children hogs are more
-        ancient resp. more recent levels that involve at least one duplication event
-        on the lineage from the query hog. So, in the parent_hogs, one can find hogs
-        for which we infer a duplication event *to* the query hog level, where as
-        for the children_hogs there happened at least one duplication event *after*
-        the query hog level. In addition, we indicate alternative levels for which
-        we infer that no event happened between those levels for this specific hog.
-        ---
-        parameters:
-
-          - name: hog_id
-            description: an unique identifier for a hog_group - either its hog id or one
-                         of its member proteins
-          - name: level
-            description: taxonomic level of restriction for a HOG. The special level
-                         'root' can be used to identify the level at the roothog, i.e.
-                         the deepest level of that HOG.
-            location: query
+        The result includes parent and child HOGs connected by duplication events,
+        and alternative levels (no duplication between them).
         """
         if hog_id[:4] != "HOG:":
             # hog_id == member
@@ -602,43 +657,21 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializers.HOGsLevelDetailSerializer(result_data, many=True, context={'request': request})
         return Response(serializer.data)
 
+    @extend_schema(parameters=[_HOG_ID_PARAM,_LEVEL_PARAM])
     @action(detail=True)
-    def members(self, request, hog_id=None, format=None):
+    def members(self, request, hog_id=str|int, format=None):
         """Retrieve a list of all the protein members for a given hog_id.
 
-        The hog_id parameter uses an encoding of the inferred duplication
-        events along the evolution of the family using the LOFT schema
+        The hog_id parameter uses an encoding of the inferred duplication events
+        along the evolution of the family using the LOFT schema
         (see https://doi.org/10.1186/1471-2105-8-83).
 
-        The hog_id changes only after duplication events and hence, the
-        ID remains the same for potentially many taxonomic levels. If
-        no level parameter is provided, this endpoint returns the deepest
-        level that contains this specific ID.
+        The hog_id changes only after duplication events and hence the ID remains
+        the same for potentially many taxonomic levels. If no level parameter is
+        provided, this endpoint returns the deepest level containing this specific ID.
 
-        If a level is provided, the endpoint returns the members with respect
-        to this level. Note that if the level is a more ancient taxonomic
-        level than the deepest level for the specified hog_id, the endpoint
-        retuns the members of for that more ancient level (but adjusting the
-        hog_id in the result object).
-        The special level "root" will always return the members of the root
-        HOG together with its deepest level.
-
-        ---
-        parameters:
-
-          - name: hog_id
-            description: a unique identifier for a hog_group - either
-                         its hog id starting with "HOG:" or one of its
-                         member proteins in which case the specific
-                         HOG ID of that protein is used.
-            example: HOG:0001221.1a,  P12345
-
-          - name: level
-            description: taxonomic level of restriction for a HOG -
-                         default is its deepest level for a given
-                         HOG ID.
-            location: query
-            example: "Mammalia"
+        The special level "root" always returns the members of the root HOG together
+        with its deepest level.
         """
         if hog_id[:4] != "HOG:":
             hog_id = self._hog_id_from_entry(hog_id)
@@ -665,40 +698,28 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializers.HOGMembersListSerializer(instance=data, context={'request': request})
         return Response(serializer.data)
 
+    @extend_schema(
+        parameters=[
+            _HOG_ID_PARAM,
+            OpenApiParameter(
+                'max_results',
+                location=OpenApiParameter.QUERY,
+                type=int,
+                required=False,
+                description='Number of similar HOGs to return. Must be a positive integer ≤ 50. Default: 10.',
+            ),
+        ]
+    )
     @action(detail=True)
     def similar_profile_hogs(self, request, hog_id=None, format=None):
         """Returns the HOGs with the most similar phylogenetic profiles.
 
-        The profiles are based on the number of duplications, losses and
-        retained genes along the phylogenetic tree. Hence, the profiles are
-        computed on the deepest level only and all sub-hogs ids will return
-        the same similar HOGs.
+        Profiles are based on the number of duplications, losses and retained genes
+        along the phylogenetic tree, computed at the deepest level only. Sub-HOG IDs
+        return the same result as the root HOG.
 
-        Similar profile search is only useful for hogs that have a certain
-        size, i.e. 100 species. For smaller query HOGs, the result will simply
-        be empty.
-
-        The result contains for both, the query HOG as well as the similar HOGs
-        a field `in_species` that contains a list of all species in which at
-        least one copy of the gene is present in the HOG.
-
-        ---
-        parameters:
-
-          - name: hog_id
-            description: an unique identifier for a hog_group - either
-                         its hog id starting with "HOG:" or one of its
-                         member proteins in which case the specific
-                         HOG ID of that protein is used.
-            example: HOG:0450897,  P12345
-
-          - name: max_results
-            description: the number of similar profiles to return. Must
-                         be a positive number less than 50. By default
-                         the 10 most HOGs with the most similar profiles
-                         are returned.
-            location: query
-            example: 20
+        Similar profile search is only useful for large HOGs (≥100 species). For
+        smaller query HOGs the result will be empty.
         """
         if hog_id[:4] != "HOG:":
             hog_id = self._hog_id_from_entry(hog_id)
@@ -726,34 +747,14 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializers.HOGsSimilarProfileSerializer(data, context={'request': request})
         return Response(serializer.data)
 
+    @extend_schema(parameters=[_HOG_ID_PARAM,_LEVEL_PARAM])
     @action(detail=True)
-    def gene_ontology(self, request, hog_id=None, format=None):
+    def gene_ontology(self, request, hog_id: str, format=None):
         """Gene ontology annotations for an ancestral gene (i.e. HOG).
 
-        If a level is provided, the endpoint returns annotations with respect
-        to this level. Note that if the level is a more ancient taxonomic
-        level than the deepest level for the specified hog_id, the endpoint
-        returns the annotations of that more ancient level (but adjusting the
-        hog_id in the result object).
-        The special level "root" will always return the members of the root
-        HOG together with its deepest level.
-
-        ---
-        parameters:
-
-          - name: hog_id
-            description: a unique identifier for a hog_group - either
-                         its hog id starting with "HOG:" or one of its
-                         member proteins in which case the specific
-                         HOG ID of that protein is used.
-            example: HOG:0001221.1a,  P12345
-
-          - name: level
-            description: taxonomic level of reference for a HOG -
-                         default is its deepest level for a given
-                         HOG ID.
-            location: query
-            example: "Mammalia"
+        If a level is provided, the endpoint returns annotations with respect to
+        that level. The special level "root" always returns annotations for the
+        root HOG at its deepest level.
         """
         if hog_id[:4] != "HOG:":
             hog_id = self._hog_id_from_entry(hog_id)
@@ -767,58 +768,24 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializers.AncestralGeneOntologySerializer(instance=hack_models, many=True)
         return Response(serializer.data)
 
-
 class SyntenyViewSet(ViewSet):
-    schema = DocStringSchemaExtractor()
     lookup_field = 'hog_id'
     lookup_value_regex = r'[^/]+'
 
+    @extend_schema(parameters=[_SYNTENY_LEVEL_PARAM, _SYNTENY_EVIDENCE_PARAM, _SYNTENY_BREAK_CIRCULAR_CONTIGS_PARAM],
+                   responses={200: OpenApiTypes.OBJECT})
     def list(self, request, format=None):
-        """List of all the ancestral / extant "contigs" of an ancestral / extant genome.
+        """List all the ancestral or extant contigs of a genome.
 
-        Each contig will contain a graph with all the ancestral genes (HOGs) or
-        the extant genes and their neighbors as edges (order of ancestral/extant genes
-        on "scaffolds/chromosomes")
+        Each contig is a graph with all the ancestral genes (HOGs) or extant genes
+        and their neighbors as edges (order of genes on scaffolds/chromosomes).
 
-        The return value is a list of graph objects that consist of 'nodes' and
-        'links' attributes.
+        The return value is a list of graph objects with 'nodes' and 'links' attributes::
 
-            {"nodes": [{"id":"HOG:C0594134.1a", ...},
-                       {"id":"HOG:C0594135.3c", ...},
-                       {"id":"HOG:C0600830.1c.3b", ...}],
-             "links": [{"weight":15,"source":"HOG:C0594134.1a","target":"HOG:C0594135.3c"},
-                       {"weight":15,"source":"HOG:C0594134.1a","target":"HOG:C0600830.1c.3b"}]
-            }
+            {"nodes": [{"id":"HOG:C0594134.1a", ...}, ...],
+             "links": [{"weight":15,"source":"HOG:C0594134.1a","target":"HOG:C0594135.3c"}, ...]}
 
-        For extant genes, the gene IDs are the OMA IDs (e.g. `HUMAN00007`)
-
-        ---
-        parameters:
-
-          - name: level
-            description: The taxonomic level at which the ancestral synteny should
-                         be retrieved. The level can be specified with its numeric
-                         taxid or the scientific name. For extant genomes, also the
-                         UniProt mnemonic species code can be used.
-            location: query
-            required: True
-
-          - name: evidence
-            description: The evidence value for the ancestral synteny graph.
-                         This is used for filtering. The evidence values are
-                         `linearized` < `parsimonious` < `any`
-                         By default, we only show the linearized graph
-            location: query
-            example: linearized, parsimonious, any
-
-          - name: break_circular_contigs
-            description: Some ancestral contigs end up being circles. For certain applications
-                         this poses a problem. By setting this argument to "yes" (default),
-                         the function will break the circle on the weakest edge, with "no" it
-                         will return the full linearized graph. Note that this parameter
-                         has no effect if the `evidence` parameter is not equal to "linearized".
-            location: query
-
+        For extant genes, IDs are OMA IDs (e.g. HUMAN00007).
         """
         level = self.request.query_params.get('level', None)
         if level is None:
@@ -850,51 +817,23 @@ class SyntenyViewSet(ViewSet):
             contigs.append(g)
         return Response(contigs)
 
+    @extend_schema(
+        parameters=[
+            _HOG_ID_PARAM,
+            _SYNTENY_LEVEL_PARAM,
+            _SYNTENY_EVIDENCE_PARAM,
+            _SYNTENY_BREAK_CIRCULAR_CONTIGS_PARAM,
+            OpenApiParameter(
+                'context',
+                location=OpenApiParameter.QUERY,
+                type=int,
+                required=False,
+                description='Size of the graph around the query HOG (max edge distance). Default: 2.',
+            )
+        ],
+        responses={200: OpenApiTypes.OBJECT})
     def retrieve(self, request, hog_id):
-        """
-        Returns the ancestral synteny graph around a reference hog at a given taxonomic level.
-
-        ---
-        parameters:
-
-          - name: hog_id / protein_id
-            description: a unique identifier for a hog_group starting
-                         with "HOG:" for ancestral synteny levels, or
-                         a unique protein ID (e.g. YEAST00012) for an
-                         extant species synteny query.
-            example: HOG:0450897, HUMAN01330
-
-          - name: level
-            description: the taxonomic level at which the synteny graph
-                         should be extracted. If not specified, the
-                         deepest level of the given HOG is used. The level
-                         can bei either a scientific name or the numeric
-                         taxonomy identifier
-            location: query
-            example: Primates, 9604
-
-          - name: evidence
-            description: The evidence value for the ancestral synteny graph.
-                         This is used for filtering. The evidence values are
-                         `linearized` < `parsimonious` < `any`
-            location: query
-            example: parsimonious
-
-          - name: context
-            description: the size of the graph around the query HOG. By default
-                         the HOGs which are at most 2 edges apart from the query
-                         HOG are returned.
-            location: query
-
-          - name: break_circular_contigs
-            description: Some ancestral contigs end up being circles. For certain applications
-                         this poses a problem. By setting this argument to "yes" (default),
-                         the function will break the circle on the weakest edge, with "no" it
-                         will return the full linearized graph. Note that this parameter
-                         has no effect if the `evidence` parameter is not equal to "linearized".
-            location: query
-
-        """
+        """Returns the ancestral synteny graph around a reference HOG at a given taxonomic level."""
         level = self.request.query_params.get('level', None)
         evidence = self.request.query_params.get('evidence', "any")
         size = int(self.request.query_params.get('context', 2))
@@ -943,6 +882,8 @@ class SyntenyViewSet(ViewSet):
 
 
 class APIVersion(ViewSet):
+    @extend_schema(responses={200: {'type': 'object', 'properties': {
+        'oma_version': {'type': 'string'}, 'api_version': {'type': 'string'}}}})
     def list(self, request, format=None):
         """Returns the version information of the api and
         the underlying oma browser database release."""
@@ -953,7 +894,6 @@ class APIVersion(ViewSet):
 class XRefsViewSet(ViewSet):
     serializer_class = serializers.XRefSerializer
     lookup_field = 'entry_id'
-    schema = DocStringSchemaExtractor()
 
     def _order_xrefs(self, xrefs, key='entry_nr'):
         if isinstance(key, str):
@@ -968,15 +908,22 @@ class XRefsViewSet(ViewSet):
             res.append(next(grp))
         return res
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                'search',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description='Pattern to search for. Must be at least 3 characters long.',
+            ),
+        ]
+    )
     def list(self, request, format=None):
-        """List all the crossreferences that match a certain pattern.
-        ---
-        parameters:
-          - name: search
-            description: the pattern to be searched for. The pattern
-                         must be at least 3 characters long in order to
-                         return a hit.
-            location: query"""
+        """List all the cross-references that match a certain pattern.
+
+        The search pattern must be at least 3 characters long to return any results.
+        """
         pattern = request.query_params.get('search', None)
         res = []
         if pattern is not None and len(pattern) >= 3:
@@ -1000,7 +947,6 @@ class XRefsViewSet(ViewSet):
 
 class GenomeViewSet(PaginationMixin, ViewSet):
     lookup_field = 'genome_id'
-    schema = DocStringSchemaExtractor()
 
     def list(self, request, format=None):
         """List of all the genomes present in the current release."""
@@ -1010,14 +956,9 @@ class GenomeViewSet(PaginationMixin, ViewSet):
         serializer = serializers.GenomeInfoSerializer(instance=page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
 
+    @extend_schema(parameters=[_GENOME_ID_PARAM])
     def retrieve(self, request, genome_id, format=None):
-        """Retrieve the information available for a given genome.
-        ---
-        parameters:
-          - name: genome_id
-            description: an unique identifier for a genome
-                         - either its ncbi taxon id or the
-                         UniProt species code"""
+        """Retrieve the information available for a given genome."""
         try:
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
         except db.UnknownSpecies as e:
@@ -1025,16 +966,10 @@ class GenomeViewSet(PaginationMixin, ViewSet):
         serializer = serializers.GenomeDetailSerializer(instance=g, context={'request': request})
         return Response(serializer.data)
 
+    @extend_schema(parameters=[_GENOME_ID_PARAM])
     @action(detail=True)
     def proteins(self, request, genome_id=None):
-        """Retrieve the list of all the protein entries available for a genome.
-        ---
-        parameters:
-          - name: genome_id
-            description: an unique identifier for a genome
-                         - either its ncbi taxon id or the
-                         UniProt species code"""
-
+        """Retrieve the list of all the protein entries available for a genome."""
         try:
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
             entries = utils.db.all_proteins_of_genome(g.uniprot_species_code)
@@ -1045,21 +980,14 @@ class GenomeViewSet(PaginationMixin, ViewSet):
         serializer = serializers.ProteinEntrySerializer(page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
 
-
+    @extend_schema(parameters=[_GENOME_ID_PARAM])
     @action(detail=True)
     def genes(self, request, genome_id=None):
         """Retrieve the list of all the genes available for a genome.
 
-        This corresponds to the list of main isoform for genomes with
-        multiple isoforms, or to all the proteins for the others.
-
-        ---
-        parameters:
-          - name: genome_id
-            description: an unique identifier for a genome
-                         - either its ncbi taxon id or the
-                         UniProt species code"""
-
+        This corresponds to the list of main isoforms for genomes with multiple
+        isoforms, or all proteins for the others.
+        """
         try:
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
             entries = utils.db.main_isoforms(g.uniprot_species_code)
@@ -1071,9 +999,7 @@ class GenomeViewSet(PaginationMixin, ViewSet):
         return self.paginator.get_paginated_response(serializer.data)
 
 
-
 class PairwiseRelationAPIView(PaginationMixin, APIView):
-    schema = DocStringSchemaExtractor()
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (CSVRenderer, TSVRenderer)
 
     def _get_entry_range(self, genome, chr):
@@ -1128,55 +1054,69 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
             crossref = [xref_mapper.xrefEnum(z) for z in xref_mapper.idtype]
         return crossref, xref_mapper
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                'genome_id1',
+                location=OpenApiParameter.PATH,
+                type=str,
+                description='A unique identifier for the first genome: NCBI taxon ID or UniProt species code.',
+            ),
+            OpenApiParameter(
+                'genome_id2',
+                location=OpenApiParameter.PATH,
+                type=str,
+                description='A unique identifier for the second genome: NCBI taxon ID or UniProt species code.',
+            ),
+            OpenApiParameter(
+                'chr1',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description='Chromosome ID in the first genome to restrict the relation list.',
+            ),
+            OpenApiParameter(
+                'chr2',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description='Chromosome ID in the second genome to restrict the relation list.',
+            ),
+            OpenApiParameter(
+                'type',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description='Type of ortholog pairs to use: "vps" or "hogs" (default).',
+            ),
+            OpenApiParameter(
+                'xrefs',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description=(
+                    'Comma-separated list of cross-reference sources to include. '
+                    'Options: "UniProtKB/SwissProt", "UniProtKB/TrEMBL", "EntrezGene", '
+                    '"SourceID", "SourceAC", "Ensembl Gene", "RefSeq". '
+                    'Default: no cross-references, only OMA IDs.'
+                ),
+            ),
+            OpenApiParameter(
+                'rel_type',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description='Limit relations to a specific type, e.g. "1:1".',
+            ),
+        ],
+        responses=serializers.PairwiseRelationSerializer(many=True),
+    )
     def get(self, request, genome_id1, genome_id2, format=None):
-        """List the pairwise relations among two genomes
+        """List the pairwise relations among two genomes.
 
-        The relations are orthologs in case the genomes are
-        different and close paralogs and homoeologs in case
-        they are the same.
-
-        By using the query_params 'chr1' and 'chr2', one can limit
-        the relations to a certain chromosome for one or both
-        genomes. The id of the chromosome corresponds to the ids
-        returned by the genome endpoint.
-        ---
-        parameters:
-          - name: genome_id1
-            description: an unique identifier for the first genome
-                         - either its ncbi taxon id or the UniProt
-                         species code
-          - name: genome_id2
-            description: an unique identifier for the second genome
-                         - either its ncbi taxon id or the UniProt
-                         species code
-          - name: chr1
-            description: id of the chromosome of interest in the
-                         first genome
-            location: query
-
-          - name: chr2
-            description: id of the chromosome of interest in the
-                         second genome
-            location: query
-
-          - name: type
-            description: type of orthologs to use, can be either
-                         'vps' or 'hogs' (default)
-            location: query
-
-          - name: xrefs
-            description: list of cross-references sources.
-                         Possible values are any subset of
-                         'UniProtKB/SwissProt', UniProtKB/TrEMBL',
-                         'EntrezGene', 'SourceID', 'SourceAC',
-                         'Ensembl Gene' and 'RefSeq'.
-                         Default is no cross-references, but only OMA IDs.
-            location: query
-
-          - name: rel_type
-            description: limit relations to a certain type of
-                        relations, e.g. '1:1'.
-            location: query
+        The relations are orthologs when the genomes differ, and close paralogs or
+        homoeologs when they are the same. Use query parameters chr1/chr2 to restrict
+        to a specific chromosome in either genome.
         """
         rel_type = request.query_params.get('rel_type', None)
         try:
@@ -1230,21 +1170,11 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
         return self.paginator.get_paginated_response(serializer.data)
 
 
+@extend_schema(exclude=True)
 class MinimalPairwiseRelation(APIView):
-    schema = None
 
     def get(self, request, genome_id1, genome_id2, format=None):
-        """Retrieve minimal version of pairs for a genome pair.
-        ---
-        parameters:
-          - name: genome_id1
-            description: an unique identifier for the first genome
-                         - either its ncbi taxon id or the UniProt
-                         species code
-          - name: genome_id2
-            description: an unique identifier for the second genome
-                         - either its ncbi taxon id or the UniProt
-                         species code"""
+        """Retrieve minimal version of pairs for a genome pair."""
         try:
             genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id1))
             genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id2))
@@ -1258,53 +1188,95 @@ class MinimalPairwiseRelation(APIView):
         return Response({'pairs': rels})
 
 
+@extend_schema_view(
+    list=extend_schema(
+        operation_id='taxonomy_list',
+        parameters=[
+            OpenApiParameter(
+                'type',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description='Format of returned data: "dictionary" (default), "newick", or "phyloxml".',
+            ),
+            OpenApiParameter(
+                'members',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description=(
+                    'Comma-separated list of members to compute an induced taxonomy. '
+                    'IDs can be NCBI taxon IDs or UniProt species codes (must be consistent).'
+                ),
+            ),
+            OpenApiParameter(
+                'collapse',
+                location=OpenApiParameter.QUERY,
+                type=bool,
+                required=False,
+                description='Whether to collapse taxonomic levels with a single child. Default: yes.',
+            ),
+            OpenApiParameter(
+                'newick_leaf_label',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description='Data to store in newick leaf nodes: "sciname" (default) or "species_code".',
+            ),
+            OpenApiParameter(
+                'newick_internal_label',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description='Data to store in newick internal nodes: "sciname" (default), "taxid", or "None".',
+            ),
+            OpenApiParameter(
+                'newick_quote_labels',
+                location=OpenApiParameter.QUERY,
+                type=bool,
+                required=False,
+                description='Whether to quote labels in the newick tree. Default: no (spaces replaced by "_").',
+            ),
+        ],
+        responses={200: OpenApiTypes.OBJECT},
+    ),
+    retrieve=extend_schema(
+        operation_id='taxonomy_retrieve',
+        parameters=[
+            OpenApiParameter(
+                'root_id',
+                location=OpenApiParameter.PATH,
+                type=str,
+                description='Taxon ID, scientific name, or 5-letter UniProt species code for the root level.',
+            ),
+            OpenApiParameter(
+                'type',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description='Format of returned data: "dictionary" (default), "newick", or "phyloxml".',
+            ),
+            OpenApiParameter(
+                'collapse',
+                location=OpenApiParameter.QUERY,
+                type=bool,
+                required=False,
+                description='Whether to collapse taxonomic levels with a single child. Default: yes.',
+            ),
+        ],
+        responses={200: OpenApiTypes.OBJECT},
+    ),
+)
 class TaxonomyViewSet(ViewSet):
     lookup_field = 'root_id'
-    schema = DocStringSchemaExtractor()
 
     def list(self, request, format=None):
-        """Retrieve the taxonomic tree that is available in the current release.
-        ---
-        parameters:
-          - name: type
-            description: the type of the returned data - either
-                dictionary (default), newick or phyloxml.
-            location: query
+        """Retrieve the taxonomic tree available in the current release.
 
-          - name: members
-            description: list of members to get the induced taxonomy
-                from. The list is supposed to be a comma-separated list.
-                Member IDs can be either their ncbi taxon IDs or their
-                UniProt species codes - they just have to be consistent.
-            location: query
-
-          - name: collapse
-            description: whether or not taxonomic levels with a single
-                child should be collapsed or not. Defaults to yes.
-            location: query
-            type: boolean
-
-          - name: newick_leaf_label
-            description: type of data to store in the leaf nodes of the
-               newick tree. Must be one of ("sciname", "species_code")
-               Defaults to "sciname" if not specified.
-            location: query
-
-          - name: newick_internal_label
-            description: type of data to store in the internal nodes of
-               the newick tree. Must be one of ("sciname", "taxid" or
-               "None").
-               Defaults to "sciname" if not specified.
-            location: query
-
-          - name: newick_quote_labels
-            description: Whether or not to quote the labels in the newick
-               tree. If not, spaces are replaced by '_' characters.
-               Defaults to no.
-            location: query
-            type: boolean
+        By default returns a dictionary representation of the full tree.
+        Use the `type` parameter to request newick or phyloxml formats.
+        Use `members` to get the induced taxonomy for a subset of species.
         """
-
         # e.g. members = YEAST,ASHGO
         members = request.query_params.getlist('members', None)  # read as a string
         type = request.query_params.get('type', None)  # if none, dictionary returned
@@ -1361,26 +1333,7 @@ class TaxonomyViewSet(ViewSet):
             return Response(data)
 
     def retrieve(self, request, root_id, format=None):
-        """
-        Retrieve the subtree rooted at the taxonomic level indicated.
-        ---
-        parameters:
-          - name: root_id
-            description: either the taxon id, species name or the 5 letter UniProt
-                species code for a root taxonomic level
-
-          - name: type
-            description: the type of the returned data - either dictionary
-                 (default) or newick.
-            location: query
-
-
-          - name: collapse
-            description: whether or not taxonomic levels with a single
-                 child should be collapsed or not. Defaults to yes.
-            type: boolean
-            location: query
-        """
+        """Retrieve the subtree rooted at the taxonomic level indicated."""
         type = request.query_params.get('type', None)
 
         try:
@@ -1431,30 +1384,41 @@ class TaxonomyViewSet(ViewSet):
 
 
 class IdentifiySequenceAPIView(APIView):
-    schema = DocStringSchemaExtractor()
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                'query',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=True,
+                description='The amino acid sequence to search for.',
+            ),
+            OpenApiParameter(
+                'search',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description=(
+                    'Search strategy: "exact", "approximate", or "mixed" (default). '
+                    '"mixed" first tries exact matching; falls back to approximate if no exact match is found.'
+                ),
+            ),
+            OpenApiParameter(
+                'full_length',
+                location=OpenApiParameter.QUERY,
+                type=bool,
+                required=False,
+                description=(
+                    'For exact matches, whether the query must match the full target sequence. '
+                    'Default: false (partial matches are also reported).'
+                ),
+            ),
+        ],
+        responses=serializers.SequenceSearchResultSerializer,
+    )
     def get(self, request, format=None):
-        """Identify a protein sequence.
-        ---
-        parameters:
-          - name: query
-            description: the sequence to be searched.
-            location: query
-            required: True
-          - name: search
-            description: argument to choose search strategy. Can be set
-                to 'exact', 'approximate' or 'mixed'. Defaults to 'mixed', meaning
-                first tries to find exact match. If no target can be found, uses
-                approximate search strategy to identify query sequence in database.
-            location: query
-          - name: full_length
-            description: a boolean indicating whether or not for
-                exact matches, the query sequence must be matching the full
-                target sequence. By default, a partial exact match is also
-                reported as exact match.
-            location: query
-            type: boolean
-        """
+        """Identify a protein by its amino acid sequence."""
         query_seq = request.query_params.get('query', '')
         strategy = request.query_params.get('search', 'mixed').lower()
         if strategy not in ('approximate', 'exact', 'mixed'):
@@ -1495,19 +1459,24 @@ class IdentifiySequenceAPIView(APIView):
 
 
 class PropagateFunctionAPIView(APIView):
-    schema = DocStringSchemaExtractor()
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                'query',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=True,
+                description='The amino acid sequence to annotate (minimum 10 amino acids).',
+            ),
+        ],
+        responses={200: OpenApiTypes.OBJECT},
+    )
     def get(self, request, format=None):
-        """Annotate a sequence with GO functions based on all
-        annotations in OMA. The sequence is expected to be a
-        simple string of amino acids and can be passed as a
-        query parameter
-        ---
-        parameters:
-          - name: query
-            description: the sequence to be annotated
-            location: query
-            required: True
+        """Annotate a sequence with GO functions based on all annotations in OMA.
+
+        The sequence is expected to be a simple string of amino acids passed as a
+        query parameter. GO annotations are projected from OMA's orthologs.
         """
         query_seq = request.query_params.get('query', '')
         query_seq = utils.db.seq_search._sanitise_seq(query_seq)
@@ -1530,29 +1499,33 @@ class PropagateFunctionAPIView(APIView):
 
 
 class SharedAncestrySummaryAPIView(APIView):
-    schema = DocStringSchemaExtractor()
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                'genome_id1',
+                location=OpenApiParameter.PATH,
+                type=str,
+                description='A unique identifier for the first genome: NCBI taxon ID or UniProt species code.',
+            ),
+            OpenApiParameter(
+                'genome_id2',
+                location=OpenApiParameter.PATH,
+                type=str,
+                description='A unique identifier for the second genome: NCBI taxon ID or UniProt species code.',
+            ),
+            OpenApiParameter(
+                'type',
+                location=OpenApiParameter.QUERY,
+                type=str,
+                required=False,
+                description='Type of orthology information to use: "hogs" (default) or "vps".',
+            ),
+        ],
+        responses={200: OpenApiTypes.OBJECT},
+    )
     def get(self, request, genome_id1, genome_id2, format=None):
-        """Returns the fraction of shared ancestry between to species of interest.
-
-        ---
-        parameters:
-          - name: genome_id1
-            description: a unique identifier for the first genome
-                         - either its ncbi taxon id or the UniProt
-                         species code
-
-          - name: genome_id2
-            description: a unique identifier for the second genome
-                         - either its ncbi taxon id or the UniProt
-                         species code
-
-          - name: type
-            description: type of orthology information to compute the
-                         fraction of shared ancestry, either 'hogs' (default)
-                         or 'vps'.
-            location: query
-        """
+        """Returns the fraction of shared ancestry between two species of interest."""
         try:
             genome1 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id1))
             genome2 = models.Genome(utils.db, utils.db.id_mapper['OMA'].identify_genome(genome_id2))
@@ -1634,84 +1607,22 @@ class StatusAsyncJobAPIView(RetrieveAPIView):
         return Response(serializer.data, status=stat, headers=header)
 
 class CreateEnrichmentAnalysisView(CreateAsyncJobAPIView):
-    serializer_class = serializers.EnrichmentAnalysisInputSerializer
-    schema = DocStringSchemaExtractor()
+    """Submit a Gene Ontology enrichment analysis.
 
-    """
-    Submit a Gene Ontology enrichment analysis.
-    
     This endpoint accepts requests to perform gene ontology enrichment analysis
-    on extant and ancestral gene sets. The jobs will be executed asynchronously.
-    The reply of the server will contain a 202 reply with a Location header that 
-    points to a url where the status of the job can be checked.
-    
-    The endpoint accepts json encoded data in a POST request. The data must contain
-    a `foreground` set of extant genes (all from the same species) for an extant genome 
-    enrichment analysis, or a set of HOGs that exist in an given ancestral taxonomy 
-    level. You must indicated whether an ancestral or an extant analysis should be 
-    performed by setting the `type` parameter to either `ancestral` or `extant`. 
-    In addition, the endpoint accepts an optional `name` parameter.
-    
-    ---
-    parameters:
-       - name: type
-         description: Indicate type of analysis. either `ancestral` or `extant`.
-         
-       - name: foreground
-         description: set of foreground genes / hogs. The background will 
-                      automatically be set as the set of all existing HOGs at the
-                      given taxonomic level for the ancestral enrichment analysis,
-                      or all the main isoform protein sequences of the extant 
-                      species.
-         type: list of gene/hog IDs
-         
-       - name: taxlevel
-         description: Taxonomic level at which the ancestral enrichment analysis 
-                      should be performed. If extant analysis, this parameter 
-                      can be ignored.
-         
-       - name: name
-         description: An optional name for the analysis. 
-          
+    on extant and ancestral gene sets. Jobs are executed asynchronously; the
+    response includes a 202 status with a Location header pointing to a URL
+    where the job status can be checked.
+
+    The request body must be JSON with a `foreground` set of extant genes (all
+    from the same species) for an extant genome enrichment analysis, or a set
+    of HOGs that exist at a given ancestral taxonomy level. Indicate the type
+    of analysis with the `type` parameter ("ancestral" or "extant"). An
+    optional `name` parameter is also accepted.
     """
+    serializer_class = serializers.EnrichmentAnalysisInputSerializer
+
     def perform_create(self, serializer):
-        """
-        Submit a Gene Ontology enrichment analysis.
-
-        This endpoint accepts requests to perform gene ontology enrichment analysis
-        on extant and ancestral gene sets. The jobs will be executed asynchronously.
-        The reply of the server will contain a 202 reply with a Location header that
-        points to a url where the status of the job can be checked.
-
-        The endpoint accepts json encoded data in a POST request. The data must contain
-        a `foreground` set of extant genes (all from the same species) for an extant genome
-        enrichment analysis, or a set of HOGs that exist in an given ancestral taxonomy
-        level. You must indicated whether an ancestral or an extant analysis should be
-        performed by setting the `type` parameter to either `ancestral` or `extant`.
-        In addition, the endpoint accepts an optional `name` parameter.
-
-        ---
-        parameters:
-           - name: type
-             description: Indicate type of analysis. either `ancestral` or `extant`.
-
-           - name: foreground
-             description: set of foreground genes / hogs. The background will
-                          automatically be set as the set of all existing HOGs at the
-                          given taxonomic level for the ancestral enrichment analysis,
-                          or all the main isoform protein sequences of the extant
-                          species.
-             type: list of gene/hog IDs
-
-           - name: taxlevel
-             description: Taxonomic level at which the ancestral enrichment analysis
-                          should be performed. If extant analysis, this parameter
-                          can be ignored.
-
-           - name: name
-             description: An optional name for the analysis.
-
-        """
         obj = serializer.save(state="PENDING")
         go_enrichment.delay(obj.id)
         return obj
@@ -1722,5 +1633,3 @@ class StatusEnrichmentAnalysisView(StatusAsyncJobAPIView):
     queryset = rest_models.EnrichmentAnalysisModel.objects.all()
     lookup_field = 'id'
     serializer_class = serializers.EnrichmentAnalysisStatusSerializer
-
-
