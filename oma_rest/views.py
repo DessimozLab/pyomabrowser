@@ -8,7 +8,6 @@ import numpy
 import pyoma.browser.exceptions
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from rest_framework import status
 
 from .tasks import go_enrichment
 
@@ -1218,6 +1217,34 @@ class MinimalPairwiseRelation(APIView):
         return Response({'pairs': rels})
 
 
+_TAXONOMY_RESPONSES = {
+    (200, 'application/json'): OpenApiResponse(
+        response=OpenApiTypes.OBJECT,
+        description=(
+            'Dictionary representation of the tree (default), or a '
+            '`{"root_taxon": {...}, "newick": "..."}` wrapper when `type=newick` '
+            'or `Accept: application/json` is combined with `type=newick`.'
+        ),
+    ),
+    (200, 'application/x-newick'): OpenApiResponse(
+        response=OpenApiTypes.STR,
+        description='Newick/NHX format tree as plain text.',
+    ),
+    (200, 'text/x-nh'): OpenApiResponse(
+        response=OpenApiTypes.STR,
+        description='Newick format tree as plain text (alias for `application/x-newick`).',
+    ),
+    (200, 'application/vnd.phyloxml+xml'): OpenApiResponse(
+        response=OpenApiTypes.STR,
+        description='PhyloXML format tree.',
+    ),
+    (200, 'application/xml'): OpenApiResponse(
+        response=OpenApiTypes.STR,
+        description='PhyloXML format tree (alias for `application/vnd.phyloxml+xml`).',
+    ),
+}
+
+
 @extend_schema_view(
     list=extend_schema(
         operation_id='taxonomy_list',
@@ -1226,8 +1253,15 @@ class MinimalPairwiseRelation(APIView):
                 'type',
                 location=OpenApiParameter.QUERY,
                 type=str,
+                enum=["dictionary", "newick", "phyloxml"],
                 required=False,
-                description='Format of returned data: "dictionary" (default), "newick", or "phyloxml".',
+                description=(
+                    'Explicit response format selector; takes precedence over the `Accept` header.\n\n'
+                    '- **dictionary** *(default)*: nested JSON object\n'
+                    '- **newick**: `{"root_taxon": {...}, "newick": "..."}` when using `Accept: application/json`; '
+                    'plain Newick string when using `Accept: application/x-newick` or `text/x-nh`\n'
+                    '- **phyloxml**: PhyloXML XML string (`Accept: application/vnd.phyloxml+xml` or `application/xml`)'
+                ),
             ),
             OpenApiParameter(
                 'members',
@@ -1268,7 +1302,7 @@ class MinimalPairwiseRelation(APIView):
                 description='Whether to quote labels in the newick tree. Default: no (spaces replaced by "_").',
             ),
         ],
-        responses={200: OpenApiTypes.OBJECT},
+        responses=_TAXONOMY_RESPONSES,
     ),
     retrieve=extend_schema(
         operation_id='taxonomy_retrieve',
@@ -1284,7 +1318,12 @@ class MinimalPairwiseRelation(APIView):
                 location=OpenApiParameter.QUERY,
                 type=str,
                 required=False,
-                description='Format of returned data: "dictionary" (default), "newick", or "phyloxml".',
+                description=(
+                    'Explicit response format selector; takes precedence over the `Accept` header.\n\n'
+                    '- **dictionary** *(default)*: nested JSON object\n'
+                    '- **newick**: plain Newick string, or a JSON wrapper when using `Accept: application/json`\n'
+                    '- **phyloxml**: PhyloXML XML string'
+                ),
             ),
             OpenApiParameter(
                 'collapse',
@@ -1294,22 +1333,50 @@ class MinimalPairwiseRelation(APIView):
                 description='Whether to collapse taxonomic levels with a single child. Default: yes.',
             ),
         ],
-        responses={200: OpenApiTypes.OBJECT},
+        responses=_TAXONOMY_RESPONSES,
     ),
 )
 class TaxonomyViewSet(ViewSet):
     lookup_field = 'root_id'
+    renderer_classes = [
+        *api_settings.DEFAULT_RENDERER_CLASSES,
+        NewickRenderer, NewickTextNhRenderer,
+        PhyloXMLRenderer, PhyloXMLLegacyRenderer,
+    ]
+
+    # Map between the `type` query param values / renderer format names and a
+    # canonical internal key used throughout the view logic.
+    _FORMAT_ALIASES = {
+        'newick': 'newick', 'nk': 'newick', 'nhx': 'newick',
+        'phyloxml': 'phyloxml',
+        'dictionary': 'dictionary', 'json': 'dictionary',
+    }
+
+    def _resolve_format(self, request):
+        """Return the canonical format string.
+
+        Explicit ``type`` query parameter takes precedence; falls back to the
+        renderer selected by Accept-header negotiation, then to 'dictionary'.
+        """
+        explicit = request.query_params.get('type', None)
+        if explicit is not None:
+            fmt = self._FORMAT_ALIASES.get(explicit.lower())
+            if fmt is None:
+                raise ParseError(f"Invalid type '{explicit}'. Choose from: newick, phyloxml, dictionary.")
+            return fmt
+        return self._FORMAT_ALIASES.get(request.accepted_renderer.format, 'dictionary')
 
     def list(self, request, format=None):
         """Retrieve the taxonomic tree available in the current release.
 
         By default returns a dictionary representation of the full tree.
-        Use the `type` parameter to request newick or phyloxml formats.
-        Use `members` to get the induced taxonomy for a subset of species.
+        Use the `type` parameter (or an ``Accept`` header) to request newick
+        or phyloxml formats. Use `members` to get the induced taxonomy for a
+        subset of species.
         """
         # e.g. members = YEAST,ASHGO
         members = request.query_params.getlist('members', None)  # read as a string
-        type = request.query_params.get('type', None)  # if none, dictionary returned
+        type = self._resolve_format(request)
         collapse = strtobool(request.query_params.get('collapse', 'True'))
         tax_obj = utils.db.tax
         if members is not None and len(members) > 0:
@@ -1356,15 +1423,14 @@ class TaxonomyViewSet(ViewSet):
             serializer = serializers.TaxonomyNewickSerializer(instance=data)
             return Response(serializer.data)
         elif type == "phyloxml":
-            phyloxml = tax_obj.as_phyloxml()
-            return HttpResponse(phyloxml, content_type="application/xml")
+            return Response(tax_obj.as_phyloxml())
         else:
             data = tx.as_dict()
             return Response(data)
 
     def retrieve(self, request, root_id, format=None):
         """Retrieve the subtree rooted at the taxonomic level indicated."""
-        type = request.query_params.get('type', None)
+        type = self._resolve_format(request)
 
         try:
             taxon_id = int(root_id)
@@ -1406,8 +1472,7 @@ class TaxonomyViewSet(ViewSet):
             serializer = serializers.TaxonomyNewickSerializer(instance=data)
             return Response(serializer.data)
         elif type == 'phyloxml':
-            phyloxml = induced_tax.as_phyloxml()
-            return HttpResponse(phyloxml, content_type="application/xml")
+            return Response(induced_tax.as_phyloxml())
         else:
             data = induced_tax.as_dict()
             return Response(data)
@@ -1428,10 +1493,14 @@ class IdentifiySequenceAPIView(APIView):
                 'search',
                 location=OpenApiParameter.QUERY,
                 type=str,
+                enum=["exact", "approxmimate", "mixed"],
+                default="mixed",
                 required=False,
                 description=(
-                    'Search strategy: "exact", "approximate", or "mixed" (default). '
-                    '"mixed" first tries exact matching; falls back to approximate if no exact match is found.'
+                    'Search strategy which is applied: \n\n'
+                    '- **exact**: the query sequence must match exactly the sequence in the database.\n'
+                    '- **approximate**: the query sequence must match at least partially the sequence in the database. This requires more time to complete.\n'
+                    '- **mixed** (*default*): first tries exact matching; falls back to approximate if no exact match is found.\n'
                 ),
             ),
             OpenApiParameter(
