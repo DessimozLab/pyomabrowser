@@ -1221,9 +1221,9 @@ _TAXONOMY_RESPONSES = {
     (200, 'application/json'): OpenApiResponse(
         response=OpenApiTypes.OBJECT,
         description=(
-            'Dictionary representation of the tree (default), or a '
-            '`{"root_taxon": {...}, "newick": "..."}` wrapper when `type=newick` '
-            'or `Accept: application/json` is combined with `type=newick`.'
+            'Default dictionary representation of the tree, or a JSON wrapper '
+            'when combined with `?type=newick` → `{"root_taxon": {...}, "newick": "..."}` '
+            'or `?type=phyloxml` → `{"root_taxon": {...}, "phyloxml": "..."}`.'
         ),
     ),
     (200, 'application/x-newick'): OpenApiResponse(
@@ -1236,11 +1236,11 @@ _TAXONOMY_RESPONSES = {
     ),
     (200, 'application/vnd.phyloxml+xml'): OpenApiResponse(
         response=OpenApiTypes.STR,
-        description='PhyloXML format tree.',
+        description='PhyloXML format tree as plain text.',
     ),
     (200, 'application/xml'): OpenApiResponse(
         response=OpenApiTypes.STR,
-        description='PhyloXML format tree (alias for `application/vnd.phyloxml+xml`).',
+        description='PhyloXML format tree as plain text (alias for `application/vnd.phyloxml+xml`).',
     ),
 }
 
@@ -1256,11 +1256,13 @@ _TAXONOMY_RESPONSES = {
                 enum=["dictionary", "newick", "phyloxml"],
                 required=False,
                 description=(
-                    'Explicit response format selector; takes precedence over the `Accept` header.\n\n'
+                    'Override the response format, takes precedence over the `Accept` header.\n\n'
                     '- **dictionary** *(default)*: nested JSON object\n'
-                    '- **newick**: `{"root_taxon": {...}, "newick": "..."}` when using `Accept: application/json`; '
-                    'plain Newick string when using `Accept: application/x-newick` or `text/x-nh`\n'
-                    '- **phyloxml**: PhyloXML XML string (`Accept: application/vnd.phyloxml+xml` or `application/xml`)'
+                    '- **newick**: JSON wrapper `{"root_taxon": {...}, "newick": "..."}` '
+                    '— use this when you need the newick string embedded in a JSON response. '
+                    'For a raw newick string, use `Accept: application/x-newick` (or `?format=newick`) instead.\n'
+                    '- **phyloxml**: JSON wrapper `{"root_taxon": {...}, "phyloxml": "..."}`. '
+                    'For a raw PhyloXML string use `Accept: application/vnd.phyloxml+xml` instead.'
                 ),
             ),
             OpenApiParameter(
@@ -1319,10 +1321,12 @@ _TAXONOMY_RESPONSES = {
                 type=str,
                 required=False,
                 description=(
-                    'Explicit response format selector; takes precedence over the `Accept` header.\n\n'
+                    'Override the response format, takes precedence over the `Accept` header.\n\n'
                     '- **dictionary** *(default)*: nested JSON object\n'
-                    '- **newick**: plain Newick string, or a JSON wrapper when using `Accept: application/json`\n'
-                    '- **phyloxml**: PhyloXML XML string'
+                    '- **newick**: JSON wrapper `{"root_taxon": {...}, "newick": "..."}`. '
+                    'For a raw newick string use `Accept: application/x-newick` (or `?format=newick`) instead.\n'
+                    '- **phyloxml**: JSON wrapper `{"root_taxon": {...}, "phyloxml": "..."}`. '
+                    'For a raw PhyloXML string use `Accept: application/vnd.phyloxml+xml` instead.'
                 ),
             ),
             OpenApiParameter(
@@ -1344,32 +1348,65 @@ class TaxonomyViewSet(ViewSet):
         PhyloXMLRenderer, PhyloXMLLegacyRenderer,
     ]
 
-    # Map between the `type` query param values / renderer format names and a
-    # canonical internal key used throughout the view logic.
-    _FORMAT_ALIASES = {
+    # Maps ?type= query param values to canonical internal names.
+    # ?format= is handled by DRF's standard content negotiation (renderer.format).
+    _TYPE_PARAM_ALIASES = {
         'newick': 'newick', 'nk': 'newick', 'nhx': 'newick',
         'phyloxml': 'phyloxml',
         'dictionary': 'dictionary', 'json': 'dictionary',
     }
 
+    # Maps negotiated Accept media type to canonical internal names.
+    _MEDIA_TYPE_TO_FORMAT = {
+        'application/x-newick': 'newick',
+        'text/x-nh': 'newick',
+        'application/vnd.phyloxml+xml': 'phyloxml',
+        'application/xml': 'phyloxml',
+    }
+
     def _resolve_format(self, request):
         """Return the canonical format string.
 
-        Explicit ``type`` query parameter takes precedence; falls back to the
-        renderer selected by Accept-header negotiation, then to 'dictionary'.
+        ``?type=`` takes precedence (backward-compatible explicit selector,
+        also supports a JSON wrapper response for newick via
+        ``?type=newick`` + ``Accept: application/json``).
+        Otherwise falls back to the negotiated media type, then 'dictionary'.
         """
-        explicit = request.query_params.get('type', None)
+        explicit = request.query_params.get('type')
         if explicit is not None:
-            fmt = self._FORMAT_ALIASES.get(explicit.lower())
+            fmt = self._TYPE_PARAM_ALIASES.get(explicit.lower())
             if fmt is None:
-                raise ParseError(f"Invalid type '{explicit}'. Choose from: newick, phyloxml, dictionary.")
+                raise ParseError(
+                    f"Invalid type='{explicit}'. "
+                    f"Choose from: {', '.join(self._TYPE_PARAM_ALIASES)}."
+                )
             return fmt
-        return self._FORMAT_ALIASES.get(request.accepted_renderer.format, 'dictionary')
+        return self._MEDIA_TYPE_TO_FORMAT.get(request.accepted_media_type, 'dictionary')
 
     def list(self, request, format=None):
         """Retrieve the taxonomic tree available in the current release.
 
-        By default returns a dictionary representation of the full tree.
+        By default returns a dictionary representation of the full tree. Use
+        `members` to get the induced subtree for a subset of species.
+
+        The API by default returns a nested JSON object representing the
+        taxonomy tree. Use the `type` query parameter or even better, the
+        `Accept` header, to override this behavior:
+
+        |type (query param) | Accept header | return value |
+        |-------------------|---------------|--------------|
+        |   [ not set ]       | text/x-nh     | raw newick tree |
+        | ?type=newick      | text/x-nh     | raw newick tree |
+        |   [ not set ]       | application/x-newick | raw newick tree |
+        | ?type=newick      | application/json | `{"root_taxon": {...}, "newick": "..."}` |
+        |   [ not set ]     | application/xml  | raw phyloxml tree |
+        |   [ not set ]     | application/vnd.phyloxml+xml | raw phyloxml tree |
+        | ?type=phyloxml    | application/xml  | raw phyloxml tree |
+        | ?type=phyloxml    | application/json | `{"root_taxon": {...}, "phyloxml": "..."}` |
+        | ?type=dictionary  | application/json | nested JSON object |
+        |  [ not set ]      | application/json | nested JSON object |
+
+
         Use the `type` parameter (or an ``Accept`` header) to request newick
         or phyloxml formats. Use `members` to get the induced taxonomy for a
         subset of species.
@@ -1423,7 +1460,9 @@ class TaxonomyViewSet(ViewSet):
             serializer = serializers.TaxonomyNewickSerializer(instance=data)
             return Response(serializer.data)
         elif type == "phyloxml":
-            return Response(tax_obj.as_phyloxml())
+            data = {"root_taxon": root_data, "phyloxml": tx.as_phyloxml().decode()}
+            serializer = serializers.TaxonomyPhyloXMLSerializer(instance=data)
+            return Response(serializer.data)
         else:
             data = tx.as_dict()
             return Response(data)
@@ -1472,7 +1511,11 @@ class TaxonomyViewSet(ViewSet):
             serializer = serializers.TaxonomyNewickSerializer(instance=data)
             return Response(serializer.data)
         elif type == 'phyloxml':
-            return Response(induced_tax.as_phyloxml())
+            root_taxon = induced_tax._taxon_from_numeric(taxon_id)
+            root_data = {'name': root_taxon['Name'].decode(), 'taxon_id': int(root_taxon['NCBITaxonId'])}
+            data = {'root_taxon': root_data, 'phyloxml': induced_tax.as_phyloxml().decode()}
+            serializer = serializers.TaxonomyPhyloXMLSerializer(instance=data)
+            return Response(serializer.data)
         else:
             data = induced_tax.as_dict()
             return Response(data)

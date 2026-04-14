@@ -380,6 +380,11 @@ class TaxonomyNewickSerializer(ReadOnlySerializer):
     newick = serializers.CharField()
 
 
+class TaxonomyPhyloXMLSerializer(ReadOnlySerializer):
+    root_taxon = TaxonSerializer()
+    phyloxml = serializers.CharField()
+
+
 class EnrichmentAnalysisInputSerializer(serializers.ModelSerializer):
     status_url = serializers.HyperlinkedIdentityField('enrichment-status', lookup_field='id')
     foreground = serializers.JSONField()

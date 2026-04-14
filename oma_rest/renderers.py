@@ -6,7 +6,10 @@ logger = logging.getLogger(__name__)
 
 class NewickRenderer(BaseRenderer):
     media_type = 'application/x-newick'
-    format = 'newick'
+    # format = 'json' so drf_spectacular sees only one unique format across all
+    # renderers on TaxonomyViewSet and suppresses the ?format= dropdown entirely.
+    # These renderers are selected via Accept-header negotiation only.
+    format = 'json'
     charset = 'utf-8'
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
@@ -24,10 +27,12 @@ class NewickTextNhRenderer(NewickRenderer):
 
 class PhyloXMLRenderer(BaseRenderer):
     media_type = 'application/vnd.phyloxml+xml'
-    format = 'phyloxml'
+    format = 'json'  # See NewickRenderer for explanation.
     charset = 'utf-8'
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
+        if isinstance(data, dict) and "phyloxml" in data:
+            data = data["phyloxml"]
         if isinstance(data, str):
             return data.encode(self.charset)
         return data
