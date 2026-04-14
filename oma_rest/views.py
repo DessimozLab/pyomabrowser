@@ -26,12 +26,12 @@ from rest_framework.exceptions import NotFound, ParseError, ValidationError
 from rest_framework.settings import api_settings
 from rest_framework import status
 from rest_framework_csv.renderers import CSVRenderer
-from django.http import HttpResponse
 from distutils.util import strtobool
 
 from . import models as rest_models
 from . import serializers
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
+from .renderers import NewickRenderer, NewickTextNhRenderer, PhyloXMLRenderer, PhyloXMLLegacyRenderer
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
 from .pagination import PaginationMixin, LazyPagedPytablesQuery
 from .renderers import TSVRenderer
@@ -236,7 +236,7 @@ class ProteinEntryViewSet(ViewSet):
 
     @extend_schema(
         parameters=[_ENTRY_ID_PARAM],
-        #responses=serializers.OrthologsListRelTypeSerializer(many=True),
+        responses=serializers.OrthologsListRelTypeSerializer(many=True),
     )
     @action(detail=True)
     def hog_derived_orthologs(self, request, entry_id: str|int, format=None):
@@ -253,6 +253,7 @@ class ProteinEntryViewSet(ViewSet):
 
     @extend_schema(
         parameters=[_ENTRY_ID_PARAM],
+        responses=serializers.ProteinEntrySerializer(many=True),
     )
     @action(detail=True)
     def homoeologs(self, request, entry_id: str|int, format=None):
@@ -286,7 +287,9 @@ class ProteinEntryViewSet(ViewSet):
         serializer = serializers.GeneOntologySerializer(instance=annotations, many=True)
         return Response(serializer.data)
 
-    @extend_schema(deprecated=True, responses=serializers.GeneOntologySerializer(many=True))
+    @extend_schema(deprecated=True,
+                   parameters=[_ENTRY_ID_PARAM],
+                   responses=serializers.GeneOntologySerializer(many=True))
     @action(detail=True)
     def ontology(self, request, entry_id: str|int, format=None):
         """Deprecated: use gene_ontology endpoint instead."""
@@ -294,7 +297,7 @@ class ProteinEntryViewSet(ViewSet):
 
     @extend_schema(
         parameters=[_ENTRY_ID_PARAM],
-        responses={200: OpenApiTypes.OBJECT},
+        responses={200: serializers.ProteinDomainsSerializer},
     )
     @action(detail=True)
     def domains(self, request, entry_id=None, format=None):
@@ -335,10 +338,11 @@ class ProteinEntryViewSet(ViewSet):
                 enum=['all', 'exact', 'maindb'],
                 default='all',
                 description=(
-                    'Filter cross-references by type. Possible values: '
-                    '"all" (default, no filter), '
-                    '"exact" (only entries with identical sequence), '
-                    '"maindb" (GeneName, UniProtKB, Ensembl, RefSeq, EntrezGene, SourceID only).'
+                    'Filter cross-references by type:\n\n'
+                    '- **all** *(default)*: no filter, return all cross-references\n'
+                    '- **exact**: only entries with an identical sequence\n'
+                    '- **maindb**: restrict to major databases only '
+                    '(GeneName, UniProtKB, Ensembl, RefSeq, EntrezGene, SourceID)'
                 ),
             ),
         ],
@@ -369,6 +373,7 @@ class ProteinEntryViewSet(ViewSet):
 class OmaGroupViewSet(PaginationMixin, ViewSet):
     lookup_field = 'group_id'
 
+    @extend_schema(responses=serializers.GroupListSerializer(many=True))
     def list(self, request, format=None):
         """List of all the OMA Groups in the current release."""
         nr_groups = utils.db.get_nr_oma_groups()
@@ -377,7 +382,7 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
         serializer = serializers.GroupListSerializer(page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
 
-    @extend_schema(parameters=_OMA_GROUP_PARAM)
+    @extend_schema(parameters=[_OMA_GROUP_PARAM], responses=serializers.OmaGroupSerializer)
     def retrieve(self, request, group_id=None, format=None):
         """Retrieve the information available for a given OMA group."""
         try:
@@ -410,7 +415,7 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
             instance=group, context={'request': request})
         return Response(serializer.data)
 
-    @extend_schema(parameters=_OMA_GROUP_PARAM)
+    @extend_schema(parameters=[_OMA_GROUP_PARAM], responses=serializers.RelatedGroupsSerializer(many=True))
     @action(detail=True)
     def close_groups(self, request, group_id=None, format=None):
         """Retrieve the sorted list of closely related groups for a given OMA group."""
@@ -454,35 +459,10 @@ class OmaGroupViewSet(PaginationMixin, ViewSet):
         return self.paginator.get_paginated_response(serializer.data)
 
 
-# @extend_schema_view(
-#     list=extend_schema(
-#         parameters=[
-#             _LEVEL_PARAM,
-#             OpenApiParameter(
-#                 'compare_with',
-#                 location=OpenApiParameter.QUERY,
-#                 type=str,
-#                 required=False,
-#                 description=(
-#                     'Compare the HOGs at the given level with those at this parent level, '
-#                     'annotating all HOGs with the evolutionary events that occurred between the two points.'
-#                 ),
-#             ),
-#         ],
-#         responses=serializers.HOGsListSerializer(many=True),
-#     ),
-#     retrieve=extend_schema(
-#         parameters=[
-#             _HOG_ID_PARAM,
-#             _LEVEL_PARAM,
-#         ],
-#         responses=serializers.HOGsLevelDetailSerializer(many=True),
-#     ),
-#)
 class HOGViewSet(PaginationMixin, ViewSet):
     lookup_field = 'hog_id'
     lookup_value_regex = r'[^/]+'
-    serializer_class = serializers.ProteinEntrySerializer
+    serializer_class = serializers.HOGsListSerializer
 
     def _hog_id_from_entry(self, entry_id):
         entry_nr = resolve_protein_from_id_or_raise(entry_id)
@@ -555,7 +535,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
                     'annotating all HOGs with the evolutionary events that occurred between the two points.'
                 ),
             )
-        ])
+        ],
+        responses=serializers.HOGsCompareListSerializer(many=True))
     def list(self, request, format=None):
         """List of all the HOGs identified by OMA.
 
@@ -594,7 +575,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializer_cls(page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
 
-    @extend_schema(parameters=[_HOG_ID_PARAM,_LEVEL_PARAM])
+    @extend_schema(operation_id='hog_retrieve', parameters=[_HOG_ID_PARAM,_LEVEL_PARAM], responses=serializers.HOGsLevelDetailSerializer(many=True))
     def retrieve(self, request, hog_id: str|int):
         """Retrieve the detail available for a given HOG.
 
@@ -657,7 +638,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializers.HOGsLevelDetailSerializer(result_data, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @extend_schema(parameters=[_HOG_ID_PARAM,_LEVEL_PARAM])
+    @extend_schema(parameters=[_HOG_ID_PARAM,_LEVEL_PARAM], responses=serializers.HOGMembersListSerializer)
     @action(detail=True)
     def members(self, request, hog_id=str|int, format=None):
         """Retrieve a list of all the protein members for a given hog_id.
@@ -708,7 +689,8 @@ class HOGViewSet(PaginationMixin, ViewSet):
                 required=False,
                 description='Number of similar HOGs to return. Must be a positive integer ≤ 50. Default: 10.',
             ),
-        ]
+        ],
+        responses=serializers.HOGsSimilarProfileSerializer,
     )
     @action(detail=True)
     def similar_profile_hogs(self, request, hog_id=None, format=None):
@@ -768,12 +750,44 @@ class HOGViewSet(PaginationMixin, ViewSet):
         serializer = serializers.AncestralGeneOntologySerializer(instance=hack_models, many=True)
         return Response(serializer.data)
 
+_SYNTENY_NODE_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'string', 'description': 'HOG identifier (e.g. HOG:0001234.1a) for ancestral genes, or OMA ID (e.g. HUMAN00007) for extant genes.'},
+    },
+    'additionalProperties': True,
+}
+
+_SYNTENY_GRAPH_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'nodes': {
+            'type': 'array',
+            'items': _SYNTENY_NODE_SCHEMA,
+        },
+        'links': {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'source': {'type': 'string', 'description': 'ID of the source node.'},
+                    'target': {'type': 'string', 'description': 'ID of the target node.'},
+                    'weight': {'type': 'integer', 'description': 'Number of genomes supporting this adjacency.'},
+                },
+                'required': ['source', 'target', 'weight'],
+            },
+        },
+    },
+    'required': ['nodes', 'links'],
+}
+
+
 class SyntenyViewSet(ViewSet):
     lookup_field = 'hog_id'
     lookup_value_regex = r'[^/]+'
 
     @extend_schema(parameters=[_SYNTENY_LEVEL_PARAM, _SYNTENY_EVIDENCE_PARAM, _SYNTENY_BREAK_CIRCULAR_CONTIGS_PARAM],
-                   responses={200: OpenApiTypes.OBJECT})
+                   responses={200: {'type': 'array', 'items': _SYNTENY_GRAPH_SCHEMA}})
     def list(self, request, format=None):
         """List all the ancestral or extant contigs of a genome.
 
@@ -831,7 +845,7 @@ class SyntenyViewSet(ViewSet):
                 description='Size of the graph around the query HOG (max edge distance). Default: 2.',
             )
         ],
-        responses={200: OpenApiTypes.OBJECT})
+        responses={200: _SYNTENY_GRAPH_SCHEMA})
     def retrieve(self, request, hog_id):
         """Returns the ancestral synteny graph around a reference HOG at a given taxonomic level."""
         level = self.request.query_params.get('level', None)
@@ -947,6 +961,7 @@ class XRefsViewSet(ViewSet):
 
 class GenomeViewSet(PaginationMixin, ViewSet):
     lookup_field = 'genome_id'
+    serializer_class = serializers.GenomeInfoSerializer
 
     def list(self, request, format=None):
         """List of all the genomes present in the current release."""
@@ -956,8 +971,8 @@ class GenomeViewSet(PaginationMixin, ViewSet):
         serializer = serializers.GenomeInfoSerializer(instance=page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
 
-    @extend_schema(parameters=[_GENOME_ID_PARAM])
-    def retrieve(self, request, genome_id, format=None):
+    @extend_schema(parameters=[_GENOME_ID_PARAM], responses=serializers.GenomeDetailSerializer)
+    def retrieve(self, request, genome_id: str|int, format=None):
         """Retrieve the information available for a given genome."""
         try:
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
@@ -966,9 +981,9 @@ class GenomeViewSet(PaginationMixin, ViewSet):
         serializer = serializers.GenomeDetailSerializer(instance=g, context={'request': request})
         return Response(serializer.data)
 
-    @extend_schema(parameters=[_GENOME_ID_PARAM])
+    @extend_schema(parameters=[_GENOME_ID_PARAM], responses=serializers.ProteinEntrySerializer(many=True))
     @action(detail=True)
-    def proteins(self, request, genome_id=None):
+    def proteins(self, request, genome_id: str|int):
         """Retrieve the list of all the protein entries available for a genome."""
         try:
             g = models.Genome(utils.db, utils.id_mapper['OMA'].identify_genome(genome_id))
@@ -980,7 +995,7 @@ class GenomeViewSet(PaginationMixin, ViewSet):
         serializer = serializers.ProteinEntrySerializer(page, many=True, context={'request': request})
         return self.paginator.get_paginated_response(serializer.data)
 
-    @extend_schema(parameters=[_GENOME_ID_PARAM])
+    @extend_schema(parameters=[_GENOME_ID_PARAM], responses=serializers.ProteinEntrySerializer(many=True))
     @action(detail=True)
     def genes(self, request, genome_id=None):
         """Retrieve the list of all the genes available for a genome.
@@ -1086,25 +1101,40 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
                 'type',
                 location=OpenApiParameter.QUERY,
                 type=str,
+                enum=["vps", "hogs"],
+                default="hogs",
                 required=False,
                 description='Type of ortholog pairs to use: "vps" or "hogs" (default).',
             ),
             OpenApiParameter(
                 'xrefs',
                 location=OpenApiParameter.QUERY,
-                type=str,
+                type={'type': 'array', 'items': {
+                    'type': 'string',
+                    'enum': [
+                        'UniProtKB/SwissProt',
+                        'UniProtKB/TrEMBL',
+                        'EntrezGene',
+                        'SourceID',
+                        'SourceAC',
+                        'Ensembl Gene',
+                        'RefSeq',
+                    ],
+                }},
+                explode=True,  # ?xrefs=UniProtKB/SwissProt&xrefs=EntrezGene
                 required=False,
                 description=(
-                    'Comma-separated list of cross-reference sources to include. '
-                    'Options: "UniProtKB/SwissProt", "UniProtKB/TrEMBL", "EntrezGene", '
-                    '"SourceID", "SourceAC", "Ensembl Gene", "RefSeq". '
-                    'Default: no cross-references, only OMA IDs.'
+                        'One or more cross-reference sources to include. '
+                        'Repeat the parameter for multiple values: '
+                        '`?xrefs=UniProtKB/SwissProt&xrefs=EntrezGene`. '
+                        'Default: no cross-references, only OMA IDs.'
                 ),
             ),
             OpenApiParameter(
                 'rel_type',
                 location=OpenApiParameter.QUERY,
                 type=str,
+                enum=["1:1", "1:n", "m:1", "m:n"],
                 required=False,
                 description='Limit relations to a specific type, e.g. "1:1".',
             ),
@@ -1160,7 +1190,7 @@ class PairwiseRelationAPIView(PaginationMixin, APIView):
                     return rel
             return None
 
-        logger.info("negociated format: %s", request.accepted_renderer.format)
+        logger.info("negotiated format: %s", request.accepted_renderer.format)
 
         query = '(EntryNr1 >= {0[0]}) & (EntryNr1 <= {0[1]}) ' \
                 '& (EntryNr2 >= {1[0]}) & (EntryNr2 <= {1[1]})'.format(range1, range2)
@@ -1409,6 +1439,7 @@ class IdentifiySequenceAPIView(APIView):
                 location=OpenApiParameter.QUERY,
                 type=bool,
                 required=False,
+                default=False,
                 description=(
                     'For exact matches, whether the query must match the full target sequence. '
                     'Default: false (partial matches are also reported).'

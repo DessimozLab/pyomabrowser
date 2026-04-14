@@ -32,7 +32,6 @@ if DEBUG:
     import socket  # only if you haven't already imported this
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
-print(INTERNAL_IPS)
 
 # Application definition
 INSTALLED_APPS = [
@@ -84,8 +83,8 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'OMA REST API',
-    'DESCRIPTION': 'REST API for the OMA Browser',
     'VERSION': '1.10',
+    'DESCRIPTION': open(os.path.join(BASE_DIR, '..', 'oma_rest', 'api_description.md')).read(),
     'SERVE_INCLUDE_SCHEMA': False,
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
