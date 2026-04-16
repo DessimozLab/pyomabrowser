@@ -12,9 +12,7 @@ import hashlib
 import collections
 
 import networkx as nx
-import pandas as pd
-import sklearn
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
 from django.utils.decorators import method_decorator
@@ -24,13 +22,11 @@ from django.views.generic.base import ContextMixin
 from django.urls import reverse
 from django.core.mail import EmailMessage
 from django.db import connections
-from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.shortcuts import redirect, resolve_url
 
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 
-import tweepy
 import logging
 import itertools
 import os
@@ -1049,8 +1045,8 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
         context.update({'tab': 'genes', 'api_base': 'genome',
                         'genome_name': context['genome'].sciname,
                         'parent_level': parent_level,
-                        'api_url_protein': '/api/genome/{}/genes/?per_page=250000'.format(species_id),
-                        'api_url_hog': '/api/hog/?level={}&compare_with={}&per_page=250000'.format(
+                        'api_url_protein': reverse("oma_rest:genome-genes", args=(species_id,)) + "?per_page=250000",
+                        'api_url_hog': reverse("oma_rest:hog-list") + '?level={}&compare_with={}&per_page=250000'.format(
                             context['genome'].sciname, parent_level)
                         })
 
@@ -1304,7 +1300,7 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
 
         context.update({'tab': 'genes',
                         'level': level,
-                        'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
+                        'api_url': reverse("oma_rest:hog-list") + '?level={}&per_page=250000'.format(context['genome_name']),
                         'parent_level': parent_level,
                         'ancestral_link_name': "ancestralgenome_genes"})
         return context
@@ -1633,7 +1629,7 @@ class HOGgo(HOGBase, TemplateView):
         context = super(HOGgo, self).get_context_data(hog_id, **kwargs)
         hog = context['hog']
         context.update({'tab': 'go',
-                        'api_url': '/api/hog/{}/gene_ontology/?level={}'.format(hog.hog_id, hog.level),
+                        'api_url': reverse("oma_rest:hog-gene-ontology", args=(hog.hog_id,)) + f'?level={hog.level}',
                         'lineage_link_name': 'hog_go',
                         })
         return context
@@ -1647,7 +1643,7 @@ class HOGtable(HOGBase, TemplateView):
         hog = context['hog']
         context.update({'tab': 'table',
                         'api_base': 'hog',
-                        'api_url': '/api/hog/{}/members/?level={}'.format(hog.hog_id, hog.level),
+                        'api_url': reverse("oma_rest:hog-members", args=(hog.hog_id,)) + f'?level={hog.level}',
                         'lineage_link_name': 'hog_table',
                         })
         return context

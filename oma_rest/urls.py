@@ -3,6 +3,9 @@ from rest_framework.routers import DefaultRouter
 from . import views
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
+# namespace for the API
+app_name = 'oma_rest'
+
 router = DefaultRouter()
 router.register(r'protein', views.ProteinEntryViewSet, basename='protein')
 router.register(r'group', views.OmaGroupViewSet, basename='group')
@@ -25,9 +28,9 @@ urlpatterns = [
     path('function/', views.PropagateFunctionAPIView.as_view(), name='function-propagation'),
     path('enrichment/', views.CreateEnrichmentAnalysisView.as_view(), name='enrichment-create'),
     path('enrichment/status/<slug:id>/', views.StatusEnrichmentAnalysisView.as_view(), name='enrichment-status'),
-    path('schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('schema/', SpectacularAPIView.as_view(versioning_class=None), name='schema'),
+    path('docs/', SpectacularSwaggerView.as_view(url_name='oma_rest:schema'), name='swagger-ui'),
+    path('docs/redoc/', SpectacularRedocView.as_view(url_name='oma_rest:schema'), name='redoc'),
 ]
 
 

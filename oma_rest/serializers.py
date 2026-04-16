@@ -77,7 +77,7 @@ class GenomeBaseSerializer(ReadOnlySerializer):
 class GenomeInfoSerializer(GenomeBaseSerializer):
     """Serializer for Genomes including the URL to the detail view"""
     genome_url = serializers.HyperlinkedIdentityField(
-        view_name='genome-detail',
+        view_name='oma_rest:genome-detail',
         lookup_field='uniprot_species_code',
         lookup_url_kwarg='genome_id')
 
@@ -86,7 +86,7 @@ class GenomeDetailSerializer(GenomeBaseSerializer):
     """Genome serializer with detail information"""
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
-    proteins = serializers.HyperlinkedIdentityField(view_name='genome-proteins', read_only=True,
+    proteins = serializers.HyperlinkedIdentityField(view_name='oma_rest:genome-proteins', read_only=True,
                                                          lookup_field='uniprot_species_code',
                                                          lookup_url_kwarg='genome_id')
     chromosomes = serializers.SerializerMethodField(method_name=None)
@@ -110,7 +110,7 @@ class GenomeDetailSerializer(GenomeBaseSerializer):
 class ProteinEntrySerializer(ReadOnlySerializer):
     entry_nr = serializers.IntegerField(required=True)
     entry_url = serializers.HyperlinkedIdentityField(
-        view_name='protein-detail',
+        view_name='oma_rest:protein-detail',
         lookup_field='entry_nr',
         lookup_url_kwarg='entry_id')
     omaid = serializers.CharField()
@@ -147,24 +147,24 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     sequence = serializers.CharField()
     cdna = serializers.CharField()
     description = serializers.CharField()
-    domains = serializers.HyperlinkedIdentityField(view_name='protein-domains', read_only=True,
+    domains = serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-domains', read_only=True,
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    xref = serializers.HyperlinkedIdentityField(view_name='protein-xref', read_only=True, lookup_field='entry_nr',
+    xref = serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-xref', read_only=True, lookup_field='entry_nr',
                                                 lookup_url_kwarg='entry_id')
-    orthologs = serializers.HyperlinkedIdentityField(view_name='protein-orthologs', read_only=True,
+    orthologs = serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-orthologs', read_only=True,
                                                      lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    homoeologs = OnlyPolyploidHyperlinkedIdentifyField(view_name='protein-homoeologs',
+    homoeologs = OnlyPolyploidHyperlinkedIdentifyField(view_name='oma_rest:protein-homoeologs',
                                                   lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    gene_ontology = serializers.HyperlinkedIdentityField(view_name='protein-gene-ontology', read_only=True,
+    gene_ontology = serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-gene-ontology', read_only=True,
                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    oma_group_url = OptionalHyperlinkedIdentityField(view_name='group-detail', lookup_field='oma_group',
+    oma_group_url = OptionalHyperlinkedIdentityField(view_name='oma_rest:group-detail', lookup_field='oma_group',
                                                          lookup_url_kwarg='group_id', nullvalues=[0])
-    oma_hog_members = OptionalHyperlinkedIdentityField(view_name='hog-members', lookup_field='oma_hog',
+    oma_hog_members = OptionalHyperlinkedIdentityField(view_name='oma_rest:hog-members', lookup_field='oma_hog',
                                                            lookup_url_kwarg='hog_id', nullvalues=('', b''))
-    isoforms = serializers.HyperlinkedIdentityField(view_name="protein-isoforms", read_only=True,
+    isoforms = serializers.HyperlinkedIdentityField(view_name="oma_rest:protein-isoforms", read_only=True,
                                                     lookup_field="entry_nr", lookup_url_kwarg='entry_id')
     alternative_isoforms_urls = serializers.ListSerializer(
-        child=serializers.HyperlinkedIdentityField(view_name='protein-detail', lookup_field='entry_nr',
+        child=serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-detail', lookup_field='entry_nr',
                                                    lookup_url_kwarg='entry_id', read_only=True),
         source='alternative_isoforms')
 
@@ -228,7 +228,7 @@ class OmaGroupSerializer(ReadOnlySerializer):
     fingerprint = serializers.CharField()
     description = serializers.CharField()
     related_groups = serializers.HyperlinkedIdentityField(
-        view_name='group-close-groups',
+        view_name='oma_rest:group-close-groups',
         lookup_field='GroupNr',
         lookup_url_kwarg='group_id')
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
@@ -282,7 +282,7 @@ class AncestralGeneOntologySerializer(BaseGeneOntologySerializer):
 class GroupListSerializer(ReadOnlySerializer):
     oma_group = serializers.IntegerField(source='GroupNr')
     group_url = serializers.HyperlinkedIdentityField(
-        view_name='group-detail',
+        view_name='oma_rest:group-detail',
         lookup_field='GroupNr',
         lookup_url_kwarg='group_id')
 
@@ -294,10 +294,10 @@ class RelatedGroupsSerializer(GroupListSerializer):
 class HOGsBaseSerializer(ReadOnlySerializer):
     hog_id = serializers.CharField()
     level = serializers.CharField(required=False)
-    levels_url = QueryParamHyperlinkedIdentityField(view_name='hog-detail',
+    levels_url = QueryParamHyperlinkedIdentityField(view_name='oma_rest:hog-detail',
                                                     lookup_field='hog_id',
                                                     query_params={'level': 'level'})
-    members_url = QueryParamHyperlinkedIdentityField(view_name='hog-members',
+    members_url = QueryParamHyperlinkedIdentityField(view_name='oma_rest:hog-members',
                                                      query_params={'level': 'level'},
                                                      lookup_field='hog_id')
     alternative_levels = serializers.ListSerializer(required=False,
@@ -310,7 +310,7 @@ class HOGsListSerializer(HOGsBaseSerializer):
     description = serializers.SerializerMethodField(method_name=None)
     nr_genes = serializers.FloatField(required=False)
     similar_profile_hogs = serializers.HyperlinkedIdentityField(
-        view_name="hog-similar-profile-hogs",
+        view_name="oma_rest:hog-similar-profile-hogs",
         lookup_field="roothog_id",
         lookup_url_kwarg="hog_id")
 
@@ -319,7 +319,7 @@ class HOGsListSerializer(HOGsBaseSerializer):
 
 
 class HOGsCompareListSerializer(HOGsListSerializer):
-    event = serializers.CharField()
+    event = serializers.CharField(required=False, help_text='Evolutionary event between the two compared levels. Only present when `compare_with` is supplied.')
 
 
 class HOGsLevelDetailSerializer(HOGsListSerializer):
@@ -435,6 +435,8 @@ class EnrichmentAnalysisInputSerializer(serializers.ModelSerializer):
 
 
 class EnrichmentAnalysisStatusSerializer(serializers.ModelSerializer, ReadOnlySerializer):
+    foreground = serializers.JSONField()
+
     class Meta:
         model = EnrichmentAnalysisModel
         fields = ['id', 'data_hash', 'type', 'foreground', 'name', 'state', 'message', 'result', 'result_json']
