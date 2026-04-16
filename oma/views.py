@@ -2112,6 +2112,56 @@ def domains_json(request, entry_id):
     return JsonResponse(response)
 
 
+class PhyloXMLSpeciesTreeView(View):
+    """Serve the species tree rooted at *root_id* as a PhyloXML file download."""
+
+    def get(self, request, root_id):
+        tax_obj = utils.db.tax
+
+        # Resolve root_id to a numeric taxon id (mirrors TaxonomyViewSet.retrieve logic)
+        taxon_id = None
+        try:
+            taxon_id = int(root_id)
+        except ValueError:
+            if len(root_id) == 5:
+                try:
+                    g = utils.db.id_mapper['OMA'].genome_from_UniProtCode(root_id.upper())
+                    taxon_id = int(g['NCBITaxonId'])
+                except Exception:
+                    pass
+                    #raise Http404("Unknown species code '{}'".format(root_id))
+            elif root_id.upper() == 'LUCA':
+                taxon_id = None
+
+            if taxon_id is None:
+                taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
+                hits = taxonomy_tab.read_where('Name==root_id', field='NCBITaxonId')
+                if len(hits) != 1:
+                    raise Http404("Taxonomic level '{}' not found".format(root_id))
+                taxon_id = int(hits[0])
+
+        if taxon_id is None:
+            # Full tree
+            tx = tax_obj
+        else:
+            # Subtree rooted at taxon_id
+            def _collect_subtree(tid):
+                ids = [tid]
+                for child in tax_obj._direct_children_taxa(tid):
+                    ids.extend(_collect_subtree(int(child['NCBITaxonId'])))
+                return ids
+
+            branch = _collect_subtree(taxon_id)
+            tx = tax_obj.get_induced_taxonomy(members=branch, collapse=True)
+
+        phyloxml_bytes = tx.as_phyloxml()
+
+        filename = "speciestree_{}.phyloxml".format(root_id)
+        response = HttpResponse(phyloxml_bytes, content_type='application/vnd.phyloxml+xml')
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+        return response
+
+
 # //</editor-fold>
 
 # <editor-fold desc="Static">

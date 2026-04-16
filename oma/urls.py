@@ -170,6 +170,7 @@ urlpatterns = [
     path('release/json/', views.GenomesJson.as_view(), name="genomes_json"),
 
     path('phylostratigraphy/', TemplateView.as_view(template_name='phylostratigraphy.html'), name='phylostratigraphy'),
+    path("speciestree/<slug:root_id>.phyloxml", views.PhyloXMLSpeciesTreeView.as_view(), name="speciestree-phyloxml"),
 
     path('current/', views.CurrentView.as_view(), name='current'),
     path('archives/', views.ArchiveView.as_view(), name='archives'),
