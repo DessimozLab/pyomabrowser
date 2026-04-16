@@ -26,6 +26,8 @@ from rest_framework.settings import api_settings
 from rest_framework import status
 from rest_framework_csv.renderers import CSVRenderer
 from distutils.util import strtobool
+from django.http import HttpResponse
+from packaging.version import Version as _Version
 
 from . import models as rest_models
 from . import serializers
@@ -157,8 +159,9 @@ class ProteinEntryViewSet(ViewSet):
         In case the ID is not unique or unknown, an empty element is returned for
         that query element.
 
-        Changed in version 1.7: the endpoint now returns a list of (query_id, target)
-        tuples instead of a plain list of proteins.
+        **Changed in version 1.7**: the endpoint now returns a list of (query_id, target)
+        tuples instead of a plain list of proteins.  Clients that need the old behaviour
+        can pin the version with `Accept: application/json; version=1.6`.
         """
         MAX_SIZE = 1000
         if 'ids' not in request.data:
@@ -1262,7 +1265,10 @@ _TAXONOMY_RESPONSES = {
                     '— use this when you need the newick string embedded in a JSON response. '
                     'For a raw newick string, use `Accept: application/x-newick` (or `?format=newick`) instead.\n'
                     '- **phyloxml**: JSON wrapper `{"root_taxon": {...}, "phyloxml": "..."}`. '
-                    'For a raw PhyloXML string use `Accept: application/vnd.phyloxml+xml` instead.'
+                    'For a raw PhyloXML string use `Accept: application/vnd.phyloxml+xml` instead.\n\n'
+                    '> **Changed in 1.11:** `?type=phyloxml` previously returned raw PhyloXML text; '
+                    'it now returns a JSON wrapper `{"root_taxon": {...}, "phyloxml": "..."}`. '
+                    'To retrieve raw PhyloXML, use `Accept: application/vnd.phyloxml+xml`.'
                 ),
             ),
             OpenApiParameter(
@@ -1326,7 +1332,10 @@ _TAXONOMY_RESPONSES = {
                     '- **newick**: JSON wrapper `{"root_taxon": {...}, "newick": "..."}`. '
                     'For a raw newick string use `Accept: application/x-newick` (or `?format=newick`) instead.\n'
                     '- **phyloxml**: JSON wrapper `{"root_taxon": {...}, "phyloxml": "..."}`. '
-                    'For a raw PhyloXML string use `Accept: application/vnd.phyloxml+xml` instead.'
+                    'For a raw PhyloXML string use `Accept: application/vnd.phyloxml+xml` instead.\n\n'
+                    '> **Changed in 1.11:** `?type=phyloxml` previously returned raw PhyloXML text; '
+                    'it now returns a JSON wrapper `{"root_taxon": {...}, "phyloxml": "..."}`. '
+                    'To retrieve raw PhyloXML, use `Accept: application/vnd.phyloxml+xml`.'
                 ),
             ),
             OpenApiParameter(
@@ -1460,6 +1469,8 @@ class TaxonomyViewSet(ViewSet):
             serializer = serializers.TaxonomyNewickSerializer(instance=data)
             return Response(serializer.data)
         elif type == "phyloxml":
+            if request.version and _Version(request.version) < _Version('1.11'):
+                return HttpResponse(tx.as_phyloxml(), content_type='application/vnd.phyloxml+xml')
             data = {"root_taxon": root_data, "phyloxml": tx.as_phyloxml().decode()}
             serializer = serializers.TaxonomyPhyloXMLSerializer(instance=data)
             return Response(serializer.data)
@@ -1513,6 +1524,8 @@ class TaxonomyViewSet(ViewSet):
         elif type == 'phyloxml':
             root_taxon = induced_tax._taxon_from_numeric(taxon_id)
             root_data = {'name': root_taxon['Name'].decode(), 'taxon_id': int(root_taxon['NCBITaxonId'])}
+            if request.version and _Version(request.version) < _Version('1.11'):
+                return HttpResponse(induced_tax.as_phyloxml(), content_type='application/vnd.phyloxml+xml')
             data = {'root_taxon': root_data, 'phyloxml': induced_tax.as_phyloxml().decode()}
             serializer = serializers.TaxonomyPhyloXMLSerializer(instance=data)
             return Response(serializer.data)

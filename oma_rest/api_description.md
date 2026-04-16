@@ -35,7 +35,7 @@ The `Link` header includes URLs for navigating between pages of results, allowin
 easily traverse the dataset without constructing URLs manually. In addition, the 
 `X-Total-Count` header reports the total number of objects matching the request across all pages.
 
-Pagination can be controlled using the page and per_page query parameters (default page size: 100).
+Pagination can be controlled using the `page` and `per_page` query parameters (default page size: 100).
 
 ### Example
 
@@ -55,3 +55,21 @@ Link:
 Vary: Accept
 X-Total-Count: 2198
 ```
+
+
+## Changelog
+
+### 1.11
+
+- **`/api/taxonomy/` and `/api/taxonomy/{root_id}/`**: `?type=phyloxml` previously returned
+  raw PhyloXML text; it now returns a JSON wrapper `{"root_taxon": {...}, "phyloxml": "..."}`.
+  To retrieve raw PhyloXML, send `Accept: application/vnd.phyloxml+xml` instead.
+  Clients that need the old behaviour can pin the version with
+  `Accept: application/json; version=1.10`.
+
+### 1.7
+
+- **`/api/protein/bulk_retrieve` returns now a list of (query_id, target)
+  tuples instead of a plain list of proteins. This is to make it easier to
+  map the results back to the original query. Clients that need the old behaviour
+  can pin the version with `Accept: application/json; version=1.6`.
