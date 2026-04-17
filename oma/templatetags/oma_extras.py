@@ -20,6 +20,16 @@ def uniprot_seq_repr(value):
 
 @register.filter
 @stringfilter
+def strip_evidence(value):
+    """Remove evidence codes like ' {ECO:0000313|...}' from cross-reference values."""
+    brace = value.find(' {')
+    if brace != -1:
+        return value[:brace]
+    return value
+
+
+@register.filter
+@stringfilter
 def as_amino_acid_seq(value):
     PROTEIN_CHARS = 'ACDEFGHIKLMNPQRSTVWXY'
     return "".join(filter(lambda c: c in PROTEIN_CHARS, value.upper()))

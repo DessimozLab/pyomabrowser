@@ -49,7 +49,7 @@
     (function(){
         $.getJSON("/api/protein/{{ entry.entry_nr }}/xref/", function(data){
             // sort accroding to xref_source_order
-            var xref_source_order = {{ xref_order | safe }};
+            const xref_source_order = {{ xref_order | safe }};
             data.sort(function(a, b){
                 var idx_a = xref_source_order.indexOf(a.source), idx_b = xref_source_order.indexOf(b.source);
                 if (idx_a === idx_b){
@@ -57,56 +57,41 @@
                 }
                 return idx_a - idx_b;
             });
-            // remove duplicated xref values of less important sources
-            var clean_data = data.filter(function(obj, pos, arr){
-                return arr.map(function(obj){return obj.xref;}).indexOf(obj.xref) === pos
-                    || (obj.source !== "SourceID" && obj.source !== "SourceAC")
+            // remove any potential evidence code from the xref
+            data.forEach(function(obj) {
+                const i = obj.xref.indexOf(" {");
+                if (i >= 0) obj.xref = obj.xref.slice(0, i);
             });
-            _.forEach(_.groupBy(clean_data, "source"), function(xrefs, source){
 
-                var list_item = [];
+            // Remove duplicate xref values only for lower-priority sources
+            const seen = new Set();
+            const clean_data = data.filter(obj => {
+                if (obj.source !== "SourceID" && obj.source !== "SourceAC") return true;
+                if (seen.has(obj.xref)) return false;
+                seen.add(obj.xref);
+                return true;
+            });
+            _.forEach(_.groupBy(clean_data, "source"), (xrefs, source) => {
+                const exact = [];
+                const unchecked = [];
+                const modified = [];
 
-                _.forEach(xrefs, function(ref){
-
-
-
-                    var d = xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}");
-
-                    if (source === "Protein Name"){
-
-                        if (ref.seq_match === "unchecked" ) {
-                            list_item.unshift(" ")
-                            list_item.unshift(d)
-                        }
-
-
-                        else{
-                            list_item.push("<i style='color:grey;'>'" + d + "'</i> " )
-                         list_item.push(" ")
-                        }
-
-
-
-
-
-
+                xrefs.forEach(ref => {
+                    const d = xref_format.dbxref_url(ref.xref, ref.source, "{{ entry.genome.release }}");
+                    if (ref.seq_match === "exact") {
+                        exact.push(d);
+                    } else if (ref.seq_match === "unchecked") {
+                        unchecked.push(d);
+                    } else if (ref.seq_match === "modified") {
+                        modified.push(`<i style="color:grey;">'${d}'</i>`);
                     }
-                    else{
-                         list_item.push(d)
-                         list_item.push(" ")
-                    }
-
-
                 });
+                if (exact.length > 0 && unchecked.length > 0){
+                    unchecked.forEach(e => `<i>${e}</i>`);
+                }
 
-
-                list_item.unshift("<td>")
-                list_item.unshift("<tr> <td>" + source + "</td>")
-
-
-
-                list_item.push("</td>")
-                $('#xrefs').append(list_item.join("")+"</tr>\n");
+                const cells = [...exact, ...unchecked, ...modified].join(" ");
+                $('#xrefs').append(`<tr><td>${source}</td><td>${cells}</td></tr>\n`);
             });
         });
         $("#loader-xrefs").hide();

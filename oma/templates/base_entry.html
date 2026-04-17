@@ -1,5 +1,6 @@
 {% extends  "base_data_centric.html" %}
 {% load static %}
+{% load oma_extras %}
 
 {% block title %}Entry {{entry.omaid}} | {{entry.canonicalid}} {% endblock %}
 
@@ -23,7 +24,7 @@
 
     {% for key in entry.xrefs %}
 
-         {% if key.source == 'Protein Name' and key.seq_match == 'unchecked' %} | <b>{{  key.xref }} </b>
+         {% if key.source == 'Protein Name' and key.seq_match != 'modified' %} | <b>{{  key.xref|strip_evidence }} </b>
          {% endif %}
 
 
@@ -32,7 +33,7 @@
 
     {% for key in entry.xrefs %}
 
-        {% if key.source == 'Gene Name' and key.seq_match == 'unchecked' %}  <b>  [{{  key.xref }}]</b>
+        {% if key.source == 'Gene Name' and key.seq_match != 'modified' %}  <b>  [{{  key.xref|strip_evidence }}]</b>
          {% endif %}
 
 
