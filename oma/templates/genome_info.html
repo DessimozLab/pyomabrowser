@@ -26,7 +26,8 @@
      {% if genome.uniprot_species_code %} <tr><td>UniProt identifier:</td><td>{{ genome.uniprot_species_code }}</td></tr> {% endif %}
      {% if genome.ncbi_taxon_id %}  <tr><td>{% if genome.ncbi_taxon_id > 0 %}NCBI {% endif %}Taxonomy ID:</td>
         {% if genome.ncbi_taxon_id > 0 %}<td><a class="external" target="_blank" href="https://uniprot.org/taxonomy/{{ genome.ncbi_taxon_id }}/">{{ genome.ncbi_taxon_id }}</a></td>
-        {% else %}<td><a href="{% url "taxmap" genome.ncbi_taxon_id %}">{{ genome.ncbi_taxon_id }}</a></td>
+        {% elif taxmap_enabled %}<td><a href="{% url "taxmap" genome.ncbi_taxon_id %}">{{ genome.ncbi_taxon_id }}</a></td>
+        {% else %}<td>{{ genome.ncbi_taxon_id }}</td>
         {% endif %}
      </tr> {% endif %}
      {% if genome.release %} <tr><td>DB Release:</td><td>{{ genome.release }}</td></tr> {% endif %}

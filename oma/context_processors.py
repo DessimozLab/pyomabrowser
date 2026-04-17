@@ -21,5 +21,6 @@ def oma_instance(request):
         "export_enabled": "export" in settings.INSTALLED_APPS,
         "omamo_enabled": "omamo" in settings.INSTALLED_APPS,
         "matomo_tracker_code": "matomo_api_tracking" in settings.INSTALLED_APPS,
+        "taxmap_enabled": "taxmap" in settings.INSTALLED_APPS,
     }
     return res
