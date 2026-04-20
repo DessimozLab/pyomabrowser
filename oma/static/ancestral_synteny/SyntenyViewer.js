@@ -187,10 +187,10 @@ class SyntenyViewer {
 
 
         return `
-         
+
          <p class='ui_title' > HOGs</p>
-        
-        <div class='ui_div' > 
+
+        <div class='ui_div' >
             <p class='ui_text' ><b>Height</b></p>
             <span>
             <select name=""  id="selecthhei">
@@ -202,9 +202,9 @@ class SyntenyViewer {
             <input id='outlier_hog_height' type="checkbox" ${check_hei} > <label for="">Remove outliers</label>
             </span>
         </div>
-        
-       
-        <div class='ui_div'> 
+
+
+        <div class='ui_div'>
             <p class='ui_text' ><b>Coloring</b></p>
             <span><select name="" id="selecthcol">
             <option value="nr_members"># Members</option>
@@ -248,11 +248,11 @@ class SyntenyViewer {
     _settings_Edges(){
 
         return `
-           
+
         <p class='ui_title'> Edges</p>
-        
-   
-        <div class='ui_div'> 
+
+
+        <div class='ui_div'>
             <p class='ui_text' ><b>Thickness</b></p>
             <span><select name="" id="selectecol">
             <option value="Weight">Weight</option>
@@ -412,7 +412,7 @@ class SyntenyViewer {
             .style("padding", "8px")
             .style("position", "absolute")
             .style("font-size", '16px')
-            .style("z-index", '999')
+            .style("z-index", '998')
 
         this.y_offset = this.settings.margin.top;
         this.master_g = this.svg.append("g").attr("id", 'master_g');
@@ -1102,5 +1102,3 @@ class SyntenyViewer {
     }
 
 }
-
-

@@ -1,27 +1,32 @@
 {% extends  "base_template.html" %}
 
 {% block content %}
+<div class="oma-fullheight-wrapper">
+    <div class="oma-details-header ">
+        {% block header_body %} {% endblock%}
+    </div>
 
-<div class="oma-details-header ">
-
-    {% block header_body %} {% endblock%}
-
-
-</div>
-
-<div class="oma-details-container">
-
-    {% block data_content %} {% endblock data_content%}
-
+    <div class="oma-details-container">
+        {% block data_content %} {% endblock data_content%}
+    </div>
 </div>
 
 
 <script>
-
-
+    (function () {
+        var header = document.querySelector('.oma-details-header');
+        if (!header) return;
+        function updateHeaderHeight() {
+            document.documentElement.style.setProperty('--header-height', header.offsetHeight + 'px');
+        }
+        updateHeaderHeight();
+        window.addEventListener('resize', updateHeaderHeight);
+    })();
 
 
     $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip({ container: 'body' });
+
         $("#toggleSidenav").click(function () {
             $('#sideNavMobile').toggle();
             $('#oma-details-sideNav-mobile').toggleClass('sideNavMobile-opened');
@@ -67,35 +72,18 @@
 
     $(document).on("click",".toggle-visibility", function () {
 
-
         var nav =   document.getElementById("sideNavMobile");
-        var content =   document.getElementsByClassName("oma-details-content")[0];
         var toggle =   document.getElementsByClassName("toggle-visibility")[0];
 
-
-        if (nav.offsetWidth > 0) {
-
-            toggle.innerHTML = '&#8250;'
-
-            nav.setAttribute("style","width:0px");
-
-        content.setAttribute("style","margin-left:0px");
-
-        toggle.setAttribute("style","left:0px");
-
-
+        if (nav.style.display !== 'none' && nav.offsetWidth > 0) {
+            toggle.innerHTML = '&#8250;';
+            nav.style.display = 'none';
+            toggle.setAttribute("style","left:0px");
+        } else {
+            toggle.innerHTML = '&#8249;';
+            nav.style.display = '';
+            toggle.setAttribute("style","left:280px");
         }
-
-        else {
-
-            toggle.innerHTML = "&#8249;"
-
-            nav.setAttribute("style","width:280px");
-
-        content.setAttribute("style","margin-left:300px");
-
-        toggle.setAttribute("style","left:280px");
-            }
 
 
 
@@ -112,7 +100,3 @@
 
 
 {% endblock content %}
-
-
-
-
