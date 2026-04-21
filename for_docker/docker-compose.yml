@@ -25,10 +25,8 @@ services:
     ports:
       - 8000
     depends_on:
-      broker:
-        condition: service_healthy
-      db:
-        condition: service_healthy
+      - broker
+      - db
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:8000/oma/health/ || exit 1"]
       interval: 30s
