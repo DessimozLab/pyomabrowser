@@ -53,10 +53,16 @@
                             Text format
                         </a>
                             <br>
-                            <a href="{{ download_root }}/oma-groups.orthoXML.xml.gz">
+                            {%  with "oma-groups.orthoXML.gz oma-groups.orthoXML.xml.gz" as orthoxmls  %}
+                            {% for xml in orthoxmls.split %}
+                            {% if xml in existing_download_files %}
+                            <a href="{{ download_root }}/{{ xml }}">
                                 <i class="fas fa-download"></i>
                                 OrthoXML format
                             </a>
+                            {% endif %}
+                            {% endfor %}
+                            {% endwith %}
                         </dd>
                     </dl>
 
@@ -90,23 +96,17 @@
                         </dd>
                     </dl>
 
+                    {% if "oma-paris.txt.gz" in existing_download_files %}
                     <hr>
-
                     <dl class="row">
                         <dt class="col-sm-6">Pairwise orthologs</dt>
                         <dd class="col-sm-6"><a href="{{ download_root }}/oma-pairs.txt.gz">
                             <i class="fas fa-download"></i>
                             Text format
                         </a>
-
-                            <!--<a href="{{ download_root }}/oma-pairs.orthoXML.xml.gz">
-                                    <span class="glyphicon glyphicon-download">
-                                    </span>
-                                    OrthoXML format
-                                </a> -->
-
                         </dd>
                     </dl>
+                    {% endif %}
 
                     <hr>
 
@@ -116,17 +116,10 @@
                         <dt class="col-sm-6">Pairs between two species</dt>
                         <dd class="col-sm-6">
                             <a href="{% url 'genomePW'  %}">Genome Pair View <i class="fas fa-external-link-alt"></i> </a>
-
-                        </a>
-
                         </dd>
                     </dl>
 
                     {% endblock genomePW %}
-
-
-
-
 
 
                 </div>
@@ -137,40 +130,52 @@
             <br>
 
             {% block Sequences %}
-
-
             <div class="card">
                 <div class="card-header" id='sequences'>
                     Sequences
                 </div>
                 <div class="card-body">
                     <p>
-                        All sequences with the corresponding OMA identifiers can be downloaded in fasta files. The
+                        All protein and coding sequences can be downloaded in fasta files. We use the OMA identifiers
+                        to identify the sequences. Cross-references to UniProt, RefSeq and Ensembl are also available
+                        as tsv files (see below in the Mapping section).
+
+                        {% if not "cds.fa.gz" in existing_download_files %}
+                        The
                         proteins are all in one file, while the coding DNA is split into two files, one for the
                         Eukaryotes and one for the Prokaryotes.
+                        {% endif %}
                     </p>
 
 
                     <hr>
-
-
                     <dl class="row">
                         <dt class="col-sm-6">Protein sequences</dt>
                         <dd class="col-sm-6"><a href="{{ download_root }}/oma-seqs.fa.gz">
                             <i class="fas fa-download"></i>
                             Fasta format
                         </a>
+                            {% if 'oma-seqs.seqxml.tgz' in existing_download_files %}
                             <br>
                             <a href="{{ download_root }}/oma-seqs.seqxml.tgz">
                                 <i class="fas fa-download"></i>
                                 SeqXML format
                             </a>
+                            {% endif %}
                         </dd>
                     </dl>
 
-
-
                     <hr>
+                    {% if "cds.fa.gz" in existing_download_files %}
+                    <dl class="row">
+                        <dt class="col-sm-6">Coding sequences (CDS)</dt>
+                        <dd class="col-sm-6"><a href="{{ download_root }}/cds.fa.gz">
+                            <i class="fas fa-download"></i>
+                            Fasta format
+                        </a>
+                    </dl>
+                    <hr>
+                    {% endif %}
 
                     {% if "eukaryotes.cdna.fa.gz" in existing_download_files %}
                     <dl class="row">
@@ -217,19 +222,8 @@
                         </a>
                         </dd>
                     </dl>
-
-
-
-
-
-
-
-
-
                 </div>
             </div>
-
-
             {% endblock Sequences %}
 
             <br>
@@ -248,7 +242,6 @@
                     </p>
 
                     <hr>
-
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to UniProt:</dt>
                         <dd class="col-sm-6">
@@ -260,8 +253,7 @@
                     </dl>
 
 
-                     <hr>
-
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to Ensembl</dt>
                         <dd class="col-sm-6">
@@ -272,9 +264,7 @@
                         </dd>
                     </dl>
 
-
-                     <hr>
-
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to Refseq ACs</dt>
                         <dd class="col-sm-6">
@@ -285,10 +275,7 @@
                         </dd>
                     </dl>
 
-
-
-                     <hr>
-
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to Entrez Gene IDs</dt>
                         <dd class="col-sm-6">
@@ -299,10 +286,8 @@
                         </dd>
                     </dl>
 
-
-
-                     <hr>
-
+                    {% if "oma-gi.txt.gz" in existing_download_files %}
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to NCBI GIs</dt>
                         <dd class="col-sm-6">
@@ -312,9 +297,10 @@
                         </a>
                         </dd>
                     </dl>
+                    {% endif %}
 
-                     <hr>
 
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to NCBI GenBank IDs</dt>
                         <dd class="col-sm-6">
@@ -325,10 +311,8 @@
                         </dd>
                     </dl>
 
-
-
-                     <hr>
-
+                    {% if 'oma-wormbase.txt.gz' in existing_download_files %}
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to Wormbase</dt>
                         <dd class="col-sm-6">
@@ -338,10 +322,10 @@
                         </a>
                         </dd>
                     </dl>
+                    {% endif %}
 
-
-                     <hr>
-
+                    {% if "oma-jgi.txt.gz" in existing_download_files %}
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to JGI</dt>
                         <dd class="col-sm-6">
@@ -351,11 +335,9 @@
                         </a>
                         </dd>
                     </dl>
+                    {% endif %}
 
-
-
-                     <hr>
-
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to GO</dt>
                         <dd class="col-sm-6">
@@ -366,10 +348,8 @@
                         </dd>
                     </dl>
 
-
-
-                     <hr>
-
+                    {% if 'oma-plants.txt.gz' in existing_download_files %}
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Plant mappings</dt>
                         <dd class="col-sm-6">
@@ -379,7 +359,7 @@
                         </a>
                         </dd>
                     </dl>
-
+                    {% endif %}
 
                 </div>
             </div>
