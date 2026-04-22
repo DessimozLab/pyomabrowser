@@ -105,6 +105,7 @@ deploy_stage:
         git fetch --all
         git reset --hard origin/master
         echo "$CI_JOB_TOKEN" | podman login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+        podman compose -f docker-compose.yml down
         podman compose -f docker-compose.yml pull
         systemctl --user restart podman-compose@pyoma.service
       EOF
