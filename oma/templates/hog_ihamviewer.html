@@ -348,13 +348,19 @@
             $.ajax({url: "/oma/hogdata/{{ entry.omaid }}/json",dataType: "text"})
         ).then(function(orthoxml, speciestree, fam_data) {
 
-
-            fam_data = JSON.parse(fam_data[0]);
+            let parsed_fam_data;
+            try{
+                parsed_fam_data = JSON.parse(fam_data[0]);
+            } catch (e) {
+                console.warn("Could not parse hog data");
+                console.warn(fam_data[0]);
+                parsed_fam_data = [];
+            }
 
             var iham = iHam()
                 .newick(speciestree[0])
                 .orthoxml(orthoxml[0])
-                .fam_data(fam_data)
+                .fam_data(parsed_fam_data)
                 .on('node_selected', function (node) {
                     d3.select('#current_level_text')
                         .text(node.node_name());
