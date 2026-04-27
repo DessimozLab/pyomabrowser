@@ -372,7 +372,7 @@
     };
 
     exports.format_xref = function(value, row) {
-        var buf = "";
+        let buf = "";
         $.each(xref_re, function (src, obj) {
             if (obj.re.test(value)) {
                 buf = '<a class="external" target="_blank" href="' + obj.url(value)
@@ -387,6 +387,12 @@
         // in case no regex match, just display xref value
         if (buf.length === 0){
             buf = value;
+        }
+        let protid;
+        if (row.hasOwnProperty('protid')) protid = row.protid;
+        else if (row.hasOwnProperty('omaid')) protid = row.omaid;
+        if (protid) {
+            buf += "&nbsp;<a href='/oma/info/" + protid + "' title='more cross references'><i class=\"fas fa-ellipsis-h\"></i></a>"
         }
         return buf;
     };
