@@ -137,3 +137,28 @@ def run_export_celery(data_id, genomes):
     finally:
         job.processing = False
         job.save()
+
+
+@shared_task(soft_time_limit=6*3600)
+def run_fastoma_export(data_id, genomes):
+    from . import export_fastoma
+    job = StandaloneExportJobs.objects.get(data_hash=data_id)
+
+    build_folder = settings.EXPORT_OMA.get('build_folder', None)
+    job.state = "running"
+    job.processing = True
+    job.create_time = timezone.now()
+    job.save()
+    try:
+        export_fastoma.build_export_tarball(
+            utils.db, genomes=genomes, outfn=job.result.path, tmpfolder=build_folder
+        )
+        job.state = "done"
+        job.create_time = timezone.now()
+    except Exception as e:
+        job.state = "error"
+        job.message = str(e)
+        logger.error("fastoma export job %s on %s failed: %s", data_id, genomes, e)
+    finally:
+        job.processing = False
+        job.save()

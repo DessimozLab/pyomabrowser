@@ -125,33 +125,45 @@ $(document).ready(function() {
                     };
                 } else {
                     export_button = document.getElementById('buttonSubmitMarkerGenes');
-                    export_button.onclick = function() {
-                        var urlExport = "/oma/export_markers/?";
-                        var min_species_coverage = document.getElementById('min_species_coverage_input').value;
-                        var max_nr_markers = document.getElementById('max_nr_markers_input').value;
-                        var sp_frac = 0.5;
-                        if (min_species_coverage !== ''){
-                            var sp_frac = parseFloat(min_species_coverage)
-                            if (sp_frac <= 0 || sp_frac > 1){
-                                alert('Minimum fraction of covered species must in range (0, 1]');
-                                return;
+                    if (export_button) {
+                        export_button.onclick = function() {
+                            var urlExport = "/oma/export_markers/?";
+                            var min_species_coverage = document.getElementById('min_species_coverage_input').value;
+                            var max_nr_markers = document.getElementById('max_nr_markers_input').value;
+                            var sp_frac = 0.5;
+                            if (min_species_coverage !== ''){
+                                var sp_frac = parseFloat(min_species_coverage)
+                                if (sp_frac <= 0 || sp_frac > 1){
+                                    alert('Minimum fraction of covered species must in range (0, 1]');
+                                    return;
+                                }
                             }
-                        }
-                        urlExport += "min_species_coverage=" + sp_frac;
-                        if (max_nr_markers !== ''){
-                            var nr_markers = parseInt(max_nr_markers, 10);
-                            if (isNaN(nr_markers)){
-                                alert("Maximum number of markers must be a value");
-                                return;
-                            }
-                            urlExport += "&max_nr_markers="+nr_markers;
+                            urlExport += "min_species_coverage=" + sp_frac;
+                            if (max_nr_markers !== ''){
+                                var nr_markers = parseInt(max_nr_markers, 10);
+                                if (isNaN(nr_markers)){
+                                    alert("Maximum number of markers must be a value");
+                                    return;
+                                }
+                                urlExport += "&max_nr_markers="+nr_markers;
 
+                            }
+                            for (var i in arrayIdSelectedGenome){
+                                urlExport += "&genomes="+hashGenome[arrayIdSelectedGenome[i]];
+                            }
+                            OpenInNewTab(urlExport);
+                        };
+                    } else {
+                        export_button = document.getElementById("buttonSubmitFastOMA");
+                        export_button.onclick = function() {
+                            let urlExport = "/oma/fastoma-export/?";
+                            for (let i in arrayIdSelectedGenome){
+                                urlExport += (i === 0 ? '' : '&') + 'genomes='+hashGenome[arrayIdSelectedGenome[i]];
+                            }
+                            console.log(urlExport);
+                            OpenInNewTab(urlExport);
                         }
-                        for (var i in arrayIdSelectedGenome){
-                            urlExport += "&genomes="+hashGenome[arrayIdSelectedGenome[i]];
-                        }
-                        OpenInNewTab(urlExport);
-                    };
+                    }
                 }
             })();
 
