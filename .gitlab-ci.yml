@@ -100,7 +100,7 @@ deploy_stage:
     - ssh-keyscan -H ${STAGE_HOST} >> ~/.ssh/known_hosts
   script:
     - |
-      ssh ${USER}@${STAGE_HOST} << 'EOF'
+      ssh ${USER}@${STAGE_HOST} << EOF
         cd pyomabrowser/for_docker
         git fetch --all
         git reset --hard origin/master
