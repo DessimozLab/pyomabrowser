@@ -2,8 +2,10 @@ import itertools
 import collections
 from hashlib import md5
 import logging
+from typing import List, Dict
 
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from oma.utils import db
 from pyoma.browser.models import ProteinEntry
 from django.utils.http import urlencode
@@ -65,6 +67,7 @@ class ReadOnlySerializer(serializers.Serializer):
 
 
 class GenomeBaseSerializer(ReadOnlySerializer):
+    """Base serializer for Genomes"""
     code = serializers.CharField(max_length=5, source='uniprot_species_code')
     taxon_id = serializers.IntegerField(source='ncbi_taxon_id')
     species = serializers.CharField(source='sciname')
@@ -72,20 +75,26 @@ class GenomeBaseSerializer(ReadOnlySerializer):
 
 
 class GenomeInfoSerializer(GenomeBaseSerializer):
+    """Serializer for Genomes including the URL to the detail view"""
     genome_url = serializers.HyperlinkedIdentityField(
-        view_name='genome-detail',
+        view_name='oma_rest:genome-detail',
         lookup_field='uniprot_species_code',
         lookup_url_kwarg='genome_id')
 
 
 class GenomeDetailSerializer(GenomeBaseSerializer):
+    """Genome serializer with detail information"""
     nr_entries = serializers.IntegerField()
     lineage = serializers.ListSerializer(child=serializers.CharField())
-    proteins = serializers.HyperlinkedIdentityField(view_name='genome-proteins', read_only=True,
+    proteins = serializers.HyperlinkedIdentityField(view_name='oma_rest:genome-proteins', read_only=True,
                                                          lookup_field='uniprot_species_code',
                                                          lookup_url_kwarg='genome_id')
     chromosomes = serializers.SerializerMethodField(method_name=None)
 
+    @extend_schema_field({'type': 'array', 'items': {'type': 'object', 'properties': {
+        'id': {'type': 'string'},
+        'entry_ranges': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'integer'}, "minItems": 2, "maxItems": 2}, "minItems": 1},
+    }}})
     def get_chromosomes(self, obj):
         chrs = []
         for chr_id in obj.chromosomes:
@@ -101,7 +110,7 @@ class GenomeDetailSerializer(GenomeBaseSerializer):
 class ProteinEntrySerializer(ReadOnlySerializer):
     entry_nr = serializers.IntegerField(required=True)
     entry_url = serializers.HyperlinkedIdentityField(
-        view_name='protein-detail',
+        view_name='oma_rest:protein-detail',
         lookup_field='entry_nr',
         lookup_url_kwarg='entry_id')
     omaid = serializers.CharField()
@@ -115,13 +124,16 @@ class ProteinEntrySerializer(ReadOnlySerializer):
     locus = serializers.SerializerMethodField(method_name=None)
     is_main_isoform = serializers.BooleanField()
 
+    @extend_schema_field({'type': 'object', 'properties': {
+        'start': {'type': 'integer'}, 'end': {'type': 'integer'}, 'strand': {'type': 'integer'}}})
     def get_locus(self, obj):
         return collections.OrderedDict([('start', obj.locus_start), ('end', obj.locus_end), ('strand', obj.strand)])
 
 
 class ProteinEntryWithXRefSerializer(ProteinEntrySerializer):
     xrefs = serializers.SerializerMethodField(method_name=None, required=False)
-    def get_xrefs(self, obj):
+    #@extend_schema_field({'type': 'object', 'additionalProperties': {'type': 'string'}})
+    def get_xrefs(self, obj) -> Dict[str, str]:
         if obj.xrefs is not None:
             res = collections.defaultdict(str)
             res.update({key: value['id'].decode() for key, value in obj.xrefs.items()})
@@ -135,28 +147,29 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
     sequence = serializers.CharField()
     cdna = serializers.CharField()
     description = serializers.CharField()
-    domains = serializers.HyperlinkedIdentityField(view_name='protein-domains', read_only=True,
+    domains = serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-domains', read_only=True,
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    xref = serializers.HyperlinkedIdentityField(view_name='protein-xref', read_only=True, lookup_field='entry_nr',
+    xref = serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-xref', read_only=True, lookup_field='entry_nr',
                                                 lookup_url_kwarg='entry_id')
-    orthologs = serializers.HyperlinkedIdentityField(view_name='protein-orthologs', read_only=True,
+    orthologs = serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-orthologs', read_only=True,
                                                      lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    homoeologs = OnlyPolyploidHyperlinkedIdentifyField(view_name='protein-homoeologs',
+    homoeologs = OnlyPolyploidHyperlinkedIdentifyField(view_name='oma_rest:protein-homoeologs',
                                                   lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    gene_ontology = serializers.HyperlinkedIdentityField(view_name='protein-gene-ontology', read_only=True,
+    gene_ontology = serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-gene-ontology', read_only=True,
                                                     lookup_field='entry_nr', lookup_url_kwarg='entry_id')
-    oma_group_url = OptionalHyperlinkedIdentityField(view_name='group-detail', lookup_field='oma_group',
+    oma_group_url = OptionalHyperlinkedIdentityField(view_name='oma_rest:group-detail', lookup_field='oma_group',
                                                          lookup_url_kwarg='group_id', nullvalues=[0])
-    oma_hog_members = OptionalHyperlinkedIdentityField(view_name='hog-members', lookup_field='oma_hog',
+    oma_hog_members = OptionalHyperlinkedIdentityField(view_name='oma_rest:hog-members', lookup_field='oma_hog',
                                                            lookup_url_kwarg='hog_id', nullvalues=('', b''))
-    isoforms = serializers.HyperlinkedIdentityField(view_name="protein-isoforms", read_only=True,
+    isoforms = serializers.HyperlinkedIdentityField(view_name="oma_rest:protein-isoforms", read_only=True,
                                                     lookup_field="entry_nr", lookup_url_kwarg='entry_id')
     alternative_isoforms_urls = serializers.ListSerializer(
-        child=serializers.HyperlinkedIdentityField(view_name='protein-detail', lookup_field='entry_nr',
+        child=serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-detail', lookup_field='entry_nr',
                                                    lookup_url_kwarg='entry_id', read_only=True),
         source='alternative_isoforms')
 
-    def get_hog_levels(self, obj):
+    @extend_schema_field({'type': 'array', 'items': {'type': 'string'}})
+    def get_hog_levels(self, obj) -> List[str]:
         protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)
         levs_of_fam = frozenset([z.decode() for z in db.hog_levels_of_fam(protein.hog_family_nr)])
         levels = []
@@ -175,10 +188,12 @@ class IsoformProteinSerializer(ProteinEntrySerializer):
     locus = serializers.SerializerMethodField(method_name=None)
     nr_exons = serializers.SerializerMethodField(method_name=None)
 
+    @extend_schema_field({'type': 'array', 'items': {'type': 'object', 'properties': {
+        'start': {'type': 'integer'}, 'end': {'type': 'integer'}, 'strand': {'type': 'string'}}}})
     def get_locus(self, obj):
         return obj.exons.as_list_of_dict()
 
-    def get_nr_exons(self, obj):
+    def get_nr_exons(self, obj) -> int:
         return len(obj.exons)
 
 
@@ -213,7 +228,7 @@ class OmaGroupSerializer(ReadOnlySerializer):
     fingerprint = serializers.CharField()
     description = serializers.CharField()
     related_groups = serializers.HyperlinkedIdentityField(
-        view_name='group-close-groups',
+        view_name='oma_rest:group-close-groups',
         lookup_field='GroupNr',
         lookup_url_kwarg='group_id')
     members = serializers.ListSerializer(child=ProteinEntrySerializer())
@@ -236,13 +251,13 @@ class BaseGeneOntologySerializer(ReadOnlySerializer):
     aspect = serializers.CharField()
     ic = serializers.FloatField()
 
-    def get_id(self, obj):
+    def get_id(self, obj) -> str:
         return str(obj.object_id)
 
-    def get_GO_term(self, obj):
+    def get_GO_term(self, obj) -> str:
         return str(obj.term)
 
-    def get_name(self, obj):
+    def get_name(self, obj) -> str:
         return obj.term.name
 
 class GeneOntologySerializer(BaseGeneOntologySerializer):
@@ -254,10 +269,10 @@ class AncestralGeneOntologySerializer(BaseGeneOntologySerializer):
     #stars = serializers.SerializerMethodField(method_name=None)
     score = serializers.SerializerMethodField(method_name=None)
 
-    def get_id(self, obj):
+    def get_id(self, obj) -> str:
         return str(obj.anno['HogID'].decode())
 
-    def get_score(self, obj):
+    def get_score(self, obj) -> float:
         return float(obj.anno['RawScore'])
 
     #def get_stars(self, obj):
@@ -267,7 +282,7 @@ class AncestralGeneOntologySerializer(BaseGeneOntologySerializer):
 class GroupListSerializer(ReadOnlySerializer):
     oma_group = serializers.IntegerField(source='GroupNr')
     group_url = serializers.HyperlinkedIdentityField(
-        view_name='group-detail',
+        view_name='oma_rest:group-detail',
         lookup_field='GroupNr',
         lookup_url_kwarg='group_id')
 
@@ -279,10 +294,10 @@ class RelatedGroupsSerializer(GroupListSerializer):
 class HOGsBaseSerializer(ReadOnlySerializer):
     hog_id = serializers.CharField()
     level = serializers.CharField(required=False)
-    levels_url = QueryParamHyperlinkedIdentityField(view_name='hog-detail',
+    levels_url = QueryParamHyperlinkedIdentityField(view_name='oma_rest:hog-detail',
                                                     lookup_field='hog_id',
                                                     query_params={'level': 'level'})
-    members_url = QueryParamHyperlinkedIdentityField(view_name='hog-members',
+    members_url = QueryParamHyperlinkedIdentityField(view_name='oma_rest:hog-members',
                                                      query_params={'level': 'level'},
                                                      lookup_field='hog_id')
     alternative_levels = serializers.ListSerializer(required=False,
@@ -295,16 +310,16 @@ class HOGsListSerializer(HOGsBaseSerializer):
     description = serializers.SerializerMethodField(method_name=None)
     nr_genes = serializers.FloatField(required=False)
     similar_profile_hogs = serializers.HyperlinkedIdentityField(
-        view_name="hog-similar-profile-hogs",
+        view_name="oma_rest:hog-similar-profile-hogs",
         lookup_field="roothog_id",
         lookup_url_kwarg="hog_id")
 
-    def get_description(self, obj):
+    def get_description(self, obj) -> str:
         return db.get_roothog_keywords(obj.roothog_id)
 
 
 class HOGsCompareListSerializer(HOGsListSerializer):
-    event = serializers.CharField()
+    event = serializers.CharField(required=False, help_text='Evolutionary event between the two compared levels. Only present when `compare_with` is supplied.')
 
 
 class HOGsLevelDetailSerializer(HOGsListSerializer):
@@ -349,7 +364,7 @@ class PairwiseRelationSerializer(ReadOnlySerializer):
     score = serializers.FloatField()
     oma_group = serializers.SerializerMethodField(method_name=None)
 
-    def get_oma_group(self, obj):
+    def get_oma_group(self, obj) -> int:
         if obj.entry_1.oma_group == obj.entry_2.oma_group and obj.entry_1.oma_group != 0:
             return obj.entry_1.oma_group
         return ""
@@ -363,6 +378,11 @@ class TaxonSerializer(ReadOnlySerializer):
 class TaxonomyNewickSerializer(ReadOnlySerializer):
     root_taxon = TaxonSerializer()
     newick = serializers.CharField()
+
+
+class TaxonomyPhyloXMLSerializer(ReadOnlySerializer):
+    root_taxon = TaxonSerializer()
+    phyloxml = serializers.CharField()
 
 
 class EnrichmentAnalysisInputSerializer(serializers.ModelSerializer):
@@ -405,7 +425,7 @@ class EnrichmentAnalysisInputSerializer(serializers.ModelSerializer):
         data['data_hash'] = self.get_data_hash(data)
         return data
 
-    def get_data_hash(self, data):
+    def get_data_hash(self, data) -> str:
         h = md5()
         if 'taxlevel' in data:
             h.update(data['taxlevel'].encode('utf-8'))
@@ -415,6 +435,8 @@ class EnrichmentAnalysisInputSerializer(serializers.ModelSerializer):
 
 
 class EnrichmentAnalysisStatusSerializer(serializers.ModelSerializer, ReadOnlySerializer):
+    foreground = serializers.JSONField()
+
     class Meta:
         model = EnrichmentAnalysisModel
         fields = ['id', 'data_hash', 'type', 'foreground', 'name', 'state', 'message', 'result', 'result_json']

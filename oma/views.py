@@ -12,9 +12,7 @@ import hashlib
 import collections
 
 import networkx as nx
-import pandas as pd
-import sklearn
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
 from django.utils.decorators import method_decorator
@@ -24,13 +22,11 @@ from django.views.generic.base import ContextMixin
 from django.urls import reverse
 from django.core.mail import EmailMessage
 from django.db import connections
-from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.shortcuts import redirect, resolve_url
 
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 
-import tweepy
 import logging
 import itertools
 import os
@@ -1049,8 +1045,8 @@ class GenomeCentricGenes(GenomeBase, TemplateView):
         context.update({'tab': 'genes', 'api_base': 'genome',
                         'genome_name': context['genome'].sciname,
                         'parent_level': parent_level,
-                        'api_url_protein': '/api/genome/{}/genes/?per_page=250000'.format(species_id),
-                        'api_url_hog': '/api/hog/?level={}&compare_with={}&per_page=250000'.format(
+                        'api_url_protein': reverse("oma_rest:genome-genes", args=(species_id,)) + "?per_page=250000",
+                        'api_url_hog': reverse("oma_rest:hog-list") + '?level={}&compare_with={}&per_page=250000'.format(
                             context['genome'].sciname, parent_level)
                         })
 
@@ -1304,7 +1300,7 @@ class AncestralGenomeCentricGenes(AncestralGenomeBase, TemplateView):
 
         context.update({'tab': 'genes',
                         'level': level,
-                        'api_url': '/api/hog/?level={}&per_page=250000'.format(context['genome_name']),
+                        'api_url': reverse("oma_rest:hog-list") + '?level={}&per_page=250000'.format(context['genome_name']),
                         'parent_level': parent_level,
                         'ancestral_link_name': "ancestralgenome_genes"})
         return context
@@ -1633,7 +1629,7 @@ class HOGgo(HOGBase, TemplateView):
         context = super(HOGgo, self).get_context_data(hog_id, **kwargs)
         hog = context['hog']
         context.update({'tab': 'go',
-                        'api_url': '/api/hog/{}/gene_ontology/?level={}'.format(hog.hog_id, hog.level),
+                        'api_url': reverse("oma_rest:hog-gene-ontology", args=(hog.hog_id,)) + f'?level={hog.level}',
                         'lineage_link_name': 'hog_go',
                         })
         return context
@@ -1647,7 +1643,7 @@ class HOGtable(HOGBase, TemplateView):
         hog = context['hog']
         context.update({'tab': 'table',
                         'api_base': 'hog',
-                        'api_url': '/api/hog/{}/members/?level={}'.format(hog.hog_id, hog.level),
+                        'api_url': reverse("oma_rest:hog-members", args=(hog.hog_id,)) + f'?level={hog.level}',
                         'lineage_link_name': 'hog_table',
                         })
         return context
@@ -1667,59 +1663,6 @@ class HOGSynteny(HOGBase, TemplateView):
 
     def get_context_data(self, hog_id, **kwargs):
         context = super(HOGSynteny, self).get_context_data(hog_id, **kwargs)
-
-        '''
-
-        try:
-            graph = utils.db.get_syntenic_hogs(hog_id=hog_id, level=context['level'], steps=2)
-        except db.DBConsistencyError as e:
-            raise Http404(str(e))
-
-        ancestral_synteny = {"nodes": [], "links": []}
-        neigh = []
-
-        # Prune the hog neighbor to prevent unreadable graph
-        limit_first_radius = 20
-        limit_second_radius = 5
-
-        logger.debug("pruning of big graph")
-        # get the source hog node
-        selected_node = [n for n, v in graph.nodes(data=True) if n == hog_id]
-        if len(selected_node) != 1:
-            logger.info("Error during graph pruning, {} nodes have been found for {}".format(len(selected_node), hog_id))
-
-        neighbors = [selected_node[0]]
-        logger.debug("pruning of big graph: query node found")
-        e = graph.edges(selected_node[0], data="weight")
-        if len(e) < limit_first_radius:
-            limit_first_radius = len(e)
-            logger.debug("pruning of big graph:  first radius receive")
-
-        for edge in sorted(e, key=lambda x: x[2], reverse=True)[:limit_first_radius]:
-            neighbors.append(edge[1])
-            se = graph.edges(edge[1], data="weight")
-            logger.debug("pruning of big graph:  second radius receive / {} ".format(limit_first_radius))
-            if len(se) < limit_second_radius:
-                limit_second_radius = len(se)
-            for subedge in sorted( se,key=lambda x: x[2], reverse=True)[:limit_second_radius]:
-                neighbors.append(subedge[1])
-        graph = graph.subgraph(neighbors)
-        logger.debug("pruning of big graph:  done ")
-
-        for n in graph.nodes.data('weight'):
-            ancestral_synteny["nodes"].append({"id": n[0], "name": n[0]})
-        for e in graph.edges.data('weight'):
-            ancestral_synteny["links"].append({"source_id": e[0], "target_id": e[1], "weight": str(e[2])})
-            if e[0] == hog_id:
-                h = models.HOG(utils.db, e[1])
-                neigh.append({'hog': e[1], 'weight': str(e[2]), 'description': h.keyword})
-            if e[1] == hog_id:
-                h = models.HOG(utils.db, e[0])
-                neigh.append({'hog': e[0], 'weight': str(e[2]), 'description': h.keyword})
-        logger.debug("data ready to ship ")
-
-        '''
-
         context.update({'tab': 'synteny',
                         'hog_id': hog_id,
                         'lineage_link_name': 'hog_synteny'})  # synteny': ancestral_synteny,'neighbor': neigh})
@@ -2005,10 +1948,6 @@ class HOGsBase(ContextMixin, EntryCentricMixin):
         return context
 
 
-class HOGsView(HOGsBase, TemplateView):
-    template_name = "hogs.html"
-
-
 class HOGsJson(HOGsBase, JsonModelMixin, View):
     json_fields = {'omaid': 'protid', 'genome.kingdom': 'kingdom',
                    'genome.species_and_strain_as_dict': 'taxon',
@@ -2114,6 +2053,56 @@ def domains_json(request, entry_id):
     domains = utils.db.get_domains(entry['EntryNr'])
     response = misc.encode_domains_to_dict(entry, domains, utils.domain_source)
     return JsonResponse(response)
+
+
+class PhyloXMLSpeciesTreeView(View):
+    """Serve the species tree rooted at *root_id* as a PhyloXML file download."""
+
+    def get(self, request, root_id):
+        tax_obj = utils.db.tax
+
+        # Resolve root_id to a numeric taxon id (mirrors TaxonomyViewSet.retrieve logic)
+        taxon_id = None
+        try:
+            taxon_id = int(root_id)
+        except ValueError:
+            if len(root_id) == 5:
+                try:
+                    g = utils.db.id_mapper['OMA'].genome_from_UniProtCode(root_id.upper())
+                    taxon_id = int(g['NCBITaxonId'])
+                except Exception:
+                    pass
+                    #raise Http404("Unknown species code '{}'".format(root_id))
+            elif root_id.upper() == 'LUCA':
+                taxon_id = None
+
+            if taxon_id is None:
+                taxonomy_tab = utils.db.get_hdf5_handle().root.Taxonomy
+                hits = taxonomy_tab.read_where('Name==root_id', field='NCBITaxonId')
+                if len(hits) != 1:
+                    raise Http404("Taxonomic level '{}' not found".format(root_id))
+                taxon_id = int(hits[0])
+
+        if taxon_id is None:
+            # Full tree
+            tx = tax_obj
+        else:
+            # Subtree rooted at taxon_id
+            def _collect_subtree(tid):
+                ids = [tid]
+                for child in tax_obj._direct_children_taxa(tid):
+                    ids.extend(_collect_subtree(int(child['NCBITaxonId'])))
+                return ids
+
+            branch = _collect_subtree(taxon_id)
+            tx = tax_obj.get_induced_taxonomy(members=branch, collapse=True)
+
+        phyloxml_bytes = tx.as_phyloxml()
+
+        filename = "speciestree_{}.phyloxml".format(root_id)
+        response = HttpResponse(phyloxml_bytes, content_type='application/vnd.phyloxml+xml')
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+        return response
 
 
 # //</editor-fold>

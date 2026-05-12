@@ -1,9 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from rest_framework.schemas import get_schema_view
-from rest_framework.documentation import include_docs_urls
-from django.template.loader import render_to_string
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+
+# namespace for the API
+app_name = 'oma_rest'
 
 router = DefaultRouter()
 router.register(r'protein', views.ProteinEntryViewSet, basename='protein')
@@ -15,8 +16,6 @@ router.register(r'hog', views.HOGViewSet, basename='hog')
 router.register(r'taxonomy', views.TaxonomyViewSet, basename='taxonomy')
 router.register(r'synteny', views.SyntenyViewSet, basename="synteny")
 
-# create docu-description from template
-desc = render_to_string("oma_rest/documentation_description.html", {})
 urlpatterns = [
     path('', include(router.urls)),
     path('pairs/<slug:genome_id1>/<slug:genome_id2>/',
@@ -29,9 +28,9 @@ urlpatterns = [
     path('function/', views.PropagateFunctionAPIView.as_view(), name='function-propagation'),
     path('enrichment/', views.CreateEnrichmentAnalysisView.as_view(), name='enrichment-create'),
     path('enrichment/status/<slug:id>/', views.StatusEnrichmentAnalysisView.as_view(), name='enrichment-status'),
-    path('schema/', get_schema_view(title="OMA REST API")),
-    path('docs', include_docs_urls(title='REST API for the OMA Browser',
-                                    description=desc)),
+    path('schema/', SpectacularAPIView.as_view(versioning_class=None), name='schema'),
+    path('docs/', SpectacularSwaggerView.as_view(url_name='oma_rest:schema'), name='swagger-ui'),
+    path('docs/redoc/', SpectacularRedocView.as_view(url_name='oma_rest:schema'), name='redoc'),
 ]
 
 

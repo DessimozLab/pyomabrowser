@@ -6,12 +6,39 @@ import itertools
 
 class LinkHeaderPagination(drf_link_header_pagination.LinkHeaderPagination):
     page_size_query_param = 'per_page'
-    max_page_size = 10000000
+    max_page_size = 10_000_000
 
     def get_paginated_response(self, data):
         response = super(LinkHeaderPagination, self).get_paginated_response(data)
         response['X-Total-Count'] = self.page.paginator.count
         return response
+
+    def get_paginated_response_schema(self, schema):
+        """Tell drf_spectacular that the response body is a plain array.
+
+        Pagination metadata is carried in response headers:
+        - ``X-Total-Count``: total number of results
+        - ``Link``: RFC-5988 links with rel=first/prev/next/last
+        """
+        return schema
+
+    def get_schema_operation_parameters(self, view):
+        return [
+            {
+                'name': self.page_query_param,
+                'required': False,
+                'in': 'query',
+                'description': 'Page number (1-based).',
+                'schema': {'type': 'integer', 'minimum': 1},
+            },
+            {
+                'name': self.page_size_query_param,
+                'required': False,
+                'in': 'query',
+                'description': f'Number of results per page.',
+                'schema': {'type': 'integer', 'minimum': 1},
+            },
+        ]
 
 
 class PaginationMixin(object):

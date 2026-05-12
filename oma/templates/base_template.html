@@ -224,9 +224,10 @@
                         <div class="dropdown-divider"></div>
 
                         <div role="presentation" class="dropdown-header">API</div>
-                        <a class="dropdown-item" href="{% url 'api-docs:docs-index' %}">OMA API</a>
-                        <a class="dropdown-item" href="https://bioconductor.org/packages/release/bioc/html/OmaDB.html">R API binding</a>
-                        <a class="dropdown-item" href="https://github.com/DessimozLab/pyomadb">Python API binding</a>
+                        <a class="dropdown-item" href="{% url 'oma_rest:redoc' %}">OMA API reference</a>
+                        <a class="dropdown-item" href="{% url 'oma_rest:swagger-ui' %}">OMA API explorer</a>
+                        <a class="dropdown-item" href="https://bioconductor.org/packages/release/bioc/html/OmaDB.html">R client library</a>
+                        <a class="dropdown-item" href="https://github.com/DessimozLab/pyomadb">Python client library</a>
 
                         <div class="dropdown-divider"></div>
                         <div role="presentation" class="dropdown-header">Semantic web</div>

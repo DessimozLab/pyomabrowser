@@ -32,7 +32,6 @@ if DEBUG:
     import socket  # only if you haven't already imported this
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
-print(INTERNAL_IPS)
 
 # Application definition
 INSTALLED_APPS = [
@@ -44,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
     'drf_link_header_pagination',
     'oma',
     'oma_rest',
@@ -71,13 +72,25 @@ MIDDLEWARE = [
     'oma.middleware.OutdatedHogIdRedirector',
 ]
 
+_API_VERSION = "1.11"
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'oma_rest.pagination.LinkHeaderPagination',
     'PAGE_SIZE': 100,
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning',
-    'DEFAULT_VERSION': '1.10',
-    'ALLOWED_VERSIONS': ('1.0', '1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', '1.10'),
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_VERSION': _API_VERSION,
+    'ALLOWED_VERSIONS': ('1.0', '1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', '1.10', '1.11'),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'OMA REST API',
+    'DESCRIPTION': open(os.path.join(BASE_DIR, '..', 'oma_rest', 'api_description.md')).read(),
+    'VERSION': _API_VERSION,
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'tryItOutEnabled': True,
+    },
 }
 
 
