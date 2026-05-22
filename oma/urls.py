@@ -32,6 +32,8 @@ urlpatterns = [
     path('isoform/<entry_id>/', views.Entry_Isoform.as_view(), name="entry_isoform"),
     path('isoform/<entry_id>/json/', views.IsoformsJson.as_view(), name="isoforms_json"),
     path('sequences/<entry_id>/', views.Entry_sequences.as_view(), name="entry_sequences"),
+    path('structure/<entry_id>/', views.EntryStructure.as_view(), name="entry_structure"),
+    path('structure/<entry_id>/fasta/', views.EntryStructureFasta.as_view(), name="entry_structure_fasta"),
 
     # HOG
     path('hog/resolve/<hog:hog_id>/', views.resolve_hog_id, name="hog-resolve"),

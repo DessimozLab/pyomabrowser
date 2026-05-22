@@ -753,7 +753,7 @@ class Entry_sequences(TemplateView, InfoBase):
         context = super(Entry_sequences, self).get_context_data(entry_id, **kwargs)
 
         # get the query entry
-        entry = self.get_entry(entry_id)
+        entry = context['entry']
 
         # Get all isoforms including itself
         isoforms = entry.alternative_isoforms
@@ -774,6 +774,33 @@ class Entry_sequences(TemplateView, InfoBase):
 
         return context
 
+
+class EntryStructure(TemplateView, InfoBase):
+    template_name = "entry_structure.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        context = super().get_context_data(entry_id, **kwargs)
+        entry = context['entry']
+        structure_info = entry.structure
+        if structure_info:
+            af_acc = None
+            if structure_info.source == "AlphaFold":
+                af_acc = [e["xref"] for e in entry.xrefs if e["source"].startswith("UniProtKB") and '_' not in e["xref"] and e["seq_match"] == "exact"]
+                af_acc = af_acc[0] if af_acc else None
+
+            context.update({
+                'tab': "structure",
+                'structure_source': structure_info.source,
+                'structure_3di': structure_info.seq_3di.decode(),
+                'alpha_fold': af_acc,
+                'structure_available': True,
+            })
+        else:
+            context.update({
+                'tab': "structure",
+                'structure_available': False,
+            })
+        return context
 
 class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
     json_fields = {'omaid': 'protid',
@@ -885,6 +912,14 @@ class InfoViewFasta(InfoBase, FastaView):
 class InfoViewCDSFasta(InfoViewFasta):
     def get_sequence(self, member):
         return member.cdna
+
+class EntryStructureFasta(InfoViewFasta):
+    def get_fastaheader(self, member):
+        return " | ".join([member.omaid, member.canonicalid, "3di-source: "+member.structure.source,
+                           "[{}]".format(member.genome.sciname)])
+
+    def get_sequence(self, member):
+        return member.structure.seq_3di.decode()
 
 
 class HomoeologBase(ContextMixin, EntryCentricMixin):
