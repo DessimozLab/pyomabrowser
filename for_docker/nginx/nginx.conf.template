@@ -6,6 +6,9 @@
 {{- $THROTTLED := or ($log_rate_limit_file | ne "") (or ($user_agent_bot_file | ne "") ($subnet_bot_file | ne "")) }}
 {{- $is_dev := eq ((getenv "DEPLOYMENT_TYPE") | strings.ToUpper | strings.Trunc 3) "DEV" }}
 {{- $log_to_file := getenv "NGINX_LOG_TO_FILE" | default "false" | conv.ToBool }}
+{{- $kc_issuer := getenv "OAUTH2_PROXY_OIDC_ISSUER_URL" }}
+{{- $kc_client_id := getenv "OAUTH2_PROXY_CLIENT_ID" }}
+{{- $kc_client_secret := getenv "OAUTH2_PROXY_CLIENT_SECRET" }}
 
 upstream pyoma {
     server web:8000;
@@ -116,6 +119,21 @@ server {
     access_log /dev/stdout;
     error_log  /dev/stderr {{ if $is_dev -}} info {{- else -}} warn {{- end }};
 
+    # Public token proxy: injects client credentials server-side for device flow
+    location = /api/auth/device {
+        proxy_pass {{ $kc_issuer }}/protocol/openid-connect/auth/device;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_body "client_id={{ $kc_client_id }}&client_secret={{ $kc_client_secret }}";
+        proxy_ssl_server_name on;
+    }
+
+    location = /api/auth/token {
+        proxy_pass {{ $kc_issuer }}/protocol/openid-connect/token;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_body "$request_body&client_id={{ $kc_client_id }}&client_secret={{ $kc_client_secret }}";
+        proxy_ssl_server_name on;
+    }
+
     location ~ ^/(oma|api)/ {
         {{- if $THROTTLED }}
         if ($should_throttle)  {
@@ -125,6 +143,11 @@ server {
         proxy_pass http://pyoma;
         proxy_redirect off;
         uwsgi_read_timeout 100;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Auth-Request-User $http_x_auth_request_user;
+        proxy_set_header X-Auth-Request-Email $http_x_auth_request_email;
     }
 
     location = /cgi-bin/gateway.pl {
