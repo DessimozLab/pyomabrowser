@@ -1876,8 +1876,16 @@ class HOGsMSA(AsyncJobMixin, HOGBase, TemplateView):
             "msa_file_obj": job,
             "lineage_link_name": "hog_msa",
             "tab": "msa",
+            "subtab": "protein",
             "unaligned_url": reverse("hog_fasta", args=(hog.hog_id, hog.level)),
         })
+        return context
+
+
+class HOGsStructureMSA(HOGsMSA):
+    def get_context_data(self, **kwargs):
+        context = super(HOGsStructureMSA, self).get_context_data(**kwargs)
+        context['subtab'] = "structure"
         return context
 
 class MSAStatus(AsyncJobMixin, View):

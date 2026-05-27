@@ -64,6 +64,8 @@ urlpatterns = [
     path('hog/<hog:hog_id>/3di-fasta/', views.HOG3diFasta.as_view(), name='hog_3di_fasta'),
     path('hog/<hog:hog_id>/<lev:level>/msa/', views.HOGsMSA.as_view(), name='hog_msa'),
     path('hog/<hog:hog_id>/msa/', views.HOGsMSA.as_view(), name='hog_msa'),
+    path('hog/<hog:hog_id>/<lev:level>/structure-msa/', views.HOGsStructureMSA.as_view(), name='hog_msa_structure'),
+    path('hog/<hog:hog_id>/structure-msa/', views.HOGsStructureMSA.as_view(), name='hog_msa_structure'),
 
     path('hog/<hog:hog_id>/<lev:level>/table/', views.HOGtable.as_view(), name='hog_table'),
     path('hog/<hog:hog_id>/table/', views.HOGtable.as_view(), name='hog_table'),
