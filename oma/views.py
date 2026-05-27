@@ -1861,6 +1861,8 @@ class HOGsMSA(AsyncJobMixin, HOGBase, TemplateView):
     template_name = "hog_msa.html"
     job_model = FileResult
     task = tasks.compute_msa
+    result_type = "msa_hog"
+    tool = "Mafft"
 
     def get_context_data(self, **kwargs):
         context = super(HOGsMSA, self).get_context_data(**kwargs)
@@ -1869,9 +1871,9 @@ class HOGsMSA(AsyncJobMixin, HOGBase, TemplateView):
             max_nr_seqs = int(self.request.GET.get('max_nr_seqs', 2000))
         except ValueError:
             max_nr_seqs = 2000
-        job = self.get_or_create_job(extra_fields={"result_type": "msa_hog"},
+        job = self.get_or_create_job(extra_fields={"result_type": self.result_type},
                                      group_type="hog", hog_id_or_grp_nr=hog.hog_id, level=hog.level,
-                                     max_nr_seqs=max_nr_seqs)
+                                     tool=self.tool, max_nr_seqs=max_nr_seqs)
         context.update({
             "msa_file_obj": job,
             "lineage_link_name": "hog_msa",
@@ -1883,9 +1885,13 @@ class HOGsMSA(AsyncJobMixin, HOGBase, TemplateView):
 
 
 class HOGsStructureMSA(HOGsMSA):
+    result_type = "hog_structure_msa"
+    tool = "Foldmason"
+
     def get_context_data(self, **kwargs):
         context = super(HOGsStructureMSA, self).get_context_data(**kwargs)
         context['subtab'] = "structure"
+        context["lineage_link_name"] = "hog_msa_structure"
         return context
 
 class MSAStatus(AsyncJobMixin, View):
