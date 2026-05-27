@@ -1693,6 +1693,16 @@ class HOGFasta(FastaView, HOGBase):
         return self.render_to_fasta_response(context['hog'].members)
 
 
+class HOG3diFasta(HOGFasta):
+    def get_fastaheader(self, memb):
+        return " | ".join([memb.omaid, memb.canonicalid, "3di-source: " + memb.structure.source,
+                           "[{}]".format(memb.genome.sciname)])
+
+    def get_sequence(self, memb):
+        return memb.structure.seq_3di.decode()
+
+
+
 class HOGSynteny(HOGBase, TemplateView):
     template_name = "hog_synteny.html"
 
