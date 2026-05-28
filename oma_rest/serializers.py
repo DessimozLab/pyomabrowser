@@ -4,10 +4,10 @@ from hashlib import md5
 import logging
 from typing import List, Dict
 
+from requests import structures
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from oma.utils import db
-from pyoma.browser.models import ProteinEntry
 from django.utils.http import urlencode
 from .models import EnrichmentAnalysisModel, ENRICHMENT_CHOICES
 
@@ -146,6 +146,7 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
 
     sequence = serializers.CharField()
     cdna = serializers.CharField()
+    structure = serializers.SerializerMethodField(method_name=None, required=False)
     description = serializers.CharField()
     domains = serializers.HyperlinkedIdentityField(view_name='oma_rest:protein-domains', read_only=True,
                                                    lookup_field='entry_nr', lookup_url_kwarg='entry_id')
@@ -170,13 +171,19 @@ class ProteinEntryDetailSerializer(ProteinEntrySerializer):
 
     @extend_schema_field({'type': 'array', 'items': {'type': 'string'}})
     def get_hog_levels(self, obj) -> List[str]:
-        protein = ProteinEntry.from_entry_nr(db, obj.entry_nr)
-        levs_of_fam = frozenset([z.decode() for z in db.hog_levels_of_fam(protein.hog_family_nr)])
+        levs_of_fam = frozenset([z.decode() for z in db.hog_levels_of_fam(obj.hog_family_nr)])
         levels = []
-        for lev in itertools.chain(protein.genome.lineage, ('LUCA',)):
+        for lev in itertools.chain(obj.genome.lineage, ('LUCA',)):
             if lev.encode('ascii') in db.tax.all_hog_levels and lev in levs_of_fam:
                 levels.append(lev)
         return levels
+
+    @extend_schema_field({'type': 'object', 'properties': {
+        'source': {'type': 'string'}, 'sequence_3di': {'type': 'string'}}})
+    def get_structure(self, obj) -> Dict[str, str]:
+        if obj.structure:
+            return {"source": obj.structure.source, "sequence_3di": obj.structure.seq_3di.decode()}
+        return {}
 
 
 class XRef2ProteinDetailSerializer(ReadOnlySerializer):

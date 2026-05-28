@@ -176,7 +176,7 @@
             }
 
              document.getElementById("cdna_div").innerHTML='<pre>' + format_uniprot(d.cdna)  + '</pre>'
-             document.getElementById("cdna_href").href= "{% url 'entry_fasta' 12345 %}".replace(/12345/, d.protid)
+             document.getElementById("cdna_href").href= "{% url 'entry_cds' 12345 %}".replace(/12345/, d.protid)
             document.querySelector('.cdna').setAttribute('data-clipboard-text', d.cdna);
 
 

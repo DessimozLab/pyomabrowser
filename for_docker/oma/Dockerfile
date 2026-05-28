@@ -104,6 +104,7 @@ RUN useradd --system --no-create-home oma
 
 # add gosu for easy step-down from root
 ARG TARGETPLATFORM
+ARG FOLDMASON_VERSION=4-dd3c235
 RUN set -eux; \
     apt-get -qq update \
     && apt-get install -y --no-install-recommends \
@@ -120,6 +121,34 @@ RUN set -eux; \
     chmod +x /usr/local/bin/gosu; \
     gosu nobody true; \
     rm -rf /var/lib/apt/lists/*
+
+# --- Install foldmason ---
+# On arm64: single binary. On amd64: install avx2/sse41/sse2 variants and a
+# wrapper that selects the best one at runtime by inspecting /proc/cpuinfo.
+RUN set -eux; \
+    BASE_URL="https://github.com/steineggerlab/foldmason/releases/download/${FOLDMASON_VERSION}"; \
+    case "$TARGETPLATFORM" in \
+      "linux/arm64") \
+        wget -q -O /tmp/foldmason.tar.gz "${BASE_URL}/foldmason-linux-arm64.tar.gz"; \
+        tar -xzf /tmp/foldmason.tar.gz -C /tmp; \
+        mv /tmp/foldmason/bin/foldmason /usr/local/bin/foldmason; \
+        chmod +x /usr/local/bin/foldmason; \
+        rm -rf /tmp/foldmason /tmp/foldmason.tar.gz; \
+        ;; \
+      "linux/amd64") \
+        for VARIANT in avx2 sse41 sse2; do \
+          wget -q -O /tmp/foldmason-${VARIANT}.tar.gz "${BASE_URL}/foldmason-linux-${VARIANT}.tar.gz"; \
+          mkdir -p /tmp/foldmason-${VARIANT}; \
+          tar -xzf /tmp/foldmason-${VARIANT}.tar.gz -C /tmp/foldmason-${VARIANT}; \
+          mv /tmp/foldmason-${VARIANT}/foldmason/bin/foldmason /usr/local/bin/foldmason.${VARIANT}; \
+          chmod +x /usr/local/bin/foldmason.${VARIANT}; \
+          rm -rf /tmp/foldmason-${VARIANT} /tmp/foldmason-${VARIANT}.tar.gz; \
+        done; \
+        printf '#!/bin/sh\nif grep -qw avx2 /proc/cpuinfo 2>/dev/null; then\n    exec /usr/local/bin/foldmason.avx2 "$@"\nelif grep -qw sse4_1 /proc/cpuinfo 2>/dev/null; then\n    exec /usr/local/bin/foldmason.sse41 "$@"\nelse\n    exec /usr/local/bin/foldmason.sse2 "$@"\nfi\n' > /usr/local/bin/foldmason; \
+        chmod +x /usr/local/bin/foldmason; \
+        ;; \
+      *) echo "Unsupported platform: $TARGETPLATFORM" >&2; exit 1 ;; \
+    esac
 
 COPY --from=oma_basis --chown=oma /app /app
 ENV PATH="/app/bin:$PATH"

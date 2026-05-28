@@ -22,5 +22,6 @@ def oma_instance(request):
         "omamo_enabled": "omamo" in settings.INSTALLED_APPS,
         "matomo_tracker_code": "matomo_api_tracking" in settings.INSTALLED_APPS,
         "taxmap_enabled": "taxmap" in settings.INSTALLED_APPS,
+        "structure_db_available": hasattr(db, "structure_db") and db.structure_db,
     }
     return res

@@ -226,12 +226,19 @@
 
         </li>
 
+        {% if structure_db_available %}
+        <li class="{% if tab == "structure" %} active selected {% endif %}">
+            <a href="{% url 'entry_structure' entry.query_id %}">
+                <span>Structure</span>
+            </a>
+        </li>
+        {% endif %}
+
         <li class="{% if tab == 'synteny' %} active selected {%endif%}">
             <a href="{% url 'synteny' entry.query_id 5 5 %}">
                 <span>Local synteny</span>
 
             </a>
-
         </li>
 
     </ul>

@@ -753,7 +753,7 @@ class Entry_sequences(TemplateView, InfoBase):
         context = super(Entry_sequences, self).get_context_data(entry_id, **kwargs)
 
         # get the query entry
-        entry = self.get_entry(entry_id)
+        entry = context['entry']
 
         # Get all isoforms including itself
         isoforms = entry.alternative_isoforms
@@ -774,6 +774,33 @@ class Entry_sequences(TemplateView, InfoBase):
 
         return context
 
+
+class EntryStructure(TemplateView, InfoBase):
+    template_name = "entry_structure.html"
+
+    def get_context_data(self, entry_id, **kwargs):
+        context = super().get_context_data(entry_id, **kwargs)
+        entry = context['entry']
+        structure_info = entry.structure
+        if structure_info:
+            af_acc = None
+            if structure_info.source == "AlphaFold":
+                af_acc = [e["xref"] for e in entry.xrefs if e["source"].startswith("UniProtKB") and '_' not in e["xref"] and e["seq_match"] == "exact"]
+                af_acc = af_acc[0] if af_acc else None
+
+            context.update({
+                'tab': "structure",
+                'structure_source': structure_info.source,
+                'structure_3di': structure_info.seq_3di.decode(),
+                'alpha_fold': af_acc,
+                'structure_available': True,
+            })
+        else:
+            context.update({
+                'tab': "structure",
+                'structure_available': False,
+            })
+        return context
 
 class IsoformsJson(Entry_Isoform, JsonModelMixin, View):
     json_fields = {'omaid': 'protid',
@@ -885,6 +912,14 @@ class InfoViewFasta(InfoBase, FastaView):
 class InfoViewCDSFasta(InfoViewFasta):
     def get_sequence(self, member):
         return member.cdna
+
+class EntryStructureFasta(InfoViewFasta):
+    def get_fastaheader(self, member):
+        return " | ".join([member.omaid, member.canonicalid, "3di-source: "+member.structure.source,
+                           "[{}]".format(member.genome.sciname)])
+
+    def get_sequence(self, member):
+        return member.structure.seq_3di.decode()
 
 
 class HomoeologBase(ContextMixin, EntryCentricMixin):
@@ -1658,6 +1693,16 @@ class HOGFasta(FastaView, HOGBase):
         return self.render_to_fasta_response(context['hog'].members)
 
 
+class HOG3diFasta(HOGFasta):
+    def get_fastaheader(self, memb):
+        return " | ".join([memb.omaid, memb.canonicalid, "3di-source: " + memb.structure.source,
+                           "[{}]".format(memb.genome.sciname)])
+
+    def get_sequence(self, memb):
+        return memb.structure.seq_3di.decode()
+
+
+
 class HOGSynteny(HOGBase, TemplateView):
     template_name = "hog_synteny.html"
 
@@ -1816,6 +1861,8 @@ class HOGsMSA(AsyncJobMixin, HOGBase, TemplateView):
     template_name = "hog_msa.html"
     job_model = FileResult
     task = tasks.compute_msa
+    result_type = "msa_hog"
+    tool = "Mafft"
 
     def get_context_data(self, **kwargs):
         context = super(HOGsMSA, self).get_context_data(**kwargs)
@@ -1824,15 +1871,27 @@ class HOGsMSA(AsyncJobMixin, HOGBase, TemplateView):
             max_nr_seqs = int(self.request.GET.get('max_nr_seqs', 2000))
         except ValueError:
             max_nr_seqs = 2000
-        job = self.get_or_create_job(extra_fields={"result_type": "msa_hog"},
+        job = self.get_or_create_job(extra_fields={"result_type": self.result_type},
                                      group_type="hog", hog_id_or_grp_nr=hog.hog_id, level=hog.level,
-                                     max_nr_seqs=max_nr_seqs)
+                                     tool=self.tool, max_nr_seqs=max_nr_seqs)
         context.update({
             "msa_file_obj": job,
             "lineage_link_name": "hog_msa",
             "tab": "msa",
+            "subtab": "protein",
             "unaligned_url": reverse("hog_fasta", args=(hog.hog_id, hog.level)),
         })
+        return context
+
+
+class HOGsStructureMSA(HOGsMSA):
+    result_type = "hog_structure_msa"
+    tool = "Foldmason"
+
+    def get_context_data(self, **kwargs):
+        context = super(HOGsStructureMSA, self).get_context_data(**kwargs)
+        context['subtab'] = "structure"
+        context["lineage_link_name"] = "hog_msa_structure"
         return context
 
 class MSAStatus(AsyncJobMixin, View):

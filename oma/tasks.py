@@ -12,6 +12,7 @@ import gzip
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from pyoma.browser.exceptions import DBVersionError
 
 from .decorators import async_job_task
 from .misc import result_upload_path
@@ -22,7 +23,7 @@ except ImportError:
     IUPAC = None
 from django.core.mail import EmailMessage
 from django.template.loader import get_template
-from zoo.wrappers.aligners import Mafft, DataType, WrapperError
+from zoo.wrappers.aligners import Mafft, Foldmason, DataType, WrapperError
 from zoo.utils import auto_open
 
 from django.conf import settings
@@ -120,7 +121,7 @@ class FastaTarballResultBuilder(object):
         return misc.as_fasta(headers=headers, seqs=seqs), misc.as_fasta(headers=headers, seqs=cds)
 
 
-@async_job_task(FileResult, soft_time_limit=800, logical_inputs=dict(group_type="group_type", group_id="hog_id_or_grp_nr", level="level", max_seqs="max_nr_seqs"))
+@async_job_task(FileResult, soft_time_limit=800, logical_inputs=dict(group_type="group_type", group_id="hog_id_or_grp_nr", level="level", tool="tool", max_seqs="max_nr_seqs"))
 def compute_msa(job: FileResult, group_type, hog_id_or_grp_nr, **kwargs):
     logger.info(f'starting computing MSA for {group_type} {hog_id_or_grp_nr} with data_id {job.data_hash}')
     t0  = time.perf_counter()
@@ -129,7 +130,8 @@ def compute_msa(job: FileResult, group_type, hog_id_or_grp_nr, **kwargs):
         memb = utils.db.member_of_hog_id(hog_id_or_grp_nr, level)
     elif group_type == 'og':
         memb = utils.db.oma_group_members(hog_id_or_grp_nr)
-    seqs = []
+    tool = kwargs.get('tool', 'Mafft')
+    seqs, struc = [], []
     for e in memb:
         prot = pyoma.browser.models.ProteinEntry(utils.db, e)
         if IUPAC is not None:
@@ -137,22 +139,46 @@ def compute_msa(job: FileResult, group_type, hog_id_or_grp_nr, **kwargs):
         else:
             seq = Seq(prot.sequence)
         seqs.append(SeqRecord(seq, id=prot.omaid, annotations={"molecule_type": "protein"}))
+        if tool == 'Foldmason':
+            try:
+                three_di = prot.structure.seq_3di.decode()
+                seq = Seq(three_di, IUPAC.protein) if IUPAC else Seq(three_di)
+            except (AttributeError, KeyError) as e:
+                logger.warning("No structure found for %s", prot.omaid)
+                raise DBVersionError("No structure found for %s", prot.omaid)
+            struc.append(SeqRecord(seq, id=prot.omaid, annotations={"molecule_type": "protein"}))
+
     avg_len = sum([len(s) for s in seqs])/len(seqs) if len(seqs) > 0 else 0
     n_seqs = len(seqs)
     logger.info("msa for %d sequences (avg length: %.1f)",len(seqs), avg_len)
 
     if kwargs.get('max_nr_seqs') and n_seqs > kwargs['max_nr_seqs']:
         logger.warning("too many sequences for msa (%d), subsampling!", n_seqs)
-        seqs = random.sample(seqs, kwargs['max_nr_seqs'])
+        keep = random.sample(range(len(seqs)), kwargs['max_nr_seqs'])
+        seqs = [seqs[k] for k in keep]
+        if tool == 'Foldmason':
+            struc = [struc[k] for k in keep]
 
     try:
-        mafft = Mafft(seqs, datatype=DataType.PROTEIN)
-        msa = mafft()
+        if tool=="Mafft":
+            aligner = Mafft(seqs, datatype=DataType.PROTEIN)
+            msa = aligner()
+        elif tool=="Foldmason":
+            aligner = Foldmason(seqs, struc, datatype=DataType.PROTEIN)
+            res = aligner()
+            msa = res['aa']
+            msa_3di = res['3di']
+        else:
+            raise NotImplementedError(f"MSA tool {tool} not implemented")
         name = result_upload_path('msa', "MSA", job.data_hash, "fasta.gz")
         path = os.path.join(settings.MEDIA_ROOT, name)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with gzip.open(path, 'wt') as fh:
             SeqIO.write(msa, fh, 'fasta')
+        if tool == 'Foldmason':
+            path_3di = path.replace('.fasta.gz', '_3di.fasta.gz')
+            with gzip.open(path_3di, 'wt') as fh:
+                SeqIO.write(msa_3di, fh, 'fasta')
     except (IOError, WrapperError) as e:
         arglist = [group_type, str(hog_id_or_grp_nr), *kwargs.items()]
         logger.exception('error while computing msa for dataset: {}'.format(
@@ -161,9 +187,9 @@ def compute_msa(job: FileResult, group_type, hog_id_or_grp_nr, **kwargs):
 
     tot_time = time.perf_counter() - t0
     logger.info(
-        'finished compute_msa task. took %.3f sec, %.3f%% for mafft',
+        f'finished compute_msa task. took %.3f sec, %.3f%% for {tool}',
         tot_time,
-        100 * mafft.elapsed_time / tot_time
+        100 * aligner.elapsed_time / tot_time
     )
     task_meta = {
         'n_sequences': n_seqs,
@@ -171,8 +197,11 @@ def compute_msa(job: FileResult, group_type, hog_id_or_grp_nr, **kwargs):
         'avg_length': avg_len,
         'subsampled': kwargs.get('max_nr_seqs') is not None and n_seqs > kwargs['max_nr_seqs'],
         'compression': 'gzip',
+        'tool': tool,
     }
     return name, task_meta
+
+
 
 
 class FunctionProjectorMock(object):

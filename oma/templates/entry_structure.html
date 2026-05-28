@@ -1,0 +1,114 @@
+{% extends "base_entry.html" %}
+{% load static %}
+{% load oma_extras %}
+
+{% block title %}Structure information for {{ entry.omaid }}{% endblock %}
+{% block meta_description %}Structure information for {{ entry.omaid }} as 3di and protein sequences {% if af_acc %}, and AlphaFold model{% endif %}{% endblock %}
+
+{% block contentTab %}
+
+<div class="container-fluid">
+    {% if not structure_available %}
+            <div class="alert alert-warning" role="alert">
+                No structure information is available for this entry.
+            </div>
+    {% else %}
+            {% if alpha_fold %}
+            <div>
+
+                <h4 >AlphaFold Model</h4>
+                <link rel="stylesheet" href="///cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.css" />
+                <script src="///cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.js"></script>
+
+                <div id="viewer" style="width:600px; height:300px; position: relative;"></div>
+
+                <script>
+                molstar.Viewer.create('viewer', {
+                  layoutIsExpanded: false,
+                  layoutShowControls: false,
+                  layoutShowLeftPanel: false,
+                }).then(viewer => {
+                  viewer.loadStructureFromUrl(
+                      'https://alphafold.ebi.ac.uk/files/AF-{{ alpha_fold }}-F1-model_v6.cif',
+                      'mmcif'
+                  );
+                });
+                </script>
+            <div>
+            <hr>
+            {% endif  %}
+
+            <h4>Structural Alphabet (3DI)</h4>
+            <table class="table">
+                <tr><td>Source</td><td>{{ structure_source }}</td></tr>
+            </table>
+
+            <div class="card " style="display: inline-block">
+                <button class="btn btn-sm seq_3di" data-clipboard-text="{{ structure_3di }}">
+                    Copy to clipboard
+                </button>
+                <h6 class="float-right" style="margin: 8px">Download:<a href="{% url 'entry_structure_fasta' entry.omaid %}"><i class="fas fa-download"></i> Fasta</a></h6>
+                    <div id="protein_3di_div" class="card-body" >
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <h4 >Protein Sequence </h4>
+            <div class="card " style="display: inline-block">
+                <button class="btn btn-sm seq_prot" data-clipboard-text="{{ entry.sequence }} ">
+                   Copy to clipboard
+                </button>
+                <h6 class="float-right" style="margin: 8px">Download:<a href="{% url 'entry_fasta' entry.omaid %}"><i class="fas fa-download"></i> Fasta</a></h6>
+                     <div id="protein_seq_div" class="card-body" >
+                     </div>
+                </div>
+            </div>
+
+            <script>
+            const format_uniprot = function(value) {
+                const len_seq = value.length;
+                let res = '';
+
+                for (let i = 0; i < len_seq; i += 60) {
+                    for (let k = i; k < i + 60; k += 10) {
+                        res += value.slice(k, k + 10);
+                        res += ' '
+                    }
+                    let padding = 5;
+
+                    if (i + 60 > len_seq) {
+                        padding += i + 60 - len_seq
+                    }
+                    res += (" ".repeat(padding) + Math.min(i + 60, len_seq)).slice(-padding);
+                    res += '\n'
+                }
+                return res;
+            };
+            document.getElementById("protein_seq_div").innerHTML = `<pre>${format_uniprot("{{ entry.sequence }}")}</pre>`;
+            document.getElementById("protein_3di_div").innerHTML = `<pre>${format_uniprot("{{ structure_3di }}")}</pre>`;
+
+            </script>
+    {% endif %}
+
+</div>
+
+
+
+
+
+
+
+<script src="{% static "js/clipboard.min.js" %}">
+</script>
+
+<script>
+
+    new ClipboardJS('.seq_prot');
+    new ClipboardJS('.seq_3di');
+
+</script>
+
+
+{% endblock contentTab %}

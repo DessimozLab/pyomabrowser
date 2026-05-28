@@ -32,6 +32,8 @@ urlpatterns = [
     path('isoform/<entry_id>/', views.Entry_Isoform.as_view(), name="entry_isoform"),
     path('isoform/<entry_id>/json/', views.IsoformsJson.as_view(), name="isoforms_json"),
     path('sequences/<entry_id>/', views.Entry_sequences.as_view(), name="entry_sequences"),
+    path('structure/<entry_id>/', views.EntryStructure.as_view(), name="entry_structure"),
+    path('structure/<entry_id>/fasta/', views.EntryStructureFasta.as_view(), name="entry_structure_fasta"),
 
     # HOG
     path('hog/resolve/<hog:hog_id>/', views.resolve_hog_id, name="hog-resolve"),
@@ -58,8 +60,12 @@ urlpatterns = [
 
     path('hog/<hog:hog_id>/<lev:level>/fasta/', views.HOGFasta.as_view(), name='hog_fasta'),
     path('hog/<hog:hog_id>/fasta/', views.HOGFasta.as_view(), name='hog_fasta'),
+    path('hog/<hog:hog_id>/<lev:level>/3di-fasta/', views.HOG3diFasta.as_view(), name='hog_3di_fasta'),
+    path('hog/<hog:hog_id>/3di-fasta/', views.HOG3diFasta.as_view(), name='hog_3di_fasta'),
     path('hog/<hog:hog_id>/<lev:level>/msa/', views.HOGsMSA.as_view(), name='hog_msa'),
     path('hog/<hog:hog_id>/msa/', views.HOGsMSA.as_view(), name='hog_msa'),
+    path('hog/<hog:hog_id>/<lev:level>/structure-msa/', views.HOGsStructureMSA.as_view(), name='hog_msa_structure'),
+    path('hog/<hog:hog_id>/structure-msa/', views.HOGsStructureMSA.as_view(), name='hog_msa_structure'),
 
     path('hog/<hog:hog_id>/<lev:level>/table/', views.HOGtable.as_view(), name='hog_table'),
     path('hog/<hog:hog_id>/table/', views.HOGtable.as_view(), name='hog_table'),
