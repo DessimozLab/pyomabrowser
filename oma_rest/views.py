@@ -27,6 +27,8 @@ from rest_framework import status
 from rest_framework_csv.renderers import CSVRenderer
 from distutils.util import strtobool
 from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from packaging.version import Version as _Version
 
 from . import models as rest_models
@@ -1748,6 +1750,7 @@ class CreateAsyncJobAPIView(CreateAPIView):
             return {}
 
 
+@method_decorator(never_cache, name='dispatch')
 class StatusAsyncJobAPIView(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
