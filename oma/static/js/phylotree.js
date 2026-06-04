@@ -60,7 +60,7 @@ $(document).ready(function() {
     function build_dicts(root){
         visit(root, function(d){
             if(!(d.children || d._children)){
-                hashGenome[d.name] = d.id
+                hashGenome[d.name] = d.code || d.id
             }
         },
         function(d) {
@@ -222,8 +222,8 @@ $(document).ready(function() {
                     ID.innerHTML='ID : ';
 
                     var IDA = document.createElement('a');
-                    IDA.innerHTML= d.id +'  '+'<img alt="ext logo" src="/static/image/ext.png" ></a>' ;
-                    IDA.href="/oma/genome/" + d.id +"/info/"
+                    IDA.innerHTML= (d.code || d.id) +'  '+'<img alt="ext logo" src="/static/image/ext.png" ></a>' ;
+                    IDA.href="/oma/genome/" + (d.code || d.id) +"/info/"
                     IDA.target="_blank"
 
                     var TAXID = document.createElement('em');
