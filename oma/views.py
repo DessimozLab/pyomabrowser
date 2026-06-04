@@ -1835,6 +1835,8 @@ class HOGsMSA(AsyncJobMixin, HOGBase, TemplateView):
         })
         return context
 
+
+@method_decorator(never_cache, name='dispatch')
 class MSAStatus(AsyncJobMixin, View):
     job_model = FileResult
 
