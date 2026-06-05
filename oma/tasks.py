@@ -36,7 +36,7 @@ from .models import FileResult
 logger = logging.getLogger(__name__)
 
 
-@async_job_task(model=FileResult)
+@async_job_task(FileResult, logical_inputs=dict(genomes="genomes", min_species_coverage="min_species_coverage", top_N_grps="top_N_grps"))
 def export_marker_genes(job: FileResult, genomes, min_species_coverage=0.5, top_N_grps=None):
     logger.info('starting task export_marker_genes for %s', job.data_hash)
 
