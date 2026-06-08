@@ -64,13 +64,10 @@
             labelName: true,
             labelId: false
         };
-        opts.colorscheme = {
-            scheme: color_scheme_name || "taylor",
-        };
         opts.conf = {
             dropImport: true,
             debug: false
-        };
+        };  
         opts.zoomer = {
             labelIdLength: 20,
             rowHeight: 20,
@@ -87,6 +84,14 @@
 
         // init msa
         const m = new msa.msa(opts);
+        m.g.colorscheme.addStaticScheme("3di", {
+            A: "#DF9A8C", C: "#FB72C5", D: "#B4A3D8", E: "#FF5701", F: "#D99E81",
+            G: "#7491C5", H: "#94ABE1", I: "#609D7B", K: "#D7A304", L: "#FE4C8B",
+            M: "#12A564", N: "#D570FD", P: "#CB99C4", Q: "#DA8E99", R: "#9487D0",
+            S: "#E842FE", T: "#42A299", V: "#FB7EDD", W: "#D1A368", Y: "#17A8FD",
+            X: "#C0C0C0", "-": "#FFFFFF"
+        });
+        m.g.colorscheme.set("scheme", color_scheme_name || "taylor");
         m.seqs.reset(seqs);
         // set max height of alignment
         const h = Math.max(window.innerHeight - opts.zoomer.overviewboxHeight - 160,
@@ -138,7 +143,7 @@
                         header_msa_struc.innerHTML = "<h2>Structure Alphabet MSA (3di)</h2>";
 
                         const msa_3di_url = data.result_url.replace(".fasta.gz", "_3di.fasta.gz");
-                        loadMSA(msa_3di_url, msaStrucDiv, "turn");
+                        loadMSA(msa_3di_url, msaStrucDiv, "3di");
                     }
                     return;
                 }
