@@ -142,7 +142,7 @@ urlpatterns = [
     # Async job status
     path('jobs/msa/<job_hash>/', views.MSAStatus.as_view(), name='msa-status'),
 
-    path('export_markers/', views.export_marker_genes, name='export_markers'),
+    path('export_markers/', views.ExportMarkerGenes.as_view(), name='export_markers'),
     path('markers/<data_id>/', views.MarkerGenesResults.as_view(), name='marker_genes'),
 
     # static pages that can be rendered directly to a template.
@@ -166,7 +166,7 @@ urlpatterns = [
     path('genomePW/', TemplateView.as_view(template_name='tool_genomePW.html'), name='genomePW'),
     path('landOMA/', TemplateView.as_view(template_name='explore_omaGroup.html'), name='landOMA'),
 
-    path('functions/', views.function_projection, name='function-projection-input'),
+    path('functions/', views.FunctionProjection.as_view(), name='function-projection-input'),
     path('functions/<data_id>/', views.FunctionProjectionResults.as_view(), name="function-projection"),
 
     path('go_enrichment/', views.go_enrichment , name='go_enrichment'),

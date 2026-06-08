@@ -1894,6 +1894,7 @@ class HOGsStructureMSA(HOGsMSA):
         context["lineage_link_name"] = "hog_msa_structure"
         return context
 
+@method_decorator(never_cache, name='dispatch')
 class MSAStatus(AsyncJobMixin, View):
     job_model = FileResult
 
@@ -2256,61 +2257,82 @@ class Release(TemplateView):
         return ctx
 
 
-def export_marker_genes(request):
-    if request.method == 'GET' and 'genomes' in request.GET:
-        genomes = request.GET.getlist('genomes')
-        min_species_coverage = float(request.GET.get('min_species_coverage', 0.5))
-        top_N_genomes = int(request.GET.get('max_nr_markers', 200))
-        if top_N_genomes < 0:
-            top_N_genomes = None
-        if len(genomes) >= 2 and 0 < min_species_coverage <= 1:
-            data_id = hashlib.md5(
-                (str(genomes) + str(min_species_coverage) + str(top_N_genomes)).encode('utf-8')
-            ).hexdigest()
+class ExportMarkerGenes(AsyncJobMixin, TemplateView):
+    template_name = "dlOMA_exportMarker.html"
+    job_model = FileResult
+    task = tasks.export_marker_genes
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['max_nr_genomes'] = 200
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if 'genomes' in request.GET:
+            genomes = request.GET.getlist('genomes')
             try:
-                r = FileResult.objects.get(data_hash=data_id)
-                do_compute = r.is_error_or_long_pending()
-            except FileResult.DoesNotExist:
-                do_compute = True
+                min_species_coverage = float(request.GET.get('min_species_coverage', 0.5))
+            except ValueError:
+                min_species_coverage = 0.5
+            try:
+                top_N_grps = int(request.GET.get('max_nr_markers', 200))
+            except ValueError:
+                top_N_grps = 200
+            if top_N_grps < 0:
+                top_N_grps = None
+            if len(genomes) >= 2 and 0 < min_species_coverage <= 1:
+                job = self.get_or_create_job(
+                    extra_fields={"result_type": "markers"},
+                    genomes=genomes,
+                    min_species_coverage=min_species_coverage,
+                    top_N_grps=top_N_grps,
+                )
+                return HttpResponseRedirect(reverse('marker_genes', args=(job.data_hash,)))
+        return super().get(request, *args, **kwargs)
 
-            if do_compute:
-                r = FileResult(data_hash=data_id, result_type='markers', state="pending")
-                r.save()
-                tasks.export_marker_genes.delay(data_id, genomes, min_species_coverage, top_N_genomes)
-            return HttpResponseRedirect(reverse('marker_genes', args=(data_id,)))
-    return render(request, "dlOMA_exportMarker.html", context={'max_nr_genomes': 200})
 
+class FunctionProjection(AsyncJobMixin, TemplateView):
+    template_name = "tool_function_prediction_upload.html"
+    job_model = FileResult
+    task = tasks.assign_go_function_to_user_sequences
 
-def function_projection(request):
-    form_cls = forms.FunctionProjectionUploadForm if 'django_recaptcha' in settings.INSTALLED_APPS else forms.FunctionProjectionUploadFormBase
-    if request.method == 'POST':
-        form = form_cls(request.POST, request.FILES)
+    def get_form_class(self):
+        if 'django_recaptcha' in settings.INSTALLED_APPS:
+            return forms.FunctionProjectionUploadForm
+        return forms.FunctionProjectionUploadFormBase
+
+    def get_context_data(self, form=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = form or self.get_form_class()()
+        context['form'] = form
+        context['max_upload_size'] = form.fields['file'].max_upload_size / (2 ** 20)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form_class()(request.POST, request.FILES)
         if form.is_valid():
             logger.info("received valid function projection form")
-            user_file_info = misc.handle_uploaded_file(request.FILES['file'])
+            user_file_info = misc.handle_uploaded_file(
+                request.FILES['file'],
+                dir=os.path.join(settings.MEDIA_ROOT, 'uploads')
+            )
             data_id = hashlib.md5(user_file_info['md5'].encode('utf-8')).hexdigest()
-            try:
-                r = FileResult.objects.get(data_hash=data_id)
-                do_compute = r.is_error_or_long_pending()
-            except FileResult.DoesNotExist:
-                do_compute = True
-
             result_page = reverse('function-projection', args=(data_id,))
-            if do_compute:
-                r = FileResult(data_hash=data_id, result_type='function_projection', state="pending",
-                               name=form.cleaned_data['name'], email=form.cleaned_data['email'])
-                r.save()
-                tasks.assign_go_function_to_user_sequences.delay(
-                    data_id, user_file_info['fname'], tax_limit=None,
-                    result_url=request.build_absolute_uri(result_page))
-            else:
+            extra_fields = {
+                "result_type": "function_projection",
+                "name": form.cleaned_data['name'],
+                "email": form.cleaned_data['email'],
+            }
+            job = self._get_or_create_by_hash(
+                data_id, extra_fields,
+                sequence_file=user_file_info['fname'],
+                tax_limit=None,
+                result_url=request.build_absolute_uri(result_page),
+            )
+            if job.state != FileResult.STATE_PENDING:
                 os.remove(user_file_info['fname'])
-
             return HttpResponseRedirect(result_page)
-    else:
-        form = form_cls()
-    return render(request, "tool_function_prediction_upload.html",
-                  {'form': form, 'max_upload_size': form.fields['file'].max_upload_size / (2 ** 20)})
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 def go_enrichment(request):

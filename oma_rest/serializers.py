@@ -393,7 +393,7 @@ class TaxonomyPhyloXMLSerializer(ReadOnlySerializer):
 
 
 class EnrichmentAnalysisInputSerializer(serializers.ModelSerializer):
-    status_url = serializers.HyperlinkedIdentityField('enrichment-status', lookup_field='id')
+    status_url = serializers.HyperlinkedIdentityField('oma_rest:enrichment-status', lookup_field='id')
     foreground = serializers.JSONField()
 
     class Meta:

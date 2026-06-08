@@ -2972,7 +2972,7 @@
                     .attr("id", results[i].name)
                     .attr("href", "#")
                     .text(results[i].name)
-                    .attr("title", results[i].id)
+                    .attr("title", results[i].code || results[i].id)
                     .on("click", function() {
                         var index = $(this).attr("class");
                         //var index = i;
@@ -3112,7 +3112,8 @@
                 return stringSearch(d.name.toLowerCase(), text.toLowerCase());
             });
             var results_id = _.filter(leafObjs, function(d) {
-                return stringSearch(d.id.toLowerCase(), text.toLowerCase());
+                var code = d.code || d.id;
+                return typeof code === 'string' && stringSearch(code.toLowerCase(), text.toLowerCase());
             });
             var results = results_name.concat(results_id);
 
