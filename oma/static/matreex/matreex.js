@@ -1645,7 +1645,7 @@ class Hog_placement {
             .on("mouseover", (event, d) => {
                 if (this.show_image){ (async() => {
 
-        const endpoint = encodeURI('http://en.wikipedia.org/w/api.php?action=query&titles=' + d.data.taxon +'&prop=pageimages&origin=*&format=json&pithumbsize=200');
+        const endpoint = encodeURI('///en.wikipedia.org/w/api.php?action=query&titles=' + d.data.taxon +'&prop=pageimages&origin=*&format=json&pithumbsize=200');
         const img = await d3.json(endpoint, {crossOrigin: "anonymous"});
 
         var idimg,j= null;
