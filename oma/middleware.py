@@ -8,6 +8,31 @@ from django.template.response import TemplateResponse
 logger = logging.getLogger(__name__)
 
 
+class CacheControlMiddleware:
+    """Set Cache-Control: public, max-age=86400 on all GET/HEAD 200 responses
+    for anonymous users, unless the view already set a Cache-Control header."""
+
+    MAX_AGE = 86400  # 24 hours
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        if request.method not in ('GET', 'HEAD'):
+            return response
+        if response.status_code != 200:
+            return response
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            return response
+        if response.has_header('Cache-Control'):
+            return response
+
+        response['Cache-Control'] = f'public, max-age={self.MAX_AGE}'
+        return response
+
+
 class LongRunningLogger(object):
     def __init__(self, get_response=None):
         self.get_response = get_response

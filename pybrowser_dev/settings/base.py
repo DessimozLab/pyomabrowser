@@ -70,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'oma.middleware.OutdatedHogIdRedirector',
+    'oma.middleware.CacheControlMiddleware',
 ]
 
 _API_VERSION = "1.11"
