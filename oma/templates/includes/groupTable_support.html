@@ -103,7 +103,7 @@
 
 
     if (row.support.includes("HOG")) {
-      return '<a href="{% url 'hog_viewer' entry.oma_hog_root %}"><i class="fas fa-check " style="color:green"></i></a>';
+      return {% if entry.oma_hog_root %}'<a href="{% url 'hog_viewer' entry.oma_hog_root %}"><i class="fas fa-check " style="color:green"></i></a>'{% else %}'<i class="fas fa-check " style="color:green"></i>'{% endif %};
     }
     else {
       return ' '
