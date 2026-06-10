@@ -309,13 +309,16 @@ class HOGsListSerializer(HOGsBaseSerializer):
     completeness_score = serializers.FloatField(required=False)
     description = serializers.SerializerMethodField(method_name=None)
     nr_genes = serializers.FloatField(required=False)
-    similar_profile_hogs = serializers.HyperlinkedIdentityField(
-        view_name="oma_rest:hog-similar-profile-hogs",
-        lookup_field="roothog_id",
-        lookup_url_kwarg="hog_id")
+    similar_profile_hogs = serializers.SerializerMethodField()
 
     def get_description(self, obj) -> str:
         return db.get_roothog_keywords(obj.roothog_id)
+
+    def get_similar_profile_hogs(self, obj) -> str:
+        from rest_framework.reverse import reverse
+        hog_id = db.format_hogid(obj.roothog_id)
+        return reverse("oma_rest:hog-similar-profile-hogs", kwargs={"hog_id": hog_id},
+                       request=self.context.get("request"))
 
 
 class HOGsCompareListSerializer(HOGsListSerializer):
