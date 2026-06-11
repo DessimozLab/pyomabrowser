@@ -996,6 +996,19 @@ class Hog_placement {
 
     _render_species_tree(){
 
+        if (!this.tooltip_internal_node) {
+            this.tooltip_internal_node = d3.select("body").append("div")
+                .attr("class", "tooltip-internal-node")
+                .style("position", "absolute")
+                .style("background-color", "white")
+                .style("border", "1px solid #666")
+                .style("border-radius", "2px")
+                .style("padding", "3px 7px")
+                .style("font-size", "12px")
+                .style("pointer-events", "none")
+                .style("opacity", 0)
+                .style("display", "none");
+        }
 
           // Add a clipPath: everything out of this area won't be drawn.
       var clip2 = this.SVG.append("defs").append("SVG:clipPath")
@@ -1056,6 +1069,22 @@ class Hog_placement {
                 this.collapse(d)
                 this.collapse_gene_by_species_name(d)
             })
+        .on("mouseover", (event, d) => {
+                if (d.children || d._children) {
+                    var label = d.data.description || d.data.name;
+                    this.tooltip_internal_node
+                        .style("display", "block")
+                        .style("opacity", 0.9)
+                        .html(label)
+                        .style("left", (event.pageX + 12) + "px")
+                        .style("top", (event.pageY - 10) + "px");
+                }
+            })
+        .on("mouseout", () => {
+                this.tooltip_internal_node
+                    .style("opacity", 0)
+                    .style("display", "none");
+            })
 
         this.tree_target.append("g")
             .selectAll(".colLabelg")
@@ -1076,6 +1105,20 @@ class Hog_placement {
             .on("click", (event, d) => {
                 this.collapse(d)
                 this.collapse_gene_by_species_name(d)
+            })
+            .on("mouseover", (event, d) => {
+                var label = d.data.description || d.data.name;
+                this.tooltip_internal_node
+                    .style("display", "block")
+                    .style("opacity", 0.9)
+                    .html(label)
+                    .style("left", (event.pageX + 12) + "px")
+                    .style("top", (event.pageY - 10) + "px");
+            })
+            .on("mouseout", () => {
+                this.tooltip_internal_node
+                    .style("opacity", 0)
+                    .style("display", "none");
             })
 
         this.grid.y_offset_st = -this.cols[0].x
