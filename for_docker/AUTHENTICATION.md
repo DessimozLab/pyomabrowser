@@ -172,6 +172,19 @@ Two nginx endpoints inject the client secret server-side so it never needs to be
 
 These are exact-match nginx locations that proxy directly to Keycloak and take precedence over the general `/api/` location. They are public (no auth required). All other `/api/` paths are protected via `auth_request /_auth_check`, which either passes the request (website AJAX or valid session/token) or rejects it (redirect to sign-in for browser navigation, 401 JSON for programmatic clients).
 
+## Sign-in page branding
+
+The oauth2-proxy sign-in page is shown only on direct browser navigation to a protected `/api/` URL (the redirect to `/oauth2/sign_in`). Website AJAX and script clients never see it. It is branded for OMA Browser using oauth2-proxy's built-in flags only, set on the `oauth2-proxy` service in `docker-compose.yml`:
+
+| Variable | Effect |
+|---|---|
+| `OAUTH2_PROXY_CUSTOM_SIGN_IN_LOGO` | Path to the logo shown on the page. The OMA wordmark is mounted into the container from `for_docker/oauth2/logo-oma.svg` (a copy of `oma/static/image/logo-oma.svg` with explicit `width`/`height` added, since oauth2-proxy inlines the SVG and a `viewBox`-only file renders oversized). |
+| `OAUTH2_PROXY_PROVIDER_DISPLAY_NAME` | Text in the button, "Sign in with Keycloak". |
+| `OAUTH2_PROXY_BANNER` | Heading text above the button. Replaces the default banner, which otherwise renders the `static://200` upstream name. |
+| `OAUTH2_PROXY_FOOTER` | Footer HTML. Set to a link back to `omabrowser.org`, replacing the default oauth2-proxy version string. |
+
+Color theming (for example making the button OMA green instead of the oauth2-proxy default teal) is intentionally not done. It would require either a custom Go template (`OAUTH2_PROXY_CUSTOM_TEMPLATES_DIR`), which has to be re-checked against upstream on every version bump, or injecting CSS through the banner, which abuses a content field. Staying with the supported flags keeps the configuration declarative and upgrade-safe.
+
 ## Configuration reference (`env` file)
 
 | Variable | Description |
