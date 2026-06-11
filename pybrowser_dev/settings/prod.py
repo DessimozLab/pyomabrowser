@@ -67,6 +67,7 @@ EXPORT_OMA = {
 CELERY_TASK_ROUTES = {
     'oma.tasks.assign_go_function_to_user_sequences': {'queue': 'long'},
     'oma.tasks.compute_msa': {'queue': 'async_web'},
+    'oma.tasks.compute_similar_profile': {'queue': 'profiler'},
     'oma.tasks.export_marker_genes': {'queue': 'long'},
 }
 

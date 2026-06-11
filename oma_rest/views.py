@@ -1,7 +1,9 @@
 import functools
+import json as _json
 import operator
 import itertools
 import os
+import time
 from  datetime import datetime
 import networkx as nx
 import numpy
@@ -39,10 +41,17 @@ from drf_spectacular.types import OpenApiTypes
 from .pagination import PaginationMixin, LazyPagedPytablesQuery
 from .renderers import TSVRenderer
 
-from oma import utils, misc
+from oma import utils, misc, tasks as oma_tasks
+from oma.models import FileResult
+from oma.views import AsyncJobMixin as _AsyncJobMixin
 from pyoma.browser import models, db
 from pyoma.browser.idmapper import NoSearchXrefIdMapper
 import logging
+
+
+class _ProfileJobHelper(_AsyncJobMixin):
+    job_model = FileResult
+    task = oma_tasks.compute_similar_profile
 
 from collections import Counter
 from rest_framework.decorators import action, api_view
@@ -700,7 +709,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
     def similar_profile_hogs(self, request, hog_id=None, format=None):
         """Returns the HOGs with the most similar phylogenetic profiles.
 
-        Profiles are based on the number of duplications, losses and retained genes
+        Profiles are based on the number of duplications, losses, and retained genes
         along the phylogenetic tree, computed at the deepest level only. Sub-HOG IDs
         return the same result as the root HOG.
 
@@ -717,21 +726,49 @@ class HOGViewSet(PaginationMixin, ViewSet):
         except ValueError:
             raise ParseError("max_results must be positive value <= 50")
 
-        result = utils.db.get_families_with_similar_hog_profile(
-            hog_id, max_nr_similar_fams=nr_profiles)
-        nr_species = len(result.species_names)
-        sim_hogs = [rest_models.HOG(hog_id=utils.db.format_hogid(fam),
-                                    in_species=[result.species_names[z] for z in range(nr_species) if result.similar[fam][z] > 0],
-                                    jaccard_similarity=result.jaccard_distance[str(fam)])
-                    for fam in result.similar.keys()]
-        sim_hogs.sort(key=lambda h: -h.jaccard_similarity)
-        data = rest_models.HOG(
-            hog_id=hog_id,
-            similar_profile_hogs=sim_hogs,
-            in_species=[result.species_names[z] for z in range(nr_species) if result.query_profile[z] > 0]
+        from django.conf import settings
+
+        def _build_response(file_data):
+            species = file_data["species"]
+            nr_species = len(species)
+            ref_entry = next((p for p in file_data["profile"] if p["id"] == "Reference"), None)
+            query_in_species = [species[z] for z in range(nr_species) if ref_entry and ref_entry["profile"][z] > 0]
+            sim_hogs = []
+            for entry in [p for p in file_data["profile"] if p["id"] != "Reference"][:int(nr_profiles)]:
+                in_sp = [species[z] for z in range(nr_species) if entry["profile"][z] > 0]
+                sim_hogs.append(rest_models.HOG(
+                    hog_id=utils.db.format_hogid(int(entry["id"])),
+                    in_species=in_sp,
+                    jaccard_similarity=entry["jaccard"],
+                ))
+            return rest_models.HOG(hog_id=hog_id, similar_profile_hogs=sim_hogs, in_species=query_in_species)
+
+        def _read_result(j):
+            with open(os.path.join(settings.MEDIA_ROOT, j.result.name)) as f:
+                return _build_response(_json.load(f))
+
+        # Submit or retrieve the cached job (profiler worker keeps Profiler in memory)
+        job = _ProfileJobHelper().get_or_create_job(
+            extra_fields={"result_type": "similar_profile"},
+            fam_nr=fam_nr,
         )
-        serializer = serializers.HOGsSimilarProfileSerializer(data, context={'request': request})
-        return Response(serializer.data)
+
+        if job.state == FileResult.STATE_DONE:
+            serializer = serializers.HOGsSimilarProfileSerializer(_read_result(job), context={'request': request})
+            return Response(serializer.data)
+
+        deadline = time.monotonic() + 120
+        while time.monotonic() < deadline:
+            time.sleep(2)
+            job.refresh_from_db()
+            if job.state == FileResult.STATE_DONE:
+                data = _read_result(job)
+                serializer = serializers.HOGsSimilarProfileSerializer(data, context={'request': request})
+                return Response(serializer.data)
+            if job.state in (FileResult.STATE_ERROR, FileResult.STATE_TIMEOUT):
+                return Response({'detail': 'Profile computation failed.'}, status=500)
+
+        return Response({'detail': 'Profile computation timed out.'}, status=503)
 
     @extend_schema(parameters=[_HOG_ID_PARAM,_LEVEL_PARAM])
     @action(detail=True)

@@ -1437,69 +1437,24 @@ class HOGInfo(HOGBase, TemplateView):
         return context
 
 
-class HOGSimilarProfile(HOGBase, TemplateView):
+class HOGSimilarProfile(AsyncJobMixin, HOGBase, TemplateView):
     template_name = "hog_similar_profile.html"
+    job_model = FileResult
+    task = tasks.compute_similar_profile
 
-    def get_context_data(self, hog_id, idtype='OMA', **kwargs):
-        context = super(HOGSimilarProfile, self).get_context_data(hog_id, **kwargs)
-        results = utils.db.get_families_with_similar_hog_profile(
-            context['hog'].fam, max_nr_similar_fams=51)
-        if len(results.similar.keys()) > 1:
-            run_prof = True
-        else:
-            run_prof = False
-
-        context.update({'tab': 'similar',
-                        'subtab': 'profile',
-                        'run_prof': run_prof,
-                        "sim_hogs": results.jaccard_distance.keys(),
-                        'table_data_url': reverse('hog_similar_profile_json', args=(hog_id,)),
-                        'lineage_link_name': 'hog_similar_profile',
-                        })
-
+    def get_context_data(self, hog_id, **kwargs):
+        context = super().get_context_data(hog_id, **kwargs)
+        job = self.get_or_create_job(
+            extra_fields={"result_type": "similar_profile"},
+            fam_nr=context['hog'].fam,
+        )
+        context.update({
+            'tab': 'similar',
+            'subtab': 'profile',
+            'profile_job': job,
+            'lineage_link_name': 'hog_similar_profile',
+        })
         return context
-
-
-class ProfileJson(HOGSimilarProfile, JsonModelMixin, View):
-
-    def get(self, request, hog_id, *args, **kwargs):
-        context = self.get_context_data(hog_id, **kwargs)
-
-        class NumpyEncoder(json.JSONEncoder):
-            def default(self, obj):
-                if isinstance(obj, numpy.ndarray):
-                    return obj.tolist()
-                return json.JSONEncoder.default(self, obj)
-
-        fam = context['hog'].fam
-        # Get profile from args and sort hogid  according to jaccard
-        results = utils.db.get_families_with_similar_hog_profile(fam)
-        sortedhogs = [(k, v) for k, v in results.jaccard_distance.items()]
-        sortedhogs = sorted(sortedhogs, key=lambda x: x[1])
-        sortedhogs = [e[0] for e in sortedhogs]
-        sortedhogs.reverse()
-
-        sim_hogs = []
-        # we add manually the reference with tag name reference
-        if str(fam) in sortedhogs:
-            sortedhogs.remove(str(fam))
-            p = results.similar[int(fam)].tolist()
-            d = models.HOG(utils.db, hog_id).keyword
-            sim_hogs.append({"id": "Reference",
-                             "profile": p,
-                             "jaccard": None,
-                             "description": d})
-        for sim in sortedhogs:
-            id_hog = utils.db.format_hogid(int(sim))
-            sim_hogs.append({"id": sim, "profile": results.similar[int(sim)].tolist(),
-                             "jaccard": results.jaccard_distance[sim],
-                             "description": models.HOG(utils.db, id_hog).keyword
-                             })
-        data = {"profile": sim_hogs,
-                "tax": results.tax_classes,
-                "species": results.species_names,
-                }
-        return JsonResponse(data, safe=False)
 
 
 class HOGSimilarDomain(HOGBase, TemplateView):
@@ -1896,6 +1851,14 @@ class HOGsStructureMSA(HOGsMSA):
 
 @method_decorator(never_cache, name='dispatch')
 class MSAStatus(AsyncJobMixin, View):
+    job_model = FileResult
+
+    def get(self, request, job_hash, **kwargs):
+        return JsonResponse(self.get_job_status(job_hash))
+
+
+@method_decorator(never_cache, name='dispatch')
+class SimilarProfileStatus(AsyncJobMixin, View):
     job_model = FileResult
 
     def get(self, request, job_hash, **kwargs):

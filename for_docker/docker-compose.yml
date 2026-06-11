@@ -8,7 +8,7 @@ services:
       secrets:
         - labgit
         - TOKEN
-    command: uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes 3 --module pybrowser_dev.wsgi --vacuum --max-requests=500
+    command: uwsgi --http-socket 0.0.0.0:8000 --master --buffer-size 8192 --processes ${WSGI_PROCESSES:-3} --module pybrowser_dev.wsgi --vacuum --max-requests=500 --harakiri 60 --listen 512
     environment:
       - CONTAINER_ROLE=web
       - AUTO_INIT=true
@@ -68,6 +68,23 @@ services:
     image: $DOCKER_REGISTRY/oma:${IMAGE_TAG:-latest}
     command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
               "--queues=celery,async_web", "--hostname=worker@%h", "--loglevel=INFO"]
+    environment:
+      - CONTAINER_ROLE=worker
+    env_file:
+      - env
+    volumes:
+      - static_volume:${DARWIN_BROWSERSTATIC_PATH}
+      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
+      - ${RELEASE_PATH_HOST}:${RELEASE_PATH}:ro
+    depends_on:
+      - broker
+      - db
+
+  profiler_worker:
+    restart: ${RESTART_CONTAINERS:-unless-stopped}
+    image: $DOCKER_REGISTRY/oma:${IMAGE_TAG:-latest}
+    command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
+              "--queues=profiler", "--hostname=profiler@%h", "--loglevel=INFO"]
     environment:
       - CONTAINER_ROLE=worker
     env_file:

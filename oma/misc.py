@@ -119,9 +119,9 @@ def result_upload_path(folder, prefix, data_id, ext):
 
 
 def parse_version_ignore_errors(version_str):
-    from pkg_resources import parse_version
+    from packaging.version import Version
     try:
-        return parse_version(version_str)
+        return Version(version_str)
     except Exception:
         return None
 
