@@ -5,16 +5,33 @@ The OMA Browser REST API (`/api/`) is protected by [oauth2-proxy](https://github
 ## Architecture
 
 ```
-internet → oauth2-proxy:80 → nginx:80 → web:8000
+internet → nginx:80 (public) → web:8000
+                │
+                └─ auth_request → oauth2-proxy:4180 (internal)
 ```
 
-oauth2-proxy is the public entry point. Nginx is internal only (not exposed on the host).
+nginx is the public entry point. It routes all traffic and uses the `auth_request` directive to validate `/api/` calls. oauth2-proxy runs in forward-auth mode (it does not proxy traffic anymore). It only validates session cookies and Bearer tokens through its `/oauth2/auth` endpoint, returning 200 or 401 to nginx's `auth_request` subrequests. oauth2-proxy is exposed inside the Docker network only (not published on the host).
+
+An internal nginx location, `/_auth_check`, inspects the `sec-fetch-site` request header before deciding whether to call oauth2-proxy:
+
+- `sec-fetch-site: same-origin` (browser AJAX from the website) returns 200 directly, so it passes freely without contacting oauth2-proxy.
+- Any other value proxies the subrequest to `oauth2-proxy:4180/oauth2/auth`, which validates the session cookie or Bearer token.
+
+On a 401 from oauth2-proxy, nginx looks at `sec-fetch-mode`. If it is `navigate` (a browser navigating directly to the URL), nginx issues a 302 redirect to `/oauth2/sign_in`. Otherwise it returns a 401 with the JSON body `{"detail":"Authentication credentials were not provided."}`.
+
+### Why `sec-fetch-site` is a reliable signal
+
+`sec-fetch-site: same-origin` is a W3C Fetch Metadata header that modern browsers set automatically on AJAX requests made from the same origin. Standard HTTP clients (curl, Python requests, wget) do not send it, and JavaScript cannot override it because browsers enforce it. This distinguishes "website AJAX" from "external API call" reliably. Headless browsers (such as Playwright) can fake it, an accepted tradeoff for public scientific data.
 
 ## Access patterns
 
-### Browser
+### Website (browser AJAX)
 
-Navigate to any `/api/` URL. You will be redirected to Keycloak to log in, then returned to the original URL automatically.
+Requests made by the OMA Browser website's own JavaScript (same origin) carry `sec-fetch-site: same-origin`. The `/_auth_check` location returns 200 for these without contacting oauth2-proxy, so the website's API calls work without any login. This keeps the interactive site fully functional for anonymous visitors.
+
+### Browser (direct navigation)
+
+Navigate to any `/api/` URL directly in the address bar. Because there is no valid session, oauth2-proxy returns 401 and nginx detects `sec-fetch-mode: navigate`, redirecting you to `/oauth2/sign_in`. You log in via Keycloak (supports OTP and passkeys) and are returned to the original URL automatically with an encrypted session cookie.
 
 ### Script / programmatic access
 
@@ -34,6 +51,8 @@ To force a new login, delete the cache file:
 ```bash
 rm ~/.oma_token
 ```
+
+Programmatic clients send no `sec-fetch-site` header, so their requests are validated by oauth2-proxy. A missing or invalid token returns a 401 JSON response; a valid Bearer token is allowed through to Django.
 
 ## Token lifespan
 
@@ -86,7 +105,7 @@ Browser login will be required again once either limit is hit. Short access toke
 This step is required. Without it, Keycloak issues tokens with `aud: account` and oauth2-proxy rejects them.
 
 1. Open the client → **Client Scopes** tab
-2. Click on `<your-client-id>-dedicated` (e.g. `omabrowser-dedicated`) — it is a hyperlink
+2. Click on `<your-client-id>-dedicated` (e.g. `omabrowser-dedicated`), it is a hyperlink
 3. **Mappers** tab → **Add mapper** → **By configuration**
 4. Choose **Audience** from the list
 5. Fill in:
@@ -125,7 +144,7 @@ Two nginx endpoints inject the client secret server-side so it never needs to be
 - `POST /api/auth/device`: starts device flow, returns `device_code` and `verification_uri`
 - `POST /api/auth/token`: exchanges `device_code` for a bearer token, or refreshes an existing session using a `refresh_token`
 
-These endpoints are public (no auth required). All other `/api/` paths require a valid token.
+These are exact-match nginx locations that proxy directly to Keycloak and take precedence over the general `/api/` location. They are public (no auth required). All other `/api/` paths are protected via `auth_request /_auth_check`, which either passes the request (website AJAX or valid session/token) or rejects it (redirect to sign-in for browser navigation, 401 JSON for programmatic clients).
 
 ## Configuration reference (`env` file)
 

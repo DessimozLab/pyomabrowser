@@ -117,12 +117,12 @@ services:
 
   oauth2-proxy:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
-    image: quay.io/oauth2-proxy/oauth2-proxy:v7.9.0
-    ports:
-      - ${WEBSERVER_PORT:-80}:4180
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.1
+    expose:
+      - 4180
     environment:
       - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4180
-      - OAUTH2_PROXY_UPSTREAMS=http://nginx:80
+      - OAUTH2_PROXY_UPSTREAMS=static://200
       - OAUTH2_PROXY_PROVIDER=oidc
       - OAUTH2_PROXY_OIDC_ISSUER_URL=${OAUTH2_PROXY_OIDC_ISSUER_URL}
       - OAUTH2_PROXY_CLIENT_ID=${OAUTH2_PROXY_CLIENT_ID}
@@ -130,7 +130,6 @@ services:
       - OAUTH2_PROXY_COOKIE_SECRET=${OAUTH2_PROXY_COOKIE_SECRET}
       - OAUTH2_PROXY_EMAIL_DOMAINS=*
       - OAUTH2_PROXY_COOKIE_SECURE=${OAUTH2_PROXY_COOKIE_SECURE}
-      - OAUTH2_PROXY_SKIP_AUTH_ROUTES=^/(oma|static|media|All)/|^/api/auth/(device|token)$
       - OAUTH2_PROXY_PASS_ACCESS_TOKEN=true
       - OAUTH2_PROXY_PASS_USER_HEADERS=true
       - OAUTH2_PROXY_REVERSE_PROXY=true
@@ -140,16 +139,14 @@ services:
       - OAUTH2_PROXY_INSECURE_OIDC_ALLOW_UNVERIFIED_EMAIL=true
       - OAUTH2_PROXY_OIDC_AUDIENCES=account
       - OAUTH2_PROXY_REDIRECT_URL=${OAUTH2_PROXY_REDIRECT_URL}
-    depends_on:
-      - nginx
 
   nginx:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     image: $DOCKER_REGISTRY/nginx:${IMAGE_TAG:-latest}
     build:
       context: ./nginx
-    expose:
-      - 80
+    ports:
+      - ${WEBSERVER_PORT:-80}:80
     volumes:
       - static_volume:${DARWIN_BROWSERSTATIC_PATH}
       - media_volume:${DARWIN_BROWSERMEDIA_PATH}
@@ -174,6 +171,7 @@ services:
       - OAUTH2_PROXY_CLIENT_SECRET=${OAUTH2_PROXY_CLIENT_SECRET}
     depends_on:
       - web
+      - oauth2-proxy
 
 volumes:
   postgres_data:

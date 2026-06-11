@@ -134,10 +134,36 @@ server {
         proxy_ssl_server_name on;
     }
 
-    location ~ ^/(oma|api)/ {
+    # oauth2-proxy sign-in flow and callbacks
+    location /oauth2/ {
+        proxy_pass http://oauth2-proxy:4180;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+    }
+
+    # Internal auth check: passes browser AJAX from the same site (sec-fetch-site: same-origin),
+    # forwards all other requests to oauth2-proxy for authentication.
+    # Note: auth_request requires a literal URI, so the branching logic lives here.
+    location = /_auth_check {
+        internal;
+        if ($http_sec_fetch_site = "same-origin") {
+            return 200;
+        }
+        proxy_pass http://oauth2-proxy:4180/oauth2/auth;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+        proxy_set_header X-Original-URI $request_uri;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Public website pages — always accessible
+    location ~ ^/oma/ {
         {{- if $THROTTLED }}
         if ($should_throttle)  {
-            return 418;    # Return 418 I'm a teapot for throttled requests => triggers redirect to throttled endpoint
+            return 418;
         }
         {{- end }}
         proxy_pass http://pyoma;
@@ -148,6 +174,40 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Auth-Request-User $http_x_auth_request_user;
         proxy_set_header X-Auth-Request-Email $http_x_auth_request_email;
+    }
+
+    # REST API — browser AJAX from the website passes freely (sec-fetch-site: same-origin);
+    # external HTTP clients (curl, scripts) require oauth2 authentication.
+    # To make specific cheap endpoints public in the future, add a location block for
+    # them above this one without auth_request (more-specific regex takes precedence).
+    location ~ ^/api/ {
+        {{- if $THROTTLED }}
+        if ($should_throttle)  {
+            return 418;
+        }
+        {{- end }}
+        auth_request /_auth_check;
+        auth_request_set $auth_user  $upstream_http_x_auth_request_user;
+        auth_request_set $auth_email $upstream_http_x_auth_request_email;
+        error_page 401 = @api_unauthorized;
+        proxy_pass http://pyoma;
+        proxy_redirect off;
+        uwsgi_read_timeout 100;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Auth-Request-User  $auth_user;
+        proxy_set_header X-Auth-Request-Email $auth_email;
+    }
+
+    location @api_unauthorized {
+        # Browser navigation gets redirected to the sign-in page.
+        # External clients (curl, scripts) get a JSON 401.
+        if ($http_sec_fetch_mode = "navigate") {
+            return 302 /oauth2/sign_in?rd=$request_uri;
+        }
+        default_type application/json;
+        return 401 '{"detail":"Authentication credentials were not provided."}';
     }
 
     location = /cgi-bin/gateway.pl {
