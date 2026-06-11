@@ -80,6 +80,23 @@ services:
       - broker
       - db
 
+  profiler_worker:
+    restart: ${RESTART_CONTAINERS:-unless-stopped}
+    image: $DOCKER_REGISTRY/oma:${IMAGE_TAG:-latest}
+    command: ["celery", "--app=pybrowser_dev.celery_app", "worker", "--concurrency=1",
+              "--queues=profiler", "--hostname=profiler@%h", "--loglevel=INFO"]
+    environment:
+      - CONTAINER_ROLE=worker
+    env_file:
+      - env
+    volumes:
+      - static_volume:${DARWIN_BROWSERSTATIC_PATH}
+      - media_volume:${DARWIN_BROWSERMEDIA_PATH}
+      - ${RELEASE_PATH_HOST}:${RELEASE_PATH}:ro
+    depends_on:
+      - broker
+      - db
+
   worker_long:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
     image: $DOCKER_REGISTRY/oma:${IMAGE_TAG:-latest}

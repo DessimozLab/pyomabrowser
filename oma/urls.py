@@ -42,8 +42,6 @@ urlpatterns = [
 
     path('hog/<hog:hog_id>/<lev:level>/similar/profile/', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
     path('hog/<hog:hog_id>/similar/profile/', views.HOGSimilarProfile.as_view(), name='hog_similar_profile'),
-    path('hog/<hog:hog_id>/<lev:level>/similar/profile/json/', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
-    path('hog/<hog:hog_id>/similar/profile/json/', views.ProfileJson.as_view(), name='hog_similar_profile_json'),
 
     path('hog/<hog:hog_id>/<lev:level>/similar/pairwise/', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
     path('hog/<hog:hog_id>/similar/pairwise/', views.HOGSimilarPairwise.as_view(), name='hog_similar_pairwise'),
@@ -135,6 +133,7 @@ urlpatterns = [
 
     # Async job status
     path('jobs/msa/<job_hash>/', views.MSAStatus.as_view(), name='msa-status'),
+    path('jobs/similar-profile/<job_hash>/', views.SimilarProfileStatus.as_view(), name='similar-profile-status'),
 
     path('export_markers/', views.ExportMarkerGenes.as_view(), name='export_markers'),
     path('markers/<data_id>/', views.MarkerGenesResults.as_view(), name='marker_genes'),

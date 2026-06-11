@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 
 import collections
+import json
 import logging
 import os
 import random
@@ -173,6 +174,44 @@ def compute_msa(job: FileResult, group_type, hog_id_or_grp_nr, **kwargs):
         'compression': 'gzip',
     }
     return name, task_meta
+
+
+@async_job_task(FileResult, logical_inputs=dict(fam_nr="fam_nr"))
+def compute_similar_profile(job: FileResult, fam_nr, **kwargs):
+    logger.info('starting compute_similar_profile for fam_nr=%d with data_id %s', fam_nr, job.data_hash)
+    result = utils.db.get_families_with_similar_hog_profile(fam_nr)
+    if result is None:
+        raise ValueError(f"No profile data found for fam_nr={fam_nr}")
+
+    sortedhogs = sorted(result.jaccard_distance.items(), key=lambda x: x[1], reverse=True)
+    fam_str = str(fam_nr)
+    sim_hogs = []
+    if fam_str in result.jaccard_distance:
+        sortedhogs = [(k, v) for k, v in sortedhogs if k != fam_str]
+        hog_id = utils.db.format_hogid(fam_nr)
+        sim_hogs.append({
+            "id": "Reference",
+            "profile": result.similar[fam_nr].tolist(),
+            "jaccard": None,
+            "description": pyoma.browser.models.HOG(utils.db, hog_id).keyword,
+        })
+    for fam_key, jaccard in sortedhogs:
+        int_fam = int(fam_key)
+        hog_id = utils.db.format_hogid(int_fam)
+        sim_hogs.append({
+            "id": fam_key,
+            "profile": result.similar[int_fam].tolist(),
+            "jaccard": jaccard,
+            "description": pyoma.browser.models.HOG(utils.db, hog_id).keyword,
+        })
+
+    name = result_upload_path('profiler', "SimilarProfile", job.data_hash, "json")
+    path = os.path.join(settings.MEDIA_ROOT, name)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        json.dump({"profile": sim_hogs, "tax": result.tax_classes, "species": result.species_names}, f)
+
+    return name, {'n_similar': len(sim_hogs)}
 
 
 class FunctionProjectorMock(object):

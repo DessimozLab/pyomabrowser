@@ -3,25 +3,56 @@
 
 {% block title %}Similar HOGs based on phylogenetic profile for {{ fam.id }}{% endblock %}
 
-
 {% block contentTab %}
 
-{%  if run_prof  %}
+<h4 id="profile_count_header"></h4>
 
+{% include "includes/profileTable.html" %}
 
+<script>
+(function(){
+    const jobHash = "{{ profile_job.data_hash }}";
+    const statusUrl = "{% url 'similar-profile-status' job_hash='JOB_HASH_PLACEHOLDER' %}".replace("JOB_HASH_PLACEHOLDER", jobHash);
+    const header = document.getElementById("profile_count_header");
 
-    <h4>This HOG has {{ sim_hogs|length|add:"-1" }} similar HOGs:</h4>
+    function poll() {
+        fetch(statusUrl)
+            .then(function(r){ return r.json(); })
+            .then(function(data) {
+                if (data.state === "done") {
+                    const nSimilar = data.metadata && data.metadata.n_similar;
+                    if (!nSimilar || nSimilar <= 1) {
+                        $("#grpTable").bootstrapTable('hideLoading');
+                        header.textContent = "No HOG with a similar profile found.";
+                        return;
+                    }
+                    fetch(data.result_url)
+                        .then(function(r){ return r.json(); })
+                        .then(function(alldata) {
+                            const count = alldata["profile"].filter(function(p){ return p.id !== "Reference"; }).length;
+                            header.textContent = "This HOG has " + count + " similar HOGs:";
+                            renderProfileTable(alldata);
+                        });
+                    return;
+                }
+                if (data.state === "error" || data.state === "timeout") {
+                    $("#grpTable").bootstrapTable('hideLoading');
+                    header.textContent = "Could not compute similar profiles. Please try again later.";
+                    return;
+                }
+                if (data.state === "pending" || data.state === "running") {
+                    setTimeout(poll, 3000);
+                }
+            })
+            .catch(function(err) {
+                console.error("Failed to check profile status:", err);
+                $("#grpTable").bootstrapTable('hideLoading');
+                header.textContent = "Could not compute similar profiles. Please try again later.";
+            });
+    }
 
-
- {% include "includes/profileTable.html" %}
-
-
-{% else %}
-
-No HOG with a similar profile found.
-
-
-{% endif %}
-
+    poll();
+})();
+</script>
 
 {% endblock contentTab %}
