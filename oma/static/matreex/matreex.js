@@ -1645,11 +1645,19 @@ class Hog_placement {
 
     _render_species_names(){
 
-        d3.select(".tooltip").remove()
+        d3.select(".tooltip-species-img").remove()
 
         var div = d3.select("body").append("div")
-            .attr("class", "tooltip")
-            .style("opacity", 0);
+            .attr("class", "tooltip-species-img")
+            .style("position", "absolute")
+            .style("display", "none")
+            .style("opacity", 0)
+            .style("background", "white")
+            .style("border", "1px solid #ccc")
+            .style("border-radius", "6px")
+            .style("box-shadow", "2px 4px 10px rgba(0,0,0,0.18)")
+            .style("padding", "6px 8px")
+            .style("pointer-events", "none");
 
          this.SVG.append("defs").append("SVG:clipPath")
           .attr("id", "clip6")
@@ -1688,40 +1696,27 @@ class Hog_placement {
             .on("mouseover", (event, d) => {
                 if (this.show_image){ (async() => {
 
-        const endpoint = encodeURI('///en.wikipedia.org/w/api.php?action=query&titles=' + d.data.taxon +'&prop=pageimages&origin=*&format=json&pithumbsize=200');
+        const endpoint = encodeURI('///en.wikipedia.org/w/api.php?action=query&titles=' + d.data.taxon +'&prop=pageimages&origin=*&format=json&pithumbsize=100');
         const img = await d3.json(endpoint, {crossOrigin: "anonymous"});
 
-        var idimg,j= null;
+        var idimg, j = null;
         j = JSON.parse(JSON.stringify(img.query.pages))
-        for (var k in j ) { idimg = k; break;}
+        for (var k in j) { idimg = k; break; }
 
+        try { j[idimg].thumbnail.source }
+        catch (e) { return }
 
-        try {
-            j[idimg].thumbnail.source
-        }
-        catch (e) {
-            return
-        }
-
-
-        div.html('')
-
-
+        div.html(
+            '<img src="' + j[idimg].thumbnail.source + '" style="max-width:100px;max-height:100px;object-fit:cover;border-radius:4px;display:block;margin:0 auto;">' +
+            '<span style="display:block;margin-top:4px;font-style:italic;font-size:11px;color:#333;text-align:center;max-width:90px;word-break:break-word;">' + d.data.taxon + '</span>'
+        )
+        .style("left", (event.pageX + 14) + "px")
+        .style("top", (event.pageY - 10) + "px");
 
         div.transition()
-            .duration(200)
-             .style("display", 'block')
+            .duration(150)
+            .style("display", "block")
             .style("opacity", 1);
-
-        div.html("<b>" + d.data.taxon + "</b>" )
-            .style("left", (event.pageX) + "px")
-            .style("top", (event.pageY - 28) + "px");
-
-
-
-        div.html("<b>" + d.data.taxon + "</b>" + '<img src="' + j[idimg].thumbnail.source + '">')
-            .style("left", (event.pageX) + "px")
-            .style("top", (event.pageY - 28) + "px");
 
 
 
