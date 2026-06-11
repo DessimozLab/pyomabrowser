@@ -21,7 +21,7 @@
             .then(function(data) {
                 if (data.state === "done") {
                     const nSimilar = data.metadata && data.metadata.n_similar;
-                    if (!nSimilar || nSimilar <= 1) {
+                    if (!nSimilar) {
                         $("#grpTable").bootstrapTable('hideLoading');
                         header.textContent = "No HOG with a similar profile found.";
                         return;
@@ -32,6 +32,11 @@
                             const count = alldata["profile"].filter(function(p){ return p.id !== "Reference"; }).length;
                             header.textContent = "This HOG has " + count + " similar HOGs:";
                             renderProfileTable(alldata);
+                        })
+                        .catch(function(err) {
+                            console.error("Failed to load profile data:", err);
+                            $("#grpTable").bootstrapTable('hideLoading');
+                            header.textContent = "Could not load similar profiles. Please try again later.";
                         });
                     return;
                 }

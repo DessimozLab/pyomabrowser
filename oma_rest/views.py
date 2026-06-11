@@ -709,7 +709,7 @@ class HOGViewSet(PaginationMixin, ViewSet):
     def similar_profile_hogs(self, request, hog_id=None, format=None):
         """Returns the HOGs with the most similar phylogenetic profiles.
 
-        Profiles are based on the number of duplications, losses and retained genes
+        Profiles are based on the number of duplications, losses, and retained genes
         along the phylogenetic tree, computed at the deepest level only. Sub-HOG IDs
         return the same result as the root HOG.
 
@@ -734,8 +734,6 @@ class HOGViewSet(PaginationMixin, ViewSet):
             ref_entry = next((p for p in file_data["profile"] if p["id"] == "Reference"), None)
             query_in_species = [species[z] for z in range(nr_species) if ref_entry and ref_entry["profile"][z] > 0]
             sim_hogs = []
-            if ref_entry:
-                sim_hogs.append(rest_models.HOG(hog_id=hog_id, in_species=query_in_species, jaccard_similarity=1.0))
             for entry in [p for p in file_data["profile"] if p["id"] != "Reference"][:int(nr_profiles)]:
                 in_sp = [species[z] for z in range(nr_species) if entry["profile"][z] > 0]
                 sim_hogs.append(rest_models.HOG(
@@ -743,7 +741,6 @@ class HOGViewSet(PaginationMixin, ViewSet):
                     in_species=in_sp,
                     jaccard_similarity=entry["jaccard"],
                 ))
-            sim_hogs.sort(key=lambda h: -(h.jaccard_similarity or 0))
             return rest_models.HOG(hog_id=hog_id, similar_profile_hogs=sim_hogs, in_species=query_in_species)
 
         def _read_result(j):

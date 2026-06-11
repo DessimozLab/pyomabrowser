@@ -179,7 +179,7 @@ def compute_msa(job: FileResult, group_type, hog_id_or_grp_nr, **kwargs):
 @async_job_task(FileResult, logical_inputs=dict(fam_nr="fam_nr"))
 def compute_similar_profile(job: FileResult, fam_nr, **kwargs):
     logger.info('starting compute_similar_profile for fam_nr=%d with data_id %s', fam_nr, job.data_hash)
-    result = utils.db.get_families_with_similar_hog_profile(fam_nr)
+    result = utils.db.get_families_with_similar_hog_profile(fam_nr, max_nr_similar_fams=200)
     if result is None:
         raise ValueError(f"No profile data found for fam_nr={fam_nr}")
 
@@ -195,6 +195,8 @@ def compute_similar_profile(job: FileResult, fam_nr, **kwargs):
             "jaccard": None,
             "description": pyoma.browser.models.HOG(utils.db, hog_id).keyword,
         })
+
+    sortedhogs = sortedhogs[:50]
     for fam_key, jaccard in sortedhogs:
         int_fam = int(fam_key)
         hog_id = utils.db.format_hogid(int_fam)
@@ -211,7 +213,7 @@ def compute_similar_profile(job: FileResult, fam_nr, **kwargs):
     with open(path, "w") as f:
         json.dump({"profile": sim_hogs, "tax": result.tax_classes, "species": result.species_names}, f)
 
-    return name, {'n_similar': len(sim_hogs)}
+    return name, {'n_similar': sum(1 for h in sim_hogs if h["id"] != "Reference")}
 
 
 class FunctionProjectorMock(object):
