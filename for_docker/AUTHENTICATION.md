@@ -54,6 +54,32 @@ rm ~/.oma_token
 
 Programmatic clients send no `sec-fetch-site` header, so their requests are validated by oauth2-proxy. A missing or invalid token returns a 401 JSON response; a valid Bearer token is allowed through to Django.
 
+## Testing
+
+Two scripts cover the access-control behavior.
+
+`test_api_access.sh` is a non-interactive smoke test for the nginx routing. It requires no login and checks each access path by sending the headers a browser would set:
+
+```bash
+./test_api_access.sh
+OMA_BASE_URL=https://yourdomain.com ./test_api_access.sh
+```
+
+It verifies that same-origin AJAX passes without a token (200), that an external client with no token gets a JSON 401, that browser navigation is redirected to `/oauth2/sign_in` (302), and that `POST /api/auth/device` and `/oma/` pages stay public. It exits non-zero if any check fails, so it can be wired into CI. To also test the authenticated path, pass a token (obtain one with `test_api_auth.sh`):
+
+```bash
+OMA_ACCESS_TOKEN=<bearer-token> ./test_api_access.sh
+```
+
+`test_api_auth.sh` (see [Script / programmatic access](#script--programmatic-access)) is the interactive end-to-end test of the Bearer-token path through the full device flow.
+
+A few things the smoke test cannot cover and which need a manual check:
+
+- **Real website AJAX.** The smoke test only simulates `sec-fetch-site: same-origin` with curl. Confirm the genuine header works by opening the site in a browser while logged out and verifying that pages whose content loads via API calls still render.
+- **Django-level 401s.** The `/api/` location maps any 401 to the sign-in redirect or JSON response. If Django itself returns a 401 for an authenticated-but-unauthorized request, nginx rewrites it. Check such an endpoint with a valid token and confirm the response is the one you expect.
+
+This is a UX gate, not a security boundary. `sec-fetch-site` is a request header that any client can set (`curl -H "sec-fetch-site: same-origin"` bypasses the check entirely), so the API contents are effectively public. That is acceptable for public scientific data but should not be relied on to protect anything sensitive.
+
 ## Token lifespan
 
 The refresh token lifetime is controlled by the Keycloak realm's SSO session settings (Realm Settings → Sessions). The Edu-ID realm defaults are:

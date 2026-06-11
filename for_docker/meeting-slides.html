@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Securing the OMA REST API — oauth2-proxy + Keycloak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0a0c10;
+    --surface:  #111318;
+    --border:   #1e2230;
+    --accent:   #00e5a0;
+    --accent2:  #0084ff;
+    --warn:     #ff6b35;
+    --text:     #e8eaf0;
+    --muted:    #5a6070;
+    --code-bg:  #161a24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    overflow: hidden;
+  }
+
+  /* ── background grid ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* ── slides container ── */
+  #deck { position: relative; width: 100vw; height: 100vh; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 60px 80px;
+    opacity: 0; pointer-events: none;
+    transform: translateY(24px);
+    transition: opacity .45s ease, transform .45s ease;
+    z-index: 1;
+  }
+  .slide.active {
+    opacity: 1; pointer-events: all;
+    transform: translateY(0);
+  }
+  .slide.exit {
+    opacity: 0; transform: translateY(-24px);
+    transition: opacity .3s ease, transform .3s ease;
+  }
+
+  /* ── nav ── */
+  #nav {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 100; align-items: center;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    cursor: pointer; transition: all .2s;
+  }
+  .dot.active { background: var(--accent); width: 22px; border-radius: 3px; }
+
+  #slide-counter {
+    position: fixed; bottom: 30px; right: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted); z-index: 100;
+    letter-spacing: .1em;
+  }
+
+  #key-hint {
+    position: fixed; bottom: 30px; left: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted); z-index: 100;
+  }
+  kbd {
+    border: 1px solid var(--border);
+    border-radius: 3px; padding: 1px 5px;
+    background: var(--surface);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+  }
+
+  /* ── decorative corner mark ── */
+  .slide::after {
+    content: '';
+    position: absolute; top: 28px; left: 60px;
+    width: 32px; height: 2px;
+    background: var(--accent);
+  }
+
+  /* ── tag chip ── */
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); background: rgba(0,229,160,.08);
+    border: 1px solid rgba(0,229,160,.2);
+    padding: 4px 12px; border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  /* ── titles ── */
+  h1 {
+    font-size: clamp(2.6rem, 5vw, 4.2rem);
+    font-weight: 800; line-height: 1.05;
+    letter-spacing: -.02em;
+  }
+  h2 {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 700; line-height: 1.1;
+    letter-spacing: -.02em; margin-bottom: 36px;
+  }
+  .accent { color: var(--accent); }
+  .accent2 { color: var(--accent2); }
+  .warn { color: var(--warn); }
+
+  p, li {
+    font-size: clamp(.95rem, 1.4vw, 1.15rem);
+    line-height: 1.7; color: #b0b8c8;
+  }
+
+  /* ── code ── */
+  pre, code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .82rem;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 18px 22px; border-radius: 4px;
+    overflow: auto; width: 100%;
+    line-height: 1.65;
+  }
+  code { color: var(--accent); background: rgba(0,229,160,.07); padding: 2px 6px; border-radius: 2px; }
+
+  /* ── cards / grid ── */
+  .grid { display: grid; gap: 20px; width: 100%; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 24px 28px;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--accent);
+  }
+  .card.blue::before { background: var(--accent2); }
+  .card.orange::before { background: var(--warn); }
+
+  .card h3 {
+    font-size: .9rem; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 10px;
+  }
+  .card.blue h3 { color: var(--accent2); }
+  .card.orange h3 { color: var(--warn); }
+
+  /* ── flow arrow ── */
+  .flow {
+    display: flex; align-items: center; gap: 0;
+    width: 100%; margin: 28px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+  }
+  .flow-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px; padding: 10px 16px;
+    text-align: center; white-space: nowrap;
+    flex: 1;
+  }
+  .flow-box.hi { border-color: var(--accent); color: var(--accent); }
+  .flow-box.blue { border-color: var(--accent2); color: var(--accent2); }
+  .flow-arr {
+    flex: 0 0 auto; padding: 0 6px;
+    color: var(--muted); font-size: .9rem;
+  }
+
+  /* ── table ── */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); text-align: left;
+    border-bottom: 1px solid var(--border); padding: 8px 14px;
+  }
+  td { padding: 12px 14px; border-bottom: 1px solid rgba(30,34,48,.6); font-size: .88rem; }
+  tr:last-child td { border-bottom: none; }
+  .pill {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: .72rem;
+  }
+  .pill.green { background: rgba(0,229,160,.12); color: var(--accent); border: 1px solid rgba(0,229,160,.3); }
+  .pill.red   { background: rgba(255,107,53,.12); color: var(--warn); border: 1px solid rgba(255,107,53,.3); }
+
+  /* ── step list ── */
+  .steps { list-style: none; display: flex; flex-direction: column; gap: 14px; width: 100%; }
+  .steps li {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 14px 18px;
+    font-size: .9rem;
+  }
+  .step-n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem; color: var(--accent);
+    background: rgba(0,229,160,.08); border: 1px solid rgba(0,229,160,.2);
+    border-radius: 2px; padding: 3px 8px;
+    min-width: 30px; text-align: center;
+    flex-shrink: 0;
+  }
+
+  ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.bullets li { display: flex; gap: 10px; align-items: flex-start; }
+  ul.bullets li::before { content: '—'; color: var(--accent); flex-shrink: 0; }
+
+  /* ── divider ── */
+  hr.dim { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+
+  /* ── title slide ── */
+  #s0 { align-items: flex-start; }
+  #s0 .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 18px;
+  }
+  #s0 h1 { margin-bottom: 24px; }
+  #s0 .subtitle {
+    font-size: 1.05rem; color: var(--muted); max-width: 540px; line-height: 1.6;
+    margin-bottom: 40px;
+  }
+  #s0 .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem; color: var(--muted);
+    display: flex; gap: 28px;
+  }
+  #s0 .meta span { display: flex; align-items: center; gap: 6px; }
+  #s0 .meta .dot-sm {
+    width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+  }
+
+  /* big accent number */
+  .big-n {
+    font-size: 7rem; font-weight: 800;
+    color: rgba(0,229,160,.07);
+    position: absolute; right: 60px; bottom: 40px;
+    line-height: 1; letter-spacing: -.04em;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- ── 0. TITLE ── -->
+  <div class="slide active" id="s0">
+    <div class="eyebrow">Infrastructure Security · 2026-05-29</div>
+    <h1>Securing the OMA<br><span class="accent">REST API</span></h1>
+    <p class="subtitle">
+      A proxy-layer authentication architecture using oauth2-proxy and Keycloak,
+      with zero modifications to the application code.
+    </p>
+    <div class="meta">
+      <span><span class="dot-sm"></span>oauth2-proxy v7.15.1</span>
+      <span><span class="dot-sm"></span>Keycloak / OIDC</span>
+      <span><span class="dot-sm"></span>Device Flow for scripts</span>
+    </div>
+    <div class="big-n">01</div>
+  </div>
+
+  <!-- ── 1. THE PROBLEM ── -->
+  <div class="slide" id="s1">
+    <div class="tag">Context</div>
+    <h2>The Problem</h2>
+    <div class="grid g2" style="width:100%">
+      <div class="card orange">
+        <h3>Before</h3>
+        <ul class="bullets" style="margin-top:8px">
+          <li><p>All <code>/api/*</code> endpoints were publicly accessible</p></li>
+          <li><p>No way to identify who is calling the API</p></li>
+          <li><p>No token-based access control for scripts or pipelines</p></li>
+          <li><p>Modifying Django for auth = risk + maintenance burden</p></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Goal</h3>
+        <ul class="bullets" style="margin-top:8px">
+          <li><p>Enforce authentication on <code>/api/*</code> without touching Django</p></li>
+          <li><p>Support both <span class="accent">browser users</span> and <span class="accent2">scripts / pipelines</span></p></li>
+          <li><p>Delegate identity to the institutional Keycloak instance</p></li>
+          <li><p>Keep secrets server-side, never expose them to clients</p></li>
+        </ul>
+      </div>
+    </div>
+    <div class="big-n">02</div>
+  </div>
+
+  <!-- ── 2. ARCHITECTURE ── -->
+  <div class="slide" id="s2">
+    <div class="tag">Architecture</div>
+    <h2>The New Stack</h2>
+    <div class="flow">
+      <div class="flow-box hi">Internet</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-box hi">nginx<br><small style="color:var(--muted)">:80 (public)</small></div>
+      <div class="flow-arr">→</div>
+      <div class="flow-box blue">Django<br><small style="color:var(--muted)">:8000</small></div>
+    </div>
+    <div class="flow" style="margin-top:-12px;justify-content:center">
+      <div class="flow-arr" style="color:var(--accent)">└─ auth_request →</div>
+      <div class="flow-box" style="flex:0 0 auto">oauth2-proxy<br><small style="color:var(--muted)">:4180 (internal, auth only)</small></div>
+    </div>
+    <div class="grid g3" style="width:100%;margin-top:8px">
+      <div class="card">
+        <h3>nginx</h3>
+        <p>Public entry point. Routes all traffic. Uses the <code>auth_request</code> directive to validate <code>/api/</code> calls. Bypasses auth for browser AJAX from the website (<code>sec-fetch-site: same-origin</code>). Redirects browsers and returns 401 JSON for external clients.</p>
+      </div>
+      <div class="card">
+        <h3>oauth2-proxy</h3>
+        <p>Internal auth service (forward-auth mode). Validates session cookies and Bearer tokens via its <code>/oauth2/auth</code> endpoint. Returns 200 or 401 to nginx's <code>auth_request</code> subrequests. No longer proxies traffic.</p>
+      </div>
+      <div class="card blue">
+        <h3>Django</h3>
+        <p>Unchanged. Receives <code>X-Auth-Request-User</code> and <code>X-Auth-Request-Email</code> headers from the proxy if needed for future per-user logic.</p>
+      </div>
+    </div>
+    <div class="big-n">03</div>
+  </div>
+
+  <!-- ── 3. ROUTES ── -->
+  <div class="slide" id="s3">
+    <div class="tag">Access Control</div>
+    <h2>Public vs Protected Routes</h2>
+    <table style="width:100%">
+      <thead>
+        <tr>
+          <th>Route</th>
+          <th>Auth Required</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>/oma/</code> &nbsp;<code>/static/</code> &nbsp;<code>/media/</code> &nbsp;<code>/All/</code></td>
+          <td><span class="pill green">Public</span></td>
+          <td style="color:var(--muted)">Browser interface, assets</td>
+        </tr>
+        <tr>
+          <td><code>/api/auth/device</code> &nbsp;<code>/api/auth/token</code></td>
+          <td><span class="pill green">Public</span></td>
+          <td style="color:var(--muted)">Exact-match nginx locations, proxy to Keycloak (device flow + token exchange)</td>
+        </tr>
+        <tr>
+          <td><code>/api/*</code> · website AJAX</td>
+          <td><span class="pill green">Passes</span></td>
+          <td style="color:var(--muted)"><code>sec-fetch-site: same-origin</code> set by the browser → <code>/_auth_check</code> returns 200, no oauth2-proxy call</td>
+        </tr>
+        <tr>
+          <td><code>/api/*</code> · browser navigation</td>
+          <td><span class="pill red">302 sign-in</span></td>
+          <td style="color:var(--muted)"><code>sec-fetch-mode: navigate</code> with no session → redirect to <code>/oauth2/sign_in</code></td>
+        </tr>
+        <tr>
+          <td><code>/api/*</code> · external client, no/invalid token</td>
+          <td><span class="pill red">401 JSON</span></td>
+          <td style="color:var(--muted)">curl, scripts: no <code>sec-fetch-site</code> header → oauth2-proxy validates → 401 JSON</td>
+        </tr>
+        <tr>
+          <td><code>/api/*</code> · valid Bearer token</td>
+          <td><span class="pill green">Allowed</span></td>
+          <td style="color:var(--muted)">oauth2-proxy validates token → request proxied to Django</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="big-n">04</div>
+  </div>
+
+  <!-- ── 4. BROWSER FLOW ── -->
+  <div class="slide" id="s4">
+    <div class="tag">Access Pattern · Browser</div>
+    <h2>Browser Access</h2>
+    <ul class="steps">
+      <li><span class="step-n">01</span><p>User navigates to <code>https://oma.example.org/api/...</code></p></li>
+      <li><span class="step-n">02</span><p>oauth2-proxy detects no session → redirects to <span class="accent">Keycloak login page</span></p></li>
+      <li><span class="step-n">03</span><p>User authenticates (password, OTP, passkey, or any IdP configured in Keycloak)</p></li>
+      <li><span class="step-n">04</span><p>Keycloak redirects back to <code>/oauth2/callback</code> with an authorization code</p></li>
+      <li><span class="step-n">05</span><p>oauth2-proxy exchanges code for tokens, sets an <span class="accent">encrypted session cookie</span></p></li>
+      <li><span class="step-n">06</span><p>Browser is forwarded to the original URL — fully authenticated</p></li>
+    </ul>
+    <div class="big-n">05</div>
+  </div>
+
+  <!-- ── 5. DEVICE FLOW ── -->
+  <div class="slide" id="s5">
+    <div class="tag">Access Pattern · Scripts &amp; Pipelines</div>
+    <h2>Programmatic Access<br><span style="font-size:1.6rem;font-weight:400;color:var(--muted)">OAuth 2.0 Device Authorization Grant</span></h2>
+    <div class="grid g2" style="width:100%;align-items:start">
+      <ul class="steps">
+        <li><span class="step-n">01</span><p><code>POST /api/auth/device</code> → receive <code>device_code</code> + browser URL</p></li>
+        <li><span class="step-n">02</span><p>Script prints the URL. User opens it and authenticates once in browser.</p></li>
+        <li><span class="step-n">03</span><p>Script polls <code>POST /api/auth/token</code> until user completes login</p></li>
+        <li><span class="step-n">04</span><p>Receives <code>access_token</code> + <code>refresh_token</code>. Caches refresh token in <code>~/.oma_token</code></p></li>
+        <li><span class="step-n">05</span><p>Subsequent runs refresh silently — no browser interaction needed</p></li>
+      </ul>
+      <pre style="align-self:center"># test_api_auth.sh
+# 1. try silent refresh
+curl -s -X POST /api/auth/token \
+  -d grant_type=refresh_token \
+  -d refresh_token=$CACHED
+
+# 2. use access token
+curl -H "Authorization: Bearer $TOKEN" \
+  https://oma.example.org/api/proteins/</pre>
+    </div>
+    <div class="big-n">06</div>
+  </div>
+
+  <!-- ── 6. KEYCLOAK SETUP ── -->
+  <div class="slide" id="s6">
+    <div class="tag">Keycloak Configuration</div>
+    <h2>Required Keycloak Setup</h2>
+    <div class="grid g2" style="width:100%">
+      <div class="card">
+        <h3>Client Settings</h3>
+        <ul class="bullets" style="margin-top:8px">
+          <li><p>Client authentication: <code>ON</code></p></li>
+          <li><p>Flows enabled: <span class="accent">Standard</span> + <span class="accent">Device Authorization</span></p></li>
+          <li><p>Valid redirect URI: <code>https://oma.example.org/oauth2/callback</code></p></li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>Audience Mapper</h3>
+        <ul class="bullets" style="margin-top:8px">
+          <li><p>Add a mapper of type <span class="accent2">Audience</span> to the client scope</p></li>
+          <li><p>Included client audience = <code>CLIENT_ID</code></p></li>
+          <li><p>Required for oauth2-proxy to accept issued tokens</p></li>
+        </ul>
+      </div>
+      <div class="card" style="grid-column: span 2">
+        <h3>Session &amp; Token Lifespan</h3>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:10px">
+          <div><p style="color:var(--muted);font-size:.78rem;margin-bottom:4px">ACCESS TOKEN</p><p class="accent" style="font-size:1.3rem;font-weight:700">5 min</p></div>
+          <div><p style="color:var(--muted);font-size:.78rem;margin-bottom:4px">SSO SESSION IDLE</p><p class="accent" style="font-size:1.3rem;font-weight:700">30 min</p></div>
+          <div><p style="color:var(--muted);font-size:.78rem;margin-bottom:4px">SSO SESSION MAX</p><p class="accent" style="font-size:1.3rem;font-weight:700">10 h</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="big-n">07</div>
+  </div>
+
+  <!-- ── 7. TOKEN VALIDATION ── -->
+  <div class="slide" id="s7">
+    <div class="tag">Token Validation</div>
+    <h2>Does every request hit Keycloak?</h2>
+    <div class="card" style="width:100%;margin-bottom:20px;border-color:var(--accent)">
+      <h3>No — validation is local, inside oauth2-proxy</h3>
+      <p style="margin-top:8px">On startup, oauth2-proxy fetches Keycloak's public keys from the <span class="accent">JWKS endpoint</span> (<code>…/realms/myrealm/protocol/openid-connect/certs</code>) and caches them in memory. Every Bearer token is then verified <em>locally</em> — signature, expiry, and audience — with no network round-trip per request.</p>
+    </div>
+    <div class="grid g3" style="width:100%">
+      <div class="card">
+        <h3>Per request</h3>
+        <ul class="bullets" style="margin-top:8px">
+          <li><p>Signature verified against <span class="accent">cached JWKS</span></p></li>
+          <li><p>Expiry (<code>exp</code>) checked locally</p></li>
+          <li><p>Audience (<code>aud</code>) checked locally</p></li>
+        </ul>
+        <p style="margin-top:12px;color:var(--accent);font-size:.78rem;font-family:'JetBrains Mono',monospace">~0 ms overhead</p>
+      </div>
+      <div class="card blue">
+        <h3>Keycloak contacted when</h3>
+        <ul class="bullets" style="margin-top:8px">
+          <li><p>oauth2-proxy starts (fetch JWKS)</p></li>
+          <li><p>Browser login redirect</p></li>
+          <li><p>Token issuance / refresh via <code>/api/auth/token</code></p></li>
+          <li><p>Periodic JWKS key rotation refresh</p></li>
+        </ul>
+      </div>
+      <div class="card orange">
+        <h3>Implication</h3>
+        <ul class="bullets" style="margin-top:8px">
+          <li><p>A revoked token stays valid until it <em>expires</em> (up to 5 min)</p></li>
+          <li><p>Acceptable for most use cases; shorten access token lifespan if stricter revocation is needed</p></li>
+        </ul>
+      </div>
+    </div>
+    <div class="big-n">08</div>
+  </div>
+
+  <!-- ── 8. SECURITY ── -->
+  <div class="slide" id="s8orig">
+    <div class="tag">Security Properties</div>
+    <h2>What We Get</h2>
+    <div class="grid g2" style="width:100%;align-items:start">
+      <ul class="bullets" style="gap:18px">
+        <li><p><strong>Client secret never reaches the client.</strong> nginx injects credentials into <code>/api/auth/*</code> requests server-side before proxying to Keycloak.</p></li>
+        <li><p><strong>Session cookies are encrypted</strong> with a random 32-byte key (<code>OAUTH2_PROXY_COOKIE_SECRET</code>). Tamper-proof.</p></li>
+        <li><p><strong>Short-lived access tokens</strong> (5 min) minimize the window for token theft. Refresh tokens extend sessions without re-login.</p></li>
+      </ul>
+      <ul class="bullets" style="gap:18px">
+        <li><p><strong>nginx enforces auth at the edge</strong> via <code>auth_request</code>. Every protected <code>/api/</code> call is checked before Django is reached. Bearer tokens are verified by oauth2-proxy against cached JWKS, no Keycloak round-trip per request.</p></li>
+        <li><p><strong>Website AJAX bypass</strong> uses <code>sec-fetch-site: same-origin</code>, a browser-enforced Fetch Metadata header that scripts cannot forge, so the public site stays fully functional without leaking the API to external clients.</p></li>
+        <li><p><strong>Edu-ID workaround (temporary):</strong> <code>INSECURE_OIDC_ALLOW_UNVERIFIED_EMAIL=true</code> is set while LifeScience login integration with Keycloak is being resolved. Will be reverted once fixed.</p></li>
+        <li><p><strong>Identity forwarded</strong> to Django via <code>X-Auth-Request-User</code> and <code>X-Auth-Request-Email</code>, ready for future per-user logic without rework.</p></li>
+      </ul>
+    </div>
+    <div class="big-n">09</div>
+  </div>
+
+  <!-- ── 9. DEPLOY / CONFIG ── -->
+  <div class="slide" id="s9deploy">
+    <div class="tag">Deployment</div>
+    <h2>Configuration &amp; Rollout</h2>
+    <div class="grid g2" style="width:100%;align-items:start">
+      <div>
+        <p style="color:var(--muted);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">New environment variables</p>
+        <pre>OAUTH2_PROXY_OIDC_ISSUER_URL=
+  https://sso.example.org/realms/myrealm
+
+OAUTH2_PROXY_CLIENT_ID=oma-api
+OAUTH2_PROXY_CLIENT_SECRET=&lt;from Keycloak&gt;
+OAUTH2_PROXY_COOKIE_SECRET=&lt;32-byte base64&gt;
+OAUTH2_PROXY_REDIRECT_URL=
+  https://oma.example.org/oauth2/callback
+
+# HTTPS prod → true, local dev → false
+OAUTH2_PROXY_COOKIE_SECURE=true</pre>
+      </div>
+      <div>
+        <p style="color:var(--muted);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">What changed in the repo</p>
+        <ul class="bullets" style="gap:12px">
+          <li><p><code>docker-compose.yml</code> — nginx is now the public entry point (<code>ports: 80:80</code>); oauth2-proxy moved to <code>expose:</code> (internal auth service); <code>OAUTH2_PROXY_UPSTREAMS=static://200</code> (forward-auth mode); <code>OAUTH2_PROXY_SKIP_AUTH_ROUTES</code> removed</p></li>
+          <li><p><code>nginx/nginx.conf.template</code> — <code>/_auth_check</code> internal location checks <code>sec-fetch-site: same-origin</code>; <code>/oauth2/</code> proxy and internal <code>/oauth2/auth</code> for <code>auth_request</code>; <code>/oma/</code> and <code>/api/</code> split into separate location blocks; 401 returns JSON or redirects to sign-in based on <code>sec-fetch-mode</code></p></li>
+          <li><p><code>env.template</code> — variables documented</p></li>
+          <li><p><code>test_api_auth.sh</code> — reference script for programmatic auth</p></li>
+          <li><p><code>AUTHENTICATION.md</code> — full architecture &amp; setup guide</p></li>
+        </ul>
+        <p style="margin-top:16px;color:var(--muted);font-size:.85rem">Zero changes to Django application code.</p>
+      </div>
+    </div>
+    <div class="big-n">10</div>
+  </div>
+
+  <!-- ── 10. NATIVE / NON-DOCKER ── -->
+  <div class="slide" id="s10native">
+    <div class="tag">Non-Docker Environments</div>
+    <h2>Native deployment<br><span style="font-size:1.5rem;font-weight:400;color:var(--muted)">same architecture, no containers</span></h2>
+    <div class="grid g2" style="width:100%;align-items:start">
+      <div>
+        <p style="color:var(--muted);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Process layout</p>
+        <pre>systemd
+├── nginx          0.0.0.0:443     (TLS, public) + 127.0.0.1:8080 (internal to Django)
+├── oauth2-proxy   127.0.0.1:4180  (auth service, nginx auth_request only)
+└── gunicorn       127.0.0.1:8000  (Django)</pre>
+        <p style="margin-top:16px;color:var(--muted);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Request flow</p>
+        <div class="flow" style="margin:0">
+          <div class="flow-box hi" style="font-size:.72rem">Internet<br>:443</div>
+          <div class="flow-arr">→</div>
+          <div class="flow-box hi" style="font-size:.72rem">nginx<br>0.0.0.0:443</div>
+          <div class="flow-arr">→</div>
+          <div class="flow-box blue" style="font-size:.72rem">Django<br>127.0.0.1:8000</div>
+        </div>
+        <div class="flow" style="margin:8px 0 0;justify-content:center">
+          <div class="flow-arr" style="color:var(--accent);font-size:.72rem">└─ auth_request →</div>
+          <div class="flow-box" style="font-size:.72rem;flex:0 0 auto">oauth2-proxy<br>127.0.0.1:4180</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card">
+          <h3>Network isolation</h3>
+          <p>Bind the internal nginx vhost to <code>127.0.0.1</code> only — equivalent to Docker's <code>expose:</code>. Verify with <code>ss -tlnp | grep 8080</code>.</p>
+        </div>
+        <div class="card blue">
+          <h3>Secret management</h3>
+          <p>Store variables in <code>/etc/oauth2-proxy/env</code> (<code>chmod 600</code>, owned by the service user). Same variables as the Docker <code>.env</code> file.</p>
+        </div>
+        <div class="card orange">
+          <h3>Process supervision</h3>
+          <p>Run oauth2-proxy as a systemd unit with <code>EnvironmentFile=</code> and <code>Restart=on-failure</code>. No other changes to nginx or Django required.</p>
+        </div>
+      </div>
+    </div>
+    <div class="big-n">11</div>
+  </div>
+
+  <!-- ── 11. NEXT STEPS ── -->
+  <div class="slide" id="s11">
+    <div class="tag">Next Steps</div>
+    <h2>Open Questions &amp; Proposals</h2>
+    <div class="grid" style="width:100%;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
+      <div class="card">
+        <h3>1. Selective endpoint protection</h3>
+        <p>Now that nginx handles routing, expose a specific endpoint by adding a dedicated <span class="accent">nginx location block</span> above the protected <code>/api/</code> block, without <code>auth_request</code>.</p>
+        <ul class="bullets" style="margin-top:10px;gap:6px">
+          <li><p style="font-size:.83rem">More specific location matches first, so the public endpoint takes precedence</p></li>
+          <li><p style="font-size:.83rem">Versioned in <code>nginx.conf.template</code>, changes tracked via git</p></li>
+          <li><p style="font-size:.83rem">Redeploy required to apply changes</p></li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <h3>2. Per-plan rate limiting</h3>
+        <p>Tiers based on <span class="accent2">affiliation, not payment</span> — managed as Keycloak roles, forwarded to nginx via <code>X-Auth-Request-Groups</code>.</p>
+        <table style="width:100%;margin-top:10px;font-size:.75rem">
+          <thead><tr><th style="padding:4px 8px">Tier</th><th style="padding:4px 8px">Who</th><th style="padding:4px 8px">Assignment</th></tr></thead>
+          <tbody>
+            <tr><td style="padding:4px 8px"><code>guest</code></td><td style="padding:4px 8px;color:var(--muted)">No token</td><td style="padding:4px 8px;color:var(--muted)">automatic</td></tr>
+            <tr><td style="padding:4px 8px"><code>registered</code></td><td style="padding:4px 8px;color:var(--muted)">Any valid login</td><td style="padding:4px 8px;color:var(--muted)">default role</td></tr>
+            <tr><td style="padding:4px 8px"><code>academic</code></td><td style="padding:4px 8px;color:var(--muted)">Institutional email / Edu-ID</td><td style="padding:4px 8px;color:var(--muted)">identity attribute</td></tr>
+            <tr><td style="padding:4px 8px"><code>institutional</code></td><td style="padding:4px 8px;color:var(--muted)">Labs contacting us directly</td><td style="padding:4px 8px;color:var(--muted)">manual</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:10px;font-size:.78rem;color:var(--muted)">If paid plans are ever needed: Stripe webhook promotes/demotes Keycloak role. Proxy layer stays unchanged.</p>
+      </div>
+      <div class="card orange">
+        <h3>3. Traffic analytics</h3>
+        <p>Stay in <strong>Matomo</strong>. nginx logs API calls and forwards them as <span class="warn">Matomo Events</span> via the HTTP Tracking API.</p>
+        <ul class="bullets" style="margin-top:10px;gap:6px">
+          <li><p style="font-size:.83rem"><code>X-Auth-Request-User</code> used as custom dimension → split guest vs authenticated in dashboards</p></li>
+          <li><p style="font-size:.83rem">Endpoint path + HTTP method tracked as event category/action</p></li>
+          <li><p style="font-size:.83rem">Single analytics platform, no new tooling required</p></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>4. Custom oauth2-proxy UI</h3>
+        <p>oauth2-proxy serves its own sign-in and error pages. These can be replaced with <span class="accent">custom HTML templates</span> mounted via Docker volume.</p>
+        <ul class="bullets" style="margin-top:10px;gap:6px">
+          <li><p style="font-size:.83rem">Brand the sign-in page with OMA logo and styles</p></li>
+          <li><p style="font-size:.83rem">Custom error pages (401, 403, 5xx) with helpful messaging</p></li>
+          <li><p style="font-size:.83rem">Configured via <code>--custom-sign-in-logo</code> and <code>--custom-templates-path</code></p></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="dim" style="width:100%">
+    <div style="display:flex;gap:32px;width:100%;justify-content:center;margin-top:8px">
+      <p style="font-size:.9rem;color:var(--muted)">Branch: <code style="color:var(--text)">oauth2-proxy</code></p>
+      <p style="font-size:.9rem;color:var(--muted)">Docs: <code style="color:var(--text)">for_docker/AUTHENTICATION.md</code></p>
+    </div>
+    <div class="big-n">12</div>
+  </div>
+
+</div><!-- /#deck -->
+
+
+<!-- nav dots -->
+<div id="nav"></div>
+<div id="slide-counter"></div>
+<div id="key-hint"><kbd>←</kbd> <kbd>→</kbd> to navigate</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const nav    = document.getElementById('nav');
+  const ctr    = document.getElementById('slide-counter');
+  let cur = 0;
+
+  function buildNav() {
+    slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => go(i);
+      nav.appendChild(d);
+    });
+  }
+
+  function go(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[cur].classList.remove('active');
+    slides[cur].classList.add('exit');
+    setTimeout(() => slides[cur].classList.remove('exit'), 350);
+    cur = n;
+    slides[cur].classList.add('active');
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+    ctr.textContent = (cur + 1) + ' / ' + slides.length;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown'  || e.key === ' ') go(cur + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                      go(cur - 1);
+  });
+
+  // swipe
+  let tx = 0;
+  document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
+  document.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 40) go(cur + (dx < 0 ? 1 : -1));
+  });
+
+  buildNav();
+  ctr.textContent = '1 / ' + slides.length;
+</script>
+</body>
+</html>
