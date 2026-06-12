@@ -203,7 +203,7 @@ def compute_msa(job: FileResult, group_type, hog_id_or_grp_nr, **kwargs):
     return name, task_meta
 
 
-@async_job_task(FileResult, logical_inputs=dict(fam_nr="fam_nr"))
+@async_job_task(FileResult, soft_time_limit=60, time_limit=120, logical_inputs=dict(fam_nr="fam_nr"))
 def compute_similar_profile(job: FileResult, fam_nr, **kwargs):
     logger.info('starting compute_similar_profile for fam_nr=%d with data_id %s', fam_nr, job.data_hash)
     result = utils.db.get_families_with_similar_hog_profile(fam_nr, max_nr_similar_fams=200)
