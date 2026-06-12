@@ -188,23 +188,21 @@ def compute_similar_profile(job: FileResult, fam_nr, **kwargs):
     sim_hogs = []
     if fam_str in result.jaccard_distance:
         sortedhogs = [(k, v) for k, v in sortedhogs if k != fam_str]
-        hog_id = utils.db.format_hogid(fam_nr)
         sim_hogs.append({
             "id": "Reference",
             "profile": result.similar[fam_nr].tolist(),
             "jaccard": None,
-            "description": pyoma.browser.models.HOG(utils.db, hog_id).keyword,
+            "description": utils.db.get_roothog_keywords(fam_nr),
         })
 
     sortedhogs = sortedhogs[:50]
     for fam_key, jaccard in sortedhogs:
         int_fam = int(fam_key)
-        hog_id = utils.db.format_hogid(int_fam)
         sim_hogs.append({
             "id": fam_key,
             "profile": result.similar[int_fam].tolist(),
             "jaccard": jaccard,
-            "description": pyoma.browser.models.HOG(utils.db, hog_id).keyword,
+            "description": utils.db.get_roothog_keywords(int_fam),
         })
 
     name = result_upload_path('profiler', "SimilarProfile", job.data_hash, "json")
