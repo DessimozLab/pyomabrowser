@@ -136,7 +136,10 @@ class ProteinEntryWithXRefSerializer(ProteinEntrySerializer):
     def get_xrefs(self, obj) -> Dict[str, str]:
         if obj.xrefs is not None:
             res = collections.defaultdict(str)
-            res.update({key: value['id'].decode() for key, value in obj.xrefs.items()})
+            try:
+                res.update({key: value['id'].decode() for key, value in obj.xrefs.items()})
+            except AttributeError:
+                logger.warning(f"[ProteinEntryWithXRefSerializer] xrefs for entry {obj.entry_nr} are not in the expected format: {obj.xrefs}")
             return res
         return None
 
