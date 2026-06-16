@@ -313,33 +313,38 @@
         <div class="container">
             <div class="row align-items-stretch">
                 <div class="col-lg-6 d-flex mb-3 mb-lg-0">
-                    <div class="oma-alert w-100">
-                        <img src="{% static "image/icon-info.svg" %}" alt="!"/>
-                        <p>If you use OMA in your work, please consider citing:<br/>
-                        Altenhoff A et al., <em><b>OMA orthology in 2024: improved prokaryote coverage, ancestral and extant GO enrichment, a revamped synteny viewer and more in the OMA Ecosystem</b></em>
-                        Nucleic Acids Research, 2024, <b>52</b>(D1):D513–D521
-                        (doi:<a href="https://doi.org/10.1093/nar/gkad1020">10.1093/nar/gkad1020</a>)</p>
+                    <div class="oma-alert oma-citation-box w-100">
+                        <p class="citation-intro"><img src="{% static "image/icon-info.svg" %}" alt="!"/> If you use OMA in your work, please consider citing:</p>
+                        <blockquote class="citation-ref">
+                            Altenhoff A et al., <em><b>OMA orthology in 2024: improved prokaryote coverage, ancestral and extant GO enrichment, a revamped synteny viewer and more in the OMA Ecosystem</b></em>
+                            <br>Nucleic Acids Research, 2024, <b>52</b>(D1):D513–D521
+                            &nbsp;(doi:&nbsp;<a href="https://doi.org/10.1093/nar/gkad1020">10.1093/nar/gkad1020</a>)
+                        </blockquote>
+
                     </div>
                 </div>
                 <div class="col-lg-6 d-flex">
                     <div class="oma-alert oma-affiliations w-100">
-                        <div class="affiliation-item">
-                            <a href="https://elixir-europe.org/platforms/data/core-data-resources" target="_blank" rel="noopener">
-                                <img src="https://elixir-europe.org/sites/default/files/styles/right-small/public/images/core-data-resources-logo.png?itok=Sep-RPgA" alt="ELIXIR Core Data Resource"/>
-                            </a>
-                            <span>OMA has been recognized as an <a href="https://elixir-europe.org/platforms/data/core-data-resources" target="_blank" rel="noopener">ELIXIR Core Data Resource</a></span>
-                        </div>
-                        <div class="affiliation-item">
-                            <a href="https://swissorthology.ch" target="_blank" rel="noopener">
-                                <img src="{% static "image/logo-swiss-orthology.svg" %}" alt="Swiss Orthology Initiative"/>
-                            </a>
-                            <span>OMA is part of the <a href="https://swissorthology.ch" target="_blank" rel="noopener">Swiss Orthology</a> initiative.</span>
-                        </div>
-                        <div class="affiliation-item">
-                            <a href="https://www.sib.swiss/research-infrastructure/databases" target="_blank" rel="noopener">
-                                <img src="{% static "image/sib-logo-emblem.svg" %}" alt="SIB Swiss Institute of Bioinformatics"/>
-                            </a>
-                            <span>OMA is part of <a href="https://www.sib.swiss/activities/open-software-and-databases" target="_blank" rel="noopener">SIB's portfolio</a> of open databases and software tools.</span>
+                        <p class="affiliations-title">OMA is part of:</p>
+                        <div class="affiliations-badges">
+                            <div class="affiliation-badge">
+                                <a href="https://elixir-europe.org/platforms/data/core-data-resources" target="_blank" rel="noopener">
+                                    <img src="https://elixir-europe.org/sites/default/files/styles/right-small/public/images/core-data-resources-logo.png?itok=Sep-RPgA" alt="ELIXIR Core Data Resource"/>
+                                    <span>ELIXIR Core<br>Data Resource</span>
+                                </a>
+                            </div>
+                            <div class="affiliation-badge">
+                                <a href="https://swissorthology.ch" target="_blank" rel="noopener">
+                                    <img src="{% static "image/logo-swiss-orthology.svg" %}" alt="Swiss Orthology Initiative"/>
+                                    <span>Swiss Orthology<br>Initiative</span>
+                                </a>
+                            </div>
+                            <div class="affiliation-badge">
+                                <a href="https://www.sib.swiss/activities/open-software-and-databases" target="_blank" rel="noopener">
+                                    <img src="{% static "image/sib-logo-emblem.svg" %}" alt="SIB Swiss Institute of Bioinformatics"/>
+                                    <span>SIB Open<br>Database Portfolio</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
