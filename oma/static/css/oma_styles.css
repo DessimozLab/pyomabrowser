@@ -235,20 +235,43 @@ background: #f7f7f7;
  body #oma-citation {
 	 margin: 60px 0;
 }
+ body #oma-citation .container .row {
+	 gap: 0;
+}
  body #oma-citation .container .oma-alert {
 	 width: 100%;
-	 padding: 10px;
-	 display: inline-flex;
+	 padding: 16px 20px;
+	 display: flex;
 	 align-items: center;
 	 background: #e9e5e5;
 	 border-radius: 20px;
 }
- body #oma-citation .container .oma-alert img {
+ body #oma-citation .container .oma-alert > img:first-child {
 	 width: 56px;
+	 flex-shrink: 0;
 	 margin: 0 10px;
 }
  body #oma-citation .container .oma-alert p {
 	 margin: 0;
+}
+ body #oma-citation .container .oma-alert.oma-affiliations {
+	 flex-direction: column;
+	 align-items: flex-start;
+	 justify-content: center;
+	 gap: 16px;
+}
+ body #oma-citation .container .oma-alert .affiliation-item {
+	 display: flex;
+	 align-items: center;
+	 gap: 14px;
+	 width: 100%;
+}
+ body #oma-citation .container .oma-alert .affiliation-item img {
+	 width: 80px;
+	 height: 50px;
+	 object-fit: contain;
+	 object-position: left center;
+	 flex-shrink: 0;
 }
 body .oma-fullheight-wrapper {
 	display: flex;
@@ -703,6 +726,9 @@ transform: none !important;
 	 body #omaLandingOthersContainer #oma-citation {
 		 width: 100%;
 	}
+	 body #omaLandingOthersContainer #oma-citation .col-lg-6 {
+		 margin-bottom: 12px;
+	}
 	 body .oma-details-header {
 		 position: relative;
 		 padding: 8px;
@@ -900,7 +926,7 @@ transform: none !important;
 		 color: #d8d82a;
 	}
 	 body #omaLandingOthersContainer #oma-statistics {
-		 order: 3;
+		 order: 2;
 		 margin: 0;
 	}
 	 body #oma-statistics .row {
@@ -932,7 +958,7 @@ width: 100%;
 		 font-size: 1rem;
 	}
 	 body #oma-citation {
-		 order: 2;
+		 order: 3;
 		 margin: 30px 0;
 	}
 	 body #oma-generic-container .container .jumbotron h1 {
