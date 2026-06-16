@@ -180,7 +180,23 @@ body #oma-search-container {
     list-style: none;
     border-bottom: 1px solid #ddd;
     border-top: 1px solid #ddd;
-    padding: 10px 0;
+    padding: 10px 8px;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul li:not(.btn-more-container) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul li:not(.btn-more-container) > a {
+    flex: 1;
+    min-width: 0;
+}
+ body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul li > .badge {
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 2px;
+    white-space: nowrap;
 }
 
  body #oma-landing-cards .container-fluid .row .col-lg-3 .oma-card ul li p {
@@ -580,8 +596,9 @@ border-bottom: 1px solid #eee;
 
 
 .oma-card-content{
-	padding: 0 20px;
+	padding: 0 20px 60px;
 	min-height: 350px;
+	position: relative;
 }
 
 .btn-more-container {
@@ -605,6 +622,9 @@ border: none !important;
 		left: initial !important;
 		bottom: initial !important;
 		transform: none !important;
+	}
+	 .oma-card-content {
+		padding-bottom: 20px;
 	}
 }
  @media screen and (max-width: 1200px) {
