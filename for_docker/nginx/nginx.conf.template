@@ -127,6 +127,12 @@ server {
         uwsgi_read_timeout 100;
     }
 
+    location = /cgi-bin/gateway.pl {
+        proxy_pass http://pyoma;
+        proxy_redirect off;
+        uwsgi_read_timeout 3;
+    }
+
     {{ if $THROTTLED }}
     error_page 418 = @throttle;
 

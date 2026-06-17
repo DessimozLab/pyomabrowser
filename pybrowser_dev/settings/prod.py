@@ -21,6 +21,7 @@ INSTALLED_APPS.extend([
     'expasysearch',
     'mailman_subscribe',
     'taxmap',
+    'legacy_gateway',
 ])
 
 MIDDLEWARE.extend([

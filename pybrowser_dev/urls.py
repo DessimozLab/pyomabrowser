@@ -43,6 +43,11 @@ if "taxmap" in settings.INSTALLED_APPS:
         path("oma/", include("taxmap.urls"))
     )
 
+if "legacy_gateway" in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path("cgi-bin/gateway.pl", include("legacy_gateway.urls"))
+    )
+
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView
     from django.urls import re_path
