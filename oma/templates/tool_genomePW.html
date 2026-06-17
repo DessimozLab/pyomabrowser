@@ -193,7 +193,7 @@ $(document).ready(function() {
       alert('Please define the two genomes.');
       return false;
     }
-    let newUrl = "{% url "pairs" "sp111" "sp222"%}".replace("sp111", sp1).replace("sp222", sp2);
+    let newUrl = "{% url "oma_rest:pairs" "sp111" "sp222"%}".replace("sp111", sp1).replace("sp222", sp2);
     let xrefs = Array.from($("#selectBrowser > option:checked"), e=>e.value).join(',');
     const params = new URLSearchParams(
              {"format": $('#selectFormat').val(),
