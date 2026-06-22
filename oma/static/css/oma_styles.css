@@ -445,6 +445,17 @@ body .oma-details-container .oma-details-nav-left ul.oma-group  li.active {
 	 border-top:    2px solid  #f8f9fa;
 	 border-bottom: 2px solid #f8f9fa;
 }
+
+body .oma-details-container .oma-details-nav-left ul.oma-group li div.submenu ul li {
+	border-radius: 8px;
+}
+
+body .oma-details-container .oma-details-nav-left ul.oma-group li div.submenu ul li.active {
+	border-radius: 8px;
+	background-color: #336799 !important;
+	color:white !important;
+}
+
  body .oma-details-container .oma-details-nav-left ul li.active > a {
 	 font-weight: 700;
 	 color: #FFFFFF
@@ -876,6 +887,7 @@ transform: none !important;
 	 body .oma-details-container .oma-details-nav-left ul li a {
 		 padding: 10px 0;
 	}
+
 	 .btn-more-container {
 position: relative !important;
 left: initial !important;
@@ -1297,10 +1309,15 @@ padding: 20px 10px; }
 body .oma-details-container .oma-details-nav-left .gene-orthology li #filterParalogs div { background: transparent !important; }
 */
 
-body .oma-details-container .oma-details-nav-left .submenu { background: #ffffff;
-box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
-padding: 20px 10px; }
-body .oma-details-container .oma-details-nav-left .submenu div { background: transparent !important; }
+body .oma-details-container .oma-details-nav-left .submenu {
+	background: #ffffff;
+    box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC;
+    padding: 20px 10px;
+}
+
+body .oma-details-container .oma-details-nav-left .submenu div {
+	background: transparent !important;
+}
 
 
 .search_entry {

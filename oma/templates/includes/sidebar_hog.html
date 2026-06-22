@@ -43,8 +43,25 @@
 
 
         <li class="{% if tab == "msa" %} active selected {% endif %}">
+            {% if structure_db_available %}
+            <a data-toggle="collapse" {% if tab == 'msa' %} aria-expanded="true" {%endif%} data-target="#msaSubmenu">
+                <span>Alignment</span><i class="material-icons">keyboard_arrow_right</i>
+            </a>
+            <div id="msaSubmenu" class="submenu collapse {% if tab == 'msa' %}show{% endif %}">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item list-group-item-action subtab-item {% if subtab == "protein" %}active{% endif %}">
+                        <a href="{% if level != None %} {% url 'hog_msa' hog.hog_id hog.level %}{% else %}{% url 'hog_msa' hog.hog_id %}{% endif %}">Protein sequences (Mafft)</a>
+                    </li>
+                    <li class="list-group-item list-group-item-action subtab-item {% if subtab == "structure" %}active{% endif %}">
+                        <a href="{% if level != None %}{% url 'hog_msa_structure' hog.hog_id hog.level %}{% else %}{% url 'hog_msa_structure' hog.hog_id %}{% endif %}">Structure (Foldmason)</a>
+                    </li>
+                </ul>
+            </div>
+            {% else %}
             <a href="{% if level != None %} {% url 'hog_msa' hog.hog_id hog.level %}{% else %}{% url 'hog_msa' hog.hog_id %}{% endif %}">
-            <span>Alignment</span> </a>
+               <span>Alignment</span>
+            </a>
+            {% endif %}
         </li>
 
 
@@ -59,43 +76,30 @@
 
          <li class="{% if tab == 'similar' %} active selected {%endif%}">
             <a data-toggle="collapse" {% if tab == 'similar'%} aria-expanded="true" {%endif%} data-target="#filterSimilar">
-
-                <span>Similar HOGs
-
-                    </span>
-
+                <span>Similar HOGs</span>
                 <i class="material-icons">keyboard_arrow_right</i>
-
             </a>
 
 
 
-          <div id="filterSimilar" class="submenu collapse {% if tab == 'similar'%} show {%endif%}">
-
-
-
+            <div id="filterSimilar" class="submenu collapse {% if tab == 'similar'%} show {%endif%}">
               <h5>Based on:</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item list-group-item-action {% if subtab == 'domain' %} active {%endif%}">
+                    <a href="{% if level != None %}{% url 'hog_similar_domain' hog_id  level%}{%else%}{% url 'hog_similar_domain' hog_id  %}{%endif%}">Similar domains</a>
+                </li>
 
+                <li class="list-group-item list-group-item-action {% if subtab == 'pairwise' %} active {%endif%}">
+                    <a href="{% if level != None %}{% url 'hog_similar_pairwise' hog_id  level%}{%else%}{% url 'hog_similar_pairwise' hog_id  %}{%endif%}">Shared orthologs</a>
+                </li>
 
-  <ul class="list-group list-group-flush">
-     <a style="{% if subtab == 'domain' %}  border-radius: 8px; background-color: #336799 !important; color:white !important; {% else %}  background-color: #fff !important; {%endif%}border:none;  padding: .75rem 1.25rem  !important;" href="{% if level != None %}  {% url 'hog_similar_domain' hog_id  level%}  {%else%}  {% url 'hog_similar_domain' hog_id  %} {%endif%}" class="list-group-item list-group-item-action {% if subtab == 'domain' %} active {%endif%}">
-    Similar domains
-  </a>
+                <li class="list-group-item list-group-item-action {% if subtab == 'profile' %} active {%endif%}">
+                    <a href="{% if level != None %}{% url 'hog_similar_profile' hog_id  level%}{%else%}{% url 'hog_similar_profile' hog_id  %}{%endif%}">Phylogenetic profiles</a>
+                </li>
+              </ul>
+            </div>
 
-      <a style="{% if subtab == 'pairwise' %}  border-radius: 8px;  background-color: #336799 !important; color:white !important; {% else %}  background-color: #fff !important; {%endif%}border:none;  padding: .75rem 1.25rem  !important;" href="{% if level != None %}  {% url 'hog_similar_pairwise' hog_id  level%}  {%else%}  {% url 'hog_similar_pairwise' hog_id  %} {%endif%}" class="list-group-item list-group-item-action {% if subtab == 'pairwise' %} active {%endif%}">
-    Shared orthologs
-  </a>
-
-      <a style="{% if subtab == 'profile' %} border-radius: 8px;   background-color: #336799 !important;  color:white !important; {% else %}  background-color: #fff !important; {%endif%}border:none;  padding: .75rem 1.25rem  !important;" href="{% if level != None %}  {% url 'hog_similar_profile' hog_id  level%}  {%else%}  {% url 'hog_similar_profile' hog_id  %} {%endif%}" class="list-group-item list-group-item-action {% if subtab == 'profile' %} active {%endif%}">
-    Phylogenetic profiles
-  </a>
-
-  </ul>
-
-
-          </div>
-
-          </li>
+         </li>
 
      <li class="{% if tab == 'matreex' %} active selected {%endif%}">
                 <a href="{% if level != None %}  {% url 'matreex' hog_id  level%}  {%else%}  {% url 'matreex' hog_id  %} {%endif%} " >
