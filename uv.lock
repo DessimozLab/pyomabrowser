@@ -1068,7 +1068,7 @@ wheels = [
 [[package]]
 name = "pyoma"
 version = "0.14.0"
-source = { git = "ssh://lab.dessimoz.org:2222/pyoma?branch=develop#1d480d5b8cc197a73fff16388a25e82c1d9a0072" }
+source = { git = "ssh://lab.dessimoz.org:2222/pyoma?branch=develop#bc7d9ff57defd3ada6f2832202965f2060842196" }
 dependencies = [
     { name = "biopython" },
     { name = "datasketch" },
