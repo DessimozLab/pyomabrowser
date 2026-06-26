@@ -147,9 +147,25 @@ server {
     }
     {{- end }}
 
+    # File downloads.
+    # Files present on disk are served directly; absent files (large HDF5, etc.)
+    # fall back to Django which records the download and redirects to Zenodo.
     location /All/ {
         alias {{ getenv "DARWIN_BROWSERDOWNLOAD_PATH" }}/;
         add_header Access-Control-Allow-Origin *;
+        try_files $request_filename @downloads_fallback;
+    }
+
+    # Specific versioned release directories: /All.Mar2026/, /Plants.Mar2026/, …
+    location ~ "^/[A-Za-z]+\.[A-Za-z]{3}\d{4}/" {
+        add_header Access-Control-Allow-Origin *;
+        try_files $request_filename @downloads_fallback;
+    }
+
+    location @downloads_fallback {
+        proxy_pass http://pyoma;
+        proxy_redirect off;
+        proxy_read_timeout 10;
     }
 
     location /static/ {

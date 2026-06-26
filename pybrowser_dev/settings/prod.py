@@ -15,6 +15,7 @@ NOCAPTCHA = True  # using No Captcha reCaptcha
 INSTALLED_APPS.extend([
     'matomo_api_tracking',
     'django_recaptcha',
+    'downloads',
     'export',
     'fastmap',
     'omamo',

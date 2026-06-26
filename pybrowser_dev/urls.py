@@ -7,6 +7,7 @@ import os
 admin.autodiscover()
 
 urlpatterns = [
+    path('oma/admin-interface/', admin.site.urls),
     path('api/', include('oma_rest.urls')),
     path('oma/', include('oma.urls')),
 ]
@@ -47,6 +48,9 @@ if "legacy_gateway" in settings.INSTALLED_APPS:
     urlpatterns.append(
         path("cgi-bin/gateway.pl", include("legacy_gateway.urls"))
     )
+
+if "downloads" in settings.INSTALLED_APPS:
+    urlpatterns += [path('', include('downloads.urls'))]
 
 if settings.DEPLOYMENT != "PRODUCTION":
     from django.views.generic.base import RedirectView
