@@ -38,7 +38,7 @@ from .models import FileResult
 logger = logging.getLogger(__name__)
 
 
-@async_job_task(FileResult, logical_inputs=dict(genomes="genomes", min_species_coverage="min_species_coverage", top_N_grps="top_N_grps"))
+@async_job_task(FileResult, soft_time_limit=1000, time_limit=1060, logical_inputs=dict(genomes="genomes", min_species_coverage="min_species_coverage", top_N_grps="top_N_grps"))
 def export_marker_genes(job: FileResult, genomes, min_species_coverage=0.5, top_N_grps=None):
     logger.info('starting task export_marker_genes for %s', job.data_hash)
 
@@ -122,7 +122,7 @@ class FastaTarballResultBuilder(object):
         return misc.as_fasta(headers=headers, seqs=seqs), misc.as_fasta(headers=headers, seqs=cds)
 
 
-@async_job_task(FileResult, soft_time_limit=800, logical_inputs=dict(group_type="group_type", group_id="hog_id_or_grp_nr", level="level", tool="tool", max_seqs="max_nr_seqs"))
+@async_job_task(FileResult, soft_time_limit=800, time_limit=860, logical_inputs=dict(group_type="group_type", group_id="hog_id_or_grp_nr", level="level", tool="tool", max_seqs="max_nr_seqs"))
 def compute_msa(job: FileResult, group_type, hog_id_or_grp_nr, **kwargs):
     logger.info(f'starting computing MSA for {group_type} {hog_id_or_grp_nr} with data_id {job.data_hash}')
     t0  = time.perf_counter()
@@ -256,7 +256,7 @@ class FunctionProjectorMock(object):
                            'Assigned_by': 'OMA Fun Proj', 'Aspect': 'M'})
                 yield rec
 
-@async_job_task(FileResult)
+@async_job_task(FileResult, soft_time_limit=8*3600, time_limit=8*3600+60)
 def assign_go_function_to_user_sequences(job: FileResult, sequence_file, tax_limit=None, result_url=None):
     t0 = time.time()
     logger.info('starting projecting GO functions for %s with data_id %s', sequence_file, job.data_hash)
