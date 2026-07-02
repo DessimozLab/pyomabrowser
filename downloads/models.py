@@ -31,14 +31,25 @@ class Release(models.Model):
         super().save(*args, **kwargs)
 
 
-class ZenodoFile(models.Model):
-    """A file within a release, served via Zenodo redirect."""
+class ReleaseFile(models.Model):
+    """A file within a release. May live on Zenodo, Backblaze B2, or be served locally by nginx."""
+
+    SOURCE_ZENODO = 'zenodo'
+    SOURCE_B2 = 'b2'
+    SOURCE_LOCAL = 'local'
+    SOURCE_CHOICES = [
+        (SOURCE_ZENODO, 'Zenodo'),
+        (SOURCE_B2, 'Backblaze B2'),
+        (SOURCE_LOCAL, 'Local (nginx)'),
+    ]
+
     release = models.ForeignKey(Release, on_delete=models.CASCADE, related_name='files')
     filename = models.CharField(max_length=255)
-    zenodo_url = models.URLField(max_length=500)
+    download_url = models.URLField(max_length=500, blank=True)
     size = models.BigIntegerField(default=0)
     checksum = models.CharField(max_length=100, blank=True)
-    source_record_id = models.CharField(max_length=50, blank=True)  # which Zenodo record this file came from
+    source_type = models.CharField(max_length=10, choices=SOURCE_CHOICES, default=SOURCE_ZENODO, db_index=True)
+    source_record_id = models.CharField(max_length=100, blank=True)
 
     class Meta:
         unique_together = [('release', 'filename')]
@@ -49,7 +60,7 @@ class ZenodoFile(models.Model):
 
 class DownloadEvent(models.Model):
     """One row per redirected download, for counting purposes."""
-    file = models.ForeignKey(ZenodoFile, on_delete=models.CASCADE, related_name='download_events')
+    file = models.ForeignKey(ReleaseFile, on_delete=models.CASCADE, related_name='download_events')
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:

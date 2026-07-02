@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="ZenodoFile",
+            name="ReleaseFile",
             fields=[
                 (
                     "id",
@@ -50,10 +50,23 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("filename", models.CharField(max_length=255)),
-                ("zenodo_url", models.URLField(max_length=500)),
+                ("download_url", models.URLField(blank=True, max_length=500)),
                 ("size", models.BigIntegerField(default=0)),
                 ("checksum", models.CharField(blank=True, max_length=100)),
-                ("source_record_id", models.CharField(blank=True, max_length=50)),
+                (
+                    "source_type",
+                    models.CharField(
+                        choices=[
+                            ("zenodo", "Zenodo"),
+                            ("b2", "Backblaze B2"),
+                            ("local", "Local (nginx)"),
+                        ],
+                        db_index=True,
+                        default="zenodo",
+                        max_length=10,
+                    ),
+                ),
+                ("source_record_id", models.CharField(blank=True, max_length=100)),
                 (
                     "release",
                     models.ForeignKey(
@@ -85,7 +98,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="download_events",
-                        to="downloads.zenodofile",
+                        to="downloads.releasefile",
                     ),
                 ),
             ],

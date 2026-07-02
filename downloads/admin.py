@@ -1,13 +1,13 @@
 from django.contrib import admin
 from django.db.models import Count
 
-from .models import DownloadEvent, Release, ZenodoFile
+from .models import DownloadEvent, Release, ReleaseFile
 
 
-class ZenodoFileInline(admin.TabularInline):
-    model = ZenodoFile
-    readonly_fields = ('filename', 'size_display', 'download_count', 'zenodo_url', 'checksum')
-    fields = ('filename', 'size_display', 'download_count', 'zenodo_url', 'checksum')
+class ReleaseFileInline(admin.TabularInline):
+    model = ReleaseFile
+    readonly_fields = ('filename', 'size_display', 'download_count', 'source_type', 'download_url', 'checksum')
+    fields = ('filename', 'size_display', 'download_count', 'source_type', 'download_url', 'checksum')
     extra = 0
     can_delete = False
     show_change_link = False
@@ -36,7 +36,7 @@ class ReleaseAdmin(admin.ModelAdmin):
     list_display = ('name', 'release_group', 'zenodo_record_id', 'release_date', 'is_latest', 'file_count', 'total_downloads')
     list_filter = ('release_group', 'is_latest')
     readonly_fields = ('zenodo_doi',)
-    inlines = [ZenodoFileInline]
+    inlines = [ReleaseFileInline]
     actions = ['mark_as_latest']
 
     def get_queryset(self, request):

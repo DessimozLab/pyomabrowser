@@ -35,7 +35,7 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand, CommandError
 
-from downloads.models import Release, ZenodoFile
+from downloads.models import Release, ReleaseFile
 
 logger = logging.getLogger(__name__)
 
@@ -257,13 +257,14 @@ class Command(BaseCommand):
             if not filename:
                 continue
             url = f"https://zenodo.org/records/{record_id}/files/{filename}?download=1"
-            ZenodoFile.objects.update_or_create(
+            ReleaseFile.objects.update_or_create(
                 release=release,
                 filename=filename,
                 defaults={
-                    'zenodo_url': url,
+                    'download_url': url,
                     'size': entry.get('size', 0),
                     'checksum': entry.get('checksum', ''),
+                    'source_type': ReleaseFile.SOURCE_ZENODO,
                     'source_record_id': str(record_id),
                 },
             )
