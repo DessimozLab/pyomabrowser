@@ -38,6 +38,9 @@ production = [
     "psycopg[binary]>=3.2.12",
     "uwsgi; sys_platform != 'darwin'",
 ]
+downloads = [
+    "b2sdk",
+]
 twitter = [
     "tweepy>=4.16.0",
 ]
