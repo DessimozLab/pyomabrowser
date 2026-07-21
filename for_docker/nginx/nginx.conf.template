@@ -151,6 +151,16 @@ server {
     # Files present on disk are served directly; absent files (large HDF5, etc.)
     # fall back to Django which records the download and redirects to Zenodo.
     location /All/ {
+        # CORS preflight — must return 200 locally, never redirect
+        # Note: redirect fallback to B2 only works in production (https)
+        # On http://localhost the GET redirect works but CORS preflight fails
+        if ($request_method = OPTIONS) {
+            add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods "GET, HEAD, OPTIONS";
+            add_header Access-Control-Allow-Headers *;
+            add_header Access-Control-Max-Age 3600;
+            return 204;
+        }
         rewrite ^/All/(.*)$ /$1 break;
         root {{ getenv "DARWIN_BROWSERDOWNLOAD_PATH" }};
         add_header Access-Control-Allow-Origin *;
