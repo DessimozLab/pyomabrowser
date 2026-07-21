@@ -162,7 +162,7 @@ means you haven't yet copied the data into the volume.
 You can also start the containers in the background with `docker compose up -d` 
 and stop them with `docker compose down`. 
 
-### Populating the download catalogue (Zenodo sync)
+### Populating the download catalogue (Zenodo data (downloads & OMAmer) and B2 buckets)
 
 The `downloads` app keeps a local database of which files are available for each release
 and where they live on Zenodo. This catalogue is **not** populated automatically on startup
@@ -175,6 +175,11 @@ docker compose exec web python manage.py sync_zenodo_release 20816667 --concept 
 
 # Merge OMAmer HDF5 files (different Zenodo concept, same release names)
 docker compose exec web python manage.py sync_zenodo_release 17822900 --concept --merge --release-name-prefix All
+
+# Merge data files from Blackblaze B2 buckets
+docker compose exec web python manage.py sync_b2_release <bucket> --scan-releases --base-url <base-url> --merge --key-id <key-id> --key <key>
+# e.g: for oma's B2 bucket (you could also put the key in the env file)
+docker compose exec web python manage.py sync_b2_release oma-download-0000 --scan-releases --base-url https://downloads.omabrowser.org --merge --key-id <key-id> --key <key>
 ```
 
 The first command creates one `Release` entry per published Zenodo version and marks the
