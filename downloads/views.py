@@ -19,7 +19,9 @@ def _serve_releasefile_redirect(request, release, filename):
         raise Http404
     DownloadEvent.objects.create(file=release_file)
     logger.info("Redirecting download: %s/%s -> %s", release.name, filename, release_file.download_url)
-    return redirect(release_file.download_url)
+    response = redirect(release_file.download_url)
+    response["Access-Control-Allow-Origin"] = "*"
+    return response
 
 
 def download_latest(request, filename):
