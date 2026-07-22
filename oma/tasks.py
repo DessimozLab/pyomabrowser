@@ -38,19 +38,24 @@ from .models import FileResult
 logger = logging.getLogger(__name__)
 
 
-@async_job_task(FileResult, soft_time_limit=1000, time_limit=1060, logical_inputs=dict(genomes="genomes", min_species_coverage="min_species_coverage", top_N_grps="top_N_grps"))
+@async_job_task(FileResult, soft_time_limit=2000, time_limit=2060, logical_inputs=dict(genomes="genomes", min_species_coverage="min_species_coverage", top_N_grps="top_N_grps"))
 def export_marker_genes(job: FileResult, genomes, min_species_coverage=0.5, top_N_grps=None):
     logger.info('starting task export_marker_genes for %s', job.data_hash)
 
+    t0 = time.perf_counter()
     grps = collect_groups(genomes, min_species_coverage=min_species_coverage)
+    t1 = time.perf_counter()
+    logger.info('collected %d groups, took %.2fsec', len(grps), t1-t0)
     if top_N_grps is not None:
         size_ordered_grpids = sorted(grps.keys(), key=lambda x: -len(grps[x]))
         grps = {k: grps[k] for k in size_ordered_grpids[0:top_N_grps]}
     with FastaTarballResultBuilder('marker_genes', 'OMAGroup_', job.data_hash) as exporter:
         exporter.add_groups(grps)
+    t2 = time.perf_counter()
     task_meta = {
         'n_groups': len(grps),
         'avg_group_size': sum(len(g) for g in grps.values()) / len(grps) if len(grps) > 0 else 0,
+        'build_time': {'collect_groups': t1-t0, 'tarball': t2-t1, 'total': t2-t0},
     }
     return exporter.fname, task_meta
 
