@@ -4,15 +4,62 @@
 {% block titleTab %}Archives {{ release.name }} {% endblock %}
 {% block titleDownload %}Archives {{ release.name }} {% endblock %}
 {% block yearPicker %}
-<strong>OMA Browser Archive</strong>: the download files form the previous releases of OMA are still available:
-</p>
-<div class="text-center">
-	<ol class="breadcrumb">
-        {%  for rel in all_releases %}
-		    <li>{% if rel.id != release.id %}<a href="{% url 'archives' rel.id %}">{% endif %}{{ rel.name }}</a> </li> {% if not forloop.last %}/{% endif %}
-        {%  endfor %}
-	</ol>
+<style>
+    .oma-archive-picker .card-body {
+        padding: 1.25rem 1.5rem;
+    }
+    .oma-release-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .oma-release-list .oma-release-badge {
+        display: inline-block;
+        padding: 0.4rem 0.9rem;
+        border-radius: 50rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        background-color: #f1f3f5;
+        color: #369;
+        border: 1px solid #e2e6ea;
+        transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+    }
+    .oma-release-list a.oma-release-badge:hover {
+        background-color: #e2e6ea;
+        color: #234;
+        text-decoration: none;
+    }
+    .oma-release-list .oma-release-current {
+        background-color: #317d3d;
+        border-color: #317d3d;
+        color: #fff;
+        cursor: default;
+    }
+</style>
+<div class="card oma-archive-picker">
+    <div class="card-header" id="archive-picker">
+        OMA Browser Archive
+    </div>
+    <div class="card-body">
+        <p class="mb-3">The download files from previous releases of OMA are still available. The release currently shown below is highlighted.</p>
+        <ul class="oma-release-list">
+            {% for rel in all_releases %}
+            <li>
+                {% if rel.id != release.id %}
+                <a href="{% url 'archives' rel.id %}" class="oma-release-badge">{{ rel.name }}</a>
+                {% else %}
+                <span class="oma-release-badge oma-release-current">{{ rel.name }}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
+<br>
 {% endblock  %}
 
 {% block genomePW %} {% endblock genomePW %}

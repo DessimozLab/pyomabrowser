@@ -12,7 +12,7 @@
         <div class="jumbotron">
 
 
-            <h1>{% block titleDownload %}Current release{% endblock titleDownload %}</h1>
+            <h1>{% block titleDownload %}Current release ({{ release.name }}){% endblock titleDownload %}</h1>
 
             <div class="oma-seperator">
                 <span class="colour1"></span>
@@ -23,7 +23,7 @@
 
             <p class="text-justify">The entire OMA database is available for download in several formats. It is also
                 possible to download each group separately. This option is available in the group view. Please read our
-                terms and conditions before integrating OMA data into your own research or database.</p>
+                <a href="{% url "license" %}">terms and conditions</a> before integrating OMA data into your own research or database.</p>
 
             <br>
 
@@ -38,16 +38,16 @@
                 <div class="card-body">
 
                     <p>
-                        The orthology relationships are available in two types: groups or pairs of orthologs. The
-                        information is given in terms of OMA identifiers (of the form HUMAN04376).
+                        The orthology relationships are available in two types: Strict Orthologous Groups (a.k.a OMA Groups)
+                        and Hierarchical Orthologous Groups (HOGs). The
+                        information is given in terms of OMA identifiers (of the form HUMAN04376).<br>
+                        Use the mapping files provided <a href="#mapping-section">below</a> to cross-link to other identifier systems.
                     </p>
-
 
                     <hr>
 
-
                     <dl class="row">
-                        <dt class="col-sm-6">OMA groups</dt>
+                        <dt class="col-sm-6">OMA groups (Strict Orthologous Groups)</dt>
                         <dd class="col-sm-6"><a href="{{ download_root }}/oma-groups.txt.gz">
                             <i class="fas fa-download"></i>
                             Text format
@@ -140,9 +140,8 @@
                         to identify the sequences. Cross-references to UniProt, RefSeq and Ensembl are also available
                         as tsv files (see below in the Mapping section).
 
-                        {% if not "cds.fa.gz" in existing_download_files %}
-                        The
-                        proteins are all in one file, while the coding DNA is split into two files, one for the
+                        {% if not "oma-cds.fa.gz" in existing_download_files %}
+                        The proteins are all in one file, while the coding DNA is split into two files, one for the
                         Eukaryotes and one for the Prokaryotes.
                         {% endif %}
                     </p>
@@ -230,7 +229,7 @@
 
             {% block Mapping %}
 
-            <div class="card">
+            <div class="card" id="mapping-section">
                 <div class="card-header" id='identifier-mapping'>
                     Identifier Mapping
                 </div>
@@ -405,7 +404,7 @@
                         </dd>
                     </dl>
 
-                     <hr>
+                    <hr>
 
 
                     <dl class="row">
@@ -437,19 +436,21 @@
                         <dt class="col-sm-6">OMA Browser database (as hdf5)</dt>
                         <dd class="col-sm-6">
                             <a href="{{ download_root }}/OmaServer.h5">
-                            <i class="fas fa-download"></i>
-                            HDF5 pytables
-                        </a>
-                            <br>
-
+                                <i class="fas fa-download"></i>HDF5 pytables
+                            </a><br>
                             <a href="{{ download_root }}/OmaServer.h5.idx">
-                            <i class="fas fa-download"></i>
-                            HDF5 pytables suffix index
-                        </a>
+                                <i class="fas fa-download"></i>HDF5 pytables suffix- &amp; kmer index
+                            </a>
+                            {% if "OmaServer.structure.h5" in existing_download_files %}
+                            <br>
+                            <a href="{{ download_root }}/OmaServer.structure.h5">
+                                <i class="fas fa-download"></i>HDF5 pytables structure database
+                            </a>
+                            {% endif %}
                         </dd>
                     </dl>
-
                 {% endif %}
+
                 {% if "oma-rdf-turtle.tgz" in existing_download_files %}
                     <hr>
                     <dl class="row">
@@ -494,12 +495,11 @@
                 <div class="card-body">
                     <p>
                         Mappings of the OMA identifier of updated genomes from one release to another. We track only
-                        proteins with same amino acid sequences.
+                        proteins with identical amino acid sequences.
                     </p>
 
 
                     {% for back in release_with_backlinks %}
-
                     <dl class="row">
                         <dt class="col-sm-6">From {{ back.name }} release</dt>
                         <dd class="col-sm-6"> <a href="{{ download_root }}/IDHistory-{{ back.date }}-to-{{ release.date }}.txt.gz">
@@ -508,8 +508,6 @@
                         </a>
                         </dd>
                     </dl>
-
-
                     {% endfor %}
 
 
@@ -520,7 +518,6 @@
 
         </div>
     </div>
-</div>
 </div>
 
 
