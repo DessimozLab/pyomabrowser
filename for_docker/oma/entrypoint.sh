@@ -64,17 +64,19 @@ function run_init_if_needed() {
     python3 manage.py shell << EOF
 import os
 from django.contrib.auth.models import User
+username = os.environ.get('DJANGO_ADMIN_USER', 'admin')
+email    = os.environ.get('DJANGO_ADMIN_EMAIL', '')
 try:
-    User.objects.get(username=os.environ['SQL_USER'])
-except User.DoesNotExist:
-    User.objects.create_superuser(os.environ['SQL_USER'],
-                                  os.environ['SQL_USERMAIL'],
-                                  os.environ['SQL_PASSWORD'])
-except Exception as dexc:
-    if str(dexc) == 'UNIQUE constraint failed: auth_user.username':
-        pass
-except:
-    raise
+  password = os.environ['DJANGO_ADMIN_PASSWORD']
+except KeyError:
+  raise RuntimeError("DJANGO_ADMIN_PASSWORD environment variable must be set to create superuser.\n"
+                     "Please add it to your env file or docker-compose.yml")
+
+if not User.objects.filter(username=username).exists():
+    User.objects.create_superuser(username, email, password)
+    print(f"Superuser '{username}' created.")
+else:
+    print(f"Superuser '{username}' already exists - skipping.")
 EOF
     # mark initialization as done
     >&2 echo "Initialization completed"
@@ -83,13 +85,14 @@ EOF
 
 function run_web() {
   wait_for_db
+
+  # Make sure the database is set up before any init that touches auth tables
+  >&2 echo " -> Assure database is set up with tables"
+  python3 manage.py migrate --noinput
+
   if [ "${AUTO_INIT:-true}" = "true" ]; then
     run_init_if_needed
   fi
-
-  # Make sure the database is set up
-  >&2 echo " -> Assure database is set up with tables"
-  python3 manage.py migrate --noinput
 
   # Install static files
   >&2 echo " -> Collect static files"

@@ -2343,6 +2343,18 @@ class CurrentView(TemplateView):
     _re_rel2name = re.compile(r'(?:(?P<scope>[A-Za-z]+).)?(?P<month>[A-Za-z]{3})(?P<year>\d{4})')
 
     def _get_all_releases_with_downloads(self, prefix_filter='All.'):
+        if 'downloads' in settings.INSTALLED_APPS:
+            try:
+                from downloads.models import Release
+                qs = Release.objects.filter(name__startswith=prefix_filter).order_by('-release_date')
+                rels = [{'name': self._name_from_release(r.name), 'id': r.name,
+                         'date': r.name[max(0, r.name.find('.') + 1):]}
+                        for r in qs]
+                if rels:
+                    return rels
+            except Exception:
+                logger.exception('DB release lookup failed; falling back to filesystem')
+        # filesystem fallback
         try:
             root = os.environ['DARWIN_BROWSER_SHARE']
         except KeyError:
@@ -2377,6 +2389,20 @@ class CurrentView(TemplateView):
         return "/All"
 
     def existing_download_files(self, release):
+        if 'downloads' in settings.INSTALLED_APPS:
+            try:
+                from downloads.models import Release as ReleaseModel
+                release_name = release.get('id') if release else None
+                if release_name:
+                    db_release = ReleaseModel.objects.get(name=release_name)
+                    filenames = list(db_release.files.values_list('filename', flat=True))
+                    if filenames:
+                        return filenames
+            except ReleaseModel.DoesNotExist:
+                pass
+            except Exception:
+                logger.exception('DB file lookup failed for release %s; falling back to filesystem', release)
+        # filesystem fallback
         root = os.getenv('DARWIN_BROWSER_SHARE', '')
         try:
             download_dir = os.path.join(root, release['id'], "downloads")
@@ -2391,6 +2417,20 @@ class CurrentView(TemplateView):
         return [f for f in os.listdir(download_dir) if os.path.exists(os.path.join(download_dir, f))]
 
     def get_release_data(self, release):
+        if 'downloads' in settings.INSTALLED_APPS:
+            try:
+                from downloads.models import Release as ReleaseModel
+                db_release = ReleaseModel.objects.get(release_group='All', is_latest=True)
+                m = self._re_rel2name.match(db_release.name)
+                if m is not None:
+                    return {'name': "{} {}".format(m.group('month'), m.group('year')),
+                            'date': "{}{}".format(m.group('month'), m.group('year')),
+                            'id': db_release.name}
+            except ReleaseModel.DoesNotExist:
+                pass
+            except Exception:
+                logger.exception('DB latest release lookup failed; falling back to HDF5')
+        # HDF5 fallback
         relname = utils.db.get_release_name()
         m = self._re_rel2name.match(relname)
         if m is not None:

@@ -1,0 +1,27 @@
+name: oma-nginx-routing-test
+
+services:
+  # Stands in for the "web" (Django/uwsgi) service. Must be named "web" since
+  # nginx.conf.template hardcodes `upstream pyoma { server web:8000; }`.
+  web:
+    image: python:3.12-alpine
+    working_dir: /app
+    volumes:
+      - ./stub_upstream:/app:ro
+    command: ["python3", "echo_server.py"]
+
+  nginx:
+    build:
+      context: ..
+    depends_on:
+      - web
+    ports:
+      - "80"
+    environment:
+      - DEPLOYMENT_TYPE=development
+      - DARWIN_BROWSERSTATIC_PATH=/data/static
+      - DARWIN_BROWSERMEDIA_PATH=/data/media
+      - DARWIN_BROWSERDOWNLOAD_PATH=/data/downloads
+      - NGINX_LOG_TO_FILE=false
+    volumes:
+      - ./fixtures/downloads:/data/downloads:ro

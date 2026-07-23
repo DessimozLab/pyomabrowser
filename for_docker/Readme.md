@@ -162,6 +162,32 @@ means you haven't yet copied the data into the volume.
 You can also start the containers in the background with `docker compose up -d` 
 and stop them with `docker compose down`. 
 
+### Populating the download catalogue (Zenodo data (downloads & OMAmer) and B2 buckets)
+
+The `downloads` app keeps a local database of which files are available for each release
+and where they live on Zenodo. This catalogue is **not** populated automatically on startup
+— run the following two commands once after the containers are up, and again whenever a new
+release is published on Zenodo:
+
+```bash
+# Sync all OMA Browser release file lists from the primary concept record
+docker compose exec web python manage.py sync_zenodo_release 20816667 --concept --set-latest
+
+# Merge OMAmer HDF5 files (different Zenodo concept, same release names)
+docker compose exec web python manage.py sync_zenodo_release 17822900 --concept --merge --release-name-prefix All
+
+# Merge data files from Blackblaze B2 buckets
+docker compose exec web python manage.py sync_b2_release <bucket> --scan-releases --base-url <base-url> --merge --key-id <key-id> --key <key>
+# e.g: for oma's B2 bucket (you could also put the key in the env file)
+docker compose exec web python manage.py sync_b2_release oma-download-0000 --scan-releases --base-url https://downloads.omabrowser.org --merge --key-id <key-id> --key <key>
+```
+
+The first command creates one `Release` entry per published Zenodo version and marks the
+newest as "latest" (used by the `/All/` download URLs). The second merges the OMAmer files
+into those same releases without overwriting any metadata.
+
+For restricted or draft Zenodo records, pass `--token $ZENODO_TOKEN`.
+
 ### Copying data into the release_volume
 In order to copy the data of a specific release into a 
 docker release_volume, you need to mount both, the 

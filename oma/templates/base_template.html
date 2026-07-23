@@ -53,6 +53,22 @@
     <!-- js includes -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
             integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script>
+        // Requests to /All/... or a versioned release dir (/All.May2026/,
+        // /Plants.Oct2024/, ...) may be redirected cross-origin to the CDN
+        // (downloads.omabrowser.org) when the file isn't served locally. jQuery
+        // only skips its default X-Requested-With header for URLs it recognizes
+        // as cross-domain up front, so a same-origin request that later redirects
+        // elsewhere still carries that header — turning an otherwise "simple" GET
+        // into one that needs (and fails) a CORS preflight against the CDN.
+        // Marking these as crossDomain avoids that header being added.
+        var DOWNLOAD_PATH_RE = /^\/(All\/|[A-Za-z]+\.[A-Za-z]{3}\d{4}\/)/;
+        $.ajaxPrefilter(function (options) {
+            if (options.url && DOWNLOAD_PATH_RE.test(options.url)) {
+                options.crossDomain = true;
+            }
+        });
+    </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"
             integrity="sha256-E/V4cWE4qvAeO5MOhjtGtqDzPndRO1LBk8lJ/PR7CA4=" crossorigin="anonymous"></script>
     <script>const static_root = "{% static "" %}";</script>

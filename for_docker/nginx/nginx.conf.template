@@ -147,9 +147,39 @@ server {
     }
     {{- end }}
 
+    # File downloads.
+    # Files present on disk are served directly; absent files (large HDF5, etc.)
+    # fall back to Django which records the download and redirects to Zenodo.
     location /All/ {
-        alias {{ getenv "DARWIN_BROWSERDOWNLOAD_PATH" }}/;
+        # CORS preflight — must return 200 locally, never redirect
+        # Note: redirect fallback to B2 only works in production (https)
+        # On http://localhost the GET redirect works but CORS preflight fails
+        if ($request_method = OPTIONS) {
+            add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods "GET, HEAD, OPTIONS";
+            add_header Access-Control-Allow-Headers *;
+            add_header Access-Control-Max-Age 3600;
+            return 204;
+        }
+        rewrite ^/All/(.*)$ /$1 break;
+        root {{ getenv "DARWIN_BROWSERDOWNLOAD_PATH" }};
         add_header Access-Control-Allow-Origin *;
+        try_files $uri @downloads_fallback;
+    }
+
+    # Specific versioned release directories: /All.Mar2026/, /Plants.Mar2026/, …
+    # These are never present locally in the container, so go straight to the app.
+    location ~ "^/[A-Za-z]+\.[A-Za-z]{3}\d{4}/" {
+        add_header Access-Control-Allow-Origin *;
+        proxy_pass http://pyoma;
+        proxy_redirect off;
+        proxy_read_timeout 10;
+    }
+
+    location @downloads_fallback {
+        proxy_pass http://pyoma$request_uri;
+        proxy_redirect off;
+        proxy_read_timeout 10;
     }
 
     location /static/ {

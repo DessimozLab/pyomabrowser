@@ -108,7 +108,7 @@ def purge_old_exports():
     StandaloneExportJobs.objects.filter(create_time__lt=time_threshold).delete()
 
 
-@shared_task(soft_time_limit=12*3600)
+@shared_task(soft_time_limit=12*3600, time_limit=12*3600+60)
 def run_export_celery(data_id, genomes):
     from . import export_standalone
     job = StandaloneExportJobs.objects.get(data_hash=data_id)
@@ -139,7 +139,7 @@ def run_export_celery(data_id, genomes):
         job.save()
 
 
-@shared_task(soft_time_limit=6*3600)
+@shared_task(soft_time_limit=6*3600, time_limit=6*3600+60)
 def run_fastoma_export(data_id, genomes):
     from . import export_fastoma
     job = StandaloneExportJobs.objects.get(data_hash=data_id)
