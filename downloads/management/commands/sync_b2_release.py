@@ -247,9 +247,12 @@ class Command(BaseCommand):
             else:
                 download_url = api.get_download_url_for_file_name(bucket.name, b2_path)
 
-            checksum = ''
-            if hasattr(file_version, 'content_sha1') and file_version.content_sha1:
-                checksum = f"sha1:{file_version.content_sha1}"
+            try:
+                sha1 = file_version.get_content_sha1()
+                checksum = f"sha1:{sha1}"
+            except Exception:
+                checksum = 'sha1:none'
+                self.stdout.write(f"    Warning: no SHA1 checksum for {filename}")
 
             size = getattr(file_version, 'size', 0) or 0
 
