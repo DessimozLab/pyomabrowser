@@ -1,5 +1,9 @@
 {% load static %}
 
+<style>
+    #header_msa_structure { margin-top: 2.5rem; }
+</style>
+
 <div class="panel-body">
     <div id="msa_message"><p>Preparing alignment job...</p></div>
     <div id="header_msa"></div>
@@ -53,13 +57,13 @@
         }
     }
 
-    function renderMSA(seqs, msa_div, color_scheme_name){
+    function renderMSA(seqs, msa_div, color_scheme_name, capped){
         const opts = {};
         opts.el = msa_div;
         opts.vis = {
             conserv: false,
             overviewbox: true,
-            seqlogo: true,
+            seqlogo: false,
             labels: true,
             labelName: true,
             labelId: false
@@ -93,19 +97,24 @@
         });
         m.g.colorscheme.set("scheme", color_scheme_name || "taylor");
         m.seqs.reset(seqs);
-        // set max height of alignment
-        const h = Math.max(window.innerHeight - opts.zoomer.overviewboxHeight - 160,
-            10 * m.g.zoomer.get('rowHeight'));
+        // set max height of alignment: when paired with another viewer, cap at 70% of
+        // viewport (floor 400px) so the other viewer stays visible; otherwise use the
+        // full viewport as before.
+        const h = capped
+            ? Math.max(window.innerHeight * 0.7 - opts.zoomer.overviewboxHeight - 160, 400)
+            : Math.max(window.innerHeight - opts.zoomer.overviewboxHeight - 160,
+                10 * m.g.zoomer.get('rowHeight'));
         m.g.zoomer.autoHeight(h);
         m.render();
         let status_message = document.getElementById("loading-info");
         if (status_message !== null && status_message !== undefined){
             status_message.innerHTML = "";
         }
+        return m;
     }
 
-    function loadMSA(url, div, color_scheme){
-        fetch(url)
+    function loadMSA(url, div, color_scheme, capped){
+        return fetch(url)
             .then(r => r.arrayBuffer())
             .then(buffer => {
                 let fastaText;
@@ -119,12 +128,27 @@
                 }
 
                 const seqs = msa.io.fasta.parse(fastaText);
-                renderMSA(seqs, div, color_scheme);
+                return renderMSA(seqs, div, color_scheme, capped);
             })
             .catch(err=>{
                 div.innerText = "Failed to load MSA.";
                 console.error(err);
             });
+    }
+
+    function linkScroll(m1, m2){
+        function relay(from, to, attr){
+            from.g.zoomer.on("change:" + attr, function(){
+                const v = from.g.zoomer.get(attr);
+                if (to.g.zoomer.get(attr) !== v){
+                    to.g.zoomer.set(attr, v);
+                }
+            });
+        }
+        ["_alignmentScrollLeft", "_alignmentScrollTop"].forEach(function(attr){
+            relay(m1, m2, attr);
+            relay(m2, m1, attr);
+        });
     }
 
 
@@ -134,16 +158,23 @@
             .then(data => {
                 if(data.state === "done"){
                     renderStatus("loading", data.metadata)
-                    loadMSA(data.result_url, msaDiv);
-                    if (data.metadata && data.metadata.tool === "Foldmason") {
+                    const isPaired = !!(data.metadata && data.metadata.tool === "Foldmason");
+                    const proteinMsaPromise = loadMSA(data.result_url, msaDiv, undefined, isPaired);
+                    if (isPaired) {
                         const header_msa = document.getElementById("header_msa");
-                        header_msa.innerHTML = "<h2>Protein Sequence MSA</h2>";
+                        header_msa.innerHTML = "<h2>Protein Sequence MSA (informed with structure)</h2>";
 
                         const header_msa_struc = document.getElementById('header_msa_structure');
                         header_msa_struc.innerHTML = "<h2>Structure Alphabet MSA (3di)</h2>";
 
                         const msa_3di_url = data.result_url.replace(".fasta.gz", "_3di.fasta.gz");
-                        loadMSA(msa_3di_url, msaStrucDiv, "3di");
+                        const structureMsaPromise = loadMSA(msa_3di_url, msaStrucDiv, "3di", true);
+
+                        Promise.all([proteinMsaPromise, structureMsaPromise]).then(([m1, m2]) => {
+                            if (m1 && m2){
+                                linkScroll(m1, m2);
+                            }
+                        });
                     }
                     return;
                 }

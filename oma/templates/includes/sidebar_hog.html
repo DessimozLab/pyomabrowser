@@ -53,7 +53,7 @@
                         <a href="{% if level != None %} {% url 'hog_msa' hog.hog_id hog.level %}{% else %}{% url 'hog_msa' hog.hog_id %}{% endif %}">Protein sequences (Mafft)</a>
                     </li>
                     <li class="list-group-item list-group-item-action subtab-item {% if subtab == "structure" %}active{% endif %}">
-                        <a href="{% if level != None %}{% url 'hog_msa_structure' hog.hog_id hog.level %}{% else %}{% url 'hog_msa_structure' hog.hog_id %}{% endif %}">Structure (Foldmason)</a>
+                        <a href="{% if level != None %}{% url 'hog_msa_structure' hog.hog_id hog.level %}{% else %}{% url 'hog_msa_structure' hog.hog_id %}{% endif %}">Struct.-informed (Foldmason)</a>
                     </li>
                 </ul>
             </div>
