@@ -15,16 +15,23 @@ $(document).ready(function() {
         mouse.y = e.clientY || e.pageY
     }, false);
 
-    var viewerHeight = $(document).height();  //height of the browser window
-    var navHeight = $('#navbb').height(); // height of the navbar
-    $('#phylo_io').css('height', viewerHeight - navHeight -110 ); // svgheight = window size - navheight - (some of margin + padding)
+    // .container-fluid's "height: calc(100%)" is relative to <body>, which does NOT account for the
+    // (in-flow, sticky) navbar above it, so it cannot be trusted to reflect the actually available
+    // space. Instead, measure how much vertical space is already used above .export-main-row (navbar,
+    // page header, etc.) directly from its rendered position, and pin its height to whatever remains
+    // in the viewport. #svgdiv and #UISelected are flex items of that row and stretch to match it.
+    var mainRow = $('.export-main-row');
+    var rowTop = mainRow.length ? mainRow[0].getBoundingClientRect().top : 0;
+    var viewerHeight = $(window).height(); // visible viewport height
+    mainRow.css('height', viewerHeight - rowTop - 10);
     var svgdivHeight = $('#svgdiv').height(); // height of the svgdiv
+    var helpButtonHeight = $('#modalhelp').outerHeight(true) || 0;
+    $('#phylo_io').css('height', svgdivHeight - helpButtonHeight);
     var buttonHeight = $('#buttondiv').height();
     var exportAdditionalInputs = $('#exportAdditionalInputs').height();
     $('#UISelected').css('height', svgdivHeight - 15 - 25 - buttonHeight - exportAdditionalInputs); //Selectedgenomediv = svgdivheight - margin btw additional input div - margin between the two UI div - height of additional input div
     var row3Width = $('#UISelected').width();
-    $('#buttonUnselect').css('width', row3Width*0.45 -5);
-    $('#buttonSubmit').css('width', row3Width*0.45 -5);
+    $('.genome-picker-btn').css('width', row3Width*0.45 -5);
     $('#buttondiv').css('width', row3Width);
 
 
@@ -187,13 +194,9 @@ $(document).ready(function() {
                     }
                 }
 
-                //var UISelectedheight = $('#UISelected').height();
-                //var textSelheight = $('#textSel').height();
-                //$('#divList').css('maxHeight', UISelectedheight  - textSelheight -20 );
                 var UISelectedheight = $('#UISelected').height();
-                var textSelheight = $('#UISelectedHeading').height();
-                var UISelectedContentPadding = parseFloat($('.panel-body').css('padding-top')) + parseFloat($('.panel-body').css('padding-bottom'));
-                $('#divList').css('maxHeight', UISelectedheight - textSelheight - 22 - UISelectedContentPadding);
+                var textSelheight = $('#textSel').outerHeight(true);
+                $('#divList').css('maxHeight', UISelectedheight - textSelheight - 10);
             }
 
             function addToInfo(d) {

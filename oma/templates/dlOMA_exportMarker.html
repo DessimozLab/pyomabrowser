@@ -3,6 +3,21 @@
 
 {% block title %}Export marker genes{% endblock %}
 {% block meta_description %}Export marker genes from a subset of your choice of OMA's genomes for species phylogeny reconstruction{% endblock %}
+{% block page_header %}Export Marker Genes{% endblock page_header %}
+
+{% block modal_title %}Export of marker genes for species tree reconstruction{% endblock modal_title %}
+{% block modal_body %}
+<p>This tool extracts a set of universal, single-copy marker genes (OMA Groups) from your selected genomes,
+    suitable for reconstructing a species phylogeny (e.g. as input to a tool such as RAxML or IQ-TREE).
+    The dataset contains individual FASTA files with unaligned protein sequences (.fa) and coding sequences (.fna).</p>
+<p> <b>Important limitations and notices</b> </p>
+<ul>
+    <li><p>Only genes present in at least the specified minimum fraction of selected species are considered as markers. Lowering this fraction yields more markers but with more missing data per species.</p></li>
+    <li><p>If more groups qualify as markers than the specified limit, only the most complete groups (i.e. those with the fewest missing species) are returned.</p></li>
+</ul>
+<p>Species trees can be inferred, for example, using the super-matrix approach described in the <a href="https://f1000research.com/articles/9-511">F1000 Research Protocol</a>.</p>
+{% endblock modal_body %}
+
 {% block menu_additional_inputs %}
     <div class="form-group">
         <label for="min_species_coverage_input">Minimum fraction of covered species</label>

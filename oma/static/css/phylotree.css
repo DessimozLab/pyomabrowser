@@ -33,6 +33,7 @@
     margin: 0px;
     border: 1px solid #22780F;
     background: #fff;
+    overflow: hidden;
 }
 
 .centered {
@@ -69,7 +70,7 @@ div.tooltip button {
     overflow-y: auto !important;
 }
 
-#buttonSubmit, #buttonSubmitMarkerGenes, #buttonUnselect {
+.genome-picker-btn {
     margin: 5px;
     border-radius: 0px !important;
 }
