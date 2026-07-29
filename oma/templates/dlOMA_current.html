@@ -377,10 +377,8 @@
                 </div>
                 <div class="card-body">
 
-
+                {% if "All.cog.tar.gz" in  existing_download_files %}
                     <hr>
-
-
                     <dl class="row">
                         <dt class="col-sm-6">OMA Groups/Sequences in COGs format</dt>
                         <dd class="col-sm-6">
@@ -390,10 +388,9 @@
                         </a>
                         </dd>
                     </dl>
+                {% endif %}
 
-                     <hr>
-
-
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Species information (Taxon IDs, scientific names, genome sources)</dt>
                         <dd class="col-sm-6">
@@ -404,9 +401,8 @@
                         </dd>
                     </dl>
 
+                {% if "group-descriptions.txt.gz" in existing_download_files %}
                     <hr>
-
-
                     <dl class="row">
                         <dt class="col-sm-6">Group descriptions</dt>
                         <dd class="col-sm-6">
@@ -416,10 +412,10 @@
                         </a>
                         </dd>
                     </dl>
+                {% endif %}
 
-                     <hr>
-
-
+                {% if "oma-close-groups.txt.gz" in existing_download_files %}
+                    <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Close OMA Groups</dt>
                         <dd class="col-sm-6">
@@ -429,6 +425,7 @@
                         </a>
                         </dd>
                     </dl>
+                {% endif %}
 
                 {% if "OmaServer.h5" in existing_download_files %}
                     <hr>
@@ -459,6 +456,19 @@
                             <a href="{{ download_root }}/oma-rdf-turtle.tgz">
                                 <i class="fas fa-download"></i>
                                 RDF turtle dumps
+                            </a>
+                        </dd>
+                    </dl>
+                {% endif %}
+
+                {% if "OMA-foldseek.tgz" in existing_download_files %}
+                    <hr>
+                    <dl class="row">
+                        <dt class="col-sm-6">OMA Browser as Foldseek database</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/OMA-foldseek.tgz">
+                                <i class="fas fa-download"></i>
+                                Foldseek database (compressed)
                             </a>
                         </dd>
                     </dl>
@@ -500,14 +510,16 @@
 
 
                     {% for back in release_with_backlinks %}
+                    {% if back.idhistory_file %}
                     <dl class="row">
                         <dt class="col-sm-6">From {{ back.name }} release</dt>
-                        <dd class="col-sm-6"> <a href="{{ download_root }}/IDHistory-{{ back.date }}-to-{{ release.date }}.txt.gz">
+                        <dd class="col-sm-6"> <a href="{{ download_root }}/{{ back.idhistory_file }}">
                             <i class="fas fa-download"></i>
                             Text format
                         </a>
                         </dd>
                     </dl>
+                    {% endif %}
                     {% endfor %}
 
 

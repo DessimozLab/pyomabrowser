@@ -2385,6 +2385,20 @@ class CurrentView(TemplateView):
         except KeyError:
             pass
 
+    def _idhistory_filename(self, back, release, existing_files):
+        """resolve the actual IDHistory filename for a backlink.
+
+        Older releases name the file with the short date (e.g. 'Jun2023'),
+        while some releases (e.g. 'All.May2026') use the full release id
+        instead. Try all combinations and return the one that actually
+        exists, so the template can hide the link if none match."""
+        for from_ident in (back.get('date'), back.get('id')):
+            for to_ident in (release.get('date'), release.get('id')):
+                candidate = "IDHistory-{}-to-{}.txt.gz".format(from_ident, to_ident)
+                if candidate in existing_files:
+                    return candidate
+        return None
+
     def download_root(self, context):
         return "/All"
 
@@ -2451,6 +2465,9 @@ class CurrentView(TemplateView):
         context['existing_download_files'] = self.existing_download_files(context['release'])
         context['omamer_database_files'] = sorted(f for f in context['existing_download_files']
                                                   if f.endswith('.h5') and not f.startswith('OmaServer'))
+        for back in context['release_with_backlinks'] or []:
+            back['idhistory_file'] = self._idhistory_filename(
+                back, context['release'], context['existing_download_files'])
         logger.debug("context data: {}".format(context))
         return context
 
