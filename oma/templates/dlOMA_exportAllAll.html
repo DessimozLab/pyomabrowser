@@ -30,8 +30,11 @@ html, body {
   height: 100%;
 }
 
-.flex-grow {
-  flex: 1 0 auto;
+.export-main-row {
+  /* height is pinned explicitly in px by phylotree.js; flex-grow must stay 0 so leftover space in
+     .container-fluid (whose own height is not reliably viewport-bound) can't stretch this past it */
+  flex: 0 0 auto;
+  min-height: 0;
 }
 
 .card > .list-group:last-child .list-group-item:last-child, .card > .list-group:first-child .list-group-item:first-child {
@@ -51,10 +54,22 @@ element {
 </style>
 
 
-<div class="container-fluid" style="height: calc(100%);">
+<div class="container-fluid d-flex flex-column">
+    <div class="row" id="exportPageHeader">
+        <div class="col-12">
+            <h2>{% block page_header %}Export for OMA Standalone{% endblock page_header %}</h2>
+            <p class="text-muted">{% block page_intro %}OMA offers three related downloads for users who want to run their own analyses locally:
+                <a href="{% url 'export' %}">export for OMA Standalone</a> provides a set of genomes together with their precomputed pairwise
+                all-against-all alignments ready to be analysed with OMA Standalone,
+                <a href="{% url 'export_markers' %}">export marker genes</a> extracts a set of universal marker
+                genes from your selected genomes for species tree reconstruction, and <a href="{% url 'fastoma-export' %}">export for FastOMA</a>
+                packages proteomes and metadata in the input format expected by
+                <a href="https://github.com/dessimozlab/FastOMA" target="_blank">FastOMA</a>.{% endblock page_intro %}</p>
+        </div>
+    </div>
     {% block above_svg %}{% endblock %}
 
-    <div class="row" style="height: 100%;">
+    <div class="row export-main-row">
 
         <div class="col-md-9" id="svgdiv" style="overflow: hidden;"> <!-- svg -->
 
@@ -136,21 +151,16 @@ element {
 
 
             <div class="col-md-12" id="exportAdditionalInputs">
-
-                {% block menu_additional_inputs %}
-
-</div>
-
-
-            {% endblock %}
+                {% block menu_additional_inputs %}{% endblock %}
+            </div>
 
 
             <div class="row mx-auto" id="buttondiv">
                 <div class="col-xs-12 col-sm-6 mx-auto">
-                    <button type="button" class="btn btn-default btn-lg greenb  " style="color: #fff; background-color: #307C3B" id="buttonUnselect">Unselect all</button>
+                    <button type="button" class="btn btn-default btn-lg greenb genome-picker-btn" style="color: #fff; background-color: #307C3B" id="buttonUnselect">Unselect all</button>
                 </div>
                 <div class="col-xs-12 col-sm-6 mx-auto">
-                    <button type="button" class="btn btn-default btn-lg greenb " style="color: #fff; background-color: #307C3B" id="{% block submit_button_id %}buttonSubmit{% endblock %}">Submit</button>
+                    <button type="button" class="btn btn-default btn-lg greenb genome-picker-btn" style="color: #fff; background-color: #307C3B" id="{% block submit_button_id %}buttonSubmit{% endblock %}">Submit</button>
                 </div>
             </div>
 

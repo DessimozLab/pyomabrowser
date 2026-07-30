@@ -11,6 +11,7 @@ from pyoma.browser.models import Genome
 from .export_standalone import DarwinExporter
 logger = logging.getLogger(__name__)
 
+
 class FastaExporter(DarwinExporter):
     def process_genome(self, genome:str, folder:Path) -> Genome:
         genome_data = self.data_for_genome(genome)
@@ -51,8 +52,8 @@ def build_export_tarball(db:Database, genomes:List[str], outfn, tmpfolder=None):
                     ignored_genomes.add(g)
                     logger.warning("cannot convert {}: {}", g, e)
                     readme.write(f"  !SKIPPING {g}. Reason: {e}")
-            readme.write("The genome files are stored in fasta format in the folder '/DB'.\n"
-                         "The Alignments are stored in '/Cache/AllAll'.\n")
+            readme.write("The proteome data are stored under /proteome, the splice files \n"
+                         "under /splice (if alternative splicing variants exist).\n")
 
         genomes = set(genomes) - ignored_genomes
         with open(basedir / "species_info.txt", "wt") as fh:

@@ -233,9 +233,16 @@
 
                         <div role="presentation" class="dropdown-header">OMA database files</div>
                         <a class="dropdown-item" href="{% url 'current' %}">Current release</a>
-                        {% if export_enabled %}<a class="dropdown-item" href="{% url 'export' %}">Export All/All</a> {% endif %}
-                        <a class="dropdown-item" href="{% url 'export_markers' %}">Export marker genes</a>
                         <a class="dropdown-item" href="{% url 'archives' %}">Archives</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <div role="presentation" class="dropdown-header">Datasets for client-side analyses</div>
+                        {% if export_enabled %}
+                            <a class="dropdown-item" href="{% url 'export' %}">Export All/All</a>
+                            <a class="dropdown-item" href="{% url 'fastoma-export' %}">Export proteomes for FastOMA</a>
+                        {% endif %}
+                        <a class="dropdown-item" href="{% url 'export_markers' %}">Export marker genes</a>
 
                         <div class="dropdown-divider"></div>
 

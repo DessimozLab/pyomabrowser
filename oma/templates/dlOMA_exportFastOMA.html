@@ -1,10 +1,23 @@
 {% extends  "dlOMA_exportAllAll.html" %}
-{% load staticfiles %}
+{% load static %}
 
 {% block title %}Export for FastOMA{% endblock %}
-{% block meta_description %}Export a set of proteomes and meta-data for FastOMA{% endblock %}
+{% block meta_description %}Export a set of proteomes and meta-data suitable for client-side FastOMA computations{% endblock %}
+{% block page_header %}Export for FastOMA{% endblock page_header %}
+
+{% block modal_title %}Export of proteomes and metadata for FastOMA{% endblock modal_title %}
+{% block modal_body %}
+<p>This tool packages the proteomes and associated metadata of your selected genomes into the input format expected by
+    <a href="https://github.com/dessimozlab/FastOMA" target="_blank">FastOMA</a>, so that you can run your own orthology
+    inference including additional genomes of your choice.</p>
+<p> <b>Important limitations and notices</b> </p>
+<ul>
+    <li><p>Up to 250 genomes can be selected per export. Please contact us if you need to export a larger number of genomes.</p></li>
+</ul>
+{% endblock modal_body %}
+
 {% block menu_additional_inputs %}
-    
+
 {% endblock menu_additional_inputs %}
 
 {% block submit_button_id %}buttonSubmitFastOMA{% endblock %}

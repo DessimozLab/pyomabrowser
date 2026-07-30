@@ -33,6 +33,7 @@
     margin: 0px;
     border: 1px solid #22780F;
     background: #fff;
+    overflow: hidden;
 }
 
 .centered {
@@ -69,7 +70,7 @@ div.tooltip button {
     overflow-y: auto !important;
 }
 
-#buttonSubmit, #buttonSubmitMarkerGenes, #buttonUnselect {
+.genome-picker-btn {
     margin: 5px;
     border-radius: 0px !important;
 }
@@ -127,5 +128,37 @@ div.notification {
 .nameGenomes {
     background: #fff !important;
     border: 0px !important;
+}
+
+@media (max-width: 767px) {
+    /* Below md, .col-md-9/.col-md-3 stack full-width (Bootstrap default), so the
+       "everything fits in one screen" desktop sizing from phylotree.js no longer
+       applies. Let the row size itself naturally and give the SVG pane and the
+       selected-genomes list sane minimum heights instead of collapsing to 0. */
+    .export-main-row {
+        height: auto !important; /* overrides the inline px height phylotree.js sets */
+    }
+    #svgdiv,
+    #phylo_io {
+        min-height: 250px;
+    }
+    #UISelected {
+        min-height: 200px;
+    }
+
+    /* #buttonUnselect/#buttonSubmit's wrappers only get real col-sm-6 flex/width rules
+       at >=576px; below that they're bare flex items whose .mx-auto margins expand to
+       fill the whole line, forcing the second button onto its own row even though both
+       fit side by side. Pin them to an even 50/50 split instead so they share one line. */
+    #buttondiv {
+        flex-wrap: nowrap;
+    }
+    #buttondiv > .col-sm-6 {
+        flex: 0 1 50%;
+        max-width: 50%;
+        margin-left: 0;
+        margin-right: 0;
+        text-align: center;
+    }
 }
 
