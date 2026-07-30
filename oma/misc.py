@@ -5,7 +5,6 @@ import tempfile
 from io import StringIO
 import logging
 import itertools
-import tweepy
 from django.conf import settings
 from future.moves.itertools import zip_longest
 

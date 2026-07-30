@@ -41,9 +41,6 @@ production = [
 downloads = [
     "b2sdk",
 ]
-twitter = [
-    "tweepy>=4.16.0",
-]
 
 [tool.uv.sources]
 pyoma = { git = "ssh://gitolite@lab.dessimoz.org:2222/pyoma", branch = "develop" }
