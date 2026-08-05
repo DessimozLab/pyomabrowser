@@ -43,6 +43,7 @@ docker-build:
     ALLALL_PATH_HOST: $CI_PROJECT_DIR/
     RELEASE_PATH_HOST: $CI_PROJECT_DIR/
     DEPLOYMENT_TYPE: production
+    BUILDX_NO_DEFAULT_ATTESTATIONS: 1
     # DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   before_script:
     - *dns_fix
@@ -57,6 +58,7 @@ docker-build:
         echo "$DOCKER_AUTH_CONFIG" | jq -s '.[0] * .[1]' /root/.docker/config.json - > /root/.docker/config.json.tmp
         mv /root/.docker/config.json.tmp /root/.docker/config.json
       fi
+
     # CI_JOB_TOKEN created automatcally by job itself: https://docs.gitlab.com/ci/jobs/ci_job_token/
     - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
   # All branches are tagged with $DOCKER_IMAGE_NAME (defaults to commit ref slug)
