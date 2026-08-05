@@ -11,9 +11,13 @@ The response-time trigger needs the log format to include `rt=$request_time`
 it, that trigger is silently inactive and only request rate / error rate are
 used.
 
-Designed to run standalone on the production host via cron, independent of
-this repo's Docker setup — it only needs Python 3's standard library and read
-access to the nginx access log.
+It only needs Python 3's standard library and read access to the nginx access
+log, so it can run either way (see Readme.md, "Cloudflare load-based
+challenge"):
+  - as the "cloudflare_guard" sidecar in docker-compose.yml, gated behind the
+    "cloudflare-guard" compose profile; or
+  - standalone via cron on a bare-metal nginx host, independent of Docker,
+    using cloudflare_load_guard.env.template as the source of its environment.
 
 One-time setup (see Readme.md, "Cloudflare load-based challenge"):
   1. Create a Custom Rule in Cloudflare (Security -> WAF -> Custom rules)
@@ -21,10 +25,8 @@ One-time setup (see Readme.md, "Cloudflare load-based challenge"):
      but left DISABLED.
   2. Note the zone ID, the ruleset ID, and that rule's ID.
   3. Create a scoped API token (Zone / Zone WAF / Edit, restricted to that
-     zone) and put it, together with the IDs above, in the environment
-     (see cloudflare_load_guard.env.template).
-  4. Add a cron entry that sources that env file and runs this script,
-     e.g. every minute.
+     zone) and put it, together with the IDs above, into the env file used by
+     whichever deployment mode above applies.
 
 Each run reads only the bytes appended to the log since the previous run
 (tracked in a small state file), classifies the window as calm or elevated,

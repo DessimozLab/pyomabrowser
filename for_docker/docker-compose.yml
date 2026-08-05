@@ -144,10 +144,35 @@ services:
     depends_on:
       - web
 
+  # Optional sidecar: watches nginx's access log and toggles a Cloudflare WAF
+  # Managed Challenge under sustained load (see Readme.md, "Cloudflare
+  # load-based challenge"). Disabled by default — only starts when the
+  # "cloudflare-guard" profile is active, e.g. via COMPOSE_PROFILES=cloudflare-guard
+  # in the env file. Requires NGINX_LOG_TO_FILE=true so access.log exists.
+  # If CF_API_TOKEN is left blank, the container idles instead of erroring.
+  cloudflare_guard:
+    restart: ${RESTART_CONTAINERS:-unless-stopped}
+    image: python:3-alpine
+    profiles:
+      - cloudflare-guard
+    entrypoint: ["/app/cloudflare_load_guard_entrypoint.sh"]
+    env_file:
+      - env
+    environment:
+      - CF_GUARD_ACCESS_LOG=/var/log/nginx/access.log
+    volumes:
+      - ./nginx/cloudflare_load_guard.py:/app/cloudflare_load_guard.py:ro
+      - ./nginx/cloudflare_load_guard_entrypoint.sh:/app/cloudflare_load_guard_entrypoint.sh:ro
+      - ${NGINX_LOG_PATH_HOST:-./nginx/logs}:/var/log/nginx:ro
+      - cloudflare_guard_state:/var/tmp
+    depends_on:
+      - nginx
+
 volumes:
   postgres_data:
   static_volume:
   media_volume:
+  cloudflare_guard_state:
   # if release data is used with a docker volume, uncomment release_volume line and
   # set RELEASE_PATH_HOST="release_volume" in env file
   #release_volume:
