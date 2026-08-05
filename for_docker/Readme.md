@@ -212,7 +212,7 @@ docker-compose down --volume
 
 ### Cloudflare load-based challenge
 
-nginx's rate limits above only shape traffic once it has already reached the origin. `nginx/cloudflare_load_guard.py` adds a layer in front of that: it watches nginx's access log and, when it sees sustained heavy load (high request rate, a high 5xx/429 rate, and/or high median response time), enables a Cloudflare WAF custom rule that puts a Managed Challenge in front of the affected paths — then disables it again once traffic settles. It needs nothing beyond Python 3's standard library and read access to the access log, and can run either as a docker-compose sidecar (recommended for this repo's setup) or standalone via cron on a bare-metal nginx host.
+nginx's rate limits above only shape traffic once it has already reached the origin. `cloudflare_guard/cloudflare_load_guard.py` adds a layer in front of that: it watches nginx's access log and, when it sees sustained heavy load (high request rate, a high 5xx/429 rate, and/or high median response time), enables a Cloudflare WAF custom rule that puts a Managed Challenge in front of the affected paths — then disables it again once traffic settles. It needs nothing beyond Python 3's standard library and read access to the access log, and can run either as a docker-compose sidecar (recommended for this repo's setup) or standalone via cron on a bare-metal nginx host.
 
 One-time setup, in the Cloudflare dashboard for the zone (same regardless of how the script itself is run):
 
@@ -256,7 +256,7 @@ access_log /var/log/nginx/access.log main_rt;
 
 then `nginx -t && nginx -s reload`. Until this is applied, leave `CF_GUARD_LATENCY_HIGH` unset — the script simply skips the latency trigger when no `rt=` fields are found.
 
-Copy `nginx/cloudflare_load_guard.env.template` to `cloudflare_load_guard.env`, fill in the token/IDs and the path to the real access log, and keep it out of git. Then add a cron entry that sources it and runs the script, e.g. every minute. `set -a`/`set +a` is required around the sourcing — plain `KEY=value` lines (no `export`) only become shell variables, not environment variables a child process like `python3` can see:
+Copy `cloudflare_guard/cloudflare_load_guard.env.template` to `cloudflare_load_guard.env`, fill in the token/IDs and the path to the real access log, and keep it out of git. Then add a cron entry that sources it and runs the script, e.g. every minute. `set -a`/`set +a` is required around the sourcing — plain `KEY=value` lines (no `export`) only become shell variables, not environment variables a child process like `python3` can see:
 
 ```
 * * * * * set -a; . /path/to/cloudflare_load_guard.env; set +a; /usr/bin/python3 /path/to/cloudflare_load_guard.py >> /var/log/cloudflare_load_guard.log 2>&1

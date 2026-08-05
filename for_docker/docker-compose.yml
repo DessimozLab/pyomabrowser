@@ -152,17 +152,16 @@ services:
   # If CF_API_TOKEN is left blank, the container idles instead of erroring.
   cloudflare_guard:
     restart: ${RESTART_CONTAINERS:-unless-stopped}
-    image: python:3-alpine
+    image: $DOCKER_REGISTRY/cloudflare_guard:${IMAGE_TAG:-latest}
+    build:
+      context: ./cloudflare_guard
     profiles:
       - cloudflare-guard
-    entrypoint: ["/app/cloudflare_load_guard_entrypoint.sh"]
     env_file:
       - env
     environment:
       - CF_GUARD_ACCESS_LOG=/var/log/nginx/access.log
     volumes:
-      - ./nginx/cloudflare_load_guard.py:/app/cloudflare_load_guard.py:ro
-      - ./nginx/cloudflare_load_guard_entrypoint.sh:/app/cloudflare_load_guard_entrypoint.sh:ro
       - ${NGINX_LOG_PATH_HOST:-./nginx/logs}:/var/log/nginx:ro
       - cloudflare_guard_state:/var/tmp
     depends_on:
