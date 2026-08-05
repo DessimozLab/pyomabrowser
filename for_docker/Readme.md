@@ -210,6 +210,42 @@ docker-compose down --volume
 ```
 
 
+### Cloudflare load-based challenge
+
+nginx's rate limits above only shape traffic once it has already reached the origin. `nginx/cloudflare_load_guard.py` adds a layer in front of that: it watches the production nginx access log and, when it sees sustained heavy load (high request rate, a high 5xx/429 rate, and/or high median response time), enables a Cloudflare WAF custom rule that puts a Managed Challenge in front of the affected paths — then disables it again once traffic settles. It runs standalone via cron on the production host and needs nothing beyond Python 3's standard library, since production is not yet running under this repo's Docker setup.
+
+The response-time trigger needs `rt=$request_time` in the access log, which is *not* part of nginx's default `combined` format (and not currently emitted by this repo's `nginx.conf.template` either). Add it to the production host's nginx config directly — either add `rt=$request_time` to whatever `log_format` it already defines, or add a new one and point `access_log` at it:
+
+```nginx
+log_format main_rt '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" rt=$request_time';
+
+access_log /var/log/nginx/access.log main_rt;
+```
+
+then `nginx -t && nginx -s reload`. Until this is applied, leave `CF_GUARD_LATENCY_HIGH` unset — the script simply skips the latency trigger when no `rt=` fields are found.
+
+Setup (one-time, in the Cloudflare dashboard for the zone):
+
+1. **Security -> WAF -> Custom rules -> Create rule.** Match the URI path(s) to protect (e.g. `starts_with(http.request.uri.path, "/api/")` — or narrower, to the specific endpoint that tends to fall over), action **Managed Challenge**. Save it, but leave it **disabled** — the script is what turns it on.
+2. Note the zone ID (dashboard sidebar) and this rule's ruleset/rule IDs. If not obvious from the UI, list them:
+   ```bash
+   curl -s -H "Authorization: Bearer $CF_API_TOKEN" \
+     "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/rulesets/phases/http_request_firewall_custom/entrypoint"
+   ```
+3. **My Profile -> API Tokens -> Create Token**, "Edit zone WAF" template, restricted to this one zone. Broader tokens are not needed and should not be used here.
+4. Copy `nginx/cloudflare_load_guard.env.template` to `cloudflare_load_guard.env` on the production host, fill in the token/IDs and the path to the real access log, and keep it out of git.
+5. Add a cron entry that sources the env file and runs the script, e.g. every minute. `set -a`/`set +a` is required around the sourcing — plain `KEY=value` lines (no `export`) only become shell variables, not environment variables a child process like `python3` can see:
+   ```
+   * * * * * set -a; . /path/to/cloudflare_load_guard.env; set +a; /usr/bin/python3 /path/to/cloudflare_load_guard.py >> /var/log/cloudflare_load_guard.log 2>&1
+   ```
+
+Each run only reads the log bytes appended since the previous run (tracked in a small state file next to it), so it stays cheap even on a busy log. It requires several consecutive elevated windows before enabling the rule and several consecutive calm windows before disabling it again (tunable via `CF_GUARD_CONSECUTIVE_ON`/`_OFF`) — deliberately quicker to turn on than to turn back off — and it always re-reads the rule's live state from Cloudflare before deciding to change it, so a manual toggle in the dashboard is respected rather than immediately undone.
+
+The request-rate, error-rate, and latency thresholds (`CF_GUARD_RPS_HIGH`/`_LOW`, `CF_GUARD_ERROR_RATE_HIGH`, `CF_GUARD_LATENCY_HIGH`) have no safe universal default — run with `CF_GUARD_DRY_RUN=true` (or `--dry-run`) against real production traffic first to see what the metrics look like before trusting it to act. Use `--replay <log-file>` to calibrate offline against a historical access log instead (see `cloudflare_load_guard.py --help`).
+
+
 ### Changes
 - discontinued the build_container script - please use now directly `docker compose build`.
 - We recently dropped the legacy container from the setup, as all functionality has been ported to the Django webserver.
