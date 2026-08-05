@@ -1,6 +1,6 @@
 # API Authentication
 
-The OMA Browser REST API (`/api/`) is protected by [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) integrated with Keycloak. Public paths (`/oma/`, `/static/`, `/media/`) require no authentication.
+The OMA Browser REST API (`/api/`) sits behind [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) integrated with Keycloak, and behind a set of nginx rate limits that split callers into tiers. Public paths (`/oma/`, `/static/`, `/media/`) require no authentication and are not rate-limited by this mechanism.
 
 ## Architecture
 
@@ -12,26 +12,28 @@ internet → nginx:80 (public) → web:8000
 
 nginx is the public entry point. It routes all traffic and uses the `auth_request` directive to validate `/api/` calls. oauth2-proxy runs in forward-auth mode (it does not proxy traffic anymore). It only validates session cookies and Bearer tokens through its `/oauth2/auth` endpoint, returning 200 or 401 to nginx's `auth_request` subrequests. oauth2-proxy is exposed inside the Docker network only (not published on the host).
 
-An internal nginx location, `/_auth_check`, inspects the `sec-fetch-site` request header before deciding whether to call oauth2-proxy:
+An internal nginx location, `/_auth_check`, inspects Fetch Metadata request headers before deciding whether to call oauth2-proxy:
 
-- `sec-fetch-site: same-origin` (browser AJAX from the website) returns 200 directly, so it passes freely without contacting oauth2-proxy.
-- Any other value proxies the subrequest to `oauth2-proxy:4180/oauth2/auth`, which validates the session cookie or Bearer token.
+- `sec-fetch-site: same-origin` **and** `sec-fetch-mode: cors` or `same-origin` (a real `fetch()`/XHR call from the website's own JavaScript) returns 200 directly, so it passes freely without contacting oauth2-proxy.
+- Anything else proxies the subrequest to `oauth2-proxy:4180/oauth2/auth`, which validates the session cookie or Bearer token.
 
-On a 401 from oauth2-proxy, nginx looks at `sec-fetch-mode`. If it is `navigate` (a browser navigating directly to the URL), nginx issues a 302 redirect to `/oauth2/sign_in`. Otherwise it returns a 401 with the JSON body `{"detail":"Authentication credentials were not provided."}`.
+Unlike before, oauth2-proxy returning 401 no longer blocks the request outright — it's served anyway, at the strict anonymous rate limit (see "Rate limits" below). Authentication now determines *how generous your limit is*, not *whether you're let in at all*.
 
-### Why `sec-fetch-site` is a reliable signal
+### Why both `sec-fetch-site` and `sec-fetch-mode` are checked
 
-`sec-fetch-site: same-origin` is a W3C Fetch Metadata header that modern browsers set automatically on AJAX requests made from the same origin. Standard HTTP clients (curl, Python requests, wget) do not send it, and JavaScript cannot override it because browsers enforce it. This distinguishes "website AJAX" from "external API call" reliably. Headless browsers (such as Playwright) can fake it, an accepted tradeoff for public scientific data.
+`sec-fetch-site`/`sec-fetch-mode` are W3C Fetch Metadata headers that modern browsers set automatically and that JavaScript cannot override, because browsers enforce them. Standard HTTP clients (curl, Python requests, wget) do not send them at all.
+
+Checking only `sec-fetch-site: same-origin` turned out to be too broad: analysis of production traffic showed a large, distributed crawler (real or headless browser engines, ~26k distinct source IPs) directly navigating to `/api/...` URLs — most likely following the DRF browsable-API's own hyperlinks between related resources. Because it genuinely navigates from an omabrowser.org page to an omabrowser.org URL, `sec-fetch-site: same-origin` is not spoofed — it's just not what the check is meant to exempt. The tell is `sec-fetch-mode`: a real page navigation (clicking a link, typing a URL) always sends `sec-fetch-mode: navigate`, while `fetch()`/XHR calls (what the website's own AJAX actually uses) send `cors` or `same-origin`. Requiring both headers together reclassified that traffic out of the free tier and into the rate-limited ones. A moderately sophisticated client can still fake both headers deliberately — this remains a UX/cost-shaping gate, not a security boundary (see below).
 
 ## Access patterns
 
 ### Website (browser AJAX)
 
-Requests made by the OMA Browser website's own JavaScript (same origin) carry `sec-fetch-site: same-origin`. The `/_auth_check` location returns 200 for these without contacting oauth2-proxy, so the website's API calls work without any login. This keeps the interactive site fully functional for anonymous visitors.
+Requests made by the OMA Browser website's own JavaScript (same origin, `fetch()`/XHR) carry `sec-fetch-site: same-origin` and `sec-fetch-mode: cors`/`same-origin`. The `/_auth_check` location returns 200 for these without contacting oauth2-proxy, so the website's API calls work without any login and are not rate-limited — even if the visitor happens to also be logged in. This keeps the interactive site fully functional for anonymous visitors.
 
-### Browser (direct navigation)
+### Browser (direct navigation) and other anonymous callers
 
-Navigate to any `/api/` URL directly in the address bar. Because there is no valid session, oauth2-proxy returns 401 and nginx detects `sec-fetch-mode: navigate`, redirecting you to `/oauth2/sign_in`. You log in via Keycloak (supports OTP and passkeys) and are returned to the original URL automatically with an encrypted session cookie.
+Navigate to any `/api/` URL directly in the address bar, or call it with curl/a script/a crawler without a valid session or token. There is no forced login and no redirect to sign-in anymore — the request is served directly, capped at a strict rate (see "Rate limits"). Logging in via `/oauth2/sign_in` (Keycloak, supports OTP and passkeys) raises that cap substantially, since an authenticated identity is harder to mint at scale than a new source IP.
 
 ### Script / programmatic access
 
@@ -52,7 +54,21 @@ To force a new login, delete the cache file:
 rm ~/.oma_token
 ```
 
-Programmatic clients send no `sec-fetch-site` header, so their requests are validated by oauth2-proxy. A missing or invalid token returns a 401 JSON response; a valid Bearer token is allowed through to Django.
+Programmatic clients send no `sec-fetch-site` header, so their requests are validated by oauth2-proxy. A missing or invalid token gets the anonymous rate limit; a valid Bearer token gets the higher authenticated rate limit, both proxied through to Django either way.
+
+## Rate limits
+
+`/api/` enforces three nginx `limit_req` zones, independent of the pre-existing bot user-agent/subnet throttle (which still runs first and can still hard-block known bad UAs/subnets before any of this is considered):
+
+| Zone | Key | Purpose |
+|---|---|---|
+| `api_anon_limit` | source IP (`$binary_remote_addr`) | Catches an individual anonymous IP hammering the API. |
+| `api_anon_global_limit` | a constant (shared by all anonymous callers) | Catches a *distributed* crawler that spreads load across many source IPs — per-IP limiting alone does ~nothing against a swarm where most IPs fire only once. |
+| `api_auth_limit` | the caller's own credential (Bearer token / oauth2-proxy session cookie) | Per-identity limit for authenticated callers, deliberately more generous than the anonymous tiers. Keyed on the raw credential rather than the resolved Keycloak username, because `auth_request_set` variables are only available after nginx's access phase, which runs *after* `limit_req`'s preaccess phase — a zone keyed on the resolved username would silently never limit anyone. |
+
+A request that fails both the website-AJAX check and authentication gets `api_anon_limit` + `api_anon_global_limit` applied; either one tripping returns a 429. An authenticated request gets `api_auth_limit` applied instead. Website AJAX gets neither (empty zone key ⇒ unlimited, the same trick the bot throttle already uses). All three are configured via env vars (see `env.template`); `429`s from any of them return `{"detail":"Rate limit exceeded. Log in for a higher limit."}`.
+
+The anonymous-tier defaults are conservative starting points, not measured capacity limits — tune them against your own app server's actual sustained throughput.
 
 ## Testing
 
@@ -65,7 +81,7 @@ Two scripts cover the access-control behavior.
 OMA_BASE_URL=https://yourdomain.com ./test_api_access.sh
 ```
 
-It verifies that same-origin AJAX passes without a token (200), that an external client with no token gets a JSON 401, that browser navigation is redirected to `/oauth2/sign_in` (302), and that `POST /api/auth/device` and `/oma/` pages stay public. It exits non-zero if any check fails, so it can be wired into CI. To also test the authenticated path, pass a token (obtain one with `test_api_auth.sh`):
+It verifies that same-origin AJAX (`sec-fetch-site: same-origin` + `sec-fetch-mode: cors`) passes without a token (200) and is never rate-limited, that the crawler pattern found in production (`sec-fetch-site: same-origin` + `sec-fetch-mode: navigate`, no token) is *not* exempted and gets throttled instead, that a plain external client with no token still gets served (just rate-limited, no more 401/redirect), and that `POST /api/auth/device` and `/oma/` pages stay public. It exits non-zero if any check fails, so it can be wired into CI. To also test the authenticated path, pass a token (obtain one with `test_api_auth.sh`):
 
 ```bash
 OMA_ACCESS_TOKEN=<bearer-token> ./test_api_access.sh
@@ -75,10 +91,11 @@ OMA_ACCESS_TOKEN=<bearer-token> ./test_api_access.sh
 
 A few things the smoke test cannot cover and which need a manual check:
 
-- **Real website AJAX.** The smoke test only simulates `sec-fetch-site: same-origin` with curl. Confirm the genuine header works by opening the site in a browser while logged out and verifying that pages whose content loads via API calls still render.
-- **Django-level 401s.** The `/api/` location maps any 401 to the sign-in redirect or JSON response. If Django itself returns a 401 for an authenticated-but-unauthorized request, nginx rewrites it. Check such an endpoint with a valid token and confirm the response is the one you expect.
+- **Real website AJAX.** The smoke test only simulates the Fetch Metadata headers with curl. Confirm the genuine headers work by opening the site in a browser while logged out and verifying that pages whose content loads via API calls still render, with no 429s.
+- **Django-level 401s.** `error_page 401 = @api_anon` catches any 401 from the `/api/` location, including one Django itself returns (e.g. authenticated-but-unauthorized). That now means a second proxy_pass to pyoma under the anonymous rate buckets, rather than the old rewritten JSON 401. Check such an endpoint with a valid token and confirm the response is still what you expect.
+- **Rate-limit tuning.** The anonymous-tier defaults are conservative starting points. Load-test against a realistic traffic mix before relying on them in production, and adjust `API_ANON_RATE_LIMIT`/`API_ANON_GLOBAL_RATE_LIMIT` (see `env.template`) accordingly.
 
-This is a UX gate, not a security boundary. `sec-fetch-site` is a request header that any client can set (`curl -H "sec-fetch-site: same-origin"` bypasses the check entirely), so the API contents are effectively public. That is acceptable for public scientific data but should not be relied on to protect anything sensitive.
+This is a UX/cost-shaping gate, not a hard security boundary. The Fetch Metadata headers are request headers any client can set (`curl -H "sec-fetch-site: same-origin" -H "sec-fetch-mode: cors" ...` bypasses the free-tier check entirely), so the API contents are effectively public regardless of tier. That is acceptable for public scientific data but should not be relied on to protect anything sensitive.
 
 ## Token lifespan
 
@@ -170,11 +187,11 @@ Two nginx endpoints inject the client secret server-side so it never needs to be
 - `POST /api/auth/device`: starts device flow, returns `device_code` and `verification_uri`
 - `POST /api/auth/token`: exchanges `device_code` for a bearer token, or refreshes an existing session using a `refresh_token`
 
-These are exact-match nginx locations that proxy directly to Keycloak and take precedence over the general `/api/` location. They are public (no auth required). All other `/api/` paths are protected via `auth_request /_auth_check`, which either passes the request (website AJAX or valid session/token) or rejects it (redirect to sign-in for browser navigation, 401 JSON for programmatic clients).
+These are exact-match nginx locations that proxy directly to Keycloak and take precedence over the general `/api/` location. They are public (no auth required). All other `/api/` paths go through `auth_request /_auth_check`, which determines the rate-limit tier (website AJAX, authenticated, or anonymous — see "Rate limits") rather than gating access outright.
 
 ## Sign-in page branding
 
-The oauth2-proxy sign-in page is shown only on direct browser navigation to a protected `/api/` URL (the redirect to `/oauth2/sign_in`). Website AJAX and script clients never see it. It is branded for OMA Browser using oauth2-proxy's built-in flags only, set on the `oauth2-proxy` service in `docker-compose.yml`:
+The oauth2-proxy sign-in page is only reached when someone deliberately visits `/oauth2/sign_in` (e.g. to get the higher authenticated rate limit) — it's no longer auto-triggered by hitting `/api/` unauthenticated, since anonymous requests are now served directly at the anonymous rate instead of being redirected. Website AJAX and script clients never see it. It is branded for OMA Browser using oauth2-proxy's built-in flags only, set on the `oauth2-proxy` service in `docker-compose.yml`:
 
 | Variable | Effect |
 |---|---|
@@ -196,3 +213,6 @@ Color theming (for example making the button OMA green instead of the oauth2-pro
 | `OAUTH2_PROXY_REDIRECT_URL` | `https://<yourdomain>/oauth2/callback`, registered in Keycloak valid redirect URIs |
 | `OAUTH2_PROXY_COOKIE_SECURE` | Set to `true` when serving over HTTPS |
 | `OAUTH2_PROXY_OIDC_AUDIENCES` | Accepted token audiences. Set to `account` (Keycloak default audience). Bearer token validation uses the client ID from the JWT directly and is not affected by this setting. |
+| `API_ANON_RATE_LIMIT` / `API_ANON_RATE_BURST` | Per-source-IP cap for unauthenticated `/api/` callers (see "Rate limits") |
+| `API_ANON_GLOBAL_RATE_LIMIT` / `API_ANON_GLOBAL_RATE_BURST` | Aggregate cap shared across all unauthenticated `/api/` callers, regardless of source IP |
+| `API_AUTH_RATE_LIMIT` / `API_AUTH_RATE_BURST` | Per-credential cap for authenticated `/api/` callers |

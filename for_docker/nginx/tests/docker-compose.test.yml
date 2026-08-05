@@ -10,11 +10,21 @@ services:
       - ./stub_upstream:/app:ro
     command: ["python3", "echo_server.py"]
 
+  # Stands in for oauth2-proxy. Must be named "oauth2-proxy" since
+  # nginx.conf.template hardcodes proxy_pass http://oauth2-proxy:4180.
+  oauth2-proxy:
+    image: python:3.12-alpine
+    working_dir: /app
+    volumes:
+      - ./stub_oauth2:/app:ro
+    command: ["python3", "echo_server.py"]
+
   nginx:
     build:
       context: ..
     depends_on:
       - web
+      - oauth2-proxy
     ports:
       - "80"
     environment:
@@ -23,5 +33,17 @@ services:
       - DARWIN_BROWSERMEDIA_PATH=/data/media
       - DARWIN_BROWSERDOWNLOAD_PATH=/data/downloads
       - NGINX_LOG_TO_FILE=false
+      # nginx.conf.template renders /api/auth/device and /api/auth/token
+      # against these regardless of whether any test exercises them.
+      - OAUTH2_PROXY_OIDC_ISSUER_URL=http://web:8000
+      - OAUTH2_PROXY_CLIENT_ID=test-client
+      - OAUTH2_PROXY_CLIENT_SECRET=test-secret
+      # Tight bursts so rate-limit tests can trip a 429 in a handful of requests.
+      - API_ANON_RATE_LIMIT=10r/m
+      - API_ANON_RATE_BURST=2
+      - API_ANON_GLOBAL_RATE_LIMIT=10r/m
+      - API_ANON_GLOBAL_RATE_BURST=2
+      - API_AUTH_RATE_LIMIT=10r/m
+      - API_AUTH_RATE_BURST=2
     volumes:
       - ./fixtures/downloads:/data/downloads:ro

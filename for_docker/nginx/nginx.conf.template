@@ -9,10 +9,76 @@
 {{- $kc_issuer := getenv "OAUTH2_PROXY_OIDC_ISSUER_URL" }}
 {{- $kc_client_id := getenv "OAUTH2_PROXY_CLIENT_ID" }}
 {{- $kc_client_secret := getenv "OAUTH2_PROXY_CLIENT_SECRET" }}
+{{- $api_anon_rate := getenv "API_ANON_RATE_LIMIT" "10r/m" }}
+{{- $api_anon_burst := getenv "API_ANON_RATE_BURST" "5" }}
+{{- $api_anon_global_rate := getenv "API_ANON_GLOBAL_RATE_LIMIT" "300r/m" }}
+{{- $api_anon_global_burst := getenv "API_ANON_GLOBAL_RATE_BURST" "20" }}
+{{- $api_auth_rate := getenv "API_AUTH_RATE_LIMIT" "120r/m" }}
+{{- $api_auth_burst := getenv "API_AUTH_RATE_BURST" "20" }}
 
 upstream pyoma {
     server web:8000;
 }
+
+# /api/ rate-limit zones (independent of the bot UA/subnet throttle below):
+#  - api_anon_limit:        per-source-IP cap for unauthenticated callers
+#  - api_anon_global_limit: shared cap across ALL unauthenticated callers, since a
+#                            distributed crawler using many source IPs (observed:
+#                            ~26k distinct IPs, 97.7% firing a single request each)
+#                            defeats a per-IP cap almost entirely
+#  - api_auth_limit:        per-credential cap for authenticated (Keycloak) callers.
+#                            Keyed on the raw credential presented on the ORIGINAL
+#                            request ($http_authorization / the oauth2-proxy session
+#                            cookie), not on $auth_user: auth_request_set variables
+#                            are only resolved in the access phase, which runs AFTER
+#                            limit_req's preaccess phase, so a zone keyed on $auth_user
+#                            would always see it empty and never actually limit anyone.
+map $request_uri $api_anon_global_key {
+    default "anon";   # constant key => every anonymous request shares one bucket
+}
+
+# Website AJAX (fetch()/XHR) is same-origin AND uses a fetch/XHR Sec-Fetch-Mode.
+# Direct navigation to an /api/ URL is also same-origin but uses Sec-Fetch-Mode:
+# navigate — that pattern turned out to be how a distributed crawler was reaching
+# /api/ un-throttled (it genuinely navigates from omabrowser.org to omabrowser.org,
+# so sec-fetch-site: same-origin is not spoofed, just not what this check is meant
+# to exempt), so both headers are required, not just sec-fetch-site.
+map "$http_sec_fetch_site:$http_sec_fetch_mode" $is_website_ajax {
+    default                    0;
+    "same-origin:cors"        1;
+    "same-origin:same-origin" 1;
+}
+
+# Key for the authenticated-tier zone: forced empty (=> unlimited) for website AJAX
+# regardless of whether the visitor also happens to be logged in (their session
+# cookie must not count against them here); otherwise the caller's own bearer
+# token / oauth2-proxy session cookie, so each credential gets its own bucket.
+# An empty value here (no credential presented, not website AJAX) is harmless:
+# auth_request will 401 that request anyway and it falls through to @api_anon.
+map $is_website_ajax $api_auth_key {
+    1       "";
+    default "$http_authorization$cookie__oauth2_proxy";
+}
+
+limit_req_zone $binary_remote_addr  zone=api_anon_limit:10m        rate={{ $api_anon_rate }};
+limit_req_zone $api_anon_global_key zone=api_anon_global_limit:1m  rate={{ $api_anon_global_rate }};
+limit_req_zone $api_auth_key        zone=api_auth_limit:10m        rate={{ $api_auth_rate }};
+
+# Audit log for the same-origin bypass on /api/: records the Fetch Metadata
+# headers the auth decision at /_auth_check relies on, plus the resolved
+# auth user/status, so we can see how many requests actually send them.
+log_format auth_audit escape=json
+    '{"time":"$time_iso8601","remote_addr":"$remote_addr","method":"$request_method",'
+    '"uri":"$request_uri","status":$status,"sec_fetch_site":"$http_sec_fetch_site",'
+    '"sec_fetch_mode":"$http_sec_fetch_mode","origin":"$http_origin","referer":"$http_referer",'
+    '"user_agent":"$http_user_agent","auth_user":"$auth_user"}';
+
+# Same as nginx's default "combined" format, plus rt=$request_time so tools
+# like cloudflare_load_guard.py can track response-time trends (not present
+# in "combined", so it has to be spelled out here).
+log_format main_rt '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" rt=$request_time';
 
 {{ if $BEHIND_PROXY }}
 # pass incoming X-Forwarded-Proto or set to $scheme
@@ -81,6 +147,13 @@ server {
     listen 80;
     server_tokens off;
 
+    # /api/ chains two error_page redirects for anonymous, rate-limited callers
+    # (401 -> @api_anon, then a 429 from @api_anon's own limit_req -> @api_rate_limited).
+    # Without this, the second redirect is silently ignored (nginx's default is
+    # to allow only one error_page redirect per request) and nginx serves its
+    # plain built-in error page instead of the JSON body.
+    recursive_error_pages on;
+
     {{ if $BEHIND_PROXY -}}
     # set proxy headers if run behind external proxy
     set_real_ip_from {{ getenv "REVERSE_PROXY_IP" }};
@@ -113,10 +186,10 @@ server {
     {{- end }}
 
     {{- if $log_to_file }}
-    access_log /var/log/nginx/access.log;
+    access_log /var/log/nginx/access.log main_rt;
     error_log  /var/log/nginx/error.log warn;
     {{- end }}
-    access_log /dev/stdout;
+    access_log /dev/stdout main_rt;
     error_log  /dev/stderr {{ if $is_dev -}} info {{- else -}} warn {{- end }};
 
     # Public token proxy: injects client credentials server-side for device flow
@@ -144,12 +217,13 @@ server {
         proxy_set_header Content-Length "";
     }
 
-    # Internal auth check: passes browser AJAX from the same site (sec-fetch-site: same-origin),
+    # Internal auth check: passes real website AJAX ($is_website_ajax, see the map
+    # above — same-origin AND a fetch/XHR Sec-Fetch-Mode, not a navigation),
     # forwards all other requests to oauth2-proxy for authentication.
     # Note: auth_request requires a literal URI, so the branching logic lives here.
     location = /_auth_check {
         internal;
-        if ($http_sec_fetch_site = "same-origin") {
+        if ($is_website_ajax) {
             return 200;
         }
         proxy_pass http://oauth2-proxy:4180/oauth2/auth;
@@ -176,8 +250,11 @@ server {
         proxy_set_header X-Auth-Request-Email $http_x_auth_request_email;
     }
 
-    # REST API — browser AJAX from the website passes freely (sec-fetch-site: same-origin);
-    # external HTTP clients (curl, scripts) require oauth2 authentication.
+    # REST API, four tiers:
+    #  1. website AJAX ($is_website_ajax)      — passes freely, no rate limit
+    #  2. authenticated (Keycloak session/token) — generous per-credential limit (api_auth_limit)
+    #  3+4. anonymous (no valid session/token)  — served, not blocked, at a strict
+    #       per-IP + global limit (@api_anon), replacing the old hard 401/sign-in-redirect
     # To make specific cheap endpoints public in the future, add a location block for
     # them above this one without auth_request (more-specific regex takes precedence).
     location ~ ^/api/ {
@@ -189,7 +266,12 @@ server {
         auth_request /_auth_check;
         auth_request_set $auth_user  $upstream_http_x_auth_request_user;
         auth_request_set $auth_email $upstream_http_x_auth_request_email;
-        error_page 401 = @api_unauthorized;
+        error_page 401 = @api_anon;
+        error_page 429 = @api_rate_limited;
+        limit_req zone=api_auth_limit burst={{ $api_auth_burst }} nodelay;
+        limit_req_status 429;
+        access_log /dev/stdout;
+        access_log /dev/stdout auth_audit;
         proxy_pass http://pyoma;
         proxy_redirect off;
         uwsgi_read_timeout 100;
@@ -200,14 +282,32 @@ server {
         proxy_set_header X-Auth-Request-Email $auth_email;
     }
 
-    location @api_unauthorized {
-        # Browser navigation gets redirected to the sign-in page.
-        # External clients (curl, scripts) get a JSON 401.
-        if ($http_sec_fetch_mode = "navigate") {
-            return 302 /oauth2/sign_in?rd=$request_uri;
-        }
+    # Anonymous tier: no valid Keycloak session/token, and not website AJAX.
+    # Served (not blocked) at a strict rate instead of the old 401/sign-in-redirect,
+    # so casual anonymous API use still works — just capped hard. Two zones apply:
+    # a per-IP cap for individual repeat offenders, and a global cap shared across
+    # all anonymous callers, since a distributed crawler (many source IPs, most
+    # firing once) defeats a per-IP cap alone.
+    location @api_anon {
+        internal;
+        error_page 429 = @api_rate_limited;
+        limit_req zone=api_anon_limit        burst={{ $api_anon_burst }}        nodelay;
+        limit_req zone=api_anon_global_limit burst={{ $api_anon_global_burst }} nodelay;
+        limit_req_status 429;
+        access_log /dev/stdout;
+        access_log /dev/stdout auth_audit;
+        proxy_pass http://pyoma;
+        proxy_redirect off;
+        uwsgi_read_timeout 100;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location @api_rate_limited {
+        internal;
         default_type application/json;
-        return 401 '{"detail":"Authentication credentials were not provided."}';
+        return 429 '{"detail":"Rate limit exceeded. Log in for a higher limit."}';
     }
 
     location = /cgi-bin/gateway.pl {
