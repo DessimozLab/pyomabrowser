@@ -30,3 +30,9 @@
 {% endblock menu_additional_inputs %}
 
 {% block submit_button_id %}buttonSubmitMarkerGenes{% endblock %}
+
+{% block above_svg %}
+{% if clade_error %}
+<div class="alert alert-warning" role="alert">{{ clade_error }}</div>
+{% endif %}
+{% endblock %}
