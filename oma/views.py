@@ -2231,8 +2231,22 @@ class ExportMarkerGenes(AsyncJobMixin, TemplateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        if 'genomes' in request.GET:
-            genomes = request.GET.getlist('genomes')
+        genomes = request.GET.getlist('genomes')
+        clade_error = None
+        if 'clade' in request.GET:
+            clade = request.GET.get('clade')
+            try:
+                taxid = int(utils.tax.get_taxnode_from_name_or_taxid(clade)[0]['NCBITaxonId'])
+                subtax = utils.tax if taxid == 0 else utils.tax.get_subtaxonomy_rooted_at(taxid)
+                genomes += [utils.tax.genomes[t].uniprot_species_code
+                            for t in subtax.get_taxid_of_extent_genomes()]
+            except (db.InvalidTaxonId, KeyError) as e:
+                logger.warning("invalid clade '%s': %s", clade, e)
+                clade_error = "Unknown clade '{}'".format(clade)
+
+        if genomes:
+            # deduplicate genomes
+            genomes = sorted(set(genomes))
             try:
                 min_species_coverage = float(request.GET.get('min_species_coverage', 0.5))
             except ValueError:
@@ -2251,7 +2265,11 @@ class ExportMarkerGenes(AsyncJobMixin, TemplateView):
                     top_N_grps=top_N_grps,
                 )
                 return HttpResponseRedirect(reverse('marker_genes', args=(job.data_hash,)))
-        return super().get(request, *args, **kwargs)
+
+        context = self.get_context_data(**kwargs)
+        if clade_error:
+            context['clade_error'] = clade_error
+        return self.render_to_response(context)
 
 
 class FunctionProjection(AsyncJobMixin, TemplateView):

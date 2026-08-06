@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 
 import collections
+import itertools
 import json
 import logging
 import os
@@ -14,6 +15,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from pyoma.browser.exceptions import DBVersionError
+import numpy
 
 from .decorators import async_job_task
 from .misc import result_upload_path
@@ -38,19 +40,26 @@ from .models import FileResult
 logger = logging.getLogger(__name__)
 
 
-@async_job_task(FileResult, soft_time_limit=1000, time_limit=1060, logical_inputs=dict(genomes="genomes", min_species_coverage="min_species_coverage", top_N_grps="top_N_grps"))
+@async_job_task(FileResult, soft_time_limit=2000, time_limit=2060, logical_inputs=dict(genomes="genomes", min_species_coverage="min_species_coverage", top_N_grps="top_N_grps"))
 def export_marker_genes(job: FileResult, genomes, min_species_coverage=0.5, top_N_grps=None):
     logger.info('starting task export_marker_genes for %s', job.data_hash)
 
+    t0 = time.perf_counter()
     grps = collect_groups(genomes, min_species_coverage=min_species_coverage)
+    t1 = time.perf_counter()
+    logger.info('collected %d groups, took %.2fsec', len(grps), t1-t0)
     if top_N_grps is not None:
         size_ordered_grpids = sorted(grps.keys(), key=lambda x: -len(grps[x]))
         grps = {k: grps[k] for k in size_ordered_grpids[0:top_N_grps]}
+
     with FastaTarballResultBuilder('marker_genes', 'OMAGroup_', job.data_hash) as exporter:
         exporter.add_groups(grps)
+    t2 = time.perf_counter()
+
     task_meta = {
         'n_groups': len(grps),
         'avg_group_size': sum(len(g) for g in grps.values()) / len(grps) if len(grps) > 0 else 0,
+        'build_time': {'collect_groups': t1-t0, 'tarball': t2-t1, 'total': t2-t0},
     }
     return exporter.fname, task_meta
 
@@ -93,8 +102,24 @@ class FastaTarballResultBuilder(object):
         t.mode = 0o755
         self.tar.addfile(t)
 
+        all_entry_nrs = sorted(set(itertools.chain.from_iterable(groups.values())))
+        entries_tab = utils.db.get_hdf5_handle().get_node('/Protein/Entries')
+        idx = numpy.asarray(all_entry_nrs, dtype=numpy.int64) - 1
+        rows = entries_tab.read_coordinates(idx)
+        entry_rows = dict(zip(all_entry_nrs, rows))
+
+        seq_arr = utils.db.get_hdf5_handle().get_node('/Protein/SequenceBuffer')
+        cdna_arr = utils.db.get_hdf5_handle().get_node('/Protein/CDNABuffer')
+        # all_entry_nrs is sorted, and SeqBufferOffset/CDNABufferOffset are monotonic in EntryNr, so
+        # reading in this order lets PyTables' own per-dataset chunk cache serve consecutive reads that
+        # fall in the same chunk without redundant decompression -- no manual chunk bookkeeping needed.
+        seq_bytes = {e: self._read_buffer_slice(seq_arr, entry_rows[e]['SeqBufferOffset'], entry_rows[e]['SeqBufferLength'])
+                     for e in all_entry_nrs}
+        cdna_bytes = {e: self._read_buffer_slice(cdna_arr, entry_rows[e]['CDNABufferOffset'], entry_rows[e]['CDNABufferLength'])
+                      for e in all_entry_nrs}
+
         for grp_key, membs in groups.items():
-            for ext, content in zip(["fa", "fna"], self._group_to_fasta(membs)):
+            for ext, content in zip(["fa", "fna"], self._group_to_fasta(membs, entry_rows, seq_bytes, cdna_bytes)):
                 grpfile = io.BytesIO(content.encode('utf-8'))
                 t = tarfile.TarInfo('{}/{}{}.{}'.format(
                     self.prefix, self.grouptype, grp_key, ext))
@@ -106,19 +131,26 @@ class FastaTarballResultBuilder(object):
                 t.mtime = time.time()
                 self.tar.addfile(t, grpfile)
 
+    def _read_buffer_slice(self, buf_arr, offset, length):
+        # explicit int(...) casts avoid a numpy uint64+uint32-1 float-promotion trap that silently
+        # forces PyTables onto its slow fancy-selection fallback instead of the fast plain-slice path
+        offset = int(offset)
+        length = int(length)
+        return buf_arr[offset:offset + length - 1].tobytes().decode()
+
     def format_fasta_header(self, e):
         return " | ".join([e.omaid, 'OMA{}'.format(e.oma_group),
                            e.canonicalid, '[{}]'.format(e.genome.sciname)])
 
-    def _group_to_fasta(self, group):
+    def _group_to_fasta(self, group, entry_rows, seq_bytes, cdna_bytes):
         headers = []
         seqs = []
         cds = []
         for memb in group:
-            e = pyoma.browser.models.ProteinEntry.from_entry_nr(utils.db, memb)
+            e = pyoma.browser.models.ProteinEntry(utils.db, entry_rows[memb])
             headers.append(self.format_fasta_header(e))
-            seqs.append(e.sequence)
-            cds.append(e.cdna)
+            seqs.append(seq_bytes[memb])
+            cds.append(cdna_bytes[memb])
         return misc.as_fasta(headers=headers, seqs=seqs), misc.as_fasta(headers=headers, seqs=cds)
 
 
