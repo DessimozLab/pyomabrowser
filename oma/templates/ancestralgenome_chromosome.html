@@ -6,9 +6,9 @@
 {% block js_hook %}
 
 <!-- Load css from static -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.1.24/dist/GenomeViewer.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.2.0/dist/GenomeViewer.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
-<script type="module" src="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.1.24/dist/GenomeViewer.umd.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/chromosome-viewer@1.2.0/dist/GenomeViewer.umd.js"></script>
 
 {% endblock js_hook %}
 
@@ -21,6 +21,7 @@
     }
     </style>
 
+    <div id="loader" class="text-center my-4"><img src="{% static "image/loading.gif" %}" alt="loading chromosome viewer..."></div>
     <div id="app" style="width: 100%;"></div>
     <div id="message-container"></div>
 
@@ -30,6 +31,8 @@
         'heightAccessor_excerpt' : 'nr_members',
         'type_chromosome': 'ancestral',
         'sorting_chromosome': 'size',
+        'hide_sorting_button': true,
+        'hide_detail_button': true,
         'min_genes': 10,
         'force_extent_numerical': {'nr_members': {'min': 0, 'max': 2*{{nbr_species}} }},
         'level': '{{genome_name}}',
@@ -51,6 +54,7 @@
     fetch("/api/synteny/?format=json&level={{genome_name}}")
       .then(response => response.json())
       .then(data => {
+          document.getElementById('loader').remove();
           const app = Vue.createApp(GenomeViewer, {jsonData: data, user_settings: settings});
           const vm = app.mount('#app');
 
@@ -74,6 +78,7 @@
       })
       .catch(error => {
           console.error('Fetch error:', error);
+          document.getElementById('loader').remove();
           document.getElementById('message-container').innerHTML = `
             <div class="alert alert-danger mt-3" role="alert">
               Failed to load data. Please try again later.
