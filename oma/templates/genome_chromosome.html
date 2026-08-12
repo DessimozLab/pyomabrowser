@@ -22,7 +22,7 @@
     }
     </style>
 
-    <div id="loader" class="text-center my-4"><img src="{% static "image/loading.gif" %}" alt="loading chromosome viewer..."></div>
+    <div id="loader"> {% include "includes/loading.html" %} </div>
     <div id="app" style="width: 100%;"></div>
     <div id="message-container"></div>
 
@@ -32,6 +32,10 @@
         'remove_outliers_legend': ['age'],
         'sorting_chromosome': 'size',
         'hide_detail_button': true,
+        //'colorAccessor' : 'completeness_score',
+        //'heightAccessor' : 'nr_members',
+        'colorAccessor_edge': 'age_edge',
+        'color_scheme_edge': 'Blues',
         'min_genes': 20,
         'level': '{{genome_name}}',
         'oma': true,

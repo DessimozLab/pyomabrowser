@@ -1,7 +1,7 @@
 {% extends  "base_ancestralgenome.html" %}
 {% load static %}
 
-{% block title %}Chromosome viewer for genome {{genome_name}}{% endblock %}
+{% block title %}Contig viewer for genome {{genome_name}}{% endblock %}
 
 {% block js_hook %}
 
@@ -21,7 +21,7 @@
     }
     </style>
 
-    <div id="loader" class="text-center my-4"><img src="{% static "image/loading.gif" %}" alt="loading chromosome viewer..."></div>
+    <div id="loader"> {% include "includes/loading.html" %} </div>
     <div id="app" style="width: 100%;"></div>
     <div id="message-container"></div>
 
@@ -33,6 +33,10 @@
         'sorting_chromosome': 'size',
         'hide_sorting_button': true,
         'hide_detail_button': true,
+        'colorAccessor' : 'completeness_score',
+        'heightAccessor' : 'nr_members',
+        'colorAccessor_edge': 'age_edge',
+        'color_scheme_edge': 'Blues',
         'min_genes': 10,
         'force_extent_numerical': {'nr_members': {'min': 0, 'max': 2*{{nbr_species}} }},
         'level': '{{genome_name}}',
