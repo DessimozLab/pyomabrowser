@@ -42,15 +42,39 @@ class FastaExporter(DarwinExporter):
             self._write_splice_file(folder / "splice" / (genome + ".splice"), genome_data)
         t3 = time.perf_counter()
         self._write_gff3(folder / "gff3" / (genome + ".gff3"), genome, genome_data)
-        gs = Genome(self.db, genome)
         t4 = time.perf_counter()
-        msg = [f"Writing files for genome {genome} took {t4 - t0:.2f}s:",
+        self._write_3di_fasta_sequences(folder / "3di" / (genome + ".3di.fa"), genome_data)
+        gs = Genome(self.db, genome)
+        t5 = time.perf_counter()
+        msg = [f"Writing files for genome {genome} took {t5 - t0:.2f}s:",
                f"   Loading genome data: {t1-t0:.2f}s"
                f"   protein sequences:   {t2-t1:.2f}s",
                f"   splice file:         {t3-t2:.2f}s",
-               f"   gff3:                {t4-t3:.2f}s"]
+               f"   gff3:                {t4-t3:.2f}s",
+               f"   3di sequences:       {t5-t4:.2f}s"]
         logger.info("\n".join(msg))
         return gs
+
+    def _write_3di_fasta_sequences(self, fname: Path, genome_data: GenomeData):
+        if not (hasattr(self.db, "structure_db") and self.db.structure_db):
+            return
+        records = []
+        for enr, xrefs in genome_data.xrefs.items():
+            structure = self.db.get_structure(enr)
+            if structure is None:
+                continue
+            records.append((xrefs, structure))
+        if not records:
+            return
+
+        fname.parent.mkdir(parents=True, exist_ok=True)
+        with open(fname, "wt") as fh:
+            for xrefs, structure in records:
+                header = f"{self._produce_fasta_header(xrefs)} | 3di-source: {structure.source}"
+                fh.write(f">{header}\n")
+                seq = structure.seq_3di.decode()
+                for k in range(0, len(seq), 80):
+                    fh.write(f"{seq[k:k+80]}\n")
 
     def _get_go_in_darwin_format_for_entrynr_range(self, start:int, stop:int) -> Dict[int, str]:
         """we don't need this"""
@@ -142,8 +166,9 @@ def build_export_tarball(db:Database, genomes:List[str], outfn, tmpfolder=None):
                     logger.warning("cannot convert {}: {}", g, e)
                     readme.write(f"  !SKIPPING {g}. Reason: {e}")
             readme.write("The proteome data are stored under /proteome, the splice files \n"
-                         "under /splice (if alternative splicing variants exist), and the \n"
-                         "gene positions (GFF3 format) under /gff3.\n")
+                         "under /splice (if alternative splicing variants exist), the \n"
+                         "gene positions (GFF3 format) under /gff3, and 3Di structure \n"
+                         "sequences (if available) under /3di.\n")
 
         genomes = set(genomes) - ignored_genomes
         with open(basedir / "species_info.txt", "wt") as fh:
