@@ -1,0 +1,137 @@
+digraph docker_setup {
+  rankdir=TB;
+  fontname="Helvetica";
+  splines=ortho;
+  nodesep=0.7;
+  ranksep=1.15;
+  bgcolor="white";
+  compound=true;
+  newrank=true;
+
+  node [fontname="Helvetica", fontsize=13];
+  edge [fontname="Helvetica", fontsize=11.5];
+
+  client [label="Browser / client", shape=box, style="dashed,rounded", color="#888888", fontcolor="#333333", margin="0.15,0.1"];
+
+  subgraph cluster_external {
+    label="Internet / external service";
+    style=dashed; color="#888888"; fontcolor="#666666"; fontsize=15;
+    cloudflare_api [label=<<B>Cloudflare API</B><BR/><FONT POINT-SIZE="11"><I>toggle WAF Managed Challenge</I></FONT>>, shape=box, style="filled,rounded", fillcolor="#EDEDED", color="#888888"];
+  }
+
+  subgraph cluster_host {
+    label="Host / exposed";
+    style=solid; color="#333333"; fontsize=18; fontcolor="#111111"; margin=24;
+    labeljust=l;
+
+    subgraph cluster_docker {
+      label="Docker environment  (docker-compose.yml)";
+      style=dashed; color="#333333"; fontsize=16; fontcolor="#111111"; margin=20;
+      labeljust=l;
+
+      nginx [label=<<B>nginx</B><BR/><FONT POINT-SIZE="11"><I>nginx:latest (custom build)</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#4F9EE8", color="#215B8F", fontcolor=white, margin="0.25,0.15"];
+
+      web [label=<<B>web</B><BR/><FONT POINT-SIZE="11">Django OMA browser · uwsgi ×3</FONT><BR/><FONT POINT-SIZE="11"><I>oma:latest</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#4F9EE8", color="#215B8F", fontcolor=white, margin="0.25,0.15"];
+
+      subgraph cluster_backend {
+        style=invis;
+        broker [label=<<B>broker</B><BR/><FONT POINT-SIZE="11"><I>rabbitmq:3</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#4F9EE8", color="#215B8F", fontcolor=white, margin="0.25,0.15"];
+        db [label=<<B>db</B><BR/><FONT POINT-SIZE="11"><I>postgres:18-alpine</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#4F9EE8", color="#215B8F", fontcolor=white, margin="0.25,0.15"];
+        worker [label=<<B>worker</B><BR/><FONT POINT-SIZE="11">queues: celery, async_web</FONT><BR/><FONT POINT-SIZE="11"><I>oma:latest</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#4F9EE8", color="#215B8F", fontcolor=white, margin="0.25,0.15"];
+        worker_long [label=<<B>worker_long</B><BR/><FONT POINT-SIZE="11">queues: celery, async_web, long</FONT><BR/><FONT POINT-SIZE="11"><I>oma:latest</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#4F9EE8", color="#215B8F", fontcolor=white, margin="0.25,0.15"];
+        profiler_worker [label=<<B>profiler_worker</B><BR/><FONT POINT-SIZE="11">queue: profiler</FONT><BR/><FONT POINT-SIZE="11"><I>dedicated: ~6GB async HOG profiler</I></FONT><BR/><FONT POINT-SIZE="11"><I>oma:latest</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#4F9EE8", color="#215B8F", fontcolor=white, margin="0.25,0.15"];
+      }
+
+      static_volume [label=<<B>static_volume</B><BR/><FONT POINT-SIZE="10.5"><I>named volume</I></FONT><BR/><FONT POINT-SIZE="10.5">/data/static</FONT><BR/><FONT POINT-SIZE="9" COLOR="#EAFFF0"><I>read by: nginx, web, workers</I></FONT>>, shape=cylinder, style=filled, fillcolor="#2E8B45", color="#1F5E30", fontcolor=white, margin="0.2,0.15"];
+      release_vol [label=<<B>release path</B><BR/><FONT POINT-SIZE="10.5"><I>host bind, read-only</I></FONT><BR/><FONT POINT-SIZE="10.5">RELEASE_PATH_HOST → /data/release</FONT><BR/><FONT POINT-SIZE="9" COLOR="#EAFFF0"><I>read by: web, workers</I></FONT>>, shape=cylinder, style="filled,dashed", fillcolor="#2E8B45", color="#1F5E30", fontcolor=white, margin="0.2,0.15"];
+      media_volume [label=<<B>media_volume</B><BR/><FONT POINT-SIZE="10.5"><I>named volume</I></FONT><BR/><FONT POINT-SIZE="10.5">/data/media</FONT><BR/><FONT POINT-SIZE="9" COLOR="#EAFFF0"><I>read by: nginx, web, workers</I></FONT>>, shape=cylinder, style=filled, fillcolor="#2E8B45", color="#1F5E30", fontcolor=white, margin="0.2,0.15"];
+      postgres_data [label=<<B>postgres_data</B><BR/><FONT POINT-SIZE="10.5"><I>named volume</I></FONT><BR/><FONT POINT-SIZE="10.5">/var/lib/postgresql/</FONT>>, shape=cylinder, style=filled, fillcolor="#2E8B45", color="#1F5E30", fontcolor=white, margin="0.2,0.15"];
+      allall_vol [label=<<B>AllAll data</B><BR/><FONT POINT-SIZE="10.5"><I>host bind, read-only</I></FONT><BR/><FONT POINT-SIZE="10.5">/data/AllAll</FONT>>, shape=cylinder, style="filled,dashed", fillcolor="#2E8B45", color="#1F5E30", fontcolor=white, margin="0.2,0.15"];
+      downloads_vol [label=<<B>downloads</B><BR/><FONT POINT-SIZE="10.5"><I>host bind, read-only</I></FONT>>, shape=cylinder, style="filled,dashed", fillcolor="#2E8B45", color="#1F5E30", fontcolor=white, margin="0.2,0.15"];
+      snippets_vol [label=<<B>nginx snippets</B><BR/><FONT POINT-SIZE="10.5">bot / subnet block rules</FONT>>, shape=cylinder, style="filled,dashed", fillcolor="#2E8B45", color="#1F5E30", fontcolor=white, margin="0.2,0.15"];
+      logs_vol [label=<<B>nginx logs</B><BR/><FONT POINT-SIZE="10.5">access.log / error.log</FONT>>, shape=cylinder, style="filled,dashed", fillcolor="#2E8B45", color="#1F5E30", fontcolor=white, margin="0.2,0.15"];
+
+      { rank=same; worker; worker_long; profiler_worker; }
+      { rank=same; broker; db; }
+      { rank=same; static_volume; release_vol; media_volume; postgres_data; allall_vol; }
+
+      j_net [label="web + celery workers ×3\n(identical broker/db access)", shape=box, style="rounded,filled", fillcolor="#EEEEEE", color="#888888", fontcolor="#555555", fontsize=10.5, margin="0.1,0.06"];
+      j_vol [label="web + celery workers ×3\n(all write media_volume)", shape=box, style="rounded,filled", fillcolor="#EEEEEE", color="#888888", fontcolor="#555555", fontsize=10.5, margin="0.1,0.06"];
+
+      subgraph cluster_guard {
+        label="optional — profile: cloudflare-guard";
+        style="filled,dashed"; color="#B08D2B"; fillcolor="#FFF3D6"; fontsize=13; fontcolor="#7A5E12"; margin=14;
+        cloudflare_guard [label=<<B>cloudflare_guard</B><BR/><FONT POINT-SIZE="10.5">watches nginx access log,</FONT><BR/><FONT POINT-SIZE="10.5">toggles Cloudflare WAF</FONT><BR/><FONT POINT-SIZE="10.5">Managed Challenge on load</FONT><BR/><FONT POINT-SIZE="10.5"><I>cloudflare_guard:latest</I></FONT>>, shape=box, style="rounded,filled", fillcolor="#4F9EE8", color="#215B8F", fontcolor=white, margin="0.25,0.15"];
+        guard_state_vol [label=<<B>cloudflare_guard_state</B><BR/><FONT POINT-SIZE="10.5"><I>named volume</I></FONT><BR/><FONT POINT-SIZE="10.5">read offset + hysteresis</FONT>>, shape=cylinder, style=filled, fillcolor="#2E8B45", color="#1F5E30", fontcolor=white, margin="0.2,0.15"];
+      }
+    }
+  }
+
+  client -> nginx [label="tcp:${WEBSERVER_PORT:-80}", color="#111111", style=dashed, fontcolor="#111111", penwidth=1.6];
+  nginx -> web [label="tcp:8000", color="#111111", style=dashed, fontcolor="#111111", penwidth=1.6];
+
+  // rank-forcing only, not a real relationship: pins the worker row directly below web
+  // ordering hint only: keeps the cloudflare-guard cluster to nginx's right so it
+  // doesn't sit above the nginx -> static/media routing corridor on the left
+  nginx -> cloudflare_guard [style=invis];
+
+  web -> worker [style=invis];
+  web -> worker_long [style=invis];
+  web -> profiler_worker [style=invis];
+
+  // web and the 3 celery workers all run the same oma image with the same broker/db
+  // config: one line each into a labeled junction, instead of 4 separate lines per
+  // destination that would otherwise crisscross this corridor
+  web -> j_net [dir=none, color="#888888", penwidth=1.4];
+  worker -> j_net [dir=none, color="#888888", penwidth=1.4];
+  worker_long -> j_net [dir=none, color="#888888", penwidth=1.4];
+  profiler_worker -> j_net [dir=none, color="#888888", penwidth=1.4];
+  j_net -> broker [label="tcp:5672", color="#111111", style=dashed, fontcolor="#111111", penwidth=1.6];
+  j_net -> db [label="tcp:5432", color="#111111", style=dashed, fontcolor="#111111", penwidth=1.6];
+
+  // same for the media_volume write: web + all 3 workers write it. (static_volume,
+  // release path and media_volume reads are identical across nginx/web/workers too
+  // -- noted directly on each volume below instead of drawing ~10 near-duplicate
+  // read arrows)
+  web -> j_vol [dir=none, color="#888888", penwidth=1.4];
+  worker -> j_vol [dir=none, color="#888888", penwidth=1.4];
+  worker_long -> j_vol [dir=none, color="#888888", penwidth=1.4];
+  profiler_worker -> j_vol [dir=none, color="#888888", penwidth=1.4];
+  j_vol -> media_volume [color="#C0392B", penwidth=1.6];
+
+  worker_long -> allall_vol [color="#E08A2B", penwidth=1.6];
+
+  nginx -> downloads_vol [color="#E08A2B", penwidth=1.6];
+  nginx -> snippets_vol [color="#E08A2B", penwidth=1.6];
+  nginx -> logs_vol [color="#C0392B", penwidth=1.6];
+
+  cloudflare_guard -> logs_vol [color="#E08A2B", penwidth=1.6];
+  cloudflare_guard -> guard_state_vol [color="#E08A2B", penwidth=1.6];
+  cloudflare_guard -> guard_state_vol [color="#C0392B", penwidth=1.6];
+  cloudflare_guard -> cloudflare_api [label="https (toggle WAF rule)", color="#1F6FB2", style=dashed, fontcolor="#1F6FB2", penwidth=1.6];
+
+  db -> postgres_data [color="#E08A2B", penwidth=1.6];
+  db -> postgres_data [color="#C0392B", penwidth=1.6];
+
+  // legend
+  subgraph cluster_legend {
+    label="Legend"; style=solid; color="#888888"; fontsize=13; fontcolor="#333333"; margin=10;
+    l1 [shape=plaintext, label="container reads volume"]; l1b [shape=point, width=0.01, label="", style=invis];
+    l2 [shape=plaintext, label="container writes volume"]; l2b [shape=point, width=0.01, label="", style=invis];
+    l3 [shape=plaintext, label="container connects to port"]; l3b [shape=point, width=0.01, label="", style=invis];
+    l4 [shape=plaintext, label="outbound HTTPS call"]; l4b [shape=point, width=0.01, label="", style=invis];
+    l5 [shape=cylinder, style=filled, fillcolor="#2E8B45", fontcolor=white, label="named volume"];
+    l6 [shape=cylinder, style="filled,dashed", fillcolor="#2E8B45", fontcolor=white, label="host bind mount"];
+    l7 [label="junction: web + celery\nworkers (identical config)", shape=box, style="rounded,filled", fillcolor="#EEEEEE", color="#888888", fontcolor="#555555", fontsize=10.5, margin="0.1,0.06"];
+    l8 [shape=plaintext, fontsize=11, label="a volume read identically by several\ncontainers is noted as text on the\nvolume itself, not drawn as an arrow"];
+    l1 -> l1b [color="#E08A2B", dir=none, penwidth=1.6];
+    l2 -> l2b [color="#C0392B", dir=none, penwidth=1.6];
+    l3 -> l3b [color="#111111", style=dashed, dir=none, penwidth=1.6];
+    l4 -> l4b [color="#1F6FB2", style=dashed, dir=none, penwidth=1.6];
+    { rank=same; l1; l2; l3; l4; l7; l8; l5; l6; }
+  }
+
+  // rank-forcing only: pins the legend strip below the whole diagram
+  postgres_data -> l1 [style=invis];
+  allall_vol -> l1 [style=invis];
+}
