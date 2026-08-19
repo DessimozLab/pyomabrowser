@@ -3,6 +3,13 @@
     --header-height: 0px;
 }
 
+/* Apply to any heading that is the target of an in-page anchor link (e.g. #someTool),
+   so the sticky navbar does not cover it when the browser scrolls the anchor into view. */
+.oma-anchor-heading {
+    scroll-margin-top: calc(var(--navbar-height, 85px) + 15px);
+    margin-top: 12px;
+}
+
 body {
 	 color: #333;
 	 padding: 0;
