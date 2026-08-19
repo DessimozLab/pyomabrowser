@@ -223,7 +223,7 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
                              alt="export">
                     <br>
 
-                    <h3 id="addCustomFilter">Phylogenetic Marker Gene Export
+                    <h3 class="oma-anchor-heading" id="addCustomFilter">Phylogenetic Marker Gene Export
 </h3>
 
                     <p class="text-justify">In several of the tables, it is possible to add a “custom filter” to the data. This function can be used to select only the results from a certain species or taxonomic range</p>
@@ -354,7 +354,7 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 
 
-                     <h3 id="iHam">iHam (Graphical Viewer)</h3>
+                     <h3 class="oma-anchor-heading" id="iHam">iHam (Graphical Viewer)</h3>
 
 
 
@@ -468,10 +468,164 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
                     <br >
 
 
-                    <h3 style="margin-top: 12px" id="species_information_viewer"><a href="{% url 'release' %}">Species Information Viewer</a></h3>
+                    <h3 class="oma-anchor-heading" id="ancestral_contig_viewer">Ancestral Contig Viewer</h3>
+
+                    <p class="text-justify">
+                        The Ancestral Contig Viewer displays the reconstructed gene order of an ancestral genome.
+                        Ancestral gene order is inferred by <b>EdgeHOG</b>, which propagates the gene adjacencies
+                        observed between neighbouring genes in extant genomes along the inferred
+                        <a href="{% url 'glossary' %}#g-hog">Hierarchical Orthologous Groups (HOGs)</a> topology:
+                        whenever two extant genes are physical neighbours on a chromosome or scaffold, the ancestral
+                        genes (HOGs) they descend from are inferred to have also been neighbours in their common
+                        ancestor, at every taxonomic level up to which this relationship can still be traced.
+                        Chaining these inferred adjacencies together produces <b>ancestral contigs</b>, each a
+                        linear order of ancestral genes that most likely lay next to each other on an ancestral
+                        chromosome.
+                    </p>
+
+                    <small class="float-right">Please see <a href="https://doi.org/10.1038/s41559-025-02818-0">(Bernard et al. 2025)</a> for more information on the EdgeHOG algorithm, available as open-source software on <a href="https://github.com/DessimozLab/edgehog">GitHub</a>.</small>
+
+                    <p class="font-weight-bold">How can I access it?</p>
+                    <p class="text-justify">
+                        Search for an ancestral genome (e.g. type a clade name such as <i>Brassicaceae</i> in the
+                        search bar, or go to Explore &gt; Extant and ancestral genomes), then open the
+                        <b>Ancestral contig viewer</b> tab in the left-hand side menu of the ancestral genome page.
+                    </p>
+
+                    <p class="font-weight-bold">How to read the viewer?</p>
+                    <p class="text-justify">
+                        Ancestral contigs are listed from the largest to the smallest; very short ones
+                        (just a handful of genes) are left out to keep the page readable. Each contig is rendered
+                        as three synchronized tracks:
+                    </p>
+                    <ul>
+                        <li><b>Overview</b>: the whole contig as a single bar, drawn to scale relative to the
+                            largest contig of the genome, so that the relative sizes of contigs are comparable at a glance.</li>
+                        <li><b>Mapper</b>: the tick marks and bracket connecting a sub-range of the overview to
+                            the row below, showing which portion of the full contig the excerpt is currently focused on.</li>
+                        <li><b>Excerpt</b>: a detailed, interactive close-up of that sub-range. Each ancestral
+                            gene (HOG) is drawn as an arrow (arrowhead indicating the inferred strand/orientation),
+                            and consecutive genes are joined by a line representing the adjacency inferred between them.</li>
+                    </ul>
+
+                    <img src="{% static "image/ancestral_contig_viewer-1.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Ancestral contig viewer overview">
+
+                    <div class="text-center small">
+                        <b> Ancestral contigs of Brassicaceae, sorted by size. Each contig shows its overview bar,
+                            the mapper linking to the currently displayed sub-region, and the detailed excerpt of
+                            ancestral genes (arrows) with their adjacencies (connecting line).</b>
+                    </div>
+
+                    <p class="font-weight-bold">What do the colours and sizes mean?</p>
+                    <p class="text-justify">By default:</p>
+                    <ul>
+                        <li><b>Gene colour</b> = <i>Completeness score of the HOG</i>: the proportion of the expected
+                            descendant genomes in which at least one member gene of this ancestral gene is retained
+                            (1 = present in all descendants). Ancestral genes with a low completeness score are more
+                            likely to stem from an orthology/HOG inference error; genes with a completeness score
+                            above 0.2 are considered &ldquo;well supported&rdquo; and counted as such in the genome summary above
+                            the viewer.</li>
+                        <li><b>Gene height</b> = <i>Nbr of extant genes in the HOG</i>: the current size of the gene
+                            family, i.e. how many extant genes descend from this single ancestral gene (taller bars
+                            indicate genes that have since duplicated more extensively).</li>
+                        <li><b>Edge colour</b> = <i>Age of adjacency [mya]</i>: how far back in time (in million years)
+                            this specific gene-gene adjacency can still be traced in extant genomes. Darker/older
+                            edges indicate adjacencies that are conserved across a deeper range of descendant
+                            species, i.e. stronger evidence that the two ancestral genes were indeed neighbours.</li>
+                    </ul>
+                    <p class="text-justify">Any of these three accessors can be reassigned to a different metric
+                        using the drop-downs above each legend; the corresponding legend (colour scale or bar
+                        chart, with an adjustable range) updates accordingly.</p>
+
+                    <img src="{% static "image/ancestral_contig_viewer-2.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Ancestral contig viewer legend and settings">
+
+                    <div class="text-center small">
+                        <b> The settings panel: gene colour, gene height and edge colour can each be mapped to a
+                            different metric, with a legend and adjustable range for each.</b>
+                    </div>
+
+                    <p class="font-weight-bold">Gene and adjacency details</p>
+                    <p class="text-justify">
+                        Click on a gene to open a panel with its HOG id, functional description
+                        (if available), completeness score, number of extant genes and strand,
+                        plus &mdash; when browsing from within OMA &mdash; GO annotations and quick links to
+                        that HOG's <b>Synteny</b> view (recentres this same viewer on it),
+                        <b>Details</b> (opens the HOG's <a href="#iHam">iHam graphical viewer</a>)
+                        and <b>Members</b> (table of the HOG's extant member genes).
+                    </p>
+
+                    <img src="{% static "image/ancestral_contig_viewer-3.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Gene detail tooltip">
+
+                    <div class="text-center small">
+                        <b> Clicking a gene shows its HOG id, metrics and GO annotations, with links
+                            to the Synteny, Details (iHam) and Members pages.</b>
+                    </div>
+
+                    <p class="text-justify">
+                        Click on an adjacency (the line joining two genes) to see the two flanking HOG ids,
+                        the age of the adjacency, its inferred relative orientation (e.g. convergent,
+                        divergent) with a confidence score, and the number of extant gene pairs supporting it.
+                    </p>
+
+                    <img src="{% static "image/ancestral_contig_viewer-5.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="Adjacency detail tooltip">
+
+                    <div class="text-center small">
+                        <b> Clicking on an adjacency shows the two flanking HOGs, its age, orientation, and
+                            the number of extant gene pairs supporting it.</b>
+                    </div>
+
+                    <p class="font-weight-bold">Locating a gene or HOG of interest</p>
+                    <p class="text-justify">
+                        Type a HOG id in the search bar at the top of the viewer and
+                        click <b>Highlight</b>: the viewer scrolls to the contig containing that gene,
+                        recentres the excerpt on it, and highlights it in red &mdash; both in the excerpt and in
+                        the contig's overview bar, so you can also see where along the contig it sits.
+                        Use <b>Clear</b> to remove the highlight. Alternatively, browse all the ancestral
+                        genes of this genome from the <b>Ancestral genes</b> tab and follow a HOG's link
+                        back into this viewer.
+                    </p>
+
+                    <img src="{% static "image/ancestral_contig_viewer-4.png" %}" class="rounded mx-auto d-block w-100 p-3 "
+                             alt="Search and highlight a HOG">
+
+                    <div class="text-center small">
+                        <b> Searching for a HOG id highlights it, in red, in both the overview bar and the
+                            excerpt of the contig it belongs to.</b>
+                    </div>
+
+                    <p class="font-weight-bold">Navigation: overview vs excerpt</p>
+                    <p class="text-justify">
+                        Because a contig can contain well over a hundred genes, only a limited window is
+                        ever rendered in full detail (the excerpt); the overview bar above it acts as a
+                        &ldquo;minimap&rdquo; that always shows where that window sits within the full contig. Two
+                        interaction modes are available from the toolbar:
+                    </p>
+                    <ul>
+                        <li><b>Pan/Zoom</b> (default): drag the excerpt to pan along the contig, and scroll or pinch to zoom in or out, revealing fewer or more neighbouring genes.</li>
+                        <li><b>Select</b>: drag a rectangle over a range of genes in the excerpt to select them; the selection is listed in a table (gene id, start/end position, metrics) from which a <b>GO enrichment analysis</b> can be launched directly.</li>
+                    </ul>
+                    <p class="text-justify">
+                        Each contig can be exported individually as SVG or PNG using the buttons next to its title, and the whole page can be exported together (contigs and legend) using the <b>Export SVG</b> button in the toolbar.
+                    </p>
+
+                    <p class="text-justify">
+                        The Ancestral Contig Viewer is powered by the open-source <a href="https://github.com/DessimozLab/GenomeViewer">chromosome-viewer</a> Vue.js component.
+                    </p>
+
+                    <small > Using ancestral gene order data? Please cite: <br>Charles Bernard, Yannis Nevers, Naga Bhushana Rao Karampudi, Kimberly J. Gilbert, Clément Train, Alex Warwick Vesztrocy, Natasha Glover, Adrian Altenhoff, Christophe Dessimoz<br><em>EdgeHOG: fine-grained ancestral gene order inference at tree-of-life scale</em>, Nature Ecology & Evolution, 2025, doi:
+                        <a href="https://doi.org/10.1038/s41559-025-02818-0">10.1038/s41559-025-02818-0</a>. Code available on <a href="https://github.com/DessimozLab/edgehog">GitHub</a>.</small>
+                    <br >
+
+
+                    <!--- Species information viewer --->
+                    <h3 class="oma-anchor-heading" id="species_information_viewer"><a href="{% url 'release' %}">Species Information Viewer</a></h3>
                     <p>In the species information viewer, you can browse through which species are in the OMA database and get more information about them.</p>
 
-                    <h4 id="sunburst">Taxon Hierarchy View (sunburst)</h4>
+                    <h4 class="oma-anchor-heading" id="sunburst">Taxon Hierarchy View (sunburst)</h4>
                     <p style="font-weight: bold;">The default view is the Taxon Hierarchy view. Each section in the Taxon Hierarchy View represents a clade or species at the tips of the viewer.</p>
                     <img src="{% static "image/sunburst_overview.png" %}" class="rounded mx-auto d-block w-100 p-3 " alt="sunburst overview">
                     <ul>
@@ -494,7 +648,7 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
                         <li>Zoom into a taxon by clicking on it in the sunburst or searching for it and clicking the “Zoom into” button.</li>
                     </ul>
 
-                    <h4 id="species_table">Species Table View</h4>
+                    <h4 class="oma-anchor-heading" id="species_table">Species Table View</h4>
                     <p style="font-weight: bold;">The default view is the Taxon Hierarchy view. Each section in the Taxon Hierarchy View represents a clade or species at the tips of the viewer.</p>
                     <ul>
                         <li>Columns displayed:</li>
@@ -513,7 +667,7 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
                         <li>Download the data by the download icon</li>
                     </ul>
 
-                    <h4 id="species_plot">Species Plot</h4>
+                    <h4 class="oma-anchor-heading" id="species_plot">Species Plot</h4>
                     <p style="font-weight: bold;">View the number of genes per species plotted in a bar graph. The different Archaea, Bacteria, and Eukaryota domains are colored blue, green, and red, respectively.</p>
                     <ul>
                         <li>Sort bars by number of genes (size), Kingdom (domain), or Species Name (alphabetical order)</li>
@@ -523,7 +677,7 @@ A more permissive (lower) minimum species coverage will result in a higher numbe
 
 
 
-                    <h3 style="margin-top: 12px" id="phylo_io"> <a href="https://phylo.io/">Phylo.io</a></h3>
+                    <h3 class="oma-anchor-heading" id="phylo_io"> <a href="https://phylo.io/">Phylo.io</a></h3>
 
                     <p class="text-justify">
 
