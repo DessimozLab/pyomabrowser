@@ -25,9 +25,13 @@
         </li>
 
 
-      <li class="{% if tab == 'chromosome' %}  active selected {%endif%}">
+      <li class="{% if tab == 'chromosome' %}  active selected {%endif%}" style="position: relative;">
             <a href="{% url 'ancestralgenome_chromosome' genome_name %}">
                 <span> Ancestral contig viewer</span>
+            </a>
+            <a href="{% url 'tool_catalog' %}#ancestral_contig_viewer" target="_blank" title="Help: Ancestral contig viewer"
+               style="position: absolute !important; display: inline-flex !important; width: auto !important; top: 50%; right: 16px; transform: translateY(-50%); z-index: 2; color: inherit; opacity: 0.6;">
+                <i class="fas fa-question-circle"></i>
             </a>
         </li>
 
