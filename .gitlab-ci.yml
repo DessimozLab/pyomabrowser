@@ -87,7 +87,7 @@ deploy_stage:
     name: stage
     url: https://oma-stage.vital-it.ch
   only:
-    - master
+    - stage
   variables:
     STAGE_HOST: oma-stage8.vital-it.ch
     USER: oma
@@ -105,7 +105,7 @@ deploy_stage:
       ssh ${USER}@${STAGE_HOST} << EOF
         cd pyomabrowser/for_docker
         git fetch --all
-        git reset --hard origin/master
+        git reset --hard origin/stage
         echo "$CI_JOB_TOKEN" | podman login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
         podman compose -f docker-compose.yml down
         podman compose -f docker-compose.yml pull
