@@ -136,6 +136,9 @@ services:
       - NGINX_SNIPPET_PATH=${NGINX_SNIPPET_PATH:-/etc/nginx/snippets}
       - NGINX_LOG_TO_FILE=${NGINX_LOG_TO_FILE:-false}
       - REVERSE_PROXY_IP=${REVERSE_PROXY_IP:-}
+      # LIMIT_ACCESS_FROM_CIDR restricts access to a comma-separated list of subnets
+      # (allow <subnet>; per entry, followed by deny all;). Leave unset to allow all IPs.
+      - LIMIT_ACCESS_FROM_CIDR=${LIMIT_ACCESS_FROM_CIDR:-}
       # USER_AGENT_BOT_FILE and SUBNET_BOT_FILE are relative to NGINX_SNIPPET_PATH_HOST
       # they can be used to block known crawlers/crawlers coming from known subnets
       # an example of both files is provided in ./nginx/snippets/*.conf.template

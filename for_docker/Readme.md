@@ -61,6 +61,8 @@ A bit less common but still relevant settings are:
 
 - __DJANGO_SETTINGS_MODULE__: settings module to be used. can be one of `pybrowser_dev.settings.prod`, `pybrowser_dev.settings.testing`
 
+- __LIMIT_ACCESS_FROM_CIDR__: Comma-separated list of subnets (CIDR notation) allowed to reach the site, e.g. `192.168.1.0/24,10.0.0.0/8`. nginx adds an `allow <subnet>;` rule per entry followed by a final `deny all;`. Leave unset (the default) to allow traffic from all IPs.
+
 
 ### Settings in `docker-compose.yml`
 

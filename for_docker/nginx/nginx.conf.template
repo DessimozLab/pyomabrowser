@@ -3,6 +3,7 @@
 {{- $user_agent_bot_file := getenv "USER_AGENT_BOT_FILE" }}
 {{- $subnet_bot_file := getenv "SUBNET_BOT_FILE" }}
 {{- $nginx_snippet_path := getenv "NGINX_SNIPPET_PATH" "/etc/nginx/snippets" }}
+{{- $limit_access_cidrs := getenv "LIMIT_ACCESS_FROM_CIDR" }}
 {{- $THROTTLED := or ($log_rate_limit_file | ne "") (or ($user_agent_bot_file | ne "") ($subnet_bot_file | ne "")) }}
 {{- $is_dev := eq ((getenv "DEPLOYMENT_TYPE") | strings.ToUpper | strings.Trunc 3) "DEV" }}
 {{- $log_to_file := getenv "NGINX_LOG_TO_FILE" | default "false" | conv.ToBool }}
@@ -92,6 +93,14 @@ server {
     set_real_ip_from {{ getenv "REVERSE_PROXY_IP" }};
     real_ip_header X-Forwarded-For;
     real_ip_recursive on;
+    {{- end }}
+
+    {{- if $limit_access_cidrs }}
+    # Restrict access to the listed subnets only; everyone else gets denied.
+    {{- range ($limit_access_cidrs | strings.Split ",") }}
+    allow {{ . | strings.TrimSpace }};
+    {{- end }}
+    deny all;
     {{- end }}
 
     proxy_set_header Host $host;
