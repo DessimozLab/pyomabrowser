@@ -876,7 +876,7 @@ wheels = [
 [[package]]
 name = "oma-academy-app"
 version = "1.0.0"
-source = { git = "ssh://lab.dessimoz.org:2222/oma-academy#f11a925dc545a297d547371a6284006bef3263ae" }
+source = { git = "ssh://lab.dessimoz.org:2222/oma-academy#9e0e6a255835761c981687942f519d8002620c05" }
 dependencies = [
     { name = "django" },
     { name = "markdown" },
