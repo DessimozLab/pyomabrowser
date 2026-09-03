@@ -86,8 +86,12 @@ MAILMAN_SUBSCRIBE = {
 
 MATOMO_API_TRACKING = {
     'url': 'https://matomo-app.vital-it.ch/matomo.php',
-    'site_id': 6,
+    'site_id': 243,
     'ignore_paths': ["/oma/",],
+    'url_masks': [
+        (r"/api/hog/[^/]+/", "/api/hog/:hog_id/"),
+        (r"/api/protein/[^/]+/", "/api/protein/:protein_id/"),
+    ],
 }
 
 PROVIDE_SCHEMA_DOT_ORG = True
