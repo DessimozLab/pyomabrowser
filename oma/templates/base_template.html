@@ -275,9 +275,7 @@
                     <a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown">Help
                         <span class="caret"></span></a>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                        <a class="dropdown-item" href="{% url 'about' %}">Introduction</a>
-                        <a class="dropdown-item" href="{% url 'type' %}">Orthology Basics</a>
-                        <a class="dropdown-item" href="{% url 'homologs' %}">Type of homologs</a>
+                        <a class="dropdown-item" href="{% url 'get_started' %}">Get started with OMA</a>
                         <a class="dropdown-item" href="{% url 'uses' %}">Access the OMA data</a>
                         <a class="dropdown-item" href="{% url 'tool_catalog' %}">Catalog of tools</a>
                         {% if oma_instance_name != "basf" %}
@@ -305,9 +303,7 @@
 
                     <div class="dropdown-menu dropdown-menu-right" role="menu">
                         <a class="dropdown-item" href="{% url 'about' %}">OMA</a>
-                        <a class="dropdown-item" href="{% url 'team' %}">Team</a>
                         <a class="dropdown-item" href="{% url 'sab' %}">SAB</a>
-                        <a class="dropdown-item" href="{% url 'funding' %}">Funding</a>
                         <a class="dropdown-item" href="{% url 'license' %}">Terms of use</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="mailto:contact@omabrowser.org"><span

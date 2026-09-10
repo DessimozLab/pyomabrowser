@@ -149,17 +149,23 @@ urlpatterns = [
     path('synteny/', TemplateView.as_view(template_name='explore_synteny.html'), name='synteny'),
 
     path('glossary/', TemplateView.as_view(template_name='glossary.html'), name='glossary'),
+
+    # pages to remove during NAR 2027 update. Keep it until the main page is updated
     path('homologs/', TemplateView.as_view(template_name='help_homologs.html'), name='homologs'),
     path('about/', TemplateView.as_view(template_name='about_OMA.html'), name='about'),
+
+
+    path('get_started/', TemplateView.as_view(template_name='help_getting_started.html'), name='get_started'),
+    path('type/', TemplateView.as_view(template_name='help_typesOrthologs.html'), name='type'),
+    
     #path('export_selection/', TemplateView.as_view(template_name='dlOMA_exportAllAll.html'), name='export'),
     path('landAnnotation/', TemplateView.as_view(template_name='explore_Annotation.html'),
         name='landAnnotation'),
-    path('team/', TemplateView.as_view(template_name='about_team.html'), name='team'),
+    #path('team/', TemplateView.as_view(template_name='about_team.html'), name='team'),
     path('sab/', TemplateView.as_view(template_name='about_sab.html'), name='sab'),
-    path('funding/', TemplateView.as_view(template_name='about_funding.html'), name='funding'),
+    #path('funding/', TemplateView.as_view(template_name='about_funding.html'), name='funding'),
     path('license/', RedirectView.as_view(pattern_name="license"), name='red-license'),
     path('terms_of_use/', TemplateView.as_view(template_name='about_license.html'), name='license'),
-    path('type/', TemplateView.as_view(template_name='help_typesOrthologs.html'), name='type'),
     path('uses/', TemplateView.as_view(template_name='help_typicalUses.html'), name='uses'),
     path('FAQ/', TemplateView.as_view(template_name='help_FAQ.html'), name='FAQ'),
     path('genomePW/', TemplateView.as_view(template_name='tool_genomePW.html'), name='genomePW'),
