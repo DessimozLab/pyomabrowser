@@ -243,7 +243,7 @@
                     
                     <h3>I have a gene and want its orthologs</h3>
                     <p class="text-justify">Search for the gene identifier or protein sequence, then open the gene page. The ortholog table is shown by default.</p>
-                    <p class="text-justify">Go to: <a href="">Find orthologs for a gene</a></p>
+                    <p class="text-justify">Go to: <a href="{% url "find_orthologs" %}">Find orthologs for a gene</a></p>
 
                     <h3>I want to understand a gene family</h3>
                     <p class="text-justify">Search for a HOG identifier, or open the HOG from a gene page. Use the HOG page to view members, taxonomic levels, and evolutionary events.</p>
@@ -273,28 +273,25 @@
                 <hr>
                 <div class="card-body">
 
-                    <h4>Gene / entry</h4>
+                    <h3>Gene / entry</h3>
                     <p class="text-justify">A protein-coding sequence represented in OMA. OMA uses one representative protein sequence per locus for orthology inference.</p>
 
-                    <h4>OMA identifier</h4>
+                    <h3>OMA identifier</h3>
                     <p class="text-justify">The identifier for a gene in OMA. It consists of a five-letter species code followed by a unique number. Example: WHEAT00001.</p>
 
-                    <h4></h4>
-                    <p class="text-justify"></p>
-
-                    <h4>HOG</h4>
+                    <h3>HOG</h3>
                     <p class="text-justify">A hierarchical orthologous group. A HOG contains genes descended from a common ancestral gene at a specific taxonomic level.</p>
 
-                    <h4>RootHOG</h4>
+                    <h3>RootHOG</h3>
                     <p class="text-justify">The deepest HOG containing all genes in a gene family across the species represented in OMA.</p>
 
-                    <h4>Strict Orthologous Group</h4>
+                    <h3>Strict Orthologous Group</h3>
                     <p class="text-justify">A stringent group of genes that are all orthologous to one another. Formerly referred to as OMA Groups.</p>
 
-                    <h4>Ancestral genome</h4>
+                    <h3>Ancestral genome</h3>
                     <p class="text-justify">In OMA, an ancestral genome is represented by the HOGs inferred to be present at a given ancestral taxonomic level.</p>
 
-                    <h4>Synteny</h4>
+                    <h3>Synteny</h3>
                     <p class="text-justify">Conservation of gene order between genomic regions. OMA provides tools to explore both local and broader synteny patterns.</p>
 
                     <p class="text-justify">More key terms can be found in the <a href="{% url "glossary" %}">Glossary</a>.</p>
@@ -308,7 +305,7 @@
                 <hr>
                 <div class="card-body">
                     <ul>
-                        <li><a href="">Find orthologs for a gene</a></li>
+                        <li><a href="{% url "find_orthologs" %}">Find orthologs for a gene</a></li>
                         <li><a href="">Explore gene families and HOGs</a></li>
                         <li><a href="">Explore extant and ancestral genomes</a></li>
                         <li><a href="">Download and access OMA data</a></li>

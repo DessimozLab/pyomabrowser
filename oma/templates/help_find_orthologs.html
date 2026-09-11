@@ -1,0 +1,395 @@
+{% extends  "base_template.html" %}
+{% load static %}
+
+{% block title %}Find orthologs for a gene{% endblock %}
+{% block meta_description %}{% endblock %}
+
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+
+            <h1>Find orthologs for a gene</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <p class="text-justify">Use this page if you have a gene or protein sequence and want to find its orthologs in other species.</p>
+            <p class="text-justify">OMA provides several ways to search for a gene, inspect its orthology relationships, filter the results, and download the data.</p>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Before you start</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">
+                        You can search for a gene using:
+
+                        <ul>
+                            <li>an OMA identifier</li>
+                            <li>a UniProt ID or another cross-reference</li>
+                            <li>a protein sequence</li>
+                            <li>a gene or protein name</li>
+                            <li>full-text search</li>
+                        </ul>
+                    </p>
+
+                    <p class="text-justify">OMA identifiers consist of a five-letter species code followed by a unique number, for example <code>HUMAN04376</code>.</p>
+
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Search for a gene</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">From the OMA Browser home page, use the main search bar to search for your gene of interest.</p>
+
+                    <img src="{% static "image/1_landing_page_search.png" %}" class="rounded mx-auto d-block w-100 p-3 ">
+
+                    <p class="text-justify">You can choose the search type from the dropdown menu next to the search bar. Searches can be done using identifiers, protein sequences, full text, OMA fingerprints, or NCBI taxon IDs.</p>
+                    <p class="text-justify">If your search matches a gene in OMA, you will be taken to a gene page. Gene pages contain information about one OMA entry, including its orthologs, paralogs, gene information, isoforms, GO annotations, sequences, and local synteny.</p>
+
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Understand the gene page</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">At the top of a gene page, you will see the main identifiers for the gene, including its OMA ID and available cross-references such as UniProt or source database IDs.</p>
+
+                    <img src="{% static "image/2_gene_page_ortholog_table.png" %}" class="rounded mx-auto d-block w-100 p-3 ">
+
+                    <p class="text-justify">The side menu gives access to different types of information for the gene:
+
+                        <ul>
+                            <li><b>Orthologs</b>: genes in other species inferred to be orthologous to the query gene</li>
+                            <li><b>Paralogs</b>: genes related to the query gene by duplication</li>
+                            <li><b>Gene information</b>: description, organism, coordinates, exon number, and cross-references</li>
+                            <li><b>Isoforms</b>: alternative splice variants, when available in OMA</li>
+                            <li><b>GO annotations</b>: Gene Ontology annotations with evidence codes and references</li>
+                            <li><b>Sequences</b>: protein and coding DNA sequences</li>
+                            <li><b>Local synteny</b>: neighbouring genes and conserved gene order around the query gene</li>
+                        </ul>
+                        
+                    </p>
+                    <p class="text-justify">The ortholog table is usually the main starting point.</p>
+
+
+
+                </div>
+            </div>
+
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Interpret the ortholog table</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The ortholog table lists genes inferred to be orthologous to your query gene.</p>
+                    <p class="text-justify">The table can include several types of orthology evidence:
+                        <ul>
+                            <li><b>Pairwise orthologs</b></li>
+                            <li><b>HOG-induced orthologs</b></li>
+                            <li><b>Strict Orthologous Group-induced orthologs</b></li>
+                        </ul>
+                        
+                    </p>
+
+                    <p class="text-justify">These evidence types are related but not identical. Pairwise orthologs are inferred directly between genes. 
+                        Pairwise orthologs are used to build the HOGs. HOG-induced orthologs come from membership in the same HOG at the relevant taxonomic level. 
+                        Strict Orthologous Group-induced orthologs come from membership in a stricter group of mutually orthologous genes.
+                    </p>
+
+                    <p class="text-justify">The table also shows information such as:
+                        <ul>
+                            <li>domain of life</li>
+                            <li>species or taxon</li>
+                            <li>protein ID / OMA identifier</li>
+                            <li>orthology relation type</li>
+                            <li>cross-references</li>
+                            <li>protein domain architecture</li>
+                        </ul>
+                        
+                    </p>
+                    
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Understand relation types</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The relation type describes whether the orthology relationship is one-to-one or involves duplicated genes.</p>
+
+                    <div class="table-responsive my-4">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col">Relation type</th>
+                            <th scope="col">Meaning</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>1:1</td>
+                            <td>Each species has one corresponding ortholog between species</td>
+                        </tr>
+                        <tr>
+                            <td>1:many</td>
+                            <td>The query gene has multiple orthologs in the other species</td>
+                        </tr>
+                        <tr>
+                            <td>many:1</td>
+                            <td>Multiple genes in the query species correspond to one gene in the other species</td>
+                        </tr>
+                        <tr>
+                            <td>many:many</td>
+                            <td>Both lineages have duplicated copies</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </div>
+
+                    <p class="text-justify">A one-to-many or many-to-many relationship usually means that gene duplication occurred after the relevant speciation event.</p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Choose the orthology evidence to display</h2>
+                <hr>
+                <div class="card-body">
+
+
+                <p class="text-justify">Use <b>Required orthology evidence</b> in the side menu to choose which types of orthologs to show.</p>
+                <p class="text-justify">You can display:
+                    <ul>
+                        <li>only pairwise orthologs</li>
+                        <li>only HOG-induced orthologs</li>
+                        <li>only Strict Orthologous Group-induced orthologs</li>
+                        <li>combinations of the above</li>
+                    </ul>
+                </p>
+
+                <p class="text-justify">For many common gene searches, pairwise orthologs are the most direct result. If you are working with gene families or taxonomic levels, HOG-induced orthologs may be more relevant. If you need a stringent set of mutually orthologous genes, use Strict Orthologous Group-induced orthologs.</p>
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Filter by species or taxon</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">Use taxonomic filters to restrict the table to a species or clade of interest.</p>
+                    <p class="text-justify">You can:
+                        <ul>
+                            <li>filter by a predefined taxonomic range</li>
+                            <li>add a custom taxonomic filter</li>
+                            <li>search within the table for a species, gene ID, or relation type</li>
+                            <li>show or hide columns using the table settings</li>
+                        </ul>
+                    </p>
+
+                    <p class="text-justify">Filtering is useful when the full ortholog table is large or when you only care about a specific group of species, such as mammals, insects, plants, or bacteria.</p>
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Download the results</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">You can download the ortholog table using the download icon at the upper right of the table.</p>
+                    <p class="text-justify">Downloads preserve the filters currently applied to the table. This means you can first restrict the results to a species, clade, relation type, or evidence type, and then export only that subset.</p>
+                    <p class="text-justify">Available formats may include:
+                        <ul>
+                            <li>CSV</li>
+                            <li>TXT</li>
+                            <li>JSON</li>
+                            <li>XML</li>
+                            <li>SQL</li>
+                            <li>Excel</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">For larger datasets, use the <b>Downloads</b> menu or programmatic access through the REST API, SPARQL endpoint, or Python/R packages.</p>
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Find paralogs of a gene</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The gene page also includes a <b>Paralogs</b> section.</p>
+                    <p class="text-justify">Paralogs are homologous genes that started diverging through a duplication event. In the OMA browser, paralogs are derived from HOGs and are defined with respect to the taxonomic level where the duplication occurred.</p>
+                    <p class="text-justify">The paralogs table follows a similar format to the ortholog table.</p>
+
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>View gene information</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The <b>Gene information</b> section provides general information about the query gene, including:
+                        <ul>
+                            <li>gene description</li>
+                            <li>organism</li>
+                            <li>genomic coordinates</li>
+                            <li>number of exons</li>
+                            <li>source identifiers</li>
+                            <li>cross-references</li>
+                        </ul>
+                        
+                    </p>
+                    <p class="text-justify">This section is useful for confirming that you are looking at the correct gene.</p>
+
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>View GO annotations</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The GO annotations section lists Gene Ontology annotations for the gene, including evidence codes and reference information.</p>
+                    <p class="text-justify">GO annotations are organized into:
+                        <ul>
+                            <li>Biological Process</li>
+                            <li>Molecular Function</li>
+                            <li>Cellular Component</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">These annotations can help interpret the likely function of the gene and its orthologs.</p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Check isoforms</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The <b>Sequences/Isoforms</b> section lists alternative splice variants for the gene, when this information is available in OMA.</p>
+                    <p class="text-justify">If no isoforms are shown, this does not necessarily mean that the gene has no isoforms. It may mean that isoform information is not available in OMA for that genome.</p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Download sequences</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The <b>Sequences/Isoforms</b> section provides the protein and coding DNA sequences for the gene, when available.</p>
+                    <p class="text-justify">Sequences can be downloaded in FASTA format.</p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Explore local synteny</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The <b>Local Synteny Viewer</b> shows the genomic neighbourhood around the query gene and its orthologs.</p>
+                    <p class="text-justify">This can help you inspect whether neighbouring genes are conserved across species. Conserved local synteny can support orthology relationships, reveal rearrangements, and help detect possible annotation or assembly issues.</p>
+                    <p class="text-justify">In the viewer, genes are shown as boxes. Orthologous genes are connected or coloured consistently across neighbouring regions. Clicking on a gene can recenter the display around that gene.</p>
+                    
+                </div>
+            </div>
+
+
+            
+            <div class="card card-header-oma border-0">
+                <h2>Common pitfalls</h2>
+                <hr>
+                <div class="card-body">
+                    
+                    <h3>I cannot find my gene</h3>
+                    <p class="text-justify">Try searching with a different identifier, a protein sequence, or a full-text query (must be put in quotes if more than one word). Some identifiers may differ between source databases.</p>
+
+                    <h3>My species is missing</h3>
+                    <p class="text-justify">OMA only contains species included in the current OMA release. Check the <a href="{% url "release" %}">species/release information page</a> or use <a href="">OMAmer/FastOMA</a> if you want to work with your own data.</p>
+
+                    <h3>There are several orthologs in one species</h3>
+                    <p class="text-justify">This usually reflects gene duplication. Check the relation type: one-to-many and many-to-many orthology relationships are expected for many gene families.</p>
+                    
+                    <h3>The ortholog table is very large</h3>
+                    <p class="text-justify">Use taxonomic filters, relation type filters, or evidence filters to narrow the table before interpreting or downloading it.</p>
+
+                    <h3>Different evidence types give different results</h3>
+                    <p class="text-justify">Pairwise orthologs, HOG-induced orthologs, and Strict Orthologous Group-induced orthologs are inferred or derived differently. Use the evidence type that best matches your question.</p>
+
+                </div>
+            </div>
+
+            
+            
+            <div class="card card-header-oma border-0">
+                <h2>Related pages</h2>
+                <hr>
+                <div class="card-body">
+                    <ul>
+                        <li><a href="{% url "get_started" %}">Get started with OMA</a></li>
+                        <li><a href="">Explore gene families and HOGs</a></li>
+                        <li><a href="">Explore extant and ancestral genomes</a></li>
+                        <li><a href="">Download and access OMA data</a></li>
+                        <li><a href="">Run OMA on your own data</a></li>
+                        <li><a href="{% url "FAQ" %}">FAQ and troubleshooting</a></li>
+                        <li><a href="{% url "glossary" %}">Glossary</a></li>
+
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

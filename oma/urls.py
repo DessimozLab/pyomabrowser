@@ -156,6 +156,8 @@ urlpatterns = [
 
 
     path('get_started/', TemplateView.as_view(template_name='help_getting_started.html'), name='get_started'),
+    path('find_orthologs/', TemplateView.as_view(template_name='help_find_orthologs.html'), name='find_orthologs'),
+
     path('type/', TemplateView.as_view(template_name='help_typesOrthologs.html'), name='type'),
     
     #path('export_selection/', TemplateView.as_view(template_name='dlOMA_exportAllAll.html'), name='export'),
