@@ -1,0 +1,380 @@
+{% extends  "base_template.html" %}
+{% load static %}
+
+{% block title %}Explore extant and ancestral genomes{% endblock %}
+{% block meta_description %}{% endblock %}
+
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>Explore extant and ancestral genomes</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <p class="text-justify">Use this page if you want to browse an extant species, inspect an ancestral genome, 
+                explore gene content, or visualize gene order and synteny. Note that by "genome" we are referring to 
+                the protein-coding gene repertoire.</p>
+
+            <p class="text-justify">OMA provides genome-level pages for both extant genomes and ancestral genomes. 
+                Extant genomes represent species included in the current OMA release. In OMA, an ancestral genome 
+                represents the inferred protein-coding gene repertoire of a common ancestor. Each HOG at that taxonomic 
+                level acts as a proxy for one ancestral gene, and the full set of HOGs at that level approximates the 
+                ancestral gene content. Users can therefore browse ancestral "genes", trace gains and losses, and explore 
+                gene repertoire evolution across the species tree.
+
+            </p>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>What can I do from a genome page?</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">Genome pages let you:
+                        <ul>
+                            <li>view information about a species or ancestral taxon</li>
+                            <li>browse the genes in an extant genome</li>
+                            <li>browse HOGs inferred in an ancestral genome</li>
+                            <li>inspect related species</li>
+                            <li>explore gene order</li>
+                            <li>compare synteny between genomes</li>
+                            <li>download genome-level tables</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">Use genome pages when your starting point is a species, clade, or genome, 
+                        rather than a single gene.</p>
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Find an extant genome</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">An extant genome is the protein-coding gene repertoire of a species currently represented in OMA.</p>
+                    <p class="text-justify">To find an extant genome, search for the species using one of the taxon search prefixes:
+                        <ul>
+                            <li><code>species</code> for a scientific or common species name</li>
+                            <li><code>taxid</code> for an NCBI taxonomy ID</li>
+                            <li><code>taxon</code> for a broader taxonomic term</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">Examples:
+                        <ul>
+                            <li><code>species:"Homo sapiens"</code></li>
+                            <li><code>species:human</code></li>
+                            <li><code>taxid:9606</code></li>
+                            <li><code>taxon:Mammalia</code></li>
+                        </ul>
+                    </p>
+
+                    <p class="text-justify">After typing the query, press <b>Space</b> or <b>Enter</b> to create the search token. 
+                        For multi-word species names, use quotation marks.</p>
+
+                    <p class="text-justify">You can also access genome pages from gene pages by clicking the Genome link.</p>
+
+                    <img src="{% static "image/Access_genome_page.png" %}" class="rounded mx-auto d-block w-100 p-3 ">
+                    
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Find an ancestral genome</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">An ancestral genome represents the inferred protein-coding gene content of a common ancestor 
+                        at a particular taxonomic level, not a directly sequenced genome.</p>
+                    <p class="text-justify">In OMA, ancestral genomes are built from HOGs. At a given ancestral taxonomic level, each HOG
+                         acts as a proxy for one ancestral gene. The full set of HOGs inferred at that level approximates the gene 
+                         content of the common ancestor.</p>
+                    <p class="text-justify">To find an ancestral genome, search for the clade or taxonomic group whose common ancestor 
+                        you want to inspect using a taxon token.</p>
+
+
+                    <p class="text-justify">Examples:
+                        <ul>
+                            <li><code>taxon:Mammalia</code></li>
+                            <li><code>taxon:Chordata</code></li>
+                            <li><code>taxon:Hominidae</code></li>
+                            <li><code>taxon:Viridiplantae</code></li>
+                            <li><code>taxid:40674</code></li>
+                        </ul>
+                    </p>
+
+                    <p class="text-justify">After typing the query, press <b>Space</b> or <b>Enter</b> to create the search token. 
+                        For multi-word clade names, use quotation marks.</p>
+
+                    <p class="text-justify">On an ancestral genome page, the "ancestral genes" table lists HOGs inferred to have been present in that ancestor. These can be used to explore ancestral gene content, gene gains, losses, duplications, and changes in gene repertoires across evolution.</p>
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Understand the genome page</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">A genome page summarizes information about an extant or ancestral genome.</p>
+                    <p class="text-justify">For an extant genome, the page shows:
+                        <ul>
+                            <li>scientific name</li>
+                            <li>common name</li>
+                            <li>OMA species code</li>
+                            <li>NCBI taxon ID</li>
+                            <li>proteome annotation source</li>
+                            <li>release or update information</li>
+                            <li>number of proteins or genes</li>
+                            <li>number of genes assigned to HOGs or Strict Orthologous Groups</li>
+                        </ul>
+                    </p>
+
+                    <p class="text-justify">For an ancestral genome, the page shows:
+                        <ul>
+                            <li>ancestral taxon or clade name</li>
+                            <li>species included in the clade</li>
+                            <li>inferred ancestral gene content</li>
+                            <li>HOGs present at that ancestral level</li>
+                            <li>OMA taxon identifiers or related metadata</li>
+                        </ul>
+                    </p>
+
+                    <p class="text-justify">The side menu gives access to genome information, the chromosome viewer, and gene or HOG lists.</p>
+
+
+
+                    <img src="{% static "image/ancestral_genome_page.png" %}" class="rounded mx-auto d-block w-100 p-3 ">
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Browse HOGs in an ancestral genome</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">For an ancestral genome, the gene list is represented as HOGs present at that taxonomic level.</p>
+                    <p class="text-justify">Each HOG can be treated as an inferred ancestral gene. You can click on a HOG to open the corresponding HOG page and inspect its members, subHOGs, and evolutionary history.</p>
+                    <p class="text-justify">The ancestral gene table can also be downloaded from the page.</p>
+
+
+                    <img src="{% static "image/ancestral_genes_page.png" %}" class="rounded mx-auto d-block w-100 p-3 ">
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Explore ancestral gene order</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The Ancestral Contig Viewer shows the gene order inferred for an ancestral genome. Ancestral genes are represented 
+                        by HOGs, while the connections between neighbouring HOGs represent ancestral gene adjacencies inferred with EdgeHOG from gene order 
+                        observed in descendant species.</p>
+                    <p class="text-justify">Ancestral genes are grouped into ancestral contigs (contiguous regions of reconstructed gene order) and the contigs
+                         are shown from largest to smallest.</p>
+                    <p class="text-justify">Each contig has two linked views:
+                        <ul>
+                            <li>an overview showing the full contig and the location of the region currently being viewed;</li>
+                            <li>a detailed excerpt where individual ancestral genes and their inferred adjacencies can be inspected.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">By default, gene colour indicates the HOG completeness score, gene height reflects the number of extant genes descending from that ancestral gene, and 
+                        edge colour shows the inferred age of the adjacency. These properties can be changed using the viewer settings.</p>
+                    <p class="text-justify">You can:
+                        <ul>
+                            <li>pan and zoom along an ancestral contig;</li>
+                            <li>search for and highlight a HOG;</li>
+                            <li>click genes or adjacencies to inspect their details;</li>
+                            <li>select a region containing several ancestral genes and run GO enrichment on the selected set;</li>
+                            <li>export individual contigs or the complete visualization.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">See the <a href="{% url "tool_catalog" %}">Chromosome Viewer documentation</a> for a detailed explanation of the display, metrics, navigation, and EdgeHOG reconstruction.</p>
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Browse genes in an extant genome</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The gene list contains the proteins represented in an extant genome.</p>
+                    <p class="text-justify">The table includes: 
+                        <ul>
+                            <li>OMA protein ID</li>
+                            <li>cross-references</li>
+                            <li>HOG ID (if any)</li>
+                            <li>evolutionary event which led to gene from parent ancestor</li>
+                            <li>domain architecture</li>
+                            <li>species or taxon information</li>
+                            <li>locus or positional information, when available</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">OMA protein IDs are usually ordered according to locus position in the genome. 
+                        This can make it easier to inspect local patterns such as tandem duplications, especially when 
+                        neighbouring genes have similar domain architectures.
+                    </p>
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Explore related species</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The <b>Related species</b> section helps identify species that are most or least related to the 
+                        selected genome based on shared OMA Groups or HOGs.</p>
+                    <p class="text-justify">This can be useful when choosing species for comparative analysis, identifying close relatives in 
+                        the OMA database, or checking how well a clade is represented.</p>
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Explore extant gene order</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The Chromosome Viewer can also be used to explore gene order in an extant genome.</p>
+                    <p class="text-justify">Each chromosome, scaffold, or contig is shown using two linked views:
+                        <ul>
+                            <li>an overview of the full genomic region;</li>
+                            <li>a detailed excerpt showing individual genes and their local gene order.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">The overview indicates where the currently displayed excerpt lies within the chromosome or scaffold. 
+                        Pan and zoom in the excerpt to inspect neighbouring genes and larger or smaller genomic regions.</p>
+
+                    <p class="text-justify">Gene colour and height can be used to display different gene properties, and connections 
+                        between neighbouring genes can display information inferred from comparative gene order, such as the evolutionary 
+                        conservation of an adjacency.
+                    </p>
+                    <p class="text-justify">You can:
+                        <ul>
+                            <li>pan and zoom along chromosomes or scaffolds;</li>
+                            <li>inspect individual genes;</li>
+                            <li>search for and highlight genes of interest;</li>
+                            <li>select a group of genes and run GO enrichment;</li>
+                            <li>customize which properties are represented by gene colour, gene height, and adjacency colour;</li>
+                            <li>export the visualization.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">See the <a href="{% url "tool_catalog" %}">Chromosome Viewer documentation</a> for a detailed explanation of the display and available metrics.</p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Explore synteny between two genomes</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">Synteny refers to conserved gene order between genomic regions.</p>
+                    <p class="text-justify">In OMA, synteny can be explored at different scales:
+                        <ul>
+                            <li><b>local synteny</b>: conservation around a query gene and its neighbouring genes</li>
+                            <li><b>genome-level synteny</b>: broader comparison between chromosomes, scaffolds, or contigs, represented as a synteny dotplot</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">To explore genome-level synteny, select a second species from the synteny section of the genome page. 
+                        OMA then shows a synteny matrix comparing the two genomes.</p>
+
+
+                    <p class="text-justify">In the matrix, each square represents a chromosome or scaffold pair. The colour intensity reflects the number of 
+                        shared one-to-one orthologs, or the number of points in the corresponding synteny dot plot.</p>
+
+
+                    <p class="text-justify">Click a square to open the synteny dot plot for a specific chromosome or scaffold pair.</p>
+                    
+                </div>
+            </div>
+        
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Common pitfalls</h2>
+                <hr>
+                <div class="card-body">
+
+                    <h3>An ancestral genome is not a sequenced genome</h3>
+                    <p class="text-justify">An ancestral genome in OMA is an inference. It represents HOGs predicted to be present in a common ancestor, 
+                        not a directly observed genome sequence. We do not provide consensus sequences for the HOGs.</p>
+
+
+                    <h3>An ancestral gene corresponds to a HOG</h3>
+                    <p class="text-justify">At an ancestral taxonomic level, each ancestral gene is represented by a HOG inferred to be present at that level.</p>
+
+
+                    <h3>Synteny requires suitable genome assemblies</h3>
+                    <p class="text-justify">Synteny views depend on gene order information. Assemblies with many short scaffolds or incomplete 
+                        annotation may give sparse or fragmented synteny views.</p>
+
+
+                    <h3>A weak synteny signal does not always mean no relationship</h3>
+                    <p class="text-justify">Gene order can be disrupted by rearrangements, duplications, annotation differences, or fragmented assemblies. 
+                        Interpret synteny together with orthology evidence.</p>
+
+
+                    <h3>Extant and ancestral pages answer different questions</h3>
+                    <p class="text-justify">Use extant genome pages to inspect a species currently in OMA. Use ancestral genome pages to inspect 
+                        inferred gene content at a clade or ancestral taxonomic level.</p>
+
+                    <h3></h3>
+                    <p class="text-justify"></p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                    <h2>Related pages</h2>
+                    <hr>
+                    <div class="card-body">
+
+                        <ul>
+                            <li><a href="{% url "get_started" %}">Get started with OMA</a></li>
+                            <li><a href="{% url "find_orthologs" %}">Find orthologs for a gene</a></li>
+                            <li><a href="{% url "explore_hogs" %}">Explore gene families and HOGs</a></li>
+                            <li><a href="">Download and access OMA data</a></li>
+                            <li><a href="">Tutorials and workflows</a></li>
+                            <li><a href="{% url "FAQ" %}">FAQ and troubleshooting</a></li>
+                            <li><a href="{% url "glossary" %}">Glossary</a></li>
+                        </ul>
+                        
+                    </div>
+                </div>
+        
+        
+
+        
+
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock content %}

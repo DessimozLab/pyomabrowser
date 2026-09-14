@@ -155,8 +155,12 @@ urlpatterns = [
     path('about/', TemplateView.as_view(template_name='about_OMA.html'), name='about'),
 
 
+    # Help pages
     path('get_started/', TemplateView.as_view(template_name='help_getting_started.html'), name='get_started'),
     path('find_orthologs/', TemplateView.as_view(template_name='help_find_orthologs.html'), name='find_orthologs'),
+    path('explore_hogs/', TemplateView.as_view(template_name='help_explore_hogs.html'), name='explore_hogs'),
+    path('explore_genomes/', TemplateView.as_view(template_name='help_explore_genomes.html'), name='explore_genomes'),
+
 
     path('type/', TemplateView.as_view(template_name='help_typesOrthologs.html'), name='type'),
     

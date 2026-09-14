@@ -1,0 +1,355 @@
+{% extends  "base_template.html" %}
+{% load static %}
+
+{% block title %}Explore gene families and HOG{% endblock %}
+{% block meta_description %}{% endblock %}
+
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>Explore gene families and HOGs</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+
+            <p class="text-justify">Use this page if you want to explore a gene family, understand which genes belong to it, or inspect its evolutionary history across species.</p>
+            <p class="text-justify">OMA represents gene families using <b>HOGs</b>, or <b>hierarchical orthologous groups</b>. HOGs are useful for studying gene family evolution, including ancestral genes, duplications, losses, retained genes, and subfamilies at different taxonomic levels.</p>
+
+
+        
+            <div class="card card-header-oma border-0">
+                <h2>What is a HOG?</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">A HOG is a group of genes that descend from a common ancestral gene at a specific taxonomic level.</p>
+                    <p class="text-justify">For example, a HOG defined at the mammalian level contains genes inferred to descend from a single ancestral gene in the common ancestor of mammals. A broader HOG defined at the vertebrate level may contain several mammalian sub-HOGs.</p>
+                    <p class="text-justify">This is why HOGs are called <b>hierarchical</b>: HOGs defined at more recent taxonomic levels are nested within broader HOGs defined at older taxonomic levels.</p>
+
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>When should I use HOGs?</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">Use HOGs when your question is about a gene family rather than a single pair of genes.</p>
+                    <p class="text-justify">HOGs are useful when you want to:
+                        <ul>
+                            <li>list all genes in a gene family</li>
+                            <li>compare gene family composition across species</li>
+                            <li>inspect duplications and losses</li>
+                            <li>choose a taxonomic level for analysis</li>
+                            <li>identify ancestral genes</li>
+                            <li>explore subfamilies</li>
+                            <li>study gene family evolution across a species tree</li>
+                            <li>connect OMA data to downstream comparative genomics analyses</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">If you only want the ortholog of one gene in one species, start with the <a href="{% url "find_orthologs" %}">Find orthologs for a gene</a> page.</p>
+                    
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Find a HOG</h2>
+                <hr>
+                <div class="card-body">
+                    <p class="text-justify">You can find a HOG in several ways:
+                        <ol>
+                            <li>Search for a HOG ID from the OMA Browser search bar.</li>
+                            <li>Search for a gene and open the HOG linked from the gene page. </li>
+                            <li>Search using the identifier or protein sequence of a gene that belongs to the HOG.</li>
+                            <li>Browse from a genome or ancestral genome page.</li>
+                        </ol>
+                    </p>
+                    <p class="text-justify">A HOG page gives information about the selected HOG, including its taxonomic level, member genes, graphical viewer, and related HOGs.</p>
+                    <p class="text-justify"></p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>RootHOGs and subHOGs</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">A <b>rootHOG</b> is the deepest HOG containing all genes in the gene family represented in OMA.</p>
+                    <p class="text-justify">A <b>subHOG</b> is a nested HOG defined at a more recent taxonomic level. SubHOGs arise because of gene duplication events.</p>
+                    <p class="text-justify">In practice:
+                        <ul>
+                            <li>the rootHOG gives the broadest view of the gene family;</li>
+                            <li>subHOGs give more specific views within particular clades;</li>
+                            <li>the same gene family may look different depending on the taxonomic level you choose.</li>
+                        </ul>
+                    </p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Choose a taxonomic level</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">HOGs are defined relative to taxonomic levels. Choosing the right level is important.</p>
+                    <p class="text-justify">Use a broad taxonomic level if you want to study the full history of a gene family across a large clade, such as vertebrates, mammals, plants, or bacteria.</p>
+                    <p class="text-justify">Use a more specific taxonomic level if you want to focus on a subfamily within a particular group of species.</p>
+                    <p class="text-justify">For example:
+                        <ul>
+                            <li>A HOG at the <b>vertebrate</b> level may include several duplicated subfamilies.</li>
+                            <li>A HOG at the <b>mammalian</b> level may separate those subfamilies into more specific groups.</li>
+                            <li>A HOG at a very recent level may contain only a small set of closely related genes.</li>
+                        </ul>
+                    </p>
+                    
+                    
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Interpret the HOG page</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The HOG page contains information about the selected HOG, including:
+                        <ul>
+                            <li>HOG ID</li>
+                            <li>taxonomic level</li>
+                            <li>number of member genes</li>
+                            <li>graphical view of the gene family</li>
+                            <li>member table</li>
+                            <li>similar HOGs</li>
+                            <li>shared domains or orthology links, when available</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">The landing page usually gives information about the root HOG or selected HOG, depending on how you accessed it.</p>
+
+                    <img src="{% static "image/iHam_example_with_annotations.png" %}" class="rounded mx-auto d-block w-100 p-3 ">
+                    
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Use the iHam graphical viewer</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The iHam graphical viewer displays the gene family in the context of the species tree.</p>
+                    <p class="text-justify">In this view:
+                        <ul>
+                            <li>species are organized according to the species tree;</li>
+                            <li>genes are represented as boxes;</li>
+                            <li>ancestral genes and sub-HOGs can be inspected at internal nodes;</li>
+                            <li>duplication and loss events can be explored by interacting with the tree;</li>
+                            <li>different taxonomic levels reveal different parts of the HOG hierarchy.</li>
+                        </ul>
+                        
+                    </p>
+                    <p class="text-justify">The graphical viewer is especially useful for understanding how the family expanded, contracted, or split into subfamilies during evolution.</p>
+                    
+                    <p class="text-justify"><a href="">See iHam tutorial.</a></p>
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>View HOG members</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The <b>Members</b> tab lists the genes that belong to the HOG at the selected taxonomic level.</p>
+                    <p class="text-justify">The table can include:
+                        <ul>
+                            <li>protein ID / OMA identifier</li>
+                            <li>cross-references</li>
+                            <li>domain architecture</li>
+                            <li>species or taxon</li>
+                            <li>sub-HOG information at different taxonomic levels</li>
+                        </ul>
+                            
+                    </p>
+                    <p class="text-justify">Use this table when you want to retrieve the genes in the family, check which species are represented, or download the member list.</p>
+                    
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Find similar HOGs</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The <b>Similar HOGs</b> section can help identify related HOGs.</p>
+                    <p class="text-justify">Similar HOGs may represent:
+                        <ul>
+                            <li>paralogous gene families separated by an ancient duplication;</li>
+                            <li>split HOGs that may be related but not merged by OMA;</li>
+                            <li>genes with similar domain architecture;</li>
+                            <li>genes sharing only part of their sequence, such as after domain fusion or fission;</li>
+                            <li>possible annotation fragments or artefacts.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">Similarity can be based on shared domains, shared orthology relationships, or phylogenetic profiles, depending on the available view.</p>
+                    
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Shared domains</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The <b>Shared Domains</b> view identifies HOGs with similar domain architectures.</p>
+                    <p class="text-justify">This can help you find families that share conserved protein domains with your HOG of interest.</p>
+                    <p class="text-justify">The view may include:
+                        <ul>
+                            <li>the representative domain architecture of the HOG;</li>
+                            <li>the prevalence of that architecture within the HOG;</li>
+                            <li>other HOGs sharing one or more domains;</li>
+                            <li>a similarity score based on the number of shared domains.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">This is useful when proteins are related through shared domains but may not belong to the same full-length gene family.</p>                    
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Shared orthologs</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The <b>Shared Orthologs</b> view identifies similar HOGs based on orthology relationships linking the HOGs.</p>
+                    <p class="text-justify">This can be useful for detecting cases where closely related genes have been split into different HOGs.</p>                    
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Phylogenetic profiles</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">Phylogenetic profiling identifies HOGs with similar presence/absence, duplication, and loss patterns across species.</p>
+                    <p class="text-justify">Genes involved in related biological processes are sometimes jointly retained or lost during evolution. HOGs with similar phylogenetic profiles may therefore be functionally related.</p>
+                    <p class="text-justify">In OMA, phylogenetic profiles can be accessed from the <b>Similar HOGs</b> section for a HOG.</p>
+                    <p class="text-justify">The web visualization shows presence or absence across extant species, but the similarity calculation can also use inferred ancestral presence, duplications, and losses.</p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>HOGs vs. Strict Orthologous Groups</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">HOGs and Strict Orthologous Groups answer different questions.</p>
+                    <p class="text-justify">Use <b>HOGs</b> when you want to study gene families and their evolutionary history.</p>
+                    <p class="text-justify">Use <b>Strict Orthologous Groups</b> when you need stringent groups of genes that are all orthologous to one another, for example as marker genes for species tree inference.</p>
+                    <p class="text-justify">Strict Orthologous Groups are more restrictive. HOGs are more flexible and better suited for studying duplications, losses, and nested gene family structure.</p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Download HOG data</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">HOG member tables can be downloaded from the HOG page.</p>
+                    <p class="text-justify">For larger analyses, HOGs are also available from the OMA Downloads section in standard formats such as OrthoXML.</p>
+                    <p class="text-justify">Use browser downloads for small, focused datasets. Use release downloads or programmatic access if you need many HOGs or want reproducible large-scale analyses.</p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Common pitfalls</h2>
+                <hr>
+                <div class="card-body">
+
+                    <h3>A HOG is not always a one-to-one ortholog group</h3>
+                    <p class="text-justify">A HOG may contain duplicated genes. This is expected. HOGs are designed to represent gene families descended from ancestral genes, including duplications and losses.</p>
+
+                    <h3>The same gene family can look different at different taxonomic levels</h3>
+                    <p class="text-justify">This is the point of HOGs. A broad HOG may contain multiple sub-HOGs. A more specific HOG may represent only one subfamily.</p>
+
+                    <h3>A rootHOG can be very large</h3>
+                    <p class="text-justify">Large root HOGs may be difficult to inspect visually. Use a more specific taxonomic level or filter the member table to focus on the clade of interest.</p>
+
+                    <h3>Similar HOGs are not necessarily the same family</h3>
+                    <p class="text-justify">Similar HOGs can be related in different ways: ancient paralogy, shared domains, partial homology, domain fusion/fission, or possible inference artefacts. Interpret them as candidates for further inspection, not automatically as the same gene family.</p>
+
+                    <h3>Missing species do not always mean true biological absence</h3>
+                    <p class="text-justify">A gene may be missing because of true gene loss, incomplete genome annotation, assembly issues, or limits of orthology inference. Check genome quality and other evidence before drawing strong conclusions.</p>
+
+                    <h3>My HOG seems to be missing genes that should belong to the family</h3>
+                    <p class="text-justify">A gene family may be split across multiple HOGs in OMA. This can happen when family members have diverged strongly over evolutionary time, when only part of the sequence is homologous, or when gene models are fragmented. In these cases, OMA may place related genes into separate HOGs rather than one large HOG.</p>
+                    <p class="text-justify">Use the Similar HOGs section to look for related HOGs. In particular, check HOGs connected through shared orthologs, as these can help identify HOGs that may represent split parts of the same broader family. Shared domains can also be useful, but they may retrieve more distant or partial similarities.</p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Related pages</h2>
+                <hr>
+                <div class="card-body">
+
+                    <ul>
+                        <li><a href="{% url "get_started" %}">Get started with OMA</a></li>
+                        <li><a href="{% url "find_orthologs" %}">Find orthologs for a gene</a></li>
+                        <li><a href="{% url "explore_hogs" %}">Explore gene families and HOGs</a></li>
+                        <li><a href="{% url "explore_genomes" %}">Explore extant and ancestral genomes</a></li>
+                        <li><a href="">Download and access OMA data</a></li>
+                        <li><a href="">Tutorials and workflows</a></li>
+                        <li><a href="{% url "FAQ" %}">FAQ and troubleshooting</a></li>
+                        <li><a href="{% url "glossary" %}">Glossary</a></li>
+                    </ul>
+                    
+                </div>
+            </div>
+
+
+
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock content %}
