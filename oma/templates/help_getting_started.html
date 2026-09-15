@@ -306,13 +306,12 @@
                 <div class="card-body">
                     <ul>
                         <li><a href="{% url "find_orthologs" %}">Find orthologs for a gene</a></li>
-                        <li><a href="">Explore gene families and HOGs</a></li>
-                        <li><a href="">Explore extant and ancestral genomes</a></li>
-                        <li><a href="">Download and access OMA data</a></li>
+                        <li><a href="{% url "explore_hogs" %}">Explore gene families and HOGs</a></li>
+                        <li><a href="{% url "explore_genomes" %}">Explore extant and ancestral genomes</a></li>
+                        <li><a href="{% url "uses" %}">Download and access OMA data</a></li>
                         <li><a href="">Tutorials and workflows</a></li>
                         <li><a href="{% url "FAQ" %}">FAQ and troubleshooting</a></li>
                         <li><a href="{% url "glossary" %}">Glossary</a></li>
-
                     </ul>
                 </div>
             </div>

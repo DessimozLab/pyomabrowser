@@ -160,6 +160,7 @@ urlpatterns = [
     path('find_orthologs/', TemplateView.as_view(template_name='help_find_orthologs.html'), name='find_orthologs'),
     path('explore_hogs/', TemplateView.as_view(template_name='help_explore_hogs.html'), name='explore_hogs'),
     path('explore_genomes/', TemplateView.as_view(template_name='help_explore_genomes.html'), name='explore_genomes'),
+    path('run_on_your_data/', TemplateView.as_view(template_name='help_run_on_your_data.html'), name='run_on_your_data'),
 
 
     path('type/', TemplateView.as_view(template_name='help_typesOrthologs.html'), name='type'),
