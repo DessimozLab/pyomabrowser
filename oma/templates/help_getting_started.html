@@ -247,19 +247,19 @@
 
                     <h3>I want to understand a gene family</h3>
                     <p class="text-justify">Search for a HOG identifier, or open the HOG from a gene page. Use the HOG page to view members, taxonomic levels, and evolutionary events.</p>
-                    <p class="text-justify">Go to: <a href="">Explore gene families and HOGs</a></p>
+                    <p class="text-justify">Go to: <a href="{% url "explore_hogs" %}">Explore gene families and HOGs</a></p>
 
                     <h3>I want to browse a species or ancestral genome</h3>
                     <p class="text-justify">Search for a species name, common name, or NCBI taxon ID. You can browse genome information, genes, HOGs, related species, and synteny views.</p>
-                    <p class="text-justify">Go to: <a href="">Explore extant and ancestral genomes</a></p>
+                    <p class="text-justify">Go to: <a href="{% url "explore_genomes" %}">Explore extant and ancestral genomes</a></p>
 
                     <h3>I want to download data</h3>
                     <p class="text-justify">Use the Downloads menu for release-wide files, or download filtered tables directly from browser pages.</p>
-                    <p class="text-justify">Go to: <a href="">Download and access OMA data</a></p>
+                    <p class="text-justify">Go to: <a href="{% url "uses" %}">Download and access OMA data</a></p>
 
                     <h3>I want to analyse my own data</h3>
                     <p class="text-justify">Use OMA-related software depending on your task. Use FastOMA for orthology inference on custom genomes, OMAmer to map proteins to existing OMA HOGs, and OMArk to assess proteome quality.</p>
-                    <p class="text-justify">Go to: <a href="">Run OMA on your own data</a></p>
+                    <p class="text-justify">Go to: <a href="{% url "run_on_your_data" %}">Run OMA on your own data</a></p>
                 
 
                 </div>
@@ -309,7 +309,7 @@
                         <li><a href="{% url "explore_hogs" %}">Explore gene families and HOGs</a></li>
                         <li><a href="{% url "explore_genomes" %}">Explore extant and ancestral genomes</a></li>
                         <li><a href="{% url "uses" %}">Download and access OMA data</a></li>
-                        <li><a href="">Tutorials and workflows</a></li>
+                        <!--li>Tutorials and workflows</li-->
                         <li><a href="{% url "FAQ" %}">FAQ and troubleshooting</a></li>
                         <li><a href="{% url "glossary" %}">Glossary</a></li>
                     </ul>

@@ -84,7 +84,7 @@
 
                     <p class="text-justify">You can also access genome pages from gene pages by clicking the Genome link.</p>
 
-                    <img src="{% static "image/Access_genome_page.png" %}" class="rounded mx-auto d-block w-100 p-3 ">
+                    <img src="{% static "image/Access_genome_page.png" %}" class="rounded mx-auto d-block w-100 p-3 img-fluid">
                     
 
                 </div>
@@ -156,7 +156,7 @@
 
 
 
-                    <img src="{% static "image/ancestral_genome_page.png" %}" class="rounded mx-auto d-block w-100 p-3 ">
+                    <img src="{% static "image/ancestral_genome_page.png" %}" class="rounded mx-auto d-block w-100 p-3 img-fluid">
                     
                 </div>
             </div>
@@ -172,7 +172,7 @@
                     <p class="text-justify">The ancestral gene table can also be downloaded from the page.</p>
 
 
-                    <img src="{% static "image/ancestral_genes_page.png" %}" class="rounded mx-auto d-block w-100 p-3 ">
+                    <img src="{% static "image/ancestral_genes_page.png" %}" class="rounded mx-auto d-block w-100 p-3 img-fluid">
 
                 </div>
             </div>
@@ -357,8 +357,8 @@
                             <li><a href="{% url "get_started" %}">Get started with OMA</a></li>
                             <li><a href="{% url "find_orthologs" %}">Find orthologs for a gene</a></li>
                             <li><a href="{% url "explore_hogs" %}">Explore gene families and HOGs</a></li>
-                            <li><a href="">Download and access OMA data</a></li>
-                            <li><a href="">Tutorials and workflows</a></li>
+                            <li><a href="{% url "uses" %}">Download and access OMA data</a></li>
+                            <!--li><a href="">Tutorials and workflows</a></li-->
                             <li><a href="{% url "FAQ" %}">FAQ and troubleshooting</a></li>
                             <li><a href="{% url "glossary" %}">Glossary</a></li>
                         </ul>

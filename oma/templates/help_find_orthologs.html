@@ -355,7 +355,7 @@
                     <p class="text-justify">Try searching with a different identifier, a protein sequence, or a full-text query (must be put in quotes if more than one word). Some identifiers may differ between source databases.</p>
 
                     <h3>My species is missing</h3>
-                    <p class="text-justify">OMA only contains species included in the current OMA release. Check the <a href="{% url "release" %}">species/release information page</a> or use <a href="">OMAmer/FastOMA</a> if you want to work with your own data.</p>
+                    <p class="text-justify">OMA only contains species included in the current OMA release. Check the <a href="{% url "release" %}">species/release information page</a> or use <a href="{% url "run_on_your_data" %}">OMAmer/FastOMA</a> if you want to work with your own data.</p>
 
                     <h3>There are several orthologs in one species</h3>
                     <p class="text-justify">This usually reflects gene duplication. Check the relation type: one-to-many and many-to-many orthology relationships are expected for many gene families.</p>
