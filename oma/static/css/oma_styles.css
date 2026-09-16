@@ -1433,3 +1433,30 @@ a.external {
   border-radius: 50%;
   display: inline-block;
 }
+
+
+
+.publication {
+    margin-bottom: 1.75rem;
+}
+
+.publication-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.publication-authors {
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.4;
+    margin-bottom: 0.25rem;
+}
+
+.publication-meta {
+    font-size: 0.95rem;
+}
+
+.publication-link {
+    margin-left: 0.5rem;
+    white-space: nowrap;
+}

@@ -168,9 +168,11 @@ urlpatterns = [
     #path('export_selection/', TemplateView.as_view(template_name='dlOMA_exportAllAll.html'), name='export'),
     path('landAnnotation/', TemplateView.as_view(template_name='explore_Annotation.html'),
         name='landAnnotation'),
-    #path('team/', TemplateView.as_view(template_name='about_team.html'), name='team'),
+    
+    
     path('sab/', TemplateView.as_view(template_name='about_sab.html'), name='sab'),
-    #path('funding/', TemplateView.as_view(template_name='about_funding.html'), name='funding'),
+    path('publications/', TemplateView.as_view(template_name='about_publications.html'), name='publications'), 
+    
     path('license/', RedirectView.as_view(pattern_name="license"), name='red-license'),
     path('terms_of_use/', TemplateView.as_view(template_name='about_license.html'), name='license'),
     path('uses/', TemplateView.as_view(template_name='help_typicalUses.html'), name='uses'),
