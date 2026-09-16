@@ -375,7 +375,7 @@ wheels = [
 
 [[package]]
 name = "django-matomo-api-tracking"
-version = "0.3.2"
+version = "0.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -383,9 +383,9 @@ dependencies = [
     { name = "django" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b4/ca/154fcc30576dd44d4a286e72e31f4160bd2830560cf52cd6a828749043ca/django_matomo_api_tracking-0.3.2.tar.gz", hash = "sha256:816c7ef3dcd1e002a70362d90ff1401143a04320fb9ea444817cc0c5a39d0e2b", size = 16375, upload-time = "2026-09-09T09:45:51.666Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b8/1b/f51892c48a85b37e8904a71be5aaffc62ab14964ed26bfd5615acc15ece2/django_matomo_api_tracking-0.3.3.tar.gz", hash = "sha256:76a6b5f7975c74c1337951b42314815e148df6f98c20cd0ece5e64658b24b075", size = 16731, upload-time = "2026-09-16T06:58:52.21Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c9/26/27b0e0565d27482ba9a9c071cb3ebb785432c9d298997bc4c55d503f196f/django_matomo_api_tracking-0.3.2-py3-none-any.whl", hash = "sha256:250cfaa5f0aafee16b1c5c2aaaae667a07048b3ba79fbebb96e7cbf25df38b84", size = 17520, upload-time = "2026-09-09T09:45:50.593Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/5d/b09d1830b6716a01119bbbef700d54ab92c7de4bdd3bb90e844241c19354/django_matomo_api_tracking-0.3.3-py3-none-any.whl", hash = "sha256:5cc27f823f25293040f9271e0d37e07eeca901499d82c1e9444cc533245b0af6", size = 17950, upload-time = "2026-09-16T06:58:51.009Z" },
 ]
 
 [[package]]

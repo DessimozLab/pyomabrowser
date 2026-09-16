@@ -87,6 +87,8 @@ MAILMAN_SUBSCRIBE = {
 MATOMO_API_TRACKING = {
     'url': 'https://matomo-app.vital-it.ch/matomo.php',
     'site_id': 243,
+    'token_auth': os.getenv('MATOMO_API_TOKEN', None),
+    'backend': "matomo_api_tracking.backends.celery.CeleryTrackingBackend",
     'ignore_paths': ["/oma/",],
     'url_masks': [
         (r"/api/hog/[^/]+/", "/api/hog/:hog_id/"),
