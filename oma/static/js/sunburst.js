@@ -269,8 +269,9 @@ function findByName(search_term){
 
             divsearchtip.html(d.textContent);
 
-            const tipX = (10 + d.getBoundingClientRect().right).toFixed(0);
-            const tipY = (-15 + d.getBoundingClientRect().top).toFixed(0);
+            const rect = d.getBoundingClientRect();
+            const tipX = (10 + rect.right + window.scrollX).toFixed(0);
+            const tipY = (-15 + rect.top + window.scrollY).toFixed(0);
             divsearchtip.transition()
                 .duration(200)
                 .style("opacity", .9)
@@ -287,7 +288,7 @@ function findByName(search_term){
                 .duration(200)
                 .style("opacity", .9)
                 .style("left", ($("svg").width() / 2) - 75 + "px")
-                .style("top", "200px")
+                .style("top", (200 + window.scrollY) + "px")
                 .style("width", "150px")
                 .style("padding", "8px");
     }
