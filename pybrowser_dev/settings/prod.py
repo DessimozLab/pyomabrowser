@@ -43,7 +43,7 @@ LOGGING['loggers'].update({
     },
     'matomo_api_tracking': {
         'handlers': ['console'],
-        'level': 'DEBUG',
+        'level': 'DEBUG' if DEBUG else 'INFO',
         'propagate': True
     },
     'mailman_subscribe': {
