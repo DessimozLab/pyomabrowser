@@ -260,16 +260,16 @@ function findByName(term){
     d3.selectAll("path").style("stroke-width", "").style("stroke", "").style("opacity", 1);
     divsearchtip.transition().duration(800).style("opacity", 0)
 
-    if(term == "") {
+    if (term === "") {
         return false;
     }
 
     svg.selectAll("path").style("opacity", 0.3);
-    var found = false;
+    let found = false;
 
     svg.selectAll("path")[0].forEach(function (d) {
 
-        if (d3.select(d).data()[0].name.toUpperCase() == term || (d3.select(d).data()[0].id && d3.select(d).data()[0].id.toUpperCase() == term)) {
+        if (d3.select(d).data()[0].name.toUpperCase() === term || (d3.select(d).data()[0].id && d3.select(d).data()[0].id.toString().toUpperCase() === term)) {
 
             d3.select(d).style("stroke", "red").transition().duration(900).style("opacity", "0").transition().duration(1200).style("opacity", "1").style("stroke-width", "2px");
                 //.style("filter", "url(#glow)");//glow
@@ -311,7 +311,7 @@ function zoomIntoName(term){
 
     svg.selectAll("path")[0].forEach(function (d) {
         d3.select(d).style("opacity", 1); //making all paths to opacity 1
-        if (d3.select(d).data()[0].name.toUpperCase() == term || (d3.select(d).data()[0].id && d3.select(d).data()[0].id.toUpperCase() == term)) {
+        if (d3.select(d).data()[0].name.toUpperCase() === term || (d3.select(d).data()[0].id && d3.select(d).data()[0].id.toString().toUpperCase() == term)) {
             click(d3.select(d).data()[0]);
         }
     });
