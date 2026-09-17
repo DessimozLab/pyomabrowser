@@ -43,7 +43,7 @@ LOGGING['loggers'].update({
     },
     'matomo_api_tracking': {
         'handlers': ['console'],
-        'level': 'WARNING',
+        'level': 'DEBUG',
         'propagate': True
     },
     'mailman_subscribe': {
@@ -86,8 +86,14 @@ MAILMAN_SUBSCRIBE = {
 
 MATOMO_API_TRACKING = {
     'url': 'https://matomo-app.vital-it.ch/matomo.php',
-    'site_id': 6,
+    'site_id': 243,
+    'token_auth': os.getenv('MATOMO_API_TOKEN', None),
+    'backend': "matomo_api_tracking.backends.celery.CeleryTrackingBackend",
     'ignore_paths': ["/oma/",],
+    'url_masks': [
+        (r"/api/hog/[^/]+/", "/api/hog/:hog_id/"),
+        (r"/api/protein/[^/]+/", "/api/protein/:protein_id/"),
+    ],
 }
 
 PROVIDE_SCHEMA_DOT_ORG = True
