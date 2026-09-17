@@ -91,8 +91,8 @@ MATOMO_API_TRACKING = {
     'backend': "matomo_api_tracking.backends.celery.CeleryTrackingBackend",
     'ignore_paths': ["/oma/",],
     'url_masks': [
-        (r"/api/hog/[^/]+/", "/api/hog/:hog_id/"),
-        (r"/api/protein/[^/]+/", "/api/protein/:protein_id/"),
+        (r"/api/hog/[^/]+", "/api/hog/:hog_id"),
+        (r"/api/protein/[^/]+", "/api/protein/:protein_id"),
     ],
 }
 
