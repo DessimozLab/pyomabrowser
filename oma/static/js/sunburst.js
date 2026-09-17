@@ -30,20 +30,20 @@ function sb() {
 
     $('#colourSel >> .radioBtn').click(function() {
         $(this).addClass('active').siblings().removeClass('active');
-        var func = $(this).data('value').split("-");
+        const func = $(this).data('value').split("-");
 
         if(func[1]){
             scaleName = func[1];
         } else {
             scaleName = func[0];
         }
-        window.top[func[0]+"Color"]();
+        window.top[`${func[0]}Color`]();
 
-        var placeholder = "#colorscale";
+        const placeholder = "#colorscale";
 
         // init and display legend
         if(scaleName === 'avg_nr_proteins' || scaleName === "avg_nr_genes" || scaleName === "nr_hogs" || scaleName === "nr_hogs_support"){
-            var colorbar = Colorbar()
+            const colorbar = Colorbar()
                 .origin([15,0])
                 .scale(sqrt_color)
                 .orient("horizontal")
@@ -64,9 +64,10 @@ function sb() {
     init_sb();
 }
 
-var zoom = null;
+let zoom = null;
+let colorbarObject;
 
-var top_margin = 45,
+let top_margin = 45,
     sbWidth = window.innerWidth - 10,
     //sbHeight = window.innerHeight - top_margin,
     sbHeight = sbWidth * 0.6,
@@ -74,65 +75,63 @@ var top_margin = 45,
     scaleName = "dol",
     scaleMax = 0,
     //radius = (Math.min(width, height) / 2)
-    radius = (Math.min(sbWidth, sbHeight) / 2) - 10
+    radius = (Math.min(sbWidth, sbHeight) / 2) - 10,
     path = {};
 
 // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
-var b = {
+let b = {
   w: 70, h: 20, s: 3, t: 7
 };
 
-var x = d3.scale.linear()
+let x = d3.scale.linear()
     .range([0, 2 * Math.PI]);
 
-var vals = {
+let vals = {
     "avg_nr_proteins" : [],
     "avg_nr_genes" : [],
     "nr_genomes" : [],
     "size" : []
-}
+};
 
 // more compact sunburst, proportianally sized root ring
 //var y = d3.scale.sqrt().range([0, radius]);
 // linear sized rings
-var y = d3.scale.linear().range([0, radius]);
+let y = d3.scale.linear().range([0, radius]);
 
 // size/area of the slice is nr_genomes
-var partition = d3.layout.partition()
-    .value(function(d) {
-        return d.nr_genomes;
-    });
+let partition = d3.layout.partition()
+    .value(d => d.nr_genomes);
 
-var arc = d3.svg.arc()
-    .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
-    .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
-    .innerRadius(function(d) { return Math.max(0, y(d.y)); })
-    .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+let arc = d3.svg.arc()
+    .startAngle(d => Math.max(0, Math.min(2 * Math.PI, x(d.x))))
+    .endAngle(d => Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))))
+    .innerRadius(d => Math.max(0, y(d.y)))
+    .outerRadius(d => Math.max(0, y(d.y + d.dy)));
 
 
-var svg = d3.select("#chart")
+let svg = d3.select("#chart")
     .on("touchstart", nozoom)
     .on("touchmove", nozoom)
     .append("svg")
     .attr("id", "sbSvg")
     .attr("width", sbWidth)
     .attr("height", sbHeight)
-    .call(d3.behavior.zoom().on("zoom", function () {
-    svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+    .call(d3.behavior.zoom().on("zoom", () => {
+        svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")");
     }))
     .append("g")
     .attr("id", "container")
     .attr("transform", "translate(" + sbWidth / 2 + "," + (sbHeight / 2) + ")");
 
-var all_names = [];
+let all_names = [];
 
-$(document).on('keyup', '#search', function(e) {
-  if (e.keyCode == 13) {
+$(document).on('keyup', '#search', (e) => {
+  if (e.keyCode === 13) {
       findByName();
   }
 });
 
-var augment_data = function(node) {
+function augment_data(node) {
 
     if(!node.lineage) {
         node.lineage = "";
@@ -143,9 +142,9 @@ var augment_data = function(node) {
         node.avg_nr_proteins = node.nr_proteins / node.nr_genomes;
         node.avg_nr_genes = node.nr_genes / node.nr_genomes;
     } else {
-        node.children.forEach(function(child) {
-            child.lineage = node.lineage+" > "+child.name;
-            child = augment_data(child)
+        node.children.forEach((child) => {
+            child.lineage = `${node.lineage} > ${child.name}`;
+            child = augment_data(child);
             node.nr_genomes = (node.nr_genomes) ? node.nr_genomes + child.nr_genomes : child.nr_genomes;
             node.nr_proteins = (node.nr_proteins) ? node.nr_proteins + child.nr_proteins : child.nr_proteins;
             node.avg_nr_proteins = node.nr_proteins / node.nr_genomes;
@@ -155,7 +154,7 @@ var augment_data = function(node) {
     }
 
     if(node.id){
-        all_names.push({label: node.name+" ("+node.id+")", value: node.name});
+        all_names.push({label: `${node.name} (${node.id})`, value: node.name});
     } else {
         all_names.push({label: node.name, value: node.name});
     }
@@ -179,15 +178,15 @@ var augment_data = function(node) {
     return node;
 }
 
-var div = d3.select("body").append("div")
+const div = d3.select("body").append("div")
     .attr("class", "nodetooltip")
     .style("opacity", 0);
 
-var divsearchtip = d3.select("body").append("div")
+const divsearchtip = d3.select("body").append("div")
     .attr("class", "searchtip")
     .style("opacity", 0);
 
-var scales = {
+const scales = {
         "avg_nr_proteins" : [],
         "avg_nr_genes": [],
         "nr_hogs" : [],
@@ -197,16 +196,16 @@ var scales = {
 
 function scaleGen() {
 
-    for (var key in vals) {
+    for (const key in vals) {
 
-        var min = 1;
-        var max = vals[key];
+        const min = 1;
+        const max = vals[key];
         //var max = 50000; // limit max val
-        var steps = 10;
-        var increments = ((max - min) / steps).toFixed(0);
-        var arr = [];
+        const steps = 10;
+        const increments = ((max - min) / steps).toFixed(0);
+        const arr = [];
 
-        for (var i = 0; i <= steps; ++i) {
+        for (let i = 0; i <= steps; ++i) {
             arr.push(min + increments * i);
         }
 
@@ -217,11 +216,11 @@ function scaleGen() {
 
 }
 
-var linear_color = d3.scale.linear();
-var log_color = d3.scale.log();
+const linear_color = d3.scale.linear();
+const log_color = d3.scale.log();
 //var sqrt_color = d3.scale.sqrt();
-var sqrt_color = d3.scale.pow().exponent(0.7);
-var quantile_color = d3.scale.quantile();
+const sqrt_color = d3.scale.pow().exponent(0.7);
+const quantile_color = d3.scale.quantile();
 
 function heatmapColor() {
 
@@ -240,53 +239,48 @@ function heatmapColor() {
     quantile_color.domain([1, scaleMax]);
     quantile_color.range(["#90daac","#41b6c4","#2c7fb8","#253494"]);
 
-    d3.selectAll("path").transition().attr("fill", function(d) {
-        return sqrt_color(d[scaleName]);
-    });
+    d3.selectAll("path").transition().attr("fill", d => sqrt_color(d[scaleName]));
 }
 
 function dolColor() {
     d3.selectAll("path").transition().attr("fill", color);
 }
 
-function findByName(term){
-
-    if(!term){
-        var term = document.getElementById("search").value;
-    }
-
+function findByName(search_term){
+    let term = search_term || document.getElementById("search").value;
     term = term.toUpperCase();
 
     d3.selectAll("path").style("stroke-width", "").style("stroke", "").style("opacity", 1);
-    divsearchtip.transition().duration(800).style("opacity", 0)
+    divsearchtip.transition().duration(800).style("opacity", 0);
 
-    if(term == "") {
+    if (term === "") {
         return false;
     }
 
     svg.selectAll("path").style("opacity", 0.3);
-    var found = false;
+    let found = false;
 
-    svg.selectAll("path")[0].forEach(function (d) {
+    svg.selectAll("path")[0].forEach((d) => {
 
-        if (d3.select(d).data()[0].name.toUpperCase() == term || (d3.select(d).data()[0].id && d3.select(d).data()[0].id.toUpperCase() == term)) {
+        if (d3.select(d).data()[0].name.toUpperCase() === term || (d3.select(d).data()[0].id && d3.select(d).data()[0].id.toString().toUpperCase() === term)) {
 
             d3.select(d).style("stroke", "red").transition().duration(900).style("opacity", "0").transition().duration(1200).style("opacity", "1").style("stroke-width", "2px");
                 //.style("filter", "url(#glow)");//glow
 
             divsearchtip.html(d.textContent);
 
-            var tipX = (10 + d.getBoundingClientRect().right).toFixed(0);
-            var tipY = (-15 + d.getBoundingClientRect().top).toFixed(0);
+            const rect = d.getBoundingClientRect();
+            const tipX = (10 + rect.right + window.scrollX).toFixed(0);
+            const tipY = (-15 + rect.top + window.scrollY).toFixed(0);
             divsearchtip.transition()
                 .duration(200)
                 .style("opacity", .9)
                 .style("left", tipX + "px")
-                .style("top", tipY + "px")
+                .style("top", tipY + "px");
 
             found = true;
         }
-    })
+    });
 
     if(!found){
         divsearchtip.html("<h3>No matches</h3>");
@@ -294,24 +288,20 @@ function findByName(term){
                 .duration(200)
                 .style("opacity", .9)
                 .style("left", ($("svg").width() / 2) - 75 + "px")
-                .style("top", "200px")
+                .style("top", (200 + window.scrollY) + "px")
                 .style("width", "150px")
-                .style("padding", "8px")
+                .style("padding", "8px");
     }
 
 }
 
-function zoomIntoName(term){
-
-    if (!arguments.length) {
-        var term = document.getElementById("search").value;
-    }
-
+function zoomIntoName(search_term){
+    let term = search_term || document.getElementById("search").value;
     term = term.toUpperCase();
 
-    svg.selectAll("path")[0].forEach(function (d) {
+    svg.selectAll("path")[0].forEach((d) => {
         d3.select(d).style("opacity", 1); //making all paths to opacity 1
-        if (d3.select(d).data()[0].name.toUpperCase() == term || (d3.select(d).data()[0].id && d3.select(d).data()[0].id.toUpperCase() == term)) {
+        if (d3.select(d).data()[0].name.toUpperCase() === term || (d3.select(d).data()[0].id && d3.select(d).data()[0].id.toString().toUpperCase() === term)) {
             click(d3.select(d).data()[0]);
         }
     });
@@ -341,54 +331,45 @@ function click(d) {
     if (d.nr_hogs || d.nr_hogs_support){
         hogs = "<br>Ancestral nb of genes";
         if (d.nr_hogs_support){
-            hogs += "<br>&nbsp;&nbsp;&bull;&nbsp;" + d.nr_hogs_support.toFixed(0) + " (well supported HOGs)"
+            hogs += `<br>&nbsp;&nbsp;&bull;&nbsp;${d.nr_hogs_support.toFixed(0)} (well supported HOGs)`;
         }
         if (d.nr_hogs) {
-            hogs += "<br>&nbsp;&nbsp;&bull;&nbsp;" + d.nr_hogs.toFixed(0) + " (all HOGs)";
+            hogs += `<br>&nbsp;&nbsp;&bull;&nbsp;${d.nr_hogs.toFixed(0)} (all HOGs)`;
         }
     }
     if (d.avg_nr_genes) {
-        avg_genes = "<br>Avg number of genes: " + d.avg_nr_genes.toFixed(0);
+        avg_genes = `<br>Avg number of genes: ${d.avg_nr_genes.toFixed(0)}`;
     }
 
     if(d.avg_nr_proteins){
-        avg_proteins = "<br>Avg number of proteins: "+d.avg_nr_proteins.toFixed(0);
+        avg_proteins = `<br>Avg number of proteins: ${d.avg_nr_proteins.toFixed(0)}`;
     }
 
     if(d.id){
-        id = "Species: <a href='/oma/genome/" + d.id +"/info/'>"+d.id+"</a>";
+        id = `Species: <a href='/oma/genome/${d.id}/info/'>${d.id}</a>`;
     }
 
     if (d.nr_hogs){
-        id = "Ancestral species: <a href='/oma/ancestralgenome/" + d.taxid +"/info/'>"+d.name+"</a>";
+        id = `Ancestral species: <a href='/oma/ancestralgenome/${d.taxid}/info/'>${d.name}</a>`;
     }
 
-    var lineageItems = d.lineage.split(" > ");
+    const lineageItems = d.lineage.split(" > ");
     lineageItems.shift();
-    var lineage = "";
+    let lineage = "";
     if(lineageItems.length) {
 
         lineage = "<p class='lineage'>Lineage: ";
 
-        lineageItems.forEach(function (elem) {
-            lineage += "<span>" + elem + "</span>";
-        })
+        lineageItems.forEach((elem) => {
+            lineage += `<span>${elem}</span>`;
+        });
 
         lineage += "</p>";
     }
 
     d3.select('#permdiv')
-    .html("<h5 style='vertical-align: middle;border-bottom: 1px solid black;padding-bottom: 3px;'>Selected<br>" +
-        " <strong>"+d.name+
-        "</strong><br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: "+d.taxid+
-        ")</span></h5><p>"+
-        id+
-        "<br>Nb extant genomes: "+d.nr_genomes+
-        avg_genes+
-        avg_proteins+
-        hogs+"</p>"+
-        lineage)
-        .style("right", 20 + "px")
+    .html(`<h5 style='vertical-align: middle;border-bottom: 1px solid black;padding-bottom: 3px;'>Selected<br> <strong>${d.name}</strong><br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: ${d.taxid})</span></h5><p>${id}<br>Nb extant genomes: ${d.nr_genomes}${avg_genes}${avg_proteins}${hogs}</p>${lineage}`)
+        .style("right", "20px")
         .style("top", "80px")
         .style("opacity", 0.9)
         .style("z-index", 99)
@@ -401,30 +382,26 @@ function click(d) {
     }
     svg.transition()
         .duration(750)
-        .tween("scale", function () {
-            var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+        .tween("scale", () => {
+            const xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
                 yd = d3.interpolate(y.domain(), [d.y, 1]),
                 yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
-            return function (t) {
+            return (t) => {
                 x.domain(xd(t));
                 y.domain(yd(t)).range(yr(t));
             };
         })
         .selectAll("path")
-        .attrTween("d", function (d) {
-            return function () {
-                return arc(d);
-            };
-        });
+        .attrTween("d", d => () => arc(d));
 }
 
-d3.select(self.frameElement).style("height", sbHeight + "px");
+d3.select(self.frameElement).style("height", `${sbHeight}px`);
 
 // Define a function that returns the color
 // for a data point. The input parameter
 // should be a data point as defined/created
 // by the partition layout.
-var color = function(d) {
+function color(d) {
 
     // This function builds the total
     // color palette incrementally so
@@ -434,7 +411,7 @@ var color = function(d) {
     // We're going to need a color scale.
     // Normally we'll distribute the colors
     // in the scale to child nodes.
-    var colors;
+    let colors;
 
     // The root node is special since
     // we have to seed it with our
@@ -451,10 +428,8 @@ var color = function(d) {
         // we can predictably generate
         // correct individual colors.
 
-        if(scaleName != "dol"){
-            colors = function () {
-                return ["#E76818"];
-            };
+        if(scaleName !== "dol"){
+            colors = () => ["#E76818"];
         } else {
             // 3 domains of life
             colors = d3.scale.category10().domain(d3.range(0,3));
@@ -473,7 +448,9 @@ var color = function(d) {
         // will range from darker than the
         // node's color to brigher than the
         // node's color.
-        if(scaleName != "dol"){
+        let luminosity, initColor;
+
+        if(scaleName !== "dol"){
 
             luminosity = [0.3, 0.5];
             initColor = "#E76818";
@@ -485,12 +462,12 @@ var color = function(d) {
 
         }
 
-        var startColor = d3.hcl(initColor)
+        const startColor = d3.hcl(initColor)
                             .darker(luminosity[0]),
             endColor   = d3.hcl(initColor)
                             .brighter(luminosity[1]);
 
-        if(scaleName == "dol") {
+        if(scaleName === "dol") {
             // Create the scale
             colors = d3.scale.linear()
                 .interpolate(d3.interpolateHcl)
@@ -514,40 +491,36 @@ var color = function(d) {
 
         if (scaleName === "avg_nr_proteins" || scaleName === "avg_nr_genes" || scaleName === "nr_hogs" || scaleName === "nr_hogs_support") {
 
-            //d.children.map(function (child, i) {
-            d.children.map(function (child, i) {
-                return {value: child[scaleName], idx: i};
-            }).forEach(function (child, i) {
-                d.children[child.idx].color = quantile_color(child.value)
-            });
+            d.children.map((child, i) => ({value: child[scaleName], idx: i}))
+                .forEach((child) => {
+                    d.children[child.idx].color = quantile_color(child.value);
+                });
 
         } else  {
 
-            d.children.map(function (child, i) {
-                return {value: child.value, idx: i};
-            }).sort(function (a, b) {
-                return b.value - a.value
-            }).forEach(function (child, i) {
-                d.children[child.idx].color = colors(i);
-            });
+            d.children.map((child, i) => ({value: child.value, idx: i}))
+                .sort((a, b) => b.value - a.value)
+                .forEach((child, i) => {
+                    d.children[child.idx].color = colors(i);
+                });
         }
 
     }
 
     return d.color;
-};
+}
 
 function init_sb() {
 
-    top_margin = 45,
-    sbWidth = $("#genome_panel").width() - 10,
+    top_margin = 45;
+    sbWidth = $("#genome_panel").width() - 10;
     //sbHeight = $("#genome_panel").height() - top_margin,
-    sbHeight = sbWidth * 0.6,
-    rootNode = {},
-    scaleName = "dol",
-    scaleMax = 0,
+    sbHeight = sbWidth * 0.6;
+    rootNode = {};
+    scaleName = "dol";
+    scaleMax = 0;
     //radius = (Math.min(width, height) / 2)
-    radius = (Math.min(sbWidth, sbHeight) / 2) - 10
+    radius = (Math.min(sbWidth, sbHeight) / 2) - 10;
     path = {};
 
     // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
@@ -565,7 +538,7 @@ function init_sb() {
         "nr_hogs_support" : [],
         "nr_genomes" : [],
         "size" : []
-    }
+    };
 
     // more compact sunburst, proportianally sized root ring
     //var y = d3.scale.sqrt().range([0, radius]);
@@ -574,15 +547,13 @@ function init_sb() {
 
     // size/area of the slice is nr_genomes
     partition = d3.layout.partition()
-        .value(function(d) {
-            return d.nr_genomes;
-        });
+        .value(d => d.nr_genomes);
 
     arc = d3.svg.arc()
-        .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
-        .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
-        .innerRadius(function(d) { return Math.max(0, y(d.y)); })
-        .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+        .startAngle(d => Math.max(0, Math.min(2 * Math.PI, x(d.x))))
+        .endAngle(d => Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))))
+        .innerRadius(d => Math.max(0, y(d.y)))
+        .outerRadius(d => Math.max(0, y(d.y + d.dy)));
 
     zoom = d3.behavior.zoom()
     .scaleExtent([0.5, 5])
@@ -598,46 +569,46 @@ function init_sb() {
         .append("g")
         .call(zoom)
         .attr("id", "container")
-        .attr("transform", "translate(" + sbWidth / 2 + "," + (sbHeight / 2) + ")")
+        .attr("transform", "translate(" + sbWidth / 2 + "," + (sbHeight / 2) + ")");
 
 
-    var dragListener = d3.behavior.drag()
-    .on("drag", function() {
+    const dragListener = d3.behavior.drag()
+    .on("drag", () => {
         dragX = d3.event.dx;
         dragY = d3.event.dy;
     });
 
     svg.call(dragListener);
 
-    var dragging = 0;
-    var dragX = 0, dragY = 0;
+    let dragging = 0;
+    let dragX = 0, dragY = 0;
 
-    dragListener.on("dragstart", function() {
+    dragListener.on("dragstart", () => {
       dragging = 1;
     });
 
-    dragListener.on("dragend", function() {
+    dragListener.on("dragend", () => {
       dragging = 0;
       dragX = 0;
       dragY = 0;
     });
 
     function zoomed () {
-        var scale = d3.event.scale;
-        var trans = d3.transform(svg.attr("transform"));
-        var tpos = trans.translate;
-        var tscale = trans.scale;
-        var tx = tpos[0];
-        var ty = tpos[1];
-        var mx = sbWidth/2;
-        var my = sbHeight/2;
+        const scale = d3.event.scale;
+        const trans = d3.transform(svg.attr("transform"));
+        const tpos = trans.translate;
+        const tscale = trans.scale;
+        const tx = tpos[0];
+        const ty = tpos[1];
+        const mx = sbWidth/2;
+        const my = sbHeight/2;
 
-        var dx =  (mx - tx - dragX)/tscale[0];
-        var dy =  (my - ty - dragY)/tscale[1];
-        var dx2 = (mx - dx)/scale - dx;
-        var dy2 = (my - dy)/scale - dy;
+        const dx =  (mx - tx - dragX)/tscale[0];
+        const dy =  (my - ty - dragY)/tscale[1];
+        const dx2 = (mx - dx)/scale - dx;
+        const dy2 = (my - dy)/scale - dy;
 
-        var tform = "translate(" + dx + "," + dy + ")scale(" + scale + ")translate(" + dx2 + "," + dy2 + ")"
+        const tform = "translate(" + dx + "," + dy + ")scale(" + scale + ")translate(" + dx2 + "," + dy2 + ")";
         svg.attr("transform", tform);
     }
 
@@ -647,7 +618,7 @@ function init_sb() {
 
     //d3.json("genomes.json", function (error, root) {
     //d3.json("http://127.0.0.1:8000/All/genomes.json", function (error, root) {
-    d3.json("/All/genomes.json", function (error, root) {
+    d3.json("/All/genomes.json", (error, root) => {
         if (error) throw error;
 
         root = augment_data(root);
@@ -680,9 +651,7 @@ function createVisualization(root) {
         .on("click", click)
         .on("mouseover", mouseover)
         .append("title")
-        .text(function (d) {
-            return d.name;
-        });
+        .text(d => d.name);
 
         // Add the mouseleave handler to the bounding circle.
         d3.select("#container").on("mouseleave", mouseleave);
@@ -697,23 +666,23 @@ function mouseover(d) {
     if (d.nr_hogs || d.nr_hogs_support){
         hogs = "<br>Ancestral nb of genes: ";
         if (d.nr_hogs_support){
-            hogs += "<br>&nbsp;&nbsp;&bull;&nbsp;" + d.nr_hogs_support.toFixed(0) + " (well supported HOGs)"
+            hogs += `<br>&nbsp;&nbsp;&bull;&nbsp;${d.nr_hogs_support.toFixed(0)} (well supported HOGs)`;
         }
         if (d.nr_hogs) {
-            hogs += "<br>&nbsp;&nbsp;&bull;&nbsp;" + d.nr_hogs.toFixed(0) + " (all HOGs)";
+            hogs += `<br>&nbsp;&nbsp;&bull;&nbsp;${d.nr_hogs.toFixed(0)} (all HOGs)`;
         }
     }
 
     if(d.avg_nr_genes){
-        avg_genes = "<br>Avg number of genes: "+d.avg_nr_genes.toFixed(0) + " (# genes)";
+        avg_genes = `<br>Avg number of genes: ${d.avg_nr_genes.toFixed(0)} (# genes)`;
     }
     if(d.avg_nr_proteins){
-        avg_proteins = "<br>Avg number of proteins: "+d.avg_nr_proteins.toFixed(0);
+        avg_proteins = `<br>Avg number of proteins: ${d.avg_nr_proteins.toFixed(0)}`;
     }
 
     d3.select("#explanation").style("visibility", "");
 
-    var sequenceArray = getAncestors(d);
+    const sequenceArray = getAncestors(d);
     updateBreadcrumbs(sequenceArray);
 
     // highlight colorbar
@@ -734,32 +703,23 @@ function mouseover(d) {
 
     // Then highlight only those that are an ancestor of the current segment.
     svg.selectAll("path")
-        .filter(function(node) {
-            return (sequenceArray.indexOf(node) >= 0);
-        })
+        .filter(node => sequenceArray.indexOf(node) >= 0)
         .style("opacity", 1);
 
-    var tooltipTop = function(){
-        var element = d3.selectAll('.nodetooltip').node();
-        var ttHeight = element.getBoundingClientRect().sbHeight;
-        var ttTop = d3.event.pageY;
-        var ttBottom = ttTop + ttHeight + ttBottomMargin;
-        var overFlow = ttBottom - sbHeight;
+    const ttTopMargin = 40;
+    const ttBottomMargin = 20;
+
+    const tooltipTop = () => {
+        const element = d3.selectAll('.nodetooltip').node();
+        const ttHeight = element.getBoundingClientRect().height;
+        const ttTop = d3.event.pageY;
+        const ttBottom = ttTop + ttHeight + ttBottomMargin;
+        const overFlow = ttBottom - sbHeight;
 
         return (overFlow > 0) ? ttTop - (overFlow + ttBottomMargin) : ttTop - ttTopMargin;
-    }
+    };
 
-    div.html("<h5 style='vertical-align: middle;border-bottom: 1px solid black;padding-bottom: 3px;'>"+d.name+
-        "<br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: "+d.taxid+
-        ")</span></h5>"+
-        "<p style='text-align: left;'>Nb extant genomes: "+d.nr_genomes+
-        avg_genes +
-        avg_proteins +
-        hogs +
-        "<br>Lineage: <span style='font-size: 1em;'>"+d.lineage+"</span></p>");
-
-    var ttTopMargin = 40;
-    var ttBottomMargin = 20;
+    div.html(`<h5 style='vertical-align: middle;border-bottom: 1px solid black;padding-bottom: 3px;'>${d.name}<br><span style='font-size: 1em;margin-left: 5px;'>(Taxonid: ${d.taxid})</span></h5><p style='text-align: left;'>Nb extant genomes: ${d.nr_genomes}${avg_genes}${avg_proteins}${hogs}<br>Lineage: <span style='font-size: 1em;'>${d.lineage}</span></p>`);
 
     div.transition()
         .duration(200)
@@ -799,8 +759,8 @@ function mouseleave() {
 // Given a node in a partition layout, return an array of all of its ancestor
 // nodes, highest first, but excluding the root.
 function getAncestors(node) {
-  var path = [];
-  var current = node;
+  const path = [];
+  let current = node;
   while (current.parent) {
     path.unshift(current);
     current = current.parent;
@@ -810,7 +770,7 @@ function getAncestors(node) {
 
 function initializeBreadcrumbTrail() {
   // Add the svg area.
-  var trail = d3.select("#sequence").append("svg:svg")
+  d3.select("#sequence").append("svg:svg")
       .attr("width", sbWidth)
       .attr("height", 40)
       .style("fill", "#4B79A1")
@@ -820,7 +780,7 @@ function initializeBreadcrumbTrail() {
 
 // Generate a string that describes the points of a breadcrumb polygon.
 function breadcrumbPoints(d, i) {
-  var points = [];
+  const points = [];
   points.push("0,0");
   points.push(b.w + ",0");
   points.push(b.w + b.t + "," + (b.h / 2));
@@ -836,29 +796,27 @@ function breadcrumbPoints(d, i) {
 function updateBreadcrumbs(nodeArray) {
 
   // Data join; key function combines name and depth (= position in sequence).
-  var g = d3.select("#trail")
+  const g = d3.select("#trail")
       .selectAll("g")
-      .data(nodeArray, function(d) { return d.name + d.depth; });
+      .data(nodeArray, d => d.name + d.depth);
 
   // Add breadcrumb and label for entering nodes.
-  var entering = g.enter().append("svg:g");
+  const entering = g.enter().append("svg:g");
 
   entering.append("svg:polygon")
       .attr("points", breadcrumbPoints)
       //.style("fill", function(d) { return colors[d.name]; });
-      .attr("fill", "#4B79A1")
+      .attr("fill", "#4B79A1");
 
   entering.append("svg:text")
       .attr("x", (b.w + b.t) / 2)
       .attr("y", b.h / 2)
       .attr("dy", "0.25em")
       .attr("text-anchor", "middle")
-      .text(function(d) { return subStr(d.name); });
+      .text(d => subStr(d.name));
 
   // Set position for entering and updating nodes.
-  g.attr("transform", function(d, i) {
-    return "translate(" + i * (b.w + b.s) + ", 0)";
-  });
+  g.attr("transform", (d, i) => `translate(${i * (b.w + b.s)}, 0)`);
 
   // Remove exiting nodes.
   g.exit().remove();
@@ -869,59 +827,33 @@ function updateBreadcrumbs(nodeArray) {
 
 }
 
-// Given a node in a partition layout, return an array of all of its ancestor
-// nodes, highest first, but excluding the root.
-function getAncestors(node) {
-  var path = [];
-  var current = node;
-  while (current.parent) {
-    path.unshift(current);
-    current = current.parent;
-  }
-  return path;
-}
-
-// Generate a string that describes the points of a breadcrumb polygon.
-function breadcrumbPoints(d, i) {
-  var points = [];
-  points.push("0,0");
-  points.push(b.w + ",0");
-  points.push(b.w + b.t + "," + (b.h / 2));
-  points.push(b.w + "," + b.h);
-  points.push("0," + b.h);
-  if (i > 0) { // Leftmost breadcrumb; don't include 6th vertex.
-    points.push(b.t + "," + (b.h / 2));
-  }
-  return points.join(" ");
-}
-
 function subStr(string){
 
-    var length = 12;
-    var trimmedString = string.length > length ? string.substring(0, length - 3) + "..." : string.substring(0, length);
+    const length = 12;
+    const trimmedString = string.length > length ? string.substring(0, length - 3) + "..." : string.substring(0, length);
     return trimmedString;
 }
 
 function createPermDiv(containerElem) {
     if (!arguments.length || !$( containerElem ).length) {
-        var containerElem = "#genome_panel";
+        containerElem = "#genome_panel";
     }
 
     $('<div class="nodetooltip" style="position: absolute; opacity: 0;" id="permdiv"></div>').prependTo(containerElem);
 
     $( "#permdiv" ).on( "click", "span", function() {
-      zoomIntoName($( this ).text())
+      zoomIntoName($( this ).text());
     });
 
 }
 
 
 //Container for the gradients
-var defs = svg.append("defs");
+const defs = svg.append("defs");
 
 //Code taken from http://stackoverflow.com/questions/9630008/how-can-i-create-a-glow-around-a-rectangle-with-svg
 //Filter for the outside glow
-var filter = defs.append("filter")
+const filter = defs.append("filter")
     .attr("id","glow");
 
 filter.append("feGaussianBlur")
@@ -930,7 +862,7 @@ filter.append("feGaussianBlur")
     .attr("stdDeviation","2.5")
     .attr("result","coloredBlur");
 
-var feMerge = filter.append("feMerge");
+const feMerge = filter.append("feMerge");
 feMerge.append("feMergeNode")
     .attr("in","coloredBlur");
 feMerge.append("feMergeNode")

@@ -101,7 +101,7 @@ opacity: 0.7;
 }
 
 /* sunburst styles */
-path {
+#chart path {
   stroke: #fff;
 }
 
