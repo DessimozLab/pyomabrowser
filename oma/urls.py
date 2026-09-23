@@ -173,6 +173,8 @@ urlpatterns = [
     path('sab/', TemplateView.as_view(template_name='about_sab.html'), name='sab'),
     path('publications/', TemplateView.as_view(template_name='about_publications.html'), name='publications'), 
     
+    path('all_software/', TemplateView.as_view(template_name='all_software.html'), name='all_software'),
+    
     path('license/', RedirectView.as_view(pattern_name="license"), name='red-license'),
     path('terms_of_use/', TemplateView.as_view(template_name='about_license.html'), name='license'),
     path('uses/', TemplateView.as_view(template_name='help_typicalUses.html'), name='uses'),
