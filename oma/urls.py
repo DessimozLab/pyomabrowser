@@ -149,9 +149,6 @@ urlpatterns = [
     path('synteny/', TemplateView.as_view(template_name='explore_synteny.html'), name='synteny'),
 
     path('glossary/', TemplateView.as_view(template_name='glossary.html'), name='glossary'),
-
-    # pages to remove during NAR 2027 update. Keep it until the main page is updated
-    path('homologs/', TemplateView.as_view(template_name='help_homologs.html'), name='homologs'),
     path('about/', TemplateView.as_view(template_name='about_OMA.html'), name='about'),
 
 
@@ -163,8 +160,6 @@ urlpatterns = [
     path('run_on_your_data/', TemplateView.as_view(template_name='help_run_on_your_data.html'), name='run_on_your_data'),
 
 
-    path('type/', TemplateView.as_view(template_name='help_typesOrthologs.html'), name='type'),
-    
     #path('export_selection/', TemplateView.as_view(template_name='dlOMA_exportAllAll.html'), name='export'),
     path('landAnnotation/', TemplateView.as_view(template_name='explore_Annotation.html'),
         name='landAnnotation'),
