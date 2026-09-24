@@ -14,10 +14,8 @@
     <div class="container">
 
         <div class="jumbotron">
-            <h1>OMA in a nutshell (Introduction)
 
-               <span> <small class="text-center text-muted h3 d-block">Web based database interface for orthology prediction
-                </small></span></h1>
+            <h1>About OMA</h1>
 
             <div class="oma-seperator">
                 <span class="colour1"></span>
@@ -25,344 +23,299 @@
                 <span class="colour3"></span>
             </div>
 
+            <p class="text-justify">OMA is a resource for inferring, accessing, and analysing orthologs 
+                across complete genomes. It provides precomputed orthology relationships, HOGs, gene 
+                family information, genome-level views, downloadable data, and tools for comparative 
+                genomics.
+            </p>
+
+            <p class="text-justify">The OMA Browser is developed and maintained as part of the OMA 
+                ecosystem, with support from the Swiss Institute of Bioinformatics and collaborating 
+                academic institutions.
+            </p>
+
+
 
             <div class="card card-header-oma border-0">
-                    <h2> Why OMA?  </h2>
+                <h2>The OMA Standalone algorithm</h2>
                 <hr>
                 <div class="card-body">
 
-
-
-                    <p class="text-justify">The OMA (“Orthologous MAtrix”) project is a method and database for the inference of
-                        orthologs among complete genomes. </p>
-
-
-
-
-
-
-
-                        <p class="text-justify">
-
-                            The distinctive features of OMA are its:
-
-                             <ul>
-                    <li> Broad scope and size </li>
-                    <li> <a id='linkToBench' href='#bench'>High quality of inferences</a> </li>
-                    <li>Feature-rich web interface </li>
-                    <li><a href="{% url 'current' %}"> Availability of data in a wide range of formats and interfaces </a> </li>
-                    <li>Frequent update schedule of two releases per year </li>
-
-                     </ul>
-
-                     <p class="text-justify">
-                         The OMA pipeline can also run on custom genomic/transcriptomic data using the OMA stand-alone software, and it is even possible to combine precomputed data with custom data by exporting parts of the OMA database.
-                     </p>
-
-
-                </div>
-            </div>
-
-            <br>
-
-            <div class="card card-header-oma border-0">
-                    <h2>History</h2>
-                <hr>
-                <div class="card-body">
-                    <p class="lead">{% now 'Y' as current_year %}</p>
-                        <p class="text-justify">The OMA project was initiated in 2004 at ETH Zurich by Prof. Gaston Gonnet, with the goal of identifying orthologs among all publicly available genomes. At the time, most sequenced genomes were bacteria and only few were eukaryotes. Several PhD students in his group became increasingly involved, in particular Adrian Schneider, Christophe Dessimoz, and Alexander Roth. Over the subsequent 15 years, OMA underwent 24 major releases, steadily increasing the number of genomes under consideration.
-</p>
-
-                        <img src="{% static "image/history.png" %}" class="rounded mx-auto d-block w-50 p-3 "
-                             alt="Graph showing growth of OMA over time.">
-
-<div class="text-center small">
-                    <b> Graph showing growth of OMA over time.</b>
-
-    </div>
-
-                    <br>
-
-
-                        <p class="text-justify">The OMA Browser was introduced in 2006. Early releases were developed by Adrian Schneider and Christophe Dessimoz. Adrian Altenhoff joined the team in 2008.
-
-                        </p>
-
-
-                        <p class="text-justify">In 2008, the responsibility of “baby-sitting” the all-against-all (i.e. importing and converting genomes, running and verifying computations across hundreds of CPUs) was handed over from Gaston to the two Adrians.</p>
-
-
-                        <p class="text-justify">Since 2010, Adrian Altenhoff has been the main baby-sitter of the all-against-all and manager of OMA’s operations. In 2011, Christophe joined Gaston as co-PI of OMA. In 2012, OMA became a SIB-funded bioinformatics resource.</p>
-                </div>
-            </div>
-
-
-             <div class="card card-header-oma border-0">
-                    <h2>The OMA algorithm</h2>
-                 <hr>
-                <div class="card-body">
-
-
-                     <p class="text-justify">OMA’s inference algorithm consists of three main phases. First, to infer homologous sequences (sequences of common ancestry),
-                         <a href="{% url 'glossary' %}#g-allall" >all-against-all  </a> Smith-Waterman alignments are computed and significant matches are retained.
-
-
-
-                         Second, to infer <a href="{% url 'glossary' %}#g-op" >orthologous pairs  </a>   (the subset of homologs related by speciation events),
-                         mutually closest homologs are identified based on <a href="{% url 'glossary' %}#g-evod" >evolutionary distances  </a>    , taking into account distance inference uncertainty and the possibility for differential gene losses (for more details, see <a
-                                    href="http://www.biomedcentral.com/1471-2105/10/220">Roth et al 2008</a>).
-Third, these orthologs are clustered in two different ways, which are useful for different purposes:
-
-                         <ul>
-
-                    <li>
-
-We identify cliques of orthologous pairs (<a href="{% url 'glossary' %}#g-og" >“OMA groups”   </a>  ), which are useful as <a href="{% url 'glossary' %}#g-markerg" >marker genes   </a>  for
-                         phylogenetic reconstruction and tend to be very specific; </li>
-<li>We identify <a href="{% url 'glossary' %}#g-hog" >hierarchical orthologous groups   </a>  (“HOGs”), groups of genes defined for particular
-                         <a href="{% url 'glossary' %}#g-taxr" >taxonomic ranges   </a>  and identify all genes that have descended from a common ancestral
-                         gene in that taxonomic range. </li>
-
-                    </ul>
-
-
-
-                         <h4> More details on the algorithm  </h4>
-
-
-                    <ul>
-
-                    <li>    How to Identify Orthologs with OMA: A Primer <a href="https://f1000research.com/articles/9-27/v1">(Zahn-Zabal et al. 2020)</a></li>
-<li>Inferring HOGs <a href="http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0053786"">(Altenhoff et al. 2013)</a></li>
-<li>Updates to the OMA algorithm <a href="">(Train et al. 2017)</a></li>
-<li>Initial OMA algorithm <a href="">(Roth et al. 2008)</a></li>
-
+                    <p class="text-justify">The OMA browser’s inference algorithm consists of three main phases. 
+                        First, to infer homologous sequences (sequences of common ancestry), all-against-all 
+                        Smith-Waterman alignments are computed and significant matches are retained. Second, 
+                        to infer orthologous pairs (the subset of homologs related by speciation events), 
+                        mutually closest homologs are identified based on evolutionary distances, taking 
+                        into account distance inference uncertainty and the possibility for differential gene 
+                        losses (for more details, see Roth et al 2008). Third, these orthologs are clustered in 
+                        two different ways, which are useful for different purposes:
+                    </p>
+                    
+                    <p class="text-justify"><b>More details on the OMA browser algorithm</b>
+                        <ul>
+                            <li>How to Identify Orthologs with OMA: A Primer (Zahn-Zabal et al. 2020)</li>
+                            <li>Inferring HOGs (Altenhoff et al. 2013)</li>
+                            <li>Updates to the OMA algorithm (Train et al. 2017)</li>
+                            <li>Initial OMA algorithm (Roth et al. 2008)</li>
                         </ul>
-
-                    <p class="text-justify">
-For more info on the features of the OMA Browser, please consult the help pages accessible from the navigation bar in the top-right corner.
-
+                    </p>
+                    <p class="text-justify">For more info on the features of the OMA Browser, please consult 
+                        the help pages accessible from the navigation bar in the top-right corner.
                     </p>
 
-
-
-                </div>
-             </div>
-
-
-
-
-
-            <br>
-
-            <div class="card card-header-oma border-0">
-                    <h2>Publications</h2>
-                <hr>
-                <div class="card-body">
-                    <h4 id='publications' class="panel-heading">OMA overview</h4>
-                        <p class="text-justify">Adrian M Altenhoff, Alex Warwick Vesztrocy, Charles Bernard, Clement-Marie Train, Alina Nicheperovich, Silvia Prieto Baños, Irene Julca, David Moi, Yannis Nevers, Sina Majidian, Christophe Dessimoz, Natasha M Glover<br/>
-                            <em>OMA orthology in 2024: improved prokaryote coverage, ancestral and extant GO enrichment, a revamped synteny viewer and more in the OMA Ecosystem</em><br/>
-                            Nucleic Acids Research, 2024, <b>52</b>(D1):D513–D521 <a href="https://doi.org/10.1093/nar/gkad1020">Full text</a>
-                        </p><br/>
-
-                        <p class="text-justify">Adrian M Altenhoff, Clément-Marie Train, Kimberly J Gilbert, Ishita Mediratta,
-                            Tarcisio Mendes de Farias, David Moi, Yannis Nevers, Hale-Seda Radoykova, Victor Rossier,
-                            Alex Warwick Vesztrocy, Natasha M Glover, Christophe Dessimoz<br/>
-                            <em>OMA orthology in 2021: website overhaul, conserved isoforms, ancestral gene order and more</em><br/>
-                            Nucleic Acids Research, 2021, <b>49</b>(D1):D373–D379 <a href="https://doi.org/10.1093/nar/gkaa1007">Full text</a>
-                        </p><br/>
-
-                        <p class="text-justify">Adrian M Altenhoff, Natasha M Glover, Clément-Marie Train, Klara Kaleb, Alex Warwick
-                            Vesztrocy, David Dylus, Tarcisio Mendes de Farias, Karina Zile, Charles Stevenson, Jiao
-                            Long, Henning Redestig, Gaston H Gonnet and Christophe Dessimoz<br>
-                            <em>The OMA orthology database in 2018: retrieving evolutionary relationships among all
-                                domains of life through richer web and programmatic interfaces</em><br>
-                            Nucleic Acids Research, 2018, <b>46</b>(D1): D477-D485 <a
-                                    href="https://doi.org/10.1093/nar/gkx1019">Full text</a></p>
-
-                        <br>
-                        <p class="text-justify">Adrian M. Altenhoff, Nives Škunca, Natasha Glover, Clément-Marie Train, Anna Sueki, Ivana
-                            Piližota, Kevin Gori, Bartlomiej Tomiczek, Steven Müller, Henning Redestig, Gaston H Gonnet
-                            and Christophe Dessimoz<br>
-                            <em>
-                                The OMA orthology database in 2015: function predictions, better plant support, synteny
-                                view, and other improvements
-
-                            </em><br>
-                            Nucleic Acids Research, 2015, <b>43</b>(D1): D240-D249 <a
-                                    href="https://dx.doi.org/10.1093/nar/gku1158"> Full text</a>
-                        </p>
-                        <br>
-                        <p class="text-justify">Adrian M. Altenhoff, Adrian Schneider, Gaston H. Gonnet, Christophe Dessimoz <br>
-                            <em>
-                                OMA 2011: Orthology Inference Among 1,000 Complete Genomes
-                            </em><br>
-                            Nucleic Acids Research, 2011, 39 (suppl 1): D289-D294 <a
-                                    href='https://nar.oxfordjournals.org/content/39/suppl_1/D289'> Full text</a>
-                        </p>
-                        <br>
-                        <p class="text-justify">Adrian Schneider, Christophe Dessimoz, Gaston H. Gonnet <br>
-                            <em>
-                                OMA Browser - Exploring orthologous relations across 352 complete genomes
-                            </em><br>
-                            Bioinformatics, 2007, 23:16 (pp. 2180-2182) <a href="/">Project page </a>
-                            <a href='http://bioinformatics.oxfordjournals.org/content/23/16/2180'> Full text
-                            </a>
-                        </p>
-                        <br>
-
-                        <h3>OMA algorithm</h3>
-                        <br>
-                        <p class="text-justify">Sina Majidian, Yannis Nevers, Ali Yazdizadeh Kharrazi, Alex Warwick Vesztrocy, Stefano Pascarelli, David Moi, Natasha Glover, Adrian M. Altenhoff, Christophe Dessimoz<br>
-                            <em>Orthology inference at scale with FastOMA</em><br>
-                            Nature Methods, 2025, 22, 269–272, doi: 10.1038/s41592-024-02552-8 <a href="https://doi.org/10.1038/s41592-024-02552-8">Full text</a>
-                        </p>
-                        <br>
-                        <p class="text-justify">Charles Bernard, Yannis Nevers, Naga Bhushana Rao Karampudi, Kimberly J. Gilbert, Clément Train, Alex Warwick Vesztrocy, Natasha Glover, Adrian Altenhoff, Christophe Dessimoz<br>
-                           <em>EdgeHOG: fine-grained ancestral gene order inference at tree-of-life scale</em><br>
-                           Pre-print: BioRxiv 2024.08.28.610045, doi: 10.1101/2024.08.28.610045 <a href="https://doi.org/10.1101/2024.08.28.610045">Full text</a>
-                        </p>
-                        <br>
-                        <p class="text-justify">Natasha M. Glover, Adrian Altenhoff, Christophe Dessimoz<br>
-                            <em>Assigning confidence scores to homoeologs using fuzzy logic</em>
-                            PeerJ, 2019, 6, e6231 doi: 10.7717/peerj.6231 <a
-                                    href="https://dx.doi.org/10.7717/peerj.6231">Full text</a>
-                        </p>
-                        <br>
-                        <p>Clément-Marie Train, Natasha M. Glover, Gaston H. Gonnet, Adrian M. Altenhoff, Christophe
-                            Dessimoz<br>
-                            <em>Orthologous Matrix (OMA) algorithm 2.0: more robust to asymmetric evolutionary rates and
-                                more scalable hierarchical orthologous group inference</em><br>
-                            Bioinformatics, 2017, 33:14, (pp. i75–i82) <a
-                                    href="https://doi.org/10.1093/bioinformatics/btx229">Full text</a>
-                        </p>
-                        <br>
-                        <p class="text-justify">Adrian M. Altenhoff, Manuel Gil, Gaston H. Gonnet, Christophe Dessimoz <br>
-                            <em>
-                                Inferring Hierarchical Orthologous Groups From Orthologous Gene Pairs
-                            </em><br>
-                            PLoS One, 2013, 8:1, e53786 <a href="https://omabrowser.org/standalone/">Software </a>
-                            <a href='http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0053786'> Full
-                                text
-                            </a>
-                        </p>
-
-                        <br>
-
-                        <p class="text-justify">Alexander Roth, Gaston H. Gonnet, Christophe Dessimoz <br>
-                            <em>
-                                Algorithm of OMA for Large-Scale Orthology Inference
-                            </em><br>
-                            BMC Bioinformatics, 2008, 9:518
-
-                            <a href='http://www.biomedcentral.com/1471-2105/9/518'> Full text</a> <a
-                                    href="http://www.biomedcentral.com/1471-2105/10/220">(Please note the associated
-                                erratum)
-                            </a>
-                        </p>
-
-                        <br>
-                        <p class="text-justify">Christophe Dessimoz, Brigitte Boeckmann, Alexander Roth, Gaston H. Gonnet <br>
-                            <em>
-                                Detecting Non-Orthology in the COGs Database and Other Approaches Grouping Orthologs
-                                Using Genome-Specific Best Hits
-                            </em><br>
-                            Nucleic Acids Res, 2006 34:11 (pp. 3309-3316)
-                            <a href='http://nar.oxfordjournals.org/content/34/11/3309'> Full text
-                            </a>
-                        </p>
-
-                        <br>
-
-                        <p class="text-justify">Christophe Dessimoz, Gina Cannarozzi, Manuel Gil, Daniel Margadant, Alexander Roth, Adrian
-                            Schneider, Gaston H. Gonnet <br>
-                            <em>
-                                OMA, a Comprehensive, Automated Project for the Identification of Orthologs from
-                                Complete Genome Data: Introduction and First Achievements
-                            </em><br>
-                            RECOMB 2005 Workshop on Comparative Genomics, LNCS 3678 (pp. 61-72)
-                            <a href='http://download.springer.com/static/pdf/65/chp%253A10.1007%252F11554714_6.pdf?auth66=1408719784_5261138a05efa9237079a02f2783af34&amp;ext=.pdf'>
-                                Full text
-                            </a>
-                            <a href='http://link.springer.com/chapter/10.1007%2F11554714_6'> Abstract
-                            </a>
-                        </p>
-
-                        <br>
-
-
-                        <h3 id='bench'>Benchmarking</h3>
-                        <br>
-
-                        <p class="text-justify">Altenhoff AM, Boeckmann B, Capella-Gutierrez S, Dalquen DA, DeLuca T, Forslund K,
-                            Huerta-Cepas J, Linard B, Pereira C, Pryszcz LP, Schreiber F, da Silva AS, Szklarczyk D,
-                            Train CM, Bork P, Lecompte O, von Mering C, Xenarios I, Sjölander K, Jensen LJ, Martin MJ,
-                            Muffato M; Quest for Orthologs consortium, Gabaldón T, Lewis SE, Thomas PD, Sonnhammer E,
-                            Dessimoz C.<br>
-                            <em>
-                                Standardized benchmarking in the quest for orthologs
-                            </em><br>
-                            Nat Methods. 2016 May;13(5):425-30. doi: 10.1038/nmeth.3830
-                            <a href="http://dx.doi.org/10.1038/nmeth.3830">Full text</a>
-                        </p>
-                        <br>
-
-                        <p class="text-justify">Daniel A. Dalquen, Adrian M. Altenhoff, Gaston H. Gonnet, Christophe Dessimoz <br>
-                            <em>
-                                The Impact of Gene Duplication, Insertion, Deletion, Lateral Gene Transfer and
-                                Sequencing Error on Orthology Inference: a Simulation Study
-                            </em><br>
-                            PLoS One, 2013, 8:2, e56925
-                            <a href='http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0056925'> Full
-                                text
-                            </a>
-                        </p>
-
-                        <br>
-                        <p class="text-justify">Brigitte Boeckmann, Marc Robinson-Rechavi, Ioannis Xenarios, Christophe Dessimoz <br>
-                            <em>
-                                Conceptual Framework and Pilot Study to Benchmark Phylogenomic Databases Based on
-                                Reference Gene Trees
-                            </em><br>
-                            Briefings in Bioinformatics, 2011, 12:5 (pp. 474-484)
-                            <a href='http://bib.oxfordjournals.org/content/12/5/423'> Full text
-                            </a>
-                        </p>
-
-                        <br>
-                        <p class="text-justify">Adrian M. Altenhoff and Christophe Dessimoz<br>
-                            <em>Phylogenetic and Functional Assessment of Orthologs Inference Projects and Methods
-                            </em><br>
-                            PLoS Computational Biology, 2009, 5:1, e1000262
-                            <a href='http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1000262'>
-                                Full text
-                            </a>
-                        </p>
-                        <br>
-
-                        <h3>Orthology inference in general</h3>
-                        <br>
-
-                        <p class="test-justify">Adrian M. Altenhoff, Natasha M. Glover, and Christophe Dessimoz<br>
-                            <em>Inferring Orthology and Paralogy.</em>
-                            In: Evolutionary Genomics. Statistical and Computational methods <em>(M Anisimova, Editor)</em>
-                            Methods in Molecular Biology, 2019, Springer Humana, Vol 1910.
-                            <a href="https://doi.org/10.1007/978-1-4939-9074-0_5"> Full text</a>
-                        </p>
                 </div>
             </div>
 
-            <br>
 
             <div class="card card-header-oma border-0">
-                    <h2>Related Resources</h2>
+                <h2>Cite OMA</h2>
                 <hr>
                 <div class="card-body">
-                    <a href="https://swissorthology.ch"><img style="max-width: 200px;"
-                                                                 src="{% static "image/logo-swiss-orthology.svg" %}"></a>
-                        <p class="text-justify">The OMA Browser is part of the <a href="https://swissorthology.ch">SwissOrthology</a>
-                            initiative. SwissOrthology combines a number of Swiss web-resources that are centered
-                            around orthology and are funded by <a href="https://sib.swiss">SIB</a>.</p>
+
+                    <p class="text-justify">If you use OMA in your research, please cite us:</p>
+                    
+                    <h3>OMA Browser</h3>
+                    <p class="text-justify">Altenhoff, A., Warwick Vesztrocy, A., Bernard, C. et al. OMA orthology in 2024: improved prokaryote coverage, ancestral and extant GO enrichment, a revamped synteny viewer and more in the OMA Ecosystem, Nucleic Acids Research, Volume 52, Issue D1, 5 January 2024, Pages D513–D521, <a href="https://doi.org/10.1093/nar/gkad1020">https://doi.org/10.1093/nar/gkad1020</a></p>
+                    
+                    <h3>FastOMA</h3>
+                    <p class="text-justify">Majidian, S., Nevers, Y., Yazdizadeh Kharrazi, A. et al. Orthology inference at scale with FastOMA. Nat Methods 22, 269–272 (2025). <a href="https://doi.org/10.1038/s41592-024-02552-8">https://doi.org/10.1038/s41592-024-02552-8</a></p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Release notes</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">OMA is updated regularly. Each release may include new genomes, updated genome annotations, improvements to orthology inference, and changes to available files or tools.</p>
+                    <p class="text-justify">Use the release notes to:
+                        <ul>
+                            <li>check what changed in the latest release</li>
+                            <li>identify which genomes or annotations were updated</li>
+                            <li>find the OMA release used in a previous analysis</li>
+                            <li>support reproducibility in published work</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">When publishing analyses based on OMA, include the OMA release version and the date you accessed or downloaded the data.</p>
+                    <p class="text-justify">
+                        <b>Latest release:</b> <a href="https://omabrowser.org/oma/current/">https://omabrowser.org/oma/current/</a>
+                        <br>
+                        <b>Previous releases</b>: <a href="https://omabrowser.org/oma/archives/">https://omabrowser.org/oma/archives/</a>
+
+                    </p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>About us</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The OMA project was initiated in 2004 at ETH Zurich by Prof. Gaston Gonnet, with the goal of identifying orthologs among all publicly available genomes. The OMA Browser was introduced in 2006. In 2012, OMA became a SIB-funded bioinformatics resource. To date, OMA underwent 24 major releases, steadily increasing the number of genomes under consideration.</p>
+
+                    <img src="{% static "image/history.png" %}" class="rounded mx-auto d-block w-50 p-3 "
+                             alt="Graph showing growth of OMA over time.">
+
+                    <p class="text-justify">OMA is now developed by the Comparative Genomics Lab and collaborators. The project brings together expertise in orthology inference, comparative genomics, bioinformatics software development, phylogenomics, and data infrastructure.</p>
+                    <p class="text-justify">The OMA ecosystem includes:
+                        <ul>
+                            <li>the OMA Browser</li>
+                            <li>downloadable OMA release data</li>
+                            <li>programmatic access through REST, SPARQL, Python, and R</li>
+                            <li>web tools for orthology, HOGs, synteny, phylogenetic profiling, and functional analysis</li>
+                            <li>software for running OMA-related analyses on custom data</li>
+                        </ul>    
+                    </p>
+
+                    <p class="text-justify">OMA is part of the <a href="https://swissorthology.ch/">SwissOrthology</a> initiative and is supported by the Swiss Institute of Bioinformatics.</p>
+                    
+                    <h3>Team</h3>
+
+                    <div>
+                        <b>Current team</b>
+
+                        <ul>
+                            <li>
+                                <a href="https://people.inf.ethz.ch/adriaal/">Adrian Altenhoff</a>
+                                <span class="text-muted">— Project Manager</span>
+                            </li>
+                            <li>
+                                <a href="https://lab.dessimoz.org/people/christophe-dessimoz">Christophe Dessimoz</a>
+                                <span class="text-muted">— PI</span>
+                            </li>
+                            <li>
+                                Natasha Glover
+                                <span class="text-muted">— Co-PI</span>
+                            </li>
+                            
+                            <li>
+                                Alex Warwick Vesztrocy
+                                <span class="text-muted">— consultant</span>
+                            </li>
+                            <li>
+                                Silvia Prieto Baños
+                                <span class="text-muted">— PhD student</span>
+                            </li>
+                            <li>
+                                Dongwook Kim
+                                <span class="text-muted">— Post doc</span>
+                            </li>
+                            <li>
+                                Athina Gavrillidou
+                                <span class="text-muted">— Post doc</span>
+                            </li>
+                            <li>
+                                Nikolai Romashchenko
+                                <span class="text-muted">— Post doc</span>
+                            </li>
+                            <li>
+                                Stefano Pascarelli
+                                <span class="text-muted">— Post doc</span>
+                            </li>
+                            <li>
+                                Ali Yazdizadeh Kharrazi
+                                <span class="text-muted">— PhD student</span>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                    <div>
+                        <b>Former members</b>
+                        
+                        <ul>
+                            <li>
+                                <a href="https://lab.dessimoz.org/people/david_moi">David Moi</a>
+                                <span class="text-muted">— Post doc</span>
+                            </li>
+
+                            <li>
+                                <a href="https://lab.dessimoz.org/people/sina_majidian">Sina Majidian</a>
+                                <span class="text-muted">— Post doc</span>
+                            </li>
+                            <li>
+                                Irene Julca
+                                <span class="text-muted">— Post doc</span>
+                            </li>
+                            <li>
+                                <a href="https://lab.dessimoz.org/people/yannis_nevers">Yannis Nevers</a>
+                                <span class="text-muted">— Post doc</span>
+                            </li>
+                            <li>
+                                Clément-Marie Train
+                                <span class="text-muted">— Software Developer</span>
+                            </li>
+                            <li>
+                                Charles Bernard
+                                <span class="text-muted">— Post doc, 2021-2023</span>
+                            </li>
+                            <li>
+                                Victor Rossier
+                                <span class="text-muted">— PhD student</span>
+                            </li>
+                            <li>
+                                Ana Claudia Sima
+                                <span class="text-muted">— Research Scientist</span>
+                            </li>
+                            <li>
+                                Bhushan Karampundi
+                                <span class="text-muted">— Post doc, 2021</span>
+                            </li>
+                            <li>
+                                Ivana Piližota
+                                <span class="text-muted">— PhD student, 2019</span>
+                            </li>
+                            <li>
+                                Monique Zahn
+                                <span class="text-muted">— Scientific collaborator</span>
+                            </li>
+                            <li>
+                                David Dylus
+                                <span class="text-muted">— Post doc</span>
+                            </li>
+                            <li>
+                                Klara Kaleb
+                                <span class="text-muted">— Intern, summer 2017</span>
+                            </li>
+                            <li>
+                                Nives Škunca
+                                <span class="text-muted">— PhD, Post doc</span>
+                            </li>
+                            <li>
+                                Lucas Wittwer
+                                <span class="text-muted">— Intern</span>
+                            </li>
+                            <li>
+                                Anna Sueki
+                                <span class="text-muted">— Intern, summer 2014</span>
+                            </li>
+                            <li>
+                                Adrian Schneider
+                                <span class="text-muted">— (algorithm, inference pipeline, browser, 2005-2010)</span>
+                            </li>
+                            <li>
+                                Alexander Roth
+                                <span class="text-muted">— (algorithm, 2005-2009)</span>
+                            </li>
+                            <li>
+                                <a href="https://www.inf.ethz.ch/personal/gonnet/">Gaston H. Gonnet</a>
+                                <span class="text-muted">— PI</span>
+                            </li>
+                        </ul>
+                    </div>
+
+
+                    <h3>Funding and support</h3>
+                    Swiss Institute of Bioinformatics, Service and Infrastructure grant for SwissOrthology 
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Contact</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">For questions about using OMA, please first check the Help pages and FAQ.</p>
+                    <p class="text-justify">For general questions, feedback, or bug reports:
+                        <ul>
+                            <li><b>User questions</b>: <a href="https://www.biostars.org/tag/oma/">Biostars</a></li>
+                            <li><b>Bug reports for software</b>: use the relevant <a href="https://github.com/DessimozLab">GitHub repository</a></li>
+                            <li><b>General contact</b>: <a href="mailto:contact@omabrowser.org">contact@omabrowser.org</a></li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">
+                        When asking for help, include:
+                        <ul>
+                            <li>the OMA release</li>
+                            <li>the URL of the page or tool you used</li>
+                            <li>the gene, HOG, species, or genome identifiers</li>
+                            <li>your input file, if relevant</li>
+                            <li>the error message or unexpected result</li>
+                            <li>what you expected to happen</li>
+                        </ul>
+                    </p>
+
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Related pages</h2>
+                <hr>
+                <div class="card-body">
+                    <ul>
+                        <li><a href="{% url "get_started" %}">Help</a></li>
+                        <li><a href="{% url "current" %}">Downloads</a></li>
+                        <li><a href="{% url "all_software" %}">Software</a></li>
+                        <li><a href="{% url "license" %}">Terms of Use</a></li>
+                        <li><a href="{% url "sab" %}">Scientific Advisory Board</a></li>
+                    </ul>
                 </div>
             </div>
 

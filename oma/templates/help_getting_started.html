@@ -1,0 +1,325 @@
+{% extends  "base_template.html" %}
+{% load static %}
+
+{% block title %}Get started with OMA{% endblock %}
+{% block meta_description %}The OMA database provides several destinct types of groupings to the users. The appropriate grouping depends on the application of the user.{% endblock %}
+
+{% block content %}
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>Get started with OMA</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+            <p class="text-justify">OMA is a database and method for inferring evolutionary relationships among genes from complete genomes. It provides precomputed orthology relationships, gene families, genome-level views, downloadable datasets, and tools for comparative genomics. Use this page if you are new to OMA and want to understand what kind of result you need.</p>
+
+
+            <p class="text-justify">Use this page if you are new to OMA and want to understand what kind of result you need.</p>
+
+            
+            <div class="card card-header-oma border-0">
+                <h2>What can I do with OMA?</h2>
+                <hr>
+                <div class="card-body">
+                    
+
+                    <p class="text-justify">
+                        With OMA, you can:
+
+                        <ul>
+                            <li>Find orthologs of a gene across species</li>
+                            <li>Explore gene families using HOGs</li>
+                            <li>Identify strict sets of orthologs for phylogenetic analysis</li>
+                            <li>Browse extant and ancestral genomes</li>
+                            <li>Compare gene order and synteny between species</li>
+                            <li>Download OMA data for large-scale analyses</li>
+                            <li>Access OMA programmatically through APIs and wrappers</li>
+                            <li>Run OMA-related tools on your own data</li>
+
+                     </ul>
+
+                    For most users, the first step is to search for a gene, species, HOG, or group from the OMA Browser home page.
+                    </p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>What is orthology?</h2>
+                <hr>
+                <div class="card-body">
+                    
+
+                    <p class="text-justify">Orthologs are genes in different species that started diverging through a speciation event. They are often used to transfer functional information between species, infer species trees, and study gene family evolution.
+                    </p>
+
+                    <p class="text-justify">Orthology is different from paralogy. Paralogs are genes that started diverging through a duplication event.</p>
+
+                    <p class="text-justify">
+                        A gene can have different types of orthology relationships depending on the evolutionary history of the gene family. For example:
+                        
+                        <ul>
+                            <li><b>one-to-one orthology</b>: each species has a single corresponding gene</li>
+                            <li><b>one-to-many orthology</b>: one gene corresponds to multiple genes in another species, usually because of a duplication</li>
+                            <li><b>many-to-many orthology</b>: both lineages contain duplicated copies</li>
+                        </ul>
+                        
+                    </p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2 id="orthologs-type">Which OMA result should I use?</h2>
+                <hr>
+                <div class="card-body">
+                    
+
+                    <p class="text-justify">OMA provides several types of orthology results. They are related, but useful for different tasks.</p>
+
+
+                    <h3>Pairwise orthologs</h3>
+                    <p class="text-justify">Use <b>pairwise orthologs </b>when you want to find the orthologs of one gene in one or more species.</p>
+                    <p class="text-justify">This is usually the best starting point if your question is:
+
+                        <ul>
+                            <li>"What is the ortholog of my gene in another species?"</li>
+                            <li>"Does this gene have one-to-one or one-to-many orthologs?"</li>
+                            <li>"Which species have an ortholog of this gene?"</li>
+                        </ul>
+
+                    </p>
+                    <p>Pairwise orthologs are shown on gene pages and can be filtered by species, taxonomic range, relation type, or supporting evidence.</p>
+
+
+                    
+                    <h3>Hierarchical Orthologous Groups</h3>
+                    <p class="text-justify">Use <b>HOGs</b> when you want to study a gene family across evolution.</p>
+                    <p class="text-justify">HOGs contain genes that descend from a common ancestral gene at a given taxonomic level. Because HOGs are hierarchical, a broad HOG can contain smaller subHOGs defined at more recent taxonomic levels.</p>
+                    <p class="text-justify">HOGs are useful if your question is:
+                        <ul>
+                            <li>"Which genes belong to this gene family?"</li>
+                            <li>"How did this gene family evolve?"</li>
+                            <li>"Where did duplications or losses occur?"</li>
+                            <li>"Which genes were present in an ancestral genome?"</li>
+                            <li>"How does this family look at different taxonomic levels?"</li>
+                        </ul>
+                    </p>
+
+
+
+                    <h3>Strict Orthologous Groups</h3>
+                    <p class="text-justify">Use <b>Strict Orthologous Groups</b> (formerly called OMA Groups) when you need a stringent set of genes that are all orthologous to one another.</p>
+                    <p class="text-justify">These groups are especially useful for phylogenetic marker selection and species tree inference. Because the groups are strict, they contain at most one gene per species.</p>
+                    <p class="text-justify">Use them if your question is:
+                        <ul>
+                            <li>"Which genes can I use as markers for a species tree?"</li>
+                            <li>"Which genes are all mutually orthologous?"</li>
+                        </ul>
+                    </p>
+
+
+                    <h3>Summary</h3>
+
+                    <div class="table-responsive my-4">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col">Type of ortholog</th>
+                            <th scope="col">Best for</th>
+                            <th scope="col">Typical question</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><strong>Pairwise orthologs</strong></td>
+                            <td>Gene-by-gene orthology</td>
+                            <td><em>What is the ortholog of this gene in another species?</em></td>
+                        </tr>
+                        <tr>
+                            <td><strong>HOGs</strong></td>
+                            <td>Gene family evolution</td>
+                            <td><em>How did this gene family evolve across a clade?</em></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Strict Orthologous Groups</strong></td>
+                            <td>Stringent marker sets</td>
+                            <td><em>Which genes can I use for species tree inference?</em></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </div>
+
+
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>How do I search OMA?</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">From the OMA Browser home page, you can search by:
+                        <ul>
+                            <li>gene identifier</li>
+                            <li>protein sequence</li>
+                            <li>HOG identifier</li>
+                            <li>Strict Orthologous Group identifier</li>
+                            <li>species name</li>
+                            <li>common name</li>
+                            <li>NCBI taxon ID</li>
+                            <li>full text</li>
+                        </ul>
+                    </p>
+                    
+                    <p class="text-justify">OMA search uses <b>search tokens</b>. When you type a query and press <b>Space</b> or <b>Enter</b>, OMA turns the query into a token with a category prefix.</p>
+                    <p class="text-justify">Each token represents either a Gene, HOG, OMA group, or Taxon. Prefixes are used to specify which category to associate with the query term. Choose the prefix that matches what you are searching for:</p>
+
+                    <div class="table-responsive my-4">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col">Category</th>
+                            <th scope="col">Prefixes</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><strong>Genes</strong></td>
+                            <td>
+                            <code>id</code>, <code>go</code>, <code>ec</code>,
+                            <code>description</code>, <code>domain</code>, <code>sequence</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>HOGs</strong></td>
+                            <td><code>hog</code>, <code>sequence</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SOGs</strong></td>
+                            <td>
+                            <code>omagroup</code>, <code>fingerprint</code>, <code>sequence</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Taxon</strong></td>
+                            <td><code>species</code>, <code>taxid</code>, <code>taxon</code></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    
+                    <p class="text-justify">For multi-word searches, use quotation marks. For example:</p>
+                    <pre class="bg-light border rounded p-3"><code>species:"Homo sapiens"</code></pre>
+
+                    <p class="text-justify">Taxon tokens can also be combined with other token types. For example:</p>
+                    <pre class="bg-light border rounded p-3"><code>hog:60627 species:HUMAN</code></pre>
+
+                    <p class="text-justify">This searches for human genes found in HOG 60627.</p>
+                    <p class="text-justify">Searching for a gene takes you to a gene page. Searching for a HOG or group takes you to a group page. Searching for a species or ancestral taxon takes you to a genome page.</p>
+
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Common first tasks</h2>
+                <hr>
+                <div class="card-body">
+                    
+                    <h3>I have a gene and want its orthologs</h3>
+                    <p class="text-justify">Search for the gene identifier or protein sequence, then open the gene page. The ortholog table is shown by default.</p>
+                    <p class="text-justify">Go to: <a href="{% url "find_orthologs" %}">Find orthologs for a gene</a></p>
+
+                    <h3>I want to understand a gene family</h3>
+                    <p class="text-justify">Search for a HOG identifier, or open the HOG from a gene page. Use the HOG page to view members, taxonomic levels, and evolutionary events.</p>
+                    <p class="text-justify">Go to: <a href="{% url "explore_hogs" %}">Explore gene families and HOGs</a></p>
+
+                    <h3>I want to browse a species or ancestral genome</h3>
+                    <p class="text-justify">Search for a species name, common name, or NCBI taxon ID. You can browse genome information, genes, HOGs, related species, and synteny views.</p>
+                    <p class="text-justify">Go to: <a href="{% url "explore_genomes" %}">Explore extant and ancestral genomes</a></p>
+
+                    <h3>I want to download data</h3>
+                    <p class="text-justify">Use the Downloads menu for release-wide files, or download filtered tables directly from browser pages.</p>
+                    <p class="text-justify">Go to: <a href="{% url "uses" %}">Download and access OMA data</a></p>
+
+                    <h3>I want to analyse my own data</h3>
+                    <p class="text-justify">Use OMA-related software depending on your task. Use FastOMA for orthology inference on custom genomes, OMAmer to map proteins to existing OMA HOGs, and OMArk to assess proteome quality.</p>
+                    <p class="text-justify">Go to: <a href="{% url "run_on_your_data" %}">Run OMA on your own data</a></p>
+                
+
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Key terms</h2>
+                <hr>
+                <div class="card-body">
+
+                    <h3>Gene / entry</h3>
+                    <p class="text-justify">A protein-coding sequence represented in OMA. OMA uses one representative protein sequence per locus for orthology inference.</p>
+
+                    <h3>OMA identifier</h3>
+                    <p class="text-justify">The identifier for a gene in OMA. It consists of a five-letter species code followed by a unique number. Example: WHEAT00001.</p>
+
+                    <h3>HOG</h3>
+                    <p class="text-justify">A hierarchical orthologous group. A HOG contains genes descended from a common ancestral gene at a specific taxonomic level.</p>
+
+                    <h3>RootHOG</h3>
+                    <p class="text-justify">The deepest HOG containing all genes in a gene family across the species represented in OMA.</p>
+
+                    <h3>Strict Orthologous Group</h3>
+                    <p class="text-justify">A stringent group of genes that are all orthologous to one another. Formerly referred to as OMA Groups.</p>
+
+                    <h3>Ancestral genome</h3>
+                    <p class="text-justify">In OMA, an ancestral genome is represented by the HOGs inferred to be present at a given ancestral taxonomic level.</p>
+
+                    <h3>Synteny</h3>
+                    <p class="text-justify">Conservation of gene order between genomic regions. OMA provides tools to explore both local and broader synteny patterns.</p>
+
+                    <p class="text-justify">More key terms can be found in the <a href="{% url "glossary" %}">Glossary</a>.</p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Where to go next</h2>
+                <hr>
+                <div class="card-body">
+                    <ul>
+                        <li><a href="{% url "find_orthologs" %}">Find orthologs for a gene</a></li>
+                        <li><a href="{% url "explore_hogs" %}">Explore gene families and HOGs</a></li>
+                        <li><a href="{% url "explore_genomes" %}">Explore extant and ancestral genomes</a></li>
+                        <li><a href="{% url "uses" %}">Download and access OMA data</a></li>
+                        <!--li>Tutorials and workflows</li-->
+                        <li><a href="{% url "FAQ" %}">FAQ and troubleshooting</a></li>
+                        <li><a href="{% url "glossary" %}">Glossary</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            
+        </div>
+
+    </div>
+</div>
+
+{% endblock content %}

@@ -149,17 +149,29 @@ urlpatterns = [
     path('synteny/', TemplateView.as_view(template_name='explore_synteny.html'), name='synteny'),
 
     path('glossary/', TemplateView.as_view(template_name='glossary.html'), name='glossary'),
-    path('homologs/', TemplateView.as_view(template_name='help_homologs.html'), name='homologs'),
     path('about/', TemplateView.as_view(template_name='about_OMA.html'), name='about'),
+
+
+    # Help pages
+    path('get_started/', TemplateView.as_view(template_name='help_getting_started.html'), name='get_started'),
+    path('find_orthologs/', TemplateView.as_view(template_name='help_find_orthologs.html'), name='find_orthologs'),
+    path('explore_hogs/', TemplateView.as_view(template_name='help_explore_hogs.html'), name='explore_hogs'),
+    path('explore_genomes/', TemplateView.as_view(template_name='help_explore_genomes.html'), name='explore_genomes'),
+    path('run_on_your_data/', TemplateView.as_view(template_name='help_run_on_your_data.html'), name='run_on_your_data'),
+
+
     #path('export_selection/', TemplateView.as_view(template_name='dlOMA_exportAllAll.html'), name='export'),
     path('landAnnotation/', TemplateView.as_view(template_name='explore_Annotation.html'),
         name='landAnnotation'),
-    path('team/', TemplateView.as_view(template_name='about_team.html'), name='team'),
+    
+    
     path('sab/', TemplateView.as_view(template_name='about_sab.html'), name='sab'),
-    path('funding/', TemplateView.as_view(template_name='about_funding.html'), name='funding'),
+    path('publications/', TemplateView.as_view(template_name='about_publications.html'), name='publications'), 
+    
+    path('all_software/', TemplateView.as_view(template_name='all_software.html'), name='all_software'),
+    
     path('license/', RedirectView.as_view(pattern_name="license"), name='red-license'),
     path('terms_of_use/', TemplateView.as_view(template_name='about_license.html'), name='license'),
-    path('type/', TemplateView.as_view(template_name='help_typesOrthologs.html'), name='type'),
     path('uses/', TemplateView.as_view(template_name='help_typicalUses.html'), name='uses'),
     path('FAQ/', TemplateView.as_view(template_name='help_FAQ.html'), name='FAQ'),
     path('genomePW/', TemplateView.as_view(template_name='tool_genomePW.html'), name='genomePW'),

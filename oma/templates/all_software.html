@@ -1,0 +1,321 @@
+{% extends  "base_template.html" %}
+{% load static %}
+
+{% block title %}About{% endblock %}
+{% block meta_description %}OMA is a method and database for the inference of orthologs among complete genomes. Since
+    2004 it has been continuesly maintained and improved. We provide browsable orthology predictions, APIs, flat file
+    downloads and a standalone version of the inference algorithm.{% endblock %}
+
+{% block content %}
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>All software</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+            <p class="text-justify">
+                OMA provides several software tools for proteome quality assessment, orthology 
+                inference, functional inference, and downstream comparative genomics analyses.
+            </p>
+
+            <p class="text-justify">This page gives a short overview of the main tools and points to the 
+                relevant GitHub repositories or documentation. For installation instructions, 
+                command-line options, examples, and troubleshooting, please refer to each 
+                tool's documentation.
+            </p>
+
+            <div class="card card-header-oma border-0">
+                <h2>Which software should I use?</h2>
+                <hr>
+                <div class="card-body">
+
+                    <div class="table-responsive my-4">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col">I want to...</th>
+                            <th scope="col">Use this tool</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Infer orthologs from my own set of genomes</td>
+                            <td><a href="#fastoma">FastOMA</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Map protein sequences to OMA HOGs</td>
+                            <td><a href="#omamer">OMAmer</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Assess the quality of a proteome annotation</td>
+                            <td><a href="#omark">OMArk</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Analyse the evolutionary history of HOGs programmatically</td>
+                            <td><a href="#pyham">pyHam</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Infer ancestral gene order and study synteny</td>
+                            <td><a href="#edgehog">EdgeHOG</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Find genes with similar phylogenetic profiles</td>
+                            <td><a href="#hogprof">HogProf</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Work with orthoXML files</td>
+                            <td><a href="#orthoxml-tools">orthoXML-tools</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Build phylogenetic trees using protein structures</td>
+                            <td><a href="#foldtree">FoldTree</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Build phylogenetic trees from sequencing reads</td>
+                            <td><a href="#read2tree">Read2Tree</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Build improved gene trees using additional homology info</td>
+                            <td><a href="#ampliphy">AmpliPhy</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Get consensus protein-coding gene structural annotations</td>
+                            <td><a href="#omannotator">OMAnnotator</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Find model organisms for studying a biological process</td>
+                            <td><a href="#omamo">OMA-MO</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Find candidate genes within QTLs</td>
+                            <td><a href="#qtlsearch">QTLSearch</a></td>
+                        </tr>
+
+                        <tr>
+                            <td>Run legacy OMA orthology inference</td>
+                            <td><a href="#oma-standalone">OMA Standalone</a></td>
+                        </tr>
+                       
+                       
+                        </tbody>
+                    </table>
+                    </div>
+
+
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Core OMA workflows</h2>
+                <hr>
+                <div class="card-body">
+                    <h3 id="fastoma">FastOMA</h3>
+                    <p class="text-justify">FastOMA infers orthologs and HOGs from custom protein 
+                        datasets. Use FastOMA if you want to analyse your own genomes or proteomes 
+                        rather than only browsing precomputed results in the OMA Browser.
+                    </p>
+                    <p class="text-justify">
+                        Links: <a href="https://github.com/dessimozlab/FastOMA">GitHub & Documentation</a> | <a href="https://www.nature.com/articles/s41592-024-02552-8">Publication</a>
+                    </p>
+
+
+                    <h3 id="omamer">OMAmer</h3>
+                    <p class="text-justify">OMAmer maps protein sequences to OMA HOGs. It is useful 
+                        when you have new protein sequences and want to place them into the existing 
+                        OMA framework without running a full orthology inference pipeline.
+                    </p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/omamer">GitHub & Documentation</a>
+                         | OMAmer database files | <a href="https://academic.oup.com/bioinformatics/article/37/18/2866/6206361">Publication</a></p>
+
+
+                    <h3 id="omark">OMArk</h3>
+                    <p class="text-justify">OMArk assesses the quality and completeness of proteome 
+                        annotations using OMA HOGs. It can help identify missing genes, contamination, 
+                        fragmented annotations, or other issues in predicted proteomes.
+                    </p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/OMArk">GitHub & Documentation</a>
+                         | <a href="https://omark.omabrowser.org/">Web tool</a>
+                         | <a href="https://www.nature.com/articles/s41587-024-02147-w">Publication</a>
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="card card-header-oma border-0">
+                <h2>Comparative genomics and downstream analysis</h2>
+                <hr>
+                <div class="card-body">
+
+                    <h3 id="pyham">pyHam</h3>
+                    <p class="text-justify">pyHam is a Python library for analysing HOGs and their evolutionary 
+                        histories. It is useful for programmatic analysis of gene gain, duplication, loss, and 
+                        retention across a species tree.
+                    </p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/pyham">GitHub</a> 
+                        | <a href="http://zoo.cs.ucl.ac.uk/doc/pyham/index.html">Documentation</a>
+                        | <a href="http://zoo.cs.ucl.ac.uk/tutorials/tutorial_pyHam_get_started.html">Tutorial</a>
+                        | <a href="https://academic.oup.com/bioinformatics/article/35/14/2504/5227980">Publication</a></p>
+
+
+                    <h3 id="edgehog">EdgeHOG</h3>
+                    <p class="text-justify">EdgeHOG uses HOGs to infer ancestral gene order. It is useful 
+                        for comparative genomics analyses involving gene neighbourhoods, ancestral contigs, 
+                        and genome organization.
+                    </p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/edgehog">GitHub & Documentation</a>
+                        | <a href="https://www.nature.com/articles/s41559-025-02818-0">Publication</a></p>
+
+
+                    <h3 id="hogprof">HogProf</h3>
+                    <p class="text-justify">HogProf performs phylogenetic profiling based on HOG presence 
+                        and absence patterns. It can be used to identify genes with similar evolutionary 
+                        profiles across species.
+                    </p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/HogProf">GitHub & Documentation</a>
+                         | <a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007553">Publication</a></p>
+
+
+                    <h3 id="orthoxml-tools">orthoXML-tools</h3>
+                    <p class="text-justify">orthoXML-tools provides utilities for working with orthology data in orthoXML format.</p>
+                    <p class="text-justify">Links: <a href="https://github.com/ali-yz/orthoxml-tools">GitHub & Documentation</a>
+                         | <a href="https://link.springer.com/article/10.1007/s00239-025-10271-7">Publication</a></p>
+
+                </div>
+
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Comparative genomics and downstream analysis</h2>
+                <hr>
+                <div class="card-body">
+
+
+                    <h3 id="foldtree">FoldTree</h3>
+                    <p class="text-justify">FoldTree builds phylogenetic trees using information from 
+                        protein structures. Use it when structural information is central to the 
+                        phylogenetic analysis.</p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/foldtree">GitHub & Documentation</a>
+                         | <a href="https://www.nature.com/articles/s41594-025-01649-8">Publication</a></p>
+
+
+                    <h3 id="read2tree">Read2Tree</h3>
+                    <p class="text-justify">Read2Tree reconstructs phylogenetic trees directly from 
+                        sequencing reads by mapping reads to marker genes. It is useful when assembled 
+                        genomes or predicted proteomes are not available.</p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/read2tree">GitHub & Documentation</a>
+                         | <a href="https://www.nature.com/articles/s41587-023-01753-4">Publication</a></p>
+
+
+                    <h3 id="ampliphy">AmpliPhy</h3>
+                    <p class="text-justify">AmpliPhy is a scalable, fully automated Nextflow pipeline 
+                        for improving gene tree inference through database-driven homolog enrichment.</p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/ampliphy">GitHub & Documentation</a> 
+                        | <a href="https://doi.org/10.1093/bioadv/vbag222">Publication</a></p>
+
+                </div>
+
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Other tools</h2>
+                <hr>
+                <div class="card-body">
+
+                    <h3 id="alf">ALF</h3>
+                    <p class="text-justify">ALF simulates a root genome into a number of related genomes.</p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/ALF">GitHub & Documentation</a>
+                         | <a href="https://alfsim.org/#index">Web tool</a>
+                         | <a href="http://mbe.oxfordjournals.org/content/29/4/1115">Publication</a></p>
+
+
+                    <h3 id="omannotator">OMAnnotator</h3>
+                    <p class="text-justify">OMAnnotator is a workflow for combining protein-coding gene 
+                        structural annotation from different sources, using evolutionary information 
+                        from other species.</p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/omannotator">GitHub & Documentation</a>
+                         | <a href="https://www.biorxiv.org/content/10.64898/2026.01.26.701724">Publication</a></p>
+
+
+                    <h3 id="omamo">OMA-MO</h3>
+                    <p class="text-justify">Provides the user with the best non-complex organism for 
+                        research into a biological process of interest based on orthologous relationships 
+                        between human and the species.</p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/omamo">GitHub & Documentation</a>
+                         | <a href="https://omabrowser.org/oma/omamo/">Web tool</a>
+                         | <a href="https://academic.oup.com/bioinformatics/article/38/10/2965/6550503">Publication</a></p>
+
+
+                    <h3 id="qtlsearch">QTLSearch</h3>
+                    <p class="text-justify">QTLSearch prioritizes candidate causal genes in QTL regions by 
+                        combining trait-associated functional annotations with OMA HOGs. It is useful for 
+                        QTL studies where candidate regions contain many genes and functional information 
+                        from related species can help rank likely causal candidates.</p>
+                    <p class="text-justify">Links: GitHub & Documentation 
+                        | <a href="https://serval.unil.ch/resource/serval:BIB_6DAC1269D35C.P001/REF.pdf">Publication</a>
+                    </p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Legacy software</h2>
+                <hr>
+                <div class="card-body">
+
+
+                    <h3 id="oma-standalone">OMA Standalone</h3>
+                    <p class="text-justify">OMA Standalone is the legacy standalone implementation 
+                        of OMA orthology inference. For most new analyses, FastOMA is recommended.</p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/OmaStandalone">GitHub</a>
+                        | <a href="https://omabrowser.org/standalone/">Documentation</a>
+                        | <a href="https://genome.cshlp.org/content/29/7/1152">Publication</a>
+                    </p>
+
+
+                    <h3 id="esprit2">ESPRIT2</h3>
+                    <p class="text-justify">ESPRIT is a legacy tool associated with earlier OMA workflows.</p>
+                    <p class="text-justify">Links: <a href="https://github.com/DessimozLab/esprit2">GitHub & Documentation</a>
+                        | <a href="https://doi.org/10.1093/bioinformatics/bty772">Publication</a>
+                    </p>
+
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock content %}

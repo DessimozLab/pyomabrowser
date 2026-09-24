@@ -1,0 +1,353 @@
+{% extends  "base_template.html" %}
+{% load static %}
+
+{% block title %}Access the OMA Data{% endblock %}
+{% block meta_description %}Here, we provide some examples of applications together with recommended solution provided by OMA{% endblock %}
+{% block content %}
+
+
+
+
+<div id="oma-generic-container">
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <h1>Run OMA on your own data</h1>
+
+            <div class="oma-seperator">
+                <span class="colour1"></span>
+                <span class="colour2"></span>
+                <span class="colour3"></span>
+            </div>
+
+            <p class="text-justify">Use this page if you have your own protein sequences, proteomes, transcriptomes, or genome annotations and want to analyse them with OMA-related tools.</p>
+            <p class="text-justify">OMA provides several routes for working with custom data. You do not always need to run a full orthology inference pipeline. The best tool depends on your question.</p>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Which tool should I use?</h2>
+                <hr>
+                <div class="card-body">
+
+                    <div class="table-responsive my-4">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col">I want to...</th>
+                            <th scope="col">Use this</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Infer orthologs and HOGs from my own set of proteomes</td>
+                            <td>FastOMA</td>
+                        </tr>
+                        <tr>
+                            <td>Map new protein sequences to existing OMA HOGs</td>
+                            <td>OMAmer</td>
+                        </tr>
+                        <tr>
+                            <td>Assess the quality of a proteome annotation</td>
+                            <td>OMArk</td>
+                        </tr>
+                        <tr>
+                            <td>Compare my data to precomputed OMA data</td>
+                            <td>OMAmer or FastOMA, depending on the task</td>
+                        </tr>
+                        <tr>
+                            <td>Run the older standalone OMA workflow</td>
+                            <td>OMA Standalone legacy</td>
+                        </tr>
+                        <tr>
+                            <td>Analyse HOGs programmatically after inference</td>
+                            <td>pyHam</td>
+                        </tr>
+                       
+                        </tbody>
+                    </table>
+                    </div>
+
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>When should I run a full orthology inference?</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">Run a full orthology inference if you have a set of proteomes and want to infer orthologs, HOGs, or gene family evolution among those species.</p>
+                    <p class="text-justify">Use <b>FastOMA</b> for new analyses.</p>
+                    <p class="text-justify">You may not need full orthology inference if your goal is simply to:
+                        <ul>
+                            <li>assign protein sequences to existing OMA HOGs;</li>
+                            <li>predict functional annotations from OMA mappings;</li>
+                            <li>check whether a proteome annotation is complete;</li>
+                            <li>compare a new proteome to the OMA database.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">For those cases, <b>OMAmer</b> or <b>OMArk</b> may be more appropriate and faster.</p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>FastOMA</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">FastOMA infers orthologs and HOGs from custom protein datasets.</p>
+                    <p class="text-justify">Use FastOMA if you want to analyse your own genomes or proteomes rather than only browsing precomputed OMA Browser results.</p>
+                    <p class="text-justify">FastOMA is appropriate when you want to:
+                        <ul>
+                            <li>infer orthologs among a custom set of species;</li>
+                            <li>build HOGs for your own dataset;</li>
+                            <li>run comparative genomics analyses on newly sequenced genomes;</li>
+                            <li>analyse gene family evolution outside the current OMA release;</li>
+                            <li>generate orthology results for downstream tools and workflows.</li>
+                        </ul>
+                            
+                    </p>
+                    <p class="text-justify">For installation, command-line options, example datasets, and troubleshooting, use the <a href="https://github.com/DessimozLab/FastOMA">FastOMA GitHub repository</a> and documentation.</p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>OMAmer</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">OMAmer maps protein sequences to OMA HOGs.</p>
+                    <p class="text-justify">Use OMAmer if you have new protein sequences and want to place them into the existing OMA framework without running a full orthology inference pipeline.</p>
+                    <p class="text-justify">OMAmer is appropriate when you want to:
+                        <ul>
+                            <li>map proteins from a new genome to existing OMA HOGs;</li>
+                            <li>assign sequences to known gene families;</li>
+                            <li>transfer information from OMA to new data;</li>
+                            <li>process large protein datasets quickly;</li>
+                            <li>use OMAmer database files locally.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">OMAmer relies on precomputed OMAmer database files, which are available from the <a href="{% url "current" %}">OMA Downloads</a> section. The OMAmer software itself is listed under Software.</p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>OMArk</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">OMArk assesses the quality and completeness of proteome annotations using OMA HOGs.</p>
+                    <p class="text-justify">Use OMArk if you want to evaluate a predicted proteome before running downstream comparative genomics analyses.</p>
+                    <p class="text-justify">OMArk can help identify issues such as:
+                        <ul>
+                            <li>missing genes;</li>
+                            <li>fragmented annotations;</li>
+                            <li>contamination;</li>
+                            <li>unexpected duplication patterns;</li>
+                            <li>taxonomic inconsistency;</li>
+                            <li>possible annotation problems.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">This is especially useful before running FastOMA or interpreting gene family evolution, because incomplete or fragmented proteomes can affect orthology inference.</p>
+
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>OMA Standalone (legacy)</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">OMA Standalone is the legacy standalone implementation of OMA orthology inference.</p>
+                    <p class="text-justify">For most new analyses, <b>FastOMA is recommended</b>.</p>
+                    <p class="text-justify">OMA Standalone takes coding sequences from genomes or transcriptomes in FASTA format. Amino acid sequences are the recommended input type, although nucleotide sequences are also supported.</p>
+                    <p class="text-justify">With amino acid sequences, users can combine their own data with publicly available genomes from the OMA database. Precomputed all-against-all sequence comparisons can also be exported from the OMA website to reduce the most computationally intensive step.</p>
+                    <p class="text-justify">Use OMA Standalone only if you specifically need the older workflow or need to reproduce analyses that used it.</p>
+
+                </div>
+            </div>
+            
+
+            <div class="card card-header-oma border-0">
+                <h2>Input requirements</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">For most OMA-related workflows using custom data, start from protein sequences in FASTA format.</p>
+                    <p class="text-justify">Recommended input:
+                        <ul>
+                            <li>one protein FASTA file per species or proteome;</li>
+                            <li>stable and unique sequence identifiers;</li>
+                            <li>one representative protein per locus, when possible;</li>
+                            <li>meaningful species names or species codes;</li>
+                            <li>good-quality proteome annotations.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">Before running large analyses, check that your input files do not contain:
+                        <ul>
+                            <li>duplicate sequence identifiers;</li>
+                            <li>extremely short or fragmented proteins;</li>
+                            <li>many alternative isoforms from the same locus, unless the tool supports them;</li>
+                            <li>contaminant sequences;</li>
+                            <li>inconsistent species naming;</li>
+                            <li>unexpected stop codons or invalid characters.</li>
+                        </ul>
+                    </p>
+                    <p class="text-justify">For proteome quality assessment, run <b>OMArk</b> before large-scale orthology inference.</p>
+
+                </div>
+            </div>
+
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Working with isoforms</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">OMA generally represents genomes using one protein sequence per locus for orthology inference.</p>
+                    <p class="text-justify">If your input proteome contains multiple isoforms per gene, consider selecting one representative isoform before running an orthology inference workflow.</p>
+                    <p class="text-justify">Including many isoforms can inflate apparent duplications and complicate interpretation of HOGs, gene family size, and duplication/loss patterns.</p>
+
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Outputs</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">The outputs depend on the tool.</p>
+
+
+                    <h3>FastOMA outputs</h3>
+                    <p class="text-justify">FastOMA outputs may include orthology relationships, HOGs, and files for downstream comparative genomics analysis. The exact files depend on the run configuration.</p>
+                    <p class="text-justify">Use these outputs when you want to analyse:
+                        <ul>
+                            <li>orthologous relationships;</li>
+                            <li>gene family membership;</li>
+                            <li>HOGs across taxonomic levels;</li>
+                            <li>gene duplication and loss patterns;</li>
+                            <li>downstream comparative genomics workflows.</li>
+                        </ul>
+                    </p>
+
+
+                    <h3>OMAmer outputs</h3>
+                    <p class="text-justify">OMAmer returns mappings between input protein sequences and OMA HOGs.</p>
+                    <p class="text-justify">Use these outputs when you want to:
+                        <ul>
+                            <li>assign custom sequences to OMA gene families;</li>
+                            <li>connect new proteins to existing OMA annotations;</li>
+                            <li>perform fast functional or comparative mapping;</li>
+                            <li>prepare input for downstream tools.</li>
+                        </ul>
+                    </p>
+
+
+                    <h3>OMArk outputs</h3>
+                    <p class="text-justify">OMArk reports proteome quality metrics based on expected gene content from OMA HOGs.</p>
+                    <p class="text-justify">Use these outputs to detect potential problems before interpreting comparative genomics results.</p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Combining custom data with OMA data</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">Some workflows allow users to combine custom data with precomputed data from the OMA database.</p>
+                    <p class="text-justify">For example, precomputed all-against-all files can reduce the computational cost of some workflows involving OMA Standalone. OMAmer also uses precomputed OMAmer database files to map new sequences to existing OMA HOGs.</p>
+                    <p class="text-justify">Use this route when you want to compare new data with species already present in OMA, rather than running everything from scratch.</p>
+                    
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Recommended workflow</h2>
+                <hr>
+                <div class="card-body">
+
+                    <p class="text-justify">For a new proteome or set of proteomes:
+                        <ol>
+                            <li>Prepare one protein FASTA file per species.</li>
+                            <li>Remove duplicate IDs and decide how to handle isoforms.</li>
+                            <li>Run OMArk to assess proteome quality.</li>
+                            <li>If you only need mapping to existing OMA HOGs, run OMAmer.</li>
+                            <li>If you need new orthology inference among your proteomes, run FastOMA.</li>
+                            <li>Use downstream tools such as pyHam, HOG viewers, or comparative genomics workflows to analyse the results.</li>
+                        </ol>
+                    </p>
+                    
+                </div>
+            </div>
+
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Common pitfalls</h2>
+                <hr>
+                <div class="card-body">
+
+                    <h3>I only have one proteome</h3>
+                    <p class="text-justify">If you only have one proteome, you probably do not need full orthology inference. Use OMAmer to map proteins to existing OMA HOGs, or OMArk to assess proteome quality.</p>
+
+                    <h3>My species is not in OMA</h3>
+                    <p class="text-justify">Use OMAmer to map its proteins to existing OMA HOGs, or use FastOMA if you want to infer orthology relationships among your own set of species.</p>
+
+                    <h3>My proteome has many isoforms</h3>
+                    <p class="text-justify">Decide whether to keep all isoforms or select representative isoforms. For many orthology workflows, one representative protein per locus is easier to interpret.</p>
+
+                    <h3>My results show many duplications</h3>
+                    <p class="text-justify">Check whether the input contains multiple isoforms, fragmented annotations, or duplicated sequence identifiers. Also consider running OMArk to assess annotation quality.</p>
+
+                    <h3>My expected gene family is missing</h3>
+                    <p class="text-justify">Possible explanations include incomplete annotation, divergent sequences, missing species in the reference database, or orthology inference limits. Check sequence quality and consider alternative search methods.</p>
+
+                    <h3>I want to reproduce an old OMA Standalone workflow</h3>
+                    <p class="text-justify">Use OMA Standalone legacy and record the software version, input files, OMA release, and any exported precomputed files.</p>
+                    
+                    <h3>I am not sure whether to use FastOMA or OMAmer</h3>
+                    <p class="text-justify">Use OMAmer if you want to place sequences into existing OMA HOGs. Use FastOMA if you want to infer new orthology relationships and HOGs among your own set of proteomes.</p>
+                </div>
+            </div>
+
+
+            <div class="card card-header-oma border-0">
+                <h2>Related pages</h2>
+                <hr>
+                <div class="card-body">
+                    <ul>
+                        <li><a href="{% url "all_software" %}">Software</a></li>
+                        <li><a href="{% url "uses" %}">Download and access OMA data</a></li>
+                        <li><a href="{% url "explore_hogs" %}">Explore gene families and HOGs</a></li>
+                        <li><a href="{% url "FAQ" %}">FAQ and troubleshooting</a></li>
+                        <li><a href="{% url "glossary" %}">Glossary</a></li>
+
+                    </ul>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
