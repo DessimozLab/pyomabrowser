@@ -90,6 +90,7 @@ MATOMO_API_TRACKING = {
     'token_auth': os.getenv('MATOMO_API_TOKEN', None),
     'backend': "matomo_api_tracking.backends.celery.CeleryTrackingBackend",
     'ignore_paths': ["/oma/",],
+    'ignore_status_codes': [301, 302],  # ignore redirects
     'url_masks': [
         (r"/api/hog/[^/]+", "/api/hog/:hog_id"),
         (r"/api/protein/[^/]+", "/api/protein/:protein_id"),
