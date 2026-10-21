@@ -27,8 +27,9 @@ INSTALLED_APPS.extend([
 
 MIDDLEWARE.extend([
     'oma.middleware.LongRunningLogger',
-    'matomo_api_tracking.middleware.MatomoApiTrackingMiddleware',
 ])
+# before CommonMiddleware, so that it sees the final response (e.g. APPEND_SLASH redirects)
+MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.common.CommonMiddleware'), 'matomo_api_tracking.middleware.MatomoApiTrackingMiddleware')
 
 LOGGING['loggers'].update({
     'export': {
