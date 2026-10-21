@@ -7,6 +7,10 @@ Single-record mode (primary use):
 Concept-record mode — sync ALL versions from one concept DOI at once:
     python manage.py sync_zenodo_release <concept_id> --concept [options]
 
+Patch versions (e.g. "All.May2026.1") in concept mode are synced into their
+base release ("All.May2026"): the highest patch overwrites the file links,
+while the release date of the unpatched version is kept.
+
 Merge mode — add files from a second Zenodo record (e.g. OMAmer) into
 existing releases without overwriting their metadata:
     python manage.py sync_zenodo_release <omamer_record_id> <release_name> --merge
@@ -28,6 +32,7 @@ Examples:
 
 import json
 import logging
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -40,6 +45,11 @@ from downloads.models import Release, ReleaseFile
 logger = logging.getLogger(__name__)
 
 ZENODO_API = "https://zenodo.org/api"
+
+# Patch versions append a small number to a release name, e.g. "All.May2026.1"
+# or bare "May2026.1". The base must end in a component containing a letter so
+# that names like "All.2026" are not mistaken for patches.
+PATCH_RE = re.compile(r'^(?P<base>(?:.*\.)?[^.]*[A-Za-z][^.]*)\.(?P<patch>\d{1,2})$')
 
 
 class Command(BaseCommand):
@@ -120,21 +130,40 @@ class Command(BaseCommand):
             if any(r.get('is_last') for r in version_rels):
                 latest_id = v['id']
 
+        # Group versions by release name. Patch versions ("All.May2026.1") map onto
+        # their base release ("All.May2026"); only the highest patch is synced so
+        # it overwrites the file links of the unpatched version.
+        groups = {}
         for v in versions:
             record_id = str(v['id'])
-            release_name = v.get('metadata', {}).get('version', '')
-            if not release_name:
+            version = v.get('metadata', {}).get('version', '')
+            if not version:
                 self.stderr.write(f"  Skipping record {record_id}: no 'version' field in metadata")
                 continue
+
+            release_name, patch = self._split_patch(version)
 
             # Normalize bare version names like "Mar2026" → "All.Mar2026"
             if prefix and '.' not in release_name:
                 release_name = f"{prefix}.{release_name}"
 
-            is_latest = (options['set_latest'] and record_id == str(latest_id))
-            pub_date_str = v.get('metadata', {}).get('publication_date', '')
+            groups.setdefault(release_name, []).append((patch, v))
 
-            self.stdout.write(f"\n— {release_name} (record {record_id})")
+        for release_name, candidates in groups.items():
+            candidates.sort(key=lambda c: c[0])
+            patch, v = candidates[-1]
+            record_id = str(v['id'])
+            is_latest = (options['set_latest'] and record_id == str(latest_id))
+            # Keep the original release date of the unpatched (earliest) version
+            pub_date_str = candidates[0][1].get('metadata', {}).get('publication_date', '')
+
+            patch_info = f", patch {patch}" if patch else ''
+            self.stdout.write(f"\n— {release_name} (record {record_id}{patch_info})")
+            for skipped_patch, skipped in candidates[:-1]:
+                self.stdout.write(
+                    f"  Superseded: record {skipped['id']}"
+                    f"{f' (patch {skipped_patch})' if skipped_patch else ''}"
+                )
             self._sync_record(
                 record_id=record_id,
                 release_name=release_name,
@@ -146,6 +175,14 @@ class Command(BaseCommand):
                 merge=options['merge'],
                 token=token,
             )
+
+    @staticmethod
+    def _split_patch(version):
+        """Split "All.May2026.1" into ("All.May2026", 1); unpatched names get patch 0."""
+        m = PATCH_RE.match(version)
+        if m:
+            return m.group('base'), int(m.group('patch'))
+        return version, 0
 
     def _fetch_all_versions(self, concept_id, token):
         """Return list of all published version records for a concept record."""
