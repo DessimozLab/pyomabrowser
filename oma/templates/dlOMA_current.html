@@ -96,7 +96,7 @@
                         </dd>
                     </dl>
 
-                    {% if "oma-paris.txt.gz" in existing_download_files %}
+                    {% if "oma-pairs.txt.gz" in existing_download_files %}
                     <hr>
                     <dl class="row">
                         <dt class="col-sm-6">Pairwise orthologs</dt>
@@ -315,7 +315,7 @@
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to Wormbase</dt>
                         <dd class="col-sm-6">
-                             <a href="{{ download_root }}/oma-wormbase.txt.gz">
+                            <a href="{{ download_root }}/oma-wormbase.txt.gz">
                             <i class="fas fa-download"></i>
                             Text format
                         </a>
@@ -328,7 +328,20 @@
                     <dl class="row">
                         <dt class="col-sm-6">Mapping to JGI</dt>
                         <dd class="col-sm-6">
-                             <a href="{{ download_root }}/oma-jgi.txt.gz">
+                            <a href="{{ download_root }}/oma-jgi.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+                    {% endif %}
+
+                    {% if "oma-source.txt.gz" in existing_download_files %}
+                    <hr>
+                    <dl class="row">
+                        <dt class="col-sm-6">Mapping to source ID / AC of genomes</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/oma-source.txt.gz">
                             <i class="fas fa-download"></i>
                             Text format
                         </a>
@@ -404,7 +417,7 @@
                 {% if "group-descriptions.txt.gz" in existing_download_files %}
                     <hr>
                     <dl class="row">
-                        <dt class="col-sm-6">Group descriptions</dt>
+                        <dt class="col-sm-6">OMA groups (Strict Orthologous Groups) descriptions</dt>
                         <dd class="col-sm-6">
                             <a href="{{ download_root }}/group-descriptions.txt.gz">
                             <i class="fas fa-download"></i>
@@ -413,6 +426,20 @@
                         </dd>
                     </dl>
                 {% endif %}
+
+                {% if "roothog-descriptions.txt.gz" in existing_download_files %}
+                    <hr>
+                    <dl class="row">
+                        <dt class="col-sm-6">OMA HOGs descriptions (at Root level)</dt>
+                        <dd class="col-sm-6">
+                            <a href="{{ download_root }}/roothog-descriptions.txt.gz">
+                            <i class="fas fa-download"></i>
+                            Text format
+                        </a>
+                        </dd>
+                    </dl>
+                {% endif %}
+
 
                 {% if "oma-close-groups.txt.gz" in existing_download_files %}
                     <hr>
