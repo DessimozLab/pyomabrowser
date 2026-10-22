@@ -1914,6 +1914,14 @@ class HOGiHamFromEntry(HOGtableFromEntry):
     redirect_to = "hog_viewer"
 
 
+class HOGMSAFromEntry(HOGtableFromEntry):
+    redirect_to = "hog_msa"
+
+
+class HOGStructureMSAFromEntry(HOGtableFromEntry):
+    redirect_to = "hog_msa_structure"
+
+
 # might be needed for external resources (orthoxml by protein entry)
 class OrthoXMLFromEntry(EntryCentricMixin, View):
     def get(self, request, entry_id, **kwargs):

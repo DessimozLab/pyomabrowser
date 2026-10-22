@@ -122,7 +122,10 @@ urlpatterns = [
     path('hogs/<entry_id>/', views.HOGtableFromEntry.as_view(), name='hog_table_from_entry'),
     path('hogs/<entry_id>/vis/', views.HOGiHamFromEntry.as_view(), name='hog_viewer_from_entry'),
     path('hogs/<entry_id>/iham/', views.HOGiHamFromEntry.as_view(), name='hog_viewer_from_entry'),
-    path('hogs/<entry_id>/<lev:level>/', views.HOGtableFromEntry.as_view(), name='hog_table_from_entry'),
+    path('hogs/<entry_id>/msa/', views.HOGMSAFromEntry.as_view(), name='hog_msa_from_entry'),
+    path('hogs/<entry_id>/structure-msa/', views.HOGStructureMSAFromEntry.as_view(), name='hog_structure_msa_from_entry'),
+    path('hogs/<entry_id>/<lev:level>/msa/', views.HOGMSAFromEntry.as_view(), name='hog_msa_from_entry'),
+    path('hogs/<entry_id>/<lev:level>/structure-msa/', views.HOGStructureMSAFromEntry.as_view(), name='hog_structure_msa_from_entry'),
 
     #not sure if those are still needed somewhere. keep for now.
     path('hogs/<entry_id>/domains/',views.HOGDomainsView.as_view(), name='hog_domains_'),
