@@ -21,6 +21,7 @@
 
 stages:
   - build
+  - publish
   - deploy
 
 docker-build:
@@ -77,6 +78,36 @@ docker-build:
   # Run this job in a branch where a Dockerfile exists
   rules:
     - if: $CI_COMMIT_BRANCH
+      exists:
+        - for_docker/oma/Dockerfile
+
+# Mirror the images built from the `public` branch to Docker Hub as
+# dessimozlab/omabrowser-<img>:{latest,<short-sha>}.
+# Requires protected CI/CD variables DOCKERHUB_USER and DOCKERHUB_TOKEN
+# (so `public` must be a protected branch).
+dockerhub-publish:
+  image: docker:cli
+  stage: publish
+  services:
+    - docker:dind
+  needs: ["docker-build"]
+  variables:
+    DOCKERHUB_REPO_PREFIX: docker.io/dessimozlab/omabrowser-
+  before_script:
+    - *dns_fix
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+    - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USER" --password-stdin docker.io
+  script:
+    - |
+      for img in oma nginx; do
+        # registry-to-registry copy of the image built by docker-build for this branch
+        docker buildx imagetools create \
+          -t "${DOCKERHUB_REPO_PREFIX}${img}:latest" \
+          -t "${DOCKERHUB_REPO_PREFIX}${img}:${CI_COMMIT_SHORT_SHA}" \
+          "$CI_REGISTRY_IMAGE/$img:$CI_COMMIT_REF_SLUG"
+      done
+  rules:
+    - if: $CI_COMMIT_BRANCH == "public"
       exists:
         - for_docker/oma/Dockerfile
 

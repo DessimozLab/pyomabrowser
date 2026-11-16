@@ -14,3 +14,9 @@ db.sqlite3
 ansible
 media
 .venv
+# build secrets / runtime config in for_docker (patterns are root-relative)
+**/labgit.cnf
+**/token
+**/token.template
+for_docker/env
+for_docker/env.*
